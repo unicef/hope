@@ -2,6 +2,7 @@ import styled from 'styled-components';
 import { Box, Grid } from '@mui/material';
 import type { MiśTheme } from '../../../theme';
 import type { ReactElement } from 'react';
+import { responsiveGridSize, responsiveValue } from 'src/responsive';
 
 const GreyBox = styled.div`
   background-color: #f5f5f5;
@@ -69,7 +70,11 @@ export const DedupeBox = ({
               const biometricData = option.options?.[1];
 
               return (
-                <Grid key={option.name} container spacing={4}>
+                <Grid
+                  key={option.name}
+                  container
+                  spacing={responsiveValue(2, 4)}
+                >
                   <Grid size={4}>
                     <BoldGrey>
                       <Small data-cy={`label-${option.name}`}>
@@ -78,8 +83,8 @@ export const DedupeBox = ({
                     </BoldGrey>
                   </Grid>
                   {biographicalData && (
-                    <Grid size={4} container spacing={4}>
-                      <Grid size={6}>
+                    <Grid size={4} container spacing={responsiveValue(0, 4)}>
+                      <Grid size={responsiveGridSize('half', 'full')}>
                         <Bold data-cy={`percentage-${option.name}`}>
                           {showBiographicalDeduplicationResult
                             ? biographicalData.percentage.toFixed(2)
@@ -87,10 +92,10 @@ export const DedupeBox = ({
                           %
                         </Bold>
                       </Grid>
-                      <Grid size={6}>
+                      <Grid size={responsiveGridSize('half', 'full')}>
                         <Box
                           sx={{
-                            ml: 2,
+                            ml: responsiveValue(0, 2),
                           }}
                         >
                           <BoldGrey data-cy={`value-${option.name}`}>
@@ -105,8 +110,8 @@ export const DedupeBox = ({
                     </Grid>
                   )}
                   {biometricData && (
-                    <Grid size={4} container spacing={4}>
-                      <Grid size={6}>
+                    <Grid size={4} container spacing={responsiveValue(0, 4)}>
+                      <Grid size={responsiveGridSize('half', 'full')}>
                         <Bold data-cy={`percentage-${option.name}-biometric`}>
                           {showBiometricDeduplicationResult
                             ? biometricData.percentage.toFixed(2)
@@ -114,10 +119,10 @@ export const DedupeBox = ({
                           %
                         </Bold>
                       </Grid>
-                      <Grid size={6}>
+                      <Grid size={responsiveGridSize('half', 'full')}>
                         <Box
                           sx={{
-                            ml: 2,
+                            ml: responsiveValue(0, 2),
                           }}
                         >
                           <BoldGrey data-cy={`value-${option.name}-biometric`}>

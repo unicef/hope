@@ -1,8 +1,8 @@
-import { Grid } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { LabelizedField } from '@core/LabelizedField';
 import { GrievanceFlexFieldPhotoModalNewHousehold } from '../GrievancesPhotoModals/GrievanceFlexFieldPhotoModalNewHousehold';
 import type { ReactElement } from 'react';
+import { ResponsiveGrid } from 'src/responsive';
 
 export interface CurrentValueProps {
   field: {
@@ -54,20 +54,20 @@ export function CurrentValue({
         break;
       case 'IMAGE':
         return (
-          <Grid size={3}>
+          <ResponsiveGrid size="quarter">
             <GrievanceFlexFieldPhotoModalNewHousehold
               flexField={field}
               householdId={values?.selectedHousehold?.id || null}
             />
-          </Grid>
+          </ResponsiveGrid>
         );
       default:
         displayValue = value;
     }
   }
   return (
-    <Grid size={12}>
+    <ResponsiveGrid size="full">
       <LabelizedField label={t('Current Value')} value={displayValue} />
-    </Grid>
+    </ResponsiveGrid>
   );
 }

@@ -4,7 +4,6 @@ import { SearchTextField } from '@core/SearchTextField';
 import { SelectFilter } from '@core/SelectFilter';
 import { useArrayToDict } from '@hooks/useArrayToDict';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import Grid from '@mui/material/Grid';
 import { Checkbox, FormControlLabel, MenuItem } from '@mui/material';
 import type { GrievanceChoices } from '@restgenerated/models/GrievanceChoices';
 import { ProgramAutocompleteRestFilter } from '@shared/autocompletes/ProgramAutocompleteRestFilter';
@@ -15,6 +14,7 @@ import type { ReactElement } from 'react';
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { ResponsiveGrid, ResponsiveGridContainer } from 'src/responsive';
 
 interface MyTasksFiltersProps {
   filter;
@@ -129,23 +129,22 @@ export const MyTasksFilters = ({
       clearHandler={clearFilter}
       applyHandler={applyFilterChanges}
     >
-      <Grid
-        container
+      <ResponsiveGridContainer
         spacing={3}
         sx={{
           alignItems: 'flex-end',
         }}
       >
-        <Grid size={{ xs: 3 }}>
+        <ResponsiveGrid size="quarter">
           <SearchTextField
             value={filter.search}
             label="Search"
             onChange={(e) => handleFilterChange('search', e.target.value)}
             data-cy="filters-search"
           />
-        </Grid>
+        </ResponsiveGrid>
         {isAllPrograms && (
-          <Grid size={{ xs: 3 }}>
+          <ResponsiveGrid size="quarter">
             <ProgramAutocompleteRestFilter
               filter={filter}
               name="program"
@@ -156,10 +155,10 @@ export const MyTasksFilters = ({
               appliedFilter={appliedFilter}
               setAppliedFilter={setAppliedFilter}
             />
-          </Grid>
+          </ResponsiveGrid>
         )}
         {showSensitiveFilter && (
-          <Grid size={{ xs: 2 }}>
+          <ResponsiveGrid size="sixth">
             <SelectFilter
               onChange={(e) => handleSensitiveChange(e.target.value)}
               label={undefined}
@@ -174,10 +173,10 @@ export const MyTasksFilters = ({
               <MenuItem value="true">{t('Sensitive')}</MenuItem>
               <MenuItem value="false">{t('Other')}</MenuItem>
             </SelectFilter>
-          </Grid>
+          </ResponsiveGrid>
         )}
         {!sensitiveOnly && (
-          <Grid size={{ xs: 3 }}>
+          <ResponsiveGrid size="quarter">
             <SelectFilter
               onChange={(e) => handleCategoryChange(e.target.value)}
               label={t('Category')}
@@ -191,10 +190,10 @@ export const MyTasksFilters = ({
                 </MenuItem>
               ))}
             </SelectFilter>
-          </Grid>
+          </ResponsiveGrid>
         )}
         {showIssueType && (
-          <Grid size={{ xs: 3 }}>
+          <ResponsiveGrid size="quarter">
             <SelectFilter
               onChange={(e) => handleFilterChange('issueType', e.target.value)}
               label="Issue Type"
@@ -208,9 +207,9 @@ export const MyTasksFilters = ({
                 </MenuItem>
               ))}
             </SelectFilter>
-          </Grid>
+          </ResponsiveGrid>
         )}
-        <Grid size={{ xs: 3 }}>
+        <ResponsiveGrid size="quarter">
           <SelectFilter
             onChange={(e) => handleFilterChange('priority', e.target.value)}
             label={t('Priority')}
@@ -224,8 +223,8 @@ export const MyTasksFilters = ({
               </MenuItem>
             ))}
           </SelectFilter>
-        </Grid>
-        <Grid size={{ xs: 3 }}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="quarter">
           <SelectFilter
             onChange={(e) => handleFilterChange('urgency', e.target.value)}
             label={t('Urgency')}
@@ -239,9 +238,9 @@ export const MyTasksFilters = ({
               </MenuItem>
             ))}
           </SelectFilter>
-        </Grid>
+        </ResponsiveGrid>
         {showStatusFilter && (
-          <Grid size={{ xs: 2 }}>
+          <ResponsiveGrid size="sixth">
             <SelectFilter
               onChange={(e) =>
                 handleFilterChange('grievanceStatus', e.target.value)
@@ -259,11 +258,11 @@ export const MyTasksFilters = ({
                 {t('All Tickets')}
               </MenuItem>
             </SelectFilter>
-          </Grid>
+          </ResponsiveGrid>
         )}
         {/* The overdue emails deep-link with ?overdue=true; showing it here is what tells the
             recipient why the list is short, and lets them switch it off. */}
-        <Grid size={{ xs: 2 }}>
+        <ResponsiveGrid size="sixth">
           <SelectFilter
             onChange={(e) =>
               // Clearing has to write '' rather than false: `overdue=false` is a real backend
@@ -285,8 +284,8 @@ export const MyTasksFilters = ({
             <MenuItem value="">{t('All Tickets')}</MenuItem>
             <MenuItem value="true">{t('Overdue Only')}</MenuItem>
           </SelectFilter>
-        </Grid>
-        <Grid size={{ xs: 2 }}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="sixth">
           <FormControlLabel
             control={
               <Checkbox
@@ -301,8 +300,8 @@ export const MyTasksFilters = ({
             }
             label={t('Only unread')}
           />
-        </Grid>
-      </Grid>
+        </ResponsiveGrid>
+      </ResponsiveGridContainer>
     </FiltersSection>
   );
 };

@@ -1,9 +1,10 @@
-import { Box, Grid, IconButton } from '@mui/material';
+import { Box, IconButton } from '@mui/material';
 import { Delete } from '@mui/icons-material';
 import { Field } from 'formik';
 import { useTranslation } from 'react-i18next';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
 import type { ReactElement } from 'react';
+import { ResponsiveGrid } from 'src/responsive';
 
 export interface DocumentationFieldProps {
   index: number;
@@ -24,7 +25,7 @@ export function DocumentationField({
 
   return (
     <>
-      <Grid size={4}>
+      <ResponsiveGrid size="third">
         <Field
           name={`${baseName}[${index}].name`}
           fullWidth
@@ -34,8 +35,8 @@ export function DocumentationField({
           required
           maxLength={100}
         />
-      </Grid>
-      <Grid size={4}>
+      </ResponsiveGrid>
+      <ResponsiveGrid size="third">
         <Box
           style={{ height: '100%' }}
           sx={{
@@ -54,13 +55,13 @@ export function DocumentationField({
             }}
           />
         </Box>
-      </Grid>
+      </ResponsiveGrid>
       {!isEdited ? (
-        <Grid size={4}>
+        <ResponsiveGrid size="third">
           <IconButton onClick={onDelete}>
             <Delete />
           </IconButton>
-        </Grid>
+        </ResponsiveGrid>
       ) : null}
     </>
   );

@@ -4,9 +4,10 @@ import { OverviewContainer } from '@core/OverviewContainer';
 import { Title } from '@core/Title';
 import type { FollowUpInstructionDetail } from '@restgenerated/models/FollowUpInstructionDetail';
 import { formatCurrencyWithSymbol } from '@utils/utils';
-import { Grid, Typography } from '@mui/material';
+import { Typography } from '@mui/material';
 import type { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
+import { ResponsiveGrid, ResponsiveGridContainer } from 'src/responsive';
 
 interface FollowUpInstructionSummaryProps {
   instruction: FollowUpInstructionDetail;
@@ -35,18 +36,18 @@ export function FollowUpInstructionSummary({
         <Typography variant="h6">{t('Summary')}</Typography>
       </Title>
       <OverviewContainer>
-        <Grid container spacing={6}>
-          <Grid size={{ xs: 3 }} data-cy="summary-child-plans-count">
+        <ResponsiveGridContainer spacing={6}>
+          <ResponsiveGrid size="quarter" data-cy="summary-child-plans-count">
             <LabelizedField label={t('Payment Plans')}>
               {instruction.childPaymentPlansCount}
             </LabelizedField>
-          </Grid>
-          <Grid size={{ xs: 3 }} data-cy="summary-households-count">
+          </ResponsiveGrid>
+          <ResponsiveGrid size="quarter" data-cy="summary-households-count">
             <LabelizedField label={t('Households')}>
               {instruction.householdsCount}
             </LabelizedField>
-          </Grid>
-          <Grid size={{ xs: 3 }} data-cy="summary-total-entitled">
+          </ResponsiveGrid>
+          <ResponsiveGrid size="quarter" data-cy="summary-total-entitled">
             <LabelizedField label={t('Total Entitled')}>
               {formatInstructionAmount(
                 instruction.totalEntitledQuantity,
@@ -55,8 +56,8 @@ export function FollowUpInstructionSummary({
                 instruction.currencyVisionCode,
               )}
             </LabelizedField>
-          </Grid>
-          <Grid size={{ xs: 3 }} data-cy="summary-total-delivered">
+          </ResponsiveGrid>
+          <ResponsiveGrid size="quarter" data-cy="summary-total-delivered">
             <LabelizedField label={t('Total Delivered')}>
               {formatInstructionAmount(
                 instruction.totalDeliveredQuantity,
@@ -65,8 +66,8 @@ export function FollowUpInstructionSummary({
                 instruction.currencyVisionCode,
               )}
             </LabelizedField>
-          </Grid>
-          <Grid size={{ xs: 3 }} data-cy="summary-total-undelivered">
+          </ResponsiveGrid>
+          <ResponsiveGrid size="quarter" data-cy="summary-total-undelivered">
             <LabelizedField label={t('Total Undelivered')}>
               {formatInstructionAmount(
                 instruction.totalUndeliveredQuantity,
@@ -75,8 +76,8 @@ export function FollowUpInstructionSummary({
                 instruction.currencyVisionCode,
               )}
             </LabelizedField>
-          </Grid>
-        </Grid>
+          </ResponsiveGrid>
+        </ResponsiveGridContainer>
       </OverviewContainer>
     </ContainerColumnWithBorder>
   );

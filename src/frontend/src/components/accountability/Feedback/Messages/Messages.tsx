@@ -10,6 +10,7 @@ import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
 import Paper from '@mui/material/Paper';
 import Typography from '@mui/material/Typography';
+import { ResponsiveGrid, responsiveValue } from 'src/responsive';
 import type { FeedbackDetail } from '@restgenerated/models/FeedbackDetail';
 import { RestService } from '@restgenerated/services/RestService';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
@@ -110,6 +111,7 @@ function Messages({ messages, canAddMessage }: MessagesProps): ReactElement {
           <Box
             sx={{
               display: 'flex',
+              flexWrap: responsiveValue('wrap', 'nowrap'),
               justifyContent: 'space-between',
             }}
           >
@@ -143,10 +145,10 @@ function Messages({ messages, canAddMessage }: MessagesProps): ReactElement {
   const myName = `${meData.firstName || meData.email}`;
 
   return (
-    <Grid size={{ xs: 8 }}>
+    <ResponsiveGrid size="twoThirds">
       <Box
         sx={{
-          p: 3,
+          p: responsiveValue(2, 3),
         }}
       >
         <Formik
@@ -218,7 +220,7 @@ function Messages({ messages, canAddMessage }: MessagesProps): ReactElement {
           )}
         </Formik>
       </Box>
-    </Grid>
+    </ResponsiveGrid>
   );
 }
 

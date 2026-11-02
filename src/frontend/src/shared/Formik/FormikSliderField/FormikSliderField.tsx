@@ -1,11 +1,7 @@
 import { Box, Grid, Typography } from '@mui/material';
 import Slider from '@mui/material/Slider';
-import { styled } from '@mui/system';
 import type { ReactElement } from 'react';
-
-const StyledBox = styled(Box)({
-  width: 400,
-});
+import { responsiveValue } from 'src/responsive';
 
 export const FormikSliderField = ({
   field,
@@ -21,7 +17,7 @@ export const FormikSliderField = ({
   };
 
   return (
-    <StyledBox>
+    <Box sx={{ width: responsiveValue<number | string>('100%', 400) }}>
       <Typography variant="caption">{otherProps.label}</Typography>
       <Grid
         container
@@ -47,6 +43,6 @@ export const FormikSliderField = ({
           </p>
         </Grid>
       </Grid>
-    </StyledBox>
+    </Box>
   );
 };

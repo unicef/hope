@@ -9,6 +9,7 @@ import { FormikSelectField } from '@shared/Formik/FormikSelectField';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
 import { Field, FieldArray } from 'formik';
 import { useTranslation } from 'react-i18next';
+import { ResponsiveGrid, responsiveValue } from 'src/responsive';
 import { Link } from 'react-router-dom';
 
 interface ProgramFieldSeriesStepProps {
@@ -80,7 +81,7 @@ export const ProgramFieldSeriesStep = ({
                           alignItems: 'flex-start',
                         }}
                       >
-                        <Grid size={3}>
+                        <ResponsiveGrid size="quarter">
                           <Field
                             name={`pduFields.${index}.label`}
                             required
@@ -90,8 +91,8 @@ export const ProgramFieldSeriesStep = ({
                             component={FormikTextField}
                             disabled={fieldDisabled}
                           />
-                        </Grid>
-                        <Grid size={3}>
+                        </ResponsiveGrid>
+                        <ResponsiveGrid size="quarter">
                           <Field
                             name={`pduFields.${index}.pduData.subtype`}
                             required
@@ -102,8 +103,8 @@ export const ProgramFieldSeriesStep = ({
                             choices={mappedPduSubtypeChoices}
                             disabled={fieldDisabled}
                           />
-                        </Grid>
-                        <Grid size={3}>
+                        </ResponsiveGrid>
+                        <ResponsiveGrid size="quarter">
                           <Field
                             key={values.pduFields[index].pduData.numberOfRounds}
                             name={`pduFields.${index}.pduData.numberOfRounds`}
@@ -159,8 +160,11 @@ export const ProgramFieldSeriesStep = ({
                               };
                             })}
                           />
-                        </Grid>
-                        <Grid size={1}>
+                        </ResponsiveGrid>
+                        <Grid
+                          size={responsiveValue(12, 1)}
+                          sx={{ textAlign: responsiveValue('right', 'left') }}
+                        >
                           <IconButton
                             onClick={() =>
                               confirm({

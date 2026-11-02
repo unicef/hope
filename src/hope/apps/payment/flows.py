@@ -264,6 +264,25 @@ class PaymentPlanFlow:
     def background_action_status_send_to_payment_gateway_error(self) -> None:
         pass
 
+    @background_action_status.transition(
+        source=[None] + list(PaymentPlan.BACKGROUND_ACTION_ERROR_STATES),
+        target=PaymentPlan.BackgroundActionStatus.REBUILDING,
+        conditions=[lambda obj: obj.payment_plan.status == obj.payment_plan.Status.ABORTED],
+    )
+    def background_action_status_rebuilding(self) -> None:
+        pass
+
+    @background_action_status.transition(
+        source=[
+            PaymentPlan.BackgroundActionStatus.REBUILDING,
+            PaymentPlan.BackgroundActionStatus.REBUILD_ERROR,
+        ],
+        target=PaymentPlan.BackgroundActionStatus.REBUILD_ERROR,
+        conditions=[lambda obj: obj.payment_plan.status == obj.payment_plan.Status.ABORTED],
+    )
+    def background_action_status_rebuild_error(self) -> None:
+        pass
+
     # Build Status Transitions
     @build_status.transition(
         source=[None] + list(PaymentPlan.BuildStatus),
@@ -278,6 +297,7 @@ class PaymentPlanFlow:
                     obj.payment_plan.Status.TP_STEFICON_ERROR,
                     obj.payment_plan.Status.DRAFT,
                     obj.payment_plan.Status.OPEN,
+                    obj.payment_plan.Status.ABORTED,
                 ]
             )
         ],
@@ -302,6 +322,7 @@ class PaymentPlanFlow:
                     obj.payment_plan.Status.TP_STEFICON_COMPLETED,
                     obj.payment_plan.Status.TP_STEFICON_ERROR,
                     obj.payment_plan.Status.OPEN,
+                    obj.payment_plan.Status.ABORTED,
                 ]
             )
         ],
@@ -322,6 +343,7 @@ class PaymentPlanFlow:
                     obj.payment_plan.Status.TP_STEFICON_COMPLETED,
                     obj.payment_plan.Status.TP_STEFICON_ERROR,
                     obj.payment_plan.Status.OPEN,
+                    obj.payment_plan.Status.ABORTED,
                 ]
             )
         ],
@@ -342,6 +364,7 @@ class PaymentPlanFlow:
                     obj.payment_plan.Status.TP_STEFICON_ERROR,
                     obj.payment_plan.Status.TP_STEFICON_WAIT,
                     obj.payment_plan.Status.OPEN,
+                    obj.payment_plan.Status.ABORTED,
                 ]
             )
         ],
@@ -515,8 +538,6 @@ class PaymentPlanFlow:
     )
     def status_reactivate_abort(self) -> None:
         self.payment_plan.status_date = timezone.now()
-        if self.payment_plan.plan_type == PaymentPlan.PlanType.REGULAR:
-            self.payment_plan.build_status = self.payment_plan.BuildStatus.BUILD_STATUS_PENDING
 
 
 class FollowUpInstructionFlow:

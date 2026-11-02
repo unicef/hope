@@ -1,4 +1,3 @@
-import { Grid } from '@mui/material';
 import { Field } from 'formik';
 import { useTranslation } from 'react-i18next';
 import { FormikCheckboxField } from '@shared/Formik/FormikCheckboxField';
@@ -13,6 +12,7 @@ import type { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
 import { RestService } from '@restgenerated/services/RestService';
 import { displayNameWithLatin } from '@utils/utils';
 import { restQueryKey } from '@utils/queryKeys';
+import { ResponsiveGrid, ResponsiveGridContainer } from 'src/responsive';
 
 interface HouseholdQuestionnaireProps {
   values;
@@ -58,7 +58,7 @@ function HouseholdQuestionnaire({
   if (!selectedHouseholdData) return null;
 
   return (
-    <Grid container spacing={6}>
+    <ResponsiveGridContainer spacing={6}>
       {[
         {
           name: 'questionnaire_size',
@@ -91,7 +91,10 @@ function HouseholdQuestionnaire({
             <ContentLink
               href={`/${baseUrl}/population/individuals/${selectedHouseholdData.headOfHousehold?.id}`}
             >
-              {displayNameWithLatin(selectedHouseholdData.headOfHousehold, 'fullName')}
+              {displayNameWithLatin(
+                selectedHouseholdData.headOfHousehold,
+                'fullName',
+              )}
             </ContentLink>
           ),
           size: 3,
@@ -145,7 +148,7 @@ function HouseholdQuestionnaire({
           size: 3,
         },
       ].map((el) => (
-        <Grid key={el.name} size={{ xs: 3 }}>
+        <ResponsiveGrid key={el.name} size="quarter">
           <Field
             data-cy={`input-${el.name}`}
             name={el.name}
@@ -154,9 +157,9 @@ function HouseholdQuestionnaire({
             color="primary"
             component={FormikCheckboxField}
           />
-        </Grid>
+        </ResponsiveGrid>
       ))}
-    </Grid>
+    </ResponsiveGridContainer>
   );
 }
 

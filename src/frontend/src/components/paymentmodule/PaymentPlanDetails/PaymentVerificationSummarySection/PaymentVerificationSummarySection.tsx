@@ -1,4 +1,4 @@
-import { Box, Grid, Typography } from '@mui/material';
+import { Box, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { ContainerColumnWithBorder } from '@core/ContainerColumnWithBorder';
 import { LabelizedField } from '@core/LabelizedField';
@@ -10,6 +10,11 @@ import type { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail'
 import type { PaymentVerificationPlan } from '@restgenerated/models/PaymentVerificationPlan';
 import { paymentVerificationStatusToColor } from '@utils/utils';
 import type { ReactElement } from 'react';
+import {
+  responsiveValue,
+  ResponsiveGrid,
+  ResponsiveGridContainer,
+} from 'src/responsive';
 
 interface PaymentVerificationSummarySectionProps {
   paymentPlan: PaymentPlanDetail;
@@ -30,7 +35,7 @@ function PaymentVerificationSummarySection({
   return (
     <Box
       sx={{
-        m: 5,
+        m: responsiveValue(2, 5),
       }}
     >
       <ContainerColumnWithBorder>
@@ -45,8 +50,8 @@ function PaymentVerificationSummarySection({
             </Typography>
           </Title>
         </Box>
-        <Grid container spacing={3}>
-          <Grid size={{ xs: 3 }}>
+        <ResponsiveGridContainer spacing={3}>
+          <ResponsiveGrid size="quarter" mobileSize="half">
             <LabelizedField label={t('Status')}>
               <StatusBox
                 dataCy="payment-verification-summary-status"
@@ -54,58 +59,58 @@ function PaymentVerificationSummarySection({
                 statusToColor={paymentVerificationStatusToColor}
               />
             </LabelizedField>
-          </Grid>
-          <Grid size={{ xs: 3 }}>
+          </ResponsiveGrid>
+          <ResponsiveGrid size="quarter" mobileSize="half">
             <LabelizedField
               label={t('Number of Verification Plans')}
               value={paymentVerificationSummary?.numberOfVerificationPlans}
             />
-          </Grid>
-          <Grid size={{ xs: 3 }}>
+          </ResponsiveGrid>
+          <ResponsiveGrid size="quarter" mobileSize="half">
             <LabelizedField label={t('Activation Date')}>
               <UniversalMoment>
                 {paymentVerificationSummary?.activationDate}
               </UniversalMoment>
             </LabelizedField>
-          </Grid>
-          <Grid size={{ xs: 3 }}>
+          </ResponsiveGrid>
+          <ResponsiveGrid size="quarter" mobileSize="half">
             <LabelizedField label={t('Completion Date')}>
               <UniversalMoment>
                 {paymentVerificationSummary?.completionDate}
               </UniversalMoment>
             </LabelizedField>
-          </Grid>
-          <Grid size={{ xs: 3 }}>
+          </ResponsiveGrid>
+          <ResponsiveGrid size="quarter" mobileSize="half">
             <LabelizedField
               label={t('Sample Size')}
               value={sumBy((plan) => plan.sampleSize)}
             />
-          </Grid>
-          <Grid size={{ xs: 3 }}>
+          </ResponsiveGrid>
+          <ResponsiveGrid size="quarter" mobileSize="half">
             <LabelizedField
               label={t('Responded')}
               value={sumBy((plan) => plan.respondedCount)}
             />
-          </Grid>
-          <Grid size={{ xs: 3 }}>
+          </ResponsiveGrid>
+          <ResponsiveGrid size="quarter" mobileSize="half">
             <LabelizedField
               label={t('Received')}
               value={sumBy((plan) => plan.receivedCount)}
             />
-          </Grid>
-          <Grid size={{ xs: 3 }}>
+          </ResponsiveGrid>
+          <ResponsiveGrid size="quarter" mobileSize="half">
             <LabelizedField
               label={t('Not Received')}
               value={sumBy((plan) => plan.notReceivedCount)}
             />
-          </Grid>
-          <Grid size={{ xs: 3 }}>
+          </ResponsiveGrid>
+          <ResponsiveGrid size="quarter" mobileSize="half">
             <LabelizedField
               label={t('Received with Issues')}
               value={sumBy((plan) => plan.receivedWithProblemsCount)}
             />
-          </Grid>
-        </Grid>
+          </ResponsiveGrid>
+        </ResponsiveGridContainer>
       </ContainerColumnWithBorder>
     </Box>
   );

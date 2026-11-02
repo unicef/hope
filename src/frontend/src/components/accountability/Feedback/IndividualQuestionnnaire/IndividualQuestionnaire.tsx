@@ -1,4 +1,3 @@
-import Grid from '@mui/material/Grid';
 import { Field } from 'formik';
 import { useTranslation } from 'react-i18next';
 import { useBaseUrl } from '@hooks/useBaseUrl';
@@ -12,6 +11,7 @@ import { RestService } from '@restgenerated/index';
 import { restQueryKey } from '@utils/queryKeys';
 import type { IndividualChoices } from '@restgenerated/models/IndividualChoices';
 import { useQuery } from '@tanstack/react-query';
+import { ResponsiveGrid, ResponsiveGridContainer } from 'src/responsive';
 
 interface IndividualQuestionnaireProps {
   values;
@@ -35,7 +35,7 @@ const IndividualQuestionnaire = ({
   );
 
   return (
-    <Grid container spacing={6}>
+    <ResponsiveGridContainer spacing={6}>
       {[
         {
           name: 'questionnaire_fullName',
@@ -68,7 +68,7 @@ const IndividualQuestionnaire = ({
           size: 3,
         },
       ].map((el) => (
-        <Grid key={el.name} size={{ xs: 3 }}>
+        <ResponsiveGrid key={el.name} size="quarter">
           <Field
             key={el.name}
             name={el.name}
@@ -78,9 +78,9 @@ const IndividualQuestionnaire = ({
             color="primary"
             component={FormikCheckboxField}
           />
-        </Grid>
+        </ResponsiveGrid>
       ))}
-    </Grid>
+    </ResponsiveGridContainer>
   );
 };
 

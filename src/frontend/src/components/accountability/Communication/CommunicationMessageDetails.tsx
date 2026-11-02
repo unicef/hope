@@ -6,14 +6,7 @@ import { Box, Grid, Paper, Typography } from '@mui/material';
 import type { MessageDetail } from '@restgenerated/models/MessageDetail';
 import type { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
-
-const StyledBox = styled(Paper)`
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-  padding: 26px 22px;
-`;
+import { responsiveGridSize, responsiveValue } from 'src/responsive';
 
 interface CommunicationMessageDetailsProps {
   message: MessageDetail;
@@ -24,13 +17,23 @@ const CommunicationMessageDetails = ({
 }: CommunicationMessageDetailsProps): ReactElement => {
   const { t } = useTranslation();
   return (
-    <Grid size={{ xs: 8 }} data-cy="communication-message-details">
+    <Grid
+      size={responsiveGridSize('twoThirds')}
+      data-cy="communication-message-details"
+    >
       <Box
         sx={{
-          p: 5,
+          p: responsiveValue(2, 5),
         }}
       >
-        <StyledBox>
+        <Paper
+          sx={{
+            display: 'flex',
+            flexDirection: 'column',
+            width: '100%',
+            padding: responsiveValue('16px', '26px 22px'),
+          }}
+        >
           <Title>
             <Typography variant="h6" data-cy="message-title">
               {t('Message')}
@@ -62,7 +65,7 @@ const CommunicationMessageDetails = ({
               </Grid>
               <Box
                 sx={{
-                  ml: 6,
+                  ml: responsiveValue(0, 6),
                   p: 3,
                 }}
               >
@@ -71,7 +74,7 @@ const CommunicationMessageDetails = ({
               </Box>
             </Grid>
           </OverviewContainer>
-        </StyledBox>
+        </Paper>
       </Box>
     </Grid>
   );

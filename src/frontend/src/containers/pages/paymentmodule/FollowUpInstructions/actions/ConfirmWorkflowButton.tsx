@@ -18,6 +18,7 @@ import { showApiErrorMessages } from '@utils/utils';
 import type { ReactElement } from 'react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { COMMENT_MAX_LENGTH } from 'src/config';
 
 interface ConfirmWorkflowButtonProps {
   label: string;
@@ -69,6 +70,11 @@ export function ConfirmWorkflowButton({
     },
   });
 
+  const handleClose = (): void => {
+    setOpen(false);
+    setComment('');
+  };
+
   return (
     <>
       <Button
@@ -79,12 +85,7 @@ export function ConfirmWorkflowButton({
       >
         {t(label)}
       </Button>
-      <Dialog
-        open={open}
-        onClose={() => setOpen(false)}
-        maxWidth="sm"
-        fullWidth
-      >
+      <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
         <DialogTitleWrapper>
           <DialogTitle>{t(label)}</DialogTitle>
         </DialogTitleWrapper>
@@ -99,12 +100,13 @@ export function ConfirmWorkflowButton({
               value={comment}
               onChange={(e) => setComment(e.target.value)}
               variant="outlined"
+              slotProps={{ htmlInput: { maxLength: COMMENT_MAX_LENGTH } }}
             />
           )}
         </DialogContent>
         <DialogFooter>
           <DialogActions>
-            <Button onClick={() => setOpen(false)}>{t('CANCEL')}</Button>
+            <Button onClick={handleClose}>{t('CANCEL')}</Button>
             <LoadingButton
               loading={isPending}
               color={color}

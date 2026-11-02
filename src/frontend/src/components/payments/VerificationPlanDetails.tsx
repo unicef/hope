@@ -11,14 +11,18 @@ import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { VerificationPlanActions } from './VerificationPlanActions';
 import { VerificationPlanDetailsChart } from './VerificationPlanChart';
+import {
+  ResponsiveGrid,
+  ResponsiveGridContainer,
+  SECTION_PADDING,
+  responsiveValue,
+} from 'src/responsive';
 
-const Container = styled.div`
+const Container = styled(Box)`
   display: flex;
   flex: 1;
   width: 100%;
   background-color: #fff;
-  padding: ${({ theme }) => theme.spacing(8)}
-    ${({ theme }) => theme.spacing(11)};
   flex-direction: column;
   border-color: #b1b1b5;
   border-bottom-width: 1px;
@@ -37,11 +41,12 @@ export function VerificationPlanDetails({
   const { t } = useTranslation();
 
   return (
-    <Container>
+    <Container sx={{ padding: SECTION_PADDING }}>
       <Box
         sx={{
           display: 'flex',
-          alignItems: 'center',
+          flexDirection: responsiveValue('column', 'row'),
+          alignItems: responsiveValue('stretch', 'center'),
           justifyContent: 'space-between',
         }}
       >
@@ -59,10 +64,10 @@ export function VerificationPlanDetails({
           paymentPlanNode={paymentPlanNode}
         />
       </Box>
-      <Grid container>
-        <Grid size={{ xs: 9 }}>
-          <Grid container spacing={3}>
-            <Grid size={{ xs: 3 }}>
+      <Grid container rowSpacing={responsiveValue(4, 0)}>
+        <Grid size={responsiveValue(12, 9)}>
+          <ResponsiveGridContainer spacing={3}>
+            <ResponsiveGrid size="quarter" mobileSize="half">
               <LabelizedField label={t('STATUS')}>
                 <StatusBox
                   status={verificationPlan.status}
@@ -70,7 +75,7 @@ export function VerificationPlanDetails({
                   dataCy="verification-plan-status"
                 />
               </LabelizedField>
-            </Grid>
+            </ResponsiveGrid>
             {[
               {
                 label: t('SAMPLING'),
@@ -117,13 +122,16 @@ export function VerificationPlanDetails({
                 ),
               },
             ].map((el) => (
-              <Grid size={{ xs: 3 }} key={el.label}>
+              <ResponsiveGrid size="quarter" mobileSize="half" key={el.label}>
                 <LabelizedField label={el.label} value={el.value} />
-              </Grid>
+              </ResponsiveGrid>
             ))}
-          </Grid>
+          </ResponsiveGridContainer>
         </Grid>
-        <Grid size={{ xs: 3 }}>
+        <Grid
+          size={responsiveValue(12, 3)}
+          sx={{ minHeight: responsiveValue(160, 0) }}
+        >
           <VerificationPlanDetailsChart verificationPlan={verificationPlan} />
         </Grid>
       </Grid>

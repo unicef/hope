@@ -13,6 +13,7 @@ import { restQueryKey } from '@utils/queryKeys';
 import { showApiErrorMessages } from '@utils/utils';
 import { AbortPaymentPlan } from '@components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/AbortPaymentPlan';
 import { PERMISSIONS } from 'src/config/permissions';
+import { HeaderActions } from '@core/HeaderActions';
 
 export interface LockedPaymentPlanHeaderButtonsProps {
   paymentPlan: PaymentPlanDetail;
@@ -60,12 +61,7 @@ export function LockedPaymentPlanHeaderButtons({
   });
 
   return (
-    <Box
-      sx={{
-        display: 'flex',
-        alignItems: 'center',
-      }}
-    >
+    <HeaderActions spacing="none">
       {canUnlock && (
         <Box
           sx={{
@@ -95,6 +91,6 @@ export function LockedPaymentPlanHeaderButtons({
           <AbortPaymentPlan paymentPlan={paymentPlan} />
         </Box>
       )}
-    </Box>
+    </HeaderActions>
   );
 }

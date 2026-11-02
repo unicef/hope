@@ -2,6 +2,7 @@ import { SearchTextField } from '@core/SearchTextField';
 import { SelectFilter } from '@core/SelectFilter';
 import { Grid, MenuItem } from '@mui/material';
 import { useTranslation } from 'react-i18next';
+import { responsiveGridSize } from 'src/responsive';
 
 interface DocumentSearchFieldProps {
   onChange: (key: string, value: string) => void;
@@ -19,7 +20,7 @@ export const DocumentSearchField = ({
   const { t } = useTranslation();
 
   return (
-    <Grid container size={{ xs: 6 }} spacing={0}>
+    <Grid container size={responsiveGridSize('half')} spacing={0}>
       <Grid size={{ xs: 4 }}>
         <SelectFilter
           onChange={(e) => onChange('documentType', e.target.value)}

@@ -21,6 +21,7 @@ import { useProgramContext } from 'src/programContext';
 import styled from 'styled-components';
 import type { MiśTheme } from '../../theme';
 import { PaperContainer } from './PaperContainer';
+import { responsiveGridSize, responsiveValue } from 'src/responsive';
 import { formatFigure } from '@utils/utils';
 
 const colors = {
@@ -83,8 +84,8 @@ function ResultsForHouseholds({
           <Typography variant="h6">{t('Results')}</Typography>
         </Title>
         <ContentWrapper>
-          <Grid container>
-            <Grid size={{ xs: 4 }}>
+          <Grid container rowSpacing={responsiveValue(3, 0)}>
+            <Grid size={responsiveGridSize('third')}>
               <Grid
                 container
                 spacing={0}
@@ -126,7 +127,7 @@ function ResultsForHouseholds({
                 </Grid>
               </Grid>
             </Grid>
-            <Grid size={{ xs: 4 }}>
+            <Grid size={responsiveGridSize('third')}>
               <Grid
                 container
                 spacing={0}
@@ -216,7 +217,7 @@ function ResultsForHouseholds({
                 </Grid> */}
               </Grid>
             </Grid>
-            <Grid size={{ xs: 4 }}>
+            <Grid size={responsiveGridSize('third')}>
               <Grid
                 container
                 spacing={0}

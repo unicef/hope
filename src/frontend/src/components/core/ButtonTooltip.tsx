@@ -1,6 +1,7 @@
 import Button from '@mui/material/Button';
-import { Tooltip } from '@mui/material';
+import { Box, Tooltip } from '@mui/material';
 import type { ReactNode, FC } from 'react';
+import { responsiveValue } from 'src/responsive';
 
 interface ButtonTooltipProps {
   children: ReactNode;
@@ -23,7 +24,14 @@ export const ButtonTooltip: FC<ButtonTooltipProps> = ({
 }) => {
   return disabled ? (
     <Tooltip title={title}>
-      <span>
+      {/* Lets the button fill the row when header actions stack on mobile. */}
+      <Box
+        component="span"
+        sx={{
+          display: responsiveValue('inline-flex', 'inline'),
+          flexDirection: 'column',
+        }}
+      >
         <Button
           disabled={disabled}
           onClick={onClick}
@@ -33,7 +41,7 @@ export const ButtonTooltip: FC<ButtonTooltipProps> = ({
         >
           {children}
         </Button>
-      </span>
+      </Box>
     </Tooltip>
   ) : (
     <Button

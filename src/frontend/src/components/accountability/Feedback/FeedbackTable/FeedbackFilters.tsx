@@ -5,7 +5,7 @@ import { LoadingComponent } from '@core/LoadingComponent';
 import { SearchTextField } from '@core/SearchTextField';
 import { SelectFilter } from '@core/SelectFilter';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import { Grid, MenuItem } from '@mui/material';
+import { MenuItem } from '@mui/material';
 import type { Choice } from '@restgenerated/models/Choice';
 import { RestService } from '@restgenerated/services/RestService';
 import { restQueryKey } from '@utils/queryKeys';
@@ -17,6 +17,11 @@ import { createHandleApplyFilterChange } from '@utils/utils';
 import type { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
+import {
+  ResponsiveGrid,
+  ResponsiveGridContainer,
+  responsiveValue,
+} from 'src/responsive';
 
 interface FeedbackFiltersProps {
   setFilter: (filter) => void;
@@ -69,17 +74,17 @@ const FeedbackFilters = ({
       clearHandler={handleClearFilter}
       applyHandler={handleApplyFilter}
     >
-      <Grid container spacing={3} sx={{ alignItems: 'flex-end' }}>
-        <Grid size={{ xs: 3 }}>
+      <ResponsiveGridContainer spacing={3} sx={{ alignItems: 'flex-end' }}>
+        <ResponsiveGrid size="quarter">
           <SearchTextField
             value={filter.feedbackId}
             label="Search"
             onChange={(e) => handleFilterChange('feedbackId', e.target.value)}
             data-cy="filters-search"
           />
-        </Grid>
+        </ResponsiveGrid>
         {isAllPrograms && (
-          <Grid size={{ xs: 3 }}>
+          <ResponsiveGrid size="quarter">
             <ProgramAutocompleteRestFilter
               filter={filter}
               name="program"
@@ -89,9 +94,9 @@ const FeedbackFilters = ({
               appliedFilter={appliedFilter}
               setAppliedFilter={setAppliedFilter}
             />
-          </Grid>
+          </ResponsiveGrid>
         )}
-        <Grid size={{ xs: 3 }}>
+        <ResponsiveGrid size="quarter">
           <SelectFilter
             onChange={(e) => handleFilterChange('issueType', e.target.value)}
             label={t('Issue Type')}
@@ -104,8 +109,8 @@ const FeedbackFilters = ({
               </MenuItem>
             ))}
           </SelectFilter>
-        </Grid>
-        <Grid size={{ xs: 3 }}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="quarter">
           <CreatedByAutocompleteRestFilter
             name="createdBy"
             filter={filter}
@@ -117,9 +122,14 @@ const FeedbackFilters = ({
             setAppliedFilter={setAppliedFilter}
             additionalVariables={{ isFeedbackCreator: true }}
           />
-        </Grid>
-        {!isAllPrograms && <Grid size={{ xs: 3 }} />}
-        <Grid size={{ xs: 3 }}>
+        </ResponsiveGrid>
+        {!isAllPrograms && (
+          <ResponsiveGrid
+            size="quarter"
+            sx={{ display: responsiveValue('none', 'block') }}
+          />
+        )}
+        <ResponsiveGrid size="quarter" mobileSize="half">
           <DatePickerFilter
             topLabel={t('Creation Date')}
             label="From"
@@ -127,17 +137,17 @@ const FeedbackFilters = ({
             value={filter.createdAtBefore}
             dataCy="filters-creation-date-from"
           />
-        </Grid>
-        <Grid size={{ xs: 3 }}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="quarter" mobileSize="half">
           <DatePickerFilter
             label={t('To')}
             onChange={(date) => handleFilterChange('createdAtAfter', date)}
             value={filter.createdAtAfter}
             dataCy="filters-creation-date-to"
           />
-        </Grid>
+        </ResponsiveGrid>
         {isAllPrograms && (
-          <Grid size={{ xs: 3 }}>
+          <ResponsiveGrid size="quarter">
             <SelectFilter
               onChange={(e) =>
                 handleFilterChange('programState', e.target.value)
@@ -155,9 +165,9 @@ const FeedbackFilters = ({
                 {t('All Programmes')}
               </MenuItem>
             </SelectFilter>
-          </Grid>
+          </ResponsiveGrid>
         )}
-      </Grid>
+      </ResponsiveGridContainer>
     </FiltersSection>
   );
 };

@@ -13,7 +13,6 @@ import { useSnackbar } from '@hooks/useSnackBar';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Divider from '@mui/material/Divider';
-import Grid from '@mui/material/Grid';
 import type { FeedbackDetail } from '@restgenerated/models/FeedbackDetail';
 import type { PaginatedProgramListList } from '@restgenerated/models/PaginatedProgramListList';
 import type { PatchedFeedbackUpdate } from '@restgenerated/models/PatchedFeedbackUpdate';
@@ -32,6 +31,12 @@ import { useProgramContext } from 'src/programContext';
 import * as Yup from 'yup';
 import { PERMISSIONS, hasPermissions } from '../../../../config/permissions';
 import { showApiErrorMessages } from '@utils/utils';
+import {
+  ResponsiveGrid,
+  ResponsiveGridContainer,
+  responsiveGridSize,
+  responsiveValue,
+} from 'src/responsive';
 
 export const validationSchema = Yup.object().shape({
   issueType: Yup.string().required('Issue Type is required').nullable(),
@@ -251,28 +256,34 @@ const EditFeedbackPage = (): ReactElement => {
               </LoadingButton>
             </Box>
           </PageHeader>
-          <Grid container spacing={3}>
-            <Grid size={{ xs: 12 }}>
-              <Box sx={{ p: 3 }}>
+          <ResponsiveGridContainer spacing={3}>
+            <ResponsiveGrid size="full">
+              <Box sx={{ p: responsiveValue(1, 3) }}>
                 <ContainerColumnWithBorder>
-                  <Box sx={{ p: 3 }}>
+                  <Box sx={{ p: responsiveValue(0, 3) }}>
                     <Box sx={{ mb: 3 }}>
-                      <Grid container size={{ xs: 6 }} spacing={6}>
-                        <Grid size={{ xs: 6 }}>
+                      <ResponsiveGridContainer
+                        size={responsiveGridSize('half')}
+                        spacing={6}
+                      >
+                        <ResponsiveGrid size="half">
                           <LabelizedField label={t('Category')}>
                             {t('Feedback')}
                           </LabelizedField>
-                        </Grid>
-                        <Grid size={{ xs: 6 }}>
+                        </ResponsiveGrid>
+                        <ResponsiveGrid size="half">
                           <LabelizedField label={t('Issue Type')}>
                             {feedback.issueType === 'POSITIVE_FEEDBACK'
                               ? 'Positive Feedback'
                               : 'Negative Feedback'}
                           </LabelizedField>
-                        </Grid>
-                      </Grid>
-                      <Grid container size={{ xs: 6 }} spacing={6}>
-                        <Grid size={{ xs: 6 }}>
+                        </ResponsiveGrid>
+                      </ResponsiveGridContainer>
+                      <ResponsiveGridContainer
+                        size={responsiveGridSize('half')}
+                        spacing={6}
+                      >
+                        <ResponsiveGrid size="half">
                           <LabelizedField
                             label={t(`${beneficiaryGroup?.groupLabel} ID`)}
                           >
@@ -293,8 +304,8 @@ const EditFeedbackPage = (): ReactElement => {
                               </div>
                             )}
                           </LabelizedField>
-                        </Grid>
-                        <Grid size={{ xs: 6 }}>
+                        </ResponsiveGrid>
+                        <ResponsiveGrid size="half">
                           <LabelizedField
                             label={t(`${beneficiaryGroup?.memberLabel} ID`)}
                           >
@@ -315,14 +326,14 @@ const EditFeedbackPage = (): ReactElement => {
                               </div>
                             )}
                           </LabelizedField>
-                        </Grid>
-                      </Grid>
+                        </ResponsiveGrid>
+                      </ResponsiveGridContainer>
                       <Box sx={{ mt: 6, mb: 6 }}>
                         <Divider />
                       </Box>
                     </Box>
-                    <Grid container spacing={3}>
-                      <Grid size={{ xs: 12 }}>
+                    <ResponsiveGridContainer spacing={3}>
+                      <ResponsiveGrid size="full">
                         <Field
                           name="description"
                           multiline
@@ -332,8 +343,8 @@ const EditFeedbackPage = (): ReactElement => {
                           required
                           component={FormikTextField}
                         />
-                      </Grid>
-                      <Grid size={{ xs: 12 }}>
+                      </ResponsiveGrid>
+                      <ResponsiveGrid size="full">
                         <Field
                           name="comments"
                           multiline
@@ -342,15 +353,15 @@ const EditFeedbackPage = (): ReactElement => {
                           label={t('Comments')}
                           component={FormikTextField}
                         />
-                      </Grid>
-                      <Grid size={{ xs: 6 }}>
+                      </ResponsiveGrid>
+                      <ResponsiveGrid size="half">
                         <Field
                           name="admin2"
                           variant="outlined"
                           component={FormikAdminAreaAutocomplete}
                         />
-                      </Grid>
-                      <Grid size={{ xs: 6 }}>
+                      </ResponsiveGrid>
+                      <ResponsiveGrid size="half">
                         <Field
                           name="area"
                           fullWidth
@@ -358,8 +369,8 @@ const EditFeedbackPage = (): ReactElement => {
                           label={t('Area / Village / Pay point')}
                           component={FormikTextField}
                         />
-                      </Grid>
-                      <Grid size={{ xs: 6 }}>
+                      </ResponsiveGrid>
+                      <ResponsiveGrid size="half">
                         <Field
                           name="language"
                           multiline
@@ -368,8 +379,8 @@ const EditFeedbackPage = (): ReactElement => {
                           label={t('Languages Spoken')}
                           component={FormikTextField}
                         />
-                      </Grid>
-                      <Grid size={{ xs: 3 }}>
+                      </ResponsiveGrid>
+                      <ResponsiveGrid size="quarter">
                         <Field
                           name="programId"
                           label={t('Programme Name')}
@@ -381,13 +392,13 @@ const EditFeedbackPage = (): ReactElement => {
                             !isAllPrograms || Boolean(feedback.programId)
                           }
                         />
-                      </Grid>
-                    </Grid>
+                      </ResponsiveGrid>
+                    </ResponsiveGridContainer>
                   </Box>
                 </ContainerColumnWithBorder>
               </Box>
-            </Grid>
-          </Grid>
+            </ResponsiveGrid>
+          </ResponsiveGridContainer>
         </>
       )}
     </Formik>

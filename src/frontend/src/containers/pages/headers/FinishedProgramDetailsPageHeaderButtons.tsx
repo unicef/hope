@@ -1,3 +1,4 @@
+import { HeaderActions } from '@components/core/HeaderActions';
 import { Box } from '@mui/material';
 import { DuplicateProgramButtonLink } from '../../dialogs/programs/DuplicateProgramButtonLink';
 import { ReactivateProgram } from '../../dialogs/programs/ReactivateProgram';
@@ -16,30 +17,17 @@ export function FinishedProgramDetailsPageHeaderButtons({
   canDuplicate,
 }: FinishedProgramDetailsPageHeaderPropTypes): ReactElement {
   return (
-    <Box
-      sx={{
-        display: 'flex',
-        alignItems: 'center',
-      }}
-    >
+    <HeaderActions>
       {canActivate && (
-        <Box
-          sx={{
-            m: 2,
-          }}
-        >
+        <Box>
           <ReactivateProgram program={program} />
         </Box>
       )}
       {canDuplicate && (
-        <Box
-          sx={{
-            m: 2,
-          }}
-        >
+        <Box>
           <DuplicateProgramButtonLink program={program} />
         </Box>
       )}
-    </Box>
+    </HeaderActions>
   );
 }
