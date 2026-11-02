@@ -135,14 +135,6 @@ class PaymentPlanFlow:
         pass
 
     @background_action_status.transition(
-        source=[None] + list(PaymentPlan.BACKGROUND_ACTION_ERROR_STATES),
-        target=PaymentPlan.BackgroundActionStatus.XLSX_IMPORTING_FSP_EXTRA_FIELDS,
-        conditions=[lambda obj: obj.payment_plan.status == obj.payment_plan.Status.LOCKED_FSP],
-    )
-    def background_action_status_xlsx_importing_fsp_extra_fields(self) -> None:
-        pass
-
-    @background_action_status.transition(
         source=[
             PaymentPlan.BackgroundActionStatus.XLSX_IMPORTING_ENTITLEMENTS,
             PaymentPlan.BackgroundActionStatus.IMPORTING_ENTITLEMENTS,

@@ -1,3 +1,4 @@
+from collections.abc import Iterable
 from io import BytesIO
 import logging
 from tempfile import NamedTemporaryFile
@@ -193,7 +194,7 @@ class XlsxPaymentPlanDeliveryExportService(XlsxExportBaseService):
     @classmethod
     def get_system_controlled_headers(
         cls,
-        payment_plan: PaymentPlan,
+        payment_plans: Iterable[PaymentPlan],
     ) -> frozenset[str]:
         headers = set(FinancialServiceProviderXlsxTemplate.DEFAULT_COLUMNS)
         template_fields = FinancialServiceProviderXlsxTemplate.objects.values_list(
@@ -205,7 +206,8 @@ class XlsxPaymentPlanDeliveryExportService(XlsxExportBaseService):
             headers.update(core_fields or ())
             headers.update(flex_fields or ())
             headers.update(document_types or ())
-        headers.update(cls.get_account_fields_headers(payment_plan))
+        for payment_plan in payment_plans:
+            headers.update(cls.get_account_fields_headers(payment_plan))
         return frozenset(headers)
 
     def open_workbook(self, title: str) -> tuple[Workbook, Worksheet]:

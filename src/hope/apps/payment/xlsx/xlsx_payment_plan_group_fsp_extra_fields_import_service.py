@@ -16,7 +16,7 @@ from hope.apps.payment.xlsx.xlsx_payment_plan_delivery_export_service import (
 )
 from hope.models import (
     Payment,
-    PaymentPlan,
+    PaymentPlanGroup,
     User,
 )
 
@@ -26,13 +26,13 @@ if TYPE_CHECKING:
 Row = tuple["Cell", ...]
 
 
-class XlsxPaymentPlanFspExtraFieldsImportService(XlsxImportBaseService):
-    TITLE = "Payment Plan - FSP Extra Fields"
+class XlsxPaymentPlanGroupFspExtraFieldsImportService(XlsxImportBaseService):
+    TITLE = "Payment Plan Group - FSP Extra Fields"
     PAYMENT_ID_COLUMN = "payment_id"
     BATCH_SIZE = 500
 
-    def __init__(self, payment_plan: PaymentPlan, file: IO[bytes]) -> None:
-        self.payment_plan = payment_plan
+    def __init__(self, payment_plan_group: PaymentPlanGroup, file: IO[bytes]) -> None:
+        self.payment_plan_group = payment_plan_group
         self.file = file
         self.errors: list[XlsxError] = []
         self.headers: list[Any] = []
@@ -40,10 +40,9 @@ class XlsxPaymentPlanFspExtraFieldsImportService(XlsxImportBaseService):
         self.custom_headers: list[str] = []
         self.payments = {
             str(payment.unicef_id): payment
-            for payment in payment_plan.eligible_payments.select_related(
-                "currency",
-                "delivery_type",
-            )
+            for payment in Payment.objects.filter(parent__payment_plan_group=payment_plan_group)
+            .eligible()
+            .select_related("currency", "delivery_type")
         }
         self.is_updated = False
 
@@ -103,7 +102,7 @@ class XlsxPaymentPlanFspExtraFieldsImportService(XlsxImportBaseService):
 
     def _system_controlled_headers(self) -> frozenset[str]:
         return XlsxPaymentPlanDeliveryExportService.get_system_controlled_headers(
-            self.payment_plan,
+            self.payment_plan_group.payment_plans.all(),
         )
 
     def _validate_rows(self) -> None:
@@ -122,7 +121,7 @@ class XlsxPaymentPlanFspExtraFieldsImportService(XlsxImportBaseService):
                     XlsxError(
                         self.sheetname,
                         payment_id_cell.coordinate,
-                        f"This payment id {payment_id} is not in Payment Plan Payment List",
+                        f"This payment id {payment_id} is not in Payment Plan Group Payment List",
                     )
                 )
                 continue

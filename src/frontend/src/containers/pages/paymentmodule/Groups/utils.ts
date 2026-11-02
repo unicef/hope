@@ -14,7 +14,9 @@ export function isGroupBackgroundActionBusy(
     status ===
       PaymentPlanGroupDetailBackgroundActionStatusEnum.XLSX_EXPORTING ||
     status ===
-      PaymentPlanGroupDetailBackgroundActionStatusEnum.XLSX_IMPORTING_RECONCILIATION
+      PaymentPlanGroupDetailBackgroundActionStatusEnum.XLSX_IMPORTING_RECONCILIATION ||
+    status ===
+      PaymentPlanGroupDetailBackgroundActionStatusEnum.XLSX_IMPORTING_FSP_EXTRA_FIELDS
   );
 }
 

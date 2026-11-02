@@ -46,7 +46,16 @@ from hope.apps.payment.celery_tasks import (
 )
 from hope.apps.payment.services.payment_plan_group_services import PaymentPlanGroupService
 from hope.apps.payment.xlsx.xlsx_error import XlsxError
-from hope.models import AsyncRetryJob, LogEntry, Payment, PaymentPlan, PaymentPlanGroup, PaymentPlanSplit, User
+from hope.models import (
+    AsyncRetryJob,
+    FileTemp,
+    LogEntry,
+    Payment,
+    PaymentPlan,
+    PaymentPlanGroup,
+    PaymentPlanSplit,
+    User,
+)
 
 pytestmark = pytest.mark.django_db
 
@@ -4121,3 +4130,277 @@ def test_send_group_to_payment_gateway_on_finished_group_returns_400(
 
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response.json()[0] == "Send to Payment Gateway is possible only within Status ACCEPTED, got FINISHED"
+
+
+def _fsp_extra_fields_template_url(ba_slug: str, program_code: str, group_id: Any) -> str:
+    return reverse(
+        "api:payments:payment-plan-groups-fsp-extra-fields-template",
+        kwargs={"business_area_slug": ba_slug, "program_code": program_code, "pk": group_id},
+    )
+
+
+def _fsp_extra_fields_import_url(ba_slug: str, program_code: str, group_id: Any) -> str:
+    return reverse(
+        "api:payments:payment-plan-groups-fsp-extra-fields-import-xlsx",
+        kwargs={"business_area_slug": ba_slug, "program_code": program_code, "pk": group_id},
+    )
+
+
+@pytest.fixture
+def fsp_extra_fields_permissions(
+    user: Any, business_area: Any, program: Any, create_user_role_with_permissions: Any
+) -> None:
+    create_user_role_with_permissions(
+        user,
+        [Permissions.PM_VIEW_LIST, Permissions.PM_IMPORT_XLSX_WITH_RECONCILIATION],
+        business_area,
+        program=program,
+    )
+
+
+@pytest.fixture
+def locked_group_with_payment(business_area: Any, cycle: Any) -> Any:
+    group = cycle.payment_plan_groups.first()
+    group.status = PaymentPlanGroup.Status.LOCKED
+    group.save(update_fields=["status"])
+    payment_plan = PaymentPlanFactory(
+        business_area=business_area,
+        program_cycle=cycle,
+        payment_plan_group=group,
+        status=PaymentPlan.Status.LOCKED_FSP,
+    )
+    payment = PaymentFactory(parent=payment_plan, program=cycle.program, unicef_id="PAYMENT-FSP-EXTRA-FIELDS")
+    payment.save(update_fields=["unicef_id"])
+    return group
+
+
+@pytest.fixture
+def open_group_with_payment(locked_group_with_payment: Any) -> Any:
+    locked_group_with_payment.status = PaymentPlanGroup.Status.OPEN
+    locked_group_with_payment.save(update_fields=["status"])
+    return locked_group_with_payment
+
+
+@pytest.fixture
+def locked_group_after_failed_import(locked_group_with_payment: Any) -> Any:
+    locked_group_with_payment.background_action_status = PaymentPlanGroup.BackgroundActionStatus.XLSX_IMPORT_ERROR
+    locked_group_with_payment.save(update_fields=["background_action_status"])
+    return locked_group_with_payment
+
+
+@pytest.fixture
+def locked_group_importing_fsp_extra_fields(locked_group_with_payment: Any) -> Any:
+    locked_group_with_payment.background_action_status = (
+        PaymentPlanGroup.BackgroundActionStatus.XLSX_IMPORTING_FSP_EXTRA_FIELDS
+    )
+    locked_group_with_payment.save(update_fields=["background_action_status"])
+    return locked_group_with_payment
+
+
+@pytest.fixture
+def fsp_extra_fields_import_file() -> SimpleUploadedFile:
+    workbook = openpyxl.Workbook()
+    worksheet = workbook.active
+    worksheet.append(["payment_id", "fsp_reference"])
+    worksheet.append(["PAYMENT-FSP-EXTRA-FIELDS", "FSP-001"])
+    stream = BytesIO()
+    workbook.save(stream)
+    return SimpleUploadedFile("fsp_extra_fields.xlsx", stream.getvalue())
+
+
+@pytest.fixture
+def fsp_extra_fields_file_without_payment_id() -> SimpleUploadedFile:
+    workbook = openpyxl.Workbook()
+    worksheet = workbook.active
+    worksheet.append(["fsp_reference"])
+    worksheet.append(["FSP-001"])
+    stream = BytesIO()
+    workbook.save(stream)
+    return SimpleUploadedFile("fsp_extra_fields.xlsx", stream.getvalue())
+
+
+def test_fsp_extra_fields_template_is_available_for_locked_group(
+    client: Any,
+    business_area: Any,
+    program: Any,
+    locked_group_with_payment: Any,
+    fsp_extra_fields_permissions: None,
+) -> None:
+    response = client.get(
+        _fsp_extra_fields_template_url(business_area.slug, program.code, locked_group_with_payment.id)
+    )
+
+    assert response.status_code == status.HTTP_200_OK
+    assert (
+        f"payment_plan_group_{locked_group_with_payment.unicef_id}_fsp_extra_fields.xlsx"
+        in response["Content-Disposition"]
+    )
+
+
+def test_fsp_extra_fields_template_is_not_available_for_open_group(
+    client: Any,
+    business_area: Any,
+    program: Any,
+    open_group_with_payment: Any,
+    fsp_extra_fields_permissions: None,
+) -> None:
+    response = client.get(_fsp_extra_fields_template_url(business_area.slug, program.code, open_group_with_payment.id))
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert "available only for LOCKED Payment Plan Groups" in str(response.data)
+
+
+@patch("hope.apps.payment.api.views.import_payment_plan_group_fsp_extra_fields_from_xlsx_async_task")
+@pytest.mark.enable_activity_log
+def test_fsp_extra_fields_import_starts_for_locked_group(
+    mock_import_task: mock.Mock,
+    client: Any,
+    user: Any,
+    business_area: Any,
+    program: Any,
+    locked_group_with_payment: Any,
+    fsp_extra_fields_permissions: None,
+    fsp_extra_fields_import_file: SimpleUploadedFile,
+    django_capture_on_commit_callbacks: Any,
+) -> None:
+    with django_capture_on_commit_callbacks(execute=True):
+        response = client.post(
+            _fsp_extra_fields_import_url(business_area.slug, program.code, locked_group_with_payment.id),
+            {"file": fsp_extra_fields_import_file},
+            format="multipart",
+        )
+
+    locked_group_with_payment.refresh_from_db(fields=["background_action_status"])
+    file_temp = FileTemp.objects.get(object_id=locked_group_with_payment.pk)
+    log = LogEntry.objects.get(
+        content_type=ContentType.objects.get_for_model(PaymentPlanGroup),
+        object_id=locked_group_with_payment.pk,
+    )
+    assert response.status_code == status.HTTP_200_OK
+    assert (
+        locked_group_with_payment.background_action_status
+        == PaymentPlanGroup.BackgroundActionStatus.XLSX_IMPORTING_FSP_EXTRA_FIELDS
+    )
+    assert file_temp.created_by == user
+    mock_import_task.assert_called_once_with(locked_group_with_payment, str(file_temp.id), str(user.pk))
+    assert log.user == user
+    assert log.changes["background_action_status"] == {
+        "from": None,
+        "to": PaymentPlanGroup.BackgroundActionStatus.XLSX_IMPORTING_FSP_EXTRA_FIELDS,
+    }
+
+
+@patch("hope.apps.payment.api.views.import_payment_plan_group_fsp_extra_fields_from_xlsx_async_task")
+def test_fsp_extra_fields_import_can_retry_after_error(
+    mock_import_task: mock.Mock,
+    client: Any,
+    business_area: Any,
+    program: Any,
+    locked_group_after_failed_import: Any,
+    fsp_extra_fields_permissions: None,
+    fsp_extra_fields_import_file: SimpleUploadedFile,
+) -> None:
+    response = client.post(
+        _fsp_extra_fields_import_url(business_area.slug, program.code, locked_group_after_failed_import.id),
+        {"file": fsp_extra_fields_import_file},
+        format="multipart",
+    )
+
+    locked_group_after_failed_import.refresh_from_db(fields=["background_action_status"])
+    assert response.status_code == status.HTTP_200_OK
+    assert (
+        locked_group_after_failed_import.background_action_status
+        == PaymentPlanGroup.BackgroundActionStatus.XLSX_IMPORTING_FSP_EXTRA_FIELDS
+    )
+
+
+def test_fsp_extra_fields_import_rejects_active_background_action(
+    client: Any,
+    business_area: Any,
+    program: Any,
+    locked_group_importing_fsp_extra_fields: Any,
+    fsp_extra_fields_permissions: None,
+    fsp_extra_fields_import_file: SimpleUploadedFile,
+) -> None:
+    response = client.post(
+        _fsp_extra_fields_import_url(business_area.slug, program.code, locked_group_importing_fsp_extra_fields.id),
+        {"file": fsp_extra_fields_import_file},
+        format="multipart",
+    )
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert "Another background action is already in progress." in str(response.data)
+    assert FileTemp.objects.filter(object_id=locked_group_importing_fsp_extra_fields.pk).exists() is False
+
+
+def test_fsp_extra_fields_import_requires_file(
+    client: Any,
+    business_area: Any,
+    program: Any,
+    locked_group_with_payment: Any,
+    fsp_extra_fields_permissions: None,
+) -> None:
+    response = client.post(
+        _fsp_extra_fields_import_url(business_area.slug, program.code, locked_group_with_payment.id),
+        {},
+        format="multipart",
+    )
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert "file" in response.data
+
+
+def test_fsp_extra_fields_import_rejects_unreadable_xlsx(
+    client: Any,
+    business_area: Any,
+    program: Any,
+    locked_group_with_payment: Any,
+    fsp_extra_fields_permissions: None,
+) -> None:
+    response = client.post(
+        _fsp_extra_fields_import_url(business_area.slug, program.code, locked_group_with_payment.id),
+        {"file": SimpleUploadedFile("fsp_extra_fields.xlsx", b"not-an-xlsx-workbook")},
+        format="multipart",
+    )
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert "Invalid XLSX file. Upload another file." in str(response.data)
+
+
+def test_fsp_extra_fields_import_returns_workbook_validation_errors(
+    client: Any,
+    business_area: Any,
+    program: Any,
+    locked_group_with_payment: Any,
+    fsp_extra_fields_permissions: None,
+    fsp_extra_fields_file_without_payment_id: SimpleUploadedFile,
+) -> None:
+    response = client.post(
+        _fsp_extra_fields_import_url(business_area.slug, program.code, locked_group_with_payment.id),
+        {"file": fsp_extra_fields_file_without_payment_id},
+        format="multipart",
+    )
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response.data == [
+        {"sheet": "Sheet", "coordinates": None, "message": "Header payment_id is required exactly once"}
+    ]
+    assert FileTemp.objects.filter(object_id=locked_group_with_payment.pk).exists() is False
+
+
+def test_fsp_extra_fields_import_is_not_available_for_open_group(
+    client: Any,
+    business_area: Any,
+    program: Any,
+    open_group_with_payment: Any,
+    fsp_extra_fields_permissions: None,
+    fsp_extra_fields_import_file: SimpleUploadedFile,
+) -> None:
+    response = client.post(
+        _fsp_extra_fields_import_url(business_area.slug, program.code, open_group_with_payment.id),
+        {"file": fsp_extra_fields_import_file},
+        format="multipart",
+    )
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert "imported only for LOCKED Payment Plan Groups" in str(response.data)

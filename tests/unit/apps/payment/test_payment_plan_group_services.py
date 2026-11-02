@@ -403,6 +403,51 @@ def group_in_review(group_in_authorization, user):
     return group_in_authorization
 
 
+@pytest.fixture
+def locked_group_importing_fsp_extra_fields(locked_group):
+    locked_group.background_action_status = PaymentPlanGroup.BackgroundActionStatus.XLSX_IMPORTING_FSP_EXTRA_FIELDS
+    locked_group.save(update_fields=["background_action_status"])
+    return locked_group
+
+
+@pytest.fixture
+def locked_group_after_failed_fsp_extra_fields_import(locked_group):
+    locked_group.background_action_status = PaymentPlanGroup.BackgroundActionStatus.XLSX_IMPORT_ERROR
+    locked_group.save(update_fields=["background_action_status"])
+    return locked_group
+
+
+def test_unlock_rejects_group_importing_fsp_extra_fields(locked_group_importing_fsp_extra_fields):
+    with pytest.raises(ValidationError) as error:
+        PaymentPlanGroupService(locked_group_importing_fsp_extra_fields).unlock()
+    assert error.value.detail[0] == "Another background action is already in progress."
+
+
+def test_unlock_clears_failed_fsp_extra_fields_import(locked_group_after_failed_fsp_extra_fields_import):
+    PaymentPlanGroupService(locked_group_after_failed_fsp_extra_fields_import).unlock()
+
+    locked_group_after_failed_fsp_extra_fields_import.refresh_from_db()
+    assert locked_group_after_failed_fsp_extra_fields_import.status == PaymentPlanGroup.Status.OPEN
+    assert locked_group_after_failed_fsp_extra_fields_import.background_action_status is None
+
+
+def test_send_for_approval_rejects_group_importing_fsp_extra_fields(locked_group_importing_fsp_extra_fields, user):
+    with pytest.raises(ValidationError) as error:
+        PaymentPlanGroupService(locked_group_importing_fsp_extra_fields).send_for_approval(user)
+    assert error.value.detail[0] == "Another background action is already in progress."
+
+
+@patch("hope.apps.payment.services.payment_plan_group_services.send_payment_plan_group_notification_emails_async_task")
+def test_send_for_approval_clears_failed_fsp_extra_fields_import(
+    mock_notify, locked_group_after_failed_fsp_extra_fields_import, user
+):
+    PaymentPlanGroupService(locked_group_after_failed_fsp_extra_fields_import).send_for_approval(user)
+
+    locked_group_after_failed_fsp_extra_fields_import.refresh_from_db()
+    assert locked_group_after_failed_fsp_extra_fields_import.status == PaymentPlanGroup.Status.IN_APPROVAL
+    assert locked_group_after_failed_fsp_extra_fields_import.background_action_status is None
+
+
 @patch("hope.apps.payment.services.payment_plan_group_services.send_payment_plan_group_notification_emails_async_task")
 def test_send_for_approval_moves_group_and_plans(mock_notify, locked_group, locked_payment_plan, user):
     PaymentPlanGroupService(locked_group).send_for_approval(user)

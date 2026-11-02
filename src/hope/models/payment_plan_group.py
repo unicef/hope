@@ -80,6 +80,10 @@ class PaymentPlanGroup(TimeStampedUUIDModel, UnicefIdentifiedModel, InternalData
             "XLSX_IMPORTING_RECONCILIATION",
             "Importing Reconciliation XLSX file",
         )
+        XLSX_IMPORTING_FSP_EXTRA_FIELDS = (
+            "XLSX_IMPORTING_FSP_EXTRA_FIELDS",
+            "Importing FSP Extra Fields XLSX file",
+        )
         XLSX_IMPORT_ERROR = "XLSX_IMPORT_ERROR", "Import XLSX file Error"
 
     BACKGROUND_ACTION_ERROR_STATES = [

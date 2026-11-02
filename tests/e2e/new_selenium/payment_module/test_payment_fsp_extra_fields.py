@@ -149,10 +149,11 @@ def test_payment_fsp_extra_fields_full_xlsx_flow(
 ) -> None:
     payment_plan, payment = fsp_extra_fields_payment_plan
     program = payment_plan.program
-    payment_plan_path = f"/{business_area.slug}/programs/{program.code}/payment-module/payment-plans/{payment_plan.id}"
-    template_filename = f"payment_plan_{payment_plan.unicef_id}_fsp_extra_fields.xlsx"
+    group = payment_plan.payment_plan_group
+    group_path = f"/{business_area.slug}/programs/{program.code}/payment-module/groups/{group.id}"
+    template_filename = f"payment_plan_group_{group.unicef_id}_fsp_extra_fields.xlsx"
     login.delete_downloaded_file_if_present(template_filename, browser=True)
-    login.open(payment_plan_path)
+    login.open(group_path)
 
     login.wait_for_element_clickable('[data-cy="button-fsp-extra-fields-template"]').click()
     login.assert_downloaded_file(template_filename, browser=True)
@@ -173,8 +174,6 @@ def test_payment_fsp_extra_fields_full_xlsx_flow(
         "fsp_routing_code": FSP_ROUTING_CODE,
     }
 
-    group = payment_plan.payment_plan_group
-    group_path = f"/{business_area.slug}/programs/{program.code}/payment-module/groups/{group.id}"
     login.open(group_path)
     login.wait_for_element_clickable('[data-cy="button-send-for-approval"]').click()
     login.wait_for_text("IN APPROVAL", '[data-cy="group-status"]')

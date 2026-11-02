@@ -1,6 +1,7 @@
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import AcceptanceProcess from '@components/paymentmodule/PaymentPlanDetails/AcceptanceProcess/AcceptanceProcess';
 import { ConversionToUsd } from '@components/paymentmodule/PaymentPlanDetails/ConversionToUsd';
+import { FspExtraFields } from '@components/paymentmodule/PaymentPlanDetails/FspExtraFields/FspExtraFields';
 import { SupportingDocumentsSection } from '@components/paymentmodule/PaymentPlanDetails/SupportingDocumentsSection/SupportingDocumentsSection';
 import { ContainerColumnWithBorder } from '@core/ContainerColumnWithBorder';
 import { LabelizedField } from '@core/LabelizedField';
@@ -205,6 +206,9 @@ const PaymentPlanGroupDetailsPage = (): ReactElement => {
         }
         headerAction={<ExportGroupSummaryPdfButton group={group ?? null} />}
       />
+      {group?.status === PaymentPlanGroupStatusEnum.LOCKED && (
+        <FspExtraFields group={group} permissions={permissions} />
+      )}
       {group && (
         <ConversionToUsd
           owner={group}

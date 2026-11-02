@@ -15,7 +15,7 @@ import {
   DialogTitle,
   Typography,
 } from '@mui/material';
-import type { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
+import type { PaymentPlanGroupDetail } from '@restgenerated/models/PaymentPlanGroupDetail';
 import type { PaymentPlanImportFile } from '@restgenerated/models/PaymentPlanImportFile';
 import { RestService } from '@restgenerated/services/RestService';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
@@ -33,12 +33,12 @@ import {
 } from 'src/responsive';
 
 interface FspExtraFieldsProps {
-  paymentPlan: PaymentPlanDetail;
+  group: PaymentPlanGroupDetail;
   permissions: string[];
 }
 
 export function FspExtraFields({
-  paymentPlan,
+  group,
   permissions,
 }: FspExtraFieldsProps): ReactElement {
   const { t } = useTranslation();
@@ -52,11 +52,11 @@ export function FspExtraFields({
 
   const { mutateAsync: importFile, isPending } = useMutation({
     mutationFn: (requestBody: PaymentPlanImportFile) =>
-      RestService.restBusinessAreasProgramsPaymentPlansFspExtraFieldsImportXlsxCreate(
+      RestService.restBusinessAreasProgramsPaymentPlanGroupsFspExtraFieldsImportXlsxCreate(
         {
           businessAreaSlug: businessArea,
           programCode: programId,
-          id: paymentPlan.id,
+          id: group.id,
           formData: requestBody,
         },
       ),
@@ -67,10 +67,10 @@ export function FspExtraFields({
       showMessage(t('FSP extra fields import started.'));
       queryClient.invalidateQueries({
         queryKey: restQueryKey(
-          RestService.restBusinessAreasProgramsPaymentPlansRetrieve,
+          RestService.restBusinessAreasProgramsPaymentPlanGroupsRetrieve,
           {
             businessAreaSlug: businessArea,
-            id: paymentPlan.id,
+            id: group.id,
             programCode: programId,
           },
         ),
@@ -120,7 +120,7 @@ export function FspExtraFields({
               startIcon={<GetApp />}
               disabled={actionsDisabled}
               data-cy="button-fsp-extra-fields-template"
-              href={`/api/rest/business-areas/${businessArea}/programs/${programId}/payment-plans/${paymentPlan.id}/fsp-extra-fields-template/`}
+              href={`/api/rest/business-areas/${businessArea}/programs/${programId}/payment-plan-groups/${group.id}/fsp-extra-fields-template/`}
             >
               {t('Download Template')}
             </Button>

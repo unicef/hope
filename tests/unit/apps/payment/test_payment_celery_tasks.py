@@ -49,10 +49,10 @@ from hope.apps.payment.celery_tasks import (
     export_pdf_payment_plan_group_summary_async_task_action,
     get_sync_run_rapid_pro_async_task,
     get_sync_run_rapid_pro_async_task_action,
-    import_payment_plan_fsp_extra_fields_from_xlsx_async_task,
-    import_payment_plan_fsp_extra_fields_from_xlsx_async_task_action,
     import_payment_plan_group_delivery_from_xlsx_async_task,
     import_payment_plan_group_delivery_from_xlsx_async_task_action,
+    import_payment_plan_group_fsp_extra_fields_from_xlsx_async_task,
+    import_payment_plan_group_fsp_extra_fields_from_xlsx_async_task_action,
     import_payment_plan_payment_list_from_xlsx_async_task,
     notify_payment_plan_group_reconciliation_import_failure,
     payment_plan_apply_engine_rule_async_task,
@@ -294,26 +294,26 @@ def group_with_accepted_plan_and_import_file(payment_plan_group_with_accepted_pl
 
 @pytest.fixture
 def fsp_extra_fields_import_task_context(user):
-    payment_plan = PaymentPlanFactory(
-        status=PaymentPlan.Status.LOCKED_FSP,
-        background_action_status=PaymentPlan.BackgroundActionStatus.XLSX_IMPORTING_FSP_EXTRA_FIELDS,
+    payment_plan_group = PaymentPlanGroupFactory(
+        status=PaymentPlanGroup.Status.LOCKED,
+        background_action_status=PaymentPlanGroup.BackgroundActionStatus.XLSX_IMPORTING_FSP_EXTRA_FIELDS,
     )
     file_temp = FileTempFactory(
-        object_id=payment_plan.pk,
-        content_type=get_content_type_for_model(payment_plan),
+        object_id=payment_plan_group.pk,
+        content_type=get_content_type_for_model(payment_plan_group),
         created_by=user,
     )
     job = AsyncRetryJob.objects.create(
         type=AsyncJobModel.JobType.JOB_TASK,
-        action="hope.apps.payment.celery_tasks.import_payment_plan_fsp_extra_fields_from_xlsx_async_task_action",
+        action="hope.apps.payment.celery_tasks.import_payment_plan_group_fsp_extra_fields_from_xlsx_async_task_action",
         config={
-            "payment_plan_id": str(payment_plan.pk),
+            "payment_plan_group_id": str(payment_plan_group.pk),
             "file_temp_id": str(file_temp.pk),
             "user_id": str(user.pk),
         },
     )
     return {
-        "payment_plan": payment_plan,
+        "payment_plan_group": payment_plan_group,
         "file_temp": file_temp,
         "job": job,
         "user": user,
@@ -1367,89 +1367,89 @@ def test_import_payment_plan_payment_list_from_xlsx_import_error_retries(
     mock_retry.assert_called_once()
 
 
-def test_import_payment_plan_fsp_extra_fields_action_clears_status_and_logs_change(
+def test_import_payment_plan_group_fsp_extra_fields_action_clears_status_and_logs_change(
     fsp_extra_fields_import_task_context,
 ) -> None:
     context = fsp_extra_fields_import_task_context
     with (
         patch(
-            "hope.apps.payment.xlsx.xlsx_payment_plan_fsp_extra_fields_import_service."
-            "XlsxPaymentPlanFspExtraFieldsImportService"
+            "hope.apps.payment.xlsx.xlsx_payment_plan_group_fsp_extra_fields_import_service."
+            "XlsxPaymentPlanGroupFspExtraFieldsImportService"
         ) as mock_service_cls,
         patch("hope.apps.payment.celery_tasks.set_sentry_business_area_tag") as mock_set_sentry_tag,
-        patch("hope.apps.payment.celery_tasks.log_payment_plan_change") as mock_log_payment_plan_change,
+        patch("hope.apps.payment.celery_tasks.log_payment_plan_group_change") as mock_log_group_change,
     ):
-        result = import_payment_plan_fsp_extra_fields_from_xlsx_async_task_action(context["job"])
+        result = import_payment_plan_group_fsp_extra_fields_from_xlsx_async_task_action(context["job"])
 
-    context["payment_plan"].refresh_from_db(fields=["background_action_status"])
+    context["payment_plan_group"].refresh_from_db(fields=["background_action_status"])
     assert result is True
-    assert context["payment_plan"].background_action_status is None
-    mock_set_sentry_tag.assert_called_once_with(context["payment_plan"].business_area.name)
-    mock_service_cls.assert_called_once()
-    service_payment_plan, service_file = mock_service_cls.call_args.args
-    assert service_payment_plan.pk == context["payment_plan"].pk
+    assert context["payment_plan_group"].background_action_status is None
+    mock_set_sentry_tag.assert_called_once_with(context["payment_plan_group"].cycle.program.business_area.name)
+    service_payment_plan_group, service_file = mock_service_cls.call_args.args
+    assert service_payment_plan_group.pk == context["payment_plan_group"].pk
     assert service_file.name == context["file_temp"].file.name
     mock_service_cls.return_value.open_workbook.assert_called_once_with()
     mock_service_cls.return_value.import_payment_list.assert_called_once_with(str(context["user"].pk))
-    mock_log_payment_plan_change.assert_called_once()
-    logged_payment_plan, old_payment_plan, logged_user_id = mock_log_payment_plan_change.call_args.args
-    assert logged_payment_plan.pk == context["payment_plan"].pk
-    assert logged_payment_plan.background_action_status is None
-    assert (
-        old_payment_plan.background_action_status == PaymentPlan.BackgroundActionStatus.XLSX_IMPORTING_FSP_EXTRA_FIELDS
-    )
+    logged_group, old_group, logged_user_id = mock_log_group_change.call_args.args
+    assert logged_group.background_action_status is None
+    assert old_group.background_action_status == PaymentPlanGroup.BackgroundActionStatus.XLSX_IMPORTING_FSP_EXTRA_FIELDS
     assert logged_user_id == str(context["user"].pk)
 
 
-def test_import_payment_plan_fsp_extra_fields_action_sets_error_status_and_reraises(
+def test_import_payment_plan_group_fsp_extra_fields_action_sets_error_status_and_reraises(
     fsp_extra_fields_import_task_context,
 ) -> None:
     context = fsp_extra_fields_import_task_context
     with (
         patch(
-            "hope.apps.payment.xlsx.xlsx_payment_plan_fsp_extra_fields_import_service."
-            "XlsxPaymentPlanFspExtraFieldsImportService"
+            "hope.apps.payment.xlsx.xlsx_payment_plan_group_fsp_extra_fields_import_service."
+            "XlsxPaymentPlanGroupFspExtraFieldsImportService"
         ) as mock_service_cls,
         patch("hope.apps.payment.celery_tasks.logger") as mock_logger,
-        patch("hope.apps.payment.celery_tasks.log_payment_plan_change") as mock_log_payment_plan_change,
+        patch("hope.apps.payment.celery_tasks.log_payment_plan_group_change") as mock_log_group_change,
     ):
         mock_service_cls.return_value.import_payment_list.side_effect = RuntimeError("FSP import failed")
         with pytest.raises(RuntimeError, match="FSP import failed"):
-            import_payment_plan_fsp_extra_fields_from_xlsx_async_task_action(context["job"])
+            import_payment_plan_group_fsp_extra_fields_from_xlsx_async_task_action(context["job"])
 
-    context["payment_plan"].refresh_from_db(fields=["background_action_status"])
-    assert context["payment_plan"].background_action_status == PaymentPlan.BackgroundActionStatus.XLSX_IMPORT_ERROR
-    mock_service_cls.return_value.open_workbook.assert_called_once_with()
-    mock_logger.exception.assert_called_once_with("Unexpected error during Payment Plan FSP extra fields XLSX import")
-    mock_log_payment_plan_change.assert_not_called()
+    context["payment_plan_group"].refresh_from_db(fields=["background_action_status"])
+    assert (
+        context["payment_plan_group"].background_action_status
+        == PaymentPlanGroup.BackgroundActionStatus.XLSX_IMPORT_ERROR
+    )
+    mock_logger.exception.assert_called_once_with(
+        "Unexpected error during Payment Plan Group FSP extra fields XLSX import"
+    )
+    logged_group = mock_log_group_change.call_args.args[0]
+    assert logged_group.background_action_status == PaymentPlanGroup.BackgroundActionStatus.XLSX_IMPORT_ERROR
 
 
 @patch("hope.apps.payment.celery_tasks.AsyncRetryJob.queue_task")
-def test_import_payment_plan_fsp_extra_fields_task_queues_job(
+def test_import_payment_plan_group_fsp_extra_fields_task_queues_job(
     mock_queue_task: Mock,
     fsp_extra_fields_import_task_context,
 ) -> None:
     context = fsp_extra_fields_import_task_context
 
-    result = import_payment_plan_fsp_extra_fields_from_xlsx_async_task(
-        context["payment_plan"],
+    result = import_payment_plan_group_fsp_extra_fields_from_xlsx_async_task(
+        context["payment_plan_group"],
         str(context["file_temp"].pk),
         str(context["user"].pk),
     )
 
     assert result is None
     mock_queue_task.assert_called_once_with(
-        instance=context["payment_plan"],
+        instance=context["payment_plan_group"],
         owner_id=str(context["user"].pk),
-        job_name=import_payment_plan_fsp_extra_fields_from_xlsx_async_task.__name__,
-        action="hope.apps.payment.celery_tasks.import_payment_plan_fsp_extra_fields_from_xlsx_async_task_action",
+        job_name=import_payment_plan_group_fsp_extra_fields_from_xlsx_async_task.__name__,
+        action="hope.apps.payment.celery_tasks.import_payment_plan_group_fsp_extra_fields_from_xlsx_async_task_action",
         config={
-            "payment_plan_id": str(context["payment_plan"].pk),
+            "payment_plan_group_id": str(context["payment_plan_group"].pk),
             "file_temp_id": str(context["file_temp"].pk),
             "user_id": str(context["user"].pk),
         },
         group_key="payment",
-        description=f"Import Payment Plan FSP extra fields xlsx for {context['payment_plan'].pk}",
+        description=f"Import Payment Plan Group FSP extra fields xlsx for {context['payment_plan_group'].pk}",
     )
 
 

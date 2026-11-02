@@ -14,18 +14,17 @@ from extras.test_utils.factories.payment import (
     PaymentPlanFactory,
 )
 from hope.apps.payment.api.serializers import PaymentDetailSerializer
-from hope.apps.payment.flows import PaymentPlanFlow
 from hope.apps.payment.xlsx.xlsx_payment_plan_delivery_export_service import (
     XlsxPaymentPlanDeliveryExportService,
 )
 from hope.apps.payment.xlsx.xlsx_payment_plan_delivery_import_service import (
     XlsxPaymentPlanDeliveryImportService,
 )
-from hope.apps.payment.xlsx.xlsx_payment_plan_fsp_extra_fields_export_service import (
-    XlsxPaymentPlanFspExtraFieldsExportService,
+from hope.apps.payment.xlsx.xlsx_payment_plan_group_fsp_extra_fields_export_service import (
+    XlsxPaymentPlanGroupFspExtraFieldsExportService,
 )
-from hope.apps.payment.xlsx.xlsx_payment_plan_fsp_extra_fields_import_service import (
-    XlsxPaymentPlanFspExtraFieldsImportService,
+from hope.apps.payment.xlsx.xlsx_payment_plan_group_fsp_extra_fields_import_service import (
+    XlsxPaymentPlanGroupFspExtraFieldsImportService,
 )
 from hope.models import LogEntry, Payment, PaymentPlan
 from hope.one_time_scripts.migrate_payment_extras import migrate_payment_extras
@@ -36,6 +35,28 @@ pytestmark = pytest.mark.django_db
 @pytest.fixture
 def payment_plan():
     return PaymentPlanFactory(status=PaymentPlan.Status.LOCKED_FSP)
+
+
+@pytest.fixture
+def payment_plan_group(payment_plan):
+    return payment_plan.payment_plan_group
+
+
+@pytest.fixture
+def payment_in_second_plan_of_group(payment_plan):
+    second_payment_plan = PaymentPlanFactory(
+        program_cycle=payment_plan.program_cycle,
+        payment_plan_group=payment_plan.payment_plan_group,
+        status=PaymentPlan.Status.LOCKED_FSP,
+    )
+    payment = PaymentFactory(
+        parent=second_payment_plan,
+        program=second_payment_plan.program,
+        unicef_id="PAYMENT-003",
+        extras={"fsp_extra_fields": {"reference": "third-reference"}},
+    )
+    payment.save(update_fields=["unicef_id"])
+    return payment
 
 
 @pytest.fixture
@@ -75,6 +96,19 @@ def fsp_extra_fields_import_file(payments):
     worksheet = workbook.active
     worksheet.append(["payment_id", "reference", "empty_field", "date_field"])
     worksheet.append([payments[0].unicef_id, "new-reference", None, date(2026, 7, 23)])
+    stream = BytesIO()
+    workbook.save(stream)
+    stream.seek(0)
+    return stream
+
+
+@pytest.fixture
+def fsp_extra_fields_import_file_for_two_plans(payments, payment_in_second_plan_of_group):
+    workbook = openpyxl.Workbook()
+    worksheet = workbook.active
+    worksheet.append(["payment_id", "reference"])
+    worksheet.append([payments[0].unicef_id, "first-plan"])
+    worksheet.append([payment_in_second_plan_of_group.unicef_id, "second-plan"])
     stream = BytesIO()
     workbook.save(stream)
     stream.seek(0)
@@ -294,12 +328,12 @@ def test_post_deployment_script_is_idempotent(migration_payments, capsys):
 
 
 def test_fsp_extra_fields_template_contains_only_fsp_fields(
-    payment_plan,
+    payment_plan_group,
     payments,
     django_assert_num_queries,
 ):
-    with django_assert_num_queries(6):
-        workbook = XlsxPaymentPlanFspExtraFieldsExportService(payment_plan).generate_workbook()
+    with django_assert_num_queries(2):
+        workbook = XlsxPaymentPlanGroupFspExtraFieldsExportService(payment_plan_group).generate_workbook()
 
     rows = list(workbook.active.values)
     assert rows == [
@@ -310,10 +344,38 @@ def test_fsp_extra_fields_template_contains_only_fsp_fields(
     assert "reconciliation_code" not in rows[0]
 
 
-def test_fsp_extra_fields_import_background_action_starts_at_locked_fsp(payment_plan):
-    PaymentPlanFlow(payment_plan).background_action_status_xlsx_importing_fsp_extra_fields()
+def test_fsp_extra_fields_template_lists_payments_of_every_plan_in_the_group(
+    payment_plan_group,
+    payments,
+    payment_in_second_plan_of_group,
+):
+    workbook = XlsxPaymentPlanGroupFspExtraFieldsExportService(payment_plan_group).generate_workbook()
 
-    assert payment_plan.background_action_status == PaymentPlan.BackgroundActionStatus.XLSX_IMPORTING_FSP_EXTRA_FIELDS
+    rows = list(workbook.active.values)
+    assert [row[0] for row in rows] == ["payment_id", "PAYMENT-001", "PAYMENT-002", "PAYMENT-003"]
+    assert rows[3] == ("PAYMENT-003", "", "", "", "third-reference")
+
+
+def test_fsp_extra_fields_import_updates_payments_of_every_plan_in_the_group(
+    payment_plan_group,
+    payments,
+    payment_in_second_plan_of_group,
+    fsp_extra_fields_import_file_for_two_plans,
+):
+    service = XlsxPaymentPlanGroupFspExtraFieldsImportService(
+        payment_plan_group, fsp_extra_fields_import_file_for_two_plans
+    )
+    service.open_workbook()
+    service.validate()
+
+    updated_count = service.import_payment_list()
+
+    payments[0].refresh_from_db(fields=["extras"])
+    payment_in_second_plan_of_group.refresh_from_db(fields=["extras"])
+    assert service.errors == []
+    assert updated_count == 2
+    assert payments[0].fsp_extra_fields["reference"] == "first-plan"
+    assert payment_in_second_plan_of_group.fsp_extra_fields["reference"] == "second-plan"
 
 
 def test_manual_fsp_export_appends_fsp_extra_fields(
@@ -332,13 +394,14 @@ def test_manual_fsp_export_appends_fsp_extra_fields(
 
 def test_fsp_extra_fields_import_merges_non_empty_values(
     payment_plan,
+    payment_plan_group,
     payments,
     fsp_extra_fields_import_file,
     django_assert_num_queries,
 ):
     old_signature = payments[0].signature_hash
     with django_assert_num_queries(1):
-        service = XlsxPaymentPlanFspExtraFieldsImportService(payment_plan, fsp_extra_fields_import_file)
+        service = XlsxPaymentPlanGroupFspExtraFieldsImportService(payment_plan_group, fsp_extra_fields_import_file)
     assert "household_snapshot" not in service.payments[payments[0].unicef_id]._state.fields_cache
     service.open_workbook()
     service.validate()
@@ -366,11 +429,12 @@ def test_fsp_extra_fields_import_merges_non_empty_values(
 @pytest.mark.enable_activity_log
 def test_fsp_extra_fields_import_logs_previous_and_updated_values(
     payment_plan,
+    payment_plan_group,
     payments,
     fsp_extra_fields_import_file,
     django_assert_num_queries,
 ):
-    service = XlsxPaymentPlanFspExtraFieldsImportService(payment_plan, fsp_extra_fields_import_file)
+    service = XlsxPaymentPlanGroupFspExtraFieldsImportService(payment_plan_group, fsp_extra_fields_import_file)
     service.open_workbook()
     service.validate()
     content_type = ContentType.objects.get_for_model(Payment)
@@ -397,15 +461,15 @@ def test_fsp_extra_fields_import_logs_previous_and_updated_values(
 
 
 def test_fsp_extra_fields_import_allows_payment_gateway_payload_header(
-    payment_plan,
+    payment_plan_group,
     payments,
     payment_gateway_header_import_file,
     django_assert_num_queries,
 ):
-    service = XlsxPaymentPlanFspExtraFieldsImportService(payment_plan, payment_gateway_header_import_file)
+    service = XlsxPaymentPlanGroupFspExtraFieldsImportService(payment_plan_group, payment_gateway_header_import_file)
     service.open_workbook()
 
-    with django_assert_num_queries(2):
+    with django_assert_num_queries(3):
         service.validate()
     updated_count = service.import_payment_list()
 
@@ -430,11 +494,11 @@ def test_fsp_extra_fields_import_allows_payment_gateway_payload_header(
     indirect=["invalid_headers_import_file"],
 )
 def test_fsp_extra_fields_import_rejects_invalid_headers(
-    payment_plan,
+    payment_plan_group,
     invalid_headers_import_file,
     expected_message,
 ):
-    service = XlsxPaymentPlanFspExtraFieldsImportService(payment_plan, invalid_headers_import_file)
+    service = XlsxPaymentPlanGroupFspExtraFieldsImportService(payment_plan_group, invalid_headers_import_file)
     service.open_workbook()
 
     service.validate()
@@ -444,10 +508,10 @@ def test_fsp_extra_fields_import_rejects_invalid_headers(
 
 
 def test_fsp_extra_fields_import_validates_blank_missing_unknown_and_duplicate_rows(
-    payment_plan,
+    payment_plan_group,
     row_validation_import_file,
 ):
-    service = XlsxPaymentPlanFspExtraFieldsImportService(payment_plan, row_validation_import_file)
+    service = XlsxPaymentPlanGroupFspExtraFieldsImportService(payment_plan_group, row_validation_import_file)
     service.open_workbook()
 
     service.validate()
@@ -457,17 +521,17 @@ def test_fsp_extra_fields_import_validates_blank_missing_unknown_and_duplicate_r
     assert service.errors[0].coordinates == "A3"
     assert service.errors[0].message == "Payment id is required"
     assert service.errors[1].coordinates == "A4"
-    assert service.errors[1].message == "This payment id UNKNOWN-PAYMENT is not in Payment Plan Payment List"
+    assert service.errors[1].message == "This payment id UNKNOWN-PAYMENT is not in Payment Plan Group Payment List"
     assert service.errors[2].coordinates == "A6"
     assert service.errors[2].message == "Payment id PAYMENT-001 appears multiple times in the import file"
 
 
 def test_fsp_extra_fields_import_skips_blank_invalid_and_duplicate_rows(
-    payment_plan,
+    payment_plan_group,
     payments,
     row_validation_import_file,
 ):
-    service = XlsxPaymentPlanFspExtraFieldsImportService(payment_plan, row_validation_import_file)
+    service = XlsxPaymentPlanGroupFspExtraFieldsImportService(payment_plan_group, row_validation_import_file)
     service.open_workbook()
 
     updated_count = service.import_payment_list()
@@ -480,11 +544,11 @@ def test_fsp_extra_fields_import_skips_blank_invalid_and_duplicate_rows(
 
 
 def test_fsp_extra_fields_import_reports_and_skips_rows_without_changes(
-    payment_plan,
+    payment_plan_group,
     payments,
     no_change_import_file,
 ):
-    service = XlsxPaymentPlanFspExtraFieldsImportService(payment_plan, no_change_import_file)
+    service = XlsxPaymentPlanGroupFspExtraFieldsImportService(payment_plan_group, no_change_import_file)
     service.open_workbook()
 
     service.validate()
@@ -518,7 +582,7 @@ def test_fsp_extra_fields_import_reports_and_skips_rows_without_changes(
     ],
 )
 def test_fsp_extra_fields_import_normalizes_json_values(value, expected):
-    assert XlsxPaymentPlanFspExtraFieldsImportService._normalize_value(value) == expected
+    assert XlsxPaymentPlanGroupFspExtraFieldsImportService._normalize_value(value) == expected
 
 
 @pytest.mark.parametrize(
@@ -531,15 +595,15 @@ def test_fsp_extra_fields_import_normalizes_json_values(value, expected):
     indirect=True,
 )
 def test_fsp_extra_fields_import_rejects_dynamic_template_header(
-    payment_plan,
+    payment_plan_group,
     dynamic_system_header_import_file,
     django_assert_num_queries,
 ):
     import_file, header = dynamic_system_header_import_file
-    service = XlsxPaymentPlanFspExtraFieldsImportService(payment_plan, import_file)
+    service = XlsxPaymentPlanGroupFspExtraFieldsImportService(payment_plan_group, import_file)
     service.open_workbook()
 
-    with django_assert_num_queries(2):
+    with django_assert_num_queries(3):
         service.validate()
 
     assert len(service.errors) == 1
@@ -547,14 +611,14 @@ def test_fsp_extra_fields_import_rejects_dynamic_template_header(
 
 
 def test_fsp_extra_fields_import_rejects_expanded_account_header(
-    payment_plan,
+    payment_plan_group,
     account_system_header_import_file,
     django_assert_num_queries,
 ):
-    service = XlsxPaymentPlanFspExtraFieldsImportService(payment_plan, account_system_header_import_file)
+    service = XlsxPaymentPlanGroupFspExtraFieldsImportService(payment_plan_group, account_system_header_import_file)
     service.open_workbook()
 
-    with django_assert_num_queries(2):
+    with django_assert_num_queries(3):
         service.validate()
 
     assert len(service.errors) == 1

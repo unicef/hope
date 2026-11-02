@@ -462,55 +462,55 @@ def payment_plan_set_entitlement_flat_amount_async_task(payment_plan: PaymentPla
     )
 
 
-def import_payment_plan_fsp_extra_fields_from_xlsx_async_task_action(job: AsyncRetryJob) -> bool:
-    from hope.apps.payment.xlsx.xlsx_payment_plan_fsp_extra_fields_import_service import (
-        XlsxPaymentPlanFspExtraFieldsImportService,
+def import_payment_plan_group_fsp_extra_fields_from_xlsx_async_task_action(job: AsyncRetryJob) -> bool:
+    from hope.apps.payment.xlsx.xlsx_payment_plan_group_fsp_extra_fields_import_service import (
+        XlsxPaymentPlanGroupFspExtraFieldsImportService,
     )
-    from hope.models import FileTemp, PaymentPlan
 
-    payment_plan = PaymentPlan.objects.select_related("business_area").get(id=job.config["payment_plan_id"])
+    payment_plan_group = PaymentPlanGroup.objects.select_related("cycle__program__business_area").get(
+        id=job.config["payment_plan_group_id"]
+    )
     file_temp = FileTemp.objects.get(id=job.config["file_temp_id"])
-    set_sentry_business_area_tag(payment_plan.business_area.name)
-    old_payment_plan = cast("PaymentPlan", copy_model_object(payment_plan))
+    set_sentry_business_area_tag(payment_plan_group.cycle.program.business_area.name)
+    old_payment_plan_group = cast("PaymentPlanGroup", copy_model_object(payment_plan_group))
 
     try:
-        service = XlsxPaymentPlanFspExtraFieldsImportService(payment_plan, file_temp.file)
+        service = XlsxPaymentPlanGroupFspExtraFieldsImportService(payment_plan_group, file_temp.file)
         service.open_workbook()
         with transaction.atomic():
             service.import_payment_list(job.config.get("user_id"))
-            flow = PaymentPlanFlow(payment_plan)
-            flow.background_action_status_none()
-            payment_plan.save(update_fields=["background_action_status", "updated_at"])
-            log_payment_plan_change(payment_plan, old_payment_plan, job.config.get("user_id"))
+            payment_plan_group.background_action_status = None
+            payment_plan_group.save(update_fields=["background_action_status", "updated_at"])
+            log_payment_plan_group_change(payment_plan_group, old_payment_plan_group, job.config.get("user_id"))
     except Exception:
-        logger.exception("Unexpected error during Payment Plan FSP extra fields XLSX import")
-        flow = PaymentPlanFlow(payment_plan)
-        flow.background_action_status_xlsx_import_error()
-        payment_plan.save(update_fields=["background_action_status", "updated_at"])
+        logger.exception("Unexpected error during Payment Plan Group FSP extra fields XLSX import")
+        payment_plan_group.background_action_status = PaymentPlanGroup.BackgroundActionStatus.XLSX_IMPORT_ERROR
+        payment_plan_group.save(update_fields=["background_action_status", "updated_at"])
+        log_payment_plan_group_change(payment_plan_group, old_payment_plan_group, job.config.get("user_id"))
         raise
 
     return True
 
 
-def import_payment_plan_fsp_extra_fields_from_xlsx_async_task(
-    payment_plan: PaymentPlan,
+def import_payment_plan_group_fsp_extra_fields_from_xlsx_async_task(
+    payment_plan_group: PaymentPlanGroup,
     file_temp_id: str,
     user_id: str | None = None,
 ) -> None:
-    payment_plan_id = str(payment_plan.id)
+    payment_plan_group_id = str(payment_plan_group.id)
     config = {
-        "payment_plan_id": payment_plan_id,
+        "payment_plan_group_id": payment_plan_group_id,
         "file_temp_id": file_temp_id,
         "user_id": user_id,
     }
     AsyncRetryJob.queue_task(
-        instance=payment_plan,
+        instance=payment_plan_group,
         owner_id=user_id,
-        job_name=import_payment_plan_fsp_extra_fields_from_xlsx_async_task.__name__,
-        action="hope.apps.payment.celery_tasks.import_payment_plan_fsp_extra_fields_from_xlsx_async_task_action",
+        job_name=import_payment_plan_group_fsp_extra_fields_from_xlsx_async_task.__name__,
+        action="hope.apps.payment.celery_tasks.import_payment_plan_group_fsp_extra_fields_from_xlsx_async_task_action",
         config=config,
         group_key="payment",
-        description=f"Import Payment Plan FSP extra fields xlsx for {payment_plan_id}",
+        description=f"Import Payment Plan Group FSP extra fields xlsx for {payment_plan_group_id}",
     )
 
 

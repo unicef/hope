@@ -272,12 +272,13 @@ class PaymentPlanGroupService:
         payment_plan_group = self._locked_for_update()
         if payment_plan_group.status != PaymentPlanGroup.Status.LOCKED:
             raise ValidationError(f"Send for Approval is possible only within Status {PaymentPlanGroup.Status.LOCKED}")
+        self._clear_background_action(payment_plan_group)
         for payment_plan in self._payment_plans(payment_plan_group):
             PaymentPlanService(payment_plan).transition_send_for_approval()
 
         flow = PaymentPlanGroupFlow(payment_plan_group)
         flow.status_send_for_approval()
-        payment_plan_group.save(update_fields=("status", "status_date", "updated_at"))
+        payment_plan_group.save(update_fields=("status", "status_date", "background_action_status", "updated_at"))
         ApprovalProcess.objects.create(
             payment_plan_group=payment_plan_group,
             sent_for_approval_by=user,
@@ -562,16 +563,24 @@ class PaymentPlanGroupService:
             raise ValidationError(
                 f"Unlock Payment Plan Group is possible only within Status {PaymentPlanGroup.Status.LOCKED}"
             )
+        self._clear_background_action(payment_plan_group)
 
         for payment_plan in self._payment_plans(payment_plan_group):
             PaymentPlanService(payment_plan).unlock_fsp()
 
         flow = PaymentPlanGroupFlow(payment_plan_group)
         flow.status_unlock()
-        payment_plan_group.save(update_fields=("status", "status_date", "updated_at"))
+        payment_plan_group.save(update_fields=("status", "status_date", "background_action_status", "updated_at"))
 
         self.payment_plan_group = payment_plan_group
         return payment_plan_group
+
+    @staticmethod
+    def _clear_background_action(payment_plan_group: PaymentPlanGroup) -> None:
+        """Refuse while an FSP extra fields import runs; a failed one is dropped as the group moves on."""
+        if not payment_plan_group.can_start_background_action:
+            raise ValidationError("Another background action is already in progress.")
+        payment_plan_group.background_action_status = None
 
     @staticmethod
     def _payment_plans(payment_plan_group: PaymentPlanGroup) -> list[PaymentPlan]:
