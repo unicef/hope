@@ -1,13 +1,15 @@
 from __future__ import annotations
 
-import contextlib
 from dataclasses import dataclass, field
-from functools import cached_property
+from functools import cache, cached_property, partial
 import logging
+from pathlib import PurePosixPath
+import posixpath
 from typing import TYPE_CHECKING, Any, cast
 
-from django.core.files import File
+from django.core.exceptions import SuspiciousOperation
 from django.core.files.storage import default_storage
+from django.core.validators import get_available_image_extensions
 from django.db.models import Field, Model
 from django.db.transaction import atomic
 from django.http import Http404
@@ -30,11 +32,10 @@ from hope.api.endpoints.rdi.cw_ids import (
     duplicated_cw_ids,
     existing_cw_ids,
 )
-from hope.api.endpoints.rdi.mixin import HouseholdUploadMixin, PhotoMixin
+from hope.api.endpoints.rdi.mixin import HouseholdUploadMixin
 from hope.api.endpoints.rdi.upload import BirthDateValidator
 from hope.api.utils import CurrencySlugRelatedField, OnUnchangedCode
 from hope.apps.core.api.fields import ScopedSlugRelatedField, UTCDateField
-from hope.apps.core.upload_paths import upload_path
 from hope.apps.household.const import (
     DATA_SHARING_CHOICES,
     DISABILITY_CHOICES,
@@ -66,14 +67,15 @@ from hope.models import (
 )
 
 if TYPE_CHECKING:
+    from collections.abc import Iterable
     from uuid import UUID
 
-    from django.db.models import Model
     from rest_framework.request import Request
 
     from hope.models import BusinessArea, Program
 
 BATCH_SIZE = 100
+STORAGE_FILE_NAME_MAX_LENGTH = 1024  # Azure blob name limit
 logger = logging.getLogger(__name__)
 
 
@@ -85,8 +87,91 @@ class IndividualsBulkStaging:
     prepared_accounts: list[dict] = field(default_factory=list)
     doc_country_codes: set[str] = field(default_factory=set)
     doc_type_keys: set[str] = field(default_factory=set)
-    saved_file_fields: list = field(default_factory=list)
-    saved_image_paths: list[str] = field(default_factory=list)
+
+
+@cache
+def get_image_extensions() -> frozenset[str]:
+    return frozenset(get_available_image_extensions())
+
+
+def normalize_storage_file_name(file_name: str) -> str:
+    return file_name.strip().lstrip("/")
+
+
+def get_storage_file_error(file_name: str, max_length: int = STORAGE_FILE_NAME_MAX_LENGTH) -> str | None:
+    """Return why ``file_name`` is not a safe name of an existing image in the media storage, None if it is.
+
+    Names are validated strictly before reaching the storage backend because Azure silently rewrites ``a/../b``
+    to ``b``, which would make the checked name differ from the stored one.
+    """
+    if len(file_name) > max_length:
+        return f"File name must have no more than {max_length} characters."
+    if (
+        not file_name
+        or "\\" in file_name
+        or "\x00" in file_name
+        or ".." in file_name.split("/")
+        or posixpath.normpath(file_name) != file_name
+    ):
+        return f"Invalid file name '{file_name}'."
+    if PurePosixPath(file_name).suffix[1:].lower() not in get_image_extensions():
+        return f"File '{file_name}' is not a supported image type."
+    try:
+        exists = default_storage.exists(file_name)
+    except (SuspiciousOperation, ValueError):
+        return f"Invalid file name '{file_name}'."
+    if not exists:
+        return f"File '{file_name}' does not exist in storage."
+    return None
+
+
+class StorageFileField(serializers.CharField):
+    """Name of an image already written to the media storage by CW, kept as the name string."""
+
+    def __init__(self, *, model_field: tuple[type[Model], str], **kwargs: Any) -> None:
+        model, field_name = model_field
+        self.file_name_max_length = model._meta.get_field(field_name).max_length or STORAGE_FILE_NAME_MAX_LENGTH
+        kwargs.setdefault("help_text", "File name (full path inside the media storage container) of an image.")
+        super().__init__(**kwargs)
+
+    def to_internal_value(self, data: Any) -> str:
+        file_name = normalize_storage_file_name(super().to_internal_value(data))
+        if error := get_storage_file_error(file_name, self.file_name_max_length):
+            raise ValidationError(error)
+        return file_name
+
+
+def clean_image_flex_fields(flex_fields: dict | None, image_field_names: Iterable[str]) -> dict[str, list[str]]:
+    """Normalize IMAGE type flex fields in place and return errors keyed by flex field name."""
+    if not flex_fields:
+        return {}
+
+    errors: dict[str, list[str]] = {}
+    for field_name in image_field_names:
+        value = flex_fields.get(field_name)
+        if not value:
+            continue
+        if not isinstance(value, str):
+            errors[field_name] = ["Expected a file name."]
+            continue
+        file_name = normalize_storage_file_name(value)
+        if error := get_storage_file_error(file_name):
+            errors[field_name] = [error]
+        else:
+            flex_fields[field_name] = file_name
+    return errors
+
+
+class ImageFlexFieldsValidationMixin:
+    context: dict[str, Any]
+
+    def validate_flex_fields(self, value: dict | None) -> dict | None:
+        get_image_flex_fields = self.context.get("get_image_flex_fields")
+        if not value or get_image_flex_fields is None:
+            return value
+        if errors := clean_image_flex_fields(value, get_image_flex_fields() or ()):
+            raise ValidationError(errors)
+        return value
 
 
 class DocumentTypeKeyField(serializers.CharField):
@@ -110,7 +195,11 @@ class DocumentTypeKeyField(serializers.CharField):
 class DocumentSerializerLax(serializers.ModelSerializer):
     type = DocumentTypeKeyField(required=True)
     country = serializers.ChoiceField(choices=Countries())
-    image = serializers.CharField(allow_blank=True, required=False)
+    image = StorageFileField(
+        model_field=(PendingDocument, "photo"),
+        allow_blank=True,
+        required=False,
+    )
     document_number = serializers.CharField(required=True)
     issuance_date = UTCDateField(required=False)
     expiry_date = UTCDateField(required=False)
@@ -148,7 +237,7 @@ class AccountLaxSerializer(serializers.ModelSerializer):
         return attrs
 
 
-class IndividualSerializer(serializers.ModelSerializer):
+class IndividualSerializer(ImageFlexFieldsValidationMixin, serializers.ModelSerializer):
     first_registration_date = serializers.DateTimeField(default=timezone.now)
     last_registration_date = serializers.DateTimeField(default=timezone.now)
     household = serializers.ReadOnlyField()
@@ -161,8 +250,17 @@ class IndividualSerializer(serializers.ModelSerializer):
     documents = DocumentSerializerLax(many=True, required=False)
     birth_date = serializers.DateField(validators=[BirthDateValidator()])
     accounts = AccountLaxSerializer(many=True, required=False)
-    photo = serializers.CharField(allow_blank=True, required=False)
-    disability_certificate_picture = serializers.CharField(allow_null=True, allow_blank=True, required=False)
+    photo = StorageFileField(
+        model_field=(PendingIndividual, "photo"),
+        allow_blank=True,
+        required=False,
+    )
+    disability_certificate_picture = StorageFileField(
+        model_field=(PendingIndividual, "disability_certificate_picture"),
+        allow_null=True,
+        allow_blank=True,
+        required=False,
+    )
     disability = DisabilityChoiceField(choices=DISABILITY_CHOICES, required=False, allow_blank=True)
     sex = serializers.ChoiceField(SEX_CHOICE, allow_blank=False, default=NOT_COLLECTED)
     country_workspace_id = serializers.CharField(required=True, max_length=150)
@@ -265,41 +363,6 @@ class HandleFlexFieldsMixin:
             reserved_fields=reserved_fields,
         )
 
-    def process_image_flex_fields(
-        self,
-        flex_fields: dict | None,
-        associated_with: int,
-        file_prefix: str = "",
-        scope_of: "Model | None" = None,
-    ) -> list[str]:
-        """Process IMAGE type flex fields: convert base64 to storage path.
-
-        Returns list of saved file paths for cleanup on error.
-        """
-        if not flex_fields:
-            return []
-
-        image_field_names = self.get_image_flex_fields(associated_with)
-        saved_paths: list[str] = []
-
-        for field_name in image_field_names:
-            value = flex_fields.get(field_name)
-            if not value:
-                continue
-
-            if not isinstance(value, str):
-                continue
-
-            photo_file = self.get_photo(value, file_prefix)
-            if not photo_file:
-                continue
-
-            saved_path = default_storage.save(upload_path(scope_of, photo_file.name), photo_file)
-            flex_fields[field_name] = saved_path
-            saved_paths.append(saved_path)
-
-        return saved_paths
-
 
 class CreateLaxBaseView(HOPEAPIBusinessAreaView, HandleFlexFieldsMixin):
     permission = Grant.API_RDI_CREATE
@@ -320,12 +383,8 @@ class CreateLaxBaseView(HOPEAPIBusinessAreaView, HandleFlexFieldsMixin):
     def _rdi_program(self) -> "Program":
         return self.selected_rdi.program
 
-    @cached_property
-    def _programme_code(self) -> str:
-        return self._rdi_program.code or ""
 
-
-class CreateLaxIndividuals(CreateLaxBaseView, PhotoMixin):
+class CreateLaxIndividuals(CreateLaxBaseView):
     """API to import individuals with selected RDI."""
 
     def _prepare_documents(
@@ -334,8 +393,6 @@ class CreateLaxIndividuals(CreateLaxBaseView, PhotoMixin):
         ind: PendingIndividual,
     ) -> None:
         for document_data in documents_data:
-            image_b64 = document_data.pop("image", None)
-            doc_photo = self.get_photo(image_b64, self._programme_code)
             country_code = document_data.get("country")
             type_key = document_data.get("type")
             if country_code:
@@ -345,7 +402,7 @@ class CreateLaxIndividuals(CreateLaxBaseView, PhotoMixin):
             self.staging.prepared_documents.append(
                 {
                     "individual": ind,
-                    "photo_file": doc_photo,
+                    "photo": document_data.get("image") or "",
                     "country_code": country_code,
                     "type_key": type_key,
                     "document_number": document_data.get("document_number"),
@@ -370,22 +427,10 @@ class CreateLaxIndividuals(CreateLaxBaseView, PhotoMixin):
         accounts_data = serializer.validated_data.pop("accounts", [])
         country_workspace_id = serializer.validated_data.get("country_workspace_id")
 
-        photo_file = self.get_photo(serializer.validated_data.pop("photo", None), self._programme_code)
-        disability_certificate_picture_file = self.get_photo(
-            serializer.validated_data.pop("disability_certificate_picture", None),
-            self._programme_code,
-        )
         validated_data = dict(serializer.validated_data)
         validated_data["flex_fields"] = populate_pdu_with_null_values(
             self._rdi_program, validated_data.get("flex_fields")
         )
-        saved_image_paths = self.process_image_flex_fields(
-            validated_data.get("flex_fields"),
-            FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL,
-            self._programme_code,
-            self._rdi_program,
-        )
-        self.staging.saved_image_paths.extend(saved_image_paths)
 
         ind = PendingIndividual(
             household=None,
@@ -394,18 +439,6 @@ class CreateLaxIndividuals(CreateLaxBaseView, PhotoMixin):
             business_area=self.selected_rdi.business_area,
             **validated_data,
         )
-
-        if photo_file:
-            ind.photo.save(photo_file.name or "", File(photo_file), save=False)
-            self.staging.saved_file_fields.append(ind.photo)
-
-        if disability_certificate_picture_file:
-            ind.disability_certificate_picture.save(
-                disability_certificate_picture_file.name or "",
-                File(disability_certificate_picture_file),
-                save=False,
-            )
-            self.staging.saved_file_fields.append(ind.disability_certificate_picture)
 
         calculate_phone_numbers_validity(ind)
 
@@ -448,7 +481,6 @@ class CreateLaxIndividuals(CreateLaxBaseView, PhotoMixin):
         doc_instances: list[PendingDocument] = []
         for item in self.staging.prepared_documents:
             ind = item["individual"]
-            photo_file = item["photo_file"]
             country_id = country_map.get(item["country_code"]) if item["country_code"] else None
             type_id = doc_type_map.get(item["type_key"]) if item["type_key"] else None
 
@@ -460,10 +492,8 @@ class CreateLaxIndividuals(CreateLaxBaseView, PhotoMixin):
                 country_id=country_id,
                 issuance_date=item["issuance_date"],
                 expiry_date=item["expiry_date"],
+                photo=item["photo"],
             )
-            if photo_file:
-                doc.photo.save(photo_file.name, File(photo_file), save=False)
-                self.staging.saved_file_fields.append(doc.photo)
             doc_instances.append(doc)
 
         if doc_instances:
@@ -510,6 +540,11 @@ class CreateLaxIndividuals(CreateLaxBaseView, PhotoMixin):
                 )
                 serializer = IndividualSerializer(
                     data=individual_raw_data,
+                    context={
+                        "get_image_flex_fields": partial(
+                            self.get_image_flex_fields, FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL
+                        ),
+                    },
                 )
 
                 if serializer.is_valid():
@@ -554,12 +589,6 @@ class CreateLaxIndividuals(CreateLaxBaseView, PhotoMixin):
                 "results": results,
             }
         except Exception as exc:
-            for field_file in self.staging.saved_file_fields:
-                with contextlib.suppress(Exception):
-                    field_file.delete(save=False)
-            for image_path in self.staging.saved_image_paths:
-                with contextlib.suppress(Exception):
-                    default_storage.delete(image_path)
             logger.exception(
                 "CreateLaxIndividuals failed",
                 extra={"rdi_id": str(self.selected_rdi.id), "business_area": self.kwargs.get("business_area")},
@@ -574,14 +603,18 @@ class CreateLaxIndividuals(CreateLaxBaseView, PhotoMixin):
         return Response(response_payload, status=status.HTTP_201_CREATED)
 
 
-class HouseholdSerializer(serializers.ModelSerializer):
+class HouseholdSerializer(ImageFlexFieldsValidationMixin, serializers.ModelSerializer):
     first_registration_date = serializers.DateTimeField(default=timezone.now)
     last_registration_date = serializers.DateTimeField(default=timezone.now)
     country = NullableChoiceField(choices=Countries(), required=False, allow_blank=True, allow_null=True)
     country_origin = NullableChoiceField(choices=Countries(), required=False, allow_blank=True, allow_null=True)
     consent_sharing = serializers.MultipleChoiceField(choices=DATA_SHARING_CHOICES, required=False)
     village = serializers.CharField(allow_blank=True, allow_null=True, required=False)
-    consent_sign = serializers.CharField(allow_blank=True, required=False)
+    consent_sign = StorageFileField(
+        model_field=(PendingHousehold, "consent_sign"),
+        allow_blank=True,
+        required=False,
+    )
     currency = CurrencySlugRelatedField(
         on_unchanged_code=OnUnchangedCode.ALWAYS_ACTIVE,
         required=False,
@@ -683,15 +716,13 @@ class CreateLaxHouseholds(CreateLaxBaseView, HouseholdUploadMixin):
 
     def _validate_and_collect_payloads(
         self, request_data: Any
-    ) -> tuple[list[dict[str, Any]], list[Any], int, int, list[str], set[str], list[Any], list[str]]:
+    ) -> tuple[list[dict[str, Any]], list[Any], int, int, list[str], set[str]]:
         valid_payloads = []
         results = []
         total_households = 0
         total_errors = 0
         household_ids_to_add_extra_rdis: list[str] = []
         country_codes = set()
-        saved_file_fields = []
-        saved_image_paths = []
 
         for household_data in request_data:
             total_households += 1
@@ -705,7 +736,13 @@ class CreateLaxHouseholds(CreateLaxBaseView, HouseholdUploadMixin):
                 },
             )
             serializer: HouseholdSerializer = HouseholdSerializer(
-                data=household_data, context={"registration_data_import": self.selected_rdi}
+                data=household_data,
+                context={
+                    "registration_data_import": self.selected_rdi,
+                    "get_image_flex_fields": partial(
+                        self.get_image_flex_fields, FlexibleAttribute.ASSOCIATED_WITH_HOUSEHOLD
+                    ),
+                },
             )
             if serializer.is_valid():
                 data = dict(serializer.validated_data)
@@ -714,24 +751,12 @@ class CreateLaxHouseholds(CreateLaxBaseView, HouseholdUploadMixin):
                 alternate_collector = data.pop("alternate_collector_id", None)
                 facility_name = data.pop("facility_name", None)
                 facility_admin_area = data.pop("facility_admin_area", None)
-                consent_sign_file = self.get_photo(
-                    data.pop("consent_sign", None),
-                    self._programme_code,
-                )
                 country_code, country_origin_code = self._process_country_codes(country_codes, data)
 
                 facility = self._get_or_create_facility(facility_name, facility_admin_area) if facility_name else None
                 data["facility"] = facility
 
                 data["flex_fields"] = populate_pdu_with_null_values(self._rdi_program, data.get("flex_fields"))
-                saved_image_paths.extend(
-                    self.process_image_flex_fields(
-                        data.get("flex_fields"),
-                        FlexibleAttribute.ASSOCIATED_WITH_HOUSEHOLD,
-                        self._programme_code,
-                        self._rdi_program,
-                    )
-                )
 
                 household_instance = PendingHousehold(
                     registration_data_import=self.selected_rdi,
@@ -739,13 +764,6 @@ class CreateLaxHouseholds(CreateLaxBaseView, HouseholdUploadMixin):
                     business_area=self.selected_business_area,
                     **data,
                 )
-                if consent_sign_file:
-                    household_instance.consent_sign.save(
-                        consent_sign_file.name,
-                        File(consent_sign_file),
-                        save=False,
-                    )
-                    saved_file_fields.append(household_instance.consent_sign)
 
                 if collided_household_id := self._manage_collision(household_instance, self.selected_rdi):
                     household_ids_to_add_extra_rdis.append(collided_household_id)
@@ -772,8 +790,6 @@ class CreateLaxHouseholds(CreateLaxBaseView, HouseholdUploadMixin):
             total_errors,
             household_ids_to_add_extra_rdis,
             country_codes,
-            saved_file_fields,
-            saved_image_paths,
         )
 
     @staticmethod
@@ -792,8 +808,6 @@ class CreateLaxHouseholds(CreateLaxBaseView, HouseholdUploadMixin):
     @atomic
     def post(self, request: Request, business_area: "BusinessArea", rdi: RegistrationDataImport) -> Response:
         total_accepted = 0
-        saved_file_fields: list = []
-        saved_image_paths: list[str] = []
         try:
             (
                 valid_payloads,
@@ -802,8 +816,6 @@ class CreateLaxHouseholds(CreateLaxBaseView, HouseholdUploadMixin):
                 total_errors,
                 household_ids_to_add_extra_rdis,
                 country_codes,
-                saved_file_fields,
-                saved_image_paths,
             ) = self._validate_and_collect_payloads(request.data)
 
             if household_ids_to_add_extra_rdis:
@@ -830,12 +842,6 @@ class CreateLaxHouseholds(CreateLaxBaseView, HouseholdUploadMixin):
             if roles_to_create:
                 IndividualRoleInHousehold.objects.bulk_create(roles_to_create, batch_size=BATCH_SIZE)
         except Exception as exc:
-            for file_field in saved_file_fields:
-                with contextlib.suppress(Exception):
-                    file_field.delete(save=False)
-            for image_path in saved_image_paths:
-                with contextlib.suppress(Exception):
-                    default_storage.delete(image_path)
             logger.exception(
                 "CreateLaxHouseholds failed",
                 extra={"rdi_id": str(self.selected_rdi.id), "business_area": self.kwargs.get("business_area")},
