@@ -3,7 +3,7 @@ from contextlib import suppress
 from datetime import date, datetime
 import io
 from itertools import permutations
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 import dateutil.parser
 from django.conf import settings
@@ -12,7 +12,6 @@ from django.template.loader import render_to_string
 from django.utils import timezone
 from openpyxl import Workbook, load_workbook
 from openpyxl.utils import get_column_letter
-from openpyxl.worksheet.worksheet import Worksheet
 
 from hope.apps.utils.mailjet import MailjetClient
 from hope.models import SanctionListIndividual, UploadedXLSXFile
@@ -152,16 +151,3 @@ class CheckAgainstSanctionListTask:
             mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         )
         email.send_email()
-
-    def join_names_and_birthday(self, attachment_ws: Worksheet, results_dict: dict[Any, Any]) -> None:
-        for row_number, individual in results_dict.items():
-            attachment_ws.append(
-                (
-                    individual.first_name,
-                    individual.second_name,
-                    individual.third_name,
-                    individual.fourth_name,
-                    ", ".join(d.strftime("%Y-%m-%d") for d in individual.dates_of_birth.values_list("date", flat=True)),
-                    row_number,
-                )
-            )

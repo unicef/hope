@@ -52,11 +52,12 @@ class CountryAPIView(HOPEAPIView, ListAPIView):
 
 
 class CurrencyAPIView(HOPEAPIView, ListAPIView):
-    queryset = Currency.objects.all().order_by("code")
+    queryset = Currency.objects.active().order_by("code")
     serializer_class = CurrencySerializer
     filter_backends = (OrderingFilter, SearchFilter)
     search_fields = (
         "code",
+        "vision_code",
         "name",
     )
 
@@ -96,21 +97,6 @@ class Roles(HOPEAPIView):
 class Sex(HOPEAPIView):
     def get(self, request: "Request", **kwargs: str) -> Response:
         return Response(dict(SEX_CHOICE))
-
-
-class Sector(HOPEAPIView):
-    def get(self, request: "Request", **kwargs: str) -> Response:
-        return Response(dict(Program.SECTOR_CHOICE))
-
-
-class FrequencyOfPayments(HOPEAPIView):
-    def get(self, request: "Request", **kwargs: str) -> Response:
-        return Response(dict(Program.FREQUENCY_OF_PAYMENTS_CHOICE))
-
-
-class ProgramScope(HOPEAPIView):
-    def get(self, request: "Request", **kwargs: str) -> Response:
-        return Response(dict(Program.SCOPE_CHOICE))
 
 
 class ProgramStatuses(HOPEAPIView):

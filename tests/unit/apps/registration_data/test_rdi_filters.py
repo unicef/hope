@@ -1,0 +1,67 @@
+import pytest
+
+from extras.test_utils.factories import RegistrationDataImportFactory
+from hope.apps.registration_data.filters import RegistrationDataImportFilter
+from hope.models import RegistrationDataImport
+
+pytestmark = pytest.mark.django_db
+
+
+@pytest.fixture
+def rdi_syria_import(db):
+    return RegistrationDataImportFactory(name="June 2026 Syria import")
+
+
+@pytest.fixture
+def rdi_afghanistan_import(db):
+    return RegistrationDataImportFactory(name="Afghanistan baseline")
+
+
+@pytest.fixture
+def rdi_syria_lowercase(db):
+    return RegistrationDataImportFactory(name="syria lowercase")
+
+
+@pytest.fixture
+def rdi_syria_excluded(db):
+    return RegistrationDataImportFactory(name="Syria excluded", excluded=True)
+
+
+def _filtered_qs(data):
+    return RegistrationDataImportFilter(data=data, queryset=RegistrationDataImport.objects.all()).qs
+
+
+def test_rdi_search_matches_middle_of_title(rdi_syria_import, rdi_afghanistan_import, django_assert_num_queries):
+    with django_assert_num_queries(1):
+        result = list(_filtered_qs({"search": "Syria"}))
+    assert result == [rdi_syria_import]
+
+
+def test_rdi_search_is_case_insensitive(rdi_syria_import, rdi_afghanistan_import, rdi_syria_lowercase):
+    result = set(_filtered_qs({"search": "syria"}))
+    assert result == {rdi_syria_import, rdi_syria_lowercase}
+
+
+def test_rdi_search_returns_empty_for_no_match(rdi_syria_import, rdi_afghanistan_import):
+    result = list(_filtered_qs({"search": "xyz"}))
+    assert result == []
+
+
+def test_rdi_name_startswith_meta_lookup_still_exposed(rdi_syria_import):
+    qs = RegistrationDataImportFilter(
+        data={"name__startswith": "June"},
+        queryset=RegistrationDataImport.objects.all(),
+    ).qs
+    assert rdi_syria_import in qs
+
+
+def test_rdi_name_exact_meta_lookup_removed():
+    f = RegistrationDataImportFilter()
+    assert "name" not in f.form.fields
+    assert "name__icontains" in f.form.fields
+
+
+def test_rdi_search_excludes_soft_deleted(rdi_syria_import, rdi_syria_excluded):
+    result = list(_filtered_qs({"search": "Syria"}))
+    assert rdi_syria_import in result
+    assert rdi_syria_excluded not in result

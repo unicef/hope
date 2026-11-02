@@ -5,7 +5,6 @@ from e2e.page_object.base_components import BaseComponents
 
 class IndividualsDetails(BaseComponents):
     page_header_container = 'div[data-cy="page-header-container"]'
-    page_header_title = 'h5[data-cy="page-header-title"]'
     label_full_name = 'div[data-cy="label-Full Name"]'
     label_given_name = 'div[data-cy="label-Given Name"]'
     label_middle_name = 'div[data-cy="label-Middle Name"]'
@@ -52,9 +51,6 @@ class IndividualsDetails(BaseComponents):
 
     def get_page_header_container(self) -> WebElement:
         return self.wait_for(self.page_header_container)
-
-    def get_page_header_title(self) -> WebElement:
-        return self.wait_for(self.page_header_title)
 
     def get_label_full_name(self) -> WebElement:
         return self.wait_for(self.label_full_name)

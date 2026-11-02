@@ -14,7 +14,6 @@ from hope.apps.payment.services.payment_gateway import (
 def gateway_service():
     service = object.__new__(PaymentGatewayService)
     service.api = MagicMock()
-    service.ADD_RECORDS_CHUNK_SIZE = 500
     service.change_payment_instruction_status = MagicMock()
     return service
 

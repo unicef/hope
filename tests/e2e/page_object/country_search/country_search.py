@@ -5,7 +5,6 @@ from e2e.page_object.base_components import BaseComponents
 
 class CountrySearch(BaseComponents):
     nav_country_search = 'a[data-cy="nav-Country Search"]'
-    page_header_title = 'h5[data-cy="page-header-title"]'
     page_details_container = 'div[data-cy="page-details-container"]'
     search_for_select = "#search-for"
     office_search = 'div[data-cy="office-filters-search"]'
@@ -14,9 +13,6 @@ class CountrySearch(BaseComponents):
 
     def get_nav_country_search(self) -> WebElement:
         return self.wait_for(self.nav_country_search)
-
-    def get_page_header_title(self) -> WebElement:
-        return self.wait_for(self.page_header_title)
 
     def get_search_for_select(self) -> WebElement:
         return self.wait_for(self.search_for_select)

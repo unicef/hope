@@ -8,7 +8,7 @@ from zipfile import BadZipFile
 
 from django.contrib.admin.options import get_content_type_for_model
 from django.db import DatabaseError, transaction
-from django.db.models import Q, QuerySet
+from django.db.models import Exists, OuterRef, Q, QuerySet
 from django.http import FileResponse, Http404, HttpResponse
 from django.utils import timezone
 from django_filters import rest_framework as filters
@@ -49,6 +49,7 @@ from hope.apps.payment.api.caches import (
     TargetPopulationListKeyConstructor,
 )
 from hope.apps.payment.api.filters import (
+    NotEligiblePaymentSearchFilter,
     PaymentOfficeSearchFilter,
     PaymentPlanFilter,
     PaymentPlanGroupFilter,
@@ -72,6 +73,7 @@ from hope.apps.payment.api.serializers import (
     FollowUpInstructionListSerializer,
     FspChoicesSerializer,
     FSPXlsxTemplateSerializer,
+    NotEligiblePaymentListSerializer,
     PaymentDetailSerializer,
     PaymentListSerializer,
     PaymentPlanAbortSerializer,
@@ -173,7 +175,8 @@ from hope.apps.payment.xlsx.xlsx_verification_import_service import (
 )
 from hope.apps.program.api.serializers import PaymentPlanPurposeSerializer
 from hope.apps.targeting.api.serializers import TargetPopulationListSerializer
-from hope.contrib.vision.models import FundsCommitmentItem
+from hope.contrib.vision.models import FundsCommitmentHeader
+from hope.contrib.vision.services import FundsCommitmentAssignmentError, VisionService
 from hope.models import (
     Account,
     AccountAttachment,
@@ -220,15 +223,9 @@ class PaymentPlanMixin:
     serializer_class = PaymentPlanSerializer
     filter_backends = (
         filters.DjangoFilterBackend,
-        SearchFilter,
         OrderingFilter,
     )
     filterset_class = PaymentPlanFilter
-    search_fields = (
-        "unicef_id",
-        "id",
-        "^name",
-    )
 
 
 class PaymentVerificationViewSet(
@@ -674,9 +671,8 @@ class PaymentVerificationRecordViewSet(
         )
 
     def get_queryset(self) -> QuerySet:
-        return with_payment_related_data(
-            self.payment_plan.eligible_payments.exclude(payment_verifications__payment_verification_plan__isnull=True)
-        )
+        has_verification = Exists(PaymentVerification.objects.filter(payment=OuterRef("pk")))
+        return with_payment_related_data(self.payment_plan.eligible_payments.filter(has_verification))
 
     @extend_schema(
         responses={
@@ -888,7 +884,10 @@ class PaymentPlanViewSet(
         if "target_population_id" not in request.data:
             raise ValidationError("target_population_id is required")
         payment_plan = self.scoped_payment_plan(request.data.get("target_population_id"))
-        serializer = self.get_serializer(data=request.data, context={"payment_plan": payment_plan})
+        # Despite the name this updates an existing plan, so the serializer gets the instance:
+        # that is what lets the currency field keep a plan on its deprecated row when the client
+        # echoes back the code a GET handed out. The view still saves via PaymentPlanService.
+        serializer = self.get_serializer(payment_plan, data=request.data, context={"payment_plan": payment_plan})
         serializer.is_valid(raise_exception=True)
         old_payment_plan = copy_model_object(payment_plan)
 
@@ -1475,16 +1474,17 @@ class PaymentPlanViewSet(
         payment_plan = self.get_object()
         old_payment_plan = copy_model_object(payment_plan)
 
-        def _get_reject_permission(status: str) -> Any:
+        def _get_reject_permission(status: str) -> Permissions | None:
             status_to_perm_map = {
                 PaymentPlan.Status.IN_APPROVAL.name: Permissions.PM_ACCEPTANCE_PROCESS_APPROVE,
                 PaymentPlan.Status.IN_AUTHORIZATION.name: Permissions.PM_ACCEPTANCE_PROCESS_AUTHORIZE,
                 PaymentPlan.Status.IN_REVIEW.name: Permissions.PM_ACCEPTANCE_PROCESS_FINANCIAL_REVIEW,
             }
-            return status_to_perm_map.get(status, list(status_to_perm_map.values()))
+            return status_to_perm_map.get(status)
 
         reject_permission = _get_reject_permission(payment_plan.status)
-        request.user.has_perm(reject_permission)
+        if reject_permission and not request.user.has_perm(reject_permission.value, payment_plan.program_cycle.program):
+            raise PermissionDenied(detail={"required_permissions": [reject_permission.value]})
         data = dict(request.data)
         data["action"] = PaymentPlan.Action.REJECT
         payment_plan = PaymentPlanService(payment_plan).execute_update_status_action(input_data=data, user=request.user)
@@ -1658,7 +1658,7 @@ class PaymentPlanViewSet(
     def assign_funds_commitments(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        fund_commitment_items_ids = serializer.validated_data["fund_commitment_items_ids"]
+        requested_numbers = set(serializer.validated_data["funds_commitment_numbers"])
 
         payment_plan = self.get_object()
         if payment_plan.vision_managed:
@@ -1666,22 +1666,16 @@ class PaymentPlanViewSet(
         if payment_plan.status != PaymentPlan.Status.IN_REVIEW:
             raise ValidationError("Payment plan must be in review")
 
-        funds_commitment_items = list(
-            FundsCommitmentItem.objects.select_for_update().filter(
-                rec_serial_number__in=fund_commitment_items_ids,
-            )
+        funds_commitment_headers = list(
+            FundsCommitmentHeader.objects.filter(funds_commitment_number__in=requested_numbers)
         )
-        if any(item.payment_plan_id not in {None, payment_plan.pk} for item in funds_commitment_items):
-            raise ValidationError("Chosen Funds Commitments are already assigned to a different Payment Plan")
-        if any(item.office_id != payment_plan.business_area_id for item in funds_commitment_items):
-            raise ValidationError("Chosen Funds Commitments have the wrong Business Area")
-        if len({item.funds_commitment_group_id for item in funds_commitment_items}) != 1:
-            raise ValidationError("Chosen Funds Commitment Items must belong to the same Funds Commitment Group")
-
-        FundsCommitmentItem.objects.filter(payment_plan=payment_plan).update(payment_plan=None)
-        FundsCommitmentItem.objects.filter(pk__in=[item.pk for item in funds_commitment_items]).update(
-            payment_plan=payment_plan
-        )
+        if len(funds_commitment_headers) != len(requested_numbers):
+            raise ValidationError("One or more Funds Commitment Headers were not found")
+        try:
+            VisionService.assign_selected_funds_commitment_headers(payment_plan, funds_commitment_headers)
+        except FundsCommitmentAssignmentError as error:
+            message = "One or more Funds Commitment Headers are not available for this Business Area"
+            raise ValidationError(message) from error
 
         payment_plan.refresh_from_db()
         return Response(
@@ -2222,7 +2216,7 @@ class TargetPopulationViewSet(
         url_path="pending-payments/count",
         filter_backends=[],
     )
-    def pending_payments_count(self, request: Any, *args: Any, **kwargs: Any) -> Response:
+    def pending_payments_count(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         tp = self.get_object()
         pending_payments_count = tp.payment_items.count()
         return Response({"count": pending_payments_count}, status=status.HTTP_200_OK)
@@ -2257,10 +2251,11 @@ class TargetPopulationViewSet(
     @transaction.atomic
     def copy(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         user = request.user
-        cast("dict[str, Any]", request.data)["target_population_id"] = kwargs.get("pk")
+        data = dict(request.data)
+        data["target_population_id"] = kwargs.get("pk")
 
         serializer = self.get_serializer(
-            data=request.data,
+            data=data,
         )
         if serializer.is_valid():
             name = serializer.validated_data["name"].strip()
@@ -2560,13 +2555,11 @@ class AccountAttachmentViewSet(ProgramVisibilityMixin, mixins.CreateModelMixin, 
         attachment = self.get_object()
         file = attachment.file
         file_mimetype, _ = mimetypes.guess_type(file.url)
-        response = FileResponse(
+        return FileResponse(
             file.open(),
             as_attachment=True,
             content_type=file_mimetype or "application/octet-stream",
         )
-        response["Content-Disposition"] = f"attachment; filename={file.name.split('/')[-1]}"
-        return response
 
 
 class PaymentPlanSupportingDocumentViewSet(
@@ -2613,13 +2606,11 @@ class PaymentPlanSupportingDocumentViewSet(
         document = self.get_object()
         file = document.file
         file_mimetype, _ = mimetypes.guess_type(file.url)
-        response = FileResponse(
+        return FileResponse(
             file.open(),
             as_attachment=True,
             content_type=file_mimetype or "application/octet-stream",
         )
-        response["Content-Disposition"] = f"attachment; filename={file.name.split('/')[-1]}"
-        return response
 
 
 class PaymentViewSet(
@@ -2635,6 +2626,7 @@ class PaymentViewSet(
     lookup_field = "payment_id"
     serializer_classes_by_action = {
         "list": PaymentListSerializer,
+        "not_eligible": NotEligiblePaymentListSerializer,
         "retrieve": PaymentDetailSerializer,
         "revert_mark_as_failed": RevertMarkPaymentAsFailedSerializer,
     }
@@ -2647,6 +2639,15 @@ class PaymentViewSet(
             Permissions.PM_VIEW_DETAILS,
             Permissions.PAYMENT_VERIFICATION_VIEW_DETAILS,
         ],
+        # Both actions need a functional permission for BaseRestPermission; get_queryset adds the superuser-only gate.
+        "not_eligible": [
+            Permissions.PM_VIEW_DETAILS,
+            Permissions.PAYMENT_VERIFICATION_VIEW_DETAILS,
+        ],
+        "not_eligible_count": [
+            Permissions.PM_VIEW_DETAILS,
+            Permissions.PAYMENT_VERIFICATION_VIEW_DETAILS,
+        ],
         "mark_as_failed": [Permissions.PM_MARK_PAYMENT_AS_FAILED],
         "revert_mark_as_failed": [Permissions.PM_MARK_PAYMENT_AS_FAILED],
     }
@@ -2655,19 +2656,49 @@ class PaymentViewSet(
 
     def get_object(self) -> Payment:
         # the details page is reached by a plain link with no plan id, so scope to the program instead
+        queryset = Payment.objects.all()
+        if not self.request.user.is_superuser:
+            queryset = queryset.exclude(status=Payment.STATUS_NOT_ELIGIBLE)
         return get_object_or_404(
-            with_payment_related_data(Payment.objects.all()),
+            with_payment_related_data(queryset),
             id=self.kwargs["payment_id"],
             parent__program_cycle__program=self.program,
         )
 
     def get_queryset(self) -> QuerySet:
         parent = self.payment_plan
+        if self.action in ("not_eligible", "not_eligible_count"):
+            if not self.request.user.is_superuser:
+                raise PermissionDenied("Only superusers can view Not Eligible payments.")
+            return with_payment_related_data(parent.payment_items.filter(status=Payment.STATUS_NOT_ELIGIBLE))
         if parent.status == PaymentPlan.Status.OPEN:
             queryset = parent.eligible_payments_with_conflicts
         else:
             queryset = parent.eligible_payments
         return with_payment_related_data(queryset)
+
+    @extend_schema(responses={200: NotEligiblePaymentListSerializer(many=True)})
+    @action(
+        detail=False,
+        methods=["get"],
+        url_path="not-eligible",
+        filterset_class=NotEligiblePaymentSearchFilter,
+    )
+    def not_eligible(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        return self.list(request, *args, **kwargs)
+
+    @extend_schema(
+        responses={status.HTTP_200_OK: inline_serializer("CountResponse", fields={"count": serializers.IntegerField()})}
+    )
+    @action(
+        detail=False,
+        methods=["get"],
+        url_path="not-eligible/count",
+        filterset_class=NotEligiblePaymentSearchFilter,
+    )
+    def not_eligible_count(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        queryset = self.filter_queryset(self.get_queryset()).order_by()
+        return Response({"count": queryset.count()})
 
     @action(
         detail=True,
@@ -2720,7 +2751,8 @@ class PaymentGlobalViewSet(
     program_model_field = "program"
 
     def get_queryset(self) -> QuerySet:
-        return with_payment_related_data(super().get_queryset()).order_by("-created_at")
+        queryset = super().get_queryset().eligible()
+        return with_payment_related_data(queryset).order_by("-created_at")
 
 
 @extend_schema(responses={200: FspChoicesSerializer(many=True)})

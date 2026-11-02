@@ -32,7 +32,6 @@ class XlsxSomaliaParser(BaseParser):
         self._accounts = []
         self._documents = []
         self._identities = []
-        self._individual_roles = []
         self._errors = []
         self._file_path: str | None = None
         self._parsed = False
@@ -230,20 +229,12 @@ class XlsxSomaliaParser(BaseParser):
         return self._errors
 
     @property
-    def supported_file_types(self) -> list[str]:
-        return [".xlsx", ".xls"]
-
-    @property
     def households_data(self) -> list[dict[str, Any]]:
         return list(self._households.values())
 
     @property
     def individuals_data(self) -> list[dict[str, Any]]:
         return self._individuals
-
-    @property
-    def individual_roles_in_households_data(self) -> list[dict[str, Any]]:
-        return self._individual_roles
 
     @property
     def accounts_data(self) -> list[dict[str, Any]]:

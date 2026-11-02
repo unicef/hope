@@ -370,6 +370,7 @@ class CustomOrderingFilter(OrderingFilter):
                 new_ordering.append(field)
         return qs.order_by(*new_ordering)
 
+    # Looks unused, but django-filter's OrderingFilter.__init__ calls it; it also builds lower_dict.
     def normalize_fields(self, fields: list) -> dict:
         """Normalize the fields into an ordered map of {field name: param name}."""
         from django.db.models.functions import Lower

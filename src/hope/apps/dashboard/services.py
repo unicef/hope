@@ -88,6 +88,9 @@ def _dimension_annotations(date_field: Coalesce) -> dict[str, Any]:
         "business_area_name": Coalesce(F("business_area__name"), Value("Unknown Country")),
         "region_name": Coalesce(F("business_area__region_name"), Value("Unknown Region")),
         "currency_code": Coalesce(F("currency__code"), Value("UNK")),
+        # A redenomination leaves two rows sharing one `code` whose units are not comparable,
+        # so `currency_code` alone is not a safe bucket key.
+        "currency_vision_code": Coalesce(F("currency__vision_code"), Value("UNK")),
         "admin1_name": Coalesce(F("household__admin1__name"), Value("Unknown Admin1")),
         "program_name": Coalesce(F("program__name"), F("household__program__name"), Value("Unknown Program")),
         "sector_name": Coalesce(F("program__sector"), F("household__program__sector"), Value("Unknown Sector")),
@@ -173,6 +176,7 @@ class CountrySummaryKey(NamedTuple):
     delivery_type: str
     status: str
     currency: str
+    currency_vision_code: str
 
 
 class DashboardCacheBase:
@@ -280,6 +284,7 @@ class DashboardCacheBase:
             "business_area_name",
             "region_name",
             "currency_code",
+            "currency_vision_code",
             "admin1_name",
             "program_name",
             "sector_name",
@@ -469,6 +474,7 @@ class DashboardDataCache(DashboardCacheBase):
                     "delivery_types": key.delivery_type,
                     "status": key.status,
                     "currency": key.currency,
+                    "currency_vision_code": key.currency_vision_code,
                     "total_delivered_quantity_usd": totals["total_usd"],
                     "total_delivered_quantity": totals["total_quantity"],
                     "payments": totals["total_payments"],
@@ -503,6 +509,7 @@ class DashboardDataCache(DashboardCacheBase):
             delivery_type=payment.get("delivery_type_name", "Unknown Delivery Type"),
             status=payment.get("payment_status", "Unknown Status"),
             currency=payment.get("currency_code", "UNK"),
+            currency_vision_code=payment.get("currency_vision_code", "UNK"),
         )
         current_summary = summary[key]
 
@@ -570,6 +577,7 @@ class DashboardDataCache(DashboardCacheBase):
             "delivery_type_name",
             "payment_status",
             "currency_code",
+            "currency_vision_code",
         ]
         plan_counts = cls._get_payment_plan_counts(base_payments_qs, plan_group_fields)
 

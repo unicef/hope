@@ -47,10 +47,6 @@ class StrictDateField(forms.DateField):
         raise ValidationError("Enter a date value", code="invalid")
 
 
-class RowValidationError(ValidationError):
-    pass
-
-
 def validation_error_to_json(
     error: ValidationError | list[ValidationError], seen: set[int] | None = None
 ) -> Any:  # pragma: no cover
@@ -74,8 +70,6 @@ def validation_error_to_json(
         return error.message
 
     seen.add(id(error))
-    # if isinstance(error, RowValidationError):
-
     if hasattr(error, "error_dict"):
         # Handle ValidationError with error_dict (errors from ModelForms, for example)
         return {key: validation_error_to_json(value, seen) for key, value in error.error_dict.items()}

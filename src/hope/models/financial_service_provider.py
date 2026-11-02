@@ -8,7 +8,7 @@ from django.utils.translation import gettext_lazy as _
 
 from hope.apps.core.mixins import LimitBusinessAreaModelMixin
 from hope.models.financial_service_provider_xlsx_template import FinancialServiceProviderXlsxTemplate
-from hope.models.utils import InternalDataFieldModel, TimeStampedUUIDModel
+from hope.models.utils import InternalDataFieldModel, LongNameIndex, TimeStampedUUIDModel
 
 if TYPE_CHECKING:
     from hope.models import DeliveryMechanism
@@ -46,9 +46,8 @@ class FinancialServiceProvider(InternalDataFieldModel, LimitBusinessAreaModelMix
         null=True,
         blank=True,
         help_text="The maximum amount of money in USD that can be distributed or unlimited if null",
-        db_index=True,
     )
-    communication_channel = models.CharField(max_length=6, choices=get_communication_channel_choices, db_index=True)
+    communication_channel = models.CharField(max_length=6, choices=get_communication_channel_choices)
     data_transfer_configuration = models.JSONField(
         help_text="JSON configuration for the data transfer mechanism",
         null=True,
@@ -78,3 +77,18 @@ class FinancialServiceProvider(InternalDataFieldModel, LimitBusinessAreaModelMix
     class Meta:
         app_label = "payment"
         ordering = ("id",)
+        indexes = [
+            LongNameIndex(fields=["created_at"], name="payment_financialserviceprovider_created_at_7ca1152c"),
+            LongNameIndex(fields=["updated_at"], name="payment_financialserviceprovider_updated_at_89400a76"),
+            LongNameIndex(
+                fields=["distribution_limit"], name="payment_financialserviceprovider_distribution_limit_d7a089a1"
+            ),
+            LongNameIndex(
+                fields=["communication_channel"], name="payment_financialserviceprovider_communication_channel_67d4a550"
+            ),
+            LongNameIndex(
+                fields=["communication_channel"],
+                opclasses=["varchar_pattern_ops"],
+                name="payment_financialservice_communication_channel_67d4a550_like",
+            ),
+        ]

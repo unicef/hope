@@ -4,7 +4,6 @@ from typing import Any
 
 import openpyxl
 import pytest
-from selenium.common.exceptions import TimeoutException
 
 from e2e.page_object.programme_population.individuals import Individuals
 from e2e.page_object.programme_population.periodic_data_update_templates import (
@@ -181,7 +180,7 @@ class TestPDUXlsxUpload:
             program,
         )
         page_individuals.select_global_program_filter(program.name)
-        page_individuals.get_nav_programme_population().click()
+        page_individuals.open_nav_section("Main Menu")
         page_individuals.get_nav_individuals().click()
         page_individuals.get_tab_periodic_data_updates().click()
         page_individuals.get_tab_offline_edits().click()
@@ -199,7 +198,6 @@ class TestPDUXlsxUpload:
         assert individual.flex_fields[flexible_attribute.name]["1"]["collection_date"] == "2021-05-02"
         assert page_individuals.get_update_status(periodic_data_update_upload.pk).text == "Successful"
 
-    @pytest.mark.night
     def test_periodic_data_update_upload_form_error(
         self,
         clear_downloaded_files: None,
@@ -224,12 +222,8 @@ class TestPDUXlsxUpload:
             program,
         )
         page_individuals.select_global_program_filter(program.name)
-        page_individuals.get_nav_programme_population().click()
-        try:
-            page_individuals.get_nav_individuals().click()
-        except TimeoutException:
-            page_individuals.get_nav_programme_population().click()
-            page_individuals.get_nav_individuals().click()
+        page_individuals.open_nav_section("Main Menu")
+        page_individuals.get_nav_individuals().click()
         page_individuals.get_tab_periodic_data_updates().click()
         page_individuals.get_tab_offline_edits().click()
         page_individuals.get_button_import().click()
@@ -245,8 +239,6 @@ class TestPDUXlsxUpload:
         error_text = "Row: 2\ntest_date_attribute__round_value\nEnter a valid date."
         assert page_individuals.get_pdu_form_errors().text == error_text
 
-    @pytest.mark.skip("Unskip after fix: 214341")
-    @pytest.mark.night
     def test_periodic_data_update_upload_error(
         self,
         clear_downloaded_files: None,
@@ -281,7 +273,7 @@ class TestPDUXlsxUpload:
             wb.save(tmp_file.name)
             tmp_file.seek(0)
             page_individuals.select_global_program_filter(program.name)
-            page_individuals.get_nav_programme_population().click()
+            page_individuals.open_nav_section("Main Menu")
             page_individuals.get_nav_individuals().click()
             page_individuals.get_tab_periodic_data_updates().click()
             page_individuals.get_tab_offline_edits().click()
@@ -290,9 +282,8 @@ class TestPDUXlsxUpload:
             page_individuals.upload_file(tmp_file.name)
             page_individuals.get_button_import_submit().click()
             error_text = page_individuals.get_pdu_upload_error().text
-            assert error_text == "Periodic Data Update Template with ID -1 not found"
+            assert error_text == "Error uploading file: Periodic Data Update Template with ID -1 not found"
 
-    @pytest.mark.night
     def test_periodic_data_uploads_list(
         self,
         clear_downloaded_files: None,
@@ -321,12 +312,8 @@ class TestPDUXlsxUpload:
             status=PDUXlsxUpload.Status.SUCCESSFUL,
         )
         page_individuals.select_global_program_filter(program.name)
-        page_individuals.get_nav_programme_population().click()
-        try:
-            page_individuals.get_nav_individuals().click()
-        except TimeoutException:
-            page_individuals.get_nav_programme_population().click()
-            page_individuals.get_nav_individuals().click()
+        page_individuals.open_nav_section("Main Menu")
+        page_individuals.get_nav_individuals().click()
         page_individuals.get_tab_periodic_data_updates().click()
         page_individuals.get_tab_offline_edits().click()
 

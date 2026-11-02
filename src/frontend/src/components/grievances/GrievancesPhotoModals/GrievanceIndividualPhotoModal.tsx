@@ -29,7 +29,7 @@ export function GrievanceIndividualPhotoModal({
     programCode: effectiveProgramCode,
     id: individualId || '',
   };
-  const { data } = useQuery<IndividualPhotoDetail>({
+  const { data, isFetching, refetch } = useQuery<IndividualPhotoDetail>({
     queryKey: restQueryKey(
       RestService.restBusinessAreasProgramsIndividualsPhotosRetrieve,
       individualPhotosParams,
@@ -50,5 +50,14 @@ export function GrievanceIndividualPhotoModal({
     return <>-</>;
   }
 
-  return <PhotoModal src={photoUrl} />;
+  // Signed blob URLs expire quickly: the mount fetch is only for the thumbnail,
+  // opening the modal fetches a fresh URL.
+  return isCurrent ? (
+    <PhotoModal
+      src={isFetching ? undefined : photoUrl}
+      onOpen={() => refetch()}
+    />
+  ) : (
+    <PhotoModal src={photoUrl} />
+  );
 }

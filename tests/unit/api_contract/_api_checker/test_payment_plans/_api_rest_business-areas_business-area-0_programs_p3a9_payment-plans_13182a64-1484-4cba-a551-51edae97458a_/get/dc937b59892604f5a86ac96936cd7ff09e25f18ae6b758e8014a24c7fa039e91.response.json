@@ -18,6 +18,7 @@
         "total_households_count": 0,
         "total_individuals_count": 0,
         "currency": null,
+        "currency_vision_code": null,
         "excluded_ids": null,
         "total_entitled_quantity": null,
         "total_delivered_quantity": null,
@@ -105,6 +106,11 @@
             "not_delivered": 0,
             "unsuccessful": 0,
             "pending": 0,
+            "pending_breakdown": {
+                "pending": 0,
+                "sent_to_payment_gateway": 0,
+                "sent_to_fsp": 0
+            },
             "reconciled": 0,
             "number_of_payments": 0
         },
@@ -121,7 +127,7 @@
         "vision": {
             "status": "NOT_SENT",
             "vision_id": null,
-            "fc_num": null,
+            "fc_numbers": [],
             "error_code": null
         },
         "can_split": false,
@@ -145,7 +151,7 @@
         "unore_exchange_rate": null,
         "unore_exchange_rate_unavailable": false,
         "eligible_payments_count": 0,
-        "funds_commitments": null,
+        "funds_commitments": [],
         "available_funds_commitments": [],
         "payment_verification_plans": [],
         "admin_url": "/api/unicorn/payment/paymentplan/13182a64-1484-4cba-a551-51edae97458a/change/",

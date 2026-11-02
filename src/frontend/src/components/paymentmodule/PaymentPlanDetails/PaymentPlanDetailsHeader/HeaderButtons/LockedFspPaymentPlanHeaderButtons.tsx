@@ -31,7 +31,7 @@ export function LockedFspPaymentPlanHeaderButtons({
   const { businessArea, programId } = useBaseUrl();
   const queryClient = useQueryClient();
 
-  const { mutateAsync: unlock, isPending: loadingUnlock } = useMutation({
+  const { mutate: unlock, isPending: loadingUnlock } = useMutation({
     mutationFn: () =>
       RestService.restBusinessAreasProgramsPaymentPlansUnlockFspRetrieve({
         businessAreaSlug: businessArea,
@@ -57,7 +57,7 @@ export function LockedFspPaymentPlanHeaderButtons({
     },
   });
 
-  const { mutateAsync: sendForApproval, isPending: loadingSendForApproval } =
+  const { mutate: sendForApproval, isPending: loadingSendForApproval } =
     useMutation({
       mutationFn: () =>
         RestService.restBusinessAreasProgramsPaymentPlansSendForApprovalRetrieve(

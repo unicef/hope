@@ -8,6 +8,8 @@ from typing import TYPE_CHECKING, Any, Sequence, cast
 
 if TYPE_CHECKING:
     from django.contrib.admin.options import ActionLocation
+    from django.db.models.fields.related import ForeignKey
+    from django.forms import ModelChoiceField
     from django.forms.forms import Form
 
 from admin_extra_buttons.decorators import button
@@ -43,7 +45,9 @@ from hope.models import BusinessArea, IncompatibleRoles, Partner, Role, RoleAssi
 if TYPE_CHECKING:
     from uuid import UUID
 
+    # Looks unused, but it's needed for the string annotation on get_deleted_objects.
     from django.db.models.query import _QuerySet
+    from django.utils.datastructures import _ListOrTuple
 
 logger = logging.getLogger(__name__)
 
@@ -312,7 +316,7 @@ class UserAdmin(
         return TemplateResponse(request, "admin/ad.html", {"ctx": context, "opts": self.model._meta})
 
     @property
-    def media(self) -> Any:
+    def media(self) -> forms.Media:
         return super().media + forms.Media(js=["hijack/hijack.js"])
 
     def get_queryset(self, request: HttpRequest) -> QuerySet:
@@ -330,12 +334,14 @@ class UserAdmin(
             )
         )
 
-    def get_readonly_fields(self, request: HttpRequest, obj: Any | None = ...) -> Any:
+    def get_readonly_fields(self, request: HttpRequest, obj: Any | None = ...) -> "_ListOrTuple[str]":
         if request.user.has_perm("account.restrict_help_desk"):
             return super().get_readonly_fields(request, obj)
-        return self.get_fields(request)
+        return cast("list[str] | tuple[str, ...]", self.get_fields(request))
 
-    def get_deleted_objects(self, objs: Sequence[Any] | "_QuerySet[Any, Any]", request: HttpRequest) -> Any:
+    def get_deleted_objects(
+        self, objs: Sequence[Any] | "_QuerySet[Any, Any]", request: HttpRequest
+    ) -> tuple[list[str], dict[str, int], set[str], list[str]]:
         to_delete, model_count, perms_needed, protected = super().get_deleted_objects(objs, request)
         user = objs[0]
         kobo_pk = user.custom_fields.get("kobo_pk", None)
@@ -528,9 +534,11 @@ class UserAdmin(
     def __init__(self, model: type, admin_site: Any) -> None:
         super().__init__(model, admin_site)
 
-    def formfield_for_foreignkey(self, db_field: Any, request: HttpRequest, **kwargs: Any) -> Any:
+    def formfield_for_foreignkey(
+        self, db_field: ForeignKey, request: HttpRequest, **kwargs: Any
+    ) -> ModelChoiceField | None:
         if db_field.name == "partner":  # Exclude partners that are parent partners
             kwargs["queryset"] = Partner.objects.exclude(
                 id__in=Partner.objects.exclude(parent__isnull=True).values_list("parent", flat=True)
-            )
+            ).select_related("parent")
         return super().formfield_for_foreignkey(db_field, request, **kwargs)

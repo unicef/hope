@@ -30,7 +30,7 @@ def test_tp_list_shows_group_header_row(
         Permissions.TARGETING_VIEW_LIST,
         Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS,
     ):
-        browser.login(username="noperm_user", password="testtest2")
+        browser.login(username="noperm_user")
         browser.open(f"/{business_area.slug}/programs/{program.code}/target-population/")
         browser.wait_for_element_visible('[data-cy="group-header-row"]')
         browser.assert_text(GROUP_NAME, '[data-cy="group-header-row"]')
@@ -49,7 +49,7 @@ def test_tp_details_shows_group_and_purpose(
         Permissions.TARGETING_VIEW_DETAILS,
         Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS,
     ):
-        browser.login(username="noperm_user", password="testtest2")
+        browser.login(username="noperm_user")
         browser.open(f"/{business_area.slug}/programs/{program.code}/target-population/{targeting_tp.id}")
         browser.wait_for_element_visible('h5[data-cy="page-header-title"]')
         browser.assert_text(GROUP_NAME, 'div[data-cy="label-Payment Plan Group"]')
@@ -75,7 +75,7 @@ def test_create_tp_with_group_and_purpose(
         Permissions.PM_PAYMENT_PLAN_GROUP_VIEW_LIST,
         Permissions.PM_PROGRAMME_CYCLE_VIEW_LIST,
     ):
-        browser.login(username="noperm_user", password="testtest2")
+        browser.login(username="noperm_user")
         browser.open(f"/{business_area.slug}/programs/{program.code}/target-population/")
         browser.wait_for_element_clickable('a[data-cy="button-new-tp"]').click()
         browser.wait_for_element_visible('[data-cy="filters-program-cycle-autocomplete"]')
@@ -126,7 +126,7 @@ def test_create_tp_dropdowns_show_only_relevant_options(
         Permissions.PM_PAYMENT_PLAN_GROUP_VIEW_LIST,
         Permissions.PM_PROGRAMME_CYCLE_VIEW_LIST,
     ):
-        browser.login(username="noperm_user", password="testtest2")
+        browser.login(username="noperm_user")
         browser.open(f"/{business_area.slug}/programs/{program.code}/target-population/")
         browser.wait_for_element_clickable('a[data-cy="button-new-tp"]').click()
 
@@ -164,7 +164,7 @@ def test_edit_tp_shows_group_and_purpose(
         Permissions.PM_PAYMENT_PLAN_GROUP_CREATE,
         Permissions.PM_PROGRAMME_CYCLE_VIEW_LIST,
     ):
-        browser.login(username="noperm_user", password="testtest2")
+        browser.login(username="noperm_user")
         browser.open(f"/{business_area.slug}/programs/{program.code}/target-population/edit-tp/{targeting_tp.id}")
         browser.wait_for_element_visible('[data-cy="filters-program-cycle-autocomplete"]')
 
@@ -207,7 +207,7 @@ def test_duplicate_tp_with_group_and_purpose(
         Permissions.PM_PAYMENT_PLAN_GROUP_VIEW_LIST,
         Permissions.PM_PROGRAMME_CYCLE_VIEW_LIST,
     ):
-        browser.login(username="noperm_user", password="testtest2")
+        browser.login(username="noperm_user")
         browser.open(f"/{business_area.slug}/programs/{program.code}/target-population/{targeting_tp.id}")
 
         browser.wait_for_element_clickable('[data-cy="button-target-population-duplicate"]').click()
@@ -247,7 +247,7 @@ def test_edit_latest_tp_purposes_are_editable(
         Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS,
         Permissions.PM_PROGRAMME_CYCLE_VIEW_LIST,
     ):
-        browser.login(username="noperm_user", password="testtest2")
+        browser.login(username="noperm_user")
         browser.open(f"/{business_area.slug}/programs/{program.code}/target-population/edit-tp/{targeting_tp.id}")
         browser.wait_for_element_visible('input[name="name"]')
         browser.wait_for_element_visible('[data-cy="input-payment-plan-purposes"]')
@@ -269,7 +269,7 @@ def test_edit_non_latest_tp_purposes_not_editable(
         Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS,
         Permissions.PM_PROGRAMME_CYCLE_VIEW_LIST,
     ):
-        browser.login(username="noperm_user", password="testtest2")
+        browser.login(username="noperm_user")
         browser.open(f"/{business_area.slug}/programs/{program.code}/target-population/edit-tp/{targeting_tp.id}")
         browser.wait_for_element_visible('[data-cy="filters-program-cycle-autocomplete"]')
         browser.assert_element_absent('[data-cy="input-payment-plan-purposes"]')

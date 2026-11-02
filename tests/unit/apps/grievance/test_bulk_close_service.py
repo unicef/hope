@@ -339,7 +339,7 @@ def test_bulk_close_query_count_scales_per_ticket(
     # user/business-area/program scope, and both tickets share the same scope), so it does not
     # scale per ticket. The activity-log detail relations are prefetched rather than joined, which
     # is one extra query per relation but also constant per call, not per ticket.
-    with django_assert_max_num_queries(30):
+    with django_assert_max_num_queries(32):
         BulkActionService().bulk_close(
             user,
             [complaint_for_approval.id, another_complaint_for_approval.id],

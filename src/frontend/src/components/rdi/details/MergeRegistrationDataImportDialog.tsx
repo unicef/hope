@@ -42,13 +42,17 @@ function MergeRegistrationDataImportDialog({
     ),
   );
   const merge = async (): Promise<void> => {
-    const { errors } = await mutateAsync();
-    if (errors) {
-      showMessage(t('Error while merging Registration Data Import'));
-      return;
+    try {
+      const { errors } = await mutateAsync();
+      if (errors) {
+        showMessage(t('Error while merging Registration Data Import'));
+        return;
+      }
+      setOpen(false);
+      showMessage(t('Registration Data Import Merging started'));
+    } catch {
+      // handled in onError
     }
-    setOpen(false);
-    showMessage(t('Registration Data Import Merging started'));
   };
   let dataCountInformation = (
     <div>

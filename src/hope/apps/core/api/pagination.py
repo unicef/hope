@@ -1,8 +1,9 @@
 from collections import OrderedDict
-from typing import Any
+from typing import Any, TypedDict
 
 from rest_framework.pagination import (
     LimitOffsetPagination,
+    PageLink,
     _divide_with_ceil,
     _get_displayed_page_numbers,
     _get_page_links,
@@ -10,6 +11,12 @@ from rest_framework.pagination import (
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.utils.urls import remove_query_param, replace_query_param
+
+
+class NoCountPaginationContext(TypedDict):
+    previous_url: str | None
+    next_url: str | None
+    page_links: list[PageLink]
 
 
 class NoCountLimitOffsetPagination(LimitOffsetPagination):
@@ -48,7 +55,7 @@ class NoCountLimitOffsetPagination(LimitOffsetPagination):
         offset = self.offset + self.limit  # type: ignore
         return replace_query_param(url, self.offset_query_param, offset)
 
-    def get_html_context(self) -> Any:
+    def get_html_context(self) -> NoCountPaginationContext:  # type: ignore[override]  # DRF stubs type previous/next_url as required str, but they can be None
         base_url = self.request.build_absolute_uri()
 
         if self.limit:

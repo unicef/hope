@@ -73,7 +73,7 @@ def test_history() -> None:
 
     # no history if no changes
     rule.save()
-    assert rule.history.count() == 1, rule.last_changes
+    assert rule.history.count() == 1
     assert rule.latest_commit.version
     assert rule.version != rule.latest_commit.version
 

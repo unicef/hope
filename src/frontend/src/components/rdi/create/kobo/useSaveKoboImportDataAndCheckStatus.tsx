@@ -75,7 +75,7 @@ export function useSaveKoboImportDataAndCheckStatus(): UseSaveKoboImportDataAndC
   });
 
   const saveAndStartPolling = (variables: SaveKoboVariables): void => {
-    saveMutation.mutateAsync(variables);
+    saveMutation.mutate(variables);
   };
 
   return {

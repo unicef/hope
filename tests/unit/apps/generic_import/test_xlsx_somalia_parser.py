@@ -410,22 +410,6 @@ def test_validate_file_structure_returns_true_after_successful_parse(business_ar
 
 
 @pytest.mark.django_db
-def test_supported_file_types_includes_xlsx_and_xls(business_area):
-    parser = XlsxSomaliaParser(business_area)
-    supported = parser.supported_file_types
-
-    assert ".xlsx" in supported
-    assert ".xls" in supported
-    assert len(supported) == 2
-
-
-@pytest.mark.django_db
-def test_individual_roles_in_households_data_returns_empty_list(business_area):
-    parser = XlsxSomaliaParser(business_area)
-    assert parser.individual_roles_in_households_data == []
-
-
-@pytest.mark.django_db
 def test_parse_handles_corrupted_file_gracefully(business_area, tmp_path):
     invalid_file = tmp_path / "corrupted.xlsx"
     invalid_file.write_bytes(b"not a valid xlsx file")

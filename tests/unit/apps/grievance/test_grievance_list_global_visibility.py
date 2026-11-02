@@ -17,7 +17,7 @@ import pytest
 from rest_framework import status
 from rest_framework.reverse import reverse
 
-from extras.test_utils.factories.account import PartnerFactory, UserFactory
+from extras.test_utils.factories.account import PartnerFactory, RoleAssignmentFactory, RoleFactory, UserFactory
 from extras.test_utils.factories.core import BusinessAreaFactory
 from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory, CountryFactory
 from extras.test_utils.factories.grievance import GrievanceTicketFactory
@@ -25,7 +25,7 @@ from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.sql import joined_tables, list_queryset, main_list_statement
 from hope.apps.account.permissions import Permissions
 from hope.apps.grievance.models import GrievanceTicket
-from hope.models import Area, BusinessArea, Partner, Program, User
+from hope.models import Area, BusinessArea, Partner, Program, RoleAssignment, User
 
 pytestmark = pytest.mark.django_db()
 
@@ -34,7 +34,7 @@ LIST_PERMISSIONS = [
     Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE,
 ]
 
-GLOBAL_LIST_QUERY_COUNT = 41
+GLOBAL_LIST_QUERY_COUNT = 31
 
 
 @pytest.fixture
@@ -471,3 +471,25 @@ def test_list_main_statement_filters_permissions_without_id_in_subquery(
     # matching Django's rendering of it here would break on formatting changes alone.
     main_statement = main_list_statement(captured, "grievance_grievanceticket")
     assert '"grievance_grievanceticket"."id" IN (SELECT' not in main_statement
+
+
+@pytest.fixture
+def partner_role_without_permissions(partner: Partner, afghanistan: BusinessArea) -> RoleAssignment:
+    """Role.permissions is nullable, and partner roles are created without any."""
+    return RoleAssignmentFactory(partner=partner, business_area=afghanistan, role=RoleFactory(permissions=None))
+
+
+@pytest.mark.usefixtures("partner_role_without_permissions")
+def test_list_tolerates_a_role_without_permissions(
+    api_client: Any,
+    user: User,
+    afghanistan: BusinessArea,
+    ticket_in_three_programs: GrievanceTicket,
+    create_user_role_with_permissions: Callable,
+) -> None:
+    create_user_role_with_permissions(user, LIST_PERMISSIONS, afghanistan, whole_business_area_access=True)
+
+    response = api_client(user).get(list_url(afghanistan))
+
+    assert response.status_code == status.HTTP_200_OK
+    assert [result["id"] for result in response.data["results"]] == [str(ticket_in_three_programs.id)]

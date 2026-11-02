@@ -71,7 +71,11 @@ export function useSaveXlsxImportDataAndCheckStatus(): UseSaveXlsxImportDataAndC
   const saveAndStartPolling = async (
     variables: SaveXlsxVariables,
   ): Promise<void> => {
-    await uploadMutation.mutateAsync(variables);
+    try {
+      await uploadMutation.mutateAsync(variables);
+    } catch {
+      // handled in onError
+    }
   };
 
   return {

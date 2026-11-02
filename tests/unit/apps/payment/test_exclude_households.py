@@ -10,7 +10,7 @@ from extras.test_utils.factories.payment import PaymentFactory, PaymentPlanFacto
 from extras.test_utils.factories.program import ProgramCycleFactory, ProgramFactory
 from hope.apps.core.celery_tasks import NonRetriableTaskError, async_retry_job_task
 from hope.apps.payment.celery_tasks import payment_plan_exclude_beneficiaries_async_task
-from hope.models import AsyncRetryJob, DataCollectingType, PaymentPlan, ProgramCycle
+from hope.models import AsyncRetryJob, DataCollectingType, LogEntry, Payment, PaymentPlan, ProgramCycle
 
 pytestmark = pytest.mark.django_db
 
@@ -66,6 +66,7 @@ def payment_plan_data(payment_plan, program):
 def test_exclude_successfully(payment_plan, payment_plan_data):
     payment_plan.background_action_status = PaymentPlan.BackgroundActionStatus.EXCLUDE_BENEFICIARIES
     payment_plan.save(update_fields=["background_action_status"])
+    previous_status_date = payment_plan_data["payments"][0].status_date
 
     hh_unicef_id_1 = payment_plan_data["households"][0].unicef_id
     hh_unicef_id_2 = payment_plan_data["households"][1].unicef_id
@@ -87,7 +88,14 @@ def test_exclude_successfully(payment_plan, payment_plan_data):
     assert payment_plan.background_action_status is None
     assert set(payment_plan.excluded_beneficiaries_ids) == {hh_unicef_id_1, hh_unicef_id_2}
     assert payment_plan_data["payments"][0].excluded is True
+    assert payment_plan_data["payments"][0].status == Payment.STATUS_NOT_ELIGIBLE
+    payment_log = LogEntry.objects.get(object_id=payment_plan_data["payments"][0].pk)
+    assert payment_log.changes["status_date"] == {
+        "from": str(previous_status_date),
+        "to": str(payment_plan_data["payments"][0].status_date),
+    }
     assert payment_plan_data["payments"][1].excluded is True
+    assert payment_plan_data["payments"][1].status == Payment.STATUS_NOT_ELIGIBLE
     assert payment_plan_data["payments"][2].excluded is False
 
 
@@ -297,6 +305,61 @@ def two_excluded_payments(open_payment_plan_in_active_cycle, program):
         ),
     ]
     return {"households": households, "payments": payments}
+
+
+@pytest.fixture
+def not_eligible_excluded_payments(payment_plan, program):
+    payment_plan.background_action_status = PaymentPlan.BackgroundActionStatus.EXCLUDE_BENEFICIARIES
+    payment_plan.save(update_fields=["background_action_status"])
+    restorable_household = HouseholdFactory(program=program)
+    invalid_wallet_household = HouseholdFactory(program=program)
+    restorable_payment = PaymentFactory(
+        parent=payment_plan,
+        household=restorable_household,
+        collector=restorable_household.head_of_household,
+        excluded=True,
+        status=Payment.STATUS_NOT_ELIGIBLE,
+    )
+    invalid_wallet_payment = PaymentFactory(
+        parent=payment_plan,
+        household=invalid_wallet_household,
+        collector=invalid_wallet_household.head_of_household,
+        excluded=True,
+        has_valid_wallet=False,
+        status=Payment.STATUS_NOT_ELIGIBLE,
+    )
+    return {
+        "restorable_payment": restorable_payment,
+        "invalid_wallet_payment": invalid_wallet_payment,
+    }
+
+
+def test_undo_exclusion_only_restores_payment_without_other_ineligibility_cause(
+    payment_plan,
+    not_eligible_excluded_payments,
+):
+    previous_status_date = not_eligible_excluded_payments["restorable_payment"].status_date
+
+    queue_and_run_retry_task(
+        payment_plan_exclude_beneficiaries_async_task,
+        payment_plan=payment_plan,
+        excluding_hh_or_ind_ids=[],
+        exclusion_reason="undo excluded payments",
+    )
+
+    restorable_payment = not_eligible_excluded_payments["restorable_payment"]
+    invalid_wallet_payment = not_eligible_excluded_payments["invalid_wallet_payment"]
+    restorable_payment.refresh_from_db()
+    invalid_wallet_payment.refresh_from_db()
+    assert restorable_payment.excluded is False
+    assert restorable_payment.status == Payment.STATUS_PENDING
+    payment_log = LogEntry.objects.get(object_id=restorable_payment.pk)
+    assert payment_log.changes["status_date"] == {
+        "from": str(previous_status_date),
+        "to": str(restorable_payment.status_date),
+    }
+    assert invalid_wallet_payment.excluded is False
+    assert invalid_wallet_payment.status == Payment.STATUS_NOT_ELIGIBLE
 
 
 def test_undo_exclude_when_program_cycle_has_no_end_date(

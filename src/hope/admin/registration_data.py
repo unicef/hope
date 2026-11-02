@@ -104,8 +104,6 @@ class RegistrationDataImportAdmin(ViewOnUiMixin, AdminAutoCompleteSearchMixin, H
         return super().get_queryset(request).select_related("business_area", "program", "imported_by")
 
     def frontend_url(self, obj: RegistrationDataImport) -> str | None:
-        if not obj.business_area or not obj.program:
-            return None
         return f"/{obj.business_area.slug}/programs/{obj.program.code}/registration-data-import/{obj.id}"
 
     @button(

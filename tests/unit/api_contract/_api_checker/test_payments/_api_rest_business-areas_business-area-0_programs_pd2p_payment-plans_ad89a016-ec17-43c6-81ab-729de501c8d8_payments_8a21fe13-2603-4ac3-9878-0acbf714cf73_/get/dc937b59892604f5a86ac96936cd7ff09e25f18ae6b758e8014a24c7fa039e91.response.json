@@ -37,6 +37,7 @@
         "status": "Pending",
         "status_display": "Pending",
         "currency": "PLN",
+        "currency_vision_code": "PLN",
         "fsp_auth_code": "",
         "hoh_id": null,
         "hoh_unicef_id": null,
@@ -124,6 +125,7 @@
             "female_children_count": null,
             "children_disabled_count": null,
             "currency": null,
+            "currency_vision_code": null,
             "first_registration_date": "2025-01-01",
             "last_registration_date": "2025-01-01",
             "unhcr_id": "",
@@ -193,10 +195,12 @@
             "delivered_quantities": [
                 {
                     "currency": "USD",
+                    "currency_vision_code": "USD",
                     "total_delivered_quantity": "0.00"
                 },
                 {
                     "currency": "PLN",
+                    "currency_vision_code": "PLN",
                     "total_delivered_quantity": "0.00"
                 }
             ],
@@ -250,10 +254,12 @@
                 "delivered_quantities": [
                     {
                         "currency": "USD",
+                        "currency_vision_code": "USD",
                         "total_delivered_quantity": "0.00"
                     },
                     {
                         "currency": "PLN",
+                        "currency_vision_code": "PLN",
                         "total_delivered_quantity": "0.00"
                     }
                 ],
@@ -306,10 +312,12 @@
                         "delivered_quantities": [
                             {
                                 "currency": "USD",
+                                "currency_vision_code": "USD",
                                 "total_delivered_quantity": "0.00"
                             },
                             {
                                 "currency": "PLN",
+                                "currency_vision_code": "PLN",
                                 "total_delivered_quantity": "0.00"
                             }
                         ],

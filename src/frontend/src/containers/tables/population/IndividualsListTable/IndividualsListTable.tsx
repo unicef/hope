@@ -6,10 +6,11 @@ import { RestService } from '@restgenerated/services/RestService';
 import { restQueryKey } from '@utils/queryKeys';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { createApiParams } from '@utils/apiUtils';
-import { adjustHeadCells } from '@utils/utils';
+import { adjustHeadCells, sanitizePhoneSearch } from '@utils/utils';
 import type { ReactElement } from 'react';
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { usePersistedCount } from '@hooks/usePersistedCount';
+import { useTableState } from '@hooks/useTableState';
 import { useProgramContext } from 'src/programContext';
 import { headCells } from './IndividualsListTableHeadCells';
 import { IndividualsListTableRow } from './IndividualsListTableRow';
@@ -34,9 +35,7 @@ export function IndividualsListTable({
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
-  const [page, setPage] = useState(0);
-
-  const initialQueryVariables = useMemo(
+  const filterVariables = useMemo(
     () => ({
       businessAreaSlug: businessArea,
       programCode: programId,
@@ -44,6 +43,7 @@ export function IndividualsListTable({
       ageMin: filter.ageMin,
       sex: [filter.sex],
       search: filter.search.trim(),
+      phone: sanitizePhoneSearch(filter.phone),
       documentType: filter.documentType,
       documentNumber: filter.documentNumber.trim(),
       admin2: filter.admin2,
@@ -54,13 +54,14 @@ export function IndividualsListTable({
       rdiMergeStatus: 'MERGED',
       orderBy: filter.orderBy,
       rdiId: filter.rdiId,
-      page,
+      birthDate: filter.birthDate,
     }),
     [
       filter.ageMin,
       filter.ageMax,
       filter.sex,
       filter.search,
+      filter.phone,
       filter.documentType,
       filter.documentNumber,
       filter.admin2,
@@ -71,30 +72,19 @@ export function IndividualsListTable({
       filter.orderBy,
       programId,
       businessArea,
-      page,
       filter.rdiId,
+      filter.birthDate,
     ],
   );
-  useEffect(() => {
-    setPage(0);
-  }, [
-    filter,
-    filter.ageMin,
-    filter.ageMax,
-    filter.sex,
-    filter.search,
-    filter.documentType,
-    filter.documentNumber,
-    filter.admin2,
-    filter.flags,
-    filter.status,
-    filter.lastRegistrationDateMin,
-    filter.lastRegistrationDateMax,
-    filter.orderBy,
-    programId,
-    businessArea,
-    filter.rdiId,
-  ]);
+  const table = useTableState({
+    rowsPerPageOptions: [10, 15, 20],
+    resetPageOn: filterVariables,
+  });
+  const { page } = table;
+  const listVariables = useMemo(
+    () => ({ ...filterVariables, ...table.paginationParams }),
+    [filterVariables, table.paginationParams],
+  );
   const replacements = {
     unicefId: (_beneficiaryGroup) => `${_beneficiaryGroup?.memberLabel} ID`,
     fullName: (_beneficiaryGroup) => _beneficiaryGroup?.memberLabel,
@@ -110,15 +100,9 @@ export function IndividualsListTable({
     replacements,
   );
 
-  const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
-  useEffect(() => {
-    setQueryVariables(initialQueryVariables);
-  }, [initialQueryVariables]);
-
   const individualsListParams = createApiParams(
     { businessAreaSlug: businessArea, programCode: programId },
-    queryVariables,
-    { withPagination: true },
+    listVariables,
   );
   const { data, isLoading, isFetching, error } =
     useQuery<PaginatedIndividualListList>({
@@ -141,6 +125,7 @@ export function IndividualsListTable({
       ageMin: filter.ageMin,
       sex: [filter.sex],
       search: filter.search?.trim(),
+      phone: sanitizePhoneSearch(filter.phone),
       documentType: filter.documentType,
       documentNumber: filter.documentNumber?.trim(),
       admin2: filter.admin2,
@@ -150,6 +135,7 @@ export function IndividualsListTable({
       lastRegistrationDateAfter: filter.lastRegistrationDateMax,
       rdiMergeStatus: 'MERGED',
       orderBy: filter.orderBy,
+      birthDate: filter.birthDate,
     },
   );
   const { data: countData } = useQuery<CountResponse>({
@@ -171,18 +157,13 @@ export function IndividualsListTable({
       <UniversalRestTable
         title={beneficiaryGroup?.memberLabelPlural}
         headCells={adjustedHeadCells}
-        rowsPerPageOptions={[10, 15, 20]}
-        queryVariables={queryVariables}
-        setQueryVariables={setQueryVariables}
+        tableState={table}
         data={data}
         error={error}
         isLoading={isLoading}
         isFetching={isFetching}
         allowSort={false}
-        filterOrderBy={filter.orderBy}
         itemsCount={itemsCount}
-        page={page}
-        setPage={setPage}
         renderRow={(row: IndividualList) => (
           <IndividualsListTableRow
             key={row.id}

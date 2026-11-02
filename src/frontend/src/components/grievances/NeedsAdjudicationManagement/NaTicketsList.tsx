@@ -40,6 +40,7 @@ export const NaTicketsList = ({
   const confirm = useConfirmation();
 
   const urgencyChoices = choicesData?.grievanceTicketUrgencyChoices ?? [];
+  const issueTypeChoices = choicesData?.grievanceTicketIssueTypeChoices ?? [];
 
   const managedCount = Object.keys(decisions).length;
 
@@ -93,6 +94,7 @@ export const NaTicketsList = ({
                 key={ticket.id}
                 ticket={ticket}
                 urgencyChoices={urgencyChoices}
+                issueTypeChoices={issueTypeChoices}
                 selected={ticket.id === selectedTicketId}
                 managed={!!decision}
                 needsReassignment={!!decision && !isDecisionResolved(decision)}

@@ -1,4 +1,3 @@
-from collections import defaultdict
 from typing import TYPE_CHECKING, Any, TypeIs
 
 from constance import config
@@ -62,36 +61,3 @@ def users_with_permissions(
     if not config.NOTIFY_INTERNAL_USERS:
         users = users.exclude(Q(is_superuser=True) | Q(is_staff=True))
     return users.distinct()
-
-
-def users_with_permissions_by_program(
-    business_area: "BusinessArea",
-    permissions: "Sequence[Permissions | str]",
-    programs: "Collection[Any]",
-) -> dict[User, set[Any]]:
-    """Map each user from `users_with_permissions` to which of `programs` they cover.
-
-    Two queries regardless of how many programs are asked about, rather than one lookup per program.
-    A business-area-wide role assignment covers every program in `programs`. Every user returned by
-    `users_with_permissions` matched at least one of the same role assignments, so each one covers
-    at least one program.
-    """
-    program_ids = {getattr(program, "pk", program) for program in programs}
-    if not program_ids:
-        return {}
-
-    programs_by_user_id: dict[Any, set[Any]] = defaultdict(set)
-    programs_by_partner_id: dict[Any, set[Any]] = defaultdict(set)
-    for user_id, partner_id, program_id in _role_assignments(business_area, permissions, program_ids).values_list(
-        "user_id", "partner_id", "program_id"
-    ):
-        covered = program_ids if program_id is None else {program_id}
-        if user_id is not None:
-            programs_by_user_id[user_id].update(covered)
-        if partner_id is not None:
-            programs_by_partner_id[partner_id].update(covered)
-
-    return {
-        user: programs_by_user_id.get(user.pk, set()) | programs_by_partner_id.get(user.partner_id, set())
-        for user in users_with_permissions(business_area, permissions, program_ids)
-    }

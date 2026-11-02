@@ -32,6 +32,7 @@ from hope.api.endpoints.rdi.cw_ids import (
 )
 from hope.api.endpoints.rdi.mixin import HouseholdUploadMixin, PhotoMixin
 from hope.api.endpoints.rdi.upload import BirthDateValidator
+from hope.api.utils import CurrencySlugRelatedField, OnUnchangedCode
 from hope.apps.core.api.fields import ScopedSlugRelatedField, UTCDateField
 from hope.apps.household.const import (
     DATA_SHARING_CHOICES,
@@ -62,7 +63,6 @@ from hope.models import (
     PendingIndividual,
     RegistrationDataImport,
 )
-from hope.models.currency import Currency
 
 if TYPE_CHECKING:
     from uuid import UUID
@@ -575,11 +575,10 @@ class HouseholdSerializer(serializers.ModelSerializer):
     consent_sharing = serializers.MultipleChoiceField(choices=DATA_SHARING_CHOICES, required=False)
     village = serializers.CharField(allow_blank=True, allow_null=True, required=False)
     consent_sign = serializers.CharField(allow_blank=True, required=False)
-    currency = serializers.SlugRelatedField(
-        slug_field="code",
+    currency = CurrencySlugRelatedField(
+        on_unchanged_code=OnUnchangedCode.ALWAYS_ACTIVE,
         required=False,
         allow_null=True,
-        queryset=Currency.objects.all(),
     )
     head_of_household_id = ScopedSlugRelatedField(
         source="head_of_household",

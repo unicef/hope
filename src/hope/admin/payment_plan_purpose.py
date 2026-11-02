@@ -23,3 +23,8 @@ class PaymentPlanPurposeAdmin(HOPEModelAdminBase):
     def payment_plans(self, request: HttpRequest, pk: str) -> HttpResponseRedirect:
         url = reverse("admin:payment_paymentplan_changelist")
         return HttpResponseRedirect(f"{url}?payment_plan_purposes__id__exact={pk}")
+
+    @button(permission="payment.view_paymentplanpurpose")
+    def target_populations(self, request: HttpRequest, pk: str) -> HttpResponseRedirect:
+        url = reverse("admin:payment_targetpopulation_changelist")
+        return HttpResponseRedirect(f"{url}?payment_plan_purposes__id__exact={pk}")

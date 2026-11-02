@@ -22,7 +22,7 @@ from extras.test_utils.factories import (
     UserFactory,
 )
 from hope.admin.user import CsvImportConfig, LoadUsersForm, UserAdmin
-from hope.models import BusinessArea, IncompatibleRoles, Role, RoleAssignment, User
+from hope.models import BusinessArea, IncompatibleRoles, Partner, Role, RoleAssignment, User
 
 pytestmark = pytest.mark.django_db
 
@@ -459,6 +459,24 @@ def test_formfield_for_foreignkey_partner_excludes_parent_partners(admin: UserAd
     assert parent not in field.queryset
     assert child in field.queryset
     assert standalone in field.queryset
+
+
+@pytest.fixture
+def sub_partners() -> list[Partner]:
+    parent = PartnerFactory(name="Parent")
+    return [PartnerFactory(name="Child A", parent=parent), PartnerFactory(name="Child B", parent=parent)]
+
+
+def test_formfield_for_foreignkey_partner_renders_sub_partner_labels_in_one_query(
+    admin: UserAdmin, sub_partners: list[Partner], django_assert_num_queries: Any
+) -> None:
+    field = admin.formfield_for_foreignkey(User._meta.get_field("partner"), _request())
+
+    with django_assert_num_queries(1):
+        labels = [label for _, label in field.choices]
+
+    assert "Child A [Sub-Partner of Parent]" in labels
+    assert "Child B [Sub-Partner of Parent]" in labels
 
 
 def test_get_autocomplete_fields_excludes_partner(admin: UserAdmin) -> None:

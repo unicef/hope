@@ -8,7 +8,7 @@ from hope.contrib.vision.choices import (
     VisionErrorCode,
     VisionStatus,
 )
-from hope.contrib.vision.models import FundsCommitmentGroup, FundsCommitmentItem
+from hope.contrib.vision.models import FundsCommitmentHeader, FundsCommitmentItem
 from hope.models import PaymentPlan, log_create
 
 
@@ -48,92 +48,51 @@ class VisionService:
         cls.set_status(payment_plan, VisionStatus.NOT_SENT)
         vision_data.pop("sent", None)
         vision_data.pop("vision_id", None)
-        vision_data.pop("fc_num", None)
+        vision_data.pop("fc_numbers", None)
 
     @classmethod
-    def assign_funds_commitment_from_callback(
+    def assign_funds_commitment_headers_from_callback(
         cls,
         payment_plan: PaymentPlan,
-        fc_num: str,
-    ) -> FundsCommitmentGroup:
-        matching_group_ids = FundsCommitmentItem.objects.filter(
-            funds_commitment_group__funds_commitment_number=fc_num,
-            office=payment_plan.business_area,
-        ).values("funds_commitment_group_id")
-        matching_groups = list(FundsCommitmentGroup.objects.select_for_update().filter(pk__in=matching_group_ids))
-        if not matching_groups:
-            raise FundsCommitmentAssignmentError(VisionStatus.FC_NOT_FOUND)
-        if len(matching_groups) != 1:
-            raise FundsCommitmentAssignmentError(
-                VisionStatus.CALLBACK_FAILED,
-                VisionErrorCode.FC_AMBIGUOUS,
+        fc_numbers: list[str],
+    ) -> list[FundsCommitmentHeader]:
+        requested_numbers = set(fc_numbers)
+        eligible_header_ids = FundsCommitmentItem.objects.filter(
+            office_id=payment_plan.business_area_id,
+        ).values("funds_commitment_header_id")
+        matching_headers = list(
+            FundsCommitmentHeader.objects.select_for_update().filter(
+                funds_commitment_number__in=requested_numbers,
+                pk__in=eligible_header_ids,
             )
-
-        funds_commitment_group = matching_groups[0]
-        items = list(
-            FundsCommitmentItem.objects.select_for_update().filter(funds_commitment_group=funds_commitment_group)
         )
-        if any(item.payment_plan_id not in {None, payment_plan.pk} for item in items):
-            raise FundsCommitmentAssignmentError(
-                VisionStatus.CALLBACK_FAILED,
-                VisionErrorCode.FC_CONFLICT,
-            )
-
-        if (
-            FundsCommitmentItem.objects.select_for_update()
-            .filter(payment_plan=payment_plan)
-            .exclude(funds_commitment_group=funds_commitment_group)
-            .exists()
-        ):
-            raise FundsCommitmentAssignmentError(
-                VisionStatus.CALLBACK_FAILED,
-                VisionErrorCode.FC_CONFLICT,
-            )
-
-        FundsCommitmentItem.objects.filter(
-            pk__in=[item.pk for item in items],
-            payment_plan__isnull=True,
-        ).update(payment_plan=payment_plan)
-        return funds_commitment_group
+        matched_numbers = {header.funds_commitment_number for header in matching_headers}
+        if not requested_numbers or matched_numbers != requested_numbers:
+            raise FundsCommitmentAssignmentError(VisionStatus.FC_NOT_FOUND)
+        payment_plan.funds_commitment_headers.set(matching_headers)
+        return matching_headers
 
     @classmethod
-    def assign_selected_funds_commitment_items(
+    def assign_selected_funds_commitment_headers(
         cls,
         payment_plan: PaymentPlan,
-        funds_commitment_items: Iterable[FundsCommitmentItem],
+        funds_commitment_headers: Iterable[FundsCommitmentHeader],
     ) -> None:
-        item_ids = {item.pk for item in funds_commitment_items}
-        if not item_ids:
+        header_ids = {header.pk for header in funds_commitment_headers}
+        if not header_ids:
             raise FundsCommitmentAssignmentError(VisionStatus.FC_NOT_FOUND)
 
-        items = list(FundsCommitmentItem.objects.select_for_update().filter(pk__in=item_ids))
-        if len(items) != len(item_ids) or any(item.office_id != payment_plan.business_area_id for item in items):
+        eligible_header_ids = FundsCommitmentItem.objects.filter(
+            office_id=payment_plan.business_area_id,
+        ).values("funds_commitment_header_id")
+        headers = list(
+            FundsCommitmentHeader.objects.select_for_update()
+            .filter(pk__in=header_ids)
+            .filter(pk__in=eligible_header_ids)
+        )
+        if len(headers) != len(header_ids):
             raise FundsCommitmentAssignmentError(VisionStatus.FC_NOT_FOUND)
-        group_ids = {item.funds_commitment_group_id for item in items}
-        if len(group_ids) != 1:
-            raise FundsCommitmentAssignmentError(
-                VisionStatus.CALLBACK_FAILED,
-                VisionErrorCode.FC_AMBIGUOUS,
-            )
-        if any(item.payment_plan_id not in {None, payment_plan.pk} for item in items):
-            raise FundsCommitmentAssignmentError(
-                VisionStatus.CALLBACK_FAILED,
-                VisionErrorCode.FC_CONFLICT,
-            )
-
-        group_id = group_ids.pop()
-        if (
-            FundsCommitmentItem.objects.select_for_update()
-            .filter(payment_plan=payment_plan)
-            .exclude(funds_commitment_group_id=group_id)
-            .exists()
-        ):
-            raise FundsCommitmentAssignmentError(
-                VisionStatus.CALLBACK_FAILED,
-                VisionErrorCode.FC_CONFLICT,
-            )
-
-        FundsCommitmentItem.objects.filter(pk__in=item_ids, payment_plan__isnull=True).update(payment_plan=payment_plan)
+        payment_plan.funds_commitment_headers.set(headers)
 
     @classmethod
     def process_callback(
@@ -142,7 +101,7 @@ class VisionService:
         *,
         vision_payment_plan_id: str,
         vision_result: str,
-        fc_num: str,
+        fc_numbers: list[str],
     ) -> bool:
         """Return whether the callback must be rejected because its FC could not be assigned."""
         vision_data = cls.vision_data(payment_plan)
@@ -161,23 +120,24 @@ class VisionService:
         if payment_plan.vision_status not in VISION_RECOVERABLE_STATUSES:
             return False
 
+        normalized_fc_numbers = list(dict.fromkeys(fc_numbers))
         # Any callback for the active request confirms that Vision received the Payment Plan.
         vision_data["sent"] = True
-        is_payment_plan_created_acknowledgement = vision_result == "SUCCESS" and not fc_num
+        is_payment_plan_created_acknowledgement = vision_result == "SUCCESS" and not normalized_fc_numbers
         fc_assignment_failed = False
         if is_payment_plan_created_acknowledgement:
             # A repeated creation acknowledgement must not replace a later FC result or failure.
             if payment_plan.vision_status in VISION_CREATION_ACKNOWLEDGEMENT_MUTABLE_STATUSES:
                 vision_data["vision_id"] = vision_payment_plan_id
-                vision_data.pop("fc_num", None)
+                vision_data.pop("fc_numbers", None)
                 cls.set_status(payment_plan, VisionStatus.PP_CREATED)
         else:
             vision_data["vision_id"] = vision_payment_plan_id
-            if fc_num:
-                vision_data["fc_num"] = fc_num
+            if normalized_fc_numbers:
+                vision_data["fc_numbers"] = normalized_fc_numbers
             else:
-                # Do not display an FC number from an earlier callback when the latest callback did not provide one.
-                vision_data.pop("fc_num", None)
+                # Do not display FC numbers from an earlier callback when the latest callback did not provide any.
+                vision_data.pop("fc_numbers", None)
             if vision_result != "SUCCESS":
                 cls.set_status(
                     payment_plan,
@@ -186,7 +146,7 @@ class VisionService:
                 )
             else:
                 try:
-                    cls.assign_funds_commitment_from_callback(payment_plan, fc_num)
+                    cls.assign_funds_commitment_headers_from_callback(payment_plan, normalized_fc_numbers)
                 except FundsCommitmentAssignmentError as error:
                     cls.set_status(payment_plan, error.status, error_code=error.error_code)
                     fc_assignment_failed = True
@@ -222,21 +182,21 @@ class VisionService:
             )
 
     @classmethod
-    def recover_with_funds_commitment_items(
+    def recover_with_funds_commitment_headers(
         cls,
         payment_plan: PaymentPlan,
-        funds_commitment_items: Iterable[FundsCommitmentItem],
+        funds_commitment_headers: Iterable[FundsCommitmentHeader],
     ) -> None:
-        if not cls.can_recover_with_funds_commitment_items(payment_plan):
+        if not cls.can_recover_with_funds_commitment_headers(payment_plan):
             raise FundsCommitmentAssignmentError(
                 VisionStatus.CALLBACK_FAILED,
                 VisionErrorCode.FC_CONFLICT,
             )
-        cls.assign_selected_funds_commitment_items(payment_plan, funds_commitment_items)
+        cls.assign_selected_funds_commitment_headers(payment_plan, funds_commitment_headers)
         cls.complete_funds_commitment_assignment(payment_plan)
 
     @classmethod
-    def can_recover_with_funds_commitment_items(cls, payment_plan: PaymentPlan) -> bool:
+    def can_recover_with_funds_commitment_headers(cls, payment_plan: PaymentPlan) -> bool:
         vision_status = payment_plan.vision_status
         return (
             payment_plan.status == PaymentPlan.Status.IN_REVIEW

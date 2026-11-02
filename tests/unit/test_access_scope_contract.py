@@ -13,10 +13,7 @@ SCOPE_FIELDS = {"business_area", "program", "program_cycle", "payment_plan"}
 
 WRITE_METHODS = {"post", "put", "patch", "delete"}
 
-ALLOWED_UNSCOPED = {
-    # the view rejects any item whose office differs from the business area of the plan
-    ("PaymentPlanViewSet", "assign_funds_commitments", "fund_commitment_items_ids.<cannot instantiate>"),
-}
+ALLOWED_UNSCOPED = set()
 
 
 def _scope_fields_of(model: type) -> list[str]:

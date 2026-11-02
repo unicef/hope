@@ -7,7 +7,6 @@ from e2e.page_object.base_components import BaseComponents
 
 class Individuals(BaseComponents):
     page_header_container = 'div[data-cy="page-header-container"]'
-    page_header_title = 'h5[data-cy="page-header-title"]'
     ind_filters_search = 'div[data-cy="ind-filters-search"]'
     filter_document_type = 'div[data-cy="filters-document-type"]'
     ind_filters_gender = 'div[data-cy="ind-filters-gender"]'
@@ -55,9 +54,6 @@ class Individuals(BaseComponents):
 
     def get_page_header_container(self) -> WebElement:
         return self.wait_for(self.page_header_container)
-
-    def get_page_header_title(self) -> WebElement:
-        return self.wait_for(self.page_header_title)
 
     def get_ind_filters_search(self) -> WebElement:
         return self.wait_for(self.ind_filters_search)
@@ -131,6 +127,10 @@ class Individuals(BaseComponents):
     def get_individual_table_row(self) -> [WebElement]:
         self.wait_for(self.individual_table_row)
         return self.get_elements(self.individual_table_row)
+
+    def individual_has_icon(self, unicef_id: str, label: str) -> bool:
+        row = next(row for row in self.get_individual_table_row() if unicef_id in row.text)
+        return any(label in (icon.get_attribute("aria-label") or "") for icon in row.find_elements("tag name", "svg"))
 
     def get_table_pagination(self) -> WebElement:
         return self.wait_for(self.table_pagination)

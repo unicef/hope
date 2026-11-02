@@ -172,6 +172,7 @@ export const CreateImportFromProgramPopulationForm = ({
           required
           choices={filteredProgramChoices}
           component={FormikAutocomplete}
+          dataCy="autocomplete-import-from-program"
           onInputChange={(_e, value) => setProgramSearch(value)}
         />
       </Box>

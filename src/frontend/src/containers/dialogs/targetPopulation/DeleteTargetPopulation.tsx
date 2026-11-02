@@ -66,7 +66,7 @@ export const DeleteTargetPopulation = ({
         id: targetPopulationId,
       });
       showMessage(t('Target Population Deleted'));
-      navigate(`/${baseUrl}/payment-module/payment-plans`);
+      navigate(`/${baseUrl}/target-population`);
     } catch (e) {
       // Ignore empty response error
       if (isEmptyJsonResponseError(e)) {

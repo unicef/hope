@@ -1,5 +1,4 @@
 import type { ReactElement } from 'react';
-import { useState } from 'react';
 import { TableCell } from '@mui/material';
 import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
 import type { HeadCell } from '@components/core/Table/EnhancedTableHead';
@@ -8,6 +7,7 @@ import { StatusBox } from '@components/core/StatusBox';
 import { UniversalMoment } from '@components/core/UniversalMoment';
 import { BlackLink } from '@components/core/BlackLink';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { useTableState } from '@hooks/useTableState';
 import { useQuery } from '@tanstack/react-query';
 import { RestService } from '@restgenerated/services/RestService';
 import { restQueryKey } from '@utils/queryKeys';
@@ -63,13 +63,8 @@ const mergedHeadCells: HeadCell<any>[] = [
 const MergedPeriodicDataUpdates = () => {
   const navigate = useNavigate();
   const { businessArea: businessAreaSlug, programId, baseUrl } = useBaseUrl();
-  const initialQueryVariables = {
-    ordering: 'created_at',
-    businessAreaSlug,
-    programCode: programId,
-    status: ['MERGED' as const],
-  };
-  const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
+  const table = useTableState({ defaultOrdering: 'created_at' });
+  const status = ['MERGED' as const];
 
   const { data, isLoading, error } = useQuery<PaginatedPDUOnlineEditListList>({
     queryKey: restQueryKey(
@@ -77,21 +72,19 @@ const MergedPeriodicDataUpdates = () => {
       {
         businessAreaSlug,
         programCode: programId,
-        ordering: queryVariables.ordering,
-        status: queryVariables.status,
+        ordering: table.ordering,
+        status,
       },
     ),
     queryFn: () =>
       RestService.restBusinessAreasProgramsPeriodicDataUpdateOnlineEditsList({
         businessAreaSlug,
         programCode: programId,
-        ordering: queryVariables.ordering,
-        status: queryVariables.status,
+        ordering: table.ordering,
+        status,
       }),
-    enabled: !!queryVariables.businessAreaSlug && !!queryVariables.programCode,
+    enabled: !!businessAreaSlug && !!programId,
   });
-
-  const [page, setPage] = useState(0);
 
   const renderRow = (row: any): ReactElement => (
     <ClickableTableRow
@@ -137,11 +130,8 @@ const MergedPeriodicDataUpdates = () => {
       data={data ?? []}
       isLoading={isLoading}
       error={error}
-      queryVariables={queryVariables}
-      setQueryVariables={setQueryVariables}
+      tableState={table}
       title="Merged Periodic Data Updates"
-      page={page}
-      setPage={setPage}
     />
   );
 };

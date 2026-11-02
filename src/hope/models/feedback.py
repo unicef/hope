@@ -3,7 +3,7 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 
 from hope.apps.activity_log.utils import create_mapping_dict
-from hope.models.utils import AdminUrlMixin, TimeStampedUUIDModel, UnicefIdentifiedModel
+from hope.models.utils import AdminUrlMixin, LongNameIndex, TimeStampedUUIDModel, UnicefIdentifiedModel
 
 
 def get_issue_type_choices() -> tuple:
@@ -49,7 +49,7 @@ class Feedback(TimeStampedUUIDModel, AdminUrlMixin, UnicefIdentifiedModel):
         verbose_name=_("Individual lookup"),
     )
     business_area = models.ForeignKey("core.BusinessArea", on_delete=models.CASCADE)
-    program = models.ForeignKey("program.Program", null=True, blank=True, on_delete=models.CASCADE)
+    program = models.ForeignKey("program.Program", null=True, blank=True, on_delete=models.SET_NULL)
     area = models.CharField(max_length=250, blank=True)
     admin2 = models.ForeignKey("geo.Area", null=True, blank=True, on_delete=models.SET_NULL)
     description = models.TextField()
@@ -85,3 +85,16 @@ class Feedback(TimeStampedUUIDModel, AdminUrlMixin, UnicefIdentifiedModel):
         app_label = "accountability"
         ordering = ("created_at",)
         verbose_name = _("Feedback")
+        indexes = [
+            LongNameIndex(fields=["created_at"], name="accountability_feedback_created_at_70179f13"),
+            LongNameIndex(fields=["updated_at"], name="accountability_feedback_updated_at_14c6d99e"),
+            LongNameIndex(fields=["unicef_id"], name="accountability_feedback_unicef_id_37792878"),
+            LongNameIndex(
+                fields=["unicef_id"],
+                opclasses=["varchar_pattern_ops"],
+                name="accountability_feedback_unicef_id_37792878_like",
+            ),
+        ]
+
+    def __str__(self) -> str:
+        return f"{self.description} ({self.business_area.name})"

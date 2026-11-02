@@ -6,6 +6,7 @@ nav:
   - linting.md
   - stack.md
   - elasticsearch.md
+  - elasticsearch-reindex.md
   - child-payment-plans.md
   - account-attachments.md
   - population-recalculation.md

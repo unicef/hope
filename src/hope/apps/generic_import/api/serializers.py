@@ -1,5 +1,4 @@
-from typing import Any
-
+from django.core.files.uploadedfile import UploadedFile
 from rest_framework import serializers
 
 
@@ -8,10 +7,13 @@ class GenericImportUploadSerializer(serializers.Serializer):
 
     file = serializers.FileField(required=True)
 
-    def validate_file(self, value: Any) -> Any:
+    def validate_file(self, value: UploadedFile) -> UploadedFile:
         """Validate file type and size."""
         if not value.name.endswith((".xlsx", ".xls")):
             raise serializers.ValidationError("Only Excel files (.xlsx, .xls) are allowed.")
+
+        if value.size is None:
+            raise serializers.ValidationError("File size is not available.")
 
         max_size = 50 * 1024 * 1024
         if value.size > max_size:

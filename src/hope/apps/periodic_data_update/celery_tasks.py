@@ -32,6 +32,8 @@ from hope.models import (
 
 logger = logging.getLogger(__name__)
 
+PDU_ONLINE_EDIT_MERGE_LOCK_KEY = "pdu_online_edit_merge"
+
 
 def import_periodic_data_update_async_task_action(job: AsyncRetryJob) -> bool:
     periodic_data_update_upload = PDUXlsxUpload.objects.get(id=job.config["periodic_data_update_upload_id"])
@@ -116,7 +118,7 @@ def generate_pdu_online_edit_data_async_task(pdu_online_edit: PDUOnlineEdit, fil
 
 def merge_pdu_online_edit_async_task_action(job: AsyncRetryJob) -> bool:
     with cache.lock(
-        "pdu_online_edit_merge",
+        PDU_ONLINE_EDIT_MERGE_LOCK_KEY,
         blocking_timeout=60 * 10,
         timeout=60 * 60 * 2,
     ):

@@ -52,7 +52,7 @@ The effective timezone is the timezone that applies to a particular human-facing
 | Unattended Business-Area-specific human output | Business Area, UTC |
 | Global or multi-Business-Area output | UTC |
 | Celery trigger | UTC |
-| Grievance digest and reminder delivery window | Recipient User, related Business Area, UTC |
+| My Tasks email delivery window | Recipient User, related Business Area, UTC |
 | Other scheduled-task windows | UTC unless explicitly documented otherwise |
 
 For example, if a User has no personal preference and the current Business Area uses `Africa/Nairobi`, both
@@ -206,28 +206,24 @@ Payment Plan and Periodic Data Update email notifications resolve each recipient
 with the same effective timezone are grouped so that one correctly localized message can be rendered for the group.
 The creation and action timestamps in those emails are converted to that timezone and include its IANA identifier.
 
-### Scheduled grievance notifications
+### The My Tasks email check
 
-The grievance daily digest and overdue/sensitive reminders target the local hour configured by the
-`GRIEVANCE_NOTIFICATION_HOUR` Constance setting. Its default is `6`, meaning 06:00. Enter an integer from `0` through
-`23` in 24-hour format. The Constance administration form rejects values outside that range before saving the
-configuration. Both notification mechanisms use the same setting.
+The My Tasks emails target the local hour configured by the `GRIEVANCE_NOTIFICATION_HOUR` Constance setting. Its
+default is `6`, meaning 06:00. Enter an integer from `0` through `23` in 24-hour format. The Constance administration
+form rejects values outside that range before saving the configuration.
 
-Their Celery beat entries run once per UTC hour and determine which recipient timezone has reached its configured
+The Celery beat entry runs once per UTC hour and determines which recipient timezone has reached its configured
 delivery window. This avoids creating a separate beat schedule for every timezone. With the default setting,
 timezones with a non-whole-hour offset are processed during the first hourly run after 06:00, for example at 06:30 or
 06:45 local time.
 
-The dispatcher catches up the most recent missed local delivery window after a scheduler outage. Daily digest jobs
-use a Business Area, effective timezone, and local digest date as their delivery key. The digest contains changes
-from the previous local calendar day; its local midnight boundaries are converted separately to UTC so 23-hour and
-25-hour daylight-saving transition days are handled correctly. After the send loop finishes, successful recipient IDs
-are stored before a partial failure is raised, so a retry does not resend messages to those recipients.
-
-Sensitive reminders remain eligible after one elapsed day, and other overdue reminders after 30 elapsed days. Once
-eligible, they are delivered in the assignee's next configured local delivery window. The actual send time and
-`last_notification_sent` remain UTC datetimes. An unassigned ticket has no recipient timezone and is not marked as
-notified.
+The dispatcher catches up the most recent missed local delivery window after a scheduler outage. Each job covers one
+Business Area, effective timezone and local date, and that triple is its delivery key; a new job is queued only when
+none ran or is queued for one of the last `MY_TASKS_MONITOR_WINDOW` days (one by default). The job evaluates only
+the recipients in that timezone and stamps the scheduled instant, not the actual send time, as the email date, so a
+late or retried run keeps the same cycle dates. `MY_TASKS_ALARM_WINDOW` (seven days) and `MY_TASKS_REPEAT_EACH` (two
+days) are counted in calendar days of the recipient's timezone from those stamps, so a clock change in between does
+not delay a reminder. The stamps are stored as UTC datetimes.
 
 For a human-facing report or document concerning one Business Area, use the requesting User's preference, then the
 Business Area timezone, then UTC. Global or multi-Business-Area outputs remain UTC and must state that timezone

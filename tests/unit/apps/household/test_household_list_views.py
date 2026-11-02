@@ -562,7 +562,7 @@ def household_detail_context(api_client: Any) -> dict[str, Any]:
         imported_by=user, business_area=afghanistan, program=program
     )
     geopoint = [51.107883, 17.038538]
-    currency = CurrencyFactory()
+    currency = CurrencyFactory(code="SYP", vision_code="SYP01", name="Syrian Pound")
     household = HouseholdFactory(
         admin1=area1,
         admin2=area2,
@@ -727,7 +727,8 @@ def test_household_detail_with_permissions(
     assert data["male_children_count"] == household.male_children_count
     assert data["female_children_count"] == household.female_children_count
     assert data["children_disabled_count"] == household.children_disabled_count
-    assert data["currency"] == household.currency.code
+    assert data["currency"] == "SYP"
+    assert data["currency_vision_code"] == "SYP01"
     assert data["first_registration_date"] == f"{household.first_registration_date:%Y-%m-%d}"
     assert data["last_registration_date"] == f"{household.last_registration_date:%Y-%m-%d}"
     assert data["unhcr_id"] == household.unhcr_id
@@ -767,10 +768,12 @@ def test_household_detail_with_permissions(
     assert data["delivered_quantities"] == [
         {
             "currency": "USD",
+            "currency_vision_code": "USD",
             "total_delivered_quantity": "83.00",
         },
         {
             "currency": "AFN",
+            "currency_vision_code": "AFN",
             "total_delivered_quantity": "233.00",
         },
     ]

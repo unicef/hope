@@ -21,7 +21,7 @@ class RegistrationDataImportFilter(UpdatedAtFilter):
     )
     search = CharFilter(
         field_name="name",
-        lookup_expr="startswith",
+        lookup_expr="icontains",
     )
 
     class Meta:
@@ -30,7 +30,7 @@ class RegistrationDataImportFilter(UpdatedAtFilter):
             "imported_by__id": ["exact"],
             "import_date": ["exact"],
             "status": ["exact"],
-            "name": ["exact", "startswith"],
+            "name": ["startswith", "icontains"],
         }
 
     order_by = CustomOrderingFilter(

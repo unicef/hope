@@ -31,12 +31,11 @@ class Config(SmartConfig):
         from smart_admin.console import (
             panel_error_page,
             panel_migrations,
-            panel_redis,
             panel_sentry,
             panel_sysinfo,
         )
 
-        from .panels import email, panel_elasticsearch  # noqa
+        from .panels import email, panel_elasticsearch, panel_redis  # noqa
 
         site.register_panel(panel_migrations)
         site.register_panel(panel_sysinfo)

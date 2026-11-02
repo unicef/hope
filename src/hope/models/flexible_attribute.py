@@ -11,7 +11,7 @@ import mptt
 from mptt.fields import TreeForeignKey
 from natural_keys import NaturalKeyModel
 
-from hope.models.utils import SoftDeletionTreeManager, SoftDeletionTreeModel, TimeStampedUUIDModel
+from hope.models.utils import LongNameIndex, SoftDeletionTreeManager, SoftDeletionTreeModel, TimeStampedUUIDModel
 
 
 def label_contains_english_en_validator(data: dict) -> None:
@@ -95,6 +95,10 @@ class FlexibleAttribute(SoftDeletableModel, NaturalKeyModel, TimeStampedUUIDMode
             ),
         ]
         ordering = ("name",)
+        indexes = [
+            LongNameIndex(fields=["created_at"], name="core_flexibleattribute_created_at_e15acdcb"),
+            LongNameIndex(fields=["updated_at"], name="core_flexibleattribute_updated_at_343b54a3"),
+        ]
 
     def clean(self) -> None:
         if (
@@ -138,7 +142,6 @@ class FlexibleAttributeGroup(SoftDeletionTreeModel):
         null=True,
         blank=True,
         related_name="children",
-        db_index=True,
         on_delete=models.CASCADE,
     )
     objects = FlexibleAttributeGroupManager()
@@ -152,6 +155,13 @@ class FlexibleAttributeGroup(SoftDeletionTreeModel):
     class Meta:
         app_label = "core"
         ordering = ("name",)
+        indexes = [
+            LongNameIndex(fields=["created_at"], name="core_flexibleattributegroup_created_at_2c428173"),
+            LongNameIndex(fields=["updated_at"], name="core_flexibleattributegroup_updated_at_cb04253b"),
+            # django-mptt appends this index on its own unless Meta declares it. It is in the migration
+            # state only: migrated databases do not have it.
+            models.Index(fields=["tree_id", "lft"], name="core_flexibleattributegroudd5f"),
+        ]
 
 
 class FlexibleAttributeChoice(SoftDeletableModel, NaturalKeyModel, TimeStampedUUIDModel):
@@ -159,6 +169,10 @@ class FlexibleAttributeChoice(SoftDeletableModel, NaturalKeyModel, TimeStampedUU
         app_label = "core"
         unique_together = ["list_name", "name"]
         ordering = ("name",)
+        indexes = [
+            LongNameIndex(fields=["created_at"], name="core_flexibleattributechoice_created_at_73c2246e"),
+            LongNameIndex(fields=["updated_at"], name="core_flexibleattributechoice_updated_at_466be573"),
+        ]
 
     list_name = models.CharField(max_length=255)
     name = models.CharField(max_length=255)

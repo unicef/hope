@@ -77,7 +77,7 @@ def create_payment_plan(create_active_test_program: Program, second_test_program
 @pytest.mark.usefixtures("login")
 def test_managerial_console_renders_all_sections(page_managerial_console: ManagerialConsole) -> None:
     page_managerial_console.get_nav_managerial_console().click()
-    assert "Managerial Console" in page_managerial_console.get_page_header_title().text
+    page_managerial_console.assert_page_header_title("Managerial Console")
 
     page_managerial_console.wait_for_text_in_any_element(
         "Payment Plans pending for Approval", page_managerial_console.title
@@ -110,12 +110,12 @@ def test_managerial_console_happy_path(
     page_managerial_console.get_program_select_authorization().click()
     page_managerial_console.select_listbox_element("Test Programm")
     page_managerial_console.get_column_field_authorization()
-    page_managerial_console.get_select_all_authorization().click()
+    page_managerial_console.check_checkbox(page_managerial_console.select_all_authorization)
     page_managerial_console.get_authorize_button().click()
     page_managerial_console.get_button_save().click()
     # Release Payment Plan
     page_managerial_console.get_column_field_release()
-    page_managerial_console.get_select_all_release().click()
+    page_managerial_console.check_checkbox(page_managerial_console.select_all_release)
     page_managerial_console.get_release_button().click()
     page_managerial_console.get_button_save().click()
     # Check Released Payment Plans

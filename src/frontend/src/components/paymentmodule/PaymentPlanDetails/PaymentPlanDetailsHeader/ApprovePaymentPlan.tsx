@@ -43,7 +43,7 @@ export function ApprovePaymentPlan({
   const { showMessage } = useSnackbar();
   const queryClient = useQueryClient();
 
-  const { mutateAsync: approve, isPending: loadingApprove } = useMutation({
+  const { mutate: approve, isPending: loadingApprove } = useMutation({
     mutationFn: ({
       businessAreaSlug,
       id,

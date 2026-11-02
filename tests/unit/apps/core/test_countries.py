@@ -26,21 +26,6 @@ def test_get_choices_invalid_output_code_raises_value_error(country_class: type)
 
 
 @country_classes
-def test_is_valid_country_choice_known_returns_true(country_class: type) -> None:
-    assert country_class.is_valid_country_choice("AFG") is True
-
-
-@country_classes
-def test_is_valid_country_choice_is_case_insensitive(country_class: type) -> None:
-    assert country_class.is_valid_country_choice("afg") is True
-
-
-@country_classes
-def test_is_valid_country_choice_unknown_returns_false(country_class: type) -> None:
-    assert country_class.is_valid_country_choice("XXX") is False
-
-
-@country_classes
 def test_get_country_value_name_output(country_class: type) -> None:
     assert country_class.get_country_value("AF", output_type="name") == "Afghanistan"
 

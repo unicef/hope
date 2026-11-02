@@ -64,7 +64,12 @@ class PaymentPlanFilter(FilterSet):
         return qs.filter(program_cycle_id=value)
 
     def search_filter(self, qs: QuerySet, name: str, value: str) -> "QuerySet[PaymentPlan]":
-        return qs.filter(Q(id__icontains=value) | Q(unicef_id__icontains=value) | Q(name__istartswith=value))
+        return qs.filter(
+            Q(id__icontains=value)
+            | Q(unicef_id__icontains=value)
+            | Q(name__icontains=value)
+            | Q(program_cycle__title__icontains=value)
+        )
 
 
 class TargetPopulationFilter(PaymentPlanFilter):
@@ -275,7 +280,7 @@ class PaymentVerificationRecordFilter(FilterSet):
         fields = []
 
     def search_filter(self, qs: QuerySet, name: str, value: str) -> "QuerySet[Payment]":
-        return qs.filter(unicef_id__istartswith=value)
+        return qs.filter(unicef_id__iexact=value)
 
 
 class StableOrderingFilter(OrderingFilter):
@@ -291,19 +296,29 @@ class StableOrderingFilter(OrderingFilter):
         return qs.order_by(*ordering, "pk")
 
 
-class PaymentSearchFilter(FilterSet):
+PAYMENT_STATUS_FILTER_CHOICES = tuple(
+    choice for choice in Payment.STATUS_CHOICE if choice[0] not in (Payment.STATUS_NOT_ELIGIBLE, Payment.STATUS_SUCCESS)
+)
+INELIGIBILITY_CAUSE_CHOICES = (
+    ("conflicted", "Hard Conflict"),
+    ("excluded", "Manual Exclusion"),
+    ("invalid_wallet", "Invalid Wallet"),
+)
+
+
+class BasePaymentSearchFilter(FilterSet):
     collector_full_name = django_filters.CharFilter(method="filter_collector_full_name")
     household_unicef_id = django_filters.CharFilter(
         field_name="household__unicef_id",
-        lookup_expr="istartswith",
+        lookup_expr="iexact",
     )
     individual_unicef_id = django_filters.CharFilter(
         field_name="household__individuals__unicef_id",
-        lookup_expr="istartswith",
+        lookup_expr="iexact",
     )
     payment_unicef_id = django_filters.CharFilter(
         field_name="unicef_id",
-        lookup_expr="istartswith",
+        lookup_expr="iexact",
     )
     collector_id = django_filters.CharFilter(field_name="collector_id")
 
@@ -329,7 +344,7 @@ class PaymentSearchFilter(FilterSet):
 
     def filter_collector_full_name(self, queryset: QuerySet, name: str, value: str) -> QuerySet:
         return queryset.filter(
-            Q(collector__full_name__istartswith=value) | Q(collector__full_name_latin__istartswith=value)
+            Q(collector__full_name__icontains=value) | Q(collector__full_name_latin__icontains=value)
         )
 
     def filter_queryset(self, queryset: QuerySet) -> "QuerySet[Payment]":
@@ -343,8 +358,31 @@ class PaymentSearchFilter(FilterSet):
                 When(status=Payment.STATUS_FORCE_FAILED, then=Value(5)),
                 When(status=Payment.STATUS_MANUALLY_CANCELLED, then=Value(6)),
                 When(status__in=Payment.PENDING_STATUSES, then=Value(7)),
+                When(status=Payment.STATUS_NOT_ELIGIBLE, then=Value(8)),
                 default=Value(99),
                 output_field=IntegerField(),
             )
         )
         return super().filter_queryset(queryset)
+
+
+class PaymentSearchFilter(BasePaymentSearchFilter):
+    status = django_filters.ChoiceFilter(choices=PAYMENT_STATUS_FILTER_CHOICES)
+
+
+class NotEligiblePaymentSearchFilter(BasePaymentSearchFilter):
+    ineligibility_cause = django_filters.MultipleChoiceFilter(
+        choices=INELIGIBILITY_CAUSE_CHOICES,
+        method="filter_ineligibility_cause",
+    )
+
+    @staticmethod
+    def filter_ineligibility_cause(queryset: QuerySet, name: str, value: list[str]) -> QuerySet:
+        causes = Q()
+        if "conflicted" in value:
+            causes |= Q(conflicted=True)
+        if "excluded" in value:
+            causes |= Q(excluded=True)
+        if "invalid_wallet" in value:
+            causes |= Q(has_valid_wallet=False)
+        return queryset.filter(causes)

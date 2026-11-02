@@ -53,8 +53,8 @@ export function VisionStatusSection({
           </Grid>
           <Grid size={{ xs: 6 }}>
             <LabelizedField
-              label={t('Funds Commitment Number')}
-              value={vision.fcNum ?? '-'}
+              label={t('Funds Commitment Numbers')}
+              value={vision.fcNumbers.length ? vision.fcNumbers.join(', ') : '-'}
             />
           </Grid>
         </Grid>

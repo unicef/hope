@@ -67,15 +67,6 @@ def test_latest_returns_none_when_no_release_exists() -> None:
     assert rule.latest is None
 
 
-def test_last_changes_returns_latest_commit_fields() -> None:
-    rule = Rule.objects.create(name="changed", definition="result.value=1", enabled=True)
-
-    last_changes = rule.last_changes
-
-    assert set(last_changes.keys()) == {"fields", "before", "after"}
-    assert last_changes["after"]["definition"] == "result.value=1"
-
-
 def test_execute_without_only_enabled_runs_released_commit() -> None:
     rule = Rule.objects.create(name="exec", definition="result.value=7", enabled=True)
     rule.release()

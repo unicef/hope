@@ -1,4 +1,5 @@
 import datetime
+from unittest.mock import patch
 
 import pytest
 
@@ -15,6 +16,8 @@ from extras.test_utils.factories import (
     RegistrationDataImportFactory,
 )
 from hope.apps.household.const import MALE, REMOVED_BY_COLLISION
+from hope.apps.program.collision_detectors import IdentificationKeyCollisionDetector
+from hope.apps.registration_data.tasks.rdi_merge import RdiMergeTask
 from hope.models import Household, Individual, Program, RegistrationDataImport
 from hope.models.utils import MergeStatusModel
 
@@ -318,10 +321,13 @@ def test_process_collisions_multiple_households(
     program.save(update_fields=["collision_detector"])
     household_ids = [pending_household_one.id, pending_household_two.id, pending_household_three.id]
 
-    households_to_merge_ids, household_ids_to_exclude = RdiMergeTask()._process_collisions(in_review_rdi, household_ids)
+    households_to_merge_ids, household_ids_to_exclude, collided_ids = RdiMergeTask()._process_collisions(
+        in_review_rdi, household_ids
+    )
 
     assert households_to_merge_ids == [pending_household_three.id]
     assert set(household_ids_to_exclude) == {pending_household_one.id, pending_household_two.id}
+    assert set(collided_ids) == {str(merged_target_one.id), str(merged_target_two.id)}
 
     assert not Household.all_objects.filter(id=pending_household_one.id).exists()
     assert not Household.all_objects.filter(id=pending_household_two.id).exists()
@@ -359,12 +365,13 @@ def test_process_collisions_detection_query_count(
     household_ids = [pending_household_one.id, pending_household_two.id, pending_household_three.id]
 
     with django_assert_num_queries(2):
-        households_to_merge_ids, household_ids_to_exclude = RdiMergeTask()._process_collisions(
+        households_to_merge_ids, household_ids_to_exclude, collided_ids = RdiMergeTask()._process_collisions(
             in_review_rdi, household_ids
         )
 
     assert set(households_to_merge_ids) == set(household_ids)
     assert household_ids_to_exclude == []
+    assert collided_ids == []
 
 
 def test_merge_rdi_with_collision(
@@ -457,3 +464,25 @@ def test_merge_rdi_with_collision_does_not_send_individual_withdrawn_signal(
     assert signal_calls == [], (
         f"individual_withdrawn should not fire during collision merge, but fired {len(signal_calls)} time(s)"
     )
+
+
+def test_merge_schedules_recalculation_for_collided_households(
+    program: Program,
+    pending_household: tuple[Household, Individual],
+    merged_household: tuple[Household, tuple[Individual, Individual]],
+    in_review_rdi: RegistrationDataImport,
+    django_capture_on_commit_callbacks,
+) -> None:
+    """A collision merge withdraws members of the existing household, so its counters have to change."""
+    program.collision_detector = IdentificationKeyCollisionDetector
+    program.save(update_fields=["collision_detector"])
+    merged_household_obj, _ = merged_household
+
+    with patch(
+        "hope.apps.registration_data.tasks.rdi_merge.recalculate_population_fields_async_task"
+    ) as mock_recalculate:
+        with django_capture_on_commit_callbacks(execute=True):
+            RdiMergeTask().execute(str(in_review_rdi.id))
+
+    scheduled_ids = mock_recalculate.call_args.args[0]
+    assert str(merged_household_obj.id) in scheduled_ids

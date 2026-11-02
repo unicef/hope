@@ -25,6 +25,14 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
+RDI_XLSX_IMPORT_LOCK_PREFIX = "registration_xlsx_import_async_task-"
+RDI_PROGRAM_POPULATION_IMPORT_LOCK_PREFIX = "registration_program_population_import_async_task-"
+RDI_KOBO_IMPORT_LOCK_PREFIX = "registration_kobo_import_async_task-"
+RDI_MERGE_LOCK_PREFIX = "merge_registration_data_import_async_task-"
+DEDUPLICATE_DOCUMENTS_LOCK_KEY = "deduplicate_documents"
+FETCH_FINDINGS_AND_MERGE_RDI_LOCK_PREFIX = "fetch_findings_and_merge_rdi-program-"
+
+
 def _capture_exception(e: BaseException) -> str | None:
     try:
         from sentry_sdk import capture_exception
@@ -78,7 +86,7 @@ def registration_xlsx_import_async_task_action(job: AsyncRetryJob) -> bool:
         business_area_id = job.config["business_area_id"]
         program_id = job.config["program_id"]
 
-        with locked_cache(key=f"registration_xlsx_import_async_task-{registration_data_import_id}") as locked:
+        with locked_cache(key=f"{RDI_XLSX_IMPORT_LOCK_PREFIX}{registration_data_import_id}") as locked:
             if not locked:
                 raise AlreadyRunningError(
                     f"Task with key registration_xlsx_import_async_task"
@@ -149,7 +157,7 @@ def registration_xlsx_import_async_task(
 def registration_program_population_import_async_task_action(job: AsyncRetryJob) -> bool:
     try:
         registration_data_import_id = job.config["registration_data_import_id"]
-        cache_key = f"registration_program_population_import_async_task-{registration_data_import_id}"
+        cache_key = f"{RDI_PROGRAM_POPULATION_IMPORT_LOCK_PREFIX}{registration_data_import_id}"
         with locked_cache(key=cache_key) as locked:
             if not locked:
                 raise AlreadyRunningError(f"Task with key {cache_key} is already running")
@@ -217,7 +225,7 @@ def registration_kobo_import_async_task_action(job: AsyncRetryJob) -> bool:
         business_area_id = job.config["business_area_id"]
         program_id = job.config["program_id"]
 
-        with locked_cache(key=f"registration_kobo_import_async_task-{registration_data_import_id}") as locked:
+        with locked_cache(key=f"{RDI_KOBO_IMPORT_LOCK_PREFIX}{registration_data_import_id}") as locked:
             if not locked:
                 raise AlreadyRunningError(
                     f"Task with key registration_kobo_import_async_task"
@@ -318,7 +326,7 @@ def merge_registration_data_import_async_task_action(job: AsyncRetryJob) -> bool
         f"merge_registration_data_import_async_task started for"
         f" registration_data_import_id: {registration_data_import_id}"
     )
-    with locked_cache(key=f"merge_registration_data_import_async_task-{registration_data_import_id}") as locked:
+    with locked_cache(key=f"{RDI_MERGE_LOCK_PREFIX}{registration_data_import_id}") as locked:
         if not locked:
             return True
         from hope.apps.registration_data.tasks.rdi_merge import RdiMergeTask
@@ -475,7 +483,7 @@ def check_and_set_taxid(queryset: "QuerySet") -> dict:
 
 
 def deduplicate_documents_for_rdi(rdi_id: str) -> bool:
-    with locked_cache(key="deduplicate_documents") as locked:
+    with locked_cache(key=DEDUPLICATE_DOCUMENTS_LOCK_KEY) as locked:
         if not locked:
             return True
         rdi = RegistrationDataImport.objects.get(id=rdi_id)
@@ -528,7 +536,7 @@ def fetch_findings_and_merge_rdi_action(job: AsyncRetryJob) -> bool:
     program_id = job.config["program_id"]
     merged = False
     try:
-        with locked_cache(key=f"fetch_findings_and_merge_rdi-program-{program_id}") as locked:
+        with locked_cache(key=f"{FETCH_FINDINGS_AND_MERGE_RDI_LOCK_PREFIX}{program_id}") as locked:
             if not locked:
                 logger.info(
                     f"RDI:{registration_data_import_id} fetch_findings_and_merge_rdi skipped (program lock held)"

@@ -1,5 +1,5 @@
 import type { ReactElement } from 'react';
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { RestService } from '@restgenerated/services/RestService';
@@ -10,6 +10,7 @@ import type { CountResponse } from '@restgenerated/models/CountResponse';
 import { TableWrapper } from '@components/core/TableWrapper';
 import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { useTableState } from '@hooks/useTableState';
 import { dateToIsoString } from '@utils/utils';
 import { createApiParams } from '@utils/apiUtils';
 import { headCells } from './CommunicationTableHeadCells';
@@ -29,7 +30,7 @@ function CommunicationTable({
   const { programId, businessArea } = useBaseUrl();
   const { t } = useTranslation();
 
-  const initialQueryVariables = useMemo(() => {
+  const filterVariables = useMemo(() => {
     return {
       businessAreaSlug: businessArea,
       programCode: programId,
@@ -49,48 +50,39 @@ function CommunicationTable({
     filter.createdBy,
   ]);
 
-  const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
-  useEffect(() => {
-    setQueryVariables(initialQueryVariables);
-  }, [initialQueryVariables]);
-
-  const [page, setPage] = useState(0);
+  const table = useTableState({
+    initialRowsPerPage: 10,
+    resetPageOn: filterVariables,
+  });
+  const { page } = table;
+  const messagesListParams = createApiParams(
+    { businessAreaSlug: businessArea, programCode: programId },
+    { ...filterVariables, ...table.paginationParams },
+  );
+  const messagesCountParams = createApiParams(
+    { businessAreaSlug: businessArea, programCode: programId },
+    filterVariables,
+  );
 
   const { data, isLoading, isFetching, error } =
     useQuery<PaginatedMessageListList>({
       queryKey: restQueryKey(
         RestService.restBusinessAreasProgramsMessagesList,
-        createApiParams(
-          { businessAreaSlug: businessArea, programCode: programId },
-          queryVariables,
-          { withPagination: true },
-        ),
+        messagesListParams,
       ),
       queryFn: () =>
-        RestService.restBusinessAreasProgramsMessagesList(
-          createApiParams(
-            { businessAreaSlug: businessArea, programCode: programId },
-            queryVariables,
-            { withPagination: true },
-          ),
-        ),
+        RestService.restBusinessAreasProgramsMessagesList(messagesListParams),
       placeholderData: keepPreviousData,
     });
 
   const { data: countData } = useQuery<CountResponse>({
     queryKey: restQueryKey(
       RestService.restBusinessAreasProgramsMessagesCountRetrieve,
-      createApiParams(
-        { businessAreaSlug: businessArea, programCode: programId },
-        queryVariables,
-      ),
+      messagesCountParams,
     ),
     queryFn: () =>
       RestService.restBusinessAreasProgramsMessagesCountRetrieve(
-        createApiParams(
-          { businessAreaSlug: businessArea, programCode: programId },
-          queryVariables,
-        ),
+        messagesCountParams,
       ),
     enabled: !!businessArea && !!programId && page === 0,
   });
@@ -114,12 +106,8 @@ function CommunicationTable({
         error={error}
         isLoading={isLoading}
         isFetching={isFetching}
-        queryVariables={queryVariables}
-        setQueryVariables={setQueryVariables}
+        tableState={table}
         itemsCount={itemsCount}
-        initialRowsPerPage={10}
-        page={page}
-        setPage={setPage}
       />
     </TableWrapper>
   );

@@ -5,6 +5,7 @@ import { PermissionDenied } from '@components/core/PermissionDenied';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import { ForceFailedButton } from '@components/paymentmodule/ForceFailedButton';
 import { RevertForceFailedButton } from '@components/paymentmodule/RevertForceFailedButton';
+import { SomethingWentWrong } from '@containers/pages/somethingWentWrong/SomethingWentWrong';
 import { AdminButton } from '@core/AdminButton';
 import { PaymentPlanStatusEnum } from '@restgenerated/models/PaymentPlanStatusEnum';
 import { PaymentStatusEnum } from '@restgenerated/models/PaymentStatusEnum';
@@ -15,6 +16,7 @@ import type { PaymentDetail } from '@restgenerated/models/PaymentDetail';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
 import { restQueryKey } from '@utils/queryKeys';
+import { isPermissionDeniedError } from '@utils/utils';
 import type { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams, useLocation } from 'react-router-dom';
@@ -27,9 +29,13 @@ function PaymentDetailsPage(): ReactElement {
   const location = useLocation();
   const paymentPlanId = location.state?.parentId;
 
-  const { businessArea, programId } = useBaseUrl();
+  const { baseUrl, businessArea, programId } = useBaseUrl();
 
-  const { data: payment, isLoading: loading } = useQuery<PaymentDetail>({
+  const {
+    data: payment,
+    isLoading: loading,
+    error,
+  } = useQuery<PaymentDetail>({
     queryKey: restQueryKey(
       RestService.restBusinessAreasProgramsPaymentPlansPaymentsRetrieve,
       {
@@ -51,12 +57,27 @@ function PaymentDetailsPage(): ReactElement {
   const paymentPlanStatus = payment?.parent?.status;
   const paymentPlanIsFollowUp = payment?.parent?.planType === 'FOLLOW_UP';
   const permissions = usePermissions();
-  const { baseUrl } = useBaseUrl();
   if (loading) return <LoadingComponent />;
   if (permissions === null) return null;
-  if (!hasPermissions(PERMISSIONS.PM_VIEW_DETAILS, permissions))
+  if (
+    !hasPermissions(PERMISSIONS.PM_VIEW_DETAILS, permissions) ||
+    isPermissionDeniedError(error)
+  )
     return <PermissionDenied permission={PERMISSIONS.PM_VIEW_DETAILS} />;
-  if (!payment) return null;
+  // The payment is missing whenever the request failed (404 for a payment of another
+  // program, 5xx, network). Rendering nothing here used to leave a blank page.
+  if (!payment)
+    return (
+      <SomethingWentWrong
+        specificError={
+          error?.message === 'Not Found'
+            ? 'Payment has been removed or does not exist'
+            : undefined
+        }
+        errorMessage={error?.message}
+        goBackAddress={`/${baseUrl}/payment-module/payment-plans`}
+      />
+    );
 
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {

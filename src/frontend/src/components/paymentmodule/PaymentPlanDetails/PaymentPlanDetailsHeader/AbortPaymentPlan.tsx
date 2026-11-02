@@ -41,7 +41,7 @@ export function AbortPaymentPlan({
   const { showMessage } = useSnackbar();
   const queryClient = useQueryClient();
 
-  const { mutateAsync: abort, isPending: loadingAbort } = useMutation({
+  const { mutate: abort, isPending: loadingAbort } = useMutation({
     mutationFn: ({
       businessAreaSlug,
       id,

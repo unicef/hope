@@ -10,6 +10,7 @@ from django_celery_boost.models import AsyncJobModel
 from django_celery_boost.signals import task_queued
 
 from hope.apps.core.celery import CELERY_QUEUE_DEFAULT, CELERY_QUEUE_PERIODIC
+from hope.models.utils import LongNameIndex
 
 logger = logging.getLogger(__name__)
 
@@ -34,9 +35,9 @@ class BaseAsyncJob(AsyncJobModel):
         blank=True,
         related_name="+",
     )
-    object_id = models.CharField(max_length=64, null=True, blank=True, db_index=True)
+    object_id = models.CharField(max_length=64, null=True, blank=True)
     content_object = GenericForeignKey("content_type", "object_id")
-    job_name = models.CharField(max_length=255, null=True, blank=True, db_index=True)
+    job_name = models.CharField(max_length=255, null=True, blank=True)
     errors = models.JSONField(default=dict, blank=True)
 
     class Meta(AsyncJobModel.Meta):
@@ -205,6 +206,14 @@ class AsyncJob(BaseAsyncJob):
         permissions = (("recover_missing_async_job", "Can recover missing async jobs"),)
         indexes = [
             models.Index(fields=["content_type", "object_id", "job_name"]),
+            LongNameIndex(fields=["object_id"], name="core_asyncjob_object_id_ab271347"),
+            LongNameIndex(
+                fields=["object_id"], opclasses=["varchar_pattern_ops"], name="core_asyncjob_object_id_ab271347_like"
+            ),
+            LongNameIndex(fields=["job_name"], name="core_asyncjob_job_name_26a164d8"),
+            LongNameIndex(
+                fields=["job_name"], opclasses=["varchar_pattern_ops"], name="core_asyncjob_job_name_26a164d8_like"
+            ),
         ]
 
 
@@ -217,6 +226,18 @@ class PeriodicAsyncJob(BaseAsyncJob):
         verbose_name_plural = "Periodic Asynchronous Jobs"
         indexes = [
             models.Index(fields=["content_type", "object_id", "job_name"]),
+            LongNameIndex(fields=["object_id"], name="core_periodicasyncjob_object_id_76f19a56"),
+            LongNameIndex(
+                fields=["object_id"],
+                opclasses=["varchar_pattern_ops"],
+                name="core_periodicasyncjob_object_id_76f19a56_like",
+            ),
+            LongNameIndex(fields=["job_name"], name="core_periodicasyncjob_job_name_b168ae1a"),
+            LongNameIndex(
+                fields=["job_name"],
+                opclasses=["varchar_pattern_ops"],
+                name="core_periodicasyncjob_job_name_b168ae1a_like",
+            ),
         ]
 
 

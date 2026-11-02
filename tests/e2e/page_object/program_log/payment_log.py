@@ -29,10 +29,6 @@ class ProgramLog(BaseComponents):
     pagination_actions = 'div[data-cy="pagination-actions"]'
     previous_page_button = 'button[data-cy="previous-page-button"]'
     next_page_button = 'button[data-cy="next-page-button"]'
-    page_header_title = 'h5[data-cy="page-header-title"]'
-
-    def get_page_header_title(self) -> WebElement:
-        return self.wait_for(self.page_header_title)
 
     def get_main_activity_log_table(self) -> WebElement:
         return self.wait_for(self.main_activity_log_table)

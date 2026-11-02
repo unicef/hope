@@ -10,6 +10,7 @@ from django.utils.translation import gettext_lazy as _
 from hope.apps.activity_log.utils import create_mapping_dict
 from hope.models.utils import (
     AdminUrlMixin,
+    LongNameIndex,
     TimeStampedUUIDModel,
     UnicefIdentifiedModel,
 )
@@ -83,9 +84,7 @@ class Survey(UnicefIdentifiedModel, AdminUrlMixin, TimeStampedUUIDModel):
     program = models.ForeignKey(
         "program.Program",
         related_name="surveys",
-        blank=True,
-        null=True,
-        on_delete=models.SET_NULL,
+        on_delete=models.PROTECT,
     )
     business_area = models.ForeignKey("core.BusinessArea", on_delete=models.CASCADE)
     flow_id = models.CharField(max_length=255, blank=True, null=True)
@@ -103,6 +102,16 @@ class Survey(UnicefIdentifiedModel, AdminUrlMixin, TimeStampedUUIDModel):
         app_label = "accountability"
         ordering = ("created_at",)
         verbose_name = _("Survey")
+        indexes = [
+            LongNameIndex(fields=["created_at"], name="accountability_survey_created_at_818ed9ba"),
+            LongNameIndex(fields=["updated_at"], name="accountability_survey_updated_at_504609e0"),
+            LongNameIndex(fields=["unicef_id"], name="accountability_survey_unicef_id_09eaa181"),
+            LongNameIndex(
+                fields=["unicef_id"],
+                opclasses=["varchar_pattern_ops"],
+                name="accountability_survey_unicef_id_09eaa181_like",
+            ),
+        ]
 
     def __str__(self) -> str:
         return self.title

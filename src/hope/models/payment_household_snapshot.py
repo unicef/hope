@@ -2,7 +2,7 @@ from django.db import models
 from django.db.models import JSONField
 
 from hope.models.payment import Payment
-from hope.models.utils import TimeStampedUUIDModel
+from hope.models.utils import LongNameIndex, TimeStampedUUIDModel
 
 
 class PaymentHouseholdSnapshot(TimeStampedUUIDModel):
@@ -13,3 +13,7 @@ class PaymentHouseholdSnapshot(TimeStampedUUIDModel):
     class Meta:
         app_label = "payment"
         ordering = ("id",)
+        indexes = [
+            LongNameIndex(fields=["created_at"], name="payment_paymenthouseholdsnapshot_created_at_dbec5131"),
+            LongNameIndex(fields=["updated_at"], name="payment_paymenthouseholdsnapshot_updated_at_8f771f31"),
+        ]

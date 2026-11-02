@@ -4,7 +4,6 @@ import { UniversalMoment } from '@components/core/UniversalMoment';
 import { TableCell, Button } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import type { ReactElement } from 'react';
-import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { restQueryKey } from '@utils/queryKeys';
@@ -12,6 +11,7 @@ import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
 import type { HeadCell } from '@components/core/Table/EnhancedTableHead';
 import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { useTableState } from '@hooks/useTableState';
 import { RestService } from '@restgenerated/services/RestService';
 import type { PaginatedPDUOnlineEditListList } from '@restgenerated/models/PaginatedPDUOnlineEditListList';
 import { useTranslation } from 'react-i18next';
@@ -87,20 +87,8 @@ const NewPeriodicDataUpdates = (): ReactElement => {
   const newTemplatePath = isSocialDctType
     ? `/${baseUrl}/population/people/new-online-template`
     : `/${baseUrl}/population/individuals/new-online-template`;
-  const initialQueryVariables = useMemo(
-    () => ({
-      businessAreaSlug,
-      programCode: programId,
-      ordering: '-created_at',
-      status: ['NEW' as const],
-    }),
-    [businessAreaSlug, programId],
-  );
-
-  const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
-  useEffect(() => {
-    setQueryVariables(initialQueryVariables);
-  }, [initialQueryVariables]);
+  const table = useTableState({ defaultOrdering: '-created_at' });
+  const status = ['NEW' as const];
 
   const { data, isLoading, error } = useQuery<PaginatedPDUOnlineEditListList>({
     queryKey: restQueryKey(
@@ -108,21 +96,19 @@ const NewPeriodicDataUpdates = (): ReactElement => {
       {
         businessAreaSlug,
         programCode: programId,
-        ordering: queryVariables.ordering,
-        status: queryVariables.status,
+        ordering: table.ordering,
+        status,
       },
     ),
     queryFn: () =>
       RestService.restBusinessAreasProgramsPeriodicDataUpdateOnlineEditsList({
         businessAreaSlug,
         programCode: programId,
-        ordering: queryVariables.ordering,
-        status: queryVariables.status,
+        ordering: table.ordering,
+        status,
       }),
-    enabled: !!queryVariables.businessAreaSlug && !!queryVariables.programCode,
+    enabled: !!businessAreaSlug && !!programId,
   });
-
-  const [page, setPage] = useState(0);
 
   const navigate = useNavigate();
   const renderRow = (row: any): ReactElement => {
@@ -169,11 +155,8 @@ const NewPeriodicDataUpdates = (): ReactElement => {
       data={data ?? []}
       isLoading={isLoading}
       error={error}
-      queryVariables={queryVariables}
-      setQueryVariables={setQueryVariables}
+      tableState={table}
       title="New Periodic Data Updates"
-      page={page}
-      setPage={setPage}
       actions={[
         <Button
           key="add-new-online-edit"

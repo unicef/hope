@@ -5,7 +5,7 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 from model_utils.models import SoftDeletableModel
 
-from hope.models.utils import TimeStampedUUIDModel
+from hope.models.utils import LongNameIndex, TimeStampedUUIDModel
 
 
 class XLSXKoboTemplateManager(models.Manager):
@@ -58,6 +58,10 @@ class XLSXKoboTemplate(SoftDeletableModel, TimeStampedUUIDModel):
             ("download_last_valid_file", "Can download the last valid KOBO template"),
             ("rerun_kobo_import", "Can rerun a KOBO import"),
         )
+        indexes = [
+            LongNameIndex(fields=["created_at"], name="core_xlsxkobotemplate_created_at_01750a92"),
+            LongNameIndex(fields=["updated_at"], name="core_xlsxkobotemplate_updated_at_403ef208"),
+        ]
 
     def __str__(self) -> str:
         return f"{self.file_name} - {self.created_at}"

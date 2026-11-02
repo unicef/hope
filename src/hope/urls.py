@@ -11,6 +11,7 @@ import hope.apps.accountability.views
 from hope.apps.core.rest_api import all_fields_attributes
 from hope.apps.core.views import (
     UploadFile,
+    csrf_token_view,
     homepage,
     logout_view,
     trigger_error,
@@ -31,6 +32,7 @@ api_patterns: list[URLPattern | URLResolver] = [
     path("_health", homepage),
     path("explorer/", include("explorer.urls")),
     path("logout", logout_view, name="logout"),
+    path("csrf-token", csrf_token_view, name="csrf-token"),
     path("sentry-debug/", trigger_error),
     path(
         "program/<str:program_id>/download-template",

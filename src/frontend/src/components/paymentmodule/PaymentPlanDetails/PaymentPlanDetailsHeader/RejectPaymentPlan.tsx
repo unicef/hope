@@ -42,7 +42,7 @@ export function RejectPaymentPlan({
   const { businessArea, programId } = useBaseUrl();
   const queryClient = useQueryClient();
 
-  const { mutateAsync: reject, isPending: loadingReject } = useMutation({
+  const { mutate: reject, isPending: loadingReject } = useMutation({
     mutationFn: ({
       businessAreaSlug,
       id,
@@ -169,7 +169,7 @@ export function RejectPaymentPlan({
                   color="primary"
                   variant="contained"
                   onClick={submitForm}
-                  dataCy="button-submit"
+                  data-cy="button-reject-submit"
                   disabled={!isActiveProgram}
                   data-perm={`${PERMISSIONS.PM_ACCEPTANCE_PROCESS_APPROVE}, ${PERMISSIONS.PM_ACCEPTANCE_PROCESS_AUTHORIZE}, ${PERMISSIONS.PM_ACCEPTANCE_PROCESS_FINANCIAL_REVIEW}`}
                 >

@@ -39,14 +39,12 @@ def three_business_areas(
     business_area: BusinessArea, api_user: User, read_only_api_token: APIToken
 ) -> list[BusinessArea]:
     ba1 = BusinessAreaFactory(
-        slug="ukraine11",
         code="1234",
         name="Ukraine",
         long_name="the long name of Ukraine",
         active=True,
     )
     ba2 = BusinessAreaFactory(
-        slug="ba-2",
         code="5678",
         name="Bus Area 2",
         long_name="Business Area 2",

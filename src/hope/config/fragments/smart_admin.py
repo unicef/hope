@@ -1,7 +1,5 @@
 from smart_admin.utils import MatchString, RegexString
 
-from hope.apps.utils.security import is_root
-
 SMART_ADMIN_SECTIONS = {
     "HOPE": [
         "program",
@@ -42,6 +40,4 @@ SMART_ADMIN_SECTIONS = {
 
 SMART_ADMIN_BOOKMARKS = "hope.apps.administration.admin_site.get_bookmarks"
 
-SMART_ADMIN_BOOKMARKS_PERMISSION = None
 SMART_ADMIN_PROFILE_LINK = True
-SMART_ADMIN_ISROOT = lambda r, *a: is_root(r)

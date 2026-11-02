@@ -1,8 +1,9 @@
 import type { ReactElement } from 'react';
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { TableWrapper } from '@components/core/TableWrapper';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { useTableState } from '@hooks/useTableState';
 import { headCells } from './UsersTableHeadCells';
 import { UsersTableRow } from './UsersTableRow';
 import type { PaginatedUserList } from '@restgenerated/models/PaginatedUserList';
@@ -11,7 +12,7 @@ import { restQueryKey } from '@utils/queryKeys';
 import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
 import { useQuery } from '@tanstack/react-query';
 import type { CountResponse } from '@restgenerated/models/CountResponse';
-import { filterEmptyParams } from '@utils/utils';
+import { createApiParams } from '@utils/apiUtils';
 import { usePersistedCount } from '@hooks/usePersistedCount';
 interface UsersTableProps {
   filter;
@@ -21,45 +22,33 @@ export const UsersTable = ({ filter }: UsersTableProps): ReactElement => {
   const { t } = useTranslation();
   const { businessArea, programId } = useBaseUrl();
 
-  const initialQueryVariables = useMemo(
+  const filterVariables = useMemo(
     () => ({
       search: filter.search,
       partner: filter.partner,
       roles: filter.roles,
       status: filter.status,
-      businessAreaSlug: businessArea,
       program: programId,
-      limit: 10,
-      offset: 0,
       serializer: 'program_users',
     }),
-    [
-      filter.search,
-      filter.partner,
-      filter.roles,
-      filter.status,
-      businessArea,
-      programId,
-    ],
+    [filter.search, filter.partner, filter.roles, filter.status, programId],
   );
 
-  // Controlled pagination state
-  const [page, setPage] = useState(0);
-
-  const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
-  useEffect(() => {
-    setQueryVariables(initialQueryVariables);
-  }, [initialQueryVariables]);
-
-  const filteredQueryVariables = useMemo(() => {
-    const filtered = filterEmptyParams(initialQueryVariables);
-    return {
-      ...filtered,
-      businessAreaSlug: businessArea,
-      offset: page * 10,
-      limit: 10,
-    };
-  }, [initialQueryVariables, businessArea, page]);
+  const table = useTableState({
+    rowsPerPageOptions: [10, 15, 20],
+    defaultOrderBy: 'status',
+    defaultOrderDirection: 'desc',
+    resetPageOn: filterVariables,
+  });
+  const { page } = table;
+  const usersListParams = createApiParams(
+    { businessAreaSlug: businessArea },
+    { ...filterVariables, ...table.paginationParams },
+  );
+  const usersCountParams = createApiParams(
+    { businessAreaSlug: businessArea },
+    filterVariables,
+  );
 
   const {
     data: dataUsers,
@@ -68,19 +57,18 @@ export const UsersTable = ({ filter }: UsersTableProps): ReactElement => {
   } = useQuery<PaginatedUserList>({
     queryKey: restQueryKey(
       RestService.restBusinessAreasUsersList,
-      filteredQueryVariables,
+      usersListParams,
     ),
-    queryFn: () =>
-      RestService.restBusinessAreasUsersList(filteredQueryVariables),
+    queryFn: () => RestService.restBusinessAreasUsersList(usersListParams),
   });
 
   const { data: dataUsersCount } = useQuery<CountResponse>({
     queryKey: restQueryKey(
       RestService.restBusinessAreasUsersCountRetrieve,
-      filteredQueryVariables,
+      usersCountParams,
     ),
     queryFn: () =>
-      RestService.restBusinessAreasUsersCountRetrieve(filteredQueryVariables),
+      RestService.restBusinessAreasUsersCountRetrieve(usersCountParams),
     enabled: page === 0,
   });
 
@@ -91,18 +79,12 @@ export const UsersTable = ({ filter }: UsersTableProps): ReactElement => {
       <UniversalRestTable
         title={t('Users List')}
         headCells={headCells}
-        queryVariables={queryVariables}
-        setQueryVariables={setQueryVariables}
+        tableState={table}
         data={dataUsers}
         isLoading={isLoadingUsers}
         error={errorUsers}
         itemsCount={persistedCount}
-        rowsPerPageOptions={[10, 15, 20]}
-        defaultOrderBy="status"
-        defaultOrderDirection="desc"
         renderRow={(row) => <UsersTableRow user={row} key={row.id} />}
-        page={page}
-        setPage={setPage}
       />
     </TableWrapper>
   );

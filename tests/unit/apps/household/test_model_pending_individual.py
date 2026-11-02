@@ -12,7 +12,6 @@ from extras.test_utils.factories.household import (
     IndividualCollectionFactory,
     IndividualFactory,
     IndividualRoleInHouseholdFactory,
-    PendingHouseholdFactory,
 )
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.sanction_list import SanctionListFactory
@@ -24,7 +23,6 @@ from hope.apps.household.const import (
     ROLE_PRIMARY,
     STATUS_ACTIVE,
     STATUS_DUPLICATE,
-    STATUS_INACTIVE,
     STATUS_WITHDRAWN,
 )
 from hope.models import Document, Individual, IndividualCollection
@@ -128,16 +126,6 @@ def test_status(duplicate: bool, withdrawn: bool, expected: str) -> None:
     assert individual.status == expected
 
 
-@pytest.mark.parametrize(
-    ("duplicate", "withdrawn", "expected"),
-    [(False, False, STATUS_ACTIVE), (True, False, STATUS_INACTIVE), (False, True, STATUS_INACTIVE)],
-)
-def test_cash_assist_status(duplicate: bool, withdrawn: bool, expected: str) -> None:
-    individual = IndividualFactory(duplicate=duplicate, withdrawn=withdrawn)
-
-    assert individual.cash_assist_status == expected
-
-
 def test_sanction_list_last_check_none_when_program_has_no_lists(individual: Individual) -> None:
     assert individual.sanction_list_last_check is None
 
@@ -227,8 +215,7 @@ def test_delete_sends_signal(mocker: "MockerFixture", individual: Individual) ->
     signal.send.assert_called_once()
 
 
-def test_count_all_and_primary_roles(individual_with_primary_role: Individual) -> None:
-    assert individual_with_primary_role.count_all_roles() == 1
+def test_count_primary_roles(individual_with_primary_role: Individual) -> None:
     assert individual_with_primary_role.count_primary_roles() == 1
 
 
@@ -334,13 +321,6 @@ def test_validate_phone_numbers_delegates(mocker: "MockerFixture", individual: I
     individual.validate_phone_numbers()
 
     calculate.assert_called_once_with(individual)
-
-
-def test_pending_individual_pending_household() -> None:
-    household = PendingHouseholdFactory()
-    individual = PendingIndividualFactory(household=household)
-
-    assert individual.pending_household.pk == household.pk
 
 
 def test_pending_individual_households_and_roles_setter_stores_value(pending_individual):

@@ -19,7 +19,7 @@ import type { GrievanceChoices } from '@restgenerated/models/GrievanceChoices';
 
 export interface SelectionProps {
   handleChange: (e: ChangeEvent) => void;
-  choicesData: GrievanceChoices;
+  choicesData?: GrievanceChoices;
   setFieldValue: (field: string, value, shouldValidate?: boolean) => void;
   showIssueType: (values) => boolean;
   values;
@@ -130,7 +130,7 @@ function Selection({
             handleChange(e);
           }}
           variant="outlined"
-          choices={choicesData.grievanceTicketManualCategoryChoices}
+          choices={choicesData?.grievanceTicketManualCategoryChoices ?? []}
           component={FormikSelectField}
           disabled={redirectedFromRelatedTicket}
           required

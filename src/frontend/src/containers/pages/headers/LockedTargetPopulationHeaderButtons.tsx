@@ -52,7 +52,7 @@ export function LockedTargetPopulationHeaderButtons({
   const { businessArea, programId } = useBaseUrl();
   const queryClient = useQueryClient();
 
-  const { mutateAsync: unlockAction, isPending: loadingUnlock } = useMutation({
+  const { mutate: unlockAction, isPending: loadingUnlock } = useMutation({
     mutationFn: () =>
       RestService.restBusinessAreasProgramsTargetPopulationsUnlockRetrieve({
         businessAreaSlug: businessArea,
@@ -88,6 +88,7 @@ export function LockedTargetPopulationHeaderButtons({
       {canDuplicate && (
         <IconContainer>
           <Button
+            data-cy="button-target-population-duplicate"
             onClick={() => setOpenDuplicate(true)}
             disabled={!isActiveProgram}
           >

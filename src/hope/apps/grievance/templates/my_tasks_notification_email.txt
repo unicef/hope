@@ -1,0 +1,8 @@
+{% extends 'base_notification_email.txt' %}
+
+{% block content %}
+    {{ intro }}
+    {% for tab in tabs %}
+    {{ tab.label }} - {{ tab.url|safe }}
+    {% endfor %}
+{% endblock content %}

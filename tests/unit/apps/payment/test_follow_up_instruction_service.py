@@ -1,5 +1,6 @@
 from datetime import timedelta
 from decimal import Decimal
+import re
 from typing import Any
 from unittest.mock import patch
 import uuid
@@ -62,6 +63,16 @@ def second_currency():
 
 
 @pytest.fixture
+def deprecated_syp():
+    return CurrencyFactory(code="SYP", vision_code="SYP", name="Syrian Pound", active=False)
+
+
+@pytest.fixture
+def active_syp():
+    return CurrencyFactory(code="SYP", vision_code="SYP01", name="Syrian Pound")
+
+
+@pytest.fixture
 def delivery_mechanism():
     return DeliveryMechanismFactory(code="cash", name="Cash", payment_gateway_id="dm-cash")
 
@@ -71,6 +82,32 @@ def fsp(delivery_mechanism):
     fsp = FinancialServiceProviderFactory()
     fsp.delivery_mechanisms.add(delivery_mechanism)
     return fsp
+
+
+@pytest.fixture
+def aborted_follow_up_payment(user, cycle, business_area, currency, delivery_mechanism, fsp):
+    instruction = FollowUpInstructionFactory(program=cycle.program, business_area=business_area, created_by=user)
+    payment_plan = PaymentPlanFactory(
+        program_cycle=cycle,
+        business_area=business_area,
+        currency=currency,
+        delivery_mechanism=delivery_mechanism,
+        financial_service_provider=fsp,
+        follow_up_instruction=instruction,
+        plan_type=PaymentPlan.PlanType.FOLLOW_UP,
+        status=PaymentPlan.Status.ABORTED,
+        build_status=PaymentPlan.BuildStatus.BUILD_STATUS_OK,
+    )
+    return PaymentFactory(
+        parent=payment_plan,
+        program=payment_plan.program,
+        currency=currency,
+        delivery_type=delivery_mechanism,
+        financial_service_provider=fsp,
+        entitlement_quantity=Decimal("10.00"),
+        entitlement_quantity_usd=Decimal("10.00"),
+        status=Payment.STATUS_PENDING,
+    )
 
 
 def _create_source_payment_plan(
@@ -453,6 +490,45 @@ def test_create_raises_validation_error_for_mixed_currency(
         )
 
 
+@pytest.fixture
+def group_paid_in_both_syp_denominations(cycle, business_area, deprecated_syp, active_syp, delivery_mechanism, fsp):
+    group = PaymentPlanGroupFactory(cycle=cycle)
+    _create_source_payment_plan(
+        cycle=cycle,
+        group=group,
+        business_area=business_area,
+        currency=deprecated_syp,
+        delivery_mechanism=delivery_mechanism,
+        fsp=fsp,
+        with_failed_payment=True,
+    )
+    _create_source_payment_plan(
+        cycle=cycle,
+        group=group,
+        business_area=business_area,
+        currency=active_syp,
+        delivery_mechanism=delivery_mechanism,
+        fsp=fsp,
+        with_failed_payment=True,
+    )
+    return group
+
+
+def test_create_rejects_currency_variants_sharing_a_code_and_names_both(
+    user,
+    program,
+    cycle,
+    group_paid_in_both_syp_denominations,
+):
+    with pytest.raises(ValidationError, match=re.escape("Found: SYP (SYP01) - Syrian Pound, SYP - Syrian Pound.")):
+        FollowUpInstructionService(program).create(
+            user=user,
+            payment_plan_group_ids=[str(group_paid_in_both_syp_denominations.id)],
+            dispersion_start_date=cycle.start_date + timedelta(days=1),
+            dispersion_end_date=cycle.start_date + timedelta(days=2),
+        )
+
+
 def test_export_xlsx_allows_retry_after_background_error(
     user,
     program,
@@ -752,6 +828,24 @@ def test_reactivate_abort_transitions_child_payment_plans_to_open(
     child_plan.refresh_from_db()
     assert result == instruction
     assert child_plan.status == PaymentPlan.Status.OPEN
+
+
+def test_reactivate_abort_keeps_child_payment_plan_payments(
+    user: Any,
+    aborted_follow_up_payment: Any,
+    django_capture_on_commit_callbacks: Any,
+) -> None:
+    payment_plan = aborted_follow_up_payment.parent
+
+    with django_capture_on_commit_callbacks(execute=True):
+        FollowUpInstructionService(instruction=payment_plan.follow_up_instruction).reactivate_abort(user=user)
+
+    payment_plan.refresh_from_db()
+    assert payment_plan.status == PaymentPlan.Status.OPEN
+    assert payment_plan.build_status == PaymentPlan.BuildStatus.BUILD_STATUS_OK
+    assert list(Payment.all_objects.filter(parent=payment_plan).values_list("pk", "entitlement_quantity")) == [
+        (aborted_follow_up_payment.pk, Decimal("10.00"))
+    ]
 
 
 @patch("hope.apps.payment.services.payment_plan_services.send_payment_notification_emails_async_task")

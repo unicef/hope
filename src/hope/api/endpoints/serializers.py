@@ -1,13 +1,6 @@
-from django.db import models
-from django.utils.translation import gettext_lazy as _
 from rest_framework import serializers
 
 from hope.models import Country, Currency, FinancialInstitution
-
-
-class RejectPolicy(models.TextChoices):
-    STRICT = "STRICT", _("STRICT")
-    LAX = "LAX", _("Lax")
 
 
 class CountrySerializer(serializers.ModelSerializer):
@@ -32,6 +25,7 @@ class CurrencySerializer(serializers.ModelSerializer):
         fields = (
             "id",
             "code",
+            "vision_code",
             "name",
             "is_crypto",
         )

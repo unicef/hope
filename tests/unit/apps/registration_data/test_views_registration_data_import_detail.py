@@ -137,6 +137,26 @@ def test_get_registration_data_import_detail_with_permission(
     assert response_json["number_of_registered_individuals"] == 1
 
 
+def test_get_registration_data_import_detail_returns_refuse_reason(
+    authenticated_client: Any,
+    afghanistan: BusinessArea,
+    user: User,
+    program1: Program,
+    rdi1: RegistrationDataImport,
+    url_detail: str,
+    create_user_role_with_permissions: Callable,
+) -> None:
+    create_user_role_with_permissions(user, [Permissions.RDI_VIEW_DETAILS], afghanistan, program1)
+    rdi1.status = RegistrationDataImport.REFUSED_IMPORT
+    rdi1.refuse_reason = "Duplicate data"
+    rdi1.save(update_fields=["status", "refuse_reason"])
+
+    response = authenticated_client.get(url_detail)
+
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json()["refuse_reason"] == "Duplicate data"
+
+
 @freezegun.freeze_time("2022-01-01")
 def test_get_registration_data_import_detail_with_deduplication_statistics(
     authenticated_client: Any,

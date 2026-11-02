@@ -22,6 +22,7 @@ from hope.models.individual import Individual
 from hope.models.utils import (
     AdminUrlMixin,
     InternalDataFieldModel,
+    LongNameIndex,
     SignatureMixin,
     TimeStampedUUIDModel,
     UnicefIdentifiedModel,
@@ -54,6 +55,7 @@ class Payment(
     STATUS_FORCE_FAILED = "Force failed"
     STATUS_DISTRIBUTION_PARTIAL = "Partially Distributed"
     STATUS_PENDING = "Pending"
+    STATUS_NOT_ELIGIBLE = "Not Eligible"
     # Payment Gateway statuses
     STATUS_SENT_TO_PG = "Sent to Payment Gateway"
     STATUS_SENT_TO_FSP = "Sent to FSP"
@@ -70,6 +72,7 @@ class Payment(
             _("Partially Distributed"),
         ),  # Delivered Partially
         (STATUS_PENDING, _("Pending")),  # Pending
+        (STATUS_NOT_ELIGIBLE, _("Not Eligible")),
         (STATUS_SENT_TO_PG, _("Sent to Payment Gateway")),
         (STATUS_SENT_TO_FSP, _("Sent to FSP")),
         (STATUS_MANUALLY_CANCELLED, _("Manually Cancelled")),
@@ -128,7 +131,7 @@ class Payment(
     )
     business_area = models.ForeignKey("core.BusinessArea", on_delete=models.PROTECT)
     # use program_id in UniqueConstraint order_number and token_number per Program
-    program = models.ForeignKey("program.Program", on_delete=models.SET_NULL, null=True, blank=True)
+    program = models.ForeignKey("program.Program", on_delete=models.PROTECT)
     household = models.ForeignKey("household.Household", on_delete=models.PROTECT)
     head_of_household = models.ForeignKey("household.Individual", on_delete=models.PROTECT, null=True, blank=True)
     delivery_type = models.ForeignKey("payment.DeliveryMechanism", on_delete=models.SET_NULL, null=True, blank=True)
@@ -235,7 +238,6 @@ class Payment(
         decimal_places=3,
         max_digits=6,
         help_text="Written by Steficon",
-        db_index=True,
     )
     is_cash_assist = models.BooleanField(default=False)
     sent_to_fsp_date = models.DateTimeField(
@@ -267,6 +269,12 @@ class Payment(
             ),
         ]
         ordering = ("-created_at",)
+        indexes = [
+            LongNameIndex(fields=["created_at"], name="payment_payment_created_at_537eadaf"),
+            LongNameIndex(fields=["updated_at"], name="payment_payment_updated_at_89699d7d"),
+            LongNameIndex(fields=["unicef_id"], name="payment_payment_unicef_id_07f610de"),
+            LongNameIndex(fields=["vulnerability_score"], name="payment_payment_vulnerability_score_e91d7c15"),
+        ]
 
     signature_fields = (
         "parent_id",
@@ -288,7 +296,7 @@ class Payment(
         "household_id",
         "head_of_household_id",
         "delivery_type",
-        "currency.code",
+        "currency.vision_code",
         "entitlement_quantity",
         "entitlement_quantity_usd",
         "delivered_quantity",
@@ -355,6 +363,9 @@ class Payment(
         elif self.status == Payment.STATUS_SENT_TO_FSP:
             status = "Sent to FSP"
 
+        elif self.status == Payment.STATUS_NOT_ELIGIBLE:
+            status = "Not Eligible"
+
         elif self.status in (
             Payment.STATUS_DISTRIBUTION_SUCCESS,
             Payment.STATUS_SUCCESS,
@@ -393,10 +404,6 @@ class Payment(
     @property
     def collector_is_alternate(self) -> bool:
         return self.collector_type == ROLE_ALTERNATE
-
-    @property
-    def collector_is_primary(self) -> bool:
-        return self.collector_type == ROLE_PRIMARY
 
     def get_revert_mark_as_failed_status(self, delivered_quantity: Decimal) -> str:
         if delivered_quantity == 0:

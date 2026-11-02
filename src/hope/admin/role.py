@@ -15,12 +15,15 @@ from import_export.admin import ImportExportModelAdmin
 
 from hope.admin.account_filters import IncompatibleRoleFilter, PermissionFilter
 from hope.admin.account_forms import RoleAdminForm
+from hope.admin.user_role import get_autocomplete_partner, is_autocomplete_for, limit_roles_for_partner
 from hope.admin.utils import HOPEModelAdminBase
 from hope.apps.account.permissions import Permissions
 from hope.models import IncompatibleRoles, Role
 
 if TYPE_CHECKING:
     from uuid import UUID
+
+    from django.db.models import QuerySet
 
 logger = logging.getLogger(__name__)
 
@@ -50,6 +53,13 @@ class RoleAdmin(ImportExportModelAdmin, BaseSyncMixin, HOPEModelAdminBase):
     resource_class = RoleResource
     change_list_template = "admin/account/role/change_list.html"
     protocol_class = UnrelatedForeignKeysProtocol
+
+    def get_search_results(
+        self, request: HttpRequest, queryset: "QuerySet", search_term: str
+    ) -> tuple["QuerySet", bool]:
+        if is_autocomplete_for(request, "roleassignment", "role"):
+            queryset = limit_roles_for_partner(queryset, get_autocomplete_partner(request))
+        return super().get_search_results(request, queryset, search_term)
 
     @button(permission="account.view_role")
     def members(self, request: HttpRequest, pk: "UUID") -> HttpResponseRedirect:

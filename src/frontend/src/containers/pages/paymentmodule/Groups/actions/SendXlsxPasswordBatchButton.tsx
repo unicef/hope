@@ -25,7 +25,7 @@ export function SendXlsxPasswordBatchButton({
   const { showMessage } = useSnackbar();
   const permissions = usePermissions();
 
-  const { mutateAsync: sendPassword, isPending: loadingSend } = useMutation({
+  const { mutate: sendPassword, isPending: loadingSend } = useMutation({
     mutationFn: () =>
       RestService.restBusinessAreasProgramsPaymentPlanGroupsSendXlsxPasswordCreate(
         {

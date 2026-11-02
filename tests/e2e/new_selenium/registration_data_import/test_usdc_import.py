@@ -135,7 +135,7 @@ def test_usdc_import_detail_pages_render_and_rdi_merges(
         Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE,
         Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE,
     ):
-        browser.login(username="noperm_user", password="testtest2")
+        browser.login(username="noperm_user")
 
         browser.open(f"/{business_area.slug}/programs/{program.code}/population/individuals/{individual.id}")
         browser.wait_for_element_visible('h5[data-cy="page-header-title"]')

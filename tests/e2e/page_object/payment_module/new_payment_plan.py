@@ -6,7 +6,6 @@ from e2e.page_object.base_components import BaseComponents
 
 class NewPaymentPlan(BaseComponents):
     page_header_container = 'div[data-cy="page-header-container"]'
-    page_header_title = 'h5[data-cy="page-header-title"]'
     button_save_payment_plan = 'button[data-cy="button-save-payment-plan"]'
     input_target_population = 'div[data-cy="input-target-population"]'
     select_targeting_id = 'div[data-cy="select-targetingId"]'
@@ -20,9 +19,6 @@ class NewPaymentPlan(BaseComponents):
 
     def get_page_header_container(self) -> WebElement:
         return self.wait_for(self.page_header_container)
-
-    def get_page_header_title(self) -> WebElement:
-        return self.wait_for(self.page_header_title)
 
     def get_button_save_payment_plan(self) -> WebElement:
         return self.wait_for(self.button_save_payment_plan)

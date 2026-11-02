@@ -4,6 +4,7 @@ from typing import Any
 
 @unique
 class Grant(Enum):
+    # Looks unused, but Enum calls it for every auto() member so values are the member names.
     @staticmethod
     def _generate_next_value_(name: str, start: int, count: int, last_values: list[Any]) -> str:
         return name

@@ -73,7 +73,7 @@ class TestSmokeIndividuals:
         page_individuals: Individuals,
     ) -> None:
         page_individuals.select_global_program_filter("Test Programm")
-        page_individuals.get_nav_programme_population().click()
+        page_individuals.open_nav_section("Main Menu")
         page_individuals.get_nav_individuals().click()
         assert "Items" in page_individuals.get_table_title().text
         assert "Item ID" in page_individuals.get_individual_id().text
@@ -94,7 +94,7 @@ class TestSmokeIndividuals:
         page_individuals_details: IndividualsDetails,
     ) -> None:
         page_individuals.select_global_program_filter("Test Programm")
-        page_individuals.get_nav_programme_population().click()
+        page_individuals.open_nav_section("Main Menu")
         page_individuals.get_nav_individuals().click()
         page_individuals.get_individual_table_row()[0].click()
         assert "Alicja Kowalska" in page_individuals_details.get_label_full_name().text

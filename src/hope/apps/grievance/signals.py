@@ -4,7 +4,7 @@ from django.db.models.signals import m2m_changed, post_save, pre_delete
 from django.dispatch import Signal, receiver
 
 from hope.api.caches import get_or_create_cache_key, increment_cache_key
-from hope.apps.grievance.models import GrievanceTicket
+from hope.apps.grievance.models import GrievanceTicket, TicketNote
 
 individual_added = Signal()
 individual_marked_as_duplicated = Signal()
@@ -41,6 +41,12 @@ def increment_grievance_ticket_version_cache_on_save_delete(
     program_codes = set(instance.programs.values_list("code", flat=True))
     if program_codes:
         increment_grievance_ticket_version_cache(instance.business_area.slug, program_codes)
+
+
+@receiver(post_save, sender=TicketNote)
+def increment_grievance_ticket_version_cache_on_note(sender: Any, instance: TicketNote, **kwargs: dict) -> None:
+    # a note does not save the ticket, yet it makes the row unread on the cached My Tasks list
+    increment_grievance_ticket_version_cache_for_ticket_ids(instance.ticket.business_area.slug, [instance.ticket_id])
 
 
 @receiver(m2m_changed, sender=GrievanceTicket.programs.through)

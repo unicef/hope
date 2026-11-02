@@ -2,6 +2,7 @@ from datetime import date, datetime
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
+from defusedxml import ElementTree
 from django.utils import timezone
 import pytest
 from strategy_field.utils import fqn
@@ -51,7 +52,7 @@ def test_execute(sanction_list: "SanctionList", program: "Program") -> None:
     main_test_files_path = Path(__file__).parent / "test_files"
     # Test #1
     task = LoadSanctionListXMLTask(sanction_list)
-    task.load_from_file(main_test_files_path / "original-consolidated.xml")
+    task.parse(ElementTree.parse(main_test_files_path / "original-consolidated.xml").getroot())
 
     individuals = SanctionListIndividual.all_objects.all()
     assert individuals.count() == 1
@@ -61,7 +62,7 @@ def test_execute(sanction_list: "SanctionList", program: "Program") -> None:
 
     # Test #2
     task = LoadSanctionListXMLTask(sanction_list)
-    task.load_from_file(file_path=main_test_files_path / "updated-consolidated.xml")
+    task.parse(ElementTree.parse(main_test_files_path / "updated-consolidated.xml").getroot())
 
     all_individuals = SanctionListIndividual.all_objects.all()
     assert all_individuals.count() == 1
@@ -79,7 +80,7 @@ def test_execute(sanction_list: "SanctionList", program: "Program") -> None:
 
     # Test #3
     task = LoadSanctionListXMLTask(sanction_list)
-    task.load_from_file(file_path=main_test_files_path / "updated2-consolidated.xml")
+    task.parse(ElementTree.parse(main_test_files_path / "updated2-consolidated.xml").getroot())
 
     all_individuals = SanctionListIndividual.all_objects.all()
     assert all_individuals.count() == 1
@@ -99,7 +100,7 @@ def test_invalid_dates_of_birth_are_recorded_in_internal_data(
 
     task = LoadSanctionListXMLTask(sanction_list)
     with django_assert_num_queries(25):
-        task.load_from_file(main_test_files_path / "broken-dob-consolidated.xml")
+        task.parse(ElementTree.parse(main_test_files_path / "broken-dob-consolidated.xml").getroot())
 
     assert SanctionListIndividual.all_objects.count() == 1
     individual = SanctionListIndividual.all_objects.get(reference_number="KPi.111")
@@ -123,7 +124,7 @@ def test_bad_dob_does_not_poison_other_individuals(
 
     task = LoadSanctionListXMLTask(sanction_list)
     with django_assert_num_queries(27):
-        task.load_from_file(main_test_files_path / "broken-dob-multi-consolidated.xml")
+        task.parse(ElementTree.parse(main_test_files_path / "broken-dob-multi-consolidated.xml").getroot())
 
     assert SanctionListIndividual.all_objects.count() == 2
 

@@ -5,6 +5,8 @@ from elasticsearch import NotFoundError
 import pytest
 
 from extras.test_utils.factories import BusinessAreaFactory, IndividualFactory, ProgramFactory
+from hope.apps.household.documents import get_individual_doc
+from hope.apps.household.services.index_management import rebuild_program_indexes
 from hope.apps.utils.elasticsearch_utils import (
     populate_all_indexes,
     populate_index,
@@ -218,3 +220,33 @@ def test_populate_index_reports_progress_per_chunk_and_at_the_end(
     populate_index(queryset, mock_doc_class, progress_cb=ticks.append)
 
     assert ticks == [2, 3]
+
+
+@pytest.fixture
+def index_with_max_terms_count_1(program_with_three_individuals: Program) -> Program:
+    with override_config(IS_ELASTICSEARCH_ENABLED=True):
+        rebuild_program_indexes(str(program_with_three_individuals.id))
+    # ES rejects a terms query with more values than index.max_terms_count (default 65536),
+    # so deleting docs of a big RDI in one query breaks.
+    # Lowering the limit to 1 makes 2 ids hit the same error, unless they are sent in chunks of 1.
+    get_individual_doc(str(program_with_three_individuals.id))._index.put_settings(
+        settings={"index.max_terms_count": 1}
+    )
+    return program_with_three_individuals
+
+
+@pytest.mark.django_db
+@override_config(IS_ELASTICSEARCH_ENABLED=True)
+def test_remove_elasticsearch_documents_by_matching_ids_with_more_ids_than_max_terms_count(
+    index_with_max_terms_count_1: Program, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr("hope.apps.utils.elasticsearch_utils.MAX_TERMS_COUNT", 1)
+    removed_1, removed_2, kept = Individual.all_merge_status_objects.filter(
+        program=index_with_max_terms_count_1
+    ).values_list("id", flat=True)
+    document = get_individual_doc(str(index_with_max_terms_count_1.id))
+
+    remove_elasticsearch_documents_by_matching_ids([str(removed_1), str(removed_2)], document)
+
+    document._index.refresh()
+    assert [hit.id for hit in document.search().execute()] == [str(kept)]

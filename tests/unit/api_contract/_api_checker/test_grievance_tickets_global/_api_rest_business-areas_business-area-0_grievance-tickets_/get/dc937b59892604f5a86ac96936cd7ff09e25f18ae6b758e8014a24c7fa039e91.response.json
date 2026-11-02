@@ -45,6 +45,7 @@
                     "username": "user_0"
                 },
                 "total_days": 0,
+                "unread": false,
                 "related_tickets_count": 0,
                 "programs": [],
                 "target_id": ""

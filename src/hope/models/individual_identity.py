@@ -1,7 +1,7 @@
 from django.db import models
 from model_utils.models import TimeStampedModel
 
-from hope.models.utils import PendingManager, SoftDeletableMergeStatusModel
+from hope.models.utils import LongNameIndex, PendingManager, SoftDeletableMergeStatusModel
 
 
 class IndividualIdentity(SoftDeletableMergeStatusModel, TimeStampedModel):
@@ -27,6 +27,9 @@ class IndividualIdentity(SoftDeletableMergeStatusModel, TimeStampedModel):
         app_label = "household"
         verbose_name_plural = "Individual Identities"
         ordering = ("id",)
+        indexes = [
+            LongNameIndex(fields=["is_removed"], name="household_individualidentity_is_removed_237a8b3b"),
+        ]
 
     def __str__(self) -> str:
         return f"{self.partner} {self.individual} {self.number}"

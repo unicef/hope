@@ -8,7 +8,7 @@ from hope.models.account_type import AccountType
 from hope.models.async_job import AsyncJob
 from hope.models.document_type import DocumentType
 from hope.models.program import Program
-from hope.models.utils import TimeStampedModel
+from hope.models.utils import LongNameIndex, TimeStampedModel
 
 
 class UniversalUpdate(
@@ -84,6 +84,10 @@ class UniversalUpdate(
             ),
         ]
         ordering = ("id",)
+        indexes = [
+            LongNameIndex(fields=["created_at"], name="universal_update_script_universalupdate_created_at_827043a2"),
+            LongNameIndex(fields=["updated_at"], name="universal_update_script_universalupdate_updated_at_fc896500"),
+        ]
 
     @property
     def logs(self) -> str:

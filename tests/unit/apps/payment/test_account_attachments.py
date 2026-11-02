@@ -279,7 +279,7 @@ def test_download_returns_file(
 
     assert response.status_code == status.HTTP_200_OK
     assert isinstance(response, FileResponse)
-    assert response["Content-Disposition"] == f"attachment; filename={attachment.file.name.split('/')[-1]}"
+    assert response["Content-Disposition"] == f'attachment; filename="{attachment.file.name.split("/")[-1]}"'
 
 
 def test_download_denied_without_permission(

@@ -15,7 +15,7 @@ from rest_framework.response import Response
 from hope.api.endpoints.base import HOPEAPIBusinessAreaView
 from hope.api.endpoints.rdi.cw_ids import cw_id_error
 from hope.api.endpoints.rdi.mixin import HouseholdUploadMixin
-from hope.api.utils import humanize_errors
+from hope.api.utils import CurrencySlugRelatedField, OnUnchangedCode, humanize_errors
 from hope.apps.core.api.fields import ScopedSlugRelatedField, UTCDateField
 from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hope.apps.household.const import (
@@ -41,7 +41,6 @@ from hope.models import (
     RegistrationDataImport,
 )
 from hope.models.business_area import ALL_EXCEPT_CW_INGEST_REJECT_MSG
-from hope.models.currency import Currency
 
 if TYPE_CHECKING:
     from rest_framework.request import Request
@@ -213,11 +212,10 @@ class HouseholdSerializer(serializers.ModelSerializer):
     size = serializers.IntegerField(required=False, allow_null=True)
     consent_sharing = serializers.MultipleChoiceField(choices=DATA_SHARING_CHOICES, required=False)
     village = serializers.CharField(allow_blank=True, allow_null=True, required=False)
-    currency = serializers.SlugRelatedField(
-        slug_field="code",
+    currency = CurrencySlugRelatedField(
+        on_unchanged_code=OnUnchangedCode.ALWAYS_ACTIVE,
         required=False,
         allow_null=True,
-        queryset=Currency.objects.all(),
     )
 
     admin1 = serializers.SlugRelatedField(

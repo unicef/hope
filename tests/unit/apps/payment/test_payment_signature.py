@@ -53,7 +53,7 @@ def calculate_hash_manually(payment: Payment) -> str:
     sha1.update(str(payment.household_id).encode("utf-8"))
     sha1.update(str(payment.head_of_household_id).encode("utf-8"))
     sha1.update(str(payment.delivery_type).encode("utf-8"))
-    sha1.update(str(payment.currency.code if payment.currency else None).encode("utf-8"))
+    sha1.update(str(payment.currency.vision_code if payment.currency else None).encode("utf-8"))
     sha1.update(str(payment.entitlement_quantity).encode("utf-8"))
     sha1.update(str(payment.entitlement_quantity_usd).encode("utf-8"))
     sha1.update(str(payment.delivered_quantity).encode("utf-8"))
@@ -124,18 +124,6 @@ def test_bulk_update(payment_plan: PaymentPlan) -> None:
     Payment.signature_manager.bulk_update_with_signature([payment], ["entitlement_quantity"])
     payment.refresh_from_db()
     assert payment.signature_hash != old_signature
-    assert payment.signature_hash == calculate_hash_manually(payment)
-
-
-def test_bulk_create(payment_plan: PaymentPlan) -> None:
-    (payment,) = PaymentFactory.create_batch(1, parent=payment_plan)
-    creation_dict = payment.__dict__.copy()
-    creation_dict.pop("id")
-    creation_dict.pop("_state")
-    Payment.all_objects.filter(id=payment.id).delete()
-    (payment,) = Payment.signature_manager.bulk_create_with_signature([Payment(**creation_dict)])
-    create_payment_plan_snapshot_data(payment_plan)
-    payment.refresh_from_db()
     assert payment.signature_hash == calculate_hash_manually(payment)
 
 

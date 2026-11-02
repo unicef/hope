@@ -77,7 +77,7 @@ export function EditDocumentRow({
             onClick={() => {
               arrayHelpers.remove({
                 id: document.id,
-                country: document.country.isoCode3,
+                country: document.country?.isoCode3 ?? null,
                 key: document.type.key,
                 number: document.documentNumber,
                 photo: document.photo,
@@ -99,7 +99,10 @@ export function EditDocumentRow({
       </Grid>
       <Grid size={3}>
         <DisabledDiv disabled={removed}>
-          <LabelizedField label={t('Country')} value={document.country.name} />
+          <LabelizedField
+            label={t('Country')}
+            value={document.country?.name ?? '-'}
+          />
         </DisabledDiv>
       </Grid>
       <Grid size={3}>
@@ -136,7 +139,7 @@ export function EditDocumentRow({
                 onClick={() => {
                   arrayHelpers.push({
                     id: document.id,
-                    country: document.country.isoCode3,
+                    country: document.country?.isoCode3 ?? null,
                     key: document.type.key,
                     number: document.documentNumber,
                     photo: document.photo,

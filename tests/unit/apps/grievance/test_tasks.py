@@ -1,25 +1,20 @@
-from datetime import timedelta
 from typing import Any
 from unittest.mock import Mock, patch
 
 from constance.forms import ConstanceForm
 from django.core.exceptions import ValidationError
 from django.db import Error
-from django.utils import timezone
 import pytest
 
 from extras.test_utils.factories import (
     BusinessAreaFactory,
-    GrievanceTicketFactory,
     IndividualFactory,
     ProgramFactory,
     SanctionListFactory,
-    UserFactory,
 )
 from hope.apps.grievance.celery_tasks import (
     deduplicate_and_check_against_sanctions_list_task_single_individual_async_task_action,
 )
-from hope.apps.grievance.models import GrievanceTicket
 from hope.apps.grievance.tasks.deduplicate_and_check_sanctions import (
     deduplicate_and_check_against_sanctions_list_task_single_individual,
 )
@@ -261,32 +256,3 @@ def test_celery_task_calls_inner_function_with_individual(
     call_args = inner_fn_mock.call_args
     assert call_args[0][0] is True
     assert call_args[0][1].pk == individual.pk
-
-
-def _make_ticket(
-    category: int,
-    status: int = GrievanceTicket.STATUS_NEW,
-    enable_email: bool = True,
-    created_days_ago: int = 2,
-    last_notification_sent: Any = None,
-) -> GrievanceTicket:
-    business_area = BusinessAreaFactory(enable_email_notification=enable_email)
-    # Map categories to valid issue types
-    issue_type_map = {
-        GrievanceTicket.CATEGORY_SENSITIVE_GRIEVANCE: GrievanceTicket.ISSUE_TYPE_DATA_BREACH,
-        GrievanceTicket.CATEGORY_DATA_CHANGE: GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_ADD_INDIVIDUAL,
-    }
-    issue_type = issue_type_map.get(category, GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_ADD_INDIVIDUAL)
-
-    ticket = GrievanceTicketFactory(
-        business_area=business_area,
-        assigned_to=UserFactory(),
-        category=category,
-        issue_type=issue_type,
-        status=status,
-        last_notification_sent=last_notification_sent,
-    )
-    GrievanceTicket.objects.filter(pk=ticket.pk).update(
-        created_at=timezone.now() - timedelta(days=created_days_ago),
-    )
-    return ticket

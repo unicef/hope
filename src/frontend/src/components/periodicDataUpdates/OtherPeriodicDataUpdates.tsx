@@ -1,5 +1,4 @@
 import type { ReactElement } from 'react';
-import { useState } from 'react';
 import { TableCell } from '@mui/material';
 import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
 import type { HeadCell } from '@components/core/Table/EnhancedTableHead';
@@ -8,6 +7,7 @@ import { StatusBox } from '@components/core/StatusBox';
 import { UniversalMoment } from '@components/core/UniversalMoment';
 import { BlackLink } from '@components/core/BlackLink';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { useTableState } from '@hooks/useTableState';
 import { useQuery } from '@tanstack/react-query';
 import { RestService } from '@restgenerated/services/RestService';
 import { restQueryKey } from '@utils/queryKeys';
@@ -63,23 +63,18 @@ const otherHeadCells: HeadCell<any>[] = [
 const OtherPeriodicDataUpdates = () => {
   const navigate = useNavigate();
   const { businessArea: businessAreaSlug, programId, baseUrl } = useBaseUrl();
-  const initialQueryVariables = {
-    ordering: 'created_at',
-    businessAreaSlug,
-    programCode: programId,
-    status: [
-      'CREATING',
-      'MERGING',
-      'PENDING_CREATE',
-      'NOT_SCHEDULED_CREATE',
-      'CANCELED_CREATE',
-      'NOT_SCHEDULED_MERGE',
-      'CANCELED_MERGE',
-      'FAILED_MERGE',
-      'FAILED_CREATE',
-    ] as const,
-  };
-  const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
+  const table = useTableState({ defaultOrdering: 'created_at' });
+  const status = [
+    'CREATING',
+    'MERGING',
+    'PENDING_CREATE',
+    'NOT_SCHEDULED_CREATE',
+    'CANCELED_CREATE',
+    'NOT_SCHEDULED_MERGE',
+    'CANCELED_MERGE',
+    'FAILED_MERGE',
+    'FAILED_CREATE',
+  ] as const;
 
   const { data, isLoading, error } = useQuery<PaginatedPDUOnlineEditListList>({
     queryKey: restQueryKey(
@@ -87,18 +82,18 @@ const OtherPeriodicDataUpdates = () => {
       {
         businessAreaSlug,
         programCode: programId,
-        ordering: queryVariables.ordering,
-        status: [...queryVariables.status],
+        ordering: table.ordering,
+        status: [...status],
       },
     ),
     queryFn: () =>
       RestService.restBusinessAreasProgramsPeriodicDataUpdateOnlineEditsList({
         businessAreaSlug,
         programCode: programId,
-        ordering: queryVariables.ordering,
-        status: [...queryVariables.status],
+        ordering: table.ordering,
+        status: [...status],
       }),
-    enabled: !!queryVariables.businessAreaSlug && !!queryVariables.programCode,
+    enabled: !!businessAreaSlug && !!programId,
   });
 
   const renderRow = (row: any): ReactElement => {
@@ -147,8 +142,7 @@ const OtherPeriodicDataUpdates = () => {
       data={data ?? []}
       isLoading={isLoading}
       error={error}
-      queryVariables={queryVariables}
-      setQueryVariables={setQueryVariables}
+      tableState={table}
       title="Other Periodic Data Updates"
       hidePagination={true}
     />

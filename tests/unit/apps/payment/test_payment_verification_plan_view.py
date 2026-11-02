@@ -19,6 +19,7 @@ from rest_framework import serializers as drf_serializers, status
 
 from extras.test_utils.factories import (
     BusinessAreaFactory,
+    CurrencyFactory,
     PaymentFactory,
     PaymentPlanFactory,
     PaymentVerificationFactory,
@@ -77,6 +78,7 @@ def verification_context(
         program_cycle=cycle,
         status=PaymentPlan.Status.FINISHED,
         created_by=user,
+        currency=CurrencyFactory(code="SYP", vision_code="SYP01", name="Syrian Pound"),
     )
     build_summary(payment_plan)
 
@@ -210,6 +212,8 @@ def test_get_list(
         assert len(resp_data["results"]) == 1
         pv = resp_data["results"][0]
         assert pv["verification_status"] == "PENDING"
+        assert pv["currency"] == "SYP"
+        assert pv["currency_vision_code"] == "SYP01"
 
 
 @pytest.mark.parametrize(
@@ -747,6 +751,40 @@ def test_verifications_list(
         assert "status" in payment["verification"]
         assert "verification_channel" in payment["verification"]
         assert "received_amount" in payment["verification"]
+
+
+@pytest.fixture
+def unverified_payment(verification_context: dict[str, Any]) -> Payment:
+    return PaymentFactory(parent=verification_context["payment_plan"], status=Payment.STATUS_SUCCESS)
+
+
+def test_verifications_list_omits_payment_without_verification(
+    verification_context: dict[str, Any],
+    unverified_payment: Payment,
+    create_user_role_with_permissions: Any,
+) -> None:
+    url = reverse(
+        "api:payments:verification-records-list",
+        kwargs={
+            "business_area_slug": verification_context["business_area"].slug,
+            "program_code": verification_context["program_active"].code,
+            "payment_verification_pk": str(verification_context["payment_plan"].pk),
+        },
+    )
+    create_user_role_with_permissions(
+        verification_context["user"],
+        [Permissions.PAYMENT_VERIFICATION_VIEW_DETAILS],
+        verification_context["business_area"],
+        verification_context["program_active"],
+    )
+
+    response = verification_context["client"].get(url)
+
+    assert response.status_code == status.HTTP_200_OK
+    assert {payment["id"] for payment in response.json()["results"]} == {
+        str(verification_context["payment_1"].pk),
+        str(verification_context["payment_2"].pk),
+    }
 
 
 @pytest.mark.parametrize(

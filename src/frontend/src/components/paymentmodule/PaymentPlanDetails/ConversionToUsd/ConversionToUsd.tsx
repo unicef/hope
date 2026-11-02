@@ -19,7 +19,7 @@ import { PaymentPlanStatusEnum } from '@restgenerated/models/PaymentPlanStatusEn
 import { RestService } from '@restgenerated/services/RestService';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { restQueryKey } from '@utils/queryKeys';
-import { showApiErrorMessages } from '@utils/utils';
+import { formatCurrencyCode, showApiErrorMessages } from '@utils/utils';
 import type { ReactElement } from 'react';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -70,7 +70,7 @@ function ConversionToUsd({
     paymentPlan.id,
   ]);
 
-  const { mutateAsync: applyExchangeRate, isPending } = useMutation({
+  const { mutate: applyExchangeRate, isPending } = useMutation({
     mutationFn: ({
       businessAreaSlug,
       id,
@@ -139,7 +139,10 @@ function ConversionToUsd({
     exchangeRate
       ? t('1 USD = {{rate}} {{currency}}', {
           rate: exchangeRate,
-          currency: paymentPlan.currency,
+          currency: formatCurrencyCode(
+            paymentPlan.currency,
+            paymentPlan.currencyVisionCode,
+          ),
         })
       : t('Exchange rate is unavailable');
 
@@ -170,8 +173,9 @@ function ConversionToUsd({
                 color="primary"
                 loading={isPending}
                 disabled={isApplyDisabled}
-                onClick={async () => {
-                  await applyExchangeRate({
+                data-cy="button-apply-exchange-rate"
+                onClick={() => {
+                  applyExchangeRate({
                     businessAreaSlug: businessArea,
                     id: paymentPlan.id,
                     programCode: programId,
@@ -205,6 +209,7 @@ function ConversionToUsd({
             <FormControlLabel
               value="unore"
               control={<Radio />}
+              data-cy="radio-unore-exchange-rate"
               disabled={areOptionsDisabled}
               label={t('Use UNORE exchange rate')}
             />
@@ -216,6 +221,7 @@ function ConversionToUsd({
             <FormControlLabel
               value="custom"
               control={<Radio />}
+              data-cy="radio-custom-exchange-rate"
               disabled={areOptionsDisabled}
               label={t('Custom exchange rate')}
             />
@@ -227,6 +233,7 @@ function ConversionToUsd({
                   'Enter the amount of local currency against 1 USD',
                 )}
                 value={customExchangeRate}
+                data-cy="input-custom-exchange-rate"
                 disabled={selectedOption !== 'custom' || !isSupportedStatus}
                 onChange={(event) => setCustomExchangeRate(event.target.value)}
                 sx={{ width: { xs: '100%', sm: 280 } }}

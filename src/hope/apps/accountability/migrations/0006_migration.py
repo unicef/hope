@@ -8,6 +8,15 @@ class Migration(migrations.Migration):
         ("accountability", "0005_migration"),
     ]
 
+    # accountability.0003 adds FKs to targeting.TargetPopulation and this migration
+    # removes them, so the whole accountability chain must be applied before
+    # targeting.0004 deletes that model. Without an explicit ordering edge the
+    # executor may apply targeting.0004 first, leaving those FKs unresolvable from
+    # migration state ("Related model 'targeting.targetpopulation' cannot be resolved").
+    run_before = [
+        ("targeting", "0004_migration"),
+    ]
+
     operations = [
         migrations.RemoveField(
             model_name="message",

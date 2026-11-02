@@ -24,6 +24,7 @@
         "number_of_individuals": 1,
         "number_of_registered_individuals": 0,
         "error_message": "",
+        "refuse_reason": null,
         "can_merge": true,
         "biometric_deduplication_enabled": false,
         "batch_duplicates_count_and_percentage": [

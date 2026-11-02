@@ -9,6 +9,7 @@ import { TableCell } from '@mui/material';
 import type { PaymentPlanList } from '@restgenerated/models/PaymentPlanList';
 import { PlanTypeEnum } from '@restgenerated/models/PlanTypeEnum';
 import {
+  formatCurrencyCode,
   formatCurrencyWithSymbol,
   paymentPlanStatusToColor,
 } from '@utils/utils';
@@ -70,23 +71,28 @@ export const PaymentPlanTableRow = ({
           ? plan.totalIndividualsCount || '-'
           : plan.totalHouseholdsCount || '-'}
       </TableCell>
-      <TableCell align="left">{plan.currency}</TableCell>
+      <TableCell align="left">
+        {formatCurrencyCode(plan.currency, plan.currencyVisionCode)}
+      </TableCell>
       <TableCell align="right">
         {`${formatCurrencyWithSymbol(
           Number(plan.totalEntitledQuantity),
           plan.currency,
+          plan.currencyVisionCode,
         )}`}
       </TableCell>
       <TableCell align="right">
         {`${formatCurrencyWithSymbol(
           Number(plan.totalDeliveredQuantity),
           plan.currency,
+          plan.currencyVisionCode,
         )}`}
       </TableCell>
       <TableCell align="right">
         {`${formatCurrencyWithSymbol(
           Number(plan.totalUndeliveredQuantity),
           plan.currency,
+          plan.currencyVisionCode,
         )}`}
       </TableCell>
       <TableCell align="left">

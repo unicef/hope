@@ -56,6 +56,6 @@ The **Bio Data** section of the individual details page displays an identificati
 
 The field label can be configured separately for each programme by a HOPE administrator. For example, a programme can use a label that reflects the identity reference used in its registration process. If no programme-specific label is configured, the field is displayed as **Identification Key**.
 
-The identification key can be manually compared with an identity reference returned by a Financial Service Provider (FSP). References included as additional columns in a reconciliation file are available in the relevant Payment Record details. See [Payment Reconciliation](payment.md#payment-reconciliation).
+The identification key can be manually compared with an identity reference returned by a Financial Service Provider (FSP). References included as additional columns in a reconciliation file are available in the relevant Payment Record details. See [Payment Reconciliation](payment-reconciliation.md#additional-reconciliation-columns).
 
 Programme-specific identification key labels were introduced by [Change Request 299147: Identity Field customisation & PaymentRecord flex fields](https://dev.azure.com/unicef/ICTD-HCT-MIS/_workitems/edit/299147).

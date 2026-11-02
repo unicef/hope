@@ -17,12 +17,14 @@ export interface ReadyForClosurePaymentPlanHeaderButtonsProps {
   paymentPlan: PaymentPlanDetail;
   canSendBack: boolean;
   canClose: boolean;
+  isInstructionManaged?: boolean;
 }
 
 export function ReadyForClosurePaymentPlanHeaderButtons({
   paymentPlan,
   canSendBack,
   canClose,
+  isInstructionManaged = false,
 }: ReadyForClosurePaymentPlanHeaderButtonsProps): ReactElement {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
@@ -30,7 +32,7 @@ export function ReadyForClosurePaymentPlanHeaderButtons({
   const { showMessage } = useSnackbar();
   const { businessArea, programId } = useBaseUrl();
 
-  const { mutateAsync: sendBack, isPending: loadingSendBack } = useMutation({
+  const { mutate: sendBack, isPending: loadingSendBack } = useMutation({
     mutationFn: () =>
       RestService.restBusinessAreasProgramsPaymentPlansSendBackToFinishedRetrieve(
         {
@@ -84,7 +86,7 @@ export function ReadyForClosurePaymentPlanHeaderButtons({
           </Box>
         )}
 
-        {canClose && (
+        {canClose && !isInstructionManaged && (
           <Box
             sx={{
               m: 2,

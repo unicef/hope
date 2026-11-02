@@ -15,6 +15,7 @@ import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
 import { StatusBox } from '@components/core/StatusBox';
 import { UniversalMoment } from '@components/core/UniversalMoment';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { useTableState } from '@hooks/useTableState';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { RestService } from '@restgenerated/services/RestService';
 import { restQueryKey } from '@utils/queryKeys';
@@ -95,15 +96,9 @@ const PeriodicDataUpdatePendingForApproval = () => {
 
   const { businessArea: businessAreaSlug, programId, baseUrl } = useBaseUrl();
   const [selected, setSelected] = useState<string[]>([]);
-  const [page, setPage] = useState(0);
-  const initialQueryVariables = {
-    ordering: 'created_at',
-    businessAreaSlug,
-    programCode: programId,
-    status: ['READY' as const],
-  };
-  const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
-  const { mutateAsync: bulkApprove } = useMutation({
+  const table = useTableState({ defaultOrdering: 'created_at' });
+  const status = ['READY' as const];
+  const { mutate: bulkApprove } = useMutation({
     mutationFn: (ids: number[]) => {
       return RestService.restBusinessAreasProgramsPeriodicDataUpdateOnlineEditsBulkApproveCreate(
         {
@@ -128,9 +123,9 @@ const PeriodicDataUpdatePendingForApproval = () => {
     },
   });
 
-  const handleApprove = async () => {
+  const handleApprove = () => {
     const ids = selected.map((id) => Number(id)).filter((id) => !isNaN(id));
-    await bulkApprove(ids);
+    bulkApprove(ids);
   };
 
   const { data, isLoading, error } = useQuery<PaginatedPDUOnlineEditListList>({
@@ -139,18 +134,18 @@ const PeriodicDataUpdatePendingForApproval = () => {
       {
         businessAreaSlug,
         programCode: programId,
-        ordering: queryVariables.ordering,
-        status: queryVariables.status,
+        ordering: table.ordering,
+        status,
       },
     ),
     queryFn: () =>
       RestService.restBusinessAreasProgramsPeriodicDataUpdateOnlineEditsList({
         businessAreaSlug,
         programCode: programId,
-        ordering: queryVariables.ordering,
-        status: queryVariables.status,
+        ordering: table.ordering,
+        status,
       }),
-    enabled: !!queryVariables.businessAreaSlug && !!queryVariables.programCode,
+    enabled: !!businessAreaSlug && !!programId,
   });
 
   const results = data?.results ?? [];
@@ -275,13 +270,10 @@ const PeriodicDataUpdatePendingForApproval = () => {
       data={data ?? []}
       isLoading={isLoading}
       error={error}
-      queryVariables={queryVariables}
-      setQueryVariables={setQueryVariables}
+      tableState={table}
       title="Periodic Data Updates pending for Approval"
       numSelected={selected.length}
       customHeadRenderer={customHeadRenderer}
-      page={page}
-      setPage={setPage}
       actions={
         canApprove
           ? [

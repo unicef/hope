@@ -1,5 +1,3 @@
-from time import sleep
-
 from selenium.webdriver.remote.webelement import WebElement
 
 from e2e.page_object.base_components import BaseComponents
@@ -7,7 +5,6 @@ from e2e.page_object.base_components import BaseComponents
 
 class PaymentModuleDetails(BaseComponents):
     page_header_container = 'div[data-cy="page-header-container"]'
-    page_header_title = 'h5[data-cy="page-header-title"]'
     pp_unicef_id = 'span[data-cy="pp-unicef-id"]'
     status_container = 'div[data-cy="status-container"]'
     button_export_xlsx = 'button[data-cy="button-export-xlsx"]'
@@ -64,7 +61,6 @@ class PaymentModuleDetails(BaseComponents):
     button_mark_as_released = 'button[data-cy="button-mark-as-released"]'
     button_import_submit = 'button[data-cy="button-import-submit"]'
     errors_container = 'div[data-cy="errors-container"]'
-    delete_button = 'button[data-cy="button-delete-pp"]'
     upload_file_button = 'button[data-cy="upload-file-button"]'
     title_input = 'div[data-cy="title-input"]'
     expand_supporting_documents_button = 'button[data-cy="expand-button"]'
@@ -80,9 +76,6 @@ class PaymentModuleDetails(BaseComponents):
     def get_page_header_container(self) -> WebElement:
         return self.wait_for(self.page_header_container)
 
-    def get_page_header_title(self) -> WebElement:
-        return self.wait_for(self.page_header_title)
-
     def get_pp_unicef_id(self) -> WebElement:
         return self.wait_for(self.pp_unicef_id)
 
@@ -97,9 +90,6 @@ class PaymentModuleDetails(BaseComponents):
 
     def get_button_import_submit(self) -> WebElement:
         return self.wait_for(self.button_import_submit)
-
-    def get_delete_button(self) -> WebElement:
-        return self.wait_for(self.delete_button)
 
     def get_upload_file_button(self) -> WebElement:
         return self.wait_for(self.upload_file_button)
@@ -231,10 +221,7 @@ class PaymentModuleDetails(BaseComponents):
         return self.wait_for(self.button_send_for_approval)
 
     def click_button(self, locator: str) -> None:
-        self.wait_for(locator)
-        self.element_clickable(locator)
-        sleep(5)
-        self.get(locator).click()
+        self.click(locator)
 
     def click_button_send_for_approval(self) -> None:
         self.click_button(self.button_send_for_approval)

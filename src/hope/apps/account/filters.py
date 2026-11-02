@@ -56,10 +56,5 @@ class UsersFilter(FilterSet):
             q_obj |= Q(email__startswith=v)
         return qs.filter(q_obj)
 
-    def business_area_filter(self, qs: "QuerySet", name: str, value: str) -> "QuerySet[User]":
-        return qs.filter(
-            Q(role_assignments__business_area__slug=value) | Q(partner__role_assignments__business_area__slug=value)
-        )
-
     def partners_filter(self, qs: "QuerySet", name: str, values: list[int]) -> "QuerySet[User]":
         return qs.filter(partner_id__in=values)

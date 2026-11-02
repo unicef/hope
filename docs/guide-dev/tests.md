@@ -44,7 +44,7 @@ This will require some more steps to be taken before running the tests.
 3. **Running tests**
 
 1. Install system requirements on MACOS:
-   `brew install wkhtmltopdf pango postgis gdal`
+   `brew install wkhtmltopdf pango postgis`
 2. Create virtualenvironment:
     `uv venv .venv --python 3.13.0`
 3. Register the created venv for the project with:

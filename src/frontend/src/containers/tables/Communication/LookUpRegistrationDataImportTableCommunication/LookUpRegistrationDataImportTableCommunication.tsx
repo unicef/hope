@@ -1,5 +1,5 @@
 import type { ReactElement } from 'react';
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import styled from 'styled-components';
@@ -17,6 +17,7 @@ import { headCells } from './LookUpRegistrationDataImportTableHeadCellsCommunica
 import { LookUpRegistrationDataImportTableRowCommunication } from './LookUpRegistrationDataImportTableRowCommunication';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import { usePersistedCount } from '@hooks/usePersistedCount';
+import { useTableState } from '@hooks/useTableState';
 
 interface LookUpRegistrationDataImportTableCommunicationProps {
   filter;
@@ -47,7 +48,7 @@ function LookUpRegistrationDataImportTableCommunication({
   const { t } = useTranslation();
   const { businessArea, programId } = useBaseUrl();
 
-  const initialQueryVariables = useMemo(() => {
+  const filterVariables = useMemo(() => {
     return {
       businessAreaSlug: businessArea,
       programCode: programId,
@@ -77,17 +78,16 @@ function LookUpRegistrationDataImportTableCommunication({
     filter.totalHouseholdsCountWithValidPhoneNoMax,
   ]);
 
-  const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
-  useEffect(() => {
-    setQueryVariables(initialQueryVariables);
-  }, [initialQueryVariables]);
-
-  const [page, setPage] = useState(0);
+  const table = useTableState({ resetPageOn: filterVariables });
+  const { page } = table;
+  const listVariables = useMemo(
+    () => ({ ...filterVariables, ...table.paginationParams }),
+    [filterVariables, table.paginationParams],
+  );
 
   const registrationDataImportsListParams = createApiParams(
     { businessAreaSlug: businessArea, programCode: programId },
-    queryVariables,
-    { withPagination: true },
+    listVariables,
   );
   const { data, isLoading, isFetching, error } =
     useQuery<PaginatedRegistrationDataImportListList>({
@@ -104,7 +104,7 @@ function LookUpRegistrationDataImportTableCommunication({
 
   const registrationDataImportsCountParams = createApiParams(
     { businessAreaSlug: businessArea, programCode: programId },
-    queryVariables,
+    filterVariables,
   );
   const { data: countData } = useQuery<CountResponse>({
     queryKey: restQueryKey(
@@ -146,11 +146,8 @@ function LookUpRegistrationDataImportTableCommunication({
         error={error}
         isLoading={isLoading}
         isFetching={isFetching}
-        queryVariables={queryVariables}
-        setQueryVariables={setQueryVariables}
+        tableState={table}
         itemsCount={itemsCount}
-        page={page}
-        setPage={setPage}
       />
     </TableWrapper>
   );

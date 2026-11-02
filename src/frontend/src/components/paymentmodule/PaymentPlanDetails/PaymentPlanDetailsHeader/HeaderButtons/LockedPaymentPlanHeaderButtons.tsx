@@ -33,7 +33,7 @@ export function LockedPaymentPlanHeaderButtons({
   const { businessArea, programId } = useBaseUrl();
   const queryClient = useQueryClient();
 
-  const { mutateAsync: unlock, isPending: loadingUnlock } = useMutation({
+  const { mutate: unlock, isPending: loadingUnlock } = useMutation({
     mutationFn: () =>
       RestService.restBusinessAreasProgramsPaymentPlansUnlockRetrieve({
         businessAreaSlug: businessArea,

@@ -1,6 +1,5 @@
 from datetime import date
 from typing import Any, Callable
-from unittest.mock import patch
 
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase
@@ -53,7 +52,6 @@ from hope.apps.grievance.models import (
     GrievanceTicket,
     TicketNote,
 )
-from hope.apps.grievance.notifications import GrievanceNotification
 from hope.apps.household.const import (
     IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
     IDENTIFICATION_TYPE_CHOICE,
@@ -1849,7 +1847,7 @@ def test_update_grievance_ticket_records_the_assignment(
 
 
 @pytest.mark.usefixtures("mock_elasticsearch")
-def test_status_change_back_to_in_progress_does_not_notify_the_owner_who_sent_it_back(
+def test_status_change_back_to_in_progress_stamps_the_user_who_sent_it_back(
     api_client: Any,
     user: User,
     afghanistan: BusinessArea,
@@ -1857,28 +1855,21 @@ def test_status_change_back_to_in_progress_does_not_notify_the_owner_who_sent_it
     complaint_ticket_for_approval: GrievanceTicket,
     complaint_ticket_status_change_url: str,
     create_user_role_with_permissions: Callable,
-    django_capture_on_commit_callbacks: Callable,
 ) -> None:
     create_user_role_with_permissions(user, [Permissions.GRIEVANCES_SEND_BACK_AS_OWNER], afghanistan, program)
 
     client = api_client(user)
-    with patch.object(GrievanceNotification, "send_all_notifications") as mock_send:
-        with django_capture_on_commit_callbacks(execute=True):
-            response = client.post(
-                complaint_ticket_status_change_url,
-                {"status": GrievanceTicket.STATUS_IN_PROGRESS},
-                format="json",
-            )
+    response = client.post(
+        complaint_ticket_status_change_url,
+        {"status": GrievanceTicket.STATUS_IN_PROGRESS},
+        format="json",
+    )
 
     assert response.status_code == status.HTTP_202_ACCEPTED
-    send_back_recipients = [
-        recipient.id
-        for call in mock_send.call_args_list
-        for notification in call.args[0]
-        if notification.action == GrievanceNotification.ACTION_SEND_BACK_TO_IN_PROGRESS
-        for recipient in notification.user_recipients
-    ]
-    assert send_back_recipients == []
+    complaint_ticket_for_approval.refresh_from_db()
+    assert complaint_ticket_for_approval.status == GrievanceTicket.STATUS_IN_PROGRESS
+    assert complaint_ticket_for_approval.user_modified_by == user
+    assert complaint_ticket_for_approval.user_modified is not None
 
 
 def test_update_grievance_ticket_without_linked_tickets_keeps_them(

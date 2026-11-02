@@ -191,6 +191,8 @@ export function paymentStatusDisplayMap(status: string): string {
   switch (status) {
     case PaymentStatusEnum.PENDING:
       return 'PENDING';
+    case PaymentStatusEnum.NOT_ELIGIBLE:
+      return 'NOT ELIGIBLE';
     case PaymentStatusEnum.DISTRIBUTION_SUCCESSFUL:
     case PaymentStatusEnum.TRANSACTION_SUCCESSFUL:
       return 'DELIVERED FULLY';
@@ -640,9 +642,29 @@ export function formatCurrency(
   return `${formatted}${onlyNumberValue ? '' : ' USD'}`;
 }
 
+/**
+ * A redenomination leaves two Currency rows sharing one ISO `code`, so `visionCode` is
+ * appended in brackets when it differs, matching how the backend renders a Currency.
+ */
+function currencyVariantSuffix(
+  currency: string,
+  visionCode?: string | null,
+): string {
+  return visionCode && visionCode !== currency ? ` (${visionCode})` : '';
+}
+
+export function formatCurrencyCode(
+  currency?: string | null,
+  visionCode?: string | null,
+): string | null {
+  if (!currency) return null;
+  return `${currency}${currencyVariantSuffix(currency, visionCode)}`;
+}
+
 export function formatCurrencyWithSymbol(
   amount: number | string | null | undefined,
   currency = 'USD',
+  visionCode?: string | null,
 ): string {
   // If amount is null or undefined just show '-'
   if (amount === null || amount === undefined) {
@@ -662,24 +684,27 @@ export function formatCurrencyWithSymbol(
     return '-';
   }
 
-  if (currency === 'USDC') return `${formatFigure(numValue)} ${currency}`;
   // if currency is unknown, simply format using most common formatting option, and don't show currency symbol
   if (!currency) return formatCurrency(numValue, true);
+
+  const suffix = currencyVariantSuffix(currency, visionCode);
 
   // Guard against non-ISO-4217 currency codes (e.g. app-specific codes like SYP01)
   // Intl.NumberFormat only accepts valid 3-letter ISO 4217 codes
   const ISO_CURRENCY_RE = /^[A-Z]{3}$/;
-  if (!ISO_CURRENCY_RE.test(currency)) {
-    return `${formatFigure(numValue)} ${currency}`;
+  if (currency === 'USDC' || !ISO_CURRENCY_RE.test(currency)) {
+    return `${formatFigure(numValue)} ${currency}${suffix}`;
   }
 
   // undefined forces to use local browser settings
-  return new Intl.NumberFormat(undefined, {
+  const formattedAmount = new Intl.NumberFormat(undefined, {
     style: 'currency',
     currency,
     // enable this if decided that we always want code and not a symbol
     currencyDisplay: 'code',
   }).format(numValue);
+
+  return `${formattedAmount}${suffix}`;
 }
 
 export function countPercentage(
@@ -928,6 +953,19 @@ interface HandleFilterChangeFunctions {
   applyFilterChanges: HandleApplyFilterChanges;
   clearFilter: HandleClearFilter;
 }
+
+export const MIN_PHONE_SEARCH_DIGITS = 4;
+
+export const isPhoneSearchTooShort = (phone?: string | null): boolean =>
+  !!phone && phone.replace(/\D/g, '').length < MIN_PHONE_SEARCH_DIGITS;
+
+// Filter state can be seeded straight from the URL, which bypasses the apply-time
+// guard in the filter components. The backend rejects a short phone with a 400, so
+// drop it here rather than firing a request that cannot succeed.
+export const sanitizePhoneSearch = (phone?: string | null): string => {
+  const trimmed = phone?.trim() ?? '';
+  return isPhoneSearchTooShort(trimmed) ? '' : trimmed;
+};
 
 export const createHandleApplyFilterChange = (
   initialFilter: Filter,

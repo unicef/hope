@@ -17,6 +17,7 @@ class PaymentPlanFlow:
     def __init__(self, payment_plan: "PaymentPlan"):
         self.payment_plan = payment_plan
 
+    # Looks unused, but viewflow calls this getter/setter pair on every status_* transition.
     @status.setter()
     def _set_status(self, value: str) -> None:
         self.payment_plan.status = value
@@ -25,6 +26,7 @@ class PaymentPlanFlow:
     def _get_status(self) -> str:
         return self.payment_plan.status
 
+    # Looks unused, but viewflow calls this getter/setter pair on every background_action_status_* transition.
     @background_action_status.setter()
     def _set_background_action_status(self, value: str | None) -> None:
         self.payment_plan.background_action_status = value
@@ -33,6 +35,7 @@ class PaymentPlanFlow:
     def _get_background_action_status(self) -> str | None:
         return self.payment_plan.background_action_status
 
+    # Looks unused, but viewflow calls this getter/setter pair on every build_status_* transition.
     @build_status.setter()
     def _set_build_status(self, value: str | None) -> None:
         self.payment_plan.build_status = value
@@ -318,6 +321,7 @@ class PaymentPlanFlow:
                     obj.payment_plan.Status.TP_STEFICON_WAIT,
                     obj.payment_plan.Status.TP_STEFICON_COMPLETED,
                     obj.payment_plan.Status.TP_STEFICON_ERROR,
+                    obj.payment_plan.Status.OPEN,
                 ]
             )
         ],
@@ -337,6 +341,7 @@ class PaymentPlanFlow:
                     obj.payment_plan.Status.TP_STEFICON_COMPLETED,
                     obj.payment_plan.Status.TP_STEFICON_ERROR,
                     obj.payment_plan.Status.TP_STEFICON_WAIT,
+                    obj.payment_plan.Status.OPEN,
                 ]
             )
         ],
@@ -510,7 +515,8 @@ class PaymentPlanFlow:
     )
     def status_reactivate_abort(self) -> None:
         self.payment_plan.status_date = timezone.now()
-        self.payment_plan.build_status = self.payment_plan.BuildStatus.BUILD_STATUS_PENDING
+        if self.payment_plan.plan_type == PaymentPlan.PlanType.REGULAR:
+            self.payment_plan.build_status = self.payment_plan.BuildStatus.BUILD_STATUS_PENDING
 
 
 class FollowUpInstructionFlow:
@@ -519,6 +525,7 @@ class FollowUpInstructionFlow:
     def __init__(self, instruction: "FollowUpInstruction"):
         self.instruction = instruction
 
+    # Looks unused, but viewflow calls this getter/setter pair on every background_action_status_* transition.
     @background_action_status.setter()
     def _set_background_action_status(self, value: str | None) -> None:
         self.instruction.background_action_status = value

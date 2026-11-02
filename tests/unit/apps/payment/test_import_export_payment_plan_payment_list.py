@@ -896,14 +896,6 @@ def test_send_file_passwords_with_file_temp_sends_passwords(user):
     assert "XLSX file password: xlsx-pw" in call_kwargs["text_body"]
 
 
-def test_send_delivery_passwords_sends_email_with_plan_title(payment_plan, user):
-    with patch.object(user, "email_user") as mock_email:
-        XlsxPaymentPlanDeliveryExportService.send_delivery_passwords(user, payment_plan)
-
-    mock_email.assert_called_once()
-    assert f"Payment Plan {payment_plan.unicef_id}" in mock_email.call_args[1]["subject"]
-
-
 def test_send_delivery_passwords_for_file_sends_email_with_label(user):
     file_temp = FileTempFactory()
     with patch.object(user, "email_user") as mock_email:

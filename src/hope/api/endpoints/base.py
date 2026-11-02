@@ -2,7 +2,6 @@ from typing import Any
 
 from constance import config
 from django.core.exceptions import ObjectDoesNotExist
-from django.db import models
 from django.http import Http404, HttpRequest
 from django.http.response import HttpResponseBase
 from django.utils.functional import cached_property
@@ -20,11 +19,6 @@ from hope.api.auth import (
     HOPEPermission,
 )
 from hope.models import APILogEntry, BusinessArea, Grant
-
-
-class RejectPolicy(models.TextChoices):
-    STRICT = "STRICT", "Strict"
-    LAX = "LAX", "Lax"
 
 
 class SelectedBusinessAreaMixin:
@@ -72,7 +66,7 @@ class HOPEAPIView(APIView):
 
         return ret
 
-    def handle_exception(self, exc: Exception) -> Any:
+    def handle_exception(self, exc: Exception) -> Response:
         if isinstance(exc, PermissionDenied):
             perm_name = self.permission.name if self.permission else ""
             exc = PermissionDenied("%s %s" % (exc.detail, perm_name))

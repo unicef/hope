@@ -68,30 +68,34 @@ export const ProgramCycleDetailsPage = (): ReactElement => {
     <>
       <ProgramCycleDetailsHeader programCycle={data} />
       <ProgramCycleDetailsSection programCycle={data} />
-      <TableWrapper>
-        <PaymentPlansFilters
-          filter={filter}
-          setFilter={setFilter}
-          initialFilter={initialFilter}
-          appliedFilter={appliedFilter}
-          setAppliedFilter={(f) => {
-            setAppliedFilter(f);
-            setShouldScroll(true);
-          }}
-        />
-      </TableWrapper>
-      <div ref={tableRef}>
-        <TableWrapper>
-          <PaymentPlansTable
-            programCycle={data}
-            filter={appliedFilter}
-            canViewDetails={hasPermissions(
-              PERMISSIONS.PM_VIEW_DETAILS,
-              permissions,
-            )}
-          />
-        </TableWrapper>
-      </div>
+      {hasPermissions(PERMISSIONS.PM_VIEW_LIST, permissions) && (
+        <>
+          <TableWrapper>
+            <PaymentPlansFilters
+              filter={filter}
+              setFilter={setFilter}
+              initialFilter={initialFilter}
+              appliedFilter={appliedFilter}
+              setAppliedFilter={(f) => {
+                setAppliedFilter(f);
+                setShouldScroll(true);
+              }}
+            />
+          </TableWrapper>
+          <div ref={tableRef}>
+            <TableWrapper>
+              <PaymentPlansTable
+                programCycle={data}
+                filter={appliedFilter}
+                canViewDetails={hasPermissions(
+                  PERMISSIONS.PM_VIEW_DETAILS,
+                  permissions,
+                )}
+              />
+            </TableWrapper>
+          </div>
+        </>
+      )}
     </>
   );
 };

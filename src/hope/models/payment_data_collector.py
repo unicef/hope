@@ -7,6 +7,7 @@ from hope.models.account import Account
 from hope.models.delivery_mechanism_config import DeliveryMechanismConfig
 from hope.models.financial_institution_mapping import FinancialInstitutionMapping
 from hope.models.fsp_name_mapping import FspNameMapping
+from hope.models.household import Household
 from hope.models.individual import Individual
 
 if TYPE_CHECKING:
@@ -34,7 +35,7 @@ class PaymentDataCollector(Account):
         associated_with: str,
         collector: Individual,
         account: Account | None = None,
-    ) -> Any:
+    ) -> Individual | Household | dict | None:
         associated_objects = {
             FspNameMapping.SourceModel.INDIVIDUAL.value: collector,
             FspNameMapping.SourceModel.HOUSEHOLD.value: collector.household,

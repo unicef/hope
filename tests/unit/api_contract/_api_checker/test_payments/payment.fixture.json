@@ -13,7 +13,7 @@
                 "parent": "ad89a016-ec17-43c6-81ab-729de501c8d8",
                 "parent_split": null,
                 "business_area": "07c46b07-7066-481b-88db-487f80d8e502",
-                "program": null,
+                "program": "96a88842-0f30-4277-a70c-5f5a4c08d54d",
                 "household": "c360ef81-f86c-49c6-a392-1b01c21fbf8b",
                 "head_of_household": null,
                 "delivery_type": null,
@@ -145,7 +145,6 @@
                     "rdi_import_xlsx_disabled": false,
                     "active": true,
                     "enable_email_notification": true,
-
                     "rapid_pro_host": null,
                     "rapid_pro_payment_verification_token": null,
                     "rapid_pro_messages_token": null,
@@ -586,7 +585,9 @@
                 "fields": {
                     "code": "PLN",
                     "name": "Polish Zloty",
-                    "is_crypto": false
+                    "is_crypto": false,
+                    "vision_code": "PLN",
+                    "active": true
                 }
             }
         ]

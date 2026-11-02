@@ -68,6 +68,7 @@ export const NaReassignRoleModal = ({
   const initialFilterIND = {
     search: '',
     documentType: documentTypeChoices?.[0]?.value,
+    phone: '',
     documentNumber: '',
     admin2: '',
     sex: '',
@@ -76,6 +77,7 @@ export const NaReassignRoleModal = ({
     flags: [],
     orderBy: 'unicef_id',
     status: '',
+    birthDate: '',
     // The head of household must be a member of that household; a primary
     // collector may be someone outside it.
     household: role === 'HEAD' ? household.id : '',

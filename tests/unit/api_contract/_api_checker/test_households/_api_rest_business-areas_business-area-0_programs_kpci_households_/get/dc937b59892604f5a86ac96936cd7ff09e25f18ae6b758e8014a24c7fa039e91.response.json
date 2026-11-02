@@ -30,6 +30,7 @@
                 "last_registration_date": "2025-01-01T00:00:00Z",
                 "first_registration_date": "2025-01-01T00:00:00Z",
                 "currency": null,
+                "currency_vision_code": null,
                 "has_duplicates": false,
                 "sanction_list_possible_match": false,
                 "sanction_list_confirmed_match": false,

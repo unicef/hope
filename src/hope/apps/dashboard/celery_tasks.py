@@ -19,6 +19,8 @@ from hope.models import BusinessArea
 
 logger = logging.getLogger(__name__)
 
+DASH_REPORT_LOCK_PREFIX = "dash_report_task_running_"
+
 
 @app.task(
     autoretry_for=(OperationalError, ProgrammingError, psycopg.errors.InvalidCursorName),
@@ -32,7 +34,7 @@ def update_dashboard_figures() -> None:
 
     for business_area in business_areas_with_households:
         set_sentry_business_area_tag(business_area.slug)
-        lock_key = f"dash_report_task_running_{business_area.slug}"
+        lock_key = f"{DASH_REPORT_LOCK_PREFIX}{business_area.slug}"
         lock_acquired = cache.add(lock_key, True, timeout=60 * 60)
         try:
             DashboardDataCache.refresh_data(business_area.slug)
@@ -45,7 +47,7 @@ def update_dashboard_figures() -> None:
                 cache.delete(lock_key)
 
     set_sentry_business_area_tag(GLOBAL_SLUG)
-    global_lock_key = f"dash_report_task_running_{GLOBAL_SLUG}"
+    global_lock_key = f"{DASH_REPORT_LOCK_PREFIX}{GLOBAL_SLUG}"
     global_lock_acquired = cache.add(global_lock_key, True, timeout=60 * 60)
     try:
         DashboardGlobalDataCache.refresh_data()
@@ -75,7 +77,7 @@ def update_recent_dashboard_figures() -> None:
 
     for ba in BusinessArea.objects.using(settings.DASHBOARD_DB).filter(active=True):
         set_sentry_business_area_tag(ba.slug)
-        lock_key = f"dash_report_task_running_{ba.slug}"
+        lock_key = f"{DASH_REPORT_LOCK_PREFIX}{ba.slug}"
         lock_acquired = cache.add(lock_key, True, timeout=60 * 15)
         try:
             DashboardDataCache.refresh_data(ba.slug, years_to_refresh=years_to_refresh)
@@ -89,7 +91,7 @@ def update_recent_dashboard_figures() -> None:
                 cache.delete(lock_key)
 
     set_sentry_business_area_tag("global")
-    global_lock_key = f"dash_report_task_running_{GLOBAL_SLUG}"
+    global_lock_key = f"{DASH_REPORT_LOCK_PREFIX}{GLOBAL_SLUG}"
     global_lock_acquired = cache.add(global_lock_key, True, timeout=60 * 60)
     try:
         DashboardGlobalDataCache.refresh_data(years_to_refresh=years_to_refresh)
@@ -127,4 +129,4 @@ def generate_dash_report_task(self: Task, business_area_slug: str) -> None:
         raise
     finally:
         if not is_retrying:
-            cache.delete(f"dash_report_task_running_{business_area_slug}")
+            cache.delete(f"{DASH_REPORT_LOCK_PREFIX}{business_area_slug}")

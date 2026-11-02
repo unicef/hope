@@ -94,7 +94,11 @@ export function EditGroupName({
           initialValues={{ name: group.name ?? '' }}
           validationSchema={validationSchema}
           onSubmit={async (values) => {
-            await mutateAsync(values.name);
+            try {
+              await mutateAsync(values.name);
+            } catch {
+              // handled in onError
+            }
           }}
         >
           {({ submitForm }) => (

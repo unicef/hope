@@ -2,7 +2,7 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 from model_utils import Choices
 
-from hope.models.utils import TimeStampedUUIDModel
+from hope.models.utils import LongNameIndex, TimeStampedUUIDModel
 
 
 def get_status_choices() -> tuple:
@@ -38,3 +38,7 @@ class EntitlementCard(TimeStampedUUIDModel):
     class Meta:
         app_label = "household"
         ordering = ("id",)
+        indexes = [
+            LongNameIndex(fields=["created_at"], name="household_entitlementcard_created_at_97bf4a4a"),
+            LongNameIndex(fields=["updated_at"], name="household_entitlementcard_updated_at_6438fd2a"),
+        ]

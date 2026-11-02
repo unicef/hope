@@ -8,7 +8,7 @@ from hope.contrib.vision.models import FundsCommitmentItem
 VISION_CALLBACK_FIELD_OVERRIDES = {
     "vision_payplanSno": "vision_payplan_sno",
     "vision_payplan_sno": "vision_payplanSno",
-    "fc_num": "fc_num",
+    "fc_numbers": "fc_numbers",
 }
 
 
@@ -17,6 +17,8 @@ def vision_callback_external_field_name(field_name: str) -> str:
 
 
 class FundsCommitmentItemSerializer(serializers.ModelSerializer):
+    business_area = serializers.CharField(source="office.slug", read_only=True, allow_null=True)
+
     class Meta:
         model = FundsCommitmentItem
         fields = [
@@ -27,6 +29,7 @@ class FundsCommitmentItemSerializer(serializers.ModelSerializer):
             "commitment_amount_usd",
             "total_open_amount_local",
             "total_open_amount_usd",
+            "business_area",
             "rec_serial_number",
             "funds_commitment_item",
             "sponsor",
@@ -37,6 +40,23 @@ class FundsCommitmentItemSerializer(serializers.ModelSerializer):
 class FundsCommitmentSerializer(serializers.Serializer):
     id = serializers.IntegerField()
     funds_commitment_number = serializers.CharField()
+    vendor_id = serializers.CharField(read_only=True, allow_null=True)
+    posting_date = serializers.DateField(read_only=True, allow_null=True)
+    document_reference = serializers.CharField(read_only=True, allow_null=True)
+    fc_status = serializers.CharField(read_only=True, allow_null=True)
+    total_amount_usd = serializers.DecimalField(
+        max_digits=15,
+        decimal_places=2,
+        read_only=True,
+        allow_null=True,
+    )
+    total_amount_local = serializers.DecimalField(
+        max_digits=15,
+        decimal_places=2,
+        read_only=True,
+        allow_null=True,
+    )
+    currency = serializers.CharField(read_only=True, allow_null=True)
     funds_commitment_items = FundsCommitmentItemSerializer(many=True)
 
 
@@ -45,12 +65,24 @@ class PaymentPlanCallbackRequestSerializer(serializers.Serializer):
     payplan_sno = serializers.CharField()
     vision_payplan_sno = serializers.CharField(required=False, allow_blank=True)
     status = serializers.CharField(required=False, allow_blank=True)
-    fc_num = serializers.CharField(required=False, allow_blank=True)
+    fc_numbers = serializers.ListField(
+        child=serializers.CharField(),
+        required=False,
+        default=list,
+    )
 
     def to_internal_value(self, data: dict) -> dict[str, Any]:
         field_names: tuple[str, ...] = tuple(self.fields.keys())
+        fc_numbers = data.get("fc_numbers")
+        if fc_numbers is None or fc_numbers == "":
+            fc_numbers = []
         return super().to_internal_value(
-            {field_name: data.get(vision_callback_external_field_name(field_name), "") for field_name in field_names}
+            {
+                field_name: fc_numbers
+                if field_name == "fc_numbers"
+                else data.get(vision_callback_external_field_name(field_name), "")
+                for field_name in field_names
+            }
         )
 
     def initial_value(self, field_name: str) -> Any:
@@ -63,10 +95,6 @@ class PaymentPlanCallbackRequestSerializer(serializers.Serializer):
     @property
     def initial_payplan_sno(self) -> str:
         return self.initial_value("payplan_sno")
-
-    @property
-    def validated_message_id(self) -> str:
-        return self.validated_data.get("message_id", "")
 
     @property
     def validated_payplan_sno(self) -> str:
@@ -106,7 +134,7 @@ class PaymentPlanPayloadSerializer(serializers.Serializer):
     vendor_number = serializers.CharField(source="financial_service_provider.vision_vendor_number")
     payplan_sno = serializers.CharField(source="unicef_id")
     payplan_desc = serializers.CharField(source="name")
-    currency = serializers.CharField(source="currency.code")
+    currency = serializers.CharField(source="currency.vision_code")
     auth_amt = serializers.CharField(source="total_entitled_quantity")
     auth_amt_usd = serializers.CharField(source="total_entitled_quantity_usd")
     exchange_rate = serializers.DecimalField(max_digits=15, decimal_places=8, allow_null=True)

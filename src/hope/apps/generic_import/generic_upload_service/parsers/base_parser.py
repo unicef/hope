@@ -13,19 +13,11 @@ class BaseParser:
         raise NotImplementedError("Subclasses must implement this property")
 
     @property
-    def supported_file_types(self) -> list[str]:
-        raise NotImplementedError("Subclasses must implement this property")
-
-    @property
     def households_data(self) -> list[dict[str, Any]]:
         raise NotImplementedError("Subclasses must implement this property")
 
     @property
     def individuals_data(self) -> list[dict[str, Any]]:
-        raise NotImplementedError("Subclasses must implement this property")
-
-    @property
-    def individual_roles_in_households_data(self) -> list[dict[str, Any]]:
         raise NotImplementedError("Subclasses must implement this property")
 
     @property

@@ -8,6 +8,8 @@ from django.db import transaction
 from elasticsearch import NotFoundError
 from elasticsearch.dsl import connections
 
+from hope.apps.core.utils import chunks
+
 logger = logging.getLogger(__name__)
 
 DEFAULT_SCRIPT = "return (1.0/doc.length)*query.boost"
@@ -19,6 +21,9 @@ if TYPE_CHECKING:
 
 
 PROGRESS_EVERY = 1_000
+# ES default index.max_terms_count, a terms query with more values is rejected
+# (ids query is no way around it, it is capped by max_result_window = 10000)
+MAX_TERMS_COUNT = 65_536
 
 
 def populate_index(
@@ -62,10 +67,11 @@ def remove_elasticsearch_documents_by_matching_ids(
     if not config.IS_ELASTICSEARCH_ENABLED or not id_list:
         return
     try:
-        query_dict = {"query": {"terms": {"_id": [str(_id) for _id in id_list]}}}
-        document.search(using=using).params(search_type="dfs_query_then_fetch", conflicts="proceed").update_from_dict(
-            query_dict
-        ).delete()
+        for ids_chunk in chunks(id_list, MAX_TERMS_COUNT):
+            query_dict = {"query": {"terms": {"_id": [str(_id) for _id in ids_chunk]}}}
+            document.search(using=using).params(
+                search_type="dfs_query_then_fetch", conflicts="proceed"
+            ).update_from_dict(query_dict).delete()
     except NotFoundError:
         pass
 

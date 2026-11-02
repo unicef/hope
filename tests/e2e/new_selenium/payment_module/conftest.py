@@ -17,9 +17,12 @@ from extras.test_utils.factories import (
     PaymentHouseholdSnapshotFactory,
     PaymentPlanFactory,
     PaymentPlanGroupFactory,
+    RuleCommitFactory,
 )
 from extras.test_utils.factories.program import ProgramCycleFactory, ProgramFactory
+from extras.test_utils.factories.targeting import TargetingCriteriaRuleFactory, TargetingCriteriaRuleFilterFactory
 from hope.apps.payment.services.follow_up_instruction_service import FollowUpInstructionService
+from hope.apps.payment.services.payment_plan_services import PaymentPlanService
 from hope.models import (
     BusinessArea,
     Currency,
@@ -32,8 +35,12 @@ from hope.models import (
     PaymentPlanGroup,
     Program,
     ProgramCycle,
+    Rule,
     User,
 )
+
+ENTITLEMENT_RULE_NAME = "Household Size Entitlement"
+ENTITLEMENT_RULE_DEFINITION = 'result.value = context["household"].size * 10'
 
 
 @pytest.fixture
@@ -273,3 +280,244 @@ def fi_instruction(
         dispersion_start_date=datetime.date(2027, 1, 1),
         dispersion_end_date=datetime.date(2027, 12, 31),
     )
+
+
+def _entitlement_payment_plan(
+    business_area: BusinessArea,
+    status: str,
+    entitlements: tuple[Decimal | None, Decimal | None],
+) -> PaymentPlan:
+    program = ProgramFactory(name="Entitlement E2E Program", status=Program.ACTIVE, business_area=business_area)
+    delivery_mechanism = DeliveryMechanismFactory(
+        code="entitlement-e2e", name="Entitlement E2E", payment_gateway_id="entitlement-e2e"
+    )
+    fsp = FinancialServiceProviderFactory(name="Entitlement E2E Provider")
+    fsp.delivery_mechanisms.add(delivery_mechanism)
+    currency = CurrencyFactory(code="PLN", name="Polish Zloty")
+    payment_plan = PaymentPlanFactory(
+        name="Entitlement E2E Payment Plan",
+        program_cycle=ProgramCycleFactory(program=program),
+        business_area=business_area,
+        status=status,
+        plan_type=PaymentPlan.PlanType.REGULAR,
+        financial_service_provider=fsp,
+        delivery_mechanism=delivery_mechanism,
+        currency=currency,
+        exchange_rate=Decimal("2.0"),
+    )
+    for index, (size, entitlement) in enumerate(zip((1, 3), entitlements, strict=True), start=1):
+        household = HouseholdFactory(size=size, business_area=business_area, program=program)
+        payment = PaymentFactory(
+            parent=payment_plan,
+            household=household,
+            collector=household.head_of_household,
+            head_of_household=household.head_of_household,
+            program=program,
+            unicef_id=f"RCPT-ENTITLEMENT-E2E-{index}",
+            status=Payment.STATUS_PENDING,
+            currency=currency,
+            delivery_type=delivery_mechanism,
+            financial_service_provider=fsp,
+            entitlement_quantity=entitlement,
+            entitlement_quantity_usd=entitlement / 2 if entitlement is not None else None,
+            delivered_quantity=None,
+            delivered_quantity_usd=None,
+        )
+        payment.save(update_fields=["unicef_id"])
+        PaymentHouseholdSnapshotFactory(
+            payment=payment,
+            snapshot_data={
+                "unicef_id": household.unicef_id,
+                "size": household.size,
+                "primary_collector": {
+                    "unicef_id": household.head_of_household.unicef_id,
+                    "full_name": household.head_of_household.full_name,
+                },
+                "alternate_collector": {},
+            },
+        )
+    payment_plan.update_money_fields()
+    return payment_plan
+
+
+@pytest.fixture
+def locked_entitlement_payment_plan(business_area: BusinessArea) -> PaymentPlan:
+    return _entitlement_payment_plan(business_area, PaymentPlan.Status.LOCKED, (None, None))
+
+
+@pytest.fixture
+def entitled_locked_payment_plan(business_area: BusinessArea) -> PaymentPlan:
+    return _entitlement_payment_plan(business_area, PaymentPlan.Status.LOCKED, (Decimal("10.00"), Decimal("30.00")))
+
+
+@pytest.fixture
+def entitled_open_payment_plan(business_area: BusinessArea) -> PaymentPlan:
+    return _entitlement_payment_plan(business_area, PaymentPlan.Status.OPEN, (Decimal("100.00"), Decimal("300.00")))
+
+
+@pytest.fixture
+def household_size_entitlement_rule(business_area: BusinessArea) -> Rule:
+    commit = RuleCommitFactory(
+        rule__name=ENTITLEMENT_RULE_NAME,
+        rule__type=Rule.TYPE_PAYMENT_PLAN,
+        rule__enabled=True,
+        rule__definition=ENTITLEMENT_RULE_DEFINITION,
+        definition=ENTITLEMENT_RULE_DEFINITION,
+        enabled=True,
+        is_release=True,
+    )
+    commit.rule.allowed_business_areas.add(business_area)
+    return commit.rule
+
+
+@pytest.fixture
+def cycles_program(business_area: BusinessArea) -> Program:
+    today = timezone.now().date()
+    program = ProgramFactory(
+        business_area=business_area,
+        status=Program.ACTIVE,
+        start_date=today - datetime.timedelta(days=30),
+        end_date=today + datetime.timedelta(days=30),
+        cycle=False,
+    )
+    ProgramCycleFactory(
+        program=program,
+        title="Default Programme Cycle",
+        status=ProgramCycle.FINISHED,
+        start_date=today - datetime.timedelta(days=25),
+        end_date=today - datetime.timedelta(days=20),
+    )
+    return program
+
+
+@pytest.fixture
+def active_cycle(cycles_program: Program) -> ProgramCycle:
+    today = timezone.now().date()
+    cycle = ProgramCycleFactory(
+        program=cycles_program,
+        title="Test Programme Cycle 001",
+        status=ProgramCycle.ACTIVE,
+        start_date=today,
+        end_date=today + datetime.timedelta(days=5),
+    )
+    ProgramCycleFactory(
+        program=cycles_program,
+        title="Programme Cycle in Draft",
+        status=ProgramCycle.DRAFT,
+        start_date=today + datetime.timedelta(days=6),
+        end_date=today + datetime.timedelta(days=16),
+    )
+    return cycle
+
+
+@pytest.fixture
+def active_cycle_with_payment_plans(active_cycle: ProgramCycle) -> ProgramCycle:
+    business_area = active_cycle.program.business_area
+    PaymentPlanFactory(
+        program_cycle=active_cycle, business_area=business_area, total_entitled_quantity_usd=Decimal("333.99")
+    )
+    PaymentPlanFactory(
+        program_cycle=active_cycle, business_area=business_area, total_entitled_quantity_usd=Decimal("1500.00")
+    )
+    return active_cycle
+
+
+LIFECYCLE_PAYMENT_PLAN_NAME = "Lifecycle E2E Payment Plan"
+
+
+def _lifecycle_payment_plan(
+    business_area: BusinessArea,
+    status: str,
+    payments_count: int = 3,
+    collectors_count: int | None = None,
+) -> PaymentPlan:
+    """Payment plan with an FSP, a delivery mechanism, USD and `payments_count` payments.
+
+    `collectors_count` makes payments share that many collectors, for split by collector.
+    """
+    program = ProgramFactory(name="Lifecycle E2E Program", status=Program.ACTIVE, business_area=business_area)
+    delivery_mechanism = DeliveryMechanismFactory(
+        code="lifecycle-e2e", name="Lifecycle E2E", payment_gateway_id="lifecycle-e2e"
+    )
+    fsp = FinancialServiceProviderFactory(name="Lifecycle E2E Provider")
+    fsp.delivery_mechanisms.add(delivery_mechanism)
+    currency = CurrencyFactory(code="USD", name="United States Dollar")
+    payment_plan = PaymentPlanFactory(
+        name=LIFECYCLE_PAYMENT_PLAN_NAME,
+        program_cycle=ProgramCycleFactory(program=program),
+        business_area=business_area,
+        status=status,
+        plan_type=PaymentPlan.PlanType.REGULAR,
+        financial_service_provider=fsp,
+        delivery_mechanism=delivery_mechanism,
+        currency=currency,
+    )
+    households = [HouseholdFactory(business_area=business_area, program=program) for _ in range(payments_count)]
+    collectors = [household.head_of_household for household in households[: collectors_count or payments_count]]
+    for index, household in enumerate(households):
+        payment = PaymentFactory(
+            parent=payment_plan,
+            household=household,
+            collector=collectors[index % len(collectors)],
+            head_of_household=household.head_of_household,
+            program=program,
+            status=Payment.STATUS_PENDING,
+            currency=currency,
+            delivery_type=delivery_mechanism,
+            financial_service_provider=fsp,
+            entitlement_quantity=Decimal("10.00"),
+            entitlement_quantity_usd=Decimal("10.00"),
+            delivered_quantity=None,
+            delivered_quantity_usd=None,
+        )
+        PaymentHouseholdSnapshotFactory(payment=payment, snapshot_data={})
+    if status in (PaymentPlan.Status.IN_APPROVAL, PaymentPlan.Status.IN_AUTHORIZATION):
+        ApprovalProcessFactory(payment_plan=payment_plan)
+    payment_plan.update_money_fields()
+    return payment_plan
+
+
+@pytest.fixture
+def in_approval_payment_plan(business_area: BusinessArea) -> PaymentPlan:
+    return _lifecycle_payment_plan(business_area, PaymentPlan.Status.IN_APPROVAL)
+
+
+@pytest.fixture
+def in_authorization_payment_plan(business_area: BusinessArea) -> PaymentPlan:
+    return _lifecycle_payment_plan(business_area, PaymentPlan.Status.IN_AUTHORIZATION)
+
+
+@pytest.fixture
+def locked_fsp_payment_plan(business_area: BusinessArea) -> PaymentPlan:
+    return _lifecycle_payment_plan(business_area, PaymentPlan.Status.LOCKED_FSP)
+
+
+@pytest.fixture
+def accepted_payment_plan(business_area: BusinessArea) -> PaymentPlan:
+    return _lifecycle_payment_plan(business_area, PaymentPlan.Status.ACCEPTED, payments_count=25)
+
+
+@pytest.fixture
+def accepted_shared_collectors_payment_plan(business_area: BusinessArea) -> PaymentPlan:
+    return _lifecycle_payment_plan(business_area, PaymentPlan.Status.ACCEPTED, payments_count=12, collectors_count=3)
+
+
+@pytest.fixture
+def open_payment_plan(business_area: BusinessArea) -> PaymentPlan:
+    return _lifecycle_payment_plan(business_area, PaymentPlan.Status.OPEN)
+
+
+@pytest.fixture
+def aborted_targeted_payment_plan(business_area: BusinessArea) -> PaymentPlan:
+    """ABORTED plan whose targeting matches the programme's 3 households, so Reactivate can rebuild it."""
+    payment_plan = _lifecycle_payment_plan(business_area, PaymentPlan.Status.TP_OPEN, payments_count=0)
+    rule = TargetingCriteriaRuleFactory(payment_plan=payment_plan)
+    TargetingCriteriaRuleFilterFactory(targeting_criteria_rule=rule, comparison_method="RANGE", arguments=[1, 10])
+    for size in (1, 3, 5):
+        HouseholdFactory(size=size, business_area=business_area, program=payment_plan.program)
+    PaymentPlanService(payment_plan).full_rebuild()
+    payment_plan.status = PaymentPlan.Status.ABORTED
+    payment_plan.build_status = PaymentPlan.BuildStatus.BUILD_STATUS_OK
+    payment_plan.abort_comment = "Aborted before the e2e run"
+    payment_plan.save(update_fields=["status", "build_status", "abort_comment"])
+    return payment_plan

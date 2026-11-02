@@ -42,7 +42,7 @@ export function AuthorizePaymentPlan({
 
   const { showMessage } = useSnackbar();
   const queryClient = useQueryClient();
-  const { mutateAsync: authorize, isPending: loadingAuthorize } = useMutation({
+  const { mutate: authorize, isPending: loadingAuthorize } = useMutation({
     mutationFn: ({
       businessAreaSlug,
       id,

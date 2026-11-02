@@ -20,10 +20,14 @@ RESULT_SUCCESS = "success"
 RESULT_FAILED = "failed"
 
 
+RUN_UNIVERSAL_UPDATE_LOCK_PREFIX = "lock:run_universal_individual_update_async_task:"
+GENERATE_UNIVERSAL_UPDATE_TEMPLATE_LOCK_PREFIX = "lock:generate_universal_individual_update_template_async_task:"
+
+
 def run_universal_individual_update_async_task_action(job: AsyncJob) -> str:
     universal_update_id = job.config["universal_update_id"]
     universal_update = UniversalUpdate.objects.get(id=universal_update_id)
-    lock_id = f"lock:run_universal_individual_update_async_task:{universal_update_id}"
+    lock_id = f"{RUN_UNIVERSAL_UPDATE_LOCK_PREFIX}{universal_update_id}"
     lock = cache.lock(lock_id, timeout=HARD_TIME_LIMIT)
     if not lock.acquire(blocking=False):  # pragma: no cover
         return RESULT_LOCKED
@@ -69,7 +73,7 @@ def run_universal_individual_update_async_task(universal_update_id: str) -> None
 def generate_universal_individual_update_template_async_task_action(job: AsyncJob) -> str:
     universal_update_id = job.config["universal_update_id"]
     universal_update = UniversalUpdate.objects.get(id=universal_update_id)
-    lock_id = f"lock:generate_universal_individual_update_template_async_task:{universal_update_id}"
+    lock_id = f"{GENERATE_UNIVERSAL_UPDATE_TEMPLATE_LOCK_PREFIX}{universal_update_id}"
     lock = cache.lock(lock_id, timeout=HARD_TIME_LIMIT)
     if not lock.acquire(blocking=False):  # pragma: no cover
         return RESULT_LOCKED

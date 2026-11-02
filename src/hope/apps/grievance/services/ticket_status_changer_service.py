@@ -40,6 +40,8 @@ class TicketStatusChangerService:
             self._change_status_for_approval()
         elif status == GrievanceTicket.STATUS_CLOSED:
             self._change_status_closed()
+        self.ticket.user_modified = timezone.now()
+        self.ticket.user_modified_by = cast("User", self.user)
         self.ticket.save()
 
     def _can_change_status(self, status: int) -> None:

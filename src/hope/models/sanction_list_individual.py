@@ -3,7 +3,7 @@ from typing import Any
 from django.db import models
 
 from hope.models.sanction_list import SanctionList
-from hope.models.utils import InternalDataFieldModel, TimeStampedUUIDModel
+from hope.models.utils import InternalDataFieldModel, LongNameIndex, TimeStampedUUIDModel
 
 
 class SanctionListIndividualQuerySet(models.QuerySet):
@@ -66,6 +66,10 @@ class SanctionListIndividual(TimeStampedUUIDModel, InternalDataFieldModel):
         verbose_name = "Individual"
         verbose_name_plural = "Individuals"
         unique_together = ("sanction_list", "reference_number")
+        indexes = [
+            LongNameIndex(fields=["created_at"], name="sanction_list_sanctionlistindividual_created_at_50b73670"),
+            LongNameIndex(fields=["updated_at"], name="sanction_list_sanctionlistindividual_updated_at_a42a9b36"),
+        ]
 
     def __str__(self) -> str:
         return self.full_name

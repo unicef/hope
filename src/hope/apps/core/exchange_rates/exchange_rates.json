@@ -20981,6 +20981,15 @@
                 }]
             }
         }, {
+            "CURRENCY_CODE": "SYP01",
+            "CURRENCY_NAME": "Syrian Pound",
+            "X_RATE": "28",
+            "VALID_FROM": "01-JAN-26",
+            "VALID_TO": "31-DEC-99",
+            "RATIO": "1",
+            "NO_OF_DECIMAL": "2",
+            "PAST_XRATE": null
+        }, {
             "CURRENCY_CODE": "TND",
             "CURRENCY_NAME": "Tunisian Dinar",
             "X_RATE": "3.179",

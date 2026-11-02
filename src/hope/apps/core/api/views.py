@@ -216,7 +216,7 @@ class ChoicesViewSet(ViewSet):
     def currencies(self, request: Request) -> Response:
         from hope.models.currency import Currency
 
-        currencies = Currency.objects.filter(active=True).order_by("code")
+        currencies = Currency.objects.active().order_by("code")
         return Response(CurrencyChoiceSerializer(currencies, many=True).data)
 
     @extend_schema(responses={200: ChoiceSerializer(many=True)})

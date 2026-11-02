@@ -9,7 +9,7 @@ from django_celery_boost.models import AsyncJobModel
 
 from hope.models.async_job import AsyncJob
 from hope.models.pdu_xlsx_template import PDUXlsxTemplate
-from hope.models.utils import TimeStampedModel
+from hope.models.utils import LongNameIndex, TimeStampedModel
 
 
 class PDUXlsxUpload(TimeStampedModel):
@@ -63,6 +63,10 @@ class PDUXlsxUpload(TimeStampedModel):
     class Meta:
         app_label = "periodic_data_update"
         ordering = ("-created_at",)
+        indexes = [
+            LongNameIndex(fields=["created_at"], name="periodic_data_update_pduxlsxupload_created_at_5ad6c4ee"),
+            LongNameIndex(fields=["updated_at"], name="periodic_data_update_pduxlsxupload_updated_at_fa057243"),
+        ]
 
     def _get_async_job(self, job_name: str) -> AsyncJob | None:
         return self.async_jobs.filter(job_name=job_name).order_by("-datetime_created", "-pk").first()
