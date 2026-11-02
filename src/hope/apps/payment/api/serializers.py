@@ -977,6 +977,7 @@ class FollowUpInstructionDetailSerializer(OwnerExchangeRateSerializerMixin, Foll
             "custom_exchange_rate",
             "unore_exchange_rate",
             "unore_exchange_rate_unavailable",
+            "version",
         )
 
     @staticmethod
@@ -1916,7 +1917,7 @@ class ApplyCustomExchangeRateSerializer(serializers.Serializer):
     custom_exchange_rate = serializers.DecimalField(
         max_digits=15, decimal_places=8, min_value=Decimal("0.00000001"), required=False
     )
-    updated_at = serializers.DateTimeField(required=True)
+    version = serializers.IntegerField(required=False)
 
     def validate(self, attrs: dict[str, Any]) -> dict[str, Any]:
         if ("unore_exchange_rate" in attrs) == ("custom_exchange_rate" in attrs):
@@ -2092,6 +2093,7 @@ class PaymentPlanGroupUpdateSerializer(PaymentPlanGroupConfigurationMixin, seria
     currency = CurrencySlugRelatedField(
         on_unchanged_code=OnUnchangedCode.KEEP_CURRENT_ROW, required=False, allow_null=True
     )
+    version = serializers.IntegerField(required=False, write_only=True)
 
     class Meta:
         model = PaymentPlanGroup
@@ -2103,6 +2105,7 @@ class PaymentPlanGroupUpdateSerializer(PaymentPlanGroupConfigurationMixin, seria
             "currency",
             "dispersion_start_date",
             "dispersion_end_date",
+            "version",
         ]
         read_only_fields = ["id", "unicef_id"]
 
@@ -2113,6 +2116,7 @@ class PaymentPlanGroupUpdateSerializer(PaymentPlanGroupConfigurationMixin, seria
         return value
 
     def update(self, instance: PaymentPlanGroup, validated_data: dict) -> PaymentPlanGroup:
+        check_concurrency_version_in_mutation(validated_data.pop("version", None), instance)
         currency_changed = "currency" in validated_data and validated_data["currency"] != instance.currency
         dates_changed = (
             "dispersion_start_date" in validated_data
@@ -2183,7 +2187,7 @@ class PaymentPlanGroupDetailSerializer(
             "custom_exchange_rate",
             "unore_exchange_rate",
             "unore_exchange_rate_unavailable",
-            "updated_at",
+            "version",
             "vision",
             "funds_commitments",
             "available_funds_commitments",

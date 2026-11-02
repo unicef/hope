@@ -19,6 +19,7 @@ from hope.models.approval import COMMENT_MAX_LENGTH, Approval
 from hope.models.payment_plan import PaymentPlan, last_approval_step
 from hope.models.utils import (
     AdminUrlMixin,
+    ConcurrencyModel,
     InternalDataFieldModel,
     LongNameIndex,
     TimeStampedUUIDModel,
@@ -33,7 +34,9 @@ if TYPE_CHECKING:
     from hope.models import AcceptanceProcessThreshold, BusinessArea, Program, User
 
 
-class PaymentPlanGroup(TimeStampedUUIDModel, UnicefIdentifiedModel, InternalDataFieldModel, AdminUrlMixin):
+class PaymentPlanGroup(
+    TimeStampedUUIDModel, UnicefIdentifiedModel, InternalDataFieldModel, ConcurrencyModel, AdminUrlMixin
+):
     ACTIVITY_LOG_MAPPING = create_mapping_dict(
         [
             "name",

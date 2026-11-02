@@ -1192,6 +1192,33 @@ def test_update_group_name_succeeds(
     assert group.name == "Renamed Group"
 
 
+def test_update_group_rejects_version_read_before_another_edit(
+    client: Any,
+    user: Any,
+    business_area: Any,
+    program: Any,
+    cycle: Any,
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(user, [Permissions.PM_PAYMENT_PLAN_GROUP_UPDATE], business_area, program=program)
+    group = cycle.payment_plan_groups.first()
+    version_read_by_both_users = group.version
+    client.put(
+        _detail_url(business_area.slug, program.code, group.id),
+        {"name": "First Edit", "version": version_read_by_both_users},
+    )
+
+    response = client.put(
+        _detail_url(business_area.slug, program.code, group.id),
+        {"name": "Second Edit", "version": version_read_by_both_users},
+    )
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert "Someone has modified this" in str(response.json())
+    group.refresh_from_db()
+    assert group.name == "First Edit"
+
+
 def test_update_group_fsp_and_currency_succeeds(
     client: Any,
     user: Any,

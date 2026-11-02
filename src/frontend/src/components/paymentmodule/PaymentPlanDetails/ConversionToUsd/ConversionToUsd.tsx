@@ -127,11 +127,11 @@ function ConversionToUsd({
     selectedOption === 'custom'
       ? {
           customExchangeRate: exchangeRateToApply,
-          updatedAt: owner.updatedAt,
+          version: owner.version,
         }
       : {
           unoreExchangeRate: exchangeRateToApply,
-          updatedAt: owner.updatedAt,
+          version: owner.version,
         };
   const isApplyDisabled =
     !canApplyCustomExchangeRate ||

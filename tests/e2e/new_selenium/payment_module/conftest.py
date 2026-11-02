@@ -56,6 +56,13 @@ def payment_plan_url(payment_plan: PaymentPlan) -> str:
     )
 
 
+def payment_plan_group_url(payment_plan: PaymentPlan) -> str:
+    return (
+        f"/{payment_plan.business_area.slug}/programs/{payment_plan.program.code}"
+        f"/payment-module/groups/{payment_plan.payment_plan_group_id}"
+    )
+
+
 def _group_with_plan(
     program_cycle: ProgramCycle, group_status: str, plan_status: str, **group_fields: Any
 ) -> PaymentPlanGroup:
@@ -306,7 +313,7 @@ def _entitlement_payment_plan(
     fsp.delivery_mechanisms.add(delivery_mechanism)
     currency = CurrencyFactory(code="PLN", name="Polish Zloty")
     cycle = ProgramCycleFactory(program=program)
-    group = PaymentPlanGroupFactory(cycle=cycle, exchange_rate=Decimal("2.0"))
+    group = PaymentPlanGroupFactory(cycle=cycle, exchange_rate=Decimal("2.0"), currency=currency)
     payment_plan = PaymentPlanFactory(
         name="Entitlement E2E Payment Plan",
         program_cycle=cycle,

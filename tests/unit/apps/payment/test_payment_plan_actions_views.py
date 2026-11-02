@@ -409,7 +409,7 @@ def test_apply_custom_exchange_rate(
             payment_plan_actions_context["url_custom_exchange_rate"],
             {
                 "custom_exchange_rate": "1.25000000",
-                "updated_at": payment_plan_actions_context["pp"].payment_plan_group.updated_at.isoformat(),
+                "version": payment_plan_actions_context["pp"].payment_plan_group.version,
             },
             format="json",
         )
@@ -444,7 +444,7 @@ def test_group_exchange_rate_uses_group_status_even_when_child_plan_is_busy(
     with TestCase.captureOnCommitCallbacks(execute=True):
         response = context["client"].post(
             context["url_custom_exchange_rate"],
-            {"custom_exchange_rate": "1.25000000", "updated_at": group.updated_at.isoformat()},
+            {"custom_exchange_rate": "1.25000000", "version": group.version},
             format="json",
         )
 
@@ -473,7 +473,7 @@ def test_apply_custom_exchange_rate_validation_errors(
         payment_plan_actions_context["url_custom_exchange_rate"],
         {
             "custom_exchange_rate": "1.25000000",
-            "updated_at": group.updated_at.isoformat(),
+            "version": group.version,
         },
         format="json",
     )
@@ -498,7 +498,7 @@ def test_apply_custom_exchange_rate_requires_one_rate_value(
     response = payment_plan_actions_context["client"].post(
         payment_plan_actions_context["url_custom_exchange_rate"],
         {
-            "updated_at": payment_plan_actions_context["pp"].payment_plan_group.updated_at.isoformat(),
+            "version": payment_plan_actions_context["pp"].payment_plan_group.version,
         },
         format="json",
     )
@@ -525,7 +525,7 @@ def test_apply_custom_exchange_rate_rejects_nonpositive_rate(
 
     response = payment_plan_actions_context["client"].post(
         payment_plan_actions_context["url_custom_exchange_rate"],
-        {field: rate, "updated_at": group.updated_at.isoformat()},
+        {field: rate, "version": group.version},
         format="json",
     )
 
@@ -558,7 +558,7 @@ def test_apply_unore_exchange_rate_clears_custom_flag(
             payment_plan_actions_context["url_custom_exchange_rate"],
             {
                 "unore_exchange_rate": "2.00000000",
-                "updated_at": group.updated_at.isoformat(),
+                "version": group.version,
             },
             format="json",
         )
@@ -1298,7 +1298,9 @@ def test_entitlement_flat_amount_without_version_skips_concurrency_check(
     assert response.status_code == status.HTTP_200_OK
 
 
-def test_apply_custom_exchange_rate_rejects_stale_owner_timestamp(
+@patch("hope.models.async_job.AsyncRetryJob.queue")
+def test_apply_custom_exchange_rate_rejects_version_read_before_another_apply(
+    mock_queue: Mock,
     payment_plan_actions_context: dict[str, Any],
     create_user_role_with_permissions: Any,
 ) -> None:
@@ -1310,20 +1312,27 @@ def test_apply_custom_exchange_rate_rejects_stale_owner_timestamp(
     )
     payment_plan_actions_context["pp"].status = PaymentPlan.Status.IN_REVIEW
     payment_plan_actions_context["pp"].save(update_fields=["status"])
-
     group = payment_plan_actions_context["pp"].payment_plan_group
-    response = payment_plan_actions_context["client"].post(
+    version_read_by_both_users = group.version
+    payment_plan_actions_context["client"].post(
         payment_plan_actions_context["url_custom_exchange_rate"],
-        {
-            "custom_exchange_rate": "1.25000000",
-            "updated_at": "2020-01-01T00:00:00Z",
-        },
+        {"custom_exchange_rate": "1.25000000", "version": version_read_by_both_users},
         format="json",
     )
-    assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert "changed" in str(response.data)
     group.refresh_from_db()
-    assert group.exchange_rate is None
+    group.background_action_status = None
+    group.save(update_fields=["background_action_status"])
+
+    response = payment_plan_actions_context["client"].post(
+        payment_plan_actions_context["url_custom_exchange_rate"],
+        {"custom_exchange_rate": "2.50000000", "version": version_read_by_both_users},
+        format="json",
+    )
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert "Someone has modified this" in str(response.data)
+    group.refresh_from_db()
+    assert group.exchange_rate == Decimal("1.25000000")
 
 
 @pytest.fixture
@@ -1364,7 +1373,7 @@ def test_instruction_custom_exchange_rate_updates_instruction_and_child(
     with TestCase.captureOnCommitCallbacks(execute=True):
         response = context["client"].post(
             context["url_custom_exchange_rate"],
-            {"custom_exchange_rate": "1.25000000", "updated_at": context["instruction"].updated_at.isoformat()},
+            {"custom_exchange_rate": "1.25000000", "version": context["instruction"].version},
             format="json",
         )
 
@@ -1395,7 +1404,7 @@ def test_instruction_exchange_rate_uses_instruction_status_even_when_child_plan_
     with TestCase.captureOnCommitCallbacks(execute=True):
         response = context["client"].post(
             context["url_custom_exchange_rate"],
-            {"custom_exchange_rate": "1.25000000", "updated_at": context["instruction"].updated_at.isoformat()},
+            {"custom_exchange_rate": "1.25000000", "version": context["instruction"].version},
             format="json",
         )
 
@@ -1420,7 +1429,7 @@ def test_instruction_exchange_rate_rejects_released_instruction(
 
     response = context["client"].post(
         context["url_custom_exchange_rate"],
-        {"custom_exchange_rate": "1.25000000", "updated_at": context["instruction"].updated_at.isoformat()},
+        {"custom_exchange_rate": "1.25000000", "version": context["instruction"].version},
         format="json",
     )
 

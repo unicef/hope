@@ -60,7 +60,7 @@ const baseOwner = {
   exchangeRate: '1.25000000',
   customExchangeRate: true,
   unoreExchangeRate: '2.00000000',
-  updatedAt: '2026-10-26T12:00:00Z',
+  version: 3,
 } as const;
 
 function renderComponent(
@@ -162,7 +162,7 @@ describe('ConversionToUsd', () => {
         programCode: 'test-program',
         requestBody: {
           customExchangeRate: '1.25000000',
-          updatedAt: '2026-10-26T12:00:00Z',
+          version: 3,
         },
       });
     });
@@ -185,7 +185,7 @@ describe('ConversionToUsd', () => {
         programCode: 'test-program',
         requestBody: {
           unoreExchangeRate: '2.00000000',
-          updatedAt: '2026-10-26T12:00:00Z',
+          version: 3,
         },
       });
     });
@@ -205,7 +205,7 @@ describe('ConversionToUsd', () => {
         programCode: 'test-program',
         requestBody: {
           customExchangeRate: '1.25000000',
-          updatedAt: '2026-10-26T12:00:00Z',
+          version: 3,
         },
       });
     });

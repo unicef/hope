@@ -1255,8 +1255,7 @@ class FollowUpInstructionViewSet(
         instruction = FollowUpInstruction.objects.select_for_update().get(pk=self.get_object().pk)
         if instruction.status not in (FollowUpInstruction.Status.OPEN, FollowUpInstruction.Status.IN_REVIEW):
             raise ValidationError("Exchange rate can be changed only while the instruction is OPEN or IN_REVIEW")
-        if instruction.updated_at != data["updated_at"]:
-            raise ValidationError("The instruction has changed. Refresh the page and try again.")
+        check_concurrency_version_in_mutation(data.get("version"), instruction)
         if instruction.background_action_status not in (None, *FollowUpInstruction.BACKGROUND_ACTION_ERROR_STATES):
             raise ValidationError("Wait for the current instruction action to finish before changing the rate")
 
@@ -1267,7 +1266,13 @@ class FollowUpInstructionViewSet(
         instruction.custom_exchange_rate = custom_rate is not None
         instruction.custom_exchange_rate_set_by = user if custom_rate is not None else None
         instruction.save(
-            update_fields=["exchange_rate", "custom_exchange_rate", "custom_exchange_rate_set_by", "updated_at"]
+            update_fields=[
+                "exchange_rate",
+                "custom_exchange_rate",
+                "custom_exchange_rate_set_by",
+                "version",
+                "updated_at",
+            ]
         )
         log_follow_up_instruction_change(instruction, old_instruction, str(user.pk))
         instruction = cast(
@@ -2345,8 +2350,7 @@ class PaymentPlanGroupViewSet(
         group = PaymentPlanGroup.objects.select_for_update().get(pk=self.get_object().pk)
         if group.status not in (PaymentPlanGroup.Status.OPEN, PaymentPlanGroup.Status.IN_REVIEW):
             raise ValidationError("Exchange rate can be changed only while the group is OPEN or IN_REVIEW")
-        if group.updated_at != data["updated_at"]:
-            raise ValidationError("The group has changed. Refresh the page and try again.")
+        check_concurrency_version_in_mutation(data.get("version"), group)
         if group.background_action_status not in (None, *PaymentPlanGroup.BACKGROUND_ACTION_ERROR_STATES):
             raise ValidationError("Wait for the current group action to finish before changing the rate")
 
@@ -2356,7 +2360,15 @@ class PaymentPlanGroupViewSet(
         group.exchange_rate = custom_rate if custom_rate is not None else data["unore_exchange_rate"]
         group.custom_exchange_rate = custom_rate is not None
         group.custom_exchange_rate_set_by = user if custom_rate is not None else None
-        group.save(update_fields=["exchange_rate", "custom_exchange_rate", "custom_exchange_rate_set_by", "updated_at"])
+        group.save(
+            update_fields=[
+                "exchange_rate",
+                "custom_exchange_rate",
+                "custom_exchange_rate_set_by",
+                "version",
+                "updated_at",
+            ]
+        )
         log_payment_plan_group_change(group, old_group, str(user.pk))
         group = cast(
             "PaymentPlanGroup", recalculate_owner_exchange_rate_async_task(group, str(user.pk), fetch_unore_rate=False)

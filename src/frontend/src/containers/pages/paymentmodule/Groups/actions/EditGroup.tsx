@@ -61,6 +61,7 @@ export function EditGroup({ group }: EditGroupProps): ReactElement | null {
           currency: values.currency,
           dispersionStartDate: values.dispersionStartDate,
           dispersionEndDate: values.dispersionEndDate,
+          version: group?.version,
         },
       }),
     onSuccess: async () => {

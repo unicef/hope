@@ -9,7 +9,7 @@ from extras.test_utils.selenium import HopeTestBrowser
 from hope.apps.account.permissions import Permissions
 from hope.models import BusinessArea, PaymentPlan, Rule, User
 
-from .conftest import PM_VIEW_PERMISSIONS, payment_plan_url
+from .conftest import PM_VIEW_PERMISSIONS, payment_plan_group_url, payment_plan_url
 
 pytestmark = pytest.mark.django_db()
 
@@ -210,15 +210,17 @@ def test_custom_exchange_rate(
         user_with_no_permissions,
         business_area,
         *PM_VIEW_PERMISSIONS,
+        Permissions.PM_PAYMENT_PLAN_GROUP_VIEW_DETAIL,
         Permissions.PM_CUSTOM_EXCHANGE_RATE,
     ):
         browser.login(username="noperm_user")
-        browser.open(payment_plan_url(payment_plan))
+        browser.open(payment_plan_group_url(payment_plan))
         browser.wait_for_element_clickable(CUSTOM_RATE_OPTION).click()
         browser.type(CUSTOM_RATE_INPUT, "4")
         browser.wait_for_element_clickable(APPLY_EXCHANGE_RATE).click()
         browser.wait_for_text("Exchange rate is being applied, please wait until completed")
 
+        browser.open(payment_plan_url(payment_plan))
         browser.wait_for_text("4", 'div[data-cy="label-FX Rate Applied"]')
         browser.wait_for_element_visible(entitlement_cell("100.00", "25.00"))
         browser.wait_for_element_visible(entitlement_cell("300.00", "75.00"))
@@ -284,8 +286,14 @@ def test_exchange_rate_options_follow_permission(
     permissions: tuple[Permissions, ...],
     radio_state: str,
 ) -> None:
-    with grant_permission(user_with_no_permissions, business_area, *PM_VIEW_PERMISSIONS, *permissions):
+    with grant_permission(
+        user_with_no_permissions,
+        business_area,
+        *PM_VIEW_PERMISSIONS,
+        Permissions.PM_PAYMENT_PLAN_GROUP_VIEW_DETAIL,
+        *permissions,
+    ):
         browser.login(username="noperm_user")
-        browser.open(payment_plan_url(entitled_open_payment_plan))
+        browser.open(payment_plan_group_url(entitled_open_payment_plan))
         browser.wait_for_element_present(f"{UNORE_RATE_RADIO}{radio_state}")
         browser.wait_for_element_present(f"{CUSTOM_RATE_RADIO}{radio_state}")

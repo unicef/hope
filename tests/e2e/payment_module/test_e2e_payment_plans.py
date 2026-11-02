@@ -514,7 +514,7 @@ class TestSmokePaymentModule:
         page_program_cycle_details.get_button_create_payment_plan().click()
         page_new_payment_plan.get_input_target_population().click()
         page_new_payment_plan.select_listbox_element(payment_plan.name)
-        assert "AFN" in page_new_payment_plan.get_label_group_currency().text
+        page_new_payment_plan.wait_for_text("AFN", page_new_payment_plan.label_group_currency)
         assert "2026-01-22" in page_new_payment_plan.get_label_group_dispersion_start_date().text
         assert "2030-06-30" in page_new_payment_plan.get_label_group_dispersion_end_date().text
         page_new_payment_plan.get_button_save_payment_plan().click()

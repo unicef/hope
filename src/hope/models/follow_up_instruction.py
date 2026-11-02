@@ -14,13 +14,19 @@ from hope.apps.activity_log.utils import create_mapping_dict
 from hope.models.approval import COMMENT_MAX_LENGTH, Approval
 from hope.models.file_temp import FileTemp
 from hope.models.payment import Payment
-from hope.models.utils import AdminUrlMixin, LongNameIndex, TimeStampedUUIDModel, UnicefIdentifiedModel
+from hope.models.utils import (
+    AdminUrlMixin,
+    ConcurrencyModel,
+    LongNameIndex,
+    TimeStampedUUIDModel,
+    UnicefIdentifiedModel,
+)
 
 if TYPE_CHECKING:
     from hope.models import AcceptanceProcessThreshold
 
 
-class FollowUpInstruction(TimeStampedUUIDModel, UnicefIdentifiedModel, AdminUrlMixin):
+class FollowUpInstruction(TimeStampedUUIDModel, UnicefIdentifiedModel, ConcurrencyModel, AdminUrlMixin):
     ACTIVITY_LOG_MAPPING = create_mapping_dict(["exchange_rate", "custom_exchange_rate", "custom_exchange_rate_set_by"])
 
     class Status:
