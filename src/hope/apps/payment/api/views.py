@@ -2736,6 +2736,10 @@ class PaymentPlanGroupViewSet(
         payment_plan_group = self.get_object()
         if payment_plan_group.status != PaymentPlanGroup.Status.LOCKED:
             raise ValidationError("FSP extra fields can be imported only for LOCKED Payment Plan Groups.")
+        if payment_plan_group.background_action_status == PaymentPlanGroup.BackgroundActionStatus.RECALCULATING_ERROR:
+            raise ValidationError(
+                "USD recalculation failed for this group. Retry it before importing FSP extra fields."
+            )
         if not payment_plan_group.can_start_background_action:
             raise ValidationError("Another background action is already in progress.")
 

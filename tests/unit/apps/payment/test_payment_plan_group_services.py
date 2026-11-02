@@ -417,6 +417,13 @@ def locked_group_after_failed_fsp_extra_fields_import(locked_group):
     return locked_group
 
 
+@pytest.fixture
+def locked_group_after_failed_recalculation(locked_group):
+    locked_group.background_action_status = PaymentPlanGroup.BackgroundActionStatus.RECALCULATING_ERROR
+    locked_group.save(update_fields=["background_action_status"])
+    return locked_group
+
+
 def test_unlock_rejects_group_importing_fsp_extra_fields(locked_group_importing_fsp_extra_fields):
     with pytest.raises(ValidationError) as error:
         PaymentPlanGroupService(locked_group_importing_fsp_extra_fields).unlock()
@@ -446,6 +453,29 @@ def test_send_for_approval_clears_failed_fsp_extra_fields_import(
     locked_group_after_failed_fsp_extra_fields_import.refresh_from_db()
     assert locked_group_after_failed_fsp_extra_fields_import.status == PaymentPlanGroup.Status.IN_APPROVAL
     assert locked_group_after_failed_fsp_extra_fields_import.background_action_status is None
+
+
+def test_unlock_keeps_failed_recalculation(locked_group_after_failed_recalculation):
+    PaymentPlanGroupService(locked_group_after_failed_recalculation).unlock()
+
+    locked_group_after_failed_recalculation.refresh_from_db()
+    assert locked_group_after_failed_recalculation.status == PaymentPlanGroup.Status.OPEN
+    assert (
+        locked_group_after_failed_recalculation.background_action_status
+        == PaymentPlanGroup.BackgroundActionStatus.RECALCULATING_ERROR
+    )
+
+
+@patch("hope.apps.payment.services.payment_plan_group_services.send_payment_plan_group_notification_emails_async_task")
+def test_send_for_approval_keeps_failed_recalculation(mock_notify, locked_group_after_failed_recalculation, user):
+    PaymentPlanGroupService(locked_group_after_failed_recalculation).send_for_approval(user)
+
+    locked_group_after_failed_recalculation.refresh_from_db()
+    assert locked_group_after_failed_recalculation.status == PaymentPlanGroup.Status.IN_APPROVAL
+    assert (
+        locked_group_after_failed_recalculation.background_action_status
+        == PaymentPlanGroup.BackgroundActionStatus.RECALCULATING_ERROR
+    )
 
 
 @patch("hope.apps.payment.services.payment_plan_group_services.send_payment_plan_group_notification_emails_async_task")

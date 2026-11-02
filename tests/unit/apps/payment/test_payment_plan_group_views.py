@@ -4189,6 +4189,13 @@ def locked_group_after_failed_import(locked_group_with_payment: Any) -> Any:
 
 
 @pytest.fixture
+def locked_group_after_failed_recalculation(locked_group_with_payment: Any) -> Any:
+    locked_group_with_payment.background_action_status = PaymentPlanGroup.BackgroundActionStatus.RECALCULATING_ERROR
+    locked_group_with_payment.save(update_fields=["background_action_status"])
+    return locked_group_with_payment
+
+
+@pytest.fixture
 def locked_group_importing_fsp_extra_fields(locked_group_with_payment: Any) -> Any:
     locked_group_with_payment.background_action_status = (
         PaymentPlanGroup.BackgroundActionStatus.XLSX_IMPORTING_FSP_EXTRA_FIELDS
@@ -4331,6 +4338,29 @@ def test_fsp_extra_fields_import_rejects_active_background_action(
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert "Another background action is already in progress." in str(response.data)
     assert FileTemp.objects.filter(object_id=locked_group_importing_fsp_extra_fields.pk).exists() is False
+
+
+def test_fsp_extra_fields_import_rejects_group_after_failed_recalculation(
+    client: Any,
+    business_area: Any,
+    program: Any,
+    locked_group_after_failed_recalculation: Any,
+    fsp_extra_fields_permissions: None,
+    fsp_extra_fields_import_file: SimpleUploadedFile,
+) -> None:
+    response = client.post(
+        _fsp_extra_fields_import_url(business_area.slug, program.code, locked_group_after_failed_recalculation.id),
+        {"file": fsp_extra_fields_import_file},
+        format="multipart",
+    )
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert "USD recalculation failed for this group. Retry it before importing FSP extra fields." in str(response.data)
+    locked_group_after_failed_recalculation.refresh_from_db()
+    assert (
+        locked_group_after_failed_recalculation.background_action_status
+        == PaymentPlanGroup.BackgroundActionStatus.RECALCULATING_ERROR
+    )
 
 
 def test_fsp_extra_fields_import_requires_file(

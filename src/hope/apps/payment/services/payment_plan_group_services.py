@@ -577,10 +577,14 @@ class PaymentPlanGroupService:
 
     @staticmethod
     def _clear_background_action(payment_plan_group: PaymentPlanGroup) -> None:
-        """Refuse while an FSP extra fields import runs; a failed one is dropped as the group moves on."""
+        """Refuse while a background action runs; a failed FSP extra fields import is dropped as the group moves on.
+
+        A failed USD recalculation stays, so it can still be retried from the admin.
+        """
         if not payment_plan_group.can_start_background_action:
             raise ValidationError("Another background action is already in progress.")
-        payment_plan_group.background_action_status = None
+        if payment_plan_group.background_action_status == PaymentPlanGroup.BackgroundActionStatus.XLSX_IMPORT_ERROR:
+            payment_plan_group.background_action_status = None
 
     @staticmethod
     def _payment_plans(payment_plan_group: PaymentPlanGroup) -> list[PaymentPlan]:
