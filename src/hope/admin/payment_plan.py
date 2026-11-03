@@ -485,8 +485,12 @@ class PaymentPlanAdmin(BasePaymentPlanAdmin, PaymentPlanCeleryTasksMixin):
             payment_plan=payment_plan,
         )
         if request.method == "POST" and form.is_valid():
-            # Take release actor from AD before locking the payment plan.
-            actor_snapshot = build_actor_snapshot(payment_plan.created_by)
+            # Take the release actor from AD before locking the payment plan, only while it can still be released.
+            actor_snapshot = (
+                build_actor_snapshot(payment_plan.created_by)
+                if can_recover_vision_funds_commitment(payment_plan)
+                else None
+            )
             try:
                 with transaction.atomic():
                     locked_payment_plan = (

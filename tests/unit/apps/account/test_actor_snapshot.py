@@ -113,15 +113,33 @@ def test_build_actor_snapshot_arrange_azure_id_act_build_assert_lookup_by_id(
     assert snapshot == ActorSnapshot(name="Jan Kowalski", job_title="Programme Officer", job_title_source="AD")
 
 
+@pytest.mark.parametrize(
+    ("status", "body"),
+    [
+        pytest.param(404, {"error": "not found"}, id="azure-id-not-found"),
+        pytest.param(200, {}, id="azure-id-empty-response"),
+    ],
+)
 def test_build_actor_snapshot_arrange_azure_id_unknown_to_ad_act_build_assert_lookup_by_email(
-    user_with_azure_id: User, ad: responses.RequestsMock
+    user_with_azure_id: User, ad: responses.RequestsMock, status: int, body: dict[str, Any]
 ) -> None:
-    ad.add(responses.GET, USER_BY_ID_URL, json={"error": "not found"}, status=404)
+    ad.add(responses.GET, USER_BY_ID_URL, json=body, status=status)
     ad.add(responses.GET, USERS_URL, json={"value": [{"jobTitle": "Programme Officer"}]})
 
     snapshot = build_actor_snapshot(user_with_azure_id)
 
     assert snapshot == ActorSnapshot(name="Jan Kowalski", job_title="Programme Officer", job_title_source="AD")
+
+
+def test_build_actor_snapshot_arrange_azure_id_lookup_fails_act_build_assert_stored_title_without_email_retry(
+    user_with_azure_id: User, ad: responses.RequestsMock
+) -> None:
+    ad.add(responses.GET, USER_BY_ID_URL, json={"error": "throttled"}, status=429)
+
+    snapshot = build_actor_snapshot(user_with_azure_id)
+
+    assert snapshot == ActorSnapshot(name="Jan Kowalski", job_title="Stored Title", job_title_source="USER_RECORD")
+    assert len(ad.calls) == 2
 
 
 def test_build_actor_snapshot_arrange_no_ad_credentials_act_build_assert_stored_title(

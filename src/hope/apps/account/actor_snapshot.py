@@ -46,7 +46,9 @@ def fetch_ad_job_title(ms_graph: MicrosoftGraphAPI, user: "User") -> str:
     if user.azure_id:
         try:
             return ms_graph.get_user_data(uuid=str(user.azure_id)).get("jobTitle") or ""
-        except (Http404, HTTPError):
+        except (Http404, HTTPError) as error:
+            if isinstance(error, HTTPError) and getattr(error.response, "status_code", None) != 404:
+                raise
             logger.info("AD user %s not found by azure_id, retrying by e-mail", user.pk)
     return ms_graph.get_user_data(email=user.email).get("jobTitle") or ""
 

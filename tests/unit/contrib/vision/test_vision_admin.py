@@ -149,6 +149,14 @@ def fc_not_found_recovery_context(vision_admin_context) -> dict[str, Any]:
     }
 
 
+@pytest.fixture
+def released_recovery_context(fc_not_found_recovery_context) -> dict[str, Any]:
+    payment_plan = fc_not_found_recovery_context["payment_plan"]
+    payment_plan.internal_data = {"vision": {"sent": True, "status": VisionStatus.RELEASED.value}}
+    payment_plan.save(update_fields=["internal_data"])
+    return fc_not_found_recovery_context
+
+
 def test_send_to_vision_button_visible_when_in_review(afghanistan, admin_user, program_cycle, admin_client) -> None:
     FlagState.objects.get_or_create(
         name="VISION_INTEGRATION_ACTIVE",
@@ -482,3 +490,22 @@ def test_manual_fc_header_recovery_arrange_ad_title_act_post_assert_creator_snap
     assert locked_payment_plan.pk == payment_plan.pk
     assert list(funds_commitment_headers) == [fc_not_found_recovery_context["funds_commitment_header"]]
     assert actor_snapshot == ActorSnapshot(name="Anna Nowak", job_title="Finance Officer", job_title_source="AD")
+
+
+@patch("hope.apps.account.actor_snapshot.MicrosoftGraphAPI")
+def test_manual_fc_header_recovery_arrange_released_plan_act_post_assert_conflict_error_without_ad_lookup(
+    mock_graph,
+    released_recovery_context,
+) -> None:
+    payment_plan = released_recovery_context["payment_plan"]
+
+    response = released_recovery_context["client"].post(
+        reverse("admin:payment_paymentplan_assign_vision_funds_commitment_headers", args=[payment_plan.pk]),
+        {"funds_commitment_headers": [released_recovery_context["funds_commitment_header"].pk]},
+    )
+
+    assert response.status_code == 200
+    assert response.context["form"].errors["funds_commitment_headers"] == [
+        "Select one or more available Funds Commitment Headers."
+    ]
+    mock_graph.assert_not_called()
