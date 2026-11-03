@@ -31,7 +31,7 @@ from hope.apps.household.const import FEMALE, MALE, NON_BENEFICIARY
 from hope.apps.targeting.services.targeting_service import TargetingCriteriaQueryingBase
 from hope.apps.utils.validators import DoubleSpaceValidator, StartEndSpaceValidator
 from hope.contrib.vision.choices import VisionStatus
-from hope.models.approval import Approval
+from hope.models.approval import COMMENT_MAX_LENGTH, Approval
 from hope.models.file_temp import FileTemp
 from hope.models.financial_service_provider import FinancialServiceProvider
 from hope.models.household import Household
@@ -469,7 +469,7 @@ class PaymentPlan(
         blank=True,
     )
     abort_comment = models.CharField(
-        max_length=255,
+        max_length=COMMENT_MAX_LENGTH,
         blank=True,
         help_text="Reason for aborting",
     )

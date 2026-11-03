@@ -1,7 +1,6 @@
 import { DialogContainer } from '@containers/dialogs/DialogContainer';
 import { DialogFooter } from '@containers/dialogs/DialogFooter';
 import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
-import { AutoSubmitFormOnEnter } from '@core/AutoSubmitFormOnEnter';
 import { LoadingButton } from '@core/LoadingButton';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useSnackbar } from '@hooks/useSnackBar';
@@ -24,6 +23,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import * as Yup from 'yup';
 import { useProgramContext } from '../../../../programContext';
+import { COMMENT_MAX_LENGTH } from 'src/config';
 import { PERMISSIONS } from 'src/config/permissions';
 
 export interface AbortPaymentPlanProps {
@@ -81,7 +81,7 @@ export function AbortPaymentPlan({
   const validationSchema = Yup.object().shape({
     comment: Yup.string()
       .min(4, 'Too short')
-      .max(255, 'Too long')
+      .max(COMMENT_MAX_LENGTH, 'Too long')
       .required('Abort Reason is required'),
   });
 
@@ -89,21 +89,22 @@ export function AbortPaymentPlan({
     <Formik
       initialValues={initialValues}
       onSubmit={(values, { resetForm }) => {
-        abort({
-          businessAreaSlug: businessArea,
-          id: paymentPlan.id,
-          programCode: programId,
-          requestBody: {
-            abortComment: values.comment,
+        abort(
+          {
+            businessAreaSlug: businessArea,
+            id: paymentPlan.id,
+            programCode: programId,
+            requestBody: {
+              abortComment: values.comment,
+            },
           },
-        });
-        resetForm({});
+          { onSuccess: () => resetForm() },
+        );
       }}
       validationSchema={validationSchema}
     >
-      {({ submitForm }) => (
+      {({ submitForm, resetForm }) => (
         <>
-          {abortDialogOpen && <AutoSubmitFormOnEnter />}
           <Box
             sx={{
               p: 2,
@@ -122,7 +123,10 @@ export function AbortPaymentPlan({
           </Box>
           <Dialog
             open={abortDialogOpen}
-            onClose={() => setAbortDialogOpen(false)}
+            onClose={() => {
+              resetForm();
+              setAbortDialogOpen(false);
+            }}
             scroll="paper"
             aria-labelledby="form-dialog-title"
             maxWidth="md"
@@ -143,6 +147,7 @@ export function AbortPaymentPlan({
                   <Field
                     name="comment"
                     multiline
+                    minRows={3}
                     fullWidth
                     variant="filled"
                     label={t('Abort Reason')}
@@ -154,7 +159,12 @@ export function AbortPaymentPlan({
             </DialogContent>
             <DialogFooter>
               <DialogActions>
-                <Button onClick={() => setAbortDialogOpen(false)}>
+                <Button
+                  onClick={() => {
+                    resetForm();
+                    setAbortDialogOpen(false);
+                  }}
+                >
                   CANCEL
                 </Button>
                 <LoadingButton

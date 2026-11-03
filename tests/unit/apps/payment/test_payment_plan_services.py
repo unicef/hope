@@ -2056,6 +2056,16 @@ def test_create_payments_marks_invalid_wallet_not_eligible(
     assert payment.status == Payment.STATUS_NOT_ELIGIBLE
 
 
+def test_create_payments_sets_plan_currency(invalid_wallet_payment_plan: PaymentPlan) -> None:
+    invalid_wallet_payment_plan.currency = CurrencyFactory(code="AFN", name="Afghan afghani")
+    invalid_wallet_payment_plan.save(update_fields=["currency"])
+
+    PaymentPlanService.create_payments(invalid_wallet_payment_plan)
+
+    payment = invalid_wallet_payment_plan.payment_items.get()
+    assert payment.currency.code == "AFN"
+
+
 def test_acceptance_process_validation_error(payment_plan_base: PaymentPlan) -> None:
     payment_plan_base.status = PaymentPlan.Status.OPEN
     payment_plan_base.save()
