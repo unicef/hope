@@ -14,7 +14,7 @@ import { RestService } from '@restgenerated/services/RestService';
 import { restQueryKey } from '@utils/queryKeys';
 import { useQuery } from '@tanstack/react-query';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import { useIsMobile } from 'src/responsive';
+import { responsiveValue, useIsMobile } from 'src/responsive';
 
 const StyledToolbar = styled(Toolbar)(() => ({
   display: 'flex',
@@ -33,7 +33,6 @@ interface AppBarProps {
 const StyledAppBar = styled(MuiAppBar)<AppBarProps>(({ open }) => ({
   position: 'fixed',
   top: 0,
-  zIndex: muiTheme.zIndex.drawer + 1,
   backgroundColor: muiTheme.palette.secondary.main,
   transition: muiTheme.transitions.create(['width', 'margin'], {
     easing: muiTheme.transitions.easing.sharp,
@@ -93,7 +92,16 @@ export const AppBar = ({ open, handleDrawerOpen }): ReactElement => {
   }`;
 
   return (
-    <StyledAppBar open={open}>
+    <StyledAppBar
+      open={open}
+      // On mobile the temporary drawer must cover the app bar.
+      sx={{
+        zIndex: responsiveValue(
+          muiTheme.zIndex.appBar,
+          muiTheme.zIndex.drawer + 1,
+        ),
+      }}
+    >
       <StyledToolbar>
         <Box
           sx={{

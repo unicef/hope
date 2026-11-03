@@ -9,7 +9,7 @@ from extras.test_utils.factories.payment import (
     PaymentPlanFactory,
 )
 from hope.apps.payment.services.mark_as_failed import mark_as_failed, revert_mark_as_failed
-from hope.models import FinancialServiceProvider
+from hope.models import FinancialServiceProvider, Payment
 
 pytestmark = pytest.mark.django_db
 
@@ -68,3 +68,33 @@ def test_revert_mark_as_failed_raises_for_payment_plan_with_payment_gateway_flag
         match="Payments in payment gateway plans cannot be manually marked as failed",
     ):
         revert_mark_as_failed(payment, Decimal("1.00"), payment_plan.dispersion_start_date)
+
+
+def test_mark_as_failed_and_revert_update_household_cash_received() -> None:
+    fsp_xlsx = FinancialServiceProviderFactory(
+        communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_XLSX,
+    )
+    payment_plan = PaymentPlanFactory(financial_service_provider=fsp_xlsx, exchange_rate=Decimal("2.00"))
+    payment = PaymentFactory(
+        parent=payment_plan,
+        status=Payment.STATUS_DISTRIBUTION_SUCCESS,
+        entitlement_quantity=Decimal("100.00"),
+        delivered_quantity=Decimal("100.00"),
+        delivered_quantity_usd=Decimal("50.00"),
+    )
+    household = payment.household
+    household.total_cash_received = Decimal("100.00")
+    household.total_cash_received_usd = Decimal("50.00")
+    household.save()
+
+    mark_as_failed(payment)
+
+    household.refresh_from_db()
+    assert household.total_cash_received == 0
+    assert household.total_cash_received_usd == 0
+
+    revert_mark_as_failed(payment, Decimal("60.00"), payment_plan.dispersion_start_date)
+
+    household.refresh_from_db()
+    assert household.total_cash_received == Decimal("60.00")
+    assert household.total_cash_received_usd == Decimal("30.00")

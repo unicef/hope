@@ -8,7 +8,7 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMoreRounded';
 import type { ChangeEvent, ReactElement } from 'react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { responsiveValue } from 'src/responsive';
+import { PAGINATION_SX, responsiveValue } from 'src/responsive';
 import type { ActivityLogEntry } from './types';
 import { headCells } from './headCells';
 import { LogRow } from './LogRow';
@@ -109,6 +109,7 @@ export function ActivityLogTable({
         <TablePagination
           rowsPerPageOptions={[5, 10, 15]}
           component="div"
+          sx={PAGINATION_SX}
           data-cy="pagination"
           count={totalCount}
           rowsPerPage={rowsPerPage}

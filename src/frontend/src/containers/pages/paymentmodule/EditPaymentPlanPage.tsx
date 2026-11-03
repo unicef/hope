@@ -9,7 +9,6 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { useSnackbar } from '@hooks/useSnackBar';
 import type { PaginatedProgramCycleListList } from '@restgenerated/models/PaginatedProgramCycleListList';
-import type { PaginatedTargetPopulationListList } from '@restgenerated/models/PaginatedTargetPopulationListList';
 import type { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 import { RestService } from '@restgenerated/services/RestService';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -25,15 +24,11 @@ import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 
 interface EditPaymentPlanFormProps {
   paymentPlan: PaymentPlanDetail;
-  allTargetPopulationsData: PaginatedTargetPopulationListList;
-  loadingTargetPopulations: boolean;
   permissions: string[];
 }
 
 const EditPaymentPlanForm = ({
   paymentPlan,
-  allTargetPopulationsData,
-  loadingTargetPopulations,
   permissions,
 }: EditPaymentPlanFormProps): ReactElement => {
   const navigate = useNavigate();
@@ -76,6 +71,10 @@ const EditPaymentPlanForm = ({
       },
     });
 
+  const canListCycles = hasPermissions(
+    PERMISSIONS.PM_PROGRAMME_CYCLE_VIEW_LIST,
+    permissions,
+  );
   const { data: cyclesData } = useQuery<PaginatedProgramCycleListList>({
     queryKey: restQueryKey(RestService.restBusinessAreasProgramsCyclesList, {
       businessAreaSlug: businessArea,
@@ -86,11 +85,20 @@ const EditPaymentPlanForm = ({
         businessAreaSlug: businessArea,
         programCode: programId,
       }),
+    enabled: canListCycles,
   });
-  const cycles = (cyclesData?.results ?? []).map((c) => ({
-    id: c.id,
-    title: c.title ?? null,
-  }));
+  // Without the list permission the select offers only the plan's own cycle.
+  const cycles = canListCycles
+    ? (cyclesData?.results ?? []).map((c) => ({
+        id: c.id,
+        title: c.title ?? null,
+      }))
+    : [
+        {
+          id: paymentPlan.programCycle.id,
+          title: paymentPlan.programCycle.title,
+        },
+      ];
 
   const initialValues = {
     paymentPlanId: paymentPlan.id,
@@ -133,8 +141,6 @@ const EditPaymentPlanForm = ({
       currency: values.currency?.value
         ? values.currency.value
         : values.currency,
-      // @ts-ignore TODO: add program_cycle to PatchedPaymentPlanCreateUpdate when regenerated
-      program_cycle: values.programCycle,
     };
     try {
       const res = await updatePaymentPlan({
@@ -167,14 +173,14 @@ const EditPaymentPlanForm = ({
             loadingUpdate={loadingUpdate}
           />
           <PaymentPlanTargeting
-            allTargetPopulations={allTargetPopulationsData}
-            loading={loadingTargetPopulations}
+            targetPopulations={[{ id: paymentPlan.id, name: paymentPlan.name }]}
             disabled
           />
           <PaymentPlanParameters
             paymentPlan={paymentPlan}
             values={values}
             cycles={cycles}
+            cycleDisabled
           />
         </Form>
       )}
@@ -203,43 +209,16 @@ const EditPaymentPlanPage = (): ReactElement => {
         }),
     });
 
-  const {
-    data: allTargetPopulationsData,
-    isLoading: loadingTargetPopulations,
-  } = useQuery<PaginatedTargetPopulationListList>({
-    queryKey: restQueryKey(
-      RestService.restBusinessAreasProgramsTargetPopulationsList,
-      {
-        businessAreaSlug: businessArea,
-        programCode: programId,
-        status: 'DRAFT',
-      },
-    ),
-    queryFn: () => {
-      return RestService.restBusinessAreasProgramsTargetPopulationsList({
-        businessAreaSlug: businessArea,
-        programCode: programId,
-        status: 'DRAFT',
-      });
-    },
-  });
-
   const permissions = usePermissions();
 
-  if (loadingTargetPopulations || loadingPaymentPlan)
-    return <LoadingComponent />;
-  if (!allTargetPopulationsData || !paymentPlan) return null;
+  if (loadingPaymentPlan) return <LoadingComponent />;
+  if (!paymentPlan) return null;
   if (permissions === null) return null;
   if (!hasPermissions(PERMISSIONS.PM_CREATE, permissions))
     return <PermissionDenied permission={PERMISSIONS.PM_CREATE} />;
 
   return (
-    <EditPaymentPlanForm
-      paymentPlan={paymentPlan}
-      allTargetPopulationsData={allTargetPopulationsData}
-      loadingTargetPopulations={loadingTargetPopulations}
-      permissions={permissions}
-    />
+    <EditPaymentPlanForm paymentPlan={paymentPlan} permissions={permissions} />
   );
 };
 

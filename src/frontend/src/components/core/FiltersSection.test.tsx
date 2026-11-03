@@ -54,4 +54,20 @@ describe('FiltersSection', () => {
     expect(isCollapsed(container)).toBe(false);
     expect(toggle.textContent).toBe('HIDE FILTERS');
   });
+
+  it('shows the filters after resizing from mobile to desktop', () => {
+    mockViewportWidth(375);
+    const { container, rerender } = renderFilters();
+    expect(isCollapsed(container)).toBe(true);
+
+    mockViewportWidth(1440);
+    rerender(
+      <FiltersSection>
+        <div>filter fields</div>
+      </FiltersSection>,
+    );
+
+    expect(isCollapsed(container)).toBe(false);
+    expect(screen.queryByTestId('button-filters-expand')).toBeNull();
+  });
 });

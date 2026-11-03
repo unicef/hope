@@ -9,7 +9,7 @@ import type { ChangeEvent, ReactElement } from 'react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { responsiveValue } from 'src/responsive';
+import { PAGINATION_SX, responsiveValue } from 'src/responsive';
 import { headCells } from './headCells';
 import { LogRow } from './LogRow';
 import { ButtonPlaceHolder, Row } from './TableStyledComponents';
@@ -102,6 +102,7 @@ export function ActivityLogTablePaymentVerification({
         <TablePagination
           rowsPerPageOptions={[5, 10, 15]}
           component="div"
+          sx={PAGINATION_SX}
           count={totalCount}
           rowsPerPage={rowsPerPage}
           page={page}
