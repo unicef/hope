@@ -27,6 +27,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useProgramContext } from 'src/programContext';
+import { responsiveGridSize } from 'src/responsive';
 import * as Yup from 'yup';
 import Exclusions from '../CreateTargetPopulation/Exclusions';
 import { PaperContainer } from '../PaperContainer';
@@ -286,7 +287,7 @@ const EditTargetPopulation = ({
                 mb: 5,
               }}
             >
-              <Grid size={6}>
+              <Grid size={responsiveGridSize('half')}>
                 <ProgramCycleAutocompleteRest
                   value={values.programCycleId}
                   onChange={async (e) => {
@@ -309,7 +310,7 @@ const EditTargetPopulation = ({
                   data-cy="program-cycle-autocomplete"
                 />
               </Grid>
-              <Grid size={6}>
+              <Grid size={responsiveGridSize('half')}>
                 <Box
                   sx={{
                     display: 'flex',
@@ -360,7 +361,7 @@ const EditTargetPopulation = ({
               }}
             />
             <Grid container spacing={3}>
-              <Grid size={6}>
+              <Grid size={responsiveGridSize('half')}>
                 <Field
                   name="name"
                   label={t('Target Population Name')}
@@ -373,7 +374,7 @@ const EditTargetPopulation = ({
                 />
               </Grid>
               {paymentPlan.isPurposesEditable && (
-                <Grid size={6}>
+                <Grid size={responsiveGridSize('half')}>
                   <Field
                     name="paymentPlanPurposes"
                     label={t('Payment Plan Purposes')}

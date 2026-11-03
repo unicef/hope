@@ -1,4 +1,4 @@
-import { Paper } from '@mui/material';
+import { Box, Paper } from '@mui/material';
 import Button from '@mui/material/Button';
 import Collapse from '@mui/material/Collapse';
 import TablePagination from '@mui/material/TablePagination';
@@ -9,6 +9,7 @@ import type { ChangeEvent, ReactElement } from 'react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
+import { responsiveValue } from 'src/responsive';
 import { headCells } from './headCells';
 import { LogRow } from './LogRow';
 import { ButtonPlaceHolder, Row } from './TableStyledComponents';
@@ -42,13 +43,6 @@ const PaperContainer = styled(Paper)`
   margin-bottom: ${({ theme }) => theme.spacing(5)};
 `;
 
-const Toolbar = styled.div`
-  margin: 0 ${({ theme }) => theme.spacing(6)};
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-`;
-
 interface ActivityLogTablePaymentVerificationProps {
   logEntries: LogEntry[];
   totalCount: number;
@@ -70,7 +64,13 @@ export function ActivityLogTablePaymentVerification({
 
   return (
     <PaperContainer>
-      <Toolbar>
+      <Box
+        sx={{
+          mx: responsiveValue(4, 6),
+          display: 'flex',
+          justifyContent: 'space-between',
+        }}
+      >
         <Typography variant="h6">{t('Activity Log')}</Typography>
         <Button
           variant="outlined"
@@ -80,21 +80,25 @@ export function ActivityLogTablePaymentVerification({
         >
           {expanded ? 'HIDE' : 'SHOW'}
         </Button>
-      </Toolbar>
+      </Box>
       <Collapse in={expanded}>
-        <Table>
-          <Row>
-            {headCells.map((item) => (
-              <HeadingCell key={item.id} style={{ flex: item.weight || 1 }}>
-                {item.label}
-              </HeadingCell>
-            ))}
-            <ButtonPlaceHolder />
-          </Row>
-          {logEntries.map((value) => (
-            <LogRow key={value.objectId} logEntry={value} />
-          ))}
-        </Table>
+        <Box sx={{ overflowX: 'auto' }}>
+          <Box sx={{ minWidth: responsiveValue('800px', '0') }}>
+            <Table>
+              <Row>
+                {headCells.map((item) => (
+                  <HeadingCell key={item.id} style={{ flex: item.weight || 1 }}>
+                    {item.label}
+                  </HeadingCell>
+                ))}
+                <ButtonPlaceHolder />
+              </Row>
+              {logEntries.map((value) => (
+                <LogRow key={value.objectId} logEntry={value} />
+              ))}
+            </Table>
+          </Box>
+        </Box>
         <TablePagination
           rowsPerPageOptions={[5, 10, 15]}
           component="div"

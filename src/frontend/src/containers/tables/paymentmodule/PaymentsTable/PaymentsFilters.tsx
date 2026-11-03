@@ -1,4 +1,4 @@
-import { Grid, MenuItem } from '@mui/material';
+import { MenuItem } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { FiltersSection } from '@components/core/FiltersSection';
@@ -8,6 +8,7 @@ import { createHandleApplyFilterChange } from '@utils/utils';
 import type { ReactElement } from 'react';
 import { useProgramContext } from 'src/programContext';
 import { PaymentStatusEnum } from '@restgenerated/models/PaymentStatusEnum';
+import { ResponsiveGrid, ResponsiveGridContainer } from 'src/responsive';
 
 export interface PaymentFilterKeys {
   paymentUnicefId: string;
@@ -69,14 +70,13 @@ export function PaymentsFilters({
       clearHandler={handleClearFilter}
       applyHandler={handleApplyFilter}
     >
-      <Grid
-        container
+      <ResponsiveGridContainer
         spacing={3}
         sx={{
           alignItems: 'flex-end',
         }}
       >
-        <Grid size={3}>
+        <ResponsiveGrid size="quarter">
           <SearchTextField
             label={t('Payment ID')}
             value={filter[filterKeys.paymentUnicefId]}
@@ -86,8 +86,8 @@ export function PaymentsFilters({
             }
             data-cy="filter-payment-unicef-id"
           />
-        </Grid>
-        <Grid size={3}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="quarter">
           {isSocialDctType ? (
             <SearchTextField
               label={t(`${beneficiaryGroup?.memberLabel} ID`)}
@@ -112,8 +112,8 @@ export function PaymentsFilters({
               data-cy="filter-household-id"
             />
           )}
-        </Grid>
-        <Grid size={3}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="quarter">
           <SearchTextField
             label={t('Collector Full Name')}
             value={filter[filterKeys.collectorFullName]}
@@ -123,9 +123,9 @@ export function PaymentsFilters({
             }
             data-cy="filter-collector-fullname"
           />
-        </Grid>
+        </ResponsiveGrid>
         {showStatus && filterKeys.status && (
-          <Grid size={3}>
+          <ResponsiveGrid size="quarter">
             <SelectFilter
               label={t('Status')}
               value={filter[filterKeys.status]}
@@ -146,10 +146,10 @@ export function PaymentsFilters({
                   </MenuItem>
                 ))}
             </SelectFilter>
-          </Grid>
+          </ResponsiveGrid>
         )}
         {showIneligibilityCause && filterKeys.ineligibilityCause && (
-          <Grid size={3}>
+          <ResponsiveGrid size="quarter">
             <SelectFilter
               label={t('Ineligibility Cause')}
               value={filter[filterKeys.ineligibilityCause]}
@@ -166,9 +166,9 @@ export function PaymentsFilters({
               <MenuItem value="excluded">{t('Manual Exclusion')}</MenuItem>
               <MenuItem value="invalid_wallet">{t('Invalid Wallet')}</MenuItem>
             </SelectFilter>
-          </Grid>
+          </ResponsiveGrid>
         )}
-      </Grid>
+      </ResponsiveGridContainer>
     </FiltersSection>
   );
 }

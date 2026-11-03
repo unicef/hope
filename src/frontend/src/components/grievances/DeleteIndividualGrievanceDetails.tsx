@@ -1,4 +1,4 @@
-import { Box, Button, Grid, Typography } from '@mui/material';
+import { Box, Button, Typography } from '@mui/material';
 import snakeCase from 'lodash/snakeCase';
 import { useTranslation } from 'react-i18next';
 import { useSnackbar } from '@hooks/useSnackBar';
@@ -20,6 +20,7 @@ import type { Individual } from '@restgenerated/models/Individual';
 import type { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
 import { showApiErrorMessages } from '@utils/utils';
 import { PERMISSIONS } from 'src/config/permissions';
+import { ResponsiveGrid, ResponsiveGridContainer } from 'src/responsive';
 
 export type RoleReassignData = {
   role: string;
@@ -170,14 +171,14 @@ export function DeleteIndividualGrievanceDetails({
           textValue = <UniversalMoment>{textValue as string}</UniversalMoment>;
         }
         return (
-          <Grid key={key} size={6}>
+          <ResponsiveGrid key={key} size="half">
             <LabelizedField
               label={
                 snakeKey === 'sex' ? t('GENDER') : snakeKey.replace(/_/g, ' ')
               }
               value={<>{textValue}</>}
             />
-          </Grid>
+          </ResponsiveGrid>
         );
       }) || [];
 
@@ -185,12 +186,12 @@ export function DeleteIndividualGrievanceDetails({
     documents?.map((doc) => {
       const item = doc;
       return (
-        <Grid key={item.country + item.type.label} size={6}>
+        <ResponsiveGrid key={item.country + item.type.label} size="half">
           <LabelizedField
             label={item.type.label.replace(/_/g, ' ')}
             value={item.documentNumber}
           />
-        </Grid>
+        </ResponsiveGrid>
       );
     }) || [];
   const allLabels = [...labels, ...documentLabels];
@@ -253,9 +254,7 @@ export function DeleteIndividualGrievanceDetails({
           )}
         </Box>
       </Title>
-      <Grid container spacing={6}>
-        {allLabels}
-      </Grid>
+      <ResponsiveGridContainer spacing={6}>{allLabels}</ResponsiveGridContainer>
     </ApproveBox>
   );
 }

@@ -1,4 +1,4 @@
-import { Grid, MenuItem } from '@mui/material';
+import { MenuItem } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { FiltersSection } from '@components/core/FiltersSection';
@@ -9,6 +9,7 @@ import type { ReactElement } from 'react';
 import { useApiErrorSnackbar } from '@hooks/useApiErrorSnackbar';
 import { useVerificationChannelChoices } from '@hooks/useVerificationChannelChoices';
 import { useVerificationStatusChoices } from '@hooks/useVerificationStatusChoices';
+import { ResponsiveGrid, ResponsiveGridContainer } from 'src/responsive';
 
 interface VerificationRecordsFiltersProps {
   filter;
@@ -73,8 +74,8 @@ export function VerificationRecordsFilters({
       applyHandler={handleApplyFilter}
       clearHandler={handleClearFilter}
     >
-      <Grid container spacing={3}>
-        <Grid size={3}>
+      <ResponsiveGridContainer spacing={3}>
+        <ResponsiveGrid size="quarter">
           <SearchTextField
             value={filter.search}
             label={t('Search')}
@@ -82,8 +83,8 @@ export function VerificationRecordsFilters({
             data-cy="filters-search"
             fullWidth
           />
-        </Grid>
-        <Grid size={3}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="quarter">
           <SelectFilter
             onChange={(e) =>
               handleFilterChange('verificationStatus', e.target.value)
@@ -98,8 +99,8 @@ export function VerificationRecordsFilters({
               </MenuItem>
             ))}
           </SelectFilter>
-        </Grid>
-        <Grid size={3}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="quarter">
           <SelectFilter
             onChange={(e) =>
               handleFilterChange('verificationChannel', e.target.value)
@@ -113,8 +114,8 @@ export function VerificationRecordsFilters({
               </MenuItem>
             ))}
           </SelectFilter>
-        </Grid>
-        <Grid size={3}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="quarter">
           <SelectFilter
             onChange={(e) =>
               handleFilterChange('verificationPlanId', e.target.value)
@@ -124,8 +125,8 @@ export function VerificationRecordsFilters({
           >
             {verificationPlanOptions}
           </SelectFilter>
-        </Grid>
-      </Grid>
+        </ResponsiveGrid>
+      </ResponsiveGridContainer>
     </FiltersSection>
   );
 }

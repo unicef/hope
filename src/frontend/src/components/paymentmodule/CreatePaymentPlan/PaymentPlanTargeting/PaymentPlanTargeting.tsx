@@ -1,7 +1,7 @@
 import { LoadingComponent } from '@core/LoadingComponent';
 import { OverviewContainer } from '@core/OverviewContainer';
 import { Title } from '@core/Title';
-import { Box, Grid, Typography } from '@mui/material';
+import { Box, Typography } from '@mui/material';
 import type { PaginatedTargetPopulationListList } from '@restgenerated/models/PaginatedTargetPopulationListList';
 import { FormikSelectField } from '@shared/Formik/FormikSelectField';
 import { Field } from 'formik';
@@ -9,6 +9,7 @@ import type { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { PaperContainer } from '../../../targeting/PaperContainer';
+import { ResponsiveGrid, ResponsiveGridContainer } from 'src/responsive';
 
 const StyledBox = styled(Box)`
   width: 100%;
@@ -43,8 +44,8 @@ export function PaymentPlanTargeting({
             flexDirection: 'column',
           }}
         >
-          <Grid container spacing={3}>
-            <Grid size={{ xs: 6 }}>
+          <ResponsiveGridContainer spacing={3}>
+            <ResponsiveGrid size="half">
               <Field
                 name="paymentPlanId"
                 label={t('Target Population')}
@@ -56,8 +57,8 @@ export function PaymentPlanTargeting({
                 disabled={disabled}
                 data-cy="input-target-population"
               />
-            </Grid>
-          </Grid>
+            </ResponsiveGrid>
+          </ResponsiveGridContainer>
         </StyledBox>
       </OverviewContainer>
     </PaperContainer>

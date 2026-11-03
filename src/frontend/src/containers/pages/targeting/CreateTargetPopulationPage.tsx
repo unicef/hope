@@ -29,6 +29,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { useProgramContext } from 'src/programContext';
+import { responsiveGridSize } from 'src/responsive';
 import * as Yup from 'yup';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import type { ProgramDetail } from '@restgenerated/models/ProgramDetail';
@@ -195,7 +196,7 @@ const CreateTargetPopulationPage = (): ReactElement => {
                   mb: 5,
                 }}
               >
-                <Grid size={6}>
+                <Grid size={responsiveGridSize('half')}>
                   <ProgramCycleAutocompleteRest
                     value={values.programCycleId}
                     onChange={async (e) => {
@@ -213,7 +214,7 @@ const CreateTargetPopulationPage = (): ReactElement => {
                     error={errors.programCycleId?.value}
                   />
                 </Grid>
-                <Grid size={6}>
+                <Grid size={responsiveGridSize('half')}>
                   <Box
                     sx={{
                       display: 'flex',
@@ -264,7 +265,7 @@ const CreateTargetPopulationPage = (): ReactElement => {
                 }}
               />
               <Grid container spacing={3}>
-                <Grid size={6}>
+                <Grid size={responsiveGridSize('half')}>
                   <Field
                     name="name"
                     label={t('Target Population Name')}
@@ -277,7 +278,7 @@ const CreateTargetPopulationPage = (): ReactElement => {
                   />
                 </Grid>
                 {programPurposes.length > 0 && (
-                  <Grid size={6}>
+                  <Grid size={responsiveGridSize('half')}>
                     <Field
                       name="paymentPlanPurposes"
                       label={t('Payment Plan Purposes')}

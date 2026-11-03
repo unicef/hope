@@ -4,6 +4,7 @@ import { FieldArray } from 'formik';
 import { useTranslation } from 'react-i18next';
 import { DocumentationField } from './DocumentationField';
 import type { ReactElement } from 'react';
+import { ResponsiveGrid } from 'src/responsive';
 
 export interface NewDocumentationFieldArrayProps {
   values;
@@ -43,7 +44,7 @@ export function NewDocumentationFieldArray({
                 />
               </Grid>
             ))}
-            <Grid size={12}>
+            <ResponsiveGrid size="full">
               <Button
                 data-cy="add-documentation"
                 color="primary"
@@ -61,7 +62,7 @@ export function NewDocumentationFieldArray({
                     : 'Add grievance supporting documents',
                 )}
               </Button>
-            </Grid>
+            </ResponsiveGrid>
             {errors?.documentation && (
               <FormHelperText error>{errors?.documentation}</FormHelperText>
             )}

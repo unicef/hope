@@ -17,6 +17,7 @@ import type { HeadCell } from './EnhancedTableHead';
 import { EnhancedTableHead } from './EnhancedTableHead';
 import { EnhancedTableToolbar } from './EnhancedTableToolbar';
 import styled from 'styled-components';
+import { responsiveValue } from 'src/responsive';
 import type { ReactElement, ChangeEvent, MouseEvent } from 'react';
 
 export type Order = 'asc' | 'desc';
@@ -224,11 +225,11 @@ export function TableComponent<T>({
   const table = (
     <>
       <StyledTableContainer>
-        <StyledBox>
+        <StyledBox sx={{ flexWrap: responsiveValue('wrap', 'nowrap') }}>
           {title ? <EnhancedTableToolbar title={title} /> : null}
           <StyledBox
             sx={{
-              p: 5,
+              p: responsiveValue(2, 5),
             }}
           >
             {actions || null}

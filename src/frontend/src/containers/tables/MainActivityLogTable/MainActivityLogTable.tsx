@@ -13,11 +13,8 @@ import { MainActivityLogTableRow } from './MainActivityLogTableRow';
 import { headCells } from './MainActivityLogTableHeadCells';
 import { KeyboardArrowLeft, KeyboardArrowRight } from '@mui/icons-material';
 import withErrorBoundary from '@components/core/withErrorBoundary';
+import { responsiveValue } from 'src/responsive';
 
-const Table = styled.div`
-  display: flex;
-  flex-direction: column;
-`;
 interface HeadingCellProps {
   weight?: number;
 }
@@ -95,27 +92,36 @@ export function MainActivityLogTable({
   return (
     <PaperContainer data-cy="main-activity-log-table">
       <Collapse in={expanded} data-cy="table-collapse">
-        <Table data-cy="activity-log-table">
-          <Row data-cy="table-header-row">
-            {headCells.map((item) => (
-              <HeadingCell
-                key={item.id}
-                style={{ flex: item.weight || 1 }}
-                data-cy={`header-cell-${item.id}`}
-              >
-                {item.label}
-              </HeadingCell>
+        <Box sx={{ overflowX: 'auto' }}>
+          <Box
+            data-cy="activity-log-table"
+            sx={{
+              display: 'flex',
+              flexDirection: 'column',
+              minWidth: responsiveValue('1000px', '0'),
+            }}
+          >
+            <Row data-cy="table-header-row">
+              {headCells.map((item) => (
+                <HeadingCell
+                  key={item.id}
+                  style={{ flex: item.weight || 1 }}
+                  data-cy={`header-cell-${item.id}`}
+                >
+                  {item.label}
+                </HeadingCell>
+              ))}
+              <ButtonPlaceHolder />
+            </Row>
+            {logEntries.map((value, index) => (
+              <MainActivityLogTableRow
+                key={`${value.objectId}-${value.timestamp}-${index}`}
+                logEntry={value}
+                data-cy={`log-entry-row-${value.objectId}-${index}`}
+              />
             ))}
-            <ButtonPlaceHolder />
-          </Row>
-          {logEntries.map((value, index) => (
-            <MainActivityLogTableRow
-              key={`${value.objectId}-${value.timestamp}-${index}`}
-              logEntry={value}
-              data-cy={`log-entry-row-${value.objectId}-${index}`}
-            />
-          ))}
-        </Table>
+          </Box>
+        </Box>
         <TablePagination
           rowsPerPageOptions={[5, 10, 15, 20]}
           component="div"

@@ -59,9 +59,12 @@ interface TimezoneOption {
 
 interface UserProfileMenuProps {
   meData: Profile;
+  /** Show only the avatar, without the email. */
+  compact?: boolean;
 }
 export function UserProfileMenu({
   meData,
+  compact = false,
 }: UserProfileMenuProps): ReactElement {
   const queryClient = useQueryClient();
   const { businessArea: businessAreaSlug } = useBaseUrl();
@@ -232,7 +235,7 @@ export function UserProfileMenu({
         data-cy="menu-user-profile"
       >
         <Avatar alt={meData.email} src="/static/images/avatar/1.jpg" />
-        <MenuButtonText> {meData.email}</MenuButtonText>
+        {!compact && <MenuButtonText> {meData.email}</MenuButtonText>}
       </UserProfileButton>
       <Popper
         open={open}

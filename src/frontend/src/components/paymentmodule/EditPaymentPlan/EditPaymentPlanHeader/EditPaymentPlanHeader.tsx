@@ -15,6 +15,7 @@ import type { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail'
 import { LoadingButton } from '@components/core/LoadingButton';
 import { PlanTypeEnum } from '@restgenerated/models/PlanTypeEnum';
 import { usePaymentPlanTypeLabel } from '@hooks/usePaymentPlanTypeLabel';
+import { responsiveValue } from 'src/responsive';
 
 const StatusWrapper = styled.div`
   margin-left: 30px;
@@ -60,6 +61,8 @@ export function EditPaymentPlanHeader({
         <Box
           sx={{
             display: 'flex',
+            flexWrap: responsiveValue('wrap', 'nowrap'),
+            rowGap: 2,
             alignItems: 'center',
           }}
         >

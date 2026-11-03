@@ -1,4 +1,3 @@
-import { Grid } from '@mui/material';
 import { Field } from 'formik';
 import { useLocation } from 'react-router-dom';
 import CalendarTodayRoundedIcon from '@mui/icons-material/CalendarTodayRounded';
@@ -10,6 +9,7 @@ import { FormikTextField } from '@shared/Formik/FormikTextField';
 import { FormikBoolFieldGrievances } from '../FormikBoolFieldGrievances';
 import { GrievanceFlexFieldPhotoModalEditable } from '../GrievancesPhotoModals/GrievanceFlexFieldPhotoModalEditable';
 import type { ReactElement } from 'react';
+import { ResponsiveGrid } from 'src/responsive';
 
 export interface EditIndividualDataChangeFieldProps {
   field: {
@@ -103,7 +103,7 @@ export const EditIndividualDataChangeField = ({
       fieldProps = {};
   }
   return (
-    <Grid size={12}>
+    <ResponsiveGrid size="full">
       <Field
         name={name}
         variant="outlined"
@@ -113,6 +113,6 @@ export const EditIndividualDataChangeField = ({
         disabled={isEditTicket}
         {...fieldProps}
       />
-    </Grid>
+    </ResponsiveGrid>
   );
 };

@@ -75,6 +75,7 @@ function TablePaginationActions(props) {
 import type { ReactElement, ChangeEvent, MouseEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
+import { responsiveValue } from 'src/responsive';
 
 export type Order = 'asc' | 'desc';
 
@@ -285,11 +286,11 @@ export function TableRestComponent<T>({
             }}
           />
         )}
-        <StyledBox>
+        <StyledBox sx={{ flexWrap: responsiveValue('wrap', 'nowrap') }}>
           {title ? <EnhancedTableToolbar title={title} /> : null}
           <StyledBox
             sx={{
-              p: 5,
+              p: responsiveValue(2, 5),
             }}
           >
             {actions || null}

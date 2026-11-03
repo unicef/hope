@@ -14,6 +14,7 @@ import { RestService } from '@restgenerated/services/RestService';
 import { restQueryKey } from '@utils/queryKeys';
 import { useQuery } from '@tanstack/react-query';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { useIsMobile } from 'src/responsive';
 
 const StyledToolbar = styled(Toolbar)(() => ({
   display: 'flex',
@@ -65,6 +66,7 @@ const StyledIconButton = styled(IconButton)<AppBarProps>(({ open }) => ({
 
 export const AppBar = ({ open, handleDrawerOpen }): ReactElement => {
   const { businessArea, programCode } = useBaseUrl();
+  const isMobile = useIsMobile();
 
   const profileParams = {
     businessAreaSlug: businessArea,
@@ -115,31 +117,34 @@ export const AppBar = ({ open, handleDrawerOpen }): ReactElement => {
               <MenuIcon />
             </StyledIconButton>
           </Box>
-          <Box
-            sx={{
-              display: 'flex',
-              alignItems: 'center',
-            }}
-          >
+          {/* On mobile these selects live in the drawer. */}
+          {!isMobile && (
             <Box
-              data-cy="business-area-container"
               sx={{
-                ml: 6,
+                display: 'flex',
+                alignItems: 'center',
               }}
             >
-              <BusinessAreaSelect />
-            </Box>
-            {businessArea !== 'global' && (
               <Box
-                data-cy="global-program-filter-container"
+                data-cy="business-area-container"
                 sx={{
                   ml: 6,
                 }}
               >
-                <GlobalProgramSelect />
+                <BusinessAreaSelect />
               </Box>
-            )}
-          </Box>
+              {businessArea !== 'global' && (
+                <Box
+                  data-cy="global-program-filter-container"
+                  sx={{
+                    ml: 6,
+                  }}
+                >
+                  <GlobalProgramSelect />
+                </Box>
+              )}
+            </Box>
+          )}
         </Box>
         <Box
           sx={{
@@ -147,12 +152,23 @@ export const AppBar = ({ open, handleDrawerOpen }): ReactElement => {
             justifyContent: 'flex-end',
           }}
         >
-          <Button startIcon={<TextsmsIcon style={{ color: '#e3e6e7' }} />}>
-            <StyledLink target="_blank" href={servicenow}>
-              Support
-            </StyledLink>
-          </Button>
-          <UserProfileMenu meData={meData} />
+          {isMobile ? (
+            <IconButton
+              aria-label="Support"
+              href={servicenow}
+              target="_blank"
+              sx={{ color: '#e3e6e7' }}
+            >
+              <TextsmsIcon />
+            </IconButton>
+          ) : (
+            <Button startIcon={<TextsmsIcon style={{ color: '#e3e6e7' }} />}>
+              <StyledLink target="_blank" href={servicenow}>
+                Support
+              </StyledLink>
+            </Button>
+          )}
+          <UserProfileMenu meData={meData} compact={isMobile} />
         </Box>
       </StyledToolbar>
     </StyledAppBar>

@@ -10,6 +10,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { restQueryKey } from '@utils/queryKeys';
 import { RestService } from '@restgenerated/services/RestService';
 import { PERMISSIONS } from 'src/config/permissions';
+import { HeaderActions } from '@core/HeaderActions';
 
 export interface AbortedPaymentPlanHeaderButtonsProps {
   paymentPlan: PaymentPlanDetail;
@@ -62,12 +63,7 @@ export function AbortedPaymentPlanHeaderButtons({
   };
 
   return (
-    <Box
-      sx={{
-        display: 'flex',
-        alignItems: 'center',
-      }}
-    >
+    <HeaderActions spacing="none">
       {canReactivate && (
         <Box
           sx={{
@@ -86,6 +82,6 @@ export function AbortedPaymentPlanHeaderButtons({
           </Button>
         </Box>
       )}
-    </Box>
+    </HeaderActions>
   );
 }

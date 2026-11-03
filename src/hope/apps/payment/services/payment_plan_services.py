@@ -26,6 +26,7 @@ from django.utils import timezone
 from requests import RequestException
 from rest_framework.exceptions import ValidationError
 from rest_framework.status import is_client_error
+from viewflow.fsm import NoTransition
 
 from hope.apps.account.permissions import Permissions
 from hope.apps.activity_log.utils import copy_model_object
@@ -151,7 +152,14 @@ class PaymentPlanService:
         self.validate_action()
 
         function_action = self.get_action_function()
-        return function_action()
+        try:
+            return function_action()
+        except NoTransition:
+            action_label = PaymentPlan.Action(cast("str", self.action)).label
+            raise ValidationError(
+                f"{action_label} is not allowed when the Payment Plan status is "
+                f"{self.payment_plan.get_status_display()}."
+            )
 
     def validate_action(self) -> None:
         actions = list(self.actions_map.keys())

@@ -6,8 +6,9 @@ import { OverviewContainer } from '@core/OverviewContainer';
 import { Title } from '@core/Title';
 import { UniversalMoment } from '@core/UniversalMoment';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import type { GridSize } from '@mui/material';
 import { Grid, Typography } from '@mui/material';
+import { ResponsiveGrid, ResponsiveGridContainer } from 'src/responsive';
+import type { ResponsiveGridSize } from 'src/responsive';
 import type { FeedbackDetail } from '@restgenerated/models/FeedbackDetail';
 import type { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -36,12 +37,12 @@ function FeedbackDetails({
           <Typography variant="h6">{t('Details')}</Typography>
         </Title>
         <OverviewContainer>
-          <Grid container spacing={6}>
+          <ResponsiveGridContainer spacing={6}>
             {[
               {
                 label: t('Category'),
                 value: <span>{t('Feedback')}</span>,
-                size: 3,
+                size: 'quarter',
               },
               {
                 label: t('Issue Type'),
@@ -52,7 +53,7 @@ function FeedbackDetails({
                       : 'Negative Feedback'}
                   </span>
                 ),
-                size: 3,
+                size: 'quarter',
               },
               {
                 label: `${beneficiaryGroup?.groupLabel} ID`,
@@ -75,7 +76,7 @@ function FeedbackDetails({
                     )}
                   </span>
                 ),
-                size: 3,
+                size: 'quarter',
               },
               {
                 label:
@@ -101,7 +102,7 @@ function FeedbackDetails({
                     )}
                   </span>
                 ),
-                size: 3,
+                size: 'quarter',
               },
               {
                 label: t('Programme'),
@@ -118,47 +119,47 @@ function FeedbackDetails({
                     )}
                   </span>
                 ),
-                size: 3,
+                size: 'quarter',
               },
               {
                 label: t('Created By'),
                 value: feedback.createdBy,
-                size: 3,
+                size: 'quarter',
               },
               {
                 label: t('Date Created'),
                 value: <UniversalMoment>{feedback.createdAt}</UniversalMoment>,
-                size: 3,
+                size: 'quarter',
               },
               {
                 label: t('Last Modified Date'),
                 value: <UniversalMoment>{feedback.updatedAt}</UniversalMoment>,
-                size: 3,
+                size: 'quarter',
               },
               {
                 label: t('Administrative Level 2'),
                 value: feedback.admin2?.name,
-                size: 3,
+                size: 'quarter',
               },
               {
                 label: t('Area / Village / Pay point'),
                 value: feedback.area,
-                size: 3,
+                size: 'quarter',
               },
               {
                 label: t('Languages Spoken'),
                 value: feedback.language,
-                size: 3,
+                size: 'quarter',
               },
               {
                 label: t('Description'),
                 value: feedback.description,
-                size: 12,
+                size: 'full',
               },
               {
                 label: t('Comments'),
                 value: feedback.comments,
-                size: 12,
+                size: 'full',
               },
             ]
               .filter((el) =>
@@ -167,11 +168,15 @@ function FeedbackDetails({
                   : el,
               )
               .map((el) => (
-                <Grid key={el.label} size={{ xs: el.size as GridSize }}>
+                <ResponsiveGrid
+                  key={el.label}
+                  size={el.size as ResponsiveGridSize}
+                  mobileSize={el.size === 'quarter' ? 'half' : 'full'}
+                >
                   <LabelizedField label={el.label}>{el.value}</LabelizedField>
-                </Grid>
+                </ResponsiveGrid>
               ))}
-          </Grid>
+          </ResponsiveGridContainer>
         </OverviewContainer>
       </ContainerColumnWithBorder>
     </Grid>

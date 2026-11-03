@@ -3,27 +3,24 @@ import BlockRoundedIcon from '@mui/icons-material/BlockRounded';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import type { ReactElement } from 'react';
+import { responsiveValue } from 'src/responsive';
 
-const Container = styled.div`
-  padding: 20px;
-`;
 const Icon = styled(BlockRoundedIcon)`
   && {
     font-size: 100px;
   }
 `;
-const PaperContainer = styled.div`
+const PaperContainer = styled(Box)`
   display: flex;
   align-items: center;
   justify-content: center;
   flex-direction: column;
   color: rgba(0, 0, 0, 0.38);
-  padding: 70px;
-  font-size: 50px;
   height: calc(100vh - 104px);
 `;
 const SmallerText = styled.div`
   font-size: 16px;
+  overflow-wrap: anywhere;
 `;
 
 interface PermissionDeniedProp {
@@ -38,9 +35,14 @@ export function PermissionDenied({
     ? permission.join(', ')
     : permission;
   return (
-    <Container>
+    <Box sx={{ padding: responsiveValue('8px', '20px') }}>
       <Paper>
-        <PaperContainer>
+        <PaperContainer
+          sx={{
+            padding: responsiveValue('24px', '70px'),
+            fontSize: responsiveValue('32px', '50px'),
+          }}
+        >
           <Icon />
           <Box>{t('Permission Denied')}</Box>
           <SmallerText>
@@ -50,6 +52,6 @@ export function PermissionDenied({
           <SmallerText>{permissionText}</SmallerText>
         </PaperContainer>
       </Paper>
-    </Container>
+    </Box>
   );
 }

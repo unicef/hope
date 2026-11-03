@@ -1,4 +1,4 @@
-import { Dialog, DialogContent, IconButton } from '@mui/material';
+import { Box, Dialog, DialogContent, IconButton } from '@mui/material';
 import { Close } from '@mui/icons-material';
 import type { ChangeEvent, ReactElement } from 'react';
 import { useState } from 'react';
@@ -8,12 +8,10 @@ import TargetingDiagramImage from '../../../../assets/TargetingDiagramImage.png'
 import { TabPanel } from '@components/core/TabPanel';
 import { FlexFieldTab } from './FlexFieldTab';
 import { Tabs, Tab } from '@core/Tabs';
+import { responsiveValue } from 'src/responsive';
 
 const DialogWrapper = styled(Dialog)`
   && {
-    .MuiPaper-root {
-      max-width: fit-content;
-    }
     .MuiDialogContent-root {
       padding: 0;
     }
@@ -25,22 +23,6 @@ const DialogTitleWrapper = styled.div`
   justify-content: space-between;
   align-items: center;
   border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
-`;
-
-const StyledDialogContent = styled(DialogContent)`
-  width: 900px;
-  height: 600px;
-`;
-
-const TargetingDiagram = styled.img`
-  width: 754px;
-  height: 525px;
-  margin: 0 auto;
-  background-color: #f8f8f8;
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
 `;
 
 const StyledTabPanel = styled(TabPanel)`
@@ -81,6 +63,15 @@ export const TargetingInfoDialog = ({
       onClose={() => setOpen(false)}
       scroll="paper"
       aria-labelledby="form-dialog-title"
+      slotProps={{
+        paper: {
+          sx: {
+            width: responsiveValue('100%', 'auto'),
+            maxWidth: responsiveValue('calc(100% - 32px)', 'fit-content'),
+            m: responsiveValue('16px', '32px'),
+          },
+        },
+      }}
     >
       <DialogTitleWrapper>
         {HeaderTabs}
@@ -93,14 +84,34 @@ export const TargetingInfoDialog = ({
           <Close />
         </IconButton>
       </DialogTitleWrapper>
-      <StyledDialogContent>
+      <DialogContent
+        sx={{
+          width: responsiveValue('100%', '900px'),
+          height: responsiveValue('auto', '600px'),
+        }}
+      >
         <StyledTabPanel value={selectedTab} index={0}>
           <FlexFieldTab />
         </StyledTabPanel>
         <TabPanel value={selectedTab} index={1}>
-          <TargetingDiagram src={TargetingDiagramImage} alt="diagram" />
+          <Box
+            component="img"
+            src={TargetingDiagramImage}
+            alt="diagram"
+            sx={{
+              display: 'block',
+              width: responsiveValue('100%', '754px'),
+              height: responsiveValue('auto', '525px'),
+              margin: '0 auto',
+              backgroundColor: '#f8f8f8',
+              position: responsiveValue('static', 'absolute'),
+              top: '50%',
+              left: '50%',
+              transform: responsiveValue('none', 'translate(-50%, -50%)'),
+            }}
+          />
         </TabPanel>
-      </StyledDialogContent>
+      </DialogContent>
     </DialogWrapper>
   );
 };
