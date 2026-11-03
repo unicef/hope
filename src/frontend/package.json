@@ -2,6 +2,7 @@
   "name": "frontend",
   "version": "4.22.0",
   "private": true,
+  "packageManager": "bun@1.4.2",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -132,5 +133,6 @@
     "nanoid": "^3.3.18",
     "postcss": "^8.5.26",
     "js-yaml": "^4.3.2"
-  }
+  },
+  "trustedDependencies": []
 }

@@ -75,9 +75,9 @@ ENTRYPOINT ["entrypoint.sh"]
 
 
 # Frontend builder
-FROM oven/bun:1.3-slim AS frontend-builder
+FROM oven/bun:1.4.2-slim AS frontend-builder
 WORKDIR /fe-build
-COPY ./src/frontend/package.json ./src/frontend/bun.lock ./
+COPY ./src/frontend/package.json ./src/frontend/bun.lock ./src/frontend/bunfig.toml ./src/frontend/.npmrc ./
 RUN bun install --frozen-lockfile
 COPY ./src/frontend ./
 RUN NODE_ENV="production" bun run build

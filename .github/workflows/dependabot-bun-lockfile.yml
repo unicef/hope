@@ -22,9 +22,11 @@ jobs:
 
       - name: Set up Bun
         uses: oven-sh/setup-bun@v2
+        with:
+          bun-version-file: src/frontend/package.json
 
       - name: Regenerate bun.lock
-        run: bun install
+        run: bun install --ignore-scripts
         working-directory: src/frontend
 
       - name: Commit updated lockfile
