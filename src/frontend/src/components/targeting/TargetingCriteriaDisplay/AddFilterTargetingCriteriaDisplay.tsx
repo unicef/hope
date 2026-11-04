@@ -19,7 +19,7 @@ import TargetingCriteriaDisplayDisabled, {
   ContentWrapper,
 } from './TargetingCriteriaDisplayDisabled';
 import { VulnerabilityScoreComponent } from './VulnerabilityScoreComponent';
-import { usePaymentPlanGroup } from '@hooks/usePaymentPlanGroup';
+import { usePaymentPlan } from '@hooks/usePaymentPlan';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 
 const Title = styled.div`
@@ -73,9 +73,9 @@ interface AddFilterTargetingCriteriaDisplayProps {
   rules?;
   helpers?;
   targetPopulation?: TargetPopulationDetail;
-  // The group the TP is (being) assigned to; its FSP limits the delivery
-  // mechanisms.
-  paymentPlanGroupId?: string;
+  // The payment plan the TP is (being) assigned to; its FSP limits the
+  // delivery mechanisms.
+  paymentPlanId?: string;
   isEdit?: boolean;
   screenBeneficiary: boolean;
   isSocialDctType: boolean;
@@ -86,7 +86,7 @@ const AddFilterTargetingCriteriaDisplay = ({
   rules,
   helpers,
   targetPopulation,
-  paymentPlanGroupId,
+  paymentPlanId,
   isEdit,
   screenBeneficiary,
   isSocialDctType,
@@ -96,7 +96,7 @@ const AddFilterTargetingCriteriaDisplay = ({
   const location = useLocation();
   const { selectedProgram } = useProgramContext();
   const { businessArea, isAllPrograms } = useBaseUrl();
-  const { data: paymentPlanGroup } = usePaymentPlanGroup(paymentPlanGroupId);
+  const { data: paymentPlan } = usePaymentPlan(paymentPlanId);
 
   const { data: allCoreFieldsAttributesData, isLoading: loading } = useQuery({
     queryKey: restQueryKey(
@@ -237,7 +237,7 @@ const AddFilterTargetingCriteriaDisplay = ({
           individualFiltersAvailable={individualFiltersAvailable}
           householdFiltersAvailable={householdFiltersAvailable}
           criteriaIndex={criteriaIndex}
-          paymentPlanGroup={paymentPlanGroup}
+          paymentPlan={paymentPlan}
         />
         <ContentWrapper>
           <Box
@@ -271,8 +271,8 @@ const AddFilterTargetingCriteriaDisplay = ({
                         }
                         deliveryMechanism={targetPopulation?.deliveryMechanism}
                         financialServiceProvider={
-                          paymentPlanGroup
-                            ? paymentPlanGroup.financialServiceProvider
+                          paymentPlan
+                            ? paymentPlan.financialServiceProvider
                             : targetPopulation?.financialServiceProvider
                         }
                         criteria={criteria}

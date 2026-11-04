@@ -15,7 +15,7 @@ from hope.models import (
     FinancialServiceProviderXlsxTemplate,
     FspNameMapping,
     FspXlsxTemplatePerDeliveryMechanism,
-    PaymentPlan,
+    PaymentList,
     User,
 )
 
@@ -159,14 +159,14 @@ class FspXlsxTemplatePerDeliveryMechanismAdmin(HOPEModelAdminBase):
 
 class FinancialServiceProviderAdminForm(forms.ModelForm):
     @staticmethod
-    def locked_payment_plans_for_fsp(
+    def locked_payment_lists_for_fsp(
         obj: FinancialServiceProvider,
-    ) -> QuerySet[PaymentPlan]:
-        return PaymentPlan.objects.filter(
+    ) -> QuerySet[PaymentList]:
+        return PaymentList.objects.filter(
             ~Q(
                 status__in=[
-                    PaymentPlan.Status.OPEN,
-                    PaymentPlan.Status.FINISHED,
+                    PaymentList.Status.OPEN,
+                    PaymentList.Status.FINISHED,
                 ],
             ),
             financial_service_provider=obj,
@@ -182,11 +182,11 @@ class FinancialServiceProviderAdminForm(forms.ModelForm):
                 "xlsx_templates",
             ]
             if any(x in self.changed_data for x in protected_fields):
-                payment_plans = self.locked_payment_plans_for_fsp(self.instance)
-                if payment_plans.exists():
+                payment_lists = self.locked_payment_lists_for_fsp(self.instance)
+                if payment_lists.exists():
                     raise ValidationError(
-                        f"Cannot modify {self.instance}, it is assigned to following Payment Plans:"
-                        f" {list(payment_plans)}"
+                        f"Cannot modify {self.instance}, it is assigned to following Payment Lists:"
+                        f" {list(payment_lists)}"
                     )
 
         return super().clean()

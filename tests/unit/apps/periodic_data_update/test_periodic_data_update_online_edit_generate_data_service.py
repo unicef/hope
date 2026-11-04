@@ -14,7 +14,7 @@ from extras.test_utils.factories import (
     HouseholdFactory,
     IndividualFactory,
     PaymentFactory,
-    PaymentPlanFactory,
+    PaymentListFactory,
     PDUOnlineEditFactory,
     PeriodicFieldDataFactory,
     ProgramFactory,
@@ -431,7 +431,7 @@ def test_get_individuals_queryset_target_population_id_filter(
         household=household2,
     )
 
-    pp = PaymentPlanFactory()
+    pp = PaymentListFactory()
     PaymentFactory(parent=pp, household=household, collector=ind1)
 
     filters = {"target_population_id": str(pp.pk)}

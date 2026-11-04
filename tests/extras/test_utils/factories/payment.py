@@ -24,9 +24,9 @@ from hope.models import (
     MergeStatusModel,
     Payment,
     PaymentHouseholdSnapshot,
+    PaymentList,
+    PaymentListSplit,
     PaymentPlan,
-    PaymentPlanGroup,
-    PaymentPlanSplit,
     PaymentPlanSupportingDocument,
     PaymentVerification,
     PaymentVerificationPlan,
@@ -34,7 +34,7 @@ from hope.models import (
     TargetPopulation,
     WesternUnionData,
     WesternUnionInvoice,
-    WesternUnionPaymentPlanReport,
+    WesternUnionPaymentListReport,
 )
 
 from . import HouseholdFactory, IndividualFactory
@@ -43,12 +43,12 @@ from .core import CurrencyFactory, PaymentPlanPurposeFactory
 from .program import ProgramCycleFactory
 
 
-class PaymentPlanGroupFactory(DjangoModelFactory):
+class PaymentPlanFactory(DjangoModelFactory):
     class Meta:
-        model = PaymentPlanGroup
+        model = PaymentPlan
 
     cycle = factory.SubFactory(ProgramCycleFactory)
-    name = factory.Sequence(lambda n: f"Payment Plan Group {n}")
+    name = factory.Sequence(lambda n: f"Payment Plan {n}")
     dispersion_start_date = factory.LazyFunction(date.today)
     dispersion_end_date = factory.LazyFunction(lambda: date.today() + timedelta(days=30))
 
@@ -65,9 +65,9 @@ class FollowUpInstructionFactory(DjangoModelFactory):
     dispersion_end_date = factory.LazyFunction(lambda: date.today() + timedelta(days=30))
 
 
-def _set_owner_dispersion_date(payment_plan, create, field, extracted, default):
+def _set_owner_dispersion_date(payment_list, create, field, extracted, default):
     """Dispersion dates live on the plan's group or instruction; a plan's owner without dates gets the default."""
-    owner = payment_plan.payment_plan_group or payment_plan.follow_up_instruction
+    owner = payment_list.payment_plan or payment_list.follow_up_instruction
     if not create or owner is None:
         return
     value = extracted if extracted is not None else getattr(owner, field) or default
@@ -76,19 +76,19 @@ def _set_owner_dispersion_date(payment_plan, create, field, extracted, default):
         owner.save(update_fields=[field])
 
 
-class PaymentPlanFactory(DjangoModelFactory):
+class PaymentListFactory(DjangoModelFactory):
     class Meta:
-        model = PaymentPlan
+        model = PaymentList
 
     status_date = factory.LazyFunction(timezone.now)
-    status = PaymentPlan.Status.OPEN
+    status = PaymentList.Status.OPEN
     program_cycle = factory.SubFactory(ProgramCycleFactory)
     follow_up_instruction = None
-    payment_plan_group = factory.LazyAttribute(
+    payment_plan = factory.LazyAttribute(
         lambda obj: (
             None
             if obj.follow_up_instruction
-            else obj.program_cycle.payment_plan_groups.first() or PaymentPlanGroupFactory(cycle=obj.program_cycle)
+            else obj.program_cycle.payment_plans.first() or PaymentPlanFactory(cycle=obj.program_cycle)
         )
     )
     created_by = factory.SubFactory(UserFactory)
@@ -97,14 +97,14 @@ class PaymentPlanFactory(DjangoModelFactory):
     @factory.post_generation
     def currency(self, create, extracted, **kwargs):
         if create and extracted is not None:
-            owner = self.payment_plan_group or self.follow_up_instruction
+            owner = self.payment_plan or self.follow_up_instruction
             owner.currency = extracted
             owner.save(update_fields=["currency"])
 
     @factory.post_generation
     def financial_service_provider(self, create, extracted, **kwargs):
         if create and extracted is not None:
-            owner = self.payment_plan_group or self.follow_up_instruction
+            owner = self.payment_plan or self.follow_up_instruction
             owner.financial_service_provider = extracted
             owner.save(update_fields=["financial_service_provider"])
 
@@ -118,7 +118,7 @@ class PaymentPlanFactory(DjangoModelFactory):
 
     @factory.post_generation
     def use_payment_gateway(self, create, extracted, **kwargs):
-        owner = self.payment_plan_group or self.follow_up_instruction
+        owner = self.payment_plan or self.follow_up_instruction
         if create and extracted is not None and owner is not None and owner.use_payment_gateway != extracted:
             owner.use_payment_gateway = extracted
             owner.save(update_fields=["use_payment_gateway"])
@@ -129,9 +129,9 @@ class PaymentPlanFactory(DjangoModelFactory):
             return
         if extracted is False:
             return
-        if self.status == PaymentPlan.Status.FINISHED and not hasattr(self, "payment_verification_summary"):
+        if self.status == PaymentList.Status.FINISHED and not hasattr(self, "payment_verification_summary"):
             PaymentVerificationSummaryFactory(
-                payment_plan=self,
+                payment_list=self,
             )
 
     @factory.post_generation
@@ -149,21 +149,21 @@ class PaymentPlanFactory(DjangoModelFactory):
             self.payment_plan_purposes.add(purpose)
 
 
-class TargetPopulationFactory(PaymentPlanFactory):
+class TargetPopulationFactory(PaymentListFactory):
     class Meta:
         model = TargetPopulation
 
-    status = PaymentPlan.Status.TP_OPEN
+    status = PaymentList.Status.TP_OPEN
 
 
 class ApprovalProcessFactory(DjangoModelFactory):
     class Meta:
         model = ApprovalProcess
 
-    payment_plan_group = None
+    payment_plan = None
     follow_up_instruction = None
-    payment_plan = factory.LazyAttribute(
-        lambda obj: None if obj.payment_plan_group or obj.follow_up_instruction else PaymentPlanFactory()
+    payment_list = factory.LazyAttribute(
+        lambda obj: None if obj.payment_plan or obj.follow_up_instruction else PaymentListFactory()
     )
 
 
@@ -210,7 +210,7 @@ class PaymentFactory(DjangoModelFactory):
     class Meta:
         model = Payment
 
-    parent = factory.SubFactory(PaymentPlanFactory)
+    parent = factory.SubFactory(PaymentListFactory)
     status_date = factory.LazyFunction(timezone.now)
     currency = factory.SubFactory(CurrencyFactory)
     business_area = factory.SelfAttribute("parent.business_area")
@@ -244,12 +244,12 @@ class PaymentVerificationSummaryFactory(DjangoModelFactory):
         model = PaymentVerificationSummary
 
 
-class PaymentPlanSplitFactory(DjangoModelFactory):
+class PaymentListSplitFactory(DjangoModelFactory):
     class Meta:
-        model = PaymentPlanSplit
+        model = PaymentListSplit
 
-    payment_plan = factory.SubFactory(PaymentPlanFactory)
-    split_type = PaymentPlanSplit.SplitType.NO_SPLIT
+    payment_list = factory.SubFactory(PaymentListFactory)
+    split_type = PaymentListSplit.SplitType.NO_SPLIT
     order = 0
 
 
@@ -259,9 +259,7 @@ class PaymentPlanSupportingDocumentFactory(DjangoModelFactory):
 
     title = factory.Sequence(lambda n: f"Supporting Document {n}")
     follow_up_instruction = None
-    payment_plan_group = factory.LazyAttribute(
-        lambda obj: None if obj.follow_up_instruction else PaymentPlanGroupFactory()
-    )
+    payment_plan = factory.LazyAttribute(lambda obj: None if obj.follow_up_instruction else PaymentPlanFactory())
     file = factory.Sequence(
         lambda n: SimpleUploadedFile(f"supporting_doc_{n}.pdf", b"abc", content_type="application/pdf")
     )
@@ -271,7 +269,7 @@ class PaymentVerificationPlanFactory(DjangoModelFactory):
     class Meta:
         model = PaymentVerificationPlan
 
-    payment_plan = factory.SubFactory(PaymentPlanFactory, status=PaymentPlan.Status.FINISHED)
+    payment_list = factory.SubFactory(PaymentListFactory, status=PaymentList.Status.FINISHED)
     verification_channel = PaymentVerificationPlan.VERIFICATION_CHANNEL_MANUAL
     sampling = "FULL_LIST"
 
@@ -284,7 +282,7 @@ class PaymentVerificationFactory(DjangoModelFactory):
         PaymentVerificationPlanFactory,
     )
     payment = factory.SubFactory(
-        PaymentFactory, parent=factory.SelfAttribute("..payment_verification_plan.payment_plan")
+        PaymentFactory, parent=factory.SelfAttribute("..payment_verification_plan.payment_list")
     )
     status_date = factory.Faker("date_time_this_year", before_now=True, after_now=False, tzinfo=UTC)
 
@@ -353,12 +351,12 @@ class FinancialInstitutionFactory(DjangoModelFactory):
     type = FinancialInstitution.FinancialInstitutionType.BANK
 
 
-class WesternUnionPaymentPlanReportFactory(DjangoModelFactory):
+class WesternUnionPaymentListReportFactory(DjangoModelFactory):
     class Meta:
-        model = WesternUnionPaymentPlanReport
+        model = WesternUnionPaymentListReport
 
     invoice = factory.SubFactory(WesternUnionInvoiceFactory)
-    payment_plan = factory.SubFactory(PaymentPlanFactory)
+    payment_list = factory.SubFactory(PaymentListFactory)
 
 
 class DeliveryMechanismConfigFactory(DjangoModelFactory):

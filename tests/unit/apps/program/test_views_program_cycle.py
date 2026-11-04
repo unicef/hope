@@ -14,7 +14,7 @@ from rest_framework.test import APIRequestFactory
 from extras.test_utils.factories import (
     BusinessAreaFactory,
     PartnerFactory,
-    PaymentPlanFactory,
+    PaymentListFactory,
     ProgramCycleFactory,
     ProgramFactory,
     UserFactory,
@@ -25,7 +25,7 @@ from hope.apps.program.api.serializers import (
     ProgramCycleUpdateSerializer,
 )
 from hope.apps.program.api.views import ProgramCycleViewSet
-from hope.models import BusinessArea, Partner, PaymentPlan, PaymentPlanGroup, Program, ProgramCycle, User
+from hope.models import BusinessArea, Partner, PaymentList, PaymentPlan, Program, ProgramCycle, User
 
 pytestmark = pytest.mark.django_db
 
@@ -398,7 +398,7 @@ def test_update_program_cycle_patch_without_permission(
     assert response.status_code == status.HTTP_403_FORBIDDEN
 
 
-def test_update_cycle_dates_and_payment_plan(
+def test_update_cycle_dates_and_payment_list(
     authenticated_client: Any,
     user: User,
     afghanistan: BusinessArea,
@@ -414,24 +414,24 @@ def test_update_cycle_dates_and_payment_plan(
         program=program,
     )
 
-    payment_plan = PaymentPlanFactory(program_cycle=cycle1, start_date=None, end_date=None)
-    assert payment_plan.start_date is None
-    assert payment_plan.end_date is None
+    payment_list = PaymentListFactory(program_cycle=cycle1, start_date=None, end_date=None)
+    assert payment_list.start_date is None
+    assert payment_list.end_date is None
 
     # update only end_date
     data = {"end_date": parse_date("2023-02-22")}
     response = authenticated_client.patch(cycle_1_detail_url, data, format="json")
     assert response.status_code == status.HTTP_200_OK
-    payment_plan.refresh_from_db()
-    assert payment_plan.end_date.strftime("%Y-%m-%d") == "2023-02-22"
-    assert payment_plan.start_date is None
+    payment_list.refresh_from_db()
+    assert payment_list.end_date.strftime("%Y-%m-%d") == "2023-02-22"
+    assert payment_list.start_date is None
 
     # update only start_date
     data = {"start_date": parse_date("2023-02-02")}
     response = authenticated_client.patch(cycle_1_detail_url, data, format="json")
     assert response.status_code == status.HTTP_200_OK
-    payment_plan.refresh_from_db()
-    assert payment_plan.start_date.strftime("%Y-%m-%d") == "2023-02-02"
+    payment_list.refresh_from_db()
+    assert payment_list.start_date.strftime("%Y-%m-%d") == "2023-02-02"
 
 
 def test_delete_program_cycle_with_permission(
@@ -448,8 +448,8 @@ def test_delete_program_cycle_with_permission(
         status=ProgramCycle.DRAFT,
     )
     # create PP
-    pp = PaymentPlanFactory(program_cycle=cycle3)
-    assert PaymentPlan.objects.count() == 1
+    pp = PaymentListFactory(program_cycle=cycle3)
+    assert PaymentList.objects.count() == 1
     assert ProgramCycle.objects.count() == 4
 
     create_user_role_with_permissions(
@@ -476,7 +476,7 @@ def test_delete_program_cycle_with_permission(
     response = authenticated_client.delete(url)
     assert response.status_code == status.HTTP_204_NO_CONTENT
     assert ProgramCycle.objects.count() == 3
-    assert PaymentPlan.objects.count() == 0
+    assert PaymentList.objects.count() == 0
 
 
 def test_delete_program_cycle_without_permission(
@@ -493,8 +493,8 @@ def test_delete_program_cycle_without_permission(
         status=ProgramCycle.DRAFT,
     )
     # create PP
-    PaymentPlanFactory(program_cycle=cycle3)
-    assert PaymentPlan.objects.count() == 1
+    PaymentListFactory(program_cycle=cycle3)
+    assert PaymentList.objects.count() == 1
     assert ProgramCycle.objects.count() == 4
 
     create_user_role_with_permissions(
@@ -527,11 +527,11 @@ def test_delete_program_cycle_succeeds_when_only_empty_groups_remain(
     create_user_role_with_permissions: Callable,
 ) -> None:
     cycle3 = ProgramCycleFactory(program=program, status=ProgramCycle.DRAFT)
-    pp = PaymentPlanFactory(program_cycle=cycle3)
-    group = pp.payment_plan_group
+    pp = PaymentListFactory(program_cycle=cycle3)
+    group = pp.payment_plan
     pp.delete(soft=False)
-    assert group.payment_plans.count() == 0
-    assert cycle3.payment_plan_groups.filter(id=group.id).exists()
+    assert group.payment_lists.count() == 0
+    assert cycle3.payment_plans.filter(id=group.id).exists()
 
     create_user_role_with_permissions(
         user=user,
@@ -552,7 +552,7 @@ def test_delete_program_cycle_succeeds_when_only_empty_groups_remain(
     response = authenticated_client.delete(url)
     assert response.status_code == status.HTTP_204_NO_CONTENT
     assert not ProgramCycle.objects.filter(id=cycle3.id).exists()
-    assert not PaymentPlanGroup.objects.filter(id=group.id).exists()
+    assert not PaymentPlan.objects.filter(id=group.id).exists()
 
 
 def test_filter_by_status(
@@ -710,8 +710,8 @@ def test_filter_total_delivered_quantity_usd(
         program=program,
     )
 
-    PaymentPlanFactory(program_cycle=cycle1, total_delivered_quantity_usd=Decimal("500.00"))
-    PaymentPlanFactory(program_cycle=cycle2, total_delivered_quantity_usd=Decimal("1500.00"))
+    PaymentListFactory(program_cycle=cycle1, total_delivered_quantity_usd=Decimal("500.00"))
+    PaymentListFactory(program_cycle=cycle2, total_delivered_quantity_usd=Decimal("1500.00"))
     cycle2.refresh_from_db()
     assert cycle2.total_delivered_quantity_usd == 1500
     response = authenticated_client.get(
@@ -743,8 +743,8 @@ def test_filter_total_entitled_quantity_usd(
         program=program,
     )
 
-    PaymentPlanFactory(program_cycle=cycle1, total_entitled_quantity_usd=Decimal("750.00"))
-    PaymentPlanFactory(program_cycle=cycle2, total_entitled_quantity_usd=Decimal("2000.00"))
+    PaymentListFactory(program_cycle=cycle1, total_entitled_quantity_usd=Decimal("750.00"))
+    PaymentListFactory(program_cycle=cycle2, total_entitled_quantity_usd=Decimal("2000.00"))
     cycle2.refresh_from_db()
     assert cycle2.total_entitled_quantity_usd == 2000
     response = authenticated_client.get(
@@ -827,17 +827,17 @@ def test_finish_program_cycle_with_permission(
         program=program,
     )
 
-    PaymentPlanFactory(program_cycle=cycle1, status=PaymentPlan.Status.TP_OPEN)
-    payment_plan = PaymentPlanFactory(program_cycle=cycle1, status=PaymentPlan.Status.IN_REVIEW)
+    PaymentListFactory(program_cycle=cycle1, status=PaymentList.Status.TP_OPEN)
+    payment_list = PaymentListFactory(program_cycle=cycle1, status=PaymentList.Status.IN_REVIEW)
     assert cycle1.status == ProgramCycle.ACTIVE
-    assert payment_plan.status == PaymentPlan.Status.IN_REVIEW
+    assert payment_list.status == PaymentList.Status.IN_REVIEW
 
     resp_error = authenticated_client.post(cycle_1_detail_url + "finish/", {}, format="json")
     assert resp_error.status_code == status.HTTP_400_BAD_REQUEST
-    assert "All Payment Plans and Follow-Up Payment Plans have to be Reconciled." in resp_error.data
+    assert "All Payment Lists and Follow-Up Payment Lists have to be Reconciled." in resp_error.data
 
-    payment_plan.status = PaymentPlan.Status.ACCEPTED
-    payment_plan.save()
+    payment_list.status = PaymentList.Status.ACCEPTED
+    payment_list.save()
     response = authenticated_client.post(cycle_1_detail_url + "finish/", {}, format="json")
     assert response.status_code == status.HTTP_200_OK
     cycle1.refresh_from_db()
@@ -860,10 +860,10 @@ def test_finish_program_cycle_without_permission(
         program=program,
     )
 
-    PaymentPlanFactory(program_cycle=cycle1, status=PaymentPlan.Status.TP_OPEN)
-    payment_plan = PaymentPlanFactory(program_cycle=cycle1, status=PaymentPlan.Status.IN_REVIEW)
+    PaymentListFactory(program_cycle=cycle1, status=PaymentList.Status.TP_OPEN)
+    payment_list = PaymentListFactory(program_cycle=cycle1, status=PaymentList.Status.IN_REVIEW)
     assert cycle1.status == ProgramCycle.ACTIVE
-    assert payment_plan.status == PaymentPlan.Status.IN_REVIEW
+    assert payment_list.status == PaymentList.Status.IN_REVIEW
 
     resp_error = authenticated_client.post(cycle_1_detail_url + "finish/", {}, format="json")
     assert resp_error.status_code == status.HTTP_403_FORBIDDEN
@@ -1269,7 +1269,7 @@ def test_viewset_successful_delete() -> None:
     program = ProgramFactory(status=Program.ACTIVE, cycle=False)
     cycle1 = ProgramCycleFactory(program=program, status=ProgramCycle.DRAFT)
     cycle2 = ProgramCycleFactory(program=program, status=ProgramCycle.DRAFT)
-    cycle1.payment_plan_groups.all().delete()
+    cycle1.payment_plans.all().delete()
     viewset.perform_destroy(cycle1)
     assert not ProgramCycle.objects.filter(id=cycle1.id).exists()
     assert ProgramCycle.objects.filter(id=cycle2.id).exists()

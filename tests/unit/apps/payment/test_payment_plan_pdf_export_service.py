@@ -11,14 +11,14 @@ from extras.test_utils.factories.payment import (
     FinancialServiceProviderFactory,
     FollowUpInstructionFactory,
     PaymentFactory,
-    PaymentPlanFactory,
+    PaymentListFactory,
 )
 from extras.test_utils.factories.program import ProgramFactory
 from hope.apps.payment.pdf.payment_plan_export_pdf_service import (
     FollowUpInstructionPDFExportService,
-    PaymentPlanGroupPDFExportService,
+    PaymentPlanPDFExportService,
 )
-from hope.models import Approval, DataCollectingType, FollowUpInstruction, Payment, PaymentPlan, PaymentPlanGroup
+from hope.models import Approval, DataCollectingType, FollowUpInstruction, Payment, PaymentList, PaymentPlan
 
 pytestmark = pytest.mark.django_db
 
@@ -43,21 +43,21 @@ def program_and_cycle() -> dict[str, Any]:
 
 
 @pytest.fixture
-def payment_plan(
+def payment_list(
     delivery_mechanism_cash: Any,
     financial_service_provider: Any,
     program_and_cycle: dict[str, Any],
-) -> PaymentPlan:
+) -> PaymentList:
     program = program_and_cycle["program"]
     program_cycle = program_and_cycle["program_cycle"]
-    payment_plan = PaymentPlanFactory(
+    payment_list = PaymentListFactory(
         program_cycle=program_cycle,
         business_area=program.business_area,
         delivery_mechanism=delivery_mechanism_cash,
         financial_service_provider=financial_service_provider,
     )
     PaymentFactory(
-        parent=payment_plan,
+        parent=payment_list,
         entitlement_quantity=Decimal("10.00"),
         delivered_quantity=Decimal("0.00"),
         entitlement_quantity_usd=Decimal("20.00"),
@@ -65,7 +65,7 @@ def payment_plan(
         status=Payment.STATUS_PENDING,
     )
     PaymentFactory(
-        parent=payment_plan,
+        parent=payment_list,
         entitlement_quantity=Decimal("10.00"),
         delivered_quantity=Decimal("10.00"),
         entitlement_quantity_usd=Decimal("20.00"),
@@ -73,7 +73,7 @@ def payment_plan(
         status=Payment.STATUS_DISTRIBUTION_SUCCESS,
     )
     PaymentFactory(
-        parent=payment_plan,
+        parent=payment_list,
         entitlement_quantity=Decimal("10.00"),
         delivered_quantity=Decimal("5.00"),
         entitlement_quantity_usd=Decimal("20.00"),
@@ -81,38 +81,38 @@ def payment_plan(
         status=Payment.STATUS_DISTRIBUTION_PARTIAL,
     )
     PaymentFactory(
-        parent=payment_plan,
+        parent=payment_list,
         entitlement_quantity=Decimal("100.00"),
         delivered_quantity=Decimal("0.00"),
         entitlement_quantity_usd=Decimal("200.00"),
         delivered_quantity_usd=Decimal("0.00"),
         status=Payment.STATUS_NOT_DISTRIBUTED,
     )
-    payment_plan.update_money_fields()
-    payment_plan.unicef_id = "PP-0060-24-00000007"
-    payment_plan.save()
-    payment_plan.refresh_from_db()
-    approval_process = ApprovalProcessFactory(payment_plan_group=payment_plan.payment_plan_group)
+    payment_list.update_money_fields()
+    payment_list.unicef_id = "PP-0060-24-00000007"
+    payment_list.save()
+    payment_list.refresh_from_db()
+    approval_process = ApprovalProcessFactory(payment_plan=payment_list.payment_plan)
     ApprovalFactory(type=Approval.APPROVAL, approval_process=approval_process)
-    return payment_plan
+    return payment_list
 
 
 @pytest.fixture
-def payment_plan_group(payment_plan: PaymentPlan) -> PaymentPlanGroup:
-    group = payment_plan.payment_plan_group
-    group.status = PaymentPlanGroup.Status.ACCEPTED
+def payment_plan(payment_list: PaymentList) -> PaymentPlan:
+    group = payment_list.payment_plan
+    group.status = PaymentPlan.Status.ACCEPTED
     group.save(update_fields=["status"])
     return group
 
 
 @pytest.fixture
-def second_payment_plan_in_group(
-    payment_plan_group: PaymentPlanGroup, delivery_mechanism_cash: Any, program_and_cycle: dict[str, Any]
-) -> PaymentPlan:
-    second_plan = PaymentPlanFactory(
+def second_payment_list_in_group(
+    payment_plan: PaymentPlan, delivery_mechanism_cash: Any, program_and_cycle: dict[str, Any]
+) -> PaymentList:
+    second_plan = PaymentListFactory(
         program_cycle=program_and_cycle["program_cycle"],
         business_area=program_and_cycle["program"].business_area,
-        payment_plan_group=payment_plan_group,
+        payment_plan=payment_plan,
         delivery_mechanism=delivery_mechanism_cash,
     )
     PaymentFactory(
@@ -127,42 +127,42 @@ def second_payment_plan_in_group(
 
 
 @pytest.fixture
-def group_approval_process(payment_plan_group: PaymentPlanGroup) -> Any:
-    approval_process = ApprovalProcessFactory(payment_plan_group=payment_plan_group)
+def group_approval_process(payment_plan: PaymentPlan) -> Any:
+    approval_process = ApprovalProcessFactory(payment_plan=payment_plan)
     ApprovalFactory(approval_process=approval_process, type=Approval.APPROVAL, comment="group approved")
     return approval_process
 
 
-def test_group_generate_web_links(payment_plan_group: PaymentPlanGroup, mocker: Any) -> None:
+def test_group_generate_web_links(payment_plan: PaymentPlan, mocker: Any) -> None:
     mocker.patch(
         "hope.apps.payment.pdf.payment_plan_export_pdf_service.get_link",
         side_effect=lambda path: f"http://www_link{path}",
     )
-    pdf_export_service = PaymentPlanGroupPDFExportService(payment_plan_group)
+    pdf_export_service = PaymentPlanPDFExportService(payment_plan)
 
     pdf_export_service.generate_web_links()
 
     assert pdf_export_service.download_link == (
-        f"http://www_link/api/download-payment-plan-group-summary-pdf/{payment_plan_group.id}"
+        f"http://www_link/api/download-payment-plan-summary-pdf/{payment_plan.id}"
     )
-    assert pdf_export_service.payment_plan_group_link.endswith(f"/payment-module/groups/{payment_plan_group.id}")
+    assert pdf_export_service.payment_plan_link.endswith(f"/payment-module/payment-plans/{payment_plan.id}")
 
 
 def test_group_generate_pdf_summary_returns_pdf_named_after_the_group(
-    payment_plan_group: PaymentPlanGroup, group_approval_process: Any, mocker: Any
+    payment_plan: PaymentPlan, group_approval_process: Any, mocker: Any
 ) -> None:
     mocker.patch("hope.apps.payment.pdf.payment_plan_export_pdf_service.get_link", return_value="http://www_link")
 
-    pdf, filename = PaymentPlanGroupPDFExportService(payment_plan_group).generate_pdf_summary()
+    pdf, filename = PaymentPlanPDFExportService(payment_plan).generate_pdf_summary()
 
     assert isinstance(pdf, bytes)
-    assert filename == f"PaymentPlanGroupSummary-{payment_plan_group.unicef_id}.pdf"
+    assert filename == f"PaymentPlanSummary-{payment_plan.unicef_id}.pdf"
 
 
 def test_group_generate_pdf_summary_aggregates_every_plan_in_the_group(
-    payment_plan_group: PaymentPlanGroup,
     payment_plan: PaymentPlan,
-    second_payment_plan_in_group: PaymentPlan,
+    payment_list: PaymentList,
+    second_payment_list_in_group: PaymentList,
     group_approval_process: Any,
     mocker: Any,
 ) -> None:
@@ -171,11 +171,11 @@ def test_group_generate_pdf_summary_aggregates_every_plan_in_the_group(
         "hope.apps.payment.pdf.payment_plan_export_pdf_service.generate_pdf_from_html", return_value=b"pdf"
     )
 
-    PaymentPlanGroupPDFExportService(payment_plan_group).generate_pdf_summary()
+    PaymentPlanPDFExportService(payment_plan).generate_pdf_summary()
 
     pdf_context_data = generate_pdf_from_html_mock.call_args.kwargs["data"]
-    assert pdf_context_data["payment_plans"] == sorted(
-        [payment_plan, second_payment_plan_in_group], key=lambda p: p.unicef_id
+    assert pdf_context_data["payment_lists"] == sorted(
+        [payment_list, second_payment_list_in_group], key=lambda p: p.unicef_id
     )
     assert pdf_context_data["approval_process"] == group_approval_process
     assert pdf_context_data["approval"].comment == "group approved"
@@ -185,22 +185,22 @@ def test_group_generate_pdf_summary_aggregates_every_plan_in_the_group(
     assert pdf_context_data["reconciliation"]["reconciled_usd"] == Decimal("50.00")
 
 
-def test_group_get_email_context(payment_plan_group: PaymentPlanGroup) -> None:
+def test_group_get_email_context(payment_plan: PaymentPlan) -> None:
     user_mock = MagicMock()
     user_mock.first_name = "First"
     user_mock.last_name = "Last"
     user_mock.email = "first.last@email.com"
 
-    context = PaymentPlanGroupPDFExportService(payment_plan_group).get_email_context(user_mock)
+    context = PaymentPlanPDFExportService(payment_plan).get_email_context(user_mock)
 
     assert context == {
         "first_name": "First",
         "last_name": "Last",
         "email": "first.last@email.com",
-        "message": "Payment Plan Group Summary PDF file has been generated, "
+        "message": "Payment Plan Summary PDF file has been generated, "
         "and below you will find the link to download the file.",
         "link": "",
-        "title": "Payment Plan Group Summary file generated",
+        "title": "Payment Plan Summary file generated",
     }
 
 
@@ -215,14 +215,14 @@ def instruction(program_and_cycle: dict[str, Any], financial_service_provider: A
 @pytest.fixture
 def instruction_child(
     instruction: FollowUpInstruction, program_and_cycle: dict[str, Any], delivery_mechanism_cash: Any
-) -> PaymentPlan:
-    child = PaymentPlanFactory(
+) -> PaymentList:
+    child = PaymentListFactory(
         program_cycle=program_and_cycle["program_cycle"],
         business_area=instruction.business_area,
         follow_up_instruction=instruction,
-        plan_type=PaymentPlan.PlanType.FOLLOW_UP,
+        plan_type=PaymentList.PlanType.FOLLOW_UP,
         delivery_mechanism=delivery_mechanism_cash,
-        status=PaymentPlan.Status.ACCEPTED,
+        status=PaymentList.Status.ACCEPTED,
     )
     PaymentFactory(
         parent=child,
@@ -258,7 +258,10 @@ def test_instruction_generate_web_links(instruction: FollowUpInstruction, mocker
 
 
 def test_instruction_generate_pdf_summary_returns_pdf_named_after_the_instruction(
-    instruction: FollowUpInstruction, instruction_child: PaymentPlan, instruction_approval_process: Any, mocker: Any
+    instruction: FollowUpInstruction,
+    instruction_child: PaymentList,
+    instruction_approval_process: Any,
+    mocker: Any,
 ) -> None:
     mocker.patch("hope.apps.payment.pdf.payment_plan_export_pdf_service.get_link", return_value="http://www_link")
 
@@ -270,7 +273,7 @@ def test_instruction_generate_pdf_summary_returns_pdf_named_after_the_instructio
 
 def test_instruction_generate_pdf_summary_uses_the_instruction_approvals_and_payments(
     instruction: FollowUpInstruction,
-    instruction_child: PaymentPlan,
+    instruction_child: PaymentList,
     instruction_approval_process: Any,
     program_and_cycle: dict[str, Any],
     mocker: Any,
@@ -283,7 +286,7 @@ def test_instruction_generate_pdf_summary_uses_the_instruction_approvals_and_pay
     FollowUpInstructionPDFExportService(instruction).generate_pdf_summary()
 
     pdf_context_data = generate_pdf_from_html_mock.call_args.kwargs["data"]
-    assert pdf_context_data["payment_plans"] == [instruction_child]
+    assert pdf_context_data["payment_lists"] == [instruction_child]
     assert pdf_context_data["status"] == "Accepted"
     assert pdf_context_data["cycle_title"] == program_and_cycle["program_cycle"].title
     assert pdf_context_data["approval"].comment == "instruction approved"

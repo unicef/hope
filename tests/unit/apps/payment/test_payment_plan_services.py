@@ -1,2792 +1,1315 @@
-from collections.abc import Generator
-from datetime import UTC, timedelta
+from datetime import date
 from decimal import Decimal
-import logging
-from typing import Any
-from unittest import mock
 from unittest.mock import patch
-import uuid
 
-from aniso8601 import parse_date
-from constance.test import override_config
-from django.db import IntegrityError, transaction
-from django.utils import timezone
-from django.utils.timezone import now
+from django.contrib.contenttypes.models import ContentType
+from django.db.backends.postgresql.psycopg_any import NumericRange
 from flags.models import FlagState
-from freezegun import freeze_time
 import pytest
-import requests_mock as requests_mock_lib
 from rest_framework.exceptions import ValidationError
-from viewflow.fsm import TransitionNotAllowed
 
 from extras.test_utils.factories import (
-    AccountFactory,
-    AccountTypeFactory,
-    ApprovalFactory,
-    ApprovalProcessFactory,
-    AreaFactory,
-    AreaTypeFactory,
-    BusinessAreaFactory,
-    CountryFactory,
-    CurrencyFactory,
-    DeliveryMechanismFactory,
-    FinancialServiceProviderFactory,
-    FollowUpInstructionFactory,
-    HouseholdFactory,
-    IndividualFactory,
-    PartnerFactory,
     PaymentFactory,
+    PaymentListFactory,
     PaymentPlanFactory,
-    PaymentPlanGroupFactory,
-    PaymentPlanPurposeFactory,
-    PaymentPlanSplitFactory,
     ProgramCycleFactory,
-    ProgramFactory,
-    TargetingCriteriaRuleFactory,
-    TargetingIndividualBlockRuleFilterFactory,
-    TargetingIndividualRuleFilterBlockFactory,
     UserFactory,
 )
-from extras.test_utils.factories.steficon import RuleCommitFactory
-from hope.apps.account.permissions import Permissions
-from hope.apps.household.const import ROLE_PRIMARY
-from hope.apps.payment.celery_tasks import (
-    prepare_child_payment_plan_async_task,
-    prepare_payment_plan_async_task,
+from extras.test_utils.factories.core import CurrencyFactory, FileTempFactory
+from extras.test_utils.factories.payment import (
+    DeliveryMechanismFactory,
+    FinancialServiceProviderFactory,
+    FspXlsxTemplatePerDeliveryMechanismFactory,
+    PaymentListSplitFactory,
+    PaymentVerificationPlanFactory,
 )
-from hope.apps.payment.flows import PaymentPlanFlow
+from hope.apps.payment.services.payment_list_services import PaymentListService
 from hope.apps.payment.services.payment_plan_services import PaymentPlanService
+from hope.contrib.vision.choices import VisionStatus
 from hope.models import (
-    AccountType,
-    BusinessArea,
+    AcceptanceProcessThreshold,
+    Approval,
     DeliveryMechanism,
-    DeliveryMechanismConfig,
-    FileTemp,
-    FinancialServiceProvider,
-    IndividualRoleInHousehold,
     LogEntry,
     Payment,
+    PaymentList,
+    PaymentListSplit,
     PaymentPlan,
-    PaymentPlanGroup,
-    PaymentPlanSplit,
-    Program,
-    ProgramCycle,
-    Role,
-    RoleAssignment,
-    TargetingIndividualBlockRuleFilter,
-    User,
 )
 
 pytestmark = pytest.mark.django_db
 
 
-def test_update_delivery_mechanism_returns_false_when_not_open(business_area: Any, cycle: ProgramCycle) -> None:
-    pp = PaymentPlanFactory(
-        program_cycle=cycle,
-        business_area=business_area,
-        status=PaymentPlan.Status.LOCKED,
+@pytest.fixture
+def cycle():
+    return ProgramCycleFactory()
+
+
+@pytest.fixture
+def delivery_mechanism():
+    return DeliveryMechanismFactory()
+
+
+@pytest.fixture
+def financial_service_provider(delivery_mechanism):
+    fsp = FinancialServiceProviderFactory()
+    FspXlsxTemplatePerDeliveryMechanismFactory(
+        financial_service_provider=fsp,
+        delivery_mechanism=delivery_mechanism,
     )
-    service = PaymentPlanService(payment_plan=pp)
-    result = service._update_delivery_mechanism(delivery_mechanism_code="some-code")
-    assert result is False
-
-
-@pytest.fixture
-def business_area() -> Any:
-    return BusinessAreaFactory(slug="afghanistan")
-
-
-@pytest.fixture
-def user() -> User:
-    return UserFactory()
-
-
-@pytest.fixture
-def dm_transfer_to_account() -> Any:
-    return DeliveryMechanismFactory(
-        code="transfer_to_account",
-        name="Transfer to Account",
-        payment_gateway_id="dm-transfer-account",
-    )
-
-
-@pytest.fixture
-def dm_transfer_to_digital_wallet() -> Any:
-    return DeliveryMechanismFactory(
-        code="transfer_to_digital_wallet",
-        name="Transfer to Digital Wallet",
-        payment_gateway_id="dm-transfer-wallet",
-        transfer_type=DeliveryMechanism.TransferType.DIGITAL,
-    )
-
-
-@pytest.fixture
-def fsp(
-    business_area: BusinessArea, dm_transfer_to_account: Any, dm_transfer_to_digital_wallet: Any
-) -> FinancialServiceProvider:
-    fsp = FinancialServiceProviderFactory(
-        name="Test FSP 1",
-        communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
-    )
-    fsp.delivery_mechanisms.add(dm_transfer_to_account, dm_transfer_to_digital_wallet)
-    fsp.allowed_business_areas.add(business_area)
     return fsp
 
 
 @pytest.fixture
-def account_type_bank() -> AccountType:
-    return AccountTypeFactory(key="bank", label="Bank")
+def currency():
+    return CurrencyFactory()
 
 
 @pytest.fixture
-def program(business_area: Any) -> Program:
-    return ProgramFactory(status=Program.ACTIVE, business_area=business_area, cycle=False)
-
-
-@pytest.fixture
-def cycle(program: Program) -> ProgramCycle:
-    return ProgramCycleFactory(status=ProgramCycle.ACTIVE, program=program)
-
-
-@pytest.fixture
-def lock_status_transition_context(
-    user: User,
-    business_area: BusinessArea,
-    cycle: ProgramCycle,
-) -> dict[str, Any]:
-    purpose = PaymentPlanPurposeFactory()
-    cycle.program.payment_plan_purposes.add(purpose)
-    payment_plan = PaymentPlanFactory(
-        program_cycle=cycle,
-        created_by=user,
-        business_area=business_area,
-        status=PaymentPlan.Status.OPEN,
-    )
-    payment_plan.payment_plan_purposes.add(purpose)
-    conflicting_plan = PaymentPlanFactory(
-        program_cycle=cycle,
-        business_area=business_area,
-        status=PaymentPlan.Status.LOCKED,
-    )
-    conflicting_plan.payment_plan_purposes.add(purpose)
-    hard_conflicted_payment = PaymentFactory(
-        parent=payment_plan,
-        status=Payment.STATUS_PENDING,
-        status_date=timezone.now() - timedelta(days=1),
-    )
-    PaymentFactory(
-        parent=conflicting_plan,
-        household=hard_conflicted_payment.household,
-        status=Payment.STATUS_PENDING,
-    )
-    valid_payment = PaymentFactory(parent=payment_plan, status=Payment.STATUS_PENDING)
-    return {
-        "payment_plan": payment_plan,
-        "hard_conflicted_payment": hard_conflicted_payment,
-        "valid_payment": valid_payment,
-        "user": user,
-    }
-
-
-@pytest.fixture
-def unlock_status_transition_context(
-    user: User,
-    business_area: BusinessArea,
-    cycle: ProgramCycle,
-) -> dict[str, Any]:
-    payment_plan = PaymentPlanFactory(
-        program_cycle=cycle,
-        created_by=user,
-        business_area=business_area,
-        status=PaymentPlan.Status.LOCKED,
-    )
-    restorable_payment = PaymentFactory(
-        parent=payment_plan,
-        status=Payment.STATUS_NOT_ELIGIBLE,
-        conflicted=True,
-    )
-    excluded_payment = PaymentFactory(
-        parent=payment_plan,
-        status=Payment.STATUS_NOT_ELIGIBLE,
-        conflicted=True,
-        excluded=True,
-    )
-    invalid_wallet_payment = PaymentFactory(
-        parent=payment_plan,
-        status=Payment.STATUS_NOT_ELIGIBLE,
-        conflicted=True,
-        has_valid_wallet=False,
-    )
-    return {
-        "payment_plan": payment_plan,
-        "restorable_payment": restorable_payment,
-        "excluded_payment": excluded_payment,
-        "invalid_wallet_payment": invalid_wallet_payment,
-        "user": user,
-    }
-
-
-@pytest.fixture
-def invalid_wallet_payment_plan(
-    user: User,
-    business_area: BusinessArea,
-    program: Program,
-    cycle: ProgramCycle,
-    fsp: FinancialServiceProvider,
-    account_type_bank: AccountType,
-) -> PaymentPlan:
-    household = HouseholdFactory(business_area=business_area, program=program, size=1)
-    delivery_mechanism = DeliveryMechanismFactory(
-        code="bank_transfer_for_invalid_wallet_test",
-        account_type=account_type_bank,
-    )
-    DeliveryMechanismConfig.objects.create(
-        fsp=fsp,
-        delivery_mechanism=delivery_mechanism,
-        required_fields=["number"],
-    )
-    payment_plan = PaymentPlanFactory(
-        created_by=user,
-        status=PaymentPlan.Status.DRAFT,
-        business_area=business_area,
-        program_cycle=cycle,
-        delivery_mechanism=delivery_mechanism,
-        financial_service_provider=fsp,
-    )
-    TargetingCriteriaRuleFactory(
-        household_ids=household.unicef_id,
-        payment_plan=payment_plan,
-    )
-    return payment_plan
-
-
-@pytest.fixture
-def payment_plan_base(
-    user: User,
-    business_area: Any,
-    cycle: ProgramCycle,
-    fsp: FinancialServiceProvider,
-    dm_transfer_to_account: Any,
-) -> PaymentPlan:
+def open_group(cycle, financial_service_provider, currency):
     return PaymentPlanFactory(
-        program_cycle=cycle,
-        created_by=user,
-        business_area=business_area,
-        status=PaymentPlan.Status.TP_LOCKED,
-        delivery_mechanism=dm_transfer_to_account,
-        financial_service_provider=fsp,
-    )
-
-
-@pytest.fixture
-def payment_plan_tp_open(
-    user: User,
-    business_area: Any,
-    cycle: ProgramCycle,
-    fsp: FinancialServiceProvider,
-    dm_transfer_to_account: Any,
-) -> PaymentPlan:
-    return PaymentPlanFactory(
-        program_cycle=cycle,
-        created_by=user,
-        business_area=business_area,
-        status=PaymentPlan.Status.TP_OPEN,
-        delivery_mechanism=dm_transfer_to_account,
-        financial_service_provider=fsp,
-    )
-
-
-@pytest.fixture
-def payment_plan_in_status(user: User, business_area: Any, cycle: ProgramCycle, pp_status: str) -> PaymentPlan:
-    return PaymentPlanFactory(
-        program_cycle=cycle,
-        created_by=user,
-        business_area=business_area,
-        status=pp_status,
-    )
-
-
-@pytest.fixture
-def group_in_other_cycle(program: Program) -> Any:
-    return PaymentPlanGroupFactory(cycle=ProgramCycleFactory(program=program))
-
-
-def test_delete_tp_open(payment_plan_base: PaymentPlan) -> None:
-    payment_plan_base.status = PaymentPlan.Status.TP_OPEN
-    payment_plan_base.save()
-
-    pp = PaymentPlanService(payment_plan=payment_plan_base).delete()
-
-    assert pp.is_removed is True
-    assert pp.status == PaymentPlan.Status.TP_OPEN
-
-
-def test_delete_open(payment_plan_base: PaymentPlan) -> None:
-    payment_plan_base.status = PaymentPlan.Status.OPEN
-    payment_plan_base.save()
-
-    pp = PaymentPlanService(payment_plan=payment_plan_base).delete()
-
-    assert pp.is_removed is False
-    assert pp.status == PaymentPlan.Status.DRAFT
-
-
-def test_delete_locked(payment_plan_base: PaymentPlan) -> None:
-    payment_plan_base.status = PaymentPlan.Status.LOCKED
-    payment_plan_base.save()
-
-    with pytest.raises(ValidationError) as error:
-        PaymentPlanService(payment_plan=payment_plan_base).delete()
-
-    assert error.value.detail[0] == "Deletion is only allowed when the status is 'Open'"
-
-
-def test_delete_when_its_one_pp_in_cycle(payment_plan_base: PaymentPlan) -> None:
-    payment_plan_base.status = PaymentPlan.Status.OPEN
-    payment_plan_base.save()
-    assert payment_plan_base.program_cycle.status == ProgramCycle.ACTIVE
-
-    pp = PaymentPlanService(payment_plan=payment_plan_base).delete()
-
-    assert pp.is_removed is False
-    assert pp.status == PaymentPlan.Status.DRAFT
-    payment_plan_base.program_cycle.refresh_from_db()
-    assert payment_plan_base.program_cycle.status == ProgramCycle.DRAFT
-
-
-def test_delete_when_its_two_pp_in_cycle(user: User, business_area: Any) -> None:
-    program = ProgramFactory(status=Program.ACTIVE, business_area=business_area, cycle=False)
-    program_cycle = ProgramCycleFactory(status=ProgramCycle.ACTIVE, program=program)
-    pp_1 = PaymentPlanFactory(
-        status=PaymentPlan.Status.OPEN,
-        program_cycle=program_cycle,
-        created_by=user,
-        business_area=business_area,
-    )
-    PaymentPlanFactory(
-        status=PaymentPlan.Status.OPEN,
-        program_cycle=program_cycle,
-        created_by=user,
-        business_area=business_area,
-    )
-
-    assert pp_1.program_cycle.status == ProgramCycle.ACTIVE
-
-    pp_1 = PaymentPlanService(payment_plan=pp_1).delete()
-
-    assert pp_1.is_removed is False
-    assert pp_1.status == PaymentPlan.Status.DRAFT
-    program_cycle.refresh_from_db()
-    assert program_cycle.status == ProgramCycle.ACTIVE
-
-
-@freeze_time("2020-10-10")
-def test_create_validation_errors(user: User, business_area: Any) -> None:
-    program = ProgramFactory(
-        status=Program.ACTIVE,
-        business_area=business_area,
-        start_date=timezone.datetime(2019, 10, 12, tzinfo=UTC).date(),
-        end_date=timezone.datetime(2099, 12, 10, tzinfo=UTC).date(),
-        cycle=False,
-    )
-    program_cycle = ProgramCycleFactory(
-        program=program,
-        start_date=timezone.datetime(2021, 10, 10, tzinfo=UTC).date(),
-        end_date=timezone.datetime(2021, 12, 10, tzinfo=UTC).date(),
-        status=ProgramCycle.ACTIVE,
-    )
-    household = HouseholdFactory(business_area=business_area, program=program)
-    household.size = 1
-    household.save(update_fields=["size"])
-    create_input_data = {
-        "program_cycle_id": str(program_cycle.id),
-        "name": "TEST_123",
-        "flag_exclude_if_active_adjudication_ticket": False,
-        "flag_exclude_if_on_sanction_list": False,
-        "rules": [
-            {
-                "household_filters_blocks": [],
-                "household_ids": f"{household.unicef_id}",
-                "individual_ids": "",
-                "individuals_filters_blocks": [],
-            }
-        ],
-    }
-
-    PaymentPlanFactory(
-        program_cycle=program_cycle,
-        name="TEST_123",
-        created_by=user,
-        business_area=business_area,
-    )
-    with pytest.raises(ValidationError) as error:
-        PaymentPlanService.create(
-            input_data=create_input_data,
-            user=user,
-            program=program,
-        )
-    assert error.value.detail[0] == f"Target Population with name: TEST_123 and program: {program.name} already exists."
-
-    program.status = Program.FINISHED
-    program.save()
-    program.refresh_from_db()
-    with pytest.raises(ValidationError) as error:
-        PaymentPlanService.create(
-            input_data=create_input_data,
-            user=user,
-            program=program,
-        )
-    assert error.value.detail[0] == "Impossible to create Target Population for Programme within not Active status"
-
-    program_cycle.status = ProgramCycle.FINISHED
-    program_cycle.save()
-    with pytest.raises(ValidationError) as error:
-        PaymentPlanService.create(
-            input_data=create_input_data,
-            user=user,
-            program=program,
-        )
-    assert error.value.detail[0] == "Impossible to create Target Population for Programme Cycle within Finished status"
-
-    program_cycle.status = ProgramCycle.ACTIVE
-    program_cycle.save()
-    program.status = Program.ACTIVE
-    program.save()
-
-    purpose = PaymentPlanPurposeFactory()
-    program.payment_plan_purposes.add(purpose)
-    currency_usd = CurrencyFactory(code="USD", name="United States Dollar")
-    create_input_data["name"] = "TEST"
-    create_input_data["payment_plan_group_id"] = PaymentPlanGroupFactory(
-        cycle=program_cycle,
-        currency=currency_usd,
-        dispersion_start_date=parse_date("2020-09-10"),
-        dispersion_end_date=parse_date("2020-09-11"),
-    ).id
-    create_input_data["payment_plan_purposes"] = [purpose]
-    pp = PaymentPlanService.create(
-        input_data=create_input_data,
-        user=user,
-        program=program,
-    )
-    pp.status = PaymentPlan.Status.TP_OPEN
-    pp.save()
-
-    with pytest.raises(TransitionNotAllowed) as error:
-        PaymentPlanService(payment_plan=pp).open()
-    assert str(error.value) == 'Status_Open :: no transition from "TP_OPEN"'
-
-    pp.status = PaymentPlan.Status.DRAFT
-    pp.save()
-    with pytest.raises(ValidationError) as error:
-        PaymentPlanService(payment_plan=pp).open()
-    assert error.value.detail[0] == "Dispersion End Date [2020-09-11] cannot be a past date"
-
-    pp.refresh_from_db()
-    assert pp.status == PaymentPlan.Status.DRAFT
-    pp.payment_plan_group.dispersion_end_date = parse_date("2020-11-11")
-    pp.payment_plan_group.save(update_fields=["dispersion_end_date"])
-
-    pp = PaymentPlanService(payment_plan=pp).open()
-    pp.refresh_from_db()
-
-    assert pp.status == PaymentPlan.Status.OPEN
-    assert pp.currency == currency_usd
-
-
-@freeze_time("2020-10-10")
-@mock.patch("hope.models.payment_plan.PaymentPlan.get_exchange_rate", return_value=2.0)
-def test_create(
-    get_exchange_rate_mock: Any,
-    user: User,
-    business_area: Any,
-    fsp: FinancialServiceProvider,
-    dm_transfer_to_account: Any,
-    account_type_bank: AccountType,
-    django_assert_num_queries: Any,
-    django_capture_on_commit_callbacks: Any,
-) -> None:
-    program = ProgramFactory(
-        status=Program.ACTIVE,
-        business_area=business_area,
-        start_date=timezone.datetime(2000, 9, 10, tzinfo=UTC).date(),
-        end_date=timezone.datetime(2099, 10, 10, tzinfo=UTC).date(),
-    )
-    program_cycle = program.cycles.first()
-    payment_plan_group = PaymentPlanGroupFactory(cycle=program_cycle, financial_service_provider=fsp)
-
-    hh1 = HouseholdFactory(program=program, business_area=business_area)
-    hh2 = HouseholdFactory(program=program, business_area=business_area)
-    hoh1 = hh1.head_of_household
-    AccountFactory(
-        individual=hoh1,
-        account_type=account_type_bank,
-    )
-    AccountFactory(
-        individual=hoh1,
-        account_type=account_type_bank,
-    )
-    IndividualFactory.create_batch(
-        4,
-        household=hh1,
-        business_area=business_area,
-        program=program,
-        registration_data_import=hh1.registration_data_import,
-    )
-
-    purpose = PaymentPlanPurposeFactory()
-    program.payment_plan_purposes.add(purpose)
-    input_data = {
-        "business_area_slug": "afghanistan",
-        "name": "paymentPlanName",
-        "program_cycle_id": program_cycle.id,
-        "payment_plan_group_id": payment_plan_group.id,
-        "flag_exclude_if_active_adjudication_ticket": False,
-        "flag_exclude_if_on_sanction_list": False,
-        "rules": [
-            {
-                "household_filters_blocks": [],
-                "household_ids": f"{hh1.unicef_id}, {hh2.unicef_id}",
-                "individual_ids": "",
-                "individuals_filters_blocks": [],
-            }
-        ],
-        "delivery_mechanism_code": dm_transfer_to_account.code,
-        "payment_plan_purposes": [purpose],
-    }
-
-    with mock.patch("hope.apps.payment.services.payment_plan_services.transaction") as mock_transaction:
-        with django_assert_num_queries(24):
-            pp = PaymentPlanService.create(
-                input_data=input_data,
-                user=user,
-                program=program,
-            )
-        assert mock_transaction.on_commit.call_count == 1
-
-    assert pp.status == PaymentPlan.Status.TP_OPEN
-    assert pp.financial_service_provider == fsp
-    assert pp.delivery_mechanism == dm_transfer_to_account
-    assert pp.total_households_count == 0
-    assert pp.total_individuals_count == 0
-    assert pp.payment_items.count() == 0
-
-    with django_capture_on_commit_callbacks(execute=True):
-        prepare_payment_plan_async_task(pp)
-
-    pp.refresh_from_db()
-    assert pp.status == PaymentPlan.Status.TP_OPEN
-    assert pp.build_status == PaymentPlan.BuildStatus.BUILD_STATUS_OK
-    assert pp.total_households_count == 2
-    assert pp.total_individuals_count == 6
-    assert pp.payment_items.count() == 2
-
-
-@pytest.fixture
-def draft_payment_plan(payment_plan_base: PaymentPlan) -> PaymentPlan:
-    payment_plan_group = payment_plan_base.payment_plan_group
-    payment_plan_group.currency = CurrencyFactory(code="SDG", name="Sudanese pound")
-    payment_plan_group.dispersion_start_date = parse_date("2026-10-05")
-    payment_plan_group.dispersion_end_date = parse_date("2026-10-31")
-    payment_plan_group.save(update_fields=["currency", "dispersion_start_date", "dispersion_end_date"])
-    payment_plan_base.status = PaymentPlan.Status.DRAFT
-    payment_plan_group.exchange_rate = None
-    payment_plan_group.save(update_fields=["exchange_rate"])
-    payment_plan_base.save(update_fields=["status"])
-    return payment_plan_base
-
-
-@pytest.fixture
-def unore_unavailable(request: pytest.FixtureRequest, settings: Any) -> Generator[requests_mock_lib.Mocker, None, None]:
-    settings.USE_DUMMY_EXCHANGE_RATES = False
-    settings.EXCHANGE_RATES_API_KEY = "TEST_API_KEY"
-    settings.EXCHANGE_RATE_CACHE_EXPIRY = 60 * 60 * 24
-    with requests_mock_lib.Mocker() as adapter:
-        adapter.get(settings.EXCHANGE_RATES_API_URL, status_code=request.param)
-        yield adapter
-
-
-@freeze_time("2026-10-05")
-@pytest.mark.parametrize(
-    ("unore_unavailable", "expected_log_level"),
-    [
-        pytest.param(500, "WARNING", id="unore_server_error"),
-        pytest.param(400, "ERROR", id="hope_bad_request"),
-    ],
-    indirect=["unore_unavailable"],
-)
-def test_open_arrange_unore_unavailable_and_cache_empty_act_open_assert_payment_plan_opened_without_exchange_rate(
-    draft_payment_plan: PaymentPlan,
-    unore_unavailable: requests_mock_lib.Mocker,
-    expected_log_level: str,
-    caplog: pytest.LogCaptureFixture,
-) -> None:
-    with caplog.at_level(logging.WARNING, logger="hope.apps.payment.services.payment_plan_services"):
-        PaymentPlanService(payment_plan=draft_payment_plan).open()
-
-    draft_payment_plan.refresh_from_db()
-    assert unore_unavailable.called is True
-    assert draft_payment_plan.status == PaymentPlan.Status.OPEN
-    assert draft_payment_plan.exchange_rate is None
-    assert caplog.records[-1].name == "hope.apps.payment.services.payment_plan_services"
-    assert caplog.records[-1].levelname == expected_log_level
-
-
-def test_create_raises_when_payment_plan_group_belongs_to_different_cycle(user: User, business_area: Any) -> None:
-    program = ProgramFactory(status=Program.ACTIVE, business_area=business_area)
-    program_cycle = ProgramCycleFactory(program=program)
-    other_cycle = ProgramCycleFactory(program=program)
-    group_from_other_cycle = PaymentPlanGroupFactory(cycle=other_cycle)
-
-    input_data = {
-        "business_area_slug": business_area.slug,
-        "name": "Test TP",
-        "program_cycle_id": program_cycle.id,
-        "payment_plan_group_id": group_from_other_cycle.id,
-        "flag_exclude_if_active_adjudication_ticket": False,
-        "flag_exclude_if_on_sanction_list": False,
-        "rules": [],
-    }
-
-    with pytest.raises(ValidationError) as error:
-        PaymentPlanService.create(input_data=input_data, user=user, program=program)
-    assert error.value.detail[0] == "Payment Plan Group does not exist in the given Programme Cycle."
-
-
-def test_create_raises_when_payment_plan_group_does_not_exist(user: User, business_area: Any) -> None:
-    program = ProgramFactory(status=Program.ACTIVE, business_area=business_area)
-    program_cycle = ProgramCycleFactory(program=program)
-
-    input_data = {
-        "business_area_slug": business_area.slug,
-        "name": "Test TP",
-        "program_cycle_id": program_cycle.id,
-        "payment_plan_group_id": uuid.uuid4(),
-        "flag_exclude_if_active_adjudication_ticket": False,
-        "flag_exclude_if_on_sanction_list": False,
-        "rules": [],
-    }
-
-    with pytest.raises(ValidationError) as error:
-        PaymentPlanService.create(input_data=input_data, user=user, program=program)
-    assert error.value.detail[0] == "Payment Plan Group does not exist in the given Programme Cycle."
-
-
-def test_create_raises_when_payment_plan_group_is_not_open(user: User, business_area: Any) -> None:
-    program = ProgramFactory(status=Program.ACTIVE, business_area=business_area)
-    program_cycle = ProgramCycleFactory(program=program)
-    locked_group = PaymentPlanGroupFactory(cycle=program_cycle, status=PaymentPlanGroup.Status.LOCKED)
-
-    input_data = {
-        "business_area_slug": business_area.slug,
-        "name": "Test TP",
-        "program_cycle_id": program_cycle.id,
-        "payment_plan_group_id": locked_group.id,
-        "flag_exclude_if_active_adjudication_ticket": False,
-        "flag_exclude_if_on_sanction_list": False,
-        "rules": [],
-    }
-
-    with pytest.raises(ValidationError) as error:
-        PaymentPlanService.create(input_data=input_data, user=user, program=program)
-    assert error.value.detail[0] == "Adding Target Population to Payment Plan Group is possible only within Status OPEN"
-
-
-@freeze_time("2023-10-10")
-@mock.patch("hope.models.payment_plan.PaymentPlan.get_exchange_rate", return_value=2.0)
-def test_create_follow_up_pp(
-    get_exchange_rate_mock: Any,
-    user: User,
-    business_area: Any,
-    cycle: ProgramCycle,
-    django_assert_num_queries: Any,
-    django_capture_on_commit_callbacks: Any,
-) -> None:
-    pp = PaymentPlanFactory(
-        total_households_count=1,
-        created_by=user,
-        business_area=business_area,
-        program_cycle=cycle,
-        name="Test Payment Plan",
-    )
-    follow_up_group = PaymentPlanGroupFactory(
         cycle=cycle,
-        plan_type=PaymentPlan.PlanType.FOLLOW_UP,
-        source_group=pp.payment_plan_group,
-        currency=pp.currency,
-        financial_service_provider=pp.financial_service_provider,
-    )
-    program = pp.program_cycle.program
-    purpose = pp.payment_plan_purposes.first()
-    payments = []
-    for _ in range(5):
-        hh = HouseholdFactory(program=program, business_area=business_area)
-        IndividualFactory.create_batch(
-            2,
-            household=hh,
-            business_area=business_area,
-            program=program,
-            registration_data_import=hh.registration_data_import,
-        )
-        payment = PaymentFactory(
-            parent=pp,
-            household=hh,
-            status=Payment.STATUS_DISTRIBUTION_SUCCESS,
-        )
-        payments.append(payment)
-
-    with pytest.raises(ValidationError) as error:
-        PaymentPlanService(pp).create_follow_up(user, payment_plan_group=follow_up_group)
-    assert error.value.detail[0] == "Cannot create a follow-up for a payment plan with no unsuccessful payments"
-
-    for payment, status in zip(payments[:4], Payment.FAILED_STATUSES, strict=True):
-        payment.status = status
-        payment.save()
-
-    payments[4].household.withdrawn = True
-    payments[4].household.save()
-
-    p_error = payments[0]
-    p_not_distributed = payments[1]
-    p_force_failed = payments[2]
-    p_manually_cancelled = payments[3]
-
-    with django_assert_num_queries(11):
-        follow_up_pp = PaymentPlanService(pp).create_follow_up(user, payment_plan_group=follow_up_group)
-
-    follow_up_pp.refresh_from_db()
-    assert follow_up_pp.status == PaymentPlan.Status.OPEN
-    assert follow_up_pp.program == pp.program
-    assert follow_up_pp.program_cycle == pp.program_cycle
-    assert follow_up_pp.business_area == pp.business_area
-    assert follow_up_pp.created_by == user
-    assert follow_up_pp.currency == pp.currency
-    assert follow_up_pp.dispersion_start_date == follow_up_group.dispersion_start_date
-    assert follow_up_pp.dispersion_end_date == follow_up_group.dispersion_end_date
-    assert follow_up_pp.program_cycle.start_date == pp.program_cycle.start_date
-    assert follow_up_pp.program_cycle.end_date == pp.program_cycle.end_date
-    assert follow_up_pp.total_households_count == 0
-    assert follow_up_pp.total_individuals_count == 0
-    assert follow_up_pp.payment_items.count() == 0
-    assert follow_up_pp.payment_plan_group == follow_up_group
-    assert list(follow_up_pp.payment_plan_purposes.values_list("pk", flat=True)) == [purpose.pk]
-
-    assert pp.child_plans.count() == 1
-
-    with django_capture_on_commit_callbacks(execute=True):
-        prepare_child_payment_plan_async_task(follow_up_pp)
-    follow_up_pp.refresh_from_db()
-
-    assert follow_up_pp.status == PaymentPlan.Status.OPEN
-    assert follow_up_pp.build_status == PaymentPlan.BuildStatus.BUILD_STATUS_OK
-
-    assert follow_up_pp.payment_items.count() == 4
-    assert {
-        p_error.id,
-        p_not_distributed.id,
-        p_force_failed.id,
-        p_manually_cancelled.id,
-    } == set(follow_up_pp.payment_items.values_list("source_payment_id", flat=True))
-
-    follow_up_payment = follow_up_pp.payment_items.first()
-    assert follow_up_payment.status == Payment.STATUS_PENDING
-    assert follow_up_payment.parent == follow_up_pp
-    assert follow_up_payment.source_payment is not None
-    assert follow_up_payment.is_follow_up is True
-    assert follow_up_payment.business_area == follow_up_payment.source_payment.business_area
-    assert follow_up_payment.household == follow_up_payment.source_payment.household
-    assert follow_up_payment.head_of_household == follow_up_payment.source_payment.head_of_household
-    assert follow_up_payment.collector == follow_up_payment.source_payment.collector
-    assert follow_up_payment.currency == follow_up_payment.source_payment.currency
-
-    follow_up_payment.excluded = True
-    follow_up_payment.save()
-
-    with django_assert_num_queries(11):
-        follow_up_pp_2 = PaymentPlanService(pp).create_follow_up(user, payment_plan_group=follow_up_group)
-
-    assert pp.child_plans.count() == 2
-
-    with django_assert_num_queries(60):
-        with django_capture_on_commit_callbacks(execute=True):
-            prepare_child_payment_plan_async_task(follow_up_pp_2)
-
-    assert follow_up_pp_2.payment_items.count() == 1
-    assert {follow_up_payment.source_payment.id} == set(
-        follow_up_pp_2.payment_items.values_list("source_payment_id", flat=True)
-    )
-
-
-def test_create_follow_up_pp_from_follow_up_validation(user: User, business_area: Any, cycle: ProgramCycle) -> None:
-    payment_plan = PaymentPlanFactory(
-        program_cycle=cycle,
-        created_by=user,
-        business_area=business_area,
-        status=PaymentPlan.Status.FINISHED,
-        plan_type=PaymentPlan.PlanType.FOLLOW_UP,
-    )
-    with pytest.raises(ValidationError) as error:
-        PaymentPlanService(payment_plan).create_follow_up(user)
-
-    assert error.value.detail[0] == "Cannot create a follow-up of a follow-up Payment Plan"
-
-
-@pytest.mark.parametrize(
-    ("plan_type", "method_name", "expected_kwargs"),
-    [
-        (PaymentPlan.PlanType.FOLLOW_UP, "create_follow_up", {}),
-        (PaymentPlan.PlanType.TOP_UP, "create_top_up", {"fixed_amount": None, "amounts": None}),
-        (PaymentPlan.PlanType.TOP_UP_AMENDMENT, "create_top_up_amendment", {"fixed_amount": None, "amounts": None}),
-    ],
-)
-def test_create_child_plan_arrange_supported_type_act_dispatch_assert_expected_service_method_called(
-    user: User,
-    business_area: Any,
-    cycle: ProgramCycle,
-    plan_type: str,
-    method_name: str,
-    expected_kwargs: dict,
-) -> None:
-    payment_plan = PaymentPlanFactory(
-        program_cycle=cycle,
-        created_by=user,
-        business_area=business_area,
-    )
-    expected_child_plan = PaymentPlanFactory(
-        program_cycle=cycle,
-        created_by=user,
-        business_area=business_area,
-        plan_type=plan_type,
-    )
-    linked_group = PaymentPlanGroupFactory(
-        cycle=cycle, plan_type=plan_type, source_group=payment_plan.payment_plan_group
-    )
-
-    with mock.patch.object(PaymentPlanService, method_name, return_value=expected_child_plan) as service_method:
-        result = PaymentPlanService(payment_plan).create_child_plan(
-            plan_type=plan_type,
-            user=user,
-            payment_plan_group=linked_group,
-        )
-
-    assert result == expected_child_plan
-    service_method.assert_called_once_with(user, payment_plan_group=linked_group, **expected_kwargs)
-
-
-def test_create_child_plan_arrange_unsupported_type_act_dispatch_assert_validation_error(
-    user: User, business_area: Any, cycle: ProgramCycle
-) -> None:
-    payment_plan = PaymentPlanFactory(
-        program_cycle=cycle,
-        created_by=user,
-        business_area=business_area,
-    )
-    with pytest.raises(ValidationError) as error:
-        PaymentPlanService(payment_plan).create_child_plan(
-            plan_type=PaymentPlan.PlanType.REGULAR,
-            user=user,
-            payment_plan_group=payment_plan.payment_plan_group,
-        )
-
-    assert str(error.value.detail[0]) == "Unsupported child payment plan type: REGULAR"
-
-
-@pytest.mark.parametrize(
-    ("plan_type", "method_name", "expected_kwargs"),
-    [
-        (PaymentPlan.PlanType.FOLLOW_UP, "create_follow_up_payments", {}),
-        (PaymentPlan.PlanType.TOP_UP, "create_funded_child_payments", {"amounts": None, "fixed_amount": None}),
-        (
-            PaymentPlan.PlanType.TOP_UP_AMENDMENT,
-            "create_funded_child_payments",
-            {"amounts": None, "fixed_amount": None},
-        ),
-    ],
-)
-def test_create_child_plan_payments_arrange_supported_type_act_dispatch_assert_expected_service_method_called(
-    user: User,
-    business_area: Any,
-    cycle: ProgramCycle,
-    plan_type: str,
-    method_name: str,
-    expected_kwargs: dict,
-) -> None:
-    payment_plan = PaymentPlanFactory(
-        program_cycle=cycle,
-        created_by=user,
-        business_area=business_area,
-        plan_type=plan_type,
-    )
-
-    with mock.patch.object(PaymentPlanService, method_name) as service_method:
-        PaymentPlanService(payment_plan).create_child_plan_payments()
-
-    service_method.assert_called_once_with(**expected_kwargs)
-
-
-def test_create_child_plan_payments_arrange_unsupported_type_act_dispatch_assert_validation_error(
-    user: User, business_area: Any, cycle: ProgramCycle
-) -> None:
-    payment_plan = PaymentPlanFactory(
-        program_cycle=cycle,
-        created_by=user,
-        business_area=business_area,
-        plan_type=PaymentPlan.PlanType.REGULAR,
-    )
-
-    with pytest.raises(ValidationError) as error:
-        PaymentPlanService(payment_plan).create_child_plan_payments()
-
-    assert str(error.value.detail[0]) == "Unsupported child payment plan type: REGULAR"
-
-
-@freeze_time("2023-10-10")
-@mock.patch("hope.models.payment_plan.PaymentPlan.get_exchange_rate", return_value=2.0)
-@patch("hope.models.payment_plan_split.PaymentPlanSplit.MIN_NO_OF_PAYMENTS_IN_CHUNK")
-def test_split(
-    min_no_of_payments_in_chunk_mock: Any,
-    get_exchange_rate_mock: Any,
-    user: User,
-    business_area: Any,
-    cycle: ProgramCycle,
-    django_assert_num_queries: Any,
-) -> None:
-    min_no_of_payments_in_chunk_mock.__get__ = mock.Mock(return_value=2)
-
-    pp = PaymentPlanFactory(created_by=user, business_area=business_area, program_cycle=cycle)
-
-    with pytest.raises(ValidationError, match="No payments to split"):
-        PaymentPlanService(pp).split(PaymentPlanSplit.SplitType.BY_COLLECTOR)
-
-    payments = []
-    collector = IndividualFactory(household=None, business_area=business_area, program=cycle.program)
-    for _ in range(3):
-        hh = HouseholdFactory(business_area=business_area, program=cycle.program)
-        IndividualFactory.create_batch(
-            2,
-            household=hh,
-            business_area=business_area,
-            program=cycle.program,
-            registration_data_import=hh.registration_data_import,
-        )
-        payment = PaymentFactory(
-            parent=pp,
-            household=hh,
-            status=Payment.STATUS_DISTRIBUTION_SUCCESS,
-            collector=collector,
-        )
-        payments.append(payment)
-
-    country = CountryFactory()
-    admin_type_1 = AreaTypeFactory(country=country, area_level=1)
-    admin_type_2 = AreaTypeFactory(country=country, area_level=2, parent=admin_type_1)
-    area2 = AreaFactory(parent=None, p_code="AF01", area_type=admin_type_2)
-    for _ in range(4):
-        collector = IndividualFactory(household=None, business_area=business_area, program=cycle.program)
-        hh = HouseholdFactory(admin2=area2, business_area=business_area, program=cycle.program)
-        IndividualFactory.create_batch(
-            2,
-            household=hh,
-            business_area=business_area,
-            program=cycle.program,
-            registration_data_import=hh.registration_data_import,
-        )
-        payment = PaymentFactory(
-            parent=pp,
-            household=hh,
-            status=Payment.STATUS_DISTRIBUTION_SUCCESS,
-            collector=collector,
-        )
-        payments.append(payment)
-
-    for _ in range(5):
-        collector = IndividualFactory(household=None, business_area=business_area, program=cycle.program)
-        hh = HouseholdFactory(business_area=business_area, program=cycle.program)
-        IndividualFactory.create_batch(
-            2,
-            household=hh,
-            business_area=business_area,
-            program=cycle.program,
-            registration_data_import=hh.registration_data_import,
-        )
-        payment = PaymentFactory(
-            parent=pp,
-            household=hh,
-            status=Payment.STATUS_DISTRIBUTION_SUCCESS,
-            collector=collector,
-        )
-        payments.append(payment)
-
-    with pytest.raises(ValidationError, match="Payments Number is required for split by records"):
-        PaymentPlanService(pp).split(PaymentPlanSplit.SplitType.BY_RECORDS, chunks_no=None)
-
-    with pytest.raises(ValidationError, match="Payment Parts number should be at least 2"):
-        PaymentPlanService(pp).split(PaymentPlanSplit.SplitType.BY_RECORDS, chunks_no=1)
-
-    with mock.patch("hope.apps.payment.services.payment_plan_services.PaymentPlanSplit.MAX_CHUNKS") as max_chunks_patch:
-        max_chunks_patch.__get__ = mock.Mock(return_value=2)
-        with pytest.raises(ValidationError, match="Too many Payment Parts to split: 6, maximum is 2"):
-            PaymentPlanService(pp).split(PaymentPlanSplit.SplitType.BY_RECORDS, chunks_no=2)
-
-    with django_assert_num_queries(26):
-        PaymentPlanService(pp).split(PaymentPlanSplit.SplitType.BY_COLLECTOR)
-    unique_collectors_count = pp.eligible_payments.values_list("collector", flat=True).distinct().count()
-    assert unique_collectors_count == 10
-    pp_splits = pp.splits.all().order_by("order")
-
-    assert pp_splits.count() == unique_collectors_count
-    assert pp_splits[0].split_type == PaymentPlanSplit.SplitType.BY_COLLECTOR
-    split_payment_counts = sorted([s.split_payment_items.count() for s in pp_splits], reverse=True)
-    assert split_payment_counts == [3, 1, 1, 1, 1, 1, 1, 1, 1, 1]
-
-    with django_assert_num_queries(16):
-        PaymentPlanService(pp).split(PaymentPlanSplit.SplitType.BY_RECORDS, chunks_no=5)
-    pp_splits = pp.splits.all().order_by("order")
-    assert pp_splits.count() == 3
-    assert pp_splits[0].split_type == PaymentPlanSplit.SplitType.BY_RECORDS
-    assert pp_splits[0].split_payment_items.count() == 5
-    assert pp_splits[1].split_payment_items.count() == 5
-    assert pp_splits[2].split_payment_items.count() == 2
-
-    with django_assert_num_queries(14):
-        PaymentPlanService(pp).split(PaymentPlanSplit.SplitType.BY_ADMIN_AREA2)
-    unique_admin2_count = pp.eligible_payments.values_list("household__admin2", flat=True).distinct().count()
-    assert unique_admin2_count == 2
-    pp_splits = pp.splits.all().order_by("order")
-    assert pp.splits.count() == unique_admin2_count
-    assert pp_splits[0].split_type == PaymentPlanSplit.SplitType.BY_ADMIN_AREA2
-    assert pp_splits[0].split_payment_items.count() == 4
-    assert pp_splits[1].split_payment_items.count() == 8
-
-    PaymentPlanService(pp).split(PaymentPlanSplit.SplitType.NO_SPLIT)
-    pp_splits = pp.splits.all().order_by("order")
-    assert pp.splits.count() == 1
-    assert pp_splits[0].split_type == PaymentPlanSplit.SplitType.NO_SPLIT
-    assert pp_splits[0].split_payment_items.count() == 12
-
-
-@freeze_time("2023-10-10")
-@mock.patch("hope.models.payment_plan.PaymentPlan.get_exchange_rate", return_value=2.0)
-def test_send_to_payment_gateway(
-    get_exchange_rate_mock: Any,
-    user: User,
-    business_area: Any,
-    cycle: ProgramCycle,
-    dm_transfer_to_account: Any,
-    django_capture_on_commit_callbacks: Any,
-) -> None:
-    pg_fsp = FinancialServiceProviderFactory(
-        name="Western Union",
-        communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
-        payment_gateway_id="123",
-    )
-    pg_fsp.delivery_mechanisms.add(dm_transfer_to_account)
-    pp = PaymentPlanFactory(
-        status=PaymentPlan.Status.ACCEPTED,
-        created_by=user,
-        business_area=business_area,
-        program_cycle=cycle,
-        financial_service_provider=pg_fsp,
-        delivery_mechanism=dm_transfer_to_account,
-    )
-    flow = PaymentPlanFlow(pp)
-    flow.background_action_status_send_to_payment_gateway()
-    pp.save()
-
-    with pytest.raises(ValidationError, match="Sending in progress"):
-        PaymentPlanService(pp).send_to_payment_gateway()
-
-    flow.background_action_status_none()
-    pp.save()
-
-    split = PaymentPlanSplitFactory(payment_plan=pp, sent_to_payment_gateway=True)
-
-    with pytest.raises(ValidationError, match="Already sent to Payment Gateway"):
-        PaymentPlanService(pp).send_to_payment_gateway()
-
-    split.sent_to_payment_gateway = False
-    split.save()
-    with mock.patch("hope.apps.payment.services.payment_plan_services.send_to_payment_gateway_async_task") as mock_task:
-        pps = PaymentPlanService(pp)
-        pps.user = mock.MagicMock(pk="123")
-        with django_capture_on_commit_callbacks(execute=True):
-            pps.send_to_payment_gateway()
-        mock_task.assert_called_once_with(pp, str(pps.user.pk))
-
-    pp.refresh_from_db(fields=["background_action_status"])
-    assert pp.background_action_status == PaymentPlan.BackgroundActionStatus.SEND_TO_PAYMENT_GATEWAY
-
-
-@freeze_time("2020-10-10")
-def test_create_with_program_cycle_validation_error(user: User, business_area: Any) -> None:
-    program = ProgramFactory(
-        status=Program.ACTIVE,
-        business_area=business_area,
-        start_date=timezone.datetime(2000, 9, 10, tzinfo=UTC).date(),
-        end_date=timezone.datetime(2099, 10, 10, tzinfo=UTC).date(),
-        cycle=False,
-    )
-    cycle = ProgramCycleFactory(
-        program=program,
-        start_date=timezone.datetime(2021, 10, 10, tzinfo=UTC).date(),
-        end_date=timezone.datetime(2021, 12, 10, tzinfo=UTC).date(),
-        status=ProgramCycle.ACTIVE,
-    )
-    purpose = PaymentPlanPurposeFactory()
-    program.payment_plan_purposes.add(purpose)
-    input_data = {
-        "business_area_slug": "afghanistan",
-        "currency": "USD",
-        "name": "TestName123",
-        "program_cycle_id": str(cycle.id),
-        "flag_exclude_if_active_adjudication_ticket": False,
-        "flag_exclude_if_on_sanction_list": False,
-        "rules": [
-            {
-                "household_filters_blocks": [],
-                "household_ids": "",
-                "individual_ids": "",
-                "individuals_filters_blocks": [
-                    {
-                        "individual_block_filters": [
-                            {
-                                "comparison_method": "RANGE",
-                                "arguments": [1, 99],
-                                "field_name": "age_at_registration",
-                                "flex_field_classification": "NOT_FLEX_FIELD",
-                            },
-                        ],
-                    }
-                ],
-            }
-        ],
-        "payment_plan_purposes": [purpose],
-    }
-
-    cycle.status = ProgramCycle.FINISHED
-    cycle.save()
-    with pytest.raises(ValidationError) as error:
-        PaymentPlanService.create(
-            input_data=input_data,
-            user=user,
-            program=program,
-        )
-    assert error.value.detail[0] == "Impossible to create Target Population for Programme Cycle within Finished status"
-
-    cycle.status = ProgramCycle.DRAFT
-    cycle.end_date = None
-    cycle.save()
-    input_data["payment_plan_group_id"] = PaymentPlanGroupFactory(cycle=cycle).id
-    PaymentPlanService.create(
-        input_data=input_data,
-        user=user,
-        program=program,
-    )
-    cycle.refresh_from_db()
-    assert cycle.status == ProgramCycle.DRAFT
-
-
-@freeze_time("2022-12-12")
-@mock.patch("hope.models.payment_plan.PaymentPlan.get_exchange_rate", return_value=2.0)
-def test_full_rebuild(
-    get_exchange_rate_mock: Any,
-    user: User,
-    business_area: Any,
-    django_assert_num_queries: Any,
-    django_capture_on_commit_callbacks: Any,
-) -> None:
-    program = ProgramFactory(
-        status=Program.ACTIVE,
-        business_area=business_area,
-        start_date=timezone.datetime(2000, 9, 10, tzinfo=UTC).date(),
-        end_date=timezone.datetime(2099, 10, 10, tzinfo=UTC).date(),
-    )
-    program_cycle = program.cycles.first()
-    payment_plan_group = PaymentPlanGroupFactory(cycle=program_cycle)
-
-    hh1 = HouseholdFactory(program=program, business_area=business_area)
-    hh2 = HouseholdFactory(program=program, business_area=business_area)
-    IndividualFactory.create_batch(
-        4,
-        household=hh1,
-        business_area=business_area,
-        program=program,
-        registration_data_import=hh1.registration_data_import,
-    )
-
-    purpose = PaymentPlanPurposeFactory()
-    program.payment_plan_purposes.add(purpose)
-    input_data = {
-        "business_area_slug": "afghanistan",
-        "name": "paymentPlanName",
-        "program_cycle_id": program_cycle.id,
-        "payment_plan_group_id": payment_plan_group.id,
-        "flag_exclude_if_active_adjudication_ticket": False,
-        "flag_exclude_if_on_sanction_list": False,
-        "rules": [
-            {
-                "household_filters_blocks": [],
-                "household_ids": f"{hh1.unicef_id}, {hh2.unicef_id}",
-                "individual_ids": "",
-                "individuals_filters_blocks": [],
-            }
-        ],
-        "payment_plan_purposes": [purpose],
-    }
-    with mock.patch("hope.apps.payment.services.payment_plan_services.transaction") as mock_transaction:
-        with django_assert_num_queries(18):
-            pp = PaymentPlanService.create(
-                input_data=input_data,
-                user=user,
-                program=program,
-            )
-        assert mock_transaction.on_commit.call_count == 1
-
-    assert pp.status == PaymentPlan.Status.TP_OPEN
-    assert pp.total_households_count == 0
-    assert pp.total_individuals_count == 0
-    assert pp.payment_items.count() == 0
-
-    with django_capture_on_commit_callbacks(execute=True):
-        prepare_payment_plan_async_task(pp)
-
-    pp.refresh_from_db()
-    assert pp.status == PaymentPlan.Status.TP_OPEN
-    assert pp.build_status == PaymentPlan.BuildStatus.BUILD_STATUS_OK
-    assert pp.payment_items.count() == 2
-
-    old_payment_ids = list(pp.payment_items.values_list("id", flat=True))
-    old_payment_unicef_ids = list(pp.payment_items.values_list("unicef_id", flat=True))
-
-    pp_service = PaymentPlanService(payment_plan=pp)
-    pp_service.full_rebuild()
-
-    pp.refresh_from_db()
-    assert Payment.all_objects.filter(parent=pp).count() == 2
-
-    new_payment_ids = list(pp.payment_items.values_list("id", flat=True))
-    new_payment_unicef_ids = list(pp.payment_items.values_list("unicef_id", flat=True))
-
-    for payment_id in new_payment_ids:
-        assert payment_id not in old_payment_ids
-
-    for payment_unicef_id in new_payment_unicef_ids:
-        assert payment_unicef_id not in old_payment_unicef_ids
-
-
-def test_get_approval_type_by_action_value_error(payment_plan_base: PaymentPlan) -> None:
-    with pytest.raises(ValueError, match="Action cannot be None"):
-        PaymentPlanService(payment_plan=payment_plan_base).get_approval_type_by_action()
-
-
-def test_validate_action_not_implemented(payment_plan_base: PaymentPlan, user: User) -> None:
-    with pytest.raises(ValidationError) as error:
-        PaymentPlanService(payment_plan_base).execute_update_status_action(
-            input_data={"action": "INVALID_ACTION"}, user=user
-        )
-    actions = [
-        "TP_LOCK",
-        "TP_UNLOCK",
-        "TP_REBUILD",
-        "DRAFT",
-        "LOCK",
-        "LOCK_FSP",
-        "UNLOCK",
-        "UNLOCK_FSP",
-        "SEND_FOR_APPROVAL",
-        "APPROVE",
-        "AUTHORIZE",
-        "REVIEW",
-        "REJECT",
-        "SEND_TO_PAYMENT_GATEWAY",
-    ]
-    assert error.value.detail[0] == f"Not Implemented Action: INVALID_ACTION. List of possible actions: {actions}"
-
-
-def test_tp_lock_invalid_pp_status(user: User, business_area: Any, cycle: ProgramCycle) -> None:
-    payment_plan = PaymentPlanFactory(
-        program_cycle=cycle,
-        created_by=user,
-        business_area=business_area,
-        status=PaymentPlan.Status.DRAFT,
-        build_status=PaymentPlan.BuildStatus.BUILD_STATUS_OK,
-    )
-    with pytest.raises(TransitionNotAllowed) as error:
-        PaymentPlanService(payment_plan).tp_lock()
-    assert str(error.value) == 'Status_Tp_Lock :: no transition from "DRAFT"'
-
-
-def test_tp_lock_invalid_build_status(user: User, business_area: Any, cycle: ProgramCycle) -> None:
-    payment_plan = PaymentPlanFactory(
-        program_cycle=cycle,
-        created_by=user,
-        business_area=business_area,
-        status=PaymentPlan.Status.TP_OPEN,
-        build_status=PaymentPlan.BuildStatus.BUILD_STATUS_BUILDING,
-    )
-    with pytest.raises(ValidationError) as error:
-        PaymentPlanService(payment_plan).tp_lock()
-    assert error.value.detail[0] == "Can only be locked when Build Status OK"
-
-
-def test_tp_unlock(user: User, business_area: Any, cycle: ProgramCycle) -> None:
-    payment_plan = PaymentPlanFactory(
-        program_cycle=cycle,
-        created_by=user,
-        business_area=business_area,
-        status=PaymentPlan.Status.DRAFT,
-    )
-    with pytest.raises(TransitionNotAllowed) as error:
-        PaymentPlanService(payment_plan).tp_unlock()
-    assert str(error.value) == 'Status_Tp_Open :: no transition from "DRAFT"'
-
-    payment_plan.status = PaymentPlan.Status.TP_LOCKED
-    payment_plan.save()
-    PaymentPlanService(payment_plan).tp_unlock()
-
-    payment_plan.refresh_from_db()
-    assert payment_plan.status == PaymentPlan.Status.TP_OPEN
-    assert payment_plan.build_status == PaymentPlan.BuildStatus.BUILD_STATUS_PENDING
-
-
-def test_tp_rebuild(user: User, business_area: Any, cycle: ProgramCycle) -> None:
-    payment_plan = PaymentPlanFactory(
-        program_cycle=cycle,
-        created_by=user,
-        business_area=business_area,
-        status=PaymentPlan.Status.DRAFT,
-        build_status=PaymentPlan.BuildStatus.BUILD_STATUS_FAILED,
-    )
-    with pytest.raises(ValidationError) as error:
-        PaymentPlanService(payment_plan).tp_rebuild()
-    assert error.value.detail[0] == "Can only Rebuild Population for Locked or Open Population status"
-
-    payment_plan.status = PaymentPlan.Status.TP_LOCKED
-    payment_plan.save()
-    PaymentPlanService(payment_plan).tp_rebuild()
-
-    payment_plan.refresh_from_db()
-    assert payment_plan.status == PaymentPlan.Status.TP_LOCKED
-    assert payment_plan.build_status == PaymentPlan.BuildStatus.BUILD_STATUS_PENDING
-
-
-def test_draft_with_invalid_pp_status(
-    user: User,
-    business_area: Any,
-    cycle: ProgramCycle,
-    fsp: FinancialServiceProvider,
-    dm_transfer_to_account: Any,
-) -> None:
-    payment_plan = PaymentPlanFactory(
-        program_cycle=cycle,
-        created_by=user,
-        business_area=business_area,
-        status=PaymentPlan.Status.TP_LOCKED,
-    )
-    with pytest.raises(ValidationError) as error:
-        PaymentPlanService(payment_plan).draft()
-    assert "Can only promote to Payment Plan if the Payment Plan Group has a Financial Service Provider." in str(
-        error.value
-    )
-
-    payment_plan.status = PaymentPlan.Status.DRAFT
-    payment_plan.save()
-    payment_plan.payment_plan_group.financial_service_provider = fsp
-    payment_plan.payment_plan_group.save(update_fields=["financial_service_provider"])
-
-    with pytest.raises(TransitionNotAllowed) as error:
-        PaymentPlanService(payment_plan).draft()
-    assert str(error.value) == 'Status_Draft :: no transition from "DRAFT"'
-
-
-def test_lock_if_no_valid_payments(user: User, business_area: Any, cycle: ProgramCycle) -> None:
-    payment_plan = PaymentPlanFactory(
-        program_cycle=cycle,
-        created_by=user,
-        business_area=business_area,
         status=PaymentPlan.Status.OPEN,
-    )
-    with pytest.raises(ValidationError) as error:
-        PaymentPlanService(payment_plan).lock()
-    assert error.value.detail[0] == "At least one valid Payment should exist in order to Lock the Payment Plan"
-
-
-def test_lock_marks_pending_hard_conflict_not_eligible(
-    lock_status_transition_context: dict[str, Any],
-) -> None:
-    hard_conflicted_payment = lock_status_transition_context["hard_conflicted_payment"]
-    previous_status_date = hard_conflicted_payment.status_date
-
-    PaymentPlanService(lock_status_transition_context["payment_plan"]).execute_update_status_action(
-        {"action": PaymentPlan.Action.LOCK.value},
-        lock_status_transition_context["user"],
+        financial_service_provider=financial_service_provider,
+        currency=currency,
     )
 
-    hard_conflicted_payment.refresh_from_db()
-    lock_status_transition_context["valid_payment"].refresh_from_db()
-    assert hard_conflicted_payment.conflicted is True
-    assert hard_conflicted_payment.status == Payment.STATUS_NOT_ELIGIBLE
-    assert hard_conflicted_payment.status_date > previous_status_date
-    payment_log = LogEntry.objects.get(object_id=hard_conflicted_payment.pk)
-    assert payment_log.changes["status_date"] == {
-        "from": str(previous_status_date),
-        "to": str(hard_conflicted_payment.status_date),
-    }
-    assert lock_status_transition_context["valid_payment"].status == Payment.STATUS_PENDING
 
-
-def test_unlock_only_restores_not_eligible_payment_without_remaining_cause(
-    unlock_status_transition_context: dict[str, Any],
-) -> None:
-    previous_status_date = unlock_status_transition_context["restorable_payment"].status_date
-
-    PaymentPlanService(unlock_status_transition_context["payment_plan"]).execute_update_status_action(
-        {"action": PaymentPlan.Action.UNLOCK.value},
-        unlock_status_transition_context["user"],
-    )
-
-    restorable_payment = unlock_status_transition_context["restorable_payment"]
-    excluded_payment = unlock_status_transition_context["excluded_payment"]
-    invalid_wallet_payment = unlock_status_transition_context["invalid_wallet_payment"]
-    restorable_payment.refresh_from_db()
-    excluded_payment.refresh_from_db()
-    invalid_wallet_payment.refresh_from_db()
-    assert restorable_payment.conflicted is False
-    assert restorable_payment.status == Payment.STATUS_PENDING
-    payment_log = LogEntry.objects.get(object_id=restorable_payment.pk)
-    assert payment_log.changes["status_date"] == {
-        "from": str(previous_status_date),
-        "to": str(restorable_payment.status_date),
-    }
-    assert excluded_payment.conflicted is False
-    assert excluded_payment.status == Payment.STATUS_NOT_ELIGIBLE
-    assert invalid_wallet_payment.conflicted is False
-    assert invalid_wallet_payment.status == Payment.STATUS_NOT_ELIGIBLE
-
-
-def test_update_pp_validation_errors(user: User, business_area: Any, cycle: ProgramCycle) -> None:
-    payment_plan = PaymentPlanFactory(
+@pytest.fixture
+def locked_payment_list(cycle, open_group, financial_service_provider, delivery_mechanism, currency):
+    return PaymentListFactory(
+        name="First Plan",
         program_cycle=cycle,
-        created_by=user,
-        business_area=business_area,
-        status=PaymentPlan.Status.LOCKED,
+        payment_plan=open_group,
+        status=PaymentList.Status.LOCKED,
+        financial_service_provider=financial_service_provider,
+        delivery_mechanism=delivery_mechanism,
+        currency=currency,
     )
-    with pytest.raises(ValidationError) as error:
-        PaymentPlanService(payment_plan).update({"exclusion_reason": "ABC"})
-    assert error.value.detail[0] == f"Not Allow edit targeting criteria within status {payment_plan.status}"
+
+
+def test_lock_sets_group_locked(open_group, locked_payment_list):
+    PaymentPlanService(open_group).lock()
+
+    open_group.refresh_from_db()
+    assert open_group.status == PaymentPlan.Status.LOCKED
+
+
+def test_lock_sets_status_date(open_group, locked_payment_list):
+    PaymentPlanService(open_group).lock()
+
+    open_group.refresh_from_db()
+    assert open_group.status_date is not None
+
+
+def test_lock_locks_fsp_on_every_payment_list(
+    cycle, open_group, locked_payment_list, financial_service_provider, delivery_mechanism, currency
+):
+    second_payment_list = PaymentListFactory(
+        program_cycle=cycle,
+        payment_plan=open_group,
+        status=PaymentList.Status.LOCKED,
+        financial_service_provider=financial_service_provider,
+        delivery_mechanism=delivery_mechanism,
+        currency=currency,
+    )
+
+    PaymentPlanService(open_group).lock()
+
+    locked_payment_list.refresh_from_db()
+    second_payment_list.refresh_from_db()
+    assert locked_payment_list.status == PaymentList.Status.LOCKED_FSP
+    assert second_payment_list.status == PaymentList.Status.LOCKED_FSP
+
+
+def test_lock_rejects_group_that_is_already_locked(cycle, locked_payment_list):
+    already_locked = locked_payment_list.payment_plan
+    already_locked.status = PaymentPlan.Status.LOCKED
+    already_locked.save(update_fields=["status"])
 
     with pytest.raises(ValidationError) as error:
-        PaymentPlanService(payment_plan).update({"vulnerability_score_min": "test_data"})
-    assert (
-        error.value.detail[0]
-        == "You can only set vulnerability_score_min and vulnerability_score_max on Locked Population status"
+        PaymentPlanService(already_locked).lock()
+    assert error.value.detail[0] == "Lock Payment Plan is possible only within Status OPEN"
+
+
+def test_lock_rejects_group_without_payment_lists(open_group):
+    with pytest.raises(ValidationError) as error:
+        PaymentPlanService(open_group).lock()
+    assert error.value.detail[0] == "Lock is not possible for a Payment Plan without Payment Lists."
+
+
+def test_lock_rejects_payment_list_that_is_not_locked(
+    cycle, open_group, locked_payment_list, financial_service_provider, delivery_mechanism, currency
+):
+    open_payment_list = PaymentListFactory(
+        program_cycle=cycle,
+        payment_plan=open_group,
+        status=PaymentList.Status.OPEN,
+        financial_service_provider=financial_service_provider,
+        delivery_mechanism=delivery_mechanism,
+        currency=currency,
     )
 
     with pytest.raises(ValidationError) as error:
-        PaymentPlanService(payment_plan).update({"name": "test_data"})
-    assert error.value.detail[0] == "Name can be changed only within Open status"
-
-    payment_plan.status = PaymentPlan.Status.TP_OPEN
-    payment_plan.save()
-    PaymentPlanFactory(
-        name="test_data",
-        program_cycle=cycle,
-        created_by=user,
-        business_area=business_area,
-        status=PaymentPlan.Status.DRAFT,
+        PaymentPlanService(open_group).lock()
+    assert error.value.detail[0] == (
+        f"Every Payment List must be locked before the Payment Plan can be locked. "
+        f"Not locked: {open_payment_list.unicef_id}."
     )
+
+
+def test_lock_rejects_group_without_fsp(open_group, locked_payment_list):
+    open_group.financial_service_provider = None
+    open_group.save(update_fields=["financial_service_provider"])
+
     with pytest.raises(ValidationError) as error:
-        PaymentPlanService(payment_plan).update({"name": "test_data"})
-    assert error.value.detail[0] == f"Name 'test_data' and program '{cycle.program.name}' already exists."
+        PaymentPlanService(open_group).lock()
+    assert error.value.detail[0] == "Payment Plan needs a Financial Service Provider before it can be locked."
 
-    finished_cycle = ProgramCycleFactory(program=cycle.program, status=ProgramCycle.FINISHED)
+
+def test_lock_rejects_group_without_currency(open_group, locked_payment_list):
+    open_group.currency = None
+    open_group.save(update_fields=["currency"])
+
     with pytest.raises(ValidationError) as error:
-        PaymentPlanService(payment_plan).update({"program_cycle_id": str(finished_cycle.id)})
-    assert error.value.detail[0] == "Not possible to assign Finished Program Cycle"
+        PaymentPlanService(open_group).lock()
+    assert error.value.detail[0] == "Payment Plan needs a Currency before it can be locked."
 
 
-def test_rebuild_payment_plan_population(
-    user: User, business_area: Any, cycle: ProgramCycle, django_capture_on_commit_callbacks: Any
-) -> None:
-    pp = PaymentPlanFactory(
-        name="test_data",
+def test_lock_rejects_payment_list_without_delivery_template(
+    cycle, open_group, locked_payment_list, financial_service_provider, currency
+):
+    payment_list_without_template = PaymentListFactory(
         program_cycle=cycle,
-        created_by=user,
-        business_area=business_area,
-        status=PaymentPlan.Status.TP_OPEN,
+        payment_plan=open_group,
+        status=PaymentList.Status.LOCKED,
+        financial_service_provider=financial_service_provider,
+        delivery_mechanism=DeliveryMechanismFactory(),
+        currency=currency,
     )
 
-    with django_capture_on_commit_callbacks(execute=True):
-        PaymentPlanService.rebuild_payment_plan_population(
-            rebuild_list=False,
-            should_update_money_stats=True,
-            vulnerability_filter=False,
-            payment_plan=pp,
-        )
-        PaymentPlanService.rebuild_payment_plan_population(
-            rebuild_list=True,
-            should_update_money_stats=False,
-            vulnerability_filter=False,
-            payment_plan=pp,
-        )
-        PaymentPlanService.rebuild_payment_plan_population(
-            rebuild_list=False,
-            should_update_money_stats=False,
-            vulnerability_filter=True,
-            payment_plan=pp,
-        )
-
-    pp.refresh_from_db(fields=("build_status",))
-    assert pp.build_status == PaymentPlan.BuildStatus.BUILD_STATUS_OK
+    with pytest.raises(ValidationError) as error:
+        PaymentPlanService(open_group).lock()
+    assert error.value.detail[0] == (
+        f"Every Payment List needs an FSP XLSX Template for its Financial Service Provider and "
+        f"Delivery Mechanism. Missing for: {payment_list_without_template.unicef_id}."
+    )
 
 
-@patch("hope.apps.payment.services.payment_plan_services.payment_plan_rebuild_stats_async_task")
-@patch("hope.apps.payment.services.payment_plan_services.payment_plan_full_rebuild_async_task")
-def test_rebuild_payment_plan_population_full_rebuild_with_money_stats_queues_both_tasks(
-    mock_full_rebuild: mock.Mock,
-    mock_rebuild_stats: mock.Mock,
-    user: User,
-    business_area: Any,
-    cycle: ProgramCycle,
-) -> None:
-    pp = PaymentPlanFactory(
+def test_unlock_sets_group_open(open_group, locked_payment_list):
+    PaymentPlanService(open_group).lock()
+
+    PaymentPlanService(open_group).unlock()
+
+    open_group.refresh_from_db()
+    assert open_group.status == PaymentPlan.Status.OPEN
+
+
+def test_unlock_releases_fsp_lock_on_every_payment_list(open_group, locked_payment_list):
+    PaymentPlanService(open_group).lock()
+
+    PaymentPlanService(open_group).unlock()
+
+    locked_payment_list.refresh_from_db()
+    assert locked_payment_list.status == PaymentList.Status.LOCKED
+
+
+def test_unlock_rejects_group_that_is_open(open_group, locked_payment_list):
+    with pytest.raises(ValidationError) as error:
+        PaymentPlanService(open_group).unlock()
+    assert error.value.detail[0] == "Unlock Payment Plan is possible only within Status LOCKED"
+
+
+def test_assign_fsp_copies_it_to_open_target_populations(cycle):
+    group = PaymentPlanFactory(cycle=cycle)
+    target_population = PaymentListFactory(
         program_cycle=cycle,
-        created_by=user,
-        business_area=business_area,
-        status=PaymentPlan.Status.TP_OPEN,
-    )
-
-    PaymentPlanService.rebuild_payment_plan_population(
-        rebuild_list=True,
-        should_update_money_stats=True,
-        vulnerability_filter=False,
-        payment_plan=pp,
-    )
-
-    mock_full_rebuild.assert_called_once_with(pp)
-    mock_rebuild_stats.assert_called_once_with(pp)
-
-
-@patch("hope.apps.payment.celery_tasks.payment_plan_apply_steficon_hh_selection_async_task")
-@patch("hope.apps.payment.services.payment_plan_services.payment_plan_full_rebuild_async_task")
-def test_rebuild_payment_plan_population_full_rebuild_with_steficon_targeting_queues_steficon(
-    mock_full_rebuild: mock.Mock,
-    mock_apply_steficon: mock.Mock,
-    user: User,
-    business_area: Any,
-    cycle: ProgramCycle,
-) -> None:
-    pp = PaymentPlanFactory(
-        program_cycle=cycle,
-        created_by=user,
-        business_area=business_area,
-        status=PaymentPlan.Status.TP_OPEN,
-        steficon_rule_targeting=RuleCommitFactory(),
-    )
-
-    PaymentPlanService.rebuild_payment_plan_population(
-        rebuild_list=True,
-        should_update_money_stats=False,
-        vulnerability_filter=True,
-        payment_plan=pp,
-    )
-
-    mock_full_rebuild.assert_called_once_with(pp)
-    mock_apply_steficon.assert_called_once_with(pp, str(pp.steficon_rule_targeting.rule_id), None)
-
-
-def test_lock_fsp_validation(
-    user: User,
-    business_area: Any,
-    cycle: ProgramCycle,
-    fsp: FinancialServiceProvider,
-    dm_transfer_to_account: Any,
-) -> None:
-    payment_plan = PaymentPlanFactory(
-        program_cycle=cycle,
-        created_by=user,
-        business_area=business_area,
-        status=PaymentPlan.Status.LOCKED,
-    )
-    payment = PaymentFactory(
-        parent=payment_plan,
-        program=cycle.program,
-        business_area_id=payment_plan.business_area_id,
-        status=Payment.STATUS_PENDING,
+        payment_plan=group,
+        status=PaymentList.Status.TP_OPEN,
         financial_service_provider=None,
-        entitlement_quantity=None,
-        entitlement_quantity_usd=None,
-        delivered_quantity=None,
-        delivered_quantity_usd=None,
     )
+    fsp = FinancialServiceProviderFactory()
+
+    PaymentPlanService(group).assign_financial_service_provider(fsp)
+    group.save()
+
+    target_population.refresh_from_db()
+    assert group.financial_service_provider == fsp
+    assert target_population.financial_service_provider == fsp
+
+
+@patch("hope.apps.payment.services.payment_list_services.payment_list_full_rebuild_async_task")
+def test_assign_fsp_rebuilds_every_target_population(mock_full_rebuild, cycle, django_capture_on_commit_callbacks):
+    group = PaymentPlanFactory(cycle=cycle)
+    first = PaymentListFactory(program_cycle=cycle, payment_plan=group, status=PaymentList.Status.TP_OPEN)
+    second = PaymentListFactory(program_cycle=cycle, payment_plan=group, status=PaymentList.Status.TP_OPEN)
+
+    with django_capture_on_commit_callbacks(execute=True):
+        PaymentPlanService(group).assign_financial_service_provider(FinancialServiceProviderFactory())
+
+    rebuilt = {call.args[0].pk for call in mock_full_rebuild.call_args_list}
+    assert rebuilt == {first.pk, second.pk}
+
+
+def test_assign_fsp_rejected_when_a_target_population_is_locked(cycle):
+    group = PaymentPlanFactory(cycle=cycle)
+    PaymentListFactory(program_cycle=cycle, payment_plan=group, status=PaymentList.Status.TP_LOCKED)
 
     with pytest.raises(ValidationError) as error:
-        PaymentPlanService(payment_plan).lock_fsp()
-    assert error.value.detail[0] == "Payment Plan doesn't have FSP / DeliveryMechanism assigned."
+        PaymentPlanService(group).assign_financial_service_provider(FinancialServiceProviderFactory())
+    assert error.value.detail[0] == (
+        "Financial Service Provider can be changed only while every Target Population in the payment plan is Open."
+    )
 
-    payment_plan.payment_plan_group.financial_service_provider = fsp
-    payment_plan.payment_plan_group.save(update_fields=["financial_service_provider"])
-    payment_plan.delivery_mechanism = dm_transfer_to_account
-    payment.save()
+
+def test_assign_currency_rejected_when_a_payment_list_is_opened(cycle, currency):
+    group = PaymentPlanFactory(cycle=cycle)
+    PaymentListFactory(program_cycle=cycle, payment_plan=group, status=PaymentList.Status.OPEN)
 
     with pytest.raises(ValidationError) as error:
-        PaymentPlanService(payment_plan).lock_fsp()
-    assert error.value.detail[0] == "All Payments must have entitlement quantity set."
-
-    payment.entitlement_quantity = 100
-    payment.save()
-
-    PaymentPlanService(payment_plan).lock_fsp()
-    payment.refresh_from_db()
-    assert payment.financial_service_provider == fsp
-
-
-def test_lock_fsp_rejects_running_rule_engine(
-    user: User,
-    business_area: Any,
-    cycle: ProgramCycle,
-    fsp: FinancialServiceProvider,
-    dm_transfer_to_account: Any,
-) -> None:
-    payment_plan = PaymentPlanFactory(
-        program_cycle=cycle,
-        created_by=user,
-        business_area=business_area,
-        status=PaymentPlan.Status.LOCKED,
-        financial_service_provider=fsp,
-        delivery_mechanism=dm_transfer_to_account,
-        background_action_status=PaymentPlan.BackgroundActionStatus.RULE_ENGINE_RUN,
-    )
-
-    with pytest.raises(ValidationError, match="Another background action is already in progress."):
-        PaymentPlanService(payment_plan).lock_fsp()
-    payment_plan.refresh_from_db(fields=("status",))
-    assert payment_plan.status == PaymentPlan.Status.LOCKED
-
-
-def test_unlock_fsp(user: User, business_area: Any, cycle: ProgramCycle) -> None:
-    payment_plan = PaymentPlanFactory(
-        program_cycle=cycle,
-        created_by=user,
-        business_area=business_area,
-        status=PaymentPlan.Status.LOCKED_FSP,
-    )
-
-    PaymentPlanService(payment_plan).unlock_fsp()
-
-    payment_plan.refresh_from_db(fields=("status",))
-    assert payment_plan.status == PaymentPlan.Status.LOCKED
-
-
-@pytest.fixture
-def payment_plan_importing_fsp_extra_fields(user: User, business_area: Any, cycle: ProgramCycle) -> PaymentPlan:
-    return PaymentPlanFactory(
-        program_cycle=cycle,
-        created_by=user,
-        business_area=business_area,
-        status=PaymentPlan.Status.LOCKED_FSP,
-        background_action_status=PaymentPlan.BackgroundActionStatus.XLSX_IMPORTING_FSP_EXTRA_FIELDS,
+        PaymentPlanService(group).assign_currency(currency)
+    assert (
+        error.value.detail[0] == "Currency can be changed only before any Payment List in the payment plan is opened."
     )
 
 
 @pytest.fixture
-def payment_plan_with_fsp_extra_fields_import_error(
-    user: User,
-    business_area: Any,
-    cycle: ProgramCycle,
-) -> PaymentPlan:
-    return PaymentPlanFactory(
+def group_with_custom_rate_before_open(open_group, cycle):
+    open_group.exchange_rate = Decimal("1.25000000")
+    open_group.custom_exchange_rate = True
+    open_group.save(update_fields=["exchange_rate", "custom_exchange_rate"])
+    PaymentListFactory(program_cycle=cycle, payment_plan=open_group, status=PaymentList.Status.TP_OPEN)
+    return open_group
+
+
+@pytest.fixture
+def replacement_currency():
+    return CurrencyFactory(code="EUR", name="Euro")
+
+
+def test_changing_group_currency_clears_its_previous_rate(group_with_custom_rate_before_open, replacement_currency):
+    PaymentPlanService(group_with_custom_rate_before_open).assign_currency(replacement_currency)
+
+    assert group_with_custom_rate_before_open.currency == replacement_currency
+    assert group_with_custom_rate_before_open.exchange_rate is None
+    assert group_with_custom_rate_before_open.custom_exchange_rate is False
+
+
+@pytest.fixture
+def group_with_unore_rate_and_open_plan(open_group, cycle):
+    open_group.exchange_rate = Decimal("1.25000000")
+    open_group.save(update_fields=["exchange_rate"])
+    PaymentListFactory(program_cycle=cycle, payment_plan=open_group, status=PaymentList.Status.OPEN)
+    return open_group
+
+
+def test_changing_group_dates_clears_the_previous_unore_rate(group_with_unore_rate_and_open_plan):
+    PaymentPlanService(group_with_unore_rate_and_open_plan).assign_dispersion_dates(date(2099, 2, 1), date(2099, 2, 28))
+
+    assert group_with_unore_rate_and_open_plan.exchange_rate is None
+
+
+def test_assign_currency_usdc_rejected_with_non_digital_delivery_mechanism(cycle, delivery_mechanism):
+    group = PaymentPlanFactory(cycle=cycle)
+    PaymentListFactory(
         program_cycle=cycle,
-        created_by=user,
-        business_area=business_area,
-        status=PaymentPlan.Status.LOCKED_FSP,
-        background_action_status=PaymentPlan.BackgroundActionStatus.XLSX_IMPORT_ERROR,
-    )
-
-
-def test_unlock_fsp_rejects_active_fsp_extra_fields_import(
-    payment_plan_importing_fsp_extra_fields: PaymentPlan,
-) -> None:
-    with pytest.raises(ValidationError, match="Another background action is already in progress."):
-        PaymentPlanService(payment_plan_importing_fsp_extra_fields).unlock_fsp()
-
-
-def test_send_for_approval_rejects_active_fsp_extra_fields_import(
-    payment_plan_importing_fsp_extra_fields: PaymentPlan,
-) -> None:
-    with pytest.raises(ValidationError, match="Another background action is already in progress."):
-        PaymentPlanService(payment_plan_importing_fsp_extra_fields).send_for_approval()
-
-
-def test_unlock_fsp_allows_retryable_background_error(
-    payment_plan_with_fsp_extra_fields_import_error: PaymentPlan,
-) -> None:
-    PaymentPlanService(payment_plan_with_fsp_extra_fields_import_error).unlock_fsp()
-
-    assert payment_plan_with_fsp_extra_fields_import_error.status == PaymentPlan.Status.LOCKED
-    assert payment_plan_with_fsp_extra_fields_import_error.background_action_status is None
-
-
-def test_send_for_approval_allows_retryable_background_error(
-    payment_plan_with_fsp_extra_fields_import_error: PaymentPlan,
-    user: User,
-    mocker: Any,
-) -> None:
-    notification_task = mocker.patch(
-        "hope.apps.payment.services.payment_plan_services.send_payment_notification_emails_async_task"
-    )
-
-    PaymentPlanService(payment_plan_with_fsp_extra_fields_import_error).execute_update_status_action(
-        {"action": PaymentPlan.Action.SEND_FOR_APPROVAL},
-        user,
-    )
-
-    assert payment_plan_with_fsp_extra_fields_import_error.status == PaymentPlan.Status.IN_APPROVAL
-    assert payment_plan_with_fsp_extra_fields_import_error.background_action_status is None
-    notification_task.assert_called_once()
-
-
-def test_update_pp_program_cycle(payment_plan_tp_open: PaymentPlan, program: Program) -> None:
-    new_cycle = ProgramCycleFactory(program=program, title="New Cycle ABC")
-    new_group = PaymentPlanGroupFactory(
-        cycle=new_cycle, financial_service_provider=payment_plan_tp_open.financial_service_provider
-    )
-
-    PaymentPlanService(payment_plan_tp_open).update(
-        {"program_cycle_id": new_cycle.id, "payment_plan_group_id": new_group.id}
-    )
-
-    payment_plan_tp_open.refresh_from_db()
-    assert payment_plan_tp_open.program_cycle.title == "New Cycle ABC"
-    assert payment_plan_tp_open.payment_plan_group == new_group
-
-
-def test_edit_cycle_requires_group_from_new_cycle(payment_plan_tp_open: PaymentPlan, program: Program) -> None:
-    new_cycle = ProgramCycleFactory(program=program)
-    new_group = PaymentPlanGroupFactory(
-        cycle=new_cycle, financial_service_provider=payment_plan_tp_open.financial_service_provider
-    )
-
-    PaymentPlanService(payment_plan_tp_open).update(
-        {"program_cycle_id": new_cycle.id, "payment_plan_group_id": new_group.id}
-    )
-
-    payment_plan_tp_open.refresh_from_db()
-    assert payment_plan_tp_open.program_cycle == new_cycle
-    assert payment_plan_tp_open.payment_plan_group == new_group
-
-
-def test_edit_cycle_rejects_group_from_old_cycle(payment_plan_tp_open: PaymentPlan, program: Program) -> None:
-    old_group = payment_plan_tp_open.payment_plan_group
-    new_cycle = ProgramCycleFactory(program=program)
-
-    with pytest.raises(ValidationError) as error:
-        PaymentPlanService(payment_plan_tp_open).update(
-            {"program_cycle_id": new_cycle.id, "payment_plan_group_id": old_group.id}
-        )
-    assert error.value.detail[0] == "Payment Plan Group does not exist in the given Programme Cycle."
-
-
-def test_edit_cycle_rejects_missing_group(payment_plan_tp_open: PaymentPlan, program: Program) -> None:
-    new_cycle = ProgramCycleFactory(program=program)
-
-    with pytest.raises(ValidationError) as error:
-        PaymentPlanService(payment_plan_tp_open).update({"program_cycle_id": new_cycle.id})
-    assert error.value.detail[0] == "Payment Plan Group is required when changing Programme Cycle."
-
-
-def test_edit_cycle_rejects_group_not_open(payment_plan_tp_open: PaymentPlan, program: Program) -> None:
-    new_cycle = ProgramCycleFactory(program=program)
-    locked_group = PaymentPlanGroupFactory(cycle=new_cycle, status=PaymentPlanGroup.Status.ACCEPTED)
-
-    with pytest.raises(ValidationError) as error:
-        PaymentPlanService(payment_plan_tp_open).update(
-            {"program_cycle_id": new_cycle.id, "payment_plan_group_id": locked_group.id}
-        )
-    assert error.value.detail[0] == "Adding Target Population to Payment Plan Group is possible only within Status OPEN"
-
-
-@pytest.mark.parametrize(
-    "pp_status",
-    [
-        pytest.param(PaymentPlan.Status.TP_LOCKED, id="tp-locked"),
-        pytest.param(PaymentPlan.Status.OPEN, id="open"),
-        pytest.param(PaymentPlan.Status.ACCEPTED, id="accepted"),
-    ],
-)
-def test_edit_cycle_outside_tp_open_raises_and_keeps_cycle(
-    pp_status: str,
-    payment_plan_in_status: PaymentPlan,
-    group_in_other_cycle: Any,
-    cycle: ProgramCycle,
-) -> None:
-    with pytest.raises(ValidationError) as error:
-        PaymentPlanService(payment_plan_in_status).update(
-            {"program_cycle_id": group_in_other_cycle.cycle_id, "payment_plan_group_id": group_in_other_cycle.id}
-        )
-
-    assert error.value.detail[0] == "Programme Cycle can be changed only within Open status"
-    payment_plan_in_status.refresh_from_db()
-    assert payment_plan_in_status.program_cycle == cycle
-
-
-def test_update_pp_vulnerability_score(payment_plan_base: PaymentPlan) -> None:
-    PaymentPlanService(payment_plan_base).update(
-        {
-            "vulnerability_score_min": "11.229222",
-            "vulnerability_score_max": "77.889777",
-        }
-    )
-    payment_plan_base.refresh_from_db(fields=("vulnerability_score_min", "vulnerability_score_max"))
-    assert payment_plan_base.vulnerability_score_min == Decimal("11.229")
-    assert payment_plan_base.vulnerability_score_max == Decimal("77.890")
-
-
-def test_update_pp_exclude_ids(user: User, business_area: Any, cycle: ProgramCycle) -> None:
-    payment_plan = PaymentPlanFactory(
-        program_cycle=cycle,
-        created_by=user,
-        business_area=business_area,
-        status=PaymentPlan.Status.TP_OPEN,
-    )
-    PaymentPlanService(payment_plan).update({"excluded_ids": "IND-123", "exclusion_reason": "Test text"})
-    payment_plan.refresh_from_db(fields=("excluded_ids", "exclusion_reason"))
-    assert payment_plan.excluded_ids == "IND-123"
-    assert payment_plan.exclusion_reason == "Test text"
-
-
-def test_open_rejects_group_without_currency(
-    user: User,
-    business_area: Any,
-    cycle: ProgramCycle,
-    fsp: FinancialServiceProvider,
-    dm_transfer_to_account: Any,
-) -> None:
-    payment_plan = PaymentPlanFactory(
-        program_cycle=cycle,
-        payment_plan_group=PaymentPlanGroupFactory(cycle=cycle, financial_service_provider=fsp),
-        created_by=user,
-        business_area=business_area,
-        status=PaymentPlan.Status.DRAFT,
-        currency=None,
-        delivery_mechanism=dm_transfer_to_account,
-        financial_service_provider=fsp,
-    )
-    with pytest.raises(ValidationError) as error:
-        PaymentPlanService(payment_plan).open()
-    assert error.value.detail[0] == "Payment Plan Group needs a Currency before a Payment Plan can be opened."
-
-
-def test_open_rejects_group_without_dispersion_dates(
-    user: User,
-    business_area: Any,
-    cycle: ProgramCycle,
-    fsp: FinancialServiceProvider,
-    dm_transfer_to_account: Any,
-) -> None:
-    payment_plan = PaymentPlanFactory(
-        program_cycle=cycle,
-        payment_plan_group=PaymentPlanGroupFactory(
-            cycle=cycle, financial_service_provider=fsp, currency=CurrencyFactory(code="PLN", name="Polish Zloty")
-        ),
-        created_by=user,
-        business_area=business_area,
-        status=PaymentPlan.Status.DRAFT,
-        delivery_mechanism=dm_transfer_to_account,
-    )
-    PaymentPlanGroup.objects.filter(pk=payment_plan.payment_plan_group_id).update(
-        dispersion_start_date=None, dispersion_end_date=None
-    )
-    payment_plan.payment_plan_group.refresh_from_db()
-
-    with pytest.raises(ValidationError) as error:
-        PaymentPlanService(payment_plan).open()
-
-    assert error.value.detail[0] == "Payment Plan Group needs Dispersion Dates before a Payment Plan can be opened."
-    payment_plan.refresh_from_db()
-    assert payment_plan.status == PaymentPlan.Status.DRAFT
-
-
-def test_update_pp_delivery_mechanism(
-    user: User,
-    business_area: Any,
-    cycle: ProgramCycle,
-    fsp: FinancialServiceProvider,
-    dm_transfer_to_account: Any,
-) -> None:
-    payment_plan = PaymentPlanFactory(
-        program_cycle=cycle,
-        payment_plan_group=PaymentPlanGroupFactory(cycle=cycle, financial_service_provider=fsp),
-        created_by=user,
-        business_area=business_area,
-        status=PaymentPlan.Status.TP_OPEN,
-        delivery_mechanism=None,
-        financial_service_provider=fsp,
-    )
-
-    PaymentPlanService(payment_plan).update({"delivery_mechanism_code": dm_transfer_to_account.code})
-
-    payment_plan.refresh_from_db()
-    assert payment_plan.delivery_mechanism == dm_transfer_to_account
-    assert payment_plan.financial_service_provider == fsp
-
-
-def test_update_pp_delivery_mechanism_ignored_when_not_open(
-    user: User,
-    business_area: Any,
-    cycle: ProgramCycle,
-    fsp: FinancialServiceProvider,
-    dm_transfer_to_account: Any,
-    dm_transfer_to_digital_wallet: Any,
-) -> None:
-    payment_plan = PaymentPlanFactory(
-        program_cycle=cycle,
-        payment_plan_group=PaymentPlanGroupFactory(cycle=cycle, financial_service_provider=fsp),
-        created_by=user,
-        business_area=business_area,
-        status=PaymentPlan.Status.OPEN,
-        currency=CurrencyFactory(code="AMD", name="Armenian Dram"),
-        delivery_mechanism=dm_transfer_to_account,
-        financial_service_provider=fsp,
-    )
-
-    PaymentPlanService(payment_plan).update({"delivery_mechanism_code": dm_transfer_to_digital_wallet.code})
-
-    payment_plan.refresh_from_db()
-    assert payment_plan.delivery_mechanism == dm_transfer_to_account
-
-
-def test_update_pp_delivery_mechanism_cleared_when_code_missing(
-    user: User,
-    business_area: Any,
-    cycle: ProgramCycle,
-    fsp: FinancialServiceProvider,
-    dm_transfer_to_account: Any,
-) -> None:
-    payment_plan = PaymentPlanFactory(
-        program_cycle=cycle,
-        payment_plan_group=PaymentPlanGroupFactory(cycle=cycle, financial_service_provider=fsp),
-        created_by=user,
-        business_area=business_area,
-        status=PaymentPlan.Status.TP_OPEN,
-        delivery_mechanism=dm_transfer_to_account,
-        financial_service_provider=fsp,
-    )
-
-    PaymentPlanService(payment_plan).update({"delivery_mechanism_code": None})
-
-    payment_plan.refresh_from_db()
-    assert payment_plan.delivery_mechanism is None
-    assert payment_plan.financial_service_provider == fsp
-
-
-def test_update_pp_delivery_mechanism_rejects_digital_wallet_without_usdc(
-    user: User,
-    business_area: Any,
-    cycle: ProgramCycle,
-    fsp: FinancialServiceProvider,
-    dm_transfer_to_digital_wallet: Any,
-) -> None:
-    payment_plan = PaymentPlanFactory(
-        program_cycle=cycle,
-        payment_plan_group=PaymentPlanGroupFactory(
-            cycle=cycle,
-            financial_service_provider=fsp,
-            currency=CurrencyFactory(code="PLN", name="Polish Zloty"),
-        ),
-        created_by=user,
-        business_area=business_area,
-        status=PaymentPlan.Status.TP_OPEN,
-        delivery_mechanism=None,
-        financial_service_provider=fsp,
+        payment_plan=group,
+        status=PaymentList.Status.TP_OPEN,
+        delivery_mechanism=delivery_mechanism,
     )
 
     with pytest.raises(ValidationError) as error:
-        PaymentPlanService(payment_plan).update({"delivery_mechanism_code": dm_transfer_to_digital_wallet.code})
+        PaymentPlanService(group).assign_currency(CurrencyFactory(code="USDC", name="USD Coin", is_crypto=True))
     assert (
         error.value.detail[0] == "For delivery mechanism Transfer to Digital Wallet only currency USDC can be assigned."
     )
 
 
-def test_change_group_copies_group_fsp(
-    user: User,
-    business_area: Any,
-    cycle: ProgramCycle,
-    fsp: FinancialServiceProvider,
-) -> None:
-    payment_plan = PaymentPlanFactory(
+def test_assign_currency_non_usdc_rejected_with_digital_wallet_delivery_mechanism(cycle, currency):
+    group = PaymentPlanFactory(cycle=cycle)
+    PaymentListFactory(
         program_cycle=cycle,
-        payment_plan_group=PaymentPlanGroupFactory(cycle=cycle),
-        created_by=user,
-        business_area=business_area,
-        status=PaymentPlan.Status.TP_OPEN,
-        financial_service_provider=None,
-    )
-    new_group = PaymentPlanGroupFactory(cycle=cycle, financial_service_provider=fsp)
-
-    PaymentPlanService(payment_plan).update({"payment_plan_group_id": str(new_group.id)})
-
-    payment_plan.refresh_from_db()
-    assert payment_plan.payment_plan_group == new_group
-    assert payment_plan.financial_service_provider == fsp
-
-
-@patch("hope.apps.payment.services.payment_plan_services.payment_plan_full_rebuild_async_task")
-def test_change_group_to_different_fsp_rebuilds_target_population(
-    mock_full_rebuild: mock.Mock,
-    user: User,
-    business_area: Any,
-    cycle: ProgramCycle,
-    fsp: FinancialServiceProvider,
-    django_capture_on_commit_callbacks: Any,
-) -> None:
-    payment_plan = PaymentPlanFactory(
-        program_cycle=cycle,
-        payment_plan_group=PaymentPlanGroupFactory(cycle=cycle),
-        created_by=user,
-        business_area=business_area,
-        status=PaymentPlan.Status.TP_OPEN,
-        financial_service_provider=None,
-    )
-    new_group = PaymentPlanGroupFactory(cycle=cycle, financial_service_provider=fsp)
-
-    with django_capture_on_commit_callbacks(execute=True):
-        PaymentPlanService(payment_plan).update({"payment_plan_group_id": str(new_group.id)})
-
-    mock_full_rebuild.assert_called_once_with(payment_plan)
-
-
-def test_change_group_rejects_group_currency_not_matching_delivery_mechanism(
-    user: User,
-    business_area: Any,
-    cycle: ProgramCycle,
-    fsp: FinancialServiceProvider,
-    dm_transfer_to_digital_wallet: Any,
-) -> None:
-    payment_plan = PaymentPlanFactory(
-        program_cycle=cycle,
-        payment_plan_group=PaymentPlanGroupFactory(cycle=cycle, financial_service_provider=fsp),
-        created_by=user,
-        business_area=business_area,
-        status=PaymentPlan.Status.TP_OPEN,
-        delivery_mechanism=dm_transfer_to_digital_wallet,
-        financial_service_provider=fsp,
-    )
-    new_group = PaymentPlanGroupFactory(
-        cycle=cycle,
-        financial_service_provider=fsp,
-        currency=CurrencyFactory(code="PLN", name="Polish Zloty"),
+        payment_plan=group,
+        status=PaymentList.Status.TP_OPEN,
+        delivery_mechanism=DeliveryMechanismFactory(transfer_type=DeliveryMechanism.TransferType.DIGITAL),
     )
 
     with pytest.raises(ValidationError) as error:
-        PaymentPlanService(payment_plan).update({"payment_plan_group_id": str(new_group.id)})
+        PaymentPlanService(group).assign_currency(currency)
     assert (
         error.value.detail[0] == "For delivery mechanism Transfer to Digital Wallet only currency USDC can be assigned."
     )
 
 
-def test_export_xlsx(payment_plan_base: PaymentPlan, user: User, django_capture_on_commit_callbacks: Any) -> None:
-    payment_plan_base.status = PaymentPlan.Status.LOCKED
-    payment_plan_base.save()
-    assert FileTemp.objects.all().count() == 0
-
-    with django_capture_on_commit_callbacks(execute=True):
-        PaymentPlanService(payment_plan_base).export_xlsx(str(user.pk))
-
-    assert FileTemp.objects.all().count() == 1
-    assert FileTemp.objects.first().object_id == str(payment_plan_base.pk)
-
-
-def test_create_payments_integrity_error_handling(
-    user: User,
-    business_area: Any,
-    program: Program,
-    cycle: ProgramCycle,
-    fsp: FinancialServiceProvider,
-    dm_transfer_to_account: Any,
-) -> None:
-    household = HouseholdFactory(business_area=business_area, program=program)
-    household.size = 1
-    household.save(update_fields=["size"])
-    payment_plan = PaymentPlanFactory(
-        created_by=user,
-        status=PaymentPlan.Status.DRAFT,
-        business_area=business_area,
+def test_assign_currency_sets_it_on_the_group(cycle, currency, delivery_mechanism):
+    group = PaymentPlanFactory(cycle=cycle)
+    PaymentListFactory(
         program_cycle=cycle,
-        delivery_mechanism=dm_transfer_to_account,
-        financial_service_provider=fsp,
-    )
-    TargetingCriteriaRuleFactory(
-        household_ids=f"{household.unicef_id}", payment_plan=payment_plan, alternative_collectors_ids="HH-1"
+        payment_plan=group,
+        status=PaymentList.Status.DRAFT,
+        delivery_mechanism=delivery_mechanism,
     )
 
-    PaymentFactory(
-        parent=payment_plan,
-        program=program,
-        business_area_id=payment_plan.business_area_id,
-        status=Payment.STATUS_PENDING,
-        household=household,
-        collector=household.head_of_household,
-    )
+    PaymentPlanService(group).assign_currency(currency)
 
-    hh_qs = program.households_with_payments_in_program
-    assert hh_qs.count() == 1
-    assert hh_qs.first().unicef_id == household.unicef_id
-
-    with transaction.atomic():
-        with pytest.raises(ValidationError, match="Duplicated Households in provided Targeting List") as error:
-            PaymentPlanService.create_payments(payment_plan)
-        assert isinstance(error.value.__cause__, IntegrityError)
-        assert 'duplicate key value violates unique constraint "payment_plan_and_household"' in str(
-            error.value.__cause__
-        )
-
-    with transaction.atomic():
-        IndividualRoleInHousehold.objects.filter(household=household, role=ROLE_PRIMARY).delete()
-
-        with pytest.raises(ValidationError) as error:
-            PaymentPlanService.create_payments(payment_plan)
-        assert f"Couldn't find a PRIMARY collector in {household.unicef_id}" in str(error.value)
+    assert group.currency == currency
 
 
-def test_create_payments_marks_invalid_wallet_not_eligible(
-    invalid_wallet_payment_plan: PaymentPlan,
-) -> None:
-    PaymentPlanService.create_payments(invalid_wallet_payment_plan)
+def test_assign_currency_none_clears_it_on_the_group(open_group):
+    PaymentPlanService(open_group).assign_currency(None)
 
-    payment = invalid_wallet_payment_plan.payment_items.get()
-    assert payment.has_valid_wallet is False
-    assert payment.status == Payment.STATUS_NOT_ELIGIBLE
-
-
-def test_create_payments_sets_plan_currency(invalid_wallet_payment_plan: PaymentPlan) -> None:
-    group = invalid_wallet_payment_plan.payment_plan_group
-    group.currency = CurrencyFactory(code="AFN", name="Afghan afghani")
-    group.save(update_fields=["currency"])
-
-    PaymentPlanService.create_payments(invalid_wallet_payment_plan)
-
-    payment = invalid_wallet_payment_plan.payment_items.get()
-    assert payment.currency.code == "AFN"
-
-
-def test_acceptance_process_validation_error(payment_plan_base: PaymentPlan) -> None:
-    payment_plan_base.status = PaymentPlan.Status.OPEN
-    payment_plan_base.save()
-
-    with pytest.raises(ValidationError) as error:
-        PaymentPlanService(payment_plan=payment_plan_base).acceptance_process()
-
-    assert f"Approval Process object not found for PaymentPlan {payment_plan_base.id}" in str(error.value)
-
-
-def test_update_rules_tp_open(payment_plan_base: PaymentPlan) -> None:
-    payment_plan_base.status = PaymentPlan.Status.TP_OPEN
-    payment_plan_base.save()
-    input_data = {
-        "rules": [
-            {
-                "individual_ids": "",
-                "household_ids": "",
-                "households_filters_blocks": [],
-                "individuals_filters_blocks": [
-                    {
-                        "individual_block_filters": [
-                            {
-                                "comparison_method": "RANGE",
-                                "arguments": [10, 20],
-                                "field_name": "age",
-                                "flex_field_classification": "NOT_FLEX_FIELD",
-                            }
-                        ]
-                    }
-                ],
-            }
-        ],
-        "flag_exclude_if_on_sanction_list": True,
-        "flag_exclude_if_active_adjudication_ticket": False,
-    }
-    PaymentPlanService(payment_plan_base).update(input_data)
-    payment_plan_base.refresh_from_db()
-    assert payment_plan_base.rules.count() == 1
-    assert payment_plan_base.flag_exclude_if_on_sanction_list
-    assert not payment_plan_base.flag_exclude_if_active_adjudication_ticket
-
-
-def test_send_reconciliation_overdue_emails() -> None:
-    pp = PaymentPlanFactory(
-        dispersion_start_date=now() - timedelta(days=10),
-        dispersion_end_date=now(),
-        status=PaymentPlan.Status.ACCEPTED,
-    )
-    pp.refresh_from_db()
-    program = pp.program
-    program.reconciliation_window_in_days = 10
-    program.send_reconciliation_window_expiry_notifications = True
-    program.save()
-
-    PaymentFactory(parent=pp, status=Payment.STATUS_PENDING, delivered_quantity=None)
-    assert pp.has_payments_reconciliation_overdue is True
-
-    with mock.patch(
-        "hope.apps.payment.services.payment_plan_services.send_payment_plan_reconciliation_overdue_email_async_task"
-    ) as mock_task:
-        PaymentPlanService.send_reconciliation_overdue_emails()
-        mock_task.assert_called_once_with(pp)
-
-
-def test_send_reconciliation_overdue_emails_skips_payment_plans_without_overdue_reconciliation() -> None:
-    pp = PaymentPlanFactory(
-        dispersion_start_date=now() - timedelta(days=10),
-        dispersion_end_date=now(),
-        status=PaymentPlan.Status.ACCEPTED,
-    )
-    pp.refresh_from_db()
-    program = pp.program
-    program.reconciliation_window_in_days = 10
-    program.send_reconciliation_window_expiry_notifications = True
-    program.save()
-
-    PaymentFactory(parent=pp, status=Payment.STATUS_DISTRIBUTION_SUCCESS, delivered_quantity=1)
-    assert pp.has_payments_reconciliation_overdue is False
-
-    with mock.patch(
-        "hope.apps.payment.services.payment_plan_services.send_payment_plan_reconciliation_overdue_email_async_task"
-    ) as mock_task:
-        PaymentPlanService.send_reconciliation_overdue_emails()
-        mock_task.assert_not_called()
-
-
-def test_send_reconciliation_overdue_emails_reads_instruction_dispersion_start_date() -> None:
-    program = ProgramFactory(reconciliation_window_in_days=10, send_reconciliation_window_expiry_notifications=True)
-    pp = PaymentPlanFactory(
-        program_cycle=program.cycles.first(),
-        follow_up_instruction=FollowUpInstructionFactory(
-            program=program, dispersion_start_date=now().date() - timedelta(days=10)
-        ),
-        plan_type=PaymentPlan.PlanType.FOLLOW_UP,
-        status=PaymentPlan.Status.ACCEPTED,
-    )
-    PaymentFactory(parent=pp, status=Payment.STATUS_PENDING, delivered_quantity=None)
-
-    with mock.patch(
-        "hope.apps.payment.services.payment_plan_services.send_payment_plan_reconciliation_overdue_email_async_task"
-    ) as mock_task:
-        PaymentPlanService.send_reconciliation_overdue_emails()
-
-    mock_task.assert_called_once_with(pp)
-
-
-def test_send_reconciliation_overdue_email(business_area: Any) -> None:
-    partner_unicef = PartnerFactory(name="UNICEF")
-    partner_unicef_hq = PartnerFactory(name="UNICEF HQ", parent=partner_unicef)
-    user = UserFactory(partner=partner_unicef_hq)
-    role, _ = Role.objects.update_or_create(
-        name="RECEIVE_PP_OVERDUE_EMAIL", defaults={"permissions": [Permissions.RECEIVE_PP_OVERDUE_EMAIL.value]}
-    )
-    RoleAssignment.objects.create(
-        user=user,
-        role=role,
-        business_area=business_area,
-    )
-
-    program = ProgramFactory(business_area=business_area, status=Program.ACTIVE)
-    cycle = ProgramCycleFactory(program=program)
-    pp = PaymentPlanFactory(
-        dispersion_start_date=now() - timedelta(days=10),
-        dispersion_end_date=now(),
-        status=PaymentPlan.Status.ACCEPTED,
-        program_cycle=cycle,
-    )
-    pp.refresh_from_db()
-    program = pp.program
-    program.reconciliation_window_in_days = 10
-    program.send_reconciliation_window_expiry_notifications = True
-    program.save()
-
-    with mock.patch.object(User, "email_user") as mock_email_user:
-        with mock.patch("hope.apps.payment.services.payment_plan_services.render_to_string") as mock_render_to_string:
-            PaymentPlanService(pp).send_reconciliation_overdue_email_for_pp()
-            mock_email_user.assert_called_once()
-            assert mock_render_to_string.call_count == 2
-            _args, kwargs = mock_render_to_string.call_args
-            context = kwargs["context"]
-            assert context["message"] == (
-                f"Please be informed that Payment Plan: {pp.unicef_id} has exceeded its"
-                f" reconciliation window of {pp.program.reconciliation_window_in_days} days."
-                " Please take the necessary steps to complete the reconciliation process timely."
-            )
-            assert context["title"] == f"Payment Plan {pp.unicef_id} Reconciliation Overdue"
-
-
-def test_get_collector() -> None:
-    household_dict = {
-        "unicef_id": "ID_1",
-        "use_alt_collector": True,
-        # no Alt Collector
-    }
-    with pytest.raises(ValidationError) as error:
-        PaymentPlanService._get_collector(household_dict)
-    assert error.value.detail[0] == "Couldn't find a ALTERNATE collector in ID_1"
-
-    household_dict = {
-        "unicef_id": "ID_2",
-        "use_alt_collector": False,
-        # no Pr Collector
-    }
-    with pytest.raises(ValidationError) as error:
-        PaymentPlanService._get_collector(household_dict)
-    assert error.value.detail[0] == "Couldn't find a PRIMARY collector in ID_2"
-
-    collector = IndividualFactory()
-    household_dict = {
-        "unicef_id": "ID_2",
-        "use_alt_collector": False,
-        "pr_collector": collector.id,
-    }
-    collcector_result, collcector_type = PaymentPlanService._get_collector(household_dict)
-    assert collcector_result == collector
-    assert collcector_type == "PRIMARY"
-
-
-def test_send_reconciliation_overdue_email_recipients(business_area: Any) -> None:
-    partner_unicef = PartnerFactory(name="UNICEF")
-    partner_unicef_hq = PartnerFactory(name="UNICEF HQ", parent=partner_unicef)
-    role, _ = Role.objects.update_or_create(
-        name="RECEIVE_PP_OVERDUE_EMAIL", defaults={"permissions": [Permissions.RECEIVE_PP_OVERDUE_EMAIL.value]}
-    )
-
-    program = ProgramFactory(business_area=business_area, status=Program.ACTIVE)
-    cycle = ProgramCycleFactory(program=program)
-    pp = PaymentPlanFactory(
-        dispersion_start_date=now() - timedelta(days=10),
-        dispersion_end_date=now(),
-        status=PaymentPlan.Status.ACCEPTED,
-        program_cycle=cycle,
-    )
-    pp.refresh_from_db()
-    program = pp.program
-    program.reconciliation_window_in_days = 10
-    program.send_reconciliation_window_expiry_notifications = True
-    program.save()
-
-    different_program = ProgramFactory(business_area=business_area)
-
-    user_with_perm_in_program = UserFactory(partner=partner_unicef_hq)
-    RoleAssignment.objects.create(
-        user=user_with_perm_in_program, role=role, business_area=business_area, program=program
-    )
-
-    user_with_perm_ba_wide = UserFactory(partner=partner_unicef_hq)
-    RoleAssignment.objects.create(user=user_with_perm_ba_wide, role=role, business_area=business_area, program=None)
-
-    superuser_with_perm = UserFactory(partner=partner_unicef_hq, is_superuser=True)
-    RoleAssignment.objects.create(user=superuser_with_perm, role=role, business_area=business_area, program=program)
-
-    user_with_perm_in_different_program = UserFactory(partner=partner_unicef_hq)
-    RoleAssignment.objects.create(
-        user=user_with_perm_in_different_program, role=role, business_area=business_area, program=different_program
-    )
-
-    with mock.patch.object(User, "email_user", autospec=True) as mock_email_user:
-        PaymentPlanService(pp).send_reconciliation_overdue_email_for_pp()
-
-        assert mock_email_user.call_count == 2
-        emailed_users = {call.args[0] for call in mock_email_user.call_args_list}
-        assert user_with_perm_in_program in emailed_users
-        assert user_with_perm_ba_wide in emailed_users
-        assert superuser_with_perm not in emailed_users
-        assert user_with_perm_in_different_program not in emailed_users
-
-
-@override_config(NOTIFY_INTERNAL_USERS=True)
-def test_send_reconciliation_overdue_email_recipients_include_internal_users(business_area: Any) -> None:
-    partner_unicef = PartnerFactory(name="UNICEF")
-    partner_unicef_hq = PartnerFactory(name="UNICEF HQ", parent=partner_unicef)
-    role, _ = Role.objects.update_or_create(
-        name="RECEIVE_PP_OVERDUE_EMAIL", defaults={"permissions": [Permissions.RECEIVE_PP_OVERDUE_EMAIL.value]}
-    )
-
-    program = ProgramFactory(business_area=business_area, status=Program.ACTIVE)
-    cycle = ProgramCycleFactory(program=program)
-    pp = PaymentPlanFactory(
-        dispersion_start_date=now() - timedelta(days=10),
-        dispersion_end_date=now(),
-        status=PaymentPlan.Status.ACCEPTED,
-        program_cycle=cycle,
-    )
-    pp.refresh_from_db()
-    program = pp.program
-    program.reconciliation_window_in_days = 10
-    program.send_reconciliation_window_expiry_notifications = True
-    program.save()
-
-    superuser_with_perm = UserFactory(partner=partner_unicef_hq, is_superuser=True)
-    RoleAssignment.objects.create(user=superuser_with_perm, role=role, business_area=business_area, program=program)
-
-    with mock.patch.object(User, "email_user", autospec=True) as mock_email_user:
-        PaymentPlanService(pp).send_reconciliation_overdue_email_for_pp()
-
-        assert mock_email_user.call_count == 1
-        assert mock_email_user.call_args_list[0].args[0] == superuser_with_perm
+    assert open_group.currency is None
 
 
 @pytest.fixture
-def locked_payment_plan():
-    return PaymentPlanFactory(
-        program_cycle=ProgramCycleFactory(),
-        status=PaymentPlan.Status.LOCKED,
-    )
+def user():
+    return UserFactory()
 
 
 @pytest.fixture
-def locked_payment_plan_with_payments(locked_payment_plan):
-    for _ in range(PaymentPlanSplit.MIN_NO_OF_PAYMENTS_IN_CHUNK + 1):
-        PaymentFactory(parent=locked_payment_plan)
+def locked_payment_plan(open_group, locked_payment_list):
+    PaymentPlanService(open_group).lock()
+    open_group.refresh_from_db()
+    return open_group
+
+
+@pytest.fixture
+def group_in_approval(locked_payment_plan, user):
+    with patch("hope.apps.payment.services.payment_plan_services.send_payment_plan_notification_emails_async_task"):
+        PaymentPlanService(locked_payment_plan).send_for_approval(user)
+    locked_payment_plan.refresh_from_db()
     return locked_payment_plan
 
 
-@patch("hope.apps.payment.services.payment_plan_services.config")
-def test_validate_acceptance_raises_type_error_when_required_number_is_none(mock_config, locked_payment_plan):
-    mock_config.PM_ACCEPTANCE_PROCESS_USER_HAVE_MULTIPLE_APPROVALS = True
-    service = PaymentPlanService(payment_plan=locked_payment_plan)
-    service.action = PaymentPlan.Action.APPROVE.value
-    approval_process = mock.MagicMock()
-
-    with patch.object(service, "get_required_number_by_approval_type", return_value=None):
-        with pytest.raises(TypeError):
-            service.validate_acceptance_process_approval_count(approval_process)
+@pytest.fixture
+def group_in_authorization(group_in_approval, user):
+    with patch("hope.apps.payment.services.payment_plan_services.send_payment_plan_notification_emails_async_task"):
+        PaymentPlanService(group_in_approval).acceptance_process(PaymentList.Action.APPROVE.value, user)
+    group_in_approval.refresh_from_db()
+    return group_in_approval
 
 
-def test_check_payment_plan_and_update_status_raises_type_error_when_required_number_is_none(locked_payment_plan):
-    service = PaymentPlanService(payment_plan=locked_payment_plan)
-    service.action = PaymentPlan.Action.APPROVE.value
-    approval_process = mock.MagicMock()
-
-    with patch.object(service, "get_required_number_by_approval_type", return_value=None):
-        with pytest.raises(TypeError):
-            service.check_payment_plan_and_update_status(approval_process)
+@pytest.fixture
+def group_in_review(group_in_authorization, user):
+    with patch("hope.apps.payment.services.payment_plan_services.send_payment_plan_notification_emails_async_task"):
+        PaymentPlanService(group_in_authorization).acceptance_process(PaymentList.Action.AUTHORIZE.value, user)
+    group_in_authorization.refresh_from_db()
+    return group_in_authorization
 
 
-@patch("hope.apps.payment.services.payment_plan_services.config")
-def test_validate_acceptance_does_not_raise_when_count_below_required(mock_config, locked_payment_plan):
-    mock_config.PM_ACCEPTANCE_PROCESS_USER_HAVE_MULTIPLE_APPROVALS = True
-    service = PaymentPlanService(payment_plan=locked_payment_plan)
-    service.action = PaymentPlan.Action.APPROVE.value
-    approval_process = mock.MagicMock()
-    approval_process.approvals.filter.return_value.count.return_value = 0
-
-    with patch.object(service, "get_required_number_by_approval_type", return_value=5):
-        service.validate_acceptance_process_approval_count(approval_process)
+@pytest.fixture
+def locked_group_importing_fsp_extra_fields(locked_payment_plan):
+    locked_payment_plan.background_action_status = PaymentPlan.BackgroundActionStatus.XLSX_IMPORTING_FSP_EXTRA_FIELDS
+    locked_payment_plan.save(update_fields=["background_action_status"])
+    return locked_payment_plan
 
 
-@patch("hope.apps.payment.services.payment_plan_services.config")
-def test_validate_acceptance_raises_when_count_meets_required(mock_config, locked_payment_plan):
-    mock_config.PM_ACCEPTANCE_PROCESS_USER_HAVE_MULTIPLE_APPROVALS = True
-    service = PaymentPlanService(payment_plan=locked_payment_plan)
-    service.action = PaymentPlan.Action.APPROVE.value
-    approval_process = mock.MagicMock()
-    approval_process.approvals.filter.return_value.count.return_value = 5
-
-    with patch.object(service, "get_required_number_by_approval_type", return_value=5):
-        with pytest.raises(ValidationError, match="Can't create new approval"):
-            service.validate_acceptance_process_approval_count(approval_process)
+@pytest.fixture
+def locked_group_after_failed_fsp_extra_fields_import(locked_payment_plan):
+    locked_payment_plan.background_action_status = PaymentPlan.BackgroundActionStatus.XLSX_IMPORT_ERROR
+    locked_payment_plan.save(update_fields=["background_action_status"])
+    return locked_payment_plan
 
 
-def test_check_payment_plan_and_update_status_does_not_change_when_count_below_required(locked_payment_plan):
-    service = PaymentPlanService(payment_plan=locked_payment_plan)
-    service.action = PaymentPlan.Action.APPROVE.value
-    approval_process = mock.MagicMock()
-    approval_process.approvals.filter.return_value.count.return_value = 0
-
-    with patch.object(service, "get_required_number_by_approval_type", return_value=5):
-        service.check_payment_plan_and_update_status(approval_process)
+@pytest.fixture
+def locked_group_after_failed_recalculation(locked_payment_plan):
+    locked_payment_plan.background_action_status = PaymentPlan.BackgroundActionStatus.RECALCULATING_ERROR
+    locked_payment_plan.save(update_fields=["background_action_status"])
+    return locked_payment_plan
 
 
-@patch("hope.apps.payment.services.payment_plan_services.send_payment_notification_emails_async_task")
-@patch("hope.apps.payment.services.payment_plan_services.PaymentPlanFlow")
-def test_check_payment_plan_and_update_status_triggers_when_count_meets_required(
-    mock_flow_cls, mock_notify, locked_payment_plan
+def test_unlock_rejects_group_importing_fsp_extra_fields(locked_group_importing_fsp_extra_fields):
+    with pytest.raises(ValidationError) as error:
+        PaymentPlanService(locked_group_importing_fsp_extra_fields).unlock()
+    assert error.value.detail[0] == "Another background action is already in progress."
+
+
+def test_unlock_clears_failed_fsp_extra_fields_import(locked_group_after_failed_fsp_extra_fields_import):
+    PaymentPlanService(locked_group_after_failed_fsp_extra_fields_import).unlock()
+
+    locked_group_after_failed_fsp_extra_fields_import.refresh_from_db()
+    assert locked_group_after_failed_fsp_extra_fields_import.status == PaymentPlan.Status.OPEN
+    assert locked_group_after_failed_fsp_extra_fields_import.background_action_status is None
+
+
+def test_send_for_approval_rejects_group_importing_fsp_extra_fields(locked_group_importing_fsp_extra_fields, user):
+    with pytest.raises(ValidationError) as error:
+        PaymentPlanService(locked_group_importing_fsp_extra_fields).send_for_approval(user)
+    assert error.value.detail[0] == "Another background action is already in progress."
+
+
+@patch("hope.apps.payment.services.payment_plan_services.send_payment_plan_notification_emails_async_task")
+def test_send_for_approval_clears_failed_fsp_extra_fields_import(
+    mock_notify, locked_group_after_failed_fsp_extra_fields_import, user
 ):
-    service = PaymentPlanService(payment_plan=locked_payment_plan)
-    service.action = PaymentPlan.Action.APPROVE.value
-    service.user = mock.MagicMock()
-    approval_process = mock.MagicMock()
-    approval_process.approvals.filter.return_value.count.return_value = 5
+    PaymentPlanService(locked_group_after_failed_fsp_extra_fields_import).send_for_approval(user)
 
-    with patch.object(service, "get_required_number_by_approval_type", return_value=5):
-        service.check_payment_plan_and_update_status(approval_process)
-
-    mock_flow_cls.return_value.status_approve.assert_called_once()
+    locked_group_after_failed_fsp_extra_fields_import.refresh_from_db()
+    assert locked_group_after_failed_fsp_extra_fields_import.status == PaymentPlan.Status.IN_APPROVAL
+    assert locked_group_after_failed_fsp_extra_fields_import.background_action_status is None
 
 
-@patch("hope.apps.payment.services.payment_plan_services.send_payment_notification_emails_async_task")
-@patch("hope.apps.payment.services.payment_plan_services.PaymentPlanFlow")
-def test_check_payment_plan_and_update_status_rejects_without_notification(
-    mock_flow_cls, mock_notify, locked_payment_plan
+def test_unlock_keeps_failed_recalculation(locked_group_after_failed_recalculation):
+    PaymentPlanService(locked_group_after_failed_recalculation).unlock()
+
+    locked_group_after_failed_recalculation.refresh_from_db()
+    assert locked_group_after_failed_recalculation.status == PaymentPlan.Status.OPEN
+    assert (
+        locked_group_after_failed_recalculation.background_action_status
+        == PaymentPlan.BackgroundActionStatus.RECALCULATING_ERROR
+    )
+
+
+@patch("hope.apps.payment.services.payment_plan_services.send_payment_plan_notification_emails_async_task")
+def test_send_for_approval_keeps_failed_recalculation(mock_notify, locked_group_after_failed_recalculation, user):
+    PaymentPlanService(locked_group_after_failed_recalculation).send_for_approval(user)
+
+    locked_group_after_failed_recalculation.refresh_from_db()
+    assert locked_group_after_failed_recalculation.status == PaymentPlan.Status.IN_APPROVAL
+    assert (
+        locked_group_after_failed_recalculation.background_action_status
+        == PaymentPlan.BackgroundActionStatus.RECALCULATING_ERROR
+    )
+
+
+@patch("hope.apps.payment.services.payment_plan_services.send_payment_plan_notification_emails_async_task")
+def test_send_for_approval_moves_group_and_plans(mock_notify, locked_payment_plan, locked_payment_list, user):
+    PaymentPlanService(locked_payment_plan).send_for_approval(user)
+
+    locked_payment_plan.refresh_from_db()
+    locked_payment_list.refresh_from_db()
+    assert locked_payment_plan.status == PaymentPlan.Status.IN_APPROVAL
+    assert locked_payment_list.status == PaymentList.Status.IN_APPROVAL
+
+
+@patch("hope.apps.payment.services.payment_plan_services.send_payment_plan_notification_emails_async_task")
+def test_send_for_approval_creates_approval_process_on_group(
+    mock_notify, locked_payment_plan, locked_payment_list, user
 ):
-    service = PaymentPlanService(payment_plan=locked_payment_plan)
-    service.action = PaymentPlan.Action.REJECT.value
-    service.user = mock.MagicMock()
-    approval_process = mock.MagicMock()
-    approval_process.approvals.filter.return_value.count.return_value = 1
+    PaymentPlanService(locked_payment_plan).send_for_approval(user)
 
-    with patch.object(service, "get_required_number_by_approval_type", return_value=1):
-        service.check_payment_plan_and_update_status(approval_process)
+    approval_process = locked_payment_plan.approval_process.get()
+    assert approval_process.payment_list is None
+    assert approval_process.sent_for_approval_by == user
+    assert approval_process.approval_number_required == 1
+    assert locked_payment_list.approval_process.count() == 0
 
-    mock_flow_cls.return_value.status_reject.assert_called_once()
+
+@patch("hope.apps.payment.services.payment_plan_services.send_payment_plan_notification_emails_async_task")
+def test_send_for_approval_takes_threshold_from_summed_total(
+    mock_notify, cycle, open_group, locked_payment_list, financial_service_provider, delivery_mechanism, currency, user
+):
+    locked_payment_list.total_entitled_quantity_usd = 60
+    locked_payment_list.save(update_fields=["total_entitled_quantity_usd"])
+    PaymentListFactory(
+        program_cycle=cycle,
+        payment_plan=open_group,
+        status=PaymentList.Status.LOCKED,
+        delivery_mechanism=delivery_mechanism,
+        total_entitled_quantity_usd=60,
+    )
+    AcceptanceProcessThreshold.objects.create(
+        business_area=open_group.business_area,
+        payments_range_usd=NumericRange(100, 200),
+        approval_number_required=2,
+        authorization_number_required=3,
+        finance_release_number_required=4,
+    )
+    PaymentPlanService(open_group).lock()
+
+    PaymentPlanService(open_group).send_for_approval(user)
+
+    approval_process = open_group.approval_process.get()
+    assert approval_process.approval_number_required == 2
+    assert approval_process.authorization_number_required == 3
+    assert approval_process.finance_release_number_required == 4
+
+
+@patch("hope.apps.payment.services.payment_plan_services.send_payment_plan_notification_emails_async_task")
+def test_send_for_approval_queues_one_notification_for_the_group(
+    mock_notify, locked_payment_plan, locked_payment_list, user
+):
+    PaymentPlanService(locked_payment_plan).send_for_approval(user)
+
+    mock_notify.assert_called_once()
+    assert mock_notify.call_args.args[0] == locked_payment_plan
+    assert mock_notify.call_args.args[1] == PaymentList.Action.SEND_FOR_APPROVAL.value
+
+
+def test_send_for_approval_rejects_group_not_locked(open_group, locked_payment_list, user):
+    with pytest.raises(ValidationError) as error:
+        PaymentPlanService(open_group).send_for_approval(user)
+    assert error.value.detail[0] == "Send for Approval is possible only within Status LOCKED"
+
+
+@patch("hope.apps.payment.services.payment_plan_services.send_payment_plan_notification_emails_async_task")
+def test_approve_below_required_number_keeps_statuses(mock_notify, group_in_approval, locked_payment_list, user):
+    approval_process = group_in_approval.approval_process.get()
+    approval_process.approval_number_required = 2
+    approval_process.save(update_fields=["approval_number_required"])
+
+    PaymentPlanService(group_in_approval).acceptance_process(PaymentList.Action.APPROVE.value, user, "ok")
+
+    group_in_approval.refresh_from_db()
+    locked_payment_list.refresh_from_db()
+    assert group_in_approval.status == PaymentPlan.Status.IN_APPROVAL
+    assert locked_payment_list.status == PaymentList.Status.IN_APPROVAL
+    assert approval_process.approvals.get(type=Approval.APPROVAL).comment == "ok"
+    mock_notify.assert_not_called()
+
+
+@patch("hope.apps.payment.services.payment_plan_services.send_payment_plan_notification_emails_async_task")
+def test_approve_reaching_required_number_moves_group_and_plans(
+    mock_notify, group_in_approval, locked_payment_list, user
+):
+    PaymentPlanService(group_in_approval).acceptance_process(PaymentList.Action.APPROVE.value, user)
+
+    group_in_approval.refresh_from_db()
+    locked_payment_list.refresh_from_db()
+    approval_process = group_in_approval.approval_process.get()
+    assert group_in_approval.status == PaymentPlan.Status.IN_AUTHORIZATION
+    assert locked_payment_list.status == PaymentList.Status.IN_AUTHORIZATION
+    assert approval_process.sent_for_authorization_by == user
+    assert mock_notify.call_args.args[1] == PaymentList.Action.APPROVE.value
+
+
+def test_approve_rejects_group_in_wrong_status(locked_payment_plan, user):
+    with pytest.raises(ValidationError) as error:
+        PaymentPlanService(locked_payment_plan).acceptance_process(PaymentList.Action.APPROVE.value, user)
+    assert error.value.detail[0] == "Not possible to create APPROVE for Payment Plan within status LOCKED"
+
+
+@pytest.fixture
+def group_in_approval_without_approval_process(cycle):
+    return PaymentPlanFactory(cycle=cycle, status=PaymentPlan.Status.IN_APPROVAL)
+
+
+def test_approve_rejects_group_without_approval_process(group_in_approval_without_approval_process, user):
+    with pytest.raises(ValidationError) as error:
+        PaymentPlanService(group_in_approval_without_approval_process).acceptance_process(
+            PaymentList.Action.APPROVE.value, user
+        )
+    assert error.value.detail[0] == (
+        f"Approval Process object not found for Payment Plan {group_in_approval_without_approval_process.pk}"
+    )
+
+
+@patch("hope.apps.payment.services.payment_list_services.config")
+@patch("hope.apps.payment.services.payment_plan_services.send_payment_plan_notification_emails_async_task")
+def test_second_approval_by_same_user_rejected(mock_notify, mock_config, group_in_approval, user):
+    mock_config.PM_ACCEPTANCE_PROCESS_USER_HAVE_MULTIPLE_APPROVALS = False
+    approval_process = group_in_approval.approval_process.get()
+    approval_process.approval_number_required = 2
+    approval_process.save(update_fields=["approval_number_required"])
+    PaymentPlanService(group_in_approval).acceptance_process(PaymentList.Action.APPROVE.value, user)
+
+    with pytest.raises(ValidationError) as error:
+        PaymentPlanService(group_in_approval).acceptance_process(PaymentList.Action.APPROVE.value, user)
+    assert error.value.detail[0] == "Can't create new APPROVAL. User have already created APPROVAL"
+
+
+@patch("hope.apps.payment.services.payment_plan_services.send_payment_plan_notification_emails_async_task")
+def test_reject_returns_group_and_plans_to_locked(mock_notify, group_in_approval, locked_payment_list, user):
+    PaymentPlanService(group_in_approval).acceptance_process(PaymentList.Action.REJECT.value, user, "no")
+
+    group_in_approval.refresh_from_db()
+    locked_payment_list.refresh_from_db()
+    assert group_in_approval.status == PaymentPlan.Status.LOCKED
+    assert locked_payment_list.status == PaymentList.Status.LOCKED_FSP
+    assert group_in_approval.approval_process.get().approvals.filter(type=Approval.REJECT).exists()
+    mock_notify.assert_not_called()
+
+
+@patch("hope.apps.payment.services.payment_list_services.config")
+@patch("hope.apps.payment.services.payment_plan_services.send_payment_plan_notification_emails_async_task")
+def test_reject_by_user_who_already_approved_rejected(mock_notify, mock_config, group_in_approval, user):
+    mock_config.PM_ACCEPTANCE_PROCESS_USER_HAVE_MULTIPLE_APPROVALS = False
+    approval_process = group_in_approval.approval_process.get()
+    approval_process.approval_number_required = 2
+    approval_process.save(update_fields=["approval_number_required"])
+    PaymentPlanService(group_in_approval).acceptance_process(PaymentList.Action.APPROVE.value, user)
+
+    with pytest.raises(ValidationError) as error:
+        PaymentPlanService(group_in_approval).acceptance_process(PaymentList.Action.REJECT.value, user)
+    assert error.value.detail[0] == "Can't create REJECT. User have already created APPROVAL"
+
+
+@pytest.fixture
+def group_sent_to_vision(group_in_review, locked_payment_list):
+    locked_payment_list.refresh_from_db()
+    group_in_review.internal_data = {
+        "vision": {
+            "sent": True,
+            "status": VisionStatus.WAITING_FOR_CALLBACK.value,
+            "vision_id": "VISION-1",
+            "fc_numbers": ["FC123"],
+        }
+    }
+    group_in_review.save(update_fields=["internal_data"])
+    return group_in_review
+
+
+@patch("hope.contrib.vision.tasks.notify_payment_plan_status_to_vision_async_task")
+@patch("hope.apps.payment.services.payment_plan_services.send_payment_plan_notification_emails_async_task")
+def test_reject_invalidates_vision_attempt_and_tells_vision(
+    mock_notify, mock_notify_vision, group_in_review, group_sent_to_vision, user, django_capture_on_commit_callbacks
+):
+    with django_capture_on_commit_callbacks(execute=True):
+        PaymentPlanService(group_in_review).acceptance_process(PaymentList.Action.REJECT.value, user, "no")
+
+    group_sent_to_vision.refresh_from_db()
+    assert group_sent_to_vision.status == PaymentPlan.Status.LOCKED
+    assert group_sent_to_vision.vision_data["status"] == VisionStatus.NOT_SENT.value
+    mock_notify_vision.assert_called_once_with(group_sent_to_vision, str(user.pk), "REJECTED")
+
+
+@patch("hope.apps.payment.services.payment_plan_services.send_payment_plan_notification_emails_async_task")
+def test_authorize_moves_group_and_plans_to_in_review(mock_notify, group_in_authorization, locked_payment_list, user):
+    PaymentPlanService(group_in_authorization).acceptance_process(PaymentList.Action.AUTHORIZE.value, user)
+
+    group_in_authorization.refresh_from_db()
+    locked_payment_list.refresh_from_db()
+    assert group_in_authorization.status == PaymentPlan.Status.IN_REVIEW
+    assert locked_payment_list.status == PaymentList.Status.IN_REVIEW
+    assert group_in_authorization.approval_process.get().sent_for_finance_release_by == user
+
+
+@patch("hope.contrib.vision.tasks.send_payment_plan_to_vision_async_task")
+@patch("hope.apps.payment.services.payment_plan_services.send_payment_plan_notification_emails_async_task")
+def test_authorize_queues_one_vision_send_for_group(
+    mock_notify,
+    mock_send_to_vision,
+    group_in_authorization,
+    locked_payment_list,
+    user,
+    django_capture_on_commit_callbacks,
+):
+    FlagState.objects.get_or_create(name="VISION_INTEGRATION_ACTIVE", condition="boolean", value="True")
+    business_area = locked_payment_list.business_area
+    business_area.vision_integration_active = True
+    business_area.save(update_fields=["vision_integration_active"])
+
+    with django_capture_on_commit_callbacks(execute=True):
+        PaymentPlanService(group_in_authorization).acceptance_process(PaymentList.Action.AUTHORIZE.value, user)
+
+    mock_send_to_vision.assert_called_once_with(group_in_authorization, str(user.pk))
+
+
+@patch("hope.apps.payment.services.payment_plan_services.send_payment_plan_notification_emails_async_task")
+def test_mark_as_released_moves_group_and_plans_to_accepted(mock_notify, group_in_review, locked_payment_list, user):
+    PaymentPlanService(group_in_review).acceptance_process(PaymentList.Action.REVIEW.value, user)
+
+    group_in_review.refresh_from_db()
+    locked_payment_list.refresh_from_db()
+    assert group_in_review.status == PaymentPlan.Status.ACCEPTED
+    assert locked_payment_list.status == PaymentList.Status.ACCEPTED
+    assert mock_notify.call_args.args[1] == PaymentList.Action.REVIEW.value
+
+
+def test_mark_as_released_rejected_when_group_is_vision_managed(group_in_review, locked_payment_list, user):
+    FlagState.objects.get_or_create(name="VISION_INTEGRATION_ACTIVE", condition="boolean", value="True")
+    business_area = locked_payment_list.business_area
+    business_area.vision_integration_active = True
+    business_area.save(update_fields=["vision_integration_active"])
+
+    with pytest.raises(ValidationError) as error:
+        PaymentPlanService(group_in_review).acceptance_process(PaymentList.Action.REVIEW.value, user)
+    assert error.value.detail[0] == "Vision-managed Payment Plans are released automatically after FC assignment"
+
+
+@pytest.fixture
+def partially_released_group(group_in_review, locked_payment_list):
+    locked_payment_list.status = PaymentList.Status.ACCEPTED
+    locked_payment_list.save(update_fields=["status"])
+    pending_plan = PaymentListFactory(
+        program_cycle=locked_payment_list.program_cycle,
+        payment_plan=group_in_review,
+        status=PaymentList.Status.IN_REVIEW,
+    )
+    return group_in_review, pending_plan
+
+
+@patch("hope.apps.payment.services.payment_plan_services.send_payment_plan_notification_emails_async_task")
+def test_vision_release_keeps_group_in_review_while_a_plan_is_pending(mock_notify, partially_released_group, user):
+    group, _ = partially_released_group
+    with pytest.raises(ValidationError, match="Every Payment List must be in review"):
+        PaymentPlanService(group).release_from_vision()
+
+    group.refresh_from_db()
+    assert group.status == PaymentPlan.Status.IN_REVIEW
     mock_notify.assert_not_called()
 
 
 @pytest.fixture
-def vision_authorization_context():
-    business_area = BusinessAreaFactory(vision_integration_active=True)
-    payment_plan = PaymentPlanFactory(
-        business_area=business_area,
-        program_cycle__program__business_area=business_area,
-        status=PaymentPlan.Status.IN_AUTHORIZATION,
-    )
-    approval_process = ApprovalProcessFactory(
-        payment_plan=payment_plan,
-        authorization_number_required=1,
-    )
-    ApprovalFactory(
-        approval_process=approval_process,
-        type="AUTHORIZATION",
-        created_by=payment_plan.created_by,
-    )
-    return payment_plan, approval_process
+def group_with_review_vision_plans(partially_released_group):
+    group, pending_plan = partially_released_group
+    PaymentList.objects.filter(payment_plan=group).update(status=PaymentList.Status.IN_REVIEW)
+    return group
 
 
-@patch("hope.contrib.vision.tasks.send_payment_plan_group_to_vision_async_task")
-@patch("hope.apps.payment.services.payment_plan_services.send_payment_notification_emails_async_task")
-def test_plan_authorization_does_not_queue_group_vision_send(
-    mock_notification,
-    mock_send_to_vision,
-    vision_authorization_context,
-    django_capture_on_commit_callbacks,
-) -> None:
-    FlagState.objects.get_or_create(
-        name="VISION_INTEGRATION_ACTIVE",
-        condition="boolean",
-        value="True",
+@patch("hope.apps.payment.services.payment_plan_services.send_payment_plan_notification_emails_async_task")
+def test_vision_release_accepts_group_and_all_review_plans(
+    mock_notify, group_with_review_vision_plans, locked_payment_list
+):
+    result = PaymentPlanService(group_with_review_vision_plans).release_from_vision()
+
+    repeated_result = PaymentPlanService(group_with_review_vision_plans).release_from_vision()
+
+    assert result.status == PaymentPlan.Status.ACCEPTED
+    assert repeated_result.status == PaymentPlan.Status.ACCEPTED
+    mock_notify.assert_called_once()
+    assert mock_notify.call_args.args[:3] == (
+        result,
+        PaymentList.Action.REVIEW.value,
+        str(locked_payment_list.created_by_id),
     )
-    payment_plan, approval_process = vision_authorization_context
-    service = PaymentPlanService(payment_plan)
-    service.action = PaymentPlan.Action.AUTHORIZE.value
-    service.user = payment_plan.created_by
+
+
+@pytest.mark.enable_activity_log
+@patch("hope.apps.payment.services.payment_plan_services.send_payment_plan_notification_emails_async_task")
+def test_approve_logs_event_on_group(mock_notify, group_in_approval, user):
+    PaymentPlanService(group_in_approval).acceptance_process(PaymentList.Action.APPROVE.value, user, "fine")
+
+    log = LogEntry.objects.get(
+        content_type=ContentType.objects.get_for_model(PaymentPlan),
+        object_id=group_in_approval.pk,
+        changes__has_key="acceptance_process",
+    )
+    assert log.user == user
+    assert log.changes["acceptance_process"] == {"from": None, "to": Approval.APPROVAL}
+    assert log.changes["comment"] == {"from": None, "to": "fine"}
+
+
+@pytest.fixture
+def accepted_group(group_in_review, user):
+    with patch("hope.apps.payment.services.payment_plan_services.send_payment_plan_notification_emails_async_task"):
+        PaymentPlanService(group_in_review).acceptance_process(PaymentList.Action.REVIEW.value, user)
+    group_in_review.refresh_from_db()
+    return group_in_review
+
+
+@pytest.fixture
+def delivered_payment(locked_payment_list):
+    return PaymentFactory(parent=locked_payment_list, status=Payment.STATUS_DISTRIBUTION_SUCCESS)
+
+
+@pytest.fixture
+def finished_group(accepted_group, delivered_payment):
+    PaymentPlanService(accepted_group).sync_finished()
+    accepted_group.refresh_from_db()
+    return accepted_group
+
+
+@pytest.fixture
+def ready_group(finished_group, user):
+    with patch("hope.apps.payment.services.payment_plan_services.send_payment_plan_notification_emails_async_task"):
+        PaymentPlanService(finished_group).ready_for_closure(user)
+    finished_group.refresh_from_db()
+    return finished_group
+
+
+def test_sync_finished_moves_group_and_plans_when_every_payment_is_reconciled(
+    accepted_group, locked_payment_list, delivered_payment
+):
+    PaymentPlanService(accepted_group).sync_finished()
+
+    accepted_group.refresh_from_db()
+    locked_payment_list.refresh_from_db()
+    assert accepted_group.status == PaymentPlan.Status.FINISHED
+    assert locked_payment_list.status == PaymentList.Status.FINISHED
+
+
+def test_sync_finished_waits_for_every_payment_in_the_group(
+    cycle, accepted_group, locked_payment_list, delivered_payment, delivery_mechanism
+):
+    second_payment_list = PaymentListFactory(
+        program_cycle=cycle,
+        payment_plan=accepted_group,
+        status=PaymentList.Status.ACCEPTED,
+        delivery_mechanism=delivery_mechanism,
+    )
+    PaymentFactory(parent=second_payment_list, status=Payment.STATUS_PENDING)
+
+    PaymentPlanService(accepted_group).sync_finished()
+
+    accepted_group.refresh_from_db()
+    locked_payment_list.refresh_from_db()
+    assert accepted_group.status == PaymentPlan.Status.ACCEPTED
+    assert locked_payment_list.status == PaymentList.Status.ACCEPTED
+
+
+def test_sync_finished_reopens_group_and_plans_when_a_payment_is_pending_again(
+    finished_group, locked_payment_list, delivered_payment
+):
+    delivered_payment.status = Payment.STATUS_PENDING
+    delivered_payment.save(update_fields=["status"])
+
+    PaymentPlanService(finished_group).sync_finished()
+
+    finished_group.refresh_from_db()
+    locked_payment_list.refresh_from_db()
+    assert finished_group.status == PaymentPlan.Status.ACCEPTED
+    assert locked_payment_list.status == PaymentList.Status.ACCEPTED
+
+
+@patch("hope.apps.payment.services.payment_plan_services.send_payment_plan_notification_emails_async_task")
+def test_ready_for_closure_moves_group_and_plans(mock_notify, finished_group, locked_payment_list, user):
+    PaymentPlanService(finished_group).ready_for_closure(user)
+
+    finished_group.refresh_from_db()
+    locked_payment_list.refresh_from_db()
+    assert finished_group.status == PaymentPlan.Status.READY_FOR_CLOSURE
+    assert locked_payment_list.status == PaymentList.Status.READY_FOR_CLOSURE
+    mock_notify.assert_called_once()
+    assert mock_notify.call_args.args[1] == PaymentList.Action.MARK_READY_FOR_CLOSURE.value
+
+
+def test_ready_for_closure_rejects_group_not_finished(accepted_group, user):
+    with pytest.raises(ValidationError) as error:
+        PaymentPlanService(accepted_group).ready_for_closure(user)
+    assert error.value.detail[0] == "Mark as Ready for Closure is possible only within Status FINISHED"
+
+
+@patch("hope.apps.payment.services.payment_plan_services.send_payment_plan_notification_emails_async_task")
+def test_send_back_to_finished_moves_group_and_plans(mock_notify, ready_group, locked_payment_list, user):
+    PaymentPlanService(ready_group).send_back_to_finished(user)
+
+    ready_group.refresh_from_db()
+    locked_payment_list.refresh_from_db()
+    assert ready_group.status == PaymentPlan.Status.FINISHED
+    assert locked_payment_list.status == PaymentList.Status.FINISHED
+    assert mock_notify.call_args.args[1] == PaymentList.Action.SEND_BACK_TO_FINISHED.value
+
+
+def test_send_back_to_finished_rejects_group_not_ready_for_closure(finished_group, user):
+    with pytest.raises(ValidationError) as error:
+        PaymentPlanService(finished_group).send_back_to_finished(user)
+    assert error.value.detail[0] == "Send Back is possible only within Status READY_FOR_CLOSURE"
+
+
+def test_close_rejects_group_not_ready_for_closure(finished_group, user):
+    with pytest.raises(ValidationError) as error:
+        PaymentPlanService(finished_group).close("all paid", user)
+    assert error.value.detail[0] == "Close Payment Plan is possible only within Status READY_FOR_CLOSURE"
+
+
+def test_close_requires_comment_when_no_plan_was_verified(ready_group, user):
+    with pytest.raises(ValidationError) as error:
+        PaymentPlanService(ready_group).close(None, user)
+    assert error.value.detail[0] == "Closure comment is required when no payment verification was carried out."
+
+
+def test_close_with_comment_closes_group_and_plans(ready_group, locked_payment_list, user):
+    PaymentPlanService(ready_group).close("all paid", user)
+
+    ready_group.refresh_from_db()
+    locked_payment_list.refresh_from_db()
+    assert ready_group.status == PaymentPlan.Status.CLOSED
+    assert ready_group.closure_comment == "all paid"
+    assert ready_group.closed_by == user
+    assert locked_payment_list.status == PaymentList.Status.CLOSED
+
+
+def test_close_without_comment_allowed_when_every_plan_was_verified(ready_group, locked_payment_list, user):
+    PaymentVerificationPlanFactory(payment_list=locked_payment_list, responded_count=1)
+
+    PaymentPlanService(ready_group).close(None, user)
+
+    ready_group.refresh_from_db()
+    assert ready_group.status == PaymentPlan.Status.CLOSED
+
+
+def test_abort_moves_group_and_plans(group_in_approval, locked_payment_list, user):
+    PaymentPlanService(group_in_approval).abort("wrong amounts", user)
+
+    group_in_approval.refresh_from_db()
+    locked_payment_list.refresh_from_db()
+    assert group_in_approval.status == PaymentPlan.Status.ABORTED
+    assert group_in_approval.abort_comment == "wrong amounts"
+    assert locked_payment_list.status == PaymentList.Status.ABORTED
+
+
+def test_abort_rejects_open_group(open_group, locked_payment_list, user):
+    with pytest.raises(ValidationError) as error:
+        PaymentPlanService(open_group).abort(None, user)
+    assert error.value.detail[0] == "Abort Payment Plan is not possible within Status OPEN"
+
+
+@patch("hope.apps.payment.services.payment_list_services.payment_list_refresh_payees_async_task")
+def test_reactivate_abort_keeps_group_rebuilding_while_its_plans_refresh_payees(
+    mock_refresh, group_in_approval, locked_payment_list, user, django_capture_on_commit_callbacks
+):
+    PaymentPlanService(group_in_approval).abort(None, user)
 
     with django_capture_on_commit_callbacks(execute=True):
-        service.check_payment_plan_and_update_status(approval_process)
+        PaymentPlanService(group_in_approval).reactivate_abort(str(user.pk))
 
-    payment_plan.refresh_from_db()
-    assert payment_plan.status == PaymentPlan.Status.IN_REVIEW
-    mock_send_to_vision.assert_not_called()
+    group_in_approval.refresh_from_db()
+    locked_payment_list.refresh_from_db()
+    assert group_in_approval.status == PaymentPlan.Status.ABORTED
+    assert group_in_approval.background_action_status == PaymentPlan.BackgroundActionStatus.REBUILDING
+    assert locked_payment_list.status == PaymentList.Status.ABORTED
+    assert locked_payment_list.background_action_status == PaymentList.BackgroundActionStatus.REBUILDING
+    mock_refresh.assert_called_once_with(locked_payment_list, str(user.pk))
 
 
-def test_ready_for_closure_moves_plan_to_ready_for_closure(
-    business_area: Any, cycle: ProgramCycle, django_assert_num_queries: Any
-) -> None:
-    payment_plan = PaymentPlanFactory(
+@pytest.fixture
+def aborted_group_with_top_up_plan(cycle):
+    group = PaymentPlanFactory(cycle=cycle, status=PaymentPlan.Status.ABORTED)
+    PaymentListFactory(
         program_cycle=cycle,
-        business_area=business_area,
-        status=PaymentPlan.Status.FINISHED,
+        payment_plan=group,
+        plan_type=PaymentList.PlanType.TOP_UP,
+        status=PaymentList.Status.ABORTED,
+    )
+    return group
+
+
+def test_reactivate_abort_opens_group_when_no_plan_refreshes_payees(aborted_group_with_top_up_plan, user):
+    PaymentPlanService(aborted_group_with_top_up_plan).reactivate_abort(str(user.pk))
+
+    aborted_group_with_top_up_plan.refresh_from_db()
+    assert aborted_group_with_top_up_plan.status == PaymentPlan.Status.OPEN
+    assert aborted_group_with_top_up_plan.background_action_status is None
+    assert aborted_group_with_top_up_plan.payment_lists.get().status == PaymentList.Status.OPEN
+
+
+@pytest.fixture
+def rebuilding_group(cycle):
+    return PaymentPlanFactory(
+        cycle=cycle,
+        status=PaymentPlan.Status.ABORTED,
+        background_action_status=PaymentPlan.BackgroundActionStatus.REBUILDING,
     )
 
-    with django_assert_num_queries(12):
-        PaymentPlanService(payment_plan).ready_for_closure()
 
-    payment_plan.refresh_from_db()
-    assert payment_plan.status == PaymentPlan.Status.READY_FOR_CLOSURE
-
-
-def test_send_back_to_finished_moves_plan_to_finished(
-    business_area: Any, cycle: ProgramCycle, django_assert_num_queries: Any
-) -> None:
-    payment_plan = PaymentPlanFactory(
-        program_cycle=cycle,
-        business_area=business_area,
-        status=PaymentPlan.Status.READY_FOR_CLOSURE,
-    )
-
-    with django_assert_num_queries(12):
-        PaymentPlanService(payment_plan).send_back_to_finished()
-
-    payment_plan.refresh_from_db()
-    assert payment_plan.status == PaymentPlan.Status.FINISHED
-
-
-def test_ready_for_closure_rejects_stale_status(business_area: Any, cycle: ProgramCycle) -> None:
-    payment_plan = PaymentPlanFactory(
-        program_cycle=cycle,
-        business_area=business_area,
-        status=PaymentPlan.Status.FINISHED,
-    )
-    PaymentPlan.objects.filter(pk=payment_plan.pk).update(status=PaymentPlan.Status.READY_FOR_CLOSURE)
-
+def test_reactivate_abort_rejects_group_still_rebuilding(rebuilding_group, user):
     with pytest.raises(ValidationError) as error:
-        PaymentPlanService(payment_plan).ready_for_closure()
+        PaymentPlanService(rebuilding_group).reactivate_abort(str(user.pk))
+    assert error.value.detail[0] == "Another background action is already in progress."
 
-    assert "Mark as Ready for Closure is possible only within Status FINISHED" in str(error.value)
 
-
-def test_send_back_to_finished_rejects_stale_status(business_area: Any, cycle: ProgramCycle) -> None:
-    payment_plan = PaymentPlanFactory(
-        program_cycle=cycle,
-        business_area=business_area,
-        status=PaymentPlan.Status.READY_FOR_CLOSURE,
+@pytest.fixture
+def rebuild_error_group(cycle):
+    return PaymentPlanFactory(
+        cycle=cycle,
+        status=PaymentPlan.Status.ABORTED,
+        background_action_status=PaymentPlan.BackgroundActionStatus.REBUILD_ERROR,
     )
-    PaymentPlan.objects.filter(pk=payment_plan.pk).update(status=PaymentPlan.Status.FINISHED)
-
-    with pytest.raises(ValidationError) as error:
-        PaymentPlanService(payment_plan).send_back_to_finished()
-
-    assert "Send Back is possible only within Status READY_FOR_CLOSURE" in str(error.value)
 
 
-def test_close_rejects_stale_status(user: User, business_area: Any, cycle: ProgramCycle) -> None:
-    payment_plan = PaymentPlanFactory(
+@pytest.fixture
+def failed_rebuild_plan(cycle, rebuild_error_group):
+    return PaymentListFactory(
         program_cycle=cycle,
-        business_area=business_area,
-        status=PaymentPlan.Status.READY_FOR_CLOSURE,
+        payment_plan=rebuild_error_group,
+        status=PaymentList.Status.ABORTED,
+        background_action_status=PaymentList.BackgroundActionStatus.REBUILD_ERROR,
     )
-    PaymentPlan.objects.filter(pk=payment_plan.pk).update(status=PaymentPlan.Status.CLOSED)
-
-    with pytest.raises(ValidationError) as error:
-        PaymentPlanService(payment_plan).close(closure_comment="Comment", user_id=str(user.pk))
-
-    assert "Close Payment Plan is possible only within Status READY_FOR_CLOSURE" in str(error.value)
 
 
-def test_acceptance_process_rejects_stale_status(user: User, business_area: Any, cycle: ProgramCycle) -> None:
-    payment_plan = PaymentPlanFactory(
+@pytest.fixture
+def still_rebuilding_plan(cycle, rebuild_error_group):
+    return PaymentListFactory(
         program_cycle=cycle,
-        business_area=business_area,
-        status=PaymentPlan.Status.IN_APPROVAL,
+        payment_plan=rebuild_error_group,
+        status=PaymentList.Status.ABORTED,
+        background_action_status=PaymentList.BackgroundActionStatus.REBUILDING,
     )
-    ApprovalProcessFactory(payment_plan=payment_plan)
-    PaymentPlan.objects.filter(pk=payment_plan.pk).update(status=PaymentPlan.Status.IN_AUTHORIZATION)
 
+
+@patch("hope.apps.payment.services.payment_list_services.payment_list_refresh_payees_async_task")
+def test_reactivate_abort_after_rebuild_error_retries_only_the_failed_plan(
+    mock_refresh,
+    rebuild_error_group,
+    failed_rebuild_plan,
+    still_rebuilding_plan,
+    user,
+    django_capture_on_commit_callbacks,
+):
+    with django_capture_on_commit_callbacks(execute=True):
+        PaymentPlanService(rebuild_error_group).reactivate_abort(str(user.pk))
+
+    rebuild_error_group.refresh_from_db()
+    failed_rebuild_plan.refresh_from_db()
+    assert rebuild_error_group.background_action_status == PaymentPlan.BackgroundActionStatus.REBUILDING
+    assert failed_rebuild_plan.background_action_status == PaymentList.BackgroundActionStatus.REBUILDING
+    mock_refresh.assert_called_once_with(failed_rebuild_plan, str(user.pk))
+
+
+def test_mark_rebuild_error_marks_rebuilding_group(rebuilding_group, user):
+    PaymentPlanService.mark_rebuild_error(rebuilding_group.pk, str(user.pk))
+
+    rebuilding_group.refresh_from_db()
+    assert rebuilding_group.status == PaymentPlan.Status.ABORTED
+    assert rebuilding_group.background_action_status == PaymentPlan.BackgroundActionStatus.REBUILD_ERROR
+
+
+def test_mark_rebuild_error_leaves_group_that_is_not_rebuilding(open_group, user):
+    PaymentPlanService.mark_rebuild_error(open_group.pk, str(user.pk))
+
+    open_group.refresh_from_db()
+    assert open_group.background_action_status is None
+
+
+def test_reactivate_abort_rejects_group_not_aborted(group_in_approval, user):
     with pytest.raises(ValidationError) as error:
-        PaymentPlanService(payment_plan).execute_update_status_action(
-            input_data={"action": PaymentPlan.Action.APPROVE.value, "comment": ""}, user=user
+        PaymentPlanService(group_in_approval).reactivate_abort(str(user.pk))
+    assert error.value.detail[0] == "Reactivate Aborted Payment Plan is possible only within Status ABORTED"
+
+
+@pytest.fixture
+def failed_payment(locked_payment_list):
+    return PaymentFactory(parent=locked_payment_list, status=Payment.STATUS_ERROR)
+
+
+@pytest.fixture
+def follow_up_group(accepted_group, failed_payment, user):
+    return PaymentPlanService(accepted_group).create_linked_payment_plan(
+        PaymentList.PlanType.FOLLOW_UP, user, date(2099, 1, 1), date(2099, 12, 31)
+    )
+
+
+def test_create_follow_up_creates_linked_group_from_source(
+    accepted_group, follow_up_group, financial_service_provider, currency
+):
+    assert follow_up_group.plan_type == PaymentList.PlanType.FOLLOW_UP
+    assert follow_up_group.source_payment_plan == accepted_group
+    assert follow_up_group.status == PaymentPlan.Status.OPEN
+    assert follow_up_group.cycle == accepted_group.cycle
+    assert follow_up_group.financial_service_provider == financial_service_provider
+    assert follow_up_group.currency == currency
+    assert follow_up_group.name == f"{accepted_group.name} Follow Up 1"
+
+
+def test_create_follow_up_puts_one_child_per_source_plan_in_linked_group(follow_up_group, locked_payment_list):
+    child_plan = follow_up_group.payment_lists.get()
+
+    assert child_plan.plan_type == PaymentList.PlanType.FOLLOW_UP
+    assert child_plan.source_payment_list == locked_payment_list
+    assert child_plan.status == PaymentList.Status.OPEN
+
+
+def test_create_second_follow_up_numbers_the_name(accepted_group, follow_up_group, user):
+    second_follow_up_group = PaymentPlanService(accepted_group).create_linked_payment_plan(
+        PaymentList.PlanType.FOLLOW_UP, user, date(2099, 1, 1), date(2099, 12, 31)
+    )
+
+    assert second_follow_up_group.name == f"{accepted_group.name} Follow Up 2"
+
+
+@pytest.fixture
+def group_named_like_next_follow_up(cycle, accepted_group):
+    return PaymentPlanFactory(cycle=cycle, name=f"{accepted_group.name} Follow Up 1")
+
+
+def test_create_follow_up_rejected_when_its_name_is_taken_in_the_cycle(
+    accepted_group, failed_payment, group_named_like_next_follow_up, user
+):
+    with pytest.raises(ValidationError) as error:
+        PaymentPlanService(accepted_group).create_linked_payment_plan(
+            PaymentList.PlanType.FOLLOW_UP, user, date(2099, 1, 1), date(2099, 12, 31)
         )
+    assert (
+        error.value.detail[0]
+        == f"A payment plan named '{accepted_group.name} Follow Up 1' already exists in this cycle."
+    )
 
-    assert "Not possible to create APPROVE for Payment Plan within status IN_AUTHORIZATION" in str(error.value)
 
-
-def test_build_payments_chunks_with_chunks_no_none_returns_single_chunk(locked_payment_plan_with_payments):
-    service = PaymentPlanService(payment_plan=locked_payment_plan_with_payments)
-    payments = locked_payment_plan_with_payments.eligible_payments.all()
-    payments_count = payments.count()
-
-    with patch.object(service, "_validate_split_by_record"):
-        result = service._build_payments_chunks(
-            split_type=PaymentPlanSplit.SplitType.BY_RECORDS,
-            chunks_no=None,
-            payments=payments,
-            payments_count=payments_count,
+def test_create_follow_up_rejected_without_unsuccessful_payments(accepted_group, delivered_payment, user):
+    with pytest.raises(ValidationError) as error:
+        PaymentPlanService(accepted_group).create_linked_payment_plan(
+            PaymentList.PlanType.FOLLOW_UP, user, date(2099, 1, 1), date(2099, 12, 31)
         )
-    assert len(result) == 1
+    assert error.value.detail[0] == "No Payment List in this payment plan qualifies for a Follow Up."
 
 
-def test_set_program_cycle_same_cycle_returns_early(business_area: Any, cycle: ProgramCycle) -> None:
-    pp = PaymentPlanFactory(
+def test_create_follow_up_rejected_from_follow_up_group(follow_up_group, user):
+    with pytest.raises(ValidationError) as error:
+        PaymentPlanService(follow_up_group).create_linked_payment_plan(
+            PaymentList.PlanType.FOLLOW_UP, user, date(2099, 1, 1), date(2099, 12, 31)
+        )
+    assert error.value.detail[0] == "A Follow Up cannot be created from a Follow Up payment plan."
+
+
+def test_create_top_up_rejected_from_locked_group(locked_payment_plan, user):
+    with pytest.raises(ValidationError) as error:
+        PaymentPlanService(locked_payment_plan).create_linked_payment_plan(
+            PaymentList.PlanType.TOP_UP, user, date(2099, 1, 1), date(2099, 12, 31), Decimal("10.00")
+        )
+    assert error.value.detail[0] == "A Top Up can only be created from an Accepted or Finished payment plan, got LOCKED"
+
+
+@pytest.fixture
+def second_accepted_payment_list(cycle, accepted_group, financial_service_provider, delivery_mechanism):
+    return PaymentListFactory(
+        name="Second Plan",
         program_cycle=cycle,
-        business_area=business_area,
-        status=PaymentPlan.Status.TP_OPEN,
+        payment_plan=accepted_group,
+        status=PaymentList.Status.ACCEPTED,
+        delivery_mechanism=delivery_mechanism,
     )
-    service = PaymentPlanService(payment_plan=pp)
-    service._set_program_cycle({"program_cycle_id": str(cycle.pk)})
-    pp.refresh_from_db()
-    assert pp.program_cycle == cycle
 
 
-def test_execute_update_status_action_raises_when_instruction_managed(
-    payment_plan_base: PaymentPlan,
-    user: User,
-) -> None:
-    instruction = FollowUpInstructionFactory(
-        business_area=payment_plan_base.business_area,
-        program=payment_plan_base.program,
-        created_by=user,
+@pytest.fixture
+def second_plan_payment(second_accepted_payment_list):
+    return PaymentFactory(parent=second_accepted_payment_list, status=Payment.STATUS_DISTRIBUTION_SUCCESS)
+
+
+def test_create_top_up_from_amount_file_only_creates_children_for_funded_plans(
+    accepted_group, locked_payment_list, delivered_payment, second_plan_payment, user
+):
+    top_up_group = PaymentPlanService(accepted_group).create_linked_payment_plan(
+        PaymentList.PlanType.TOP_UP,
+        user,
+        date(2099, 1, 1),
+        date(2099, 12, 31),
+        {delivered_payment.unicef_id: Decimal("40.00")},
     )
-    payment_plan_base.follow_up_instruction = instruction
-    payment_plan_base.payment_plan_group = None
-    payment_plan_base.save(update_fields=["follow_up_instruction", "payment_plan_group"])
 
-    with pytest.raises(ValidationError, match="This Payment Plan is managed by a Follow Up Instruction."):
-        PaymentPlanService(payment_plan_base).execute_update_status_action(input_data={"action": "LOCK"}, user=user)
+    child_plan = top_up_group.payment_lists.get()
+    assert child_plan.source_payment_list == locked_payment_list
 
 
-def test_copy_target_criteria_copies_individual_block_filters(
-    business_area: Any,
-    cycle: ProgramCycle,
-) -> None:
-    source_pp = PaymentPlanFactory(program_cycle=cycle, business_area=business_area)
-    target_pp = PaymentPlanFactory(program_cycle=cycle, business_area=business_area)
-    rule = TargetingCriteriaRuleFactory(payment_plan=source_pp)
-    ind_block = TargetingIndividualRuleFilterBlockFactory(targeting_criteria_rule=rule)
-    TargetingIndividualBlockRuleFilterFactory(individuals_filters_block=ind_block)
-
-    PaymentPlanService.copy_target_criteria(source_pp, target_pp)
-
-    target_rule = target_pp.rules.get()
-    target_block = target_rule.individuals_filters_blocks.get()
-    assert TargetingIndividualBlockRuleFilter.objects.filter(individuals_filters_block=target_block).count() == 1
-
-
-def test_set_group_for_open_pp_returns_early_when_cycle_is_changing(
-    user: User,
-    business_area: Any,
-    program: Program,
-) -> None:
-    cycle_a = ProgramCycleFactory(status=ProgramCycle.ACTIVE, program=program)
-    cycle_b = ProgramCycleFactory(status=ProgramCycle.ACTIVE, program=program)
-    pp = PaymentPlanFactory(
-        created_by=user,
-        business_area=business_area,
-        program_cycle=cycle_a,
-        status=PaymentPlan.Status.TP_OPEN,
+def test_create_top_up_with_fixed_amount_creates_child_for_every_eligible_plan(
+    accepted_group, delivered_payment, second_plan_payment, user
+):
+    top_up_group = PaymentPlanService(accepted_group).create_linked_payment_plan(
+        PaymentList.PlanType.TOP_UP, user, date(2099, 1, 1), date(2099, 12, 31), Decimal("10.00")
     )
-    group_in_b = PaymentPlanGroupFactory(cycle=cycle_b)
-    service = PaymentPlanService(pp)
 
-    service._set_group_for_open_pp({"payment_plan_group_id": str(group_in_b.id), "program_cycle_id": cycle_b.id})
-
-    assert pp.payment_plan_group != group_in_b
+    assert top_up_group.payment_lists.count() == 2
 
 
-def test_change_group_rejects_group_not_open(
-    user: User,
-    business_area: Any,
-    program: Program,
-) -> None:
-    cycle = ProgramCycleFactory(status=ProgramCycle.ACTIVE, program=program)
-    pp = PaymentPlanFactory(
-        created_by=user,
-        business_area=business_area,
+def test_linked_group_rejects_currency_change(follow_up_group):
+    with pytest.raises(ValidationError) as error:
+        PaymentPlanService(follow_up_group).assign_currency(CurrencyFactory(code="EUR", name="Euro"))
+    assert (
+        error.value.detail[0]
+        == "Currency of a Follow-Up / Top-Up / Amendment payment plan is taken from its source payment plan."
+    )
+
+
+def test_linked_group_rejects_new_target_population(follow_up_group):
+    with pytest.raises(ValidationError) as error:
+        PaymentListService._validate_payment_plan_accepts_new_payment_lists(follow_up_group)
+    assert error.value.detail[0] == (
+        "Adding Target Population to a Follow-Up / Top-Up / Amendment Payment Plan is not possible"
+    )
+
+
+@pytest.fixture
+def accepted_top_up_group(cycle, accepted_group, currency):
+    return PaymentPlanFactory(
+        cycle=cycle,
+        plan_type=PaymentList.PlanType.TOP_UP,
+        source_payment_plan=accepted_group,
+        status=PaymentPlan.Status.ACCEPTED,
+        currency=currency,
+    )
+
+
+@pytest.fixture
+def accepted_top_up_plan(cycle, accepted_top_up_group, locked_payment_list, delivery_mechanism):
+    return PaymentListFactory(
         program_cycle=cycle,
-        status=PaymentPlan.Status.TP_OPEN,
+        payment_plan=accepted_top_up_group,
+        plan_type=PaymentList.PlanType.TOP_UP,
+        source_payment_list=locked_payment_list,
+        status=PaymentList.Status.ACCEPTED,
+        delivery_mechanism=delivery_mechanism,
     )
-    locked_group = PaymentPlanGroupFactory(cycle=cycle, status=PaymentPlanGroup.Status.LOCKED)
-    service = PaymentPlanService(pp)
+
+
+def test_sync_finished_moves_top_up_group_with_its_top_up_plans(accepted_top_up_group, accepted_top_up_plan):
+    PaymentFactory(parent=accepted_top_up_plan, status=Payment.STATUS_DISTRIBUTION_SUCCESS)
+
+    PaymentPlanService(accepted_top_up_group).sync_finished()
+
+    accepted_top_up_group.refresh_from_db()
+    accepted_top_up_plan.refresh_from_db()
+    assert accepted_top_up_group.status == PaymentPlan.Status.FINISHED
+    assert accepted_top_up_plan.status == PaymentList.Status.FINISHED
+
+
+def test_split_splits_every_plan_in_the_group_the_same_way(
+    accepted_group, locked_payment_list, delivered_payment, second_accepted_payment_list, second_plan_payment
+):
+    PaymentPlanService(accepted_group).split(PaymentListSplit.SplitType.BY_COLLECTOR)
+
+    assert list(locked_payment_list.splits.values_list("split_type", flat=True)) == [
+        PaymentListSplit.SplitType.BY_COLLECTOR
+    ]
+    assert list(second_accepted_payment_list.splits.values_list("split_type", flat=True)) == [
+        PaymentListSplit.SplitType.BY_COLLECTOR
+    ]
+
+
+@pytest.fixture
+def five_payments_on_first_plan(locked_payment_list):
+    return PaymentFactory.create_batch(5, parent=locked_payment_list, status=Payment.STATUS_DISTRIBUTION_SUCCESS)
+
+
+@pytest.fixture
+def twelve_payments_on_second_plan(second_accepted_payment_list):
+    return PaymentFactory.create_batch(
+        12, parent=second_accepted_payment_list, status=Payment.STATUS_DISTRIBUTION_SUCCESS
+    )
+
+
+def test_split_by_records_makes_one_part_of_a_plan_smaller_than_the_chunk(
+    accepted_group,
+    locked_payment_list,
+    five_payments_on_first_plan,
+    second_accepted_payment_list,
+    twelve_payments_on_second_plan,
+):
+    PaymentPlanService(accepted_group).split(PaymentListSplit.SplitType.BY_RECORDS, payments_no=10)
+
+    first_plan_parts = locked_payment_list.splits.order_by("order")
+    second_plan_parts = second_accepted_payment_list.splits.order_by("order")
+    assert first_plan_parts.count() == 1
+    assert first_plan_parts.get().split_payment_items.count() == 5
+    assert second_plan_parts.count() == 2
+    assert second_plan_parts[0].split_payment_items.count() == 10
+    assert second_plan_parts[1].split_payment_items.count() == 2
+
+
+def test_split_by_records_below_minimum_names_the_plan(accepted_group, locked_payment_list, delivered_payment):
+    with pytest.raises(ValidationError) as error:
+        PaymentPlanService(accepted_group).split(PaymentListSplit.SplitType.BY_RECORDS, payments_no=5)
+    assert error.value.detail[0] == (f"{locked_payment_list.unicef_id}: Payment Parts number should be at least 10")
+
+
+def test_split_removes_the_group_export_file(accepted_group, locked_payment_list, delivered_payment):
+    accepted_group.export_file_delivery = FileTempFactory()
+    accepted_group.save(update_fields=["export_file_delivery"])
+
+    PaymentPlanService(accepted_group).split(PaymentListSplit.SplitType.NO_SPLIT)
+
+    accepted_group.refresh_from_db()
+    assert accepted_group.export_file_delivery is None
+
+
+def test_split_rejects_group_not_accepted(locked_payment_plan):
+    with pytest.raises(ValidationError) as error:
+        PaymentPlanService(locked_payment_plan).split(PaymentListSplit.SplitType.NO_SPLIT)
+    assert error.value.detail[0] == "Split is possible only within Status ACCEPTED"
+
+
+def test_split_rejects_group_already_sent_to_payment_gateway(accepted_group, locked_payment_list, delivered_payment):
+    PaymentListSplitFactory(payment_list=locked_payment_list, sent_to_payment_gateway=True)
 
     with pytest.raises(ValidationError) as error:
-        service._set_group_for_open_pp({"payment_plan_group_id": str(locked_group.id)})
-    assert error.value.detail[0] == "Adding Target Population to Payment Plan Group is possible only within Status OPEN"
+        PaymentPlanService(accepted_group).split(PaymentListSplit.SplitType.NO_SPLIT)
+    assert error.value.detail[0] == "Payment Plan is already sent to payment gateway"
 
 
-def test_status_action_rejected_when_group_is_not_open(user: User, business_area: Any, cycle: ProgramCycle) -> None:
-    payment_plan = PaymentPlanFactory(
-        program_cycle=cycle,
-        payment_plan_group=PaymentPlanGroupFactory(cycle=cycle, status=PaymentPlanGroup.Status.LOCKED),
-        business_area=business_area,
-        status=PaymentPlan.Status.LOCKED_FSP,
-    )
+def test_can_split_is_true_for_accepted_group_not_sent_to_payment_gateway(accepted_group):
+    assert accepted_group.can_split is True
 
-    with pytest.raises(ValidationError) as error:
-        PaymentPlanService(payment_plan).execute_update_status_action(
-            input_data={"action": PaymentPlan.Action.UNLOCK_FSP}, user=user
-        )
-    assert error.value.detail[0] == "This Payment Plan is managed by its Payment Plan Group."
+
+def test_can_split_is_false_once_a_split_was_sent_to_payment_gateway(accepted_group, locked_payment_list):
+    PaymentListSplitFactory(payment_list=locked_payment_list, sent_to_payment_gateway=True)
+
+    assert accepted_group.can_split is False

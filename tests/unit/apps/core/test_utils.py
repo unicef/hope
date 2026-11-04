@@ -20,7 +20,7 @@ from extras.test_utils.factories.core import (
     FlexibleAttributeFactory,
     FlexibleAttributeForPDUFactory,
 )
-from extras.test_utils.factories.payment import PaymentPlanFactory
+from extras.test_utils.factories.payment import PaymentListFactory
 from hope.apps.activity_log.utils import copy_model_object
 from hope.apps.core.utils import (
     AutoCompleteFilterTemp,
@@ -376,8 +376,8 @@ def test_nested_getattr_raises_when_no_default():
 @pytest.mark.django_db
 def test_nested_getattr_returns_default_when_related_object_deleted():
     file_temp = FileTempFactory()
-    payment_plan = PaymentPlanFactory(export_file_entitlement=file_temp)
-    snapshot = copy_model_object(payment_plan)
+    payment_list = PaymentListFactory(export_file_entitlement=file_temp)
+    snapshot = copy_model_object(payment_list)
     FileTemp.objects.filter(pk=file_temp.pk).delete()
 
     assert nested_getattr(snapshot, "export_file_entitlement", None) is None

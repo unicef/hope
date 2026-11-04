@@ -1,0 +1,160 @@
+import { DialogContainer } from '@containers/dialogs/DialogContainer';
+import { DialogFooter } from '@containers/dialogs/DialogFooter';
+import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
+import { LoadingButton } from '@core/LoadingButton';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { useSnackbar } from '@hooks/useSnackBar';
+import { Delete } from '@mui/icons-material';
+import {
+  Box,
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  IconButton,
+} from '@mui/material';
+import type { PaymentListDetail } from '@restgenerated/models/PaymentListDetail';
+import { RestService } from '@restgenerated/services/RestService';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { restQueryKey } from '@utils/queryKeys';
+import { showApiErrorMessages } from '@utils/utils';
+import { isEmptyJsonResponseError, toApiError } from '@utils/errors';
+import type { ReactElement } from 'react';
+import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
+import { useProgramContext } from '../../../../programContext';
+import { HeaderIconAction } from '@core/HeaderIconAction';
+
+export interface DeletePaymentListProps {
+  paymentList: PaymentListDetail;
+}
+
+export function DeletePaymentList({
+  paymentList,
+}: DeletePaymentListProps): ReactElement {
+  const navigate = useNavigate();
+  const { t } = useTranslation();
+  const { businessArea, programId } = useBaseUrl();
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const { baseUrl } = useBaseUrl();
+  const { showMessage } = useSnackbar();
+  const queryClient = useQueryClient();
+  const { mutateAsync: deletePaymentList, isPending: loadingDelete } =
+    useMutation({
+      mutationFn: ({
+        businessAreaSlug,
+        id,
+        programCode,
+      }: {
+        businessAreaSlug: string;
+        id: string;
+        programCode: string;
+      }) =>
+        RestService.restBusinessAreasProgramsPaymentListsDestroy({
+          businessAreaSlug,
+          id,
+          programCode,
+        }),
+      onSuccess: () => {
+        queryClient.invalidateQueries({
+          queryKey: restQueryKey(
+            RestService.restBusinessAreasProgramsPaymentListsList,
+          ),
+        });
+      },
+    });
+  const { id } = paymentList;
+  const afterDeletePath = paymentList.paymentPlan
+    ? `/${baseUrl}/payment-module/payment-plans/${paymentList.paymentPlan.id}`
+    : `/${baseUrl}/payment-module/payment-plans`;
+  const { isActiveProgram } = useProgramContext();
+
+  const handleDelete = async (): Promise<void> => {
+    try {
+      await deletePaymentList({
+        businessAreaSlug: businessArea,
+        programCode: programId,
+        id,
+      });
+      showMessage(t('Payment List Deleted'));
+      navigate(afterDeletePath);
+    } catch (e) {
+      // Ignore empty response error
+      if (isEmptyJsonResponseError(e)) {
+        showMessage(t('Payment List Deleted'));
+        navigate(afterDeletePath);
+      } else {
+        showApiErrorMessages(
+          toApiError(e),
+          showMessage,
+          t('Failed to delete the Payment List'),
+        );
+      }
+    }
+  };
+
+  return (
+    <>
+      <HeaderIconAction
+        icon={<Delete />}
+        label={t('Delete')}
+        onClick={() => setDeleteDialogOpen(true)}
+        disabled={!isActiveProgram}
+        dataCy="button-delete-pp"
+      >
+        <Box
+          sx={{
+            p: 2,
+          }}
+        >
+          <IconButton
+            onClick={() => setDeleteDialogOpen(true)}
+            disabled={!isActiveProgram}
+            data-cy="button-delete-pp"
+          >
+            <Delete />
+          </IconButton>
+        </Box>
+      </HeaderIconAction>
+      <Dialog
+        open={deleteDialogOpen}
+        onClose={() => setDeleteDialogOpen(false)}
+        scroll="paper"
+        aria-labelledby="form-dialog-title"
+        maxWidth="md"
+      >
+        <DialogTitleWrapper>
+          <DialogTitle>{t('Delete Payment List')}</DialogTitle>
+        </DialogTitleWrapper>
+        <DialogContent>
+          <DialogContainer>
+            <Box
+              sx={{
+                p: 5,
+              }}
+            >
+              {t('Are you sure you want to remove this Payment List?')}
+            </Box>
+          </DialogContainer>
+        </DialogContent>
+        <DialogFooter>
+          <DialogActions>
+            <Button onClick={() => setDeleteDialogOpen(false)}>CANCEL</Button>
+            <LoadingButton
+              loading={loadingDelete}
+              type="submit"
+              color="primary"
+              variant="contained"
+              onClick={() => handleDelete()}
+              data-cy="button-submit"
+            >
+              {t('Delete')}
+            </LoadingButton>
+          </DialogActions>
+        </DialogFooter>
+      </Dialog>
+    </>
+  );
+}

@@ -59,16 +59,16 @@
                     "version": 1735688653315200,
                     "is_manually_editable": true
                 },
-                "payment_plan_hard_conflicted": false,
-                "payment_plan_hard_conflicted_data": [],
-                "payment_plan_soft_conflicted": false,
-                "payment_plan_soft_conflicted_data": [],
+                "payment_list_hard_conflicted": false,
+                "payment_list_hard_conflicted_data": [],
+                "payment_list_soft_conflicted": false,
+                "payment_list_soft_conflicted_data": [],
                 "people_individual": null,
                 "program_name": "Program 0",
                 "program_code": "1cpl",
                 "collector_type_display": "Primary collector",
-                "payment_plan_cycle": "Programme Cycle 0",
-                "payment_plan_group": "Default Group",
+                "payment_list_cycle": "Programme Cycle 0",
+                "payment_plan": "Default Group",
                 "payment_plan_purposes": [
                     "Purpose 0"
                 ]

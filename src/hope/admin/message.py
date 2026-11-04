@@ -26,7 +26,7 @@ class MessageAdmin(ViewOnUiMixin, AdminAdvancedFiltersMixin, HOPEModelAdminBase)
         "body",
         "business_area",
         "program",
-        "payment_plan",
+        "payment_list",
         "registration_data_import",
         "sampling_type",
         "sample_size",

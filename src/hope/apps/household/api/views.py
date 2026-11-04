@@ -43,8 +43,15 @@ from hope.apps.household.filters import (
     IndividualOfficeSearchFilter,
 )
 from hope.apps.payment.api.querysets import with_payment_related_data
-from hope.apps.payment.api.serializers import PaymentListSerializer
-from hope.models import FlexibleAttribute, Household, Individual, IndividualRoleInHousehold, PaymentPlan, Program
+from hope.apps.payment.api.serializers import PaymentRowSerializer
+from hope.models import (
+    FlexibleAttribute,
+    Household,
+    Individual,
+    IndividualRoleInHousehold,
+    PaymentList,
+    Program,
+)
 
 
 class HouseholdViewSet(
@@ -60,7 +67,7 @@ class HouseholdViewSet(
         "list": HouseholdListSerializer,
         "retrieve": HouseholdDetailSerializer,
         "members": HouseholdMemberSerializer,
-        "payments": PaymentListSerializer,
+        "payments": PaymentRowSerializer,
         "all_flex_fields_attributes": FieldAttributeSerializer,
         "all_accountability_communication_message_recipients": RecipientSerializer,
         "recipients": RecipientSerializer,
@@ -179,7 +186,7 @@ class HouseholdViewSet(
 
     @extend_schema(
         responses={
-            200: PaymentListSerializer(many=True),
+            200: PaymentRowSerializer(many=True),
         },
     )
     @action(detail=True, methods=["get"], filter_backends=(OrderingFilter,))
@@ -187,12 +194,12 @@ class HouseholdViewSet(
         hh = self.get_object()
         payments = (
             with_payment_related_data(
-                hh.payment_set.eligible().exclude(parent__status__in=PaymentPlan.PRE_PAYMENT_PLAN_STATUSES)
+                hh.payment_set.eligible().exclude(parent__status__in=PaymentList.PRE_PAYMENT_LIST_STATUSES)
             )
             # For sorting only: OrderingFilter accepts model fields and annotations.
             .annotate(
-                payment_plan_cycle=F("parent__program_cycle__title"),
-                payment_plan_group=F("parent__payment_plan_group__name"),
+                payment_list_cycle=F("parent__program_cycle__title"),
+                payment_plan=F("parent__payment_plan__name"),
                 hoh_full_name=F("head_of_household__full_name"),
             )
         )
@@ -216,7 +223,7 @@ class HouseholdViewSet(
     def payments_count(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         hh = self.get_object()
         payments_count = (
-            hh.payment_set.eligible().exclude(parent__status__in=PaymentPlan.PRE_PAYMENT_PLAN_STATUSES).count()
+            hh.payment_set.eligible().exclude(parent__status__in=PaymentList.PRE_PAYMENT_LIST_STATUSES).count()
         )
         return Response({"count": payments_count}, status=status.HTTP_200_OK)
 

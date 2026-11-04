@@ -7,11 +7,11 @@ from hope.apps.payment.api.views import (
     FollowUpInstructionSupportingDocumentViewSet,
     FollowUpInstructionViewSet,
     PaymentGlobalViewSet,
-    PaymentPlanGlobalViewSet,
-    PaymentPlanGroupSupportingDocumentViewSet,
-    PaymentPlanGroupViewSet,
+    PaymentListGlobalViewSet,
+    PaymentListViewSet,
     PaymentPlanManagerialViewSet,
     PaymentPlanPurposeViewSet,
+    PaymentPlanSupportingDocumentViewSet,
     PaymentPlanViewSet,
     PaymentVerificationRecordViewSet,
     PaymentVerificationViewSet,
@@ -30,7 +30,7 @@ business_area_nested_router.register(
     basename="payment-plans-managerial",
 )
 business_area_nested_router.register(r"payments", PaymentGlobalViewSet, basename="payments-global")
-business_area_nested_router.register(r"payment-plans", PaymentPlanGlobalViewSet, basename="payment-plans-global")
+business_area_nested_router.register(r"payment-lists", PaymentListGlobalViewSet, basename="payment-lists-global")
 business_area_nested_router.register(
     r"financial-institutions",
     FinancialInstitutionViewSet,
@@ -45,9 +45,9 @@ business_area_nested_router.register(
 program_nested_router = program_base_router.program_nested_router
 
 program_nested_router.register(
-    "payment-plans",
-    PaymentPlanViewSet,
-    basename="payment-plans",
+    "payment-lists",
+    PaymentListViewSet,
+    basename="payment-lists",
 )
 program_nested_router.register(
     "target-populations",
@@ -60,9 +60,9 @@ program_nested_router.register(
     basename="payment-verifications",
 )
 program_nested_router.register(
-    r"payment-plan-groups",
-    PaymentPlanGroupViewSet,
-    basename="payment-plan-groups",
+    r"payment-plans",
+    PaymentPlanViewSet,
+    basename="payment-plans",
 )
 program_nested_router.register(
     r"follow-up-instructions",
@@ -70,20 +70,18 @@ program_nested_router.register(
     basename="follow-up-instructions",
 )
 
-payment_plans_nested_router = NestedDefaultRouter(program_nested_router, r"payment-plans", lookup="payment_plan")
-payment_plans_nested_router.register(
+payment_lists_nested_router = NestedDefaultRouter(program_nested_router, r"payment-lists", lookup="payment_list")
+payment_lists_nested_router.register(
     r"payments",
     PaymentViewSet,
     basename="payments",
 )
 
-payment_plan_groups_nested_router = NestedDefaultRouter(
-    program_nested_router, r"payment-plan-groups", lookup="payment_plan_group"
-)
-payment_plan_groups_nested_router.register(
+payment_plans_nested_router = NestedDefaultRouter(program_nested_router, r"payment-plans", lookup="payment_plan")
+payment_plans_nested_router.register(
     r"supporting-documents",
-    PaymentPlanGroupSupportingDocumentViewSet,
-    basename="payment-plan-group-supporting-documents",
+    PaymentPlanSupportingDocumentViewSet,
+    basename="payment-plan-supporting-documents",
 )
 
 follow_up_instructions_nested_router = NestedDefaultRouter(
@@ -112,8 +110,8 @@ urlpatterns = [
     ),
     path("", include(business_area_nested_router.urls)),
     path("", include(program_nested_router.urls)),
+    path("", include(payment_lists_nested_router.urls)),
     path("", include(payment_plans_nested_router.urls)),
-    path("", include(payment_plan_groups_nested_router.urls)),
     path("", include(follow_up_instructions_nested_router.urls)),
     path("", include(payment_verification_nested_router.urls)),
 ]

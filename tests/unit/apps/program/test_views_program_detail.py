@@ -19,7 +19,7 @@ from extras.test_utils.factories import (
     FlexibleAttributeForPDUFactory,
     PartnerFactory,
     PaymentFactory,
-    PaymentPlanFactory,
+    PaymentListFactory,
     PaymentPlanPurposeFactory,
     ProgramCycleFactory,
     ProgramFactory,
@@ -34,7 +34,7 @@ from hope.models import (
     FlexibleAttribute,
     Partner,
     Payment,
-    PaymentPlan,
+    PaymentList,
     Program,
     RegistrationDataImport,
     User,
@@ -148,33 +148,33 @@ def rdi(program: Program) -> RegistrationDataImport:
 
 
 @pytest.fixture
-def payment_plan(program: Program) -> PaymentPlan:
+def payment_list(program: Program) -> PaymentList:
     program_cycle = program.cycles.first()
-    return PaymentPlanFactory(program_cycle=program_cycle)
+    return PaymentListFactory(program_cycle=program_cycle)
 
 
 @pytest.fixture
-def payment_plan_2(program_2: Program) -> PaymentPlan:
+def payment_list_2(program_2: Program) -> PaymentList:
     program_cycle = program_2.cycles.first()
-    return PaymentPlanFactory(program_cycle=program_cycle)
+    return PaymentListFactory(program_cycle=program_cycle)
 
 
 @pytest.fixture
-def payments(afghanistan: BusinessArea, payment_plan: PaymentPlan, payment_plan_2: PaymentPlan):
+def payments(afghanistan: BusinessArea, payment_list: PaymentList, payment_list_2: PaymentList):
     # program 1
     p1 = PaymentFactory(
         business_area=afghanistan,
-        parent=payment_plan,
+        parent=payment_list,
     )
     p2 = PaymentFactory(
         business_area=afghanistan,
-        parent=payment_plan,
+        parent=payment_list,
         currency=CurrencyFactory(code="PLN", name="Polish Zloty"),
     )
     # program 2
     p3 = PaymentFactory(
         business_area=afghanistan,
-        parent=payment_plan_2,
+        parent=payment_list_2,
         currency=CurrencyFactory(code="PLN", name="Polish Zloty"),
     )
     return p1, p2, p3
@@ -183,12 +183,12 @@ def payments(afghanistan: BusinessArea, payment_plan: PaymentPlan, payment_plan_
 @pytest.fixture
 def not_eligible_payment(
     afghanistan: BusinessArea,
-    payment_plan: PaymentPlan,
+    payment_list: PaymentList,
     program: Program,
 ) -> Payment:
     return PaymentFactory(
         business_area=afghanistan,
-        parent=payment_plan,
+        parent=payment_list,
         program=program,
         status=Payment.STATUS_NOT_ELIGIBLE,
         excluded=True,
@@ -244,7 +244,7 @@ def test_program_detail_with_permission(
     partner_with_area_limits: Partner,
     partner_without_access: Partner,
     rdi: RegistrationDataImport,
-    payment_plan: PaymentPlan,
+    payment_list: PaymentList,
     area2: Area,
 ) -> None:
     create_user_role_with_permissions(user, [Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS], afghanistan, program)
@@ -272,7 +272,7 @@ def test_program_detail_without_permission(
     partner_with_area_limits: Partner,
     partner_without_access: Partner,
     rdi: RegistrationDataImport,
-    payment_plan: PaymentPlan,
+    payment_list: PaymentList,
 ) -> None:
     create_user_role_with_permissions(user, [], afghanistan, program)
     response = authenticated_client.get(detail_url)
@@ -293,7 +293,7 @@ def test_program_detail(
     create_user_role_with_permissions: Callable,
     partner_without_access: Partner,
     rdi: RegistrationDataImport,
-    payment_plan: PaymentPlan,
+    payment_list: PaymentList,
 ) -> None:
     create_user_role_with_permissions(
         user,
@@ -406,7 +406,7 @@ def test_program_detail(
     assert response_data["can_import_rdi"] is True
     assert response_data["registration_imports_total_count"] == program.registration_imports.count()
     assert (
-        response_data["target_populations_count"] == PaymentPlan.objects.filter(program_cycle__program=program).count()
+        response_data["target_populations_count"] == PaymentList.objects.filter(program_cycle__program=program).count()
     )
     assert response_data["population_goal"] == program.population_goal
 
@@ -423,7 +423,7 @@ def test_program_detail_purpose_is_used_in_pp_flag(
     unused_purpose = PaymentPlanPurposeFactory()
     program.payment_plan_purposes.add(unused_purpose)
     cycle = ProgramCycleFactory(program=program)
-    plan = PaymentPlanFactory(program_cycle=cycle)
+    plan = PaymentListFactory(program_cycle=cycle)
     plan.payment_plan_purposes.set([used_purpose])
     create_user_role_with_permissions(
         user, [Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS], afghanistan, whole_business_area_access=True

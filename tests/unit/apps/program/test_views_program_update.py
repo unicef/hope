@@ -16,7 +16,7 @@ from extras.test_utils.factories import (
     HouseholdFactory,
     IndividualFactory,
     PartnerFactory,
-    PaymentPlanFactory,
+    PaymentListFactory,
     PaymentPlanPurposeFactory,
     PeriodicFieldDataFactory,
     ProgramCycleFactory,
@@ -1901,7 +1901,7 @@ def test_update_program_can_add_purposes(
     assert {p["id"] for p in response_purposes} == {str(existing_purpose.id), str(new_purpose.id)}
 
 
-def test_update_program_cannot_remove_purpose_in_use_by_payment_plan(
+def test_update_program_cannot_remove_purpose_in_use_by_payment_list(
     authenticated_client: Any,
     user: User,
     afghanistan: BusinessArea,
@@ -1914,7 +1914,7 @@ def test_update_program_cannot_remove_purpose_in_use_by_payment_plan(
     other_purpose = PaymentPlanPurposeFactory()
     program.payment_plan_purposes.add(other_purpose)
     cycle = ProgramCycleFactory(program=program)
-    plan = PaymentPlanFactory(program_cycle=cycle)
+    plan = PaymentListFactory(program_cycle=cycle)
     plan.payment_plan_purposes.set([existing_purpose])
     create_user_role_with_permissions(
         user, [Permissions.PROGRAMME_UPDATE], afghanistan, whole_business_area_access=True

@@ -25,7 +25,7 @@
                 "total_households_count": 0,
                 "total_individuals_count": 0,
                 "updated_at": "2025-01-01T00:00:00Z",
-                "payment_plan_group": {
+                "payment_plan": {
                     "id": "b4081ca7-d4f4-4b08-9131-434c9118be8f",
                     "unicef_id": "PPG-8",
                     "name": "Default Group"

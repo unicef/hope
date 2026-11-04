@@ -5,11 +5,11 @@ import { StatusBox } from '@components/core/StatusBox';
 import { AdminButton } from '@core/AdminButton';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import type { BusinessArea } from '@restgenerated/models/BusinessArea';
-import { PaymentPlanStatusEnum } from '@restgenerated/models/PaymentPlanStatusEnum';
+import { PaymentListStatusEnum } from '@restgenerated/models/PaymentListStatusEnum';
 import { RestService } from '@restgenerated/services/RestService';
 import { restQueryKey } from '@utils/queryKeys';
 import { useQuery } from '@tanstack/react-query';
-import { paymentPlanBuildStatusToColor } from '@utils/utils';
+import { paymentListBuildStatusToColor } from '@utils/utils';
 import type { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
@@ -33,7 +33,7 @@ const StatusWrapper = styled.div`
 `;
 
 export interface TargetPopulationPageHeaderProps {
-  paymentPlan: TargetPopulationDetail;
+  paymentList: TargetPopulationDetail;
   canEdit: boolean;
   canRemove: boolean;
   canDuplicate: boolean;
@@ -43,7 +43,7 @@ export interface TargetPopulationPageHeaderProps {
 }
 
 export function TargetPopulationPageHeader({
-  paymentPlan,
+  paymentList,
   canEdit,
   canRemove,
   canDuplicate,
@@ -75,11 +75,11 @@ export function TargetPopulationPageHeader({
 
   let buttons;
 
-  switch (paymentPlan.status) {
-    case PaymentPlanStatusEnum.TP_OPEN:
+  switch (paymentList.status) {
+    case PaymentListStatusEnum.TP_OPEN:
       buttons = (
         <OpenTargetPopulationHeaderButtons
-          targetPopulation={paymentPlan}
+          targetPopulation={paymentList}
           canDuplicate={canDuplicate}
           canRemove={canRemove}
           canEdit={canEdit}
@@ -87,13 +87,13 @@ export function TargetPopulationPageHeader({
         />
       );
       break;
-    case PaymentPlanStatusEnum.TP_LOCKED:
-    case PaymentPlanStatusEnum.STEFICON_COMPLETED:
-    case PaymentPlanStatusEnum.STEFICON_ERROR:
-    case PaymentPlanStatusEnum.STEFICON_RUN:
+    case PaymentListStatusEnum.TP_LOCKED:
+    case PaymentListStatusEnum.STEFICON_COMPLETED:
+    case PaymentListStatusEnum.STEFICON_ERROR:
+    case PaymentListStatusEnum.STEFICON_RUN:
       buttons = (
         <LockedTargetPopulationHeaderButtons
-          targetPopulation={paymentPlan}
+          targetPopulation={paymentList}
           canDuplicate={canDuplicate}
           canUnlock={canUnlock}
           canSend={canSend}
@@ -105,7 +105,7 @@ export function TargetPopulationPageHeader({
       // Ready for Cash Assist, Processing, Ready, Accepted
       buttons = (
         <FinalizedTargetPopulationHeaderButtons
-          targetPopulation={paymentPlan}
+          targetPopulation={paymentList}
           canDuplicate={canDuplicate}
         />
       );
@@ -115,19 +115,19 @@ export function TargetPopulationPageHeader({
     <PageHeader
       title={
         <HeaderWrapper>
-          {t(`${paymentPlan.name}`)}
-          {paymentPlan.buildStatus !== 'OK' && (
+          {t(`${paymentList.name}`)}
+          {paymentList.buildStatus !== 'OK' && (
             <StatusWrapper>
               <StatusBox
-                status={paymentPlan.buildStatus}
-                statusToColor={paymentPlanBuildStatusToColor}
+                status={paymentList.buildStatus}
+                statusToColor={paymentListBuildStatusToColor}
               />
             </StatusWrapper>
           )}
         </HeaderWrapper>
       }
       breadCrumbs={breadCrumbsItems}
-      flags={<AdminButton adminUrl={paymentPlan.adminUrl} />}
+      flags={<AdminButton adminUrl={paymentList.adminUrl} />}
     >
       {buttons}
     </PageHeader>

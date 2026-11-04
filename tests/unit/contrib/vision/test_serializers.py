@@ -147,7 +147,7 @@ def test_funds_commitment_serializer_exposes_derived_header_fields(funds_commitm
     assert serializer.data["currency"] == "EUR"
 
 
-def test_payment_plan_callback_request_serializer_to_internal_value() -> None:
+def test_payment_list_callback_request_serializer_to_internal_value() -> None:
     serializer = PaymentPlanCallbackRequestSerializer(
         data={
             "messageId": "msg-001",
@@ -167,7 +167,7 @@ def test_payment_plan_callback_request_serializer_to_internal_value() -> None:
     }
 
 
-def test_payment_plan_callback_request_serializer_defaults_fc_numbers_for_creation_acknowledgement() -> None:
+def test_payment_list_callback_request_serializer_defaults_fc_numbers_for_creation_acknowledgement() -> None:
     serializer = PaymentPlanCallbackRequestSerializer(
         data={
             "messageId": "msg-created",
@@ -189,7 +189,7 @@ def test_payment_plan_callback_request_serializer_defaults_fc_numbers_for_creati
 
 
 @pytest.mark.parametrize("fc_numbers", [None, ""])
-def test_payment_plan_callback_request_serializer_accepts_explicit_empty_fc_numbers(fc_numbers) -> None:
+def test_payment_list_callback_request_serializer_accepts_explicit_empty_fc_numbers(fc_numbers) -> None:
     serializer = PaymentPlanCallbackRequestSerializer(
         data={"payplanSno": "PP001", "status": "SUCCESS", "fc_numbers": fc_numbers}
     )
@@ -199,7 +199,7 @@ def test_payment_plan_callback_request_serializer_accepts_explicit_empty_fc_numb
     assert serializer.validated_data["fc_numbers"] == []
 
 
-def test_payment_plan_callback_request_serializer_rejects_nonempty_string_fc_numbers() -> None:
+def test_payment_list_callback_request_serializer_rejects_nonempty_string_fc_numbers() -> None:
     serializer = PaymentPlanCallbackRequestSerializer(
         data={"payplanSno": "PP001", "status": "SUCCESS", "fc_numbers": "FC123"}
     )
@@ -208,7 +208,7 @@ def test_payment_plan_callback_request_serializer_rejects_nonempty_string_fc_num
     assert "fc_numbers" in serializer.errors
 
 
-def test_payment_plan_callback_request_serializer_external_payload() -> None:
+def test_payment_list_callback_request_serializer_external_payload() -> None:
     serializer = PaymentPlanCallbackRequestSerializer(
         data={
             "messageId": "msg-001",
@@ -234,7 +234,7 @@ def test_payment_plan_callback_request_serializer_external_payload() -> None:
     }
 
 
-def test_payment_plan_callback_request_serializer_ack_payload_uses_initial_data_before_validation() -> None:
+def test_payment_list_callback_request_serializer_ack_payload_uses_initial_data_before_validation() -> None:
     serializer = PaymentPlanCallbackRequestSerializer(data={"messageId": "msg-001", "payplanSno": "PP001"})
     assert serializer.ack_payload("KO", message="Invalid callback payload") == {
         "status": "KO",
@@ -244,7 +244,7 @@ def test_payment_plan_callback_request_serializer_ack_payload_uses_initial_data_
     }
 
 
-def test_payment_plan_callback_request_serializer_ack_payload_includes_message() -> None:
+def test_payment_list_callback_request_serializer_ack_payload_includes_message() -> None:
     serializer = PaymentPlanCallbackRequestSerializer(data={"messageId": "msg-001", "payplanSno": "PP001"})
     assert serializer.ack_payload("KO", message="FC not found") == {
         "status": "KO",
@@ -254,7 +254,7 @@ def test_payment_plan_callback_request_serializer_ack_payload_includes_message()
     }
 
 
-def test_payment_plan_callback_ack_serializer_to_representation() -> None:
+def test_payment_list_callback_ack_serializer_to_representation() -> None:
     serializer = PaymentPlanCallbackAckSerializer(
         {
             "status": "OK",
@@ -271,7 +271,7 @@ def test_payment_plan_callback_ack_serializer_to_representation() -> None:
     }
 
 
-def test_payment_plan_callback_ack_serializer_to_representation_includes_message() -> None:
+def test_payment_list_callback_ack_serializer_to_representation_includes_message() -> None:
     serializer = PaymentPlanCallbackAckSerializer(
         {
             "status": "KO",

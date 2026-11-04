@@ -10,7 +10,7 @@ from extras.test_utils.factories import (
     HouseholdFactory,
     IndividualFactory,
     PaymentFactory,
-    PaymentPlanFactory,
+    PaymentListFactory,
     PendingDocumentFactory,
     PendingHouseholdFactory,
     PendingIndividualFactory,
@@ -20,7 +20,7 @@ from extras.test_utils.factories import (
 )
 from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hope.apps.household.const import HEAD, IDENTIFICATION_TYPE_TAX_ID
-from hope.models import Payment, PaymentPlan
+from hope.models import Payment, PaymentList
 
 pytestmark = pytest.mark.django_db
 
@@ -55,8 +55,8 @@ def program(business_area):
 
 
 @pytest.fixture
-def payment_plan(business_area, program, user):
-    return PaymentPlanFactory(
+def payment_list(business_area, program, user):
+    return PaymentListFactory(
         business_area=business_area,
         program_cycle=program.cycles.first(),
         created_by=user,
@@ -168,14 +168,14 @@ def test_getting_individual_with_status_targeted(
     api_client,
     merged_household_context,
     tax_document_type,
-    payment_plan,
+    payment_list,
 ) -> None:
     household = merged_household_context["household"]
     individual = merged_household_context["individual"]
     document = PendingDocumentFactory(individual=individual, type=tax_document_type)
     tax_id = document.document_number
     PaymentFactory(
-        parent=payment_plan,
+        parent=payment_list,
         household=household,
         delivered_quantity=None,
     )
@@ -200,14 +200,14 @@ def test_getting_individual_with_status_sent_to_cash_assist(
     individual = merged_household_context["individual"]
     document = PendingDocumentFactory(individual=individual, type=tax_document_type)
     tax_id = document.document_number
-    payment_plan = PaymentPlanFactory(
+    payment_list = PaymentListFactory(
         business_area=business_area,
         program_cycle=program.cycles.first(),
         created_by=user,
-        status=PaymentPlan.Status.TP_LOCKED,
+        status=PaymentList.Status.TP_LOCKED,
     )
     PaymentFactory(
-        parent=payment_plan,
+        parent=payment_list,
         household=household,
         status=Payment.STATUS_PENDING,
         delivered_quantity=999,

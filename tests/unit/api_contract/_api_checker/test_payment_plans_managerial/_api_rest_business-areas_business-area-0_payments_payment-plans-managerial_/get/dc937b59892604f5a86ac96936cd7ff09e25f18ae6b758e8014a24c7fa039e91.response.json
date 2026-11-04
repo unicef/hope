@@ -4,13 +4,13 @@
         "Content-Type": "application/json",
         "Vary": "Accept, Cookie, origin",
         "Allow": "GET, HEAD, OPTIONS",
-        "ETag": "55caeb37ebdcbc3d1d1f65f1ffdf0554",
+        "ETag": "b78d350af3607492275f5e1f7f6e0660",
         "Cache-Control": "private, no-cache",
         "X-Frame-Options": "SAMEORIGIN",
         "X-Content-Type-Options": "nosniff",
         "Referrer-Policy": "same-origin",
         "Cross-Origin-Opener-Policy": "same-origin",
-        "Content-Length": "773"
+        "Content-Length": "768"
     },
     "data": {
         "next": "http://testserver/api/rest/business-areas/business-area-0/payments/payment-plans-managerial/?limit=50&offset=50",
@@ -29,12 +29,12 @@
                 "financial_service_provider": null,
                 "currency": null,
                 "currency_vision_code": null,
-                "payment_plans_count": 1,
+                "payment_lists_count": 1,
                 "total_households_count": 0,
                 "total_entitled_quantity_usd": "0.00",
                 "last_approval_process_date": "2025-01-01T00:00:00Z",
                 "last_approval_process_by": null,
-                "admin_url": "/api/unicorn/payment/paymentplangroup/ce59a2a7-9c8e-43ca-b8c6-ea124bbe9066/change/"
+                "admin_url": "/api/unicorn/payment/paymentplan/ce59a2a7-9c8e-43ca-b8c6-ea124bbe9066/change/"
             }
         ]
     },

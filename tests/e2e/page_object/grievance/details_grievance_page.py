@@ -29,8 +29,8 @@ class GrievanceDetailsPage(BaseComponents):
     ticket_target_id = 'div[data-cy="label-Target ID"]'
     ticket_individual_id = 'div[data-cy="label-{} ID"]'
     ticket_payment_label = 'div[data-cy="label-Payment ID"]'
-    label_payment_plan = 'div[data-cy="label-Payment Plan"]'
-    label_payment_plan_verification = 'div[data-cy="label-Payment Plan Verification"]'
+    label_payment_list = 'div[data-cy="label-Payment Plan"]'
+    label_payment_list_verification = 'div[data-cy="label-Payment List Verification"]'
     label_programme = 'div[data-cy="label-Programme"]'
     ticket_category_by = 'div[data-cy="label-Created By"]'
     date_creation = 'div[data-cy="label-Date Created"]'
@@ -280,11 +280,11 @@ class GrievanceDetailsPage(BaseComponents):
     def get_ticket_payment_label(self) -> WebElement:
         return self.wait_for(self.ticket_payment_label)
 
-    def get_label_payment_plan(self) -> WebElement:
-        return self.wait_for(self.label_payment_plan)
+    def get_label_payment_list(self) -> WebElement:
+        return self.wait_for(self.label_payment_list)
 
-    def get_label_payment_plan_verification(self) -> WebElement:
-        return self.wait_for(self.label_payment_plan_verification)
+    def get_label_payment_list_verification(self) -> WebElement:
+        return self.wait_for(self.label_payment_list_verification)
 
     def get_label_programme(self) -> WebElement:
         return self.wait_for(self.label_programme)

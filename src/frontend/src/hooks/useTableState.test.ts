@@ -34,12 +34,10 @@ describe('useTableState', () => {
 
   it('keeps compound ordering keys', () => {
     const { result } = renderHook(() =>
-      useTableState({ defaultOrderBy: 'paymentPlanGroup__name,-createdAt' }),
+      useTableState({ defaultOrderBy: 'paymentPlan__name,-createdAt' }),
     );
 
-    expect(result.current.ordering).toBe(
-      'payment_plan_group__name,-created_at',
-    );
+    expect(result.current.ordering).toBe('payment_plan__name,-created_at');
   });
 
   it('falls back to defaultOrdering until a column sort is requested', () => {

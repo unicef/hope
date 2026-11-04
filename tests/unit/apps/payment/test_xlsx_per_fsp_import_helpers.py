@@ -1,4 +1,4 @@
-"""Tests for XlsxPaymentPlanDeliveryImportService extracted helpers."""
+"""Tests for XlsxPaymentListDeliveryImportService extracted helpers."""
 
 import datetime
 from datetime import UTC
@@ -11,17 +11,17 @@ import pytest
 from extras.test_utils.factories import (
     BusinessAreaFactory,
     PaymentFactory,
-    PaymentPlanFactory,
+    PaymentListFactory,
     PaymentVerificationSummaryFactory,
     ProgramFactory,
 )
-from hope.apps.payment.xlsx.xlsx_payment_plan_delivery_import_service import (
-    XlsxPaymentPlanDeliveryImportService,
+from hope.apps.payment.xlsx.xlsx_payment_list_delivery_import_service import (
+    XlsxPaymentListDeliveryImportService,
 )
 from hope.models import (
     BusinessArea,
     Payment,
-    PaymentPlan,
+    PaymentList,
     Program,
     ProgramCycle,
 )
@@ -45,26 +45,26 @@ def program_cycle(program: Program) -> ProgramCycle:
 
 
 @pytest.fixture
-def payment_plan(program_cycle: ProgramCycle, business_area: BusinessArea) -> PaymentPlan:
-    pp = PaymentPlanFactory(
+def payment_list(program_cycle: ProgramCycle, business_area: BusinessArea) -> PaymentList:
+    pp = PaymentListFactory(
         program_cycle=program_cycle,
         business_area=business_area,
-        status=PaymentPlan.Status.ACCEPTED,
+        status=PaymentList.Status.ACCEPTED,
         create_payment_verification_summary=False,
     )
-    PaymentVerificationSummaryFactory(payment_plan=pp)
+    PaymentVerificationSummaryFactory(payment_list=pp)
     return pp
 
 
 @pytest.fixture
-def service(payment_plan: PaymentPlan) -> XlsxPaymentPlanDeliveryImportService:
-    return XlsxPaymentPlanDeliveryImportService(payment_plan, io.BytesIO())
+def service(payment_list: PaymentList) -> XlsxPaymentListDeliveryImportService:
+    return XlsxPaymentListDeliveryImportService(payment_list, io.BytesIO())
 
 
 @pytest.fixture
-def sent_to_fsp_payment(payment_plan):
+def sent_to_fsp_payment(payment_list):
     return PaymentFactory(
-        parent=payment_plan,
+        parent=payment_list,
         status=Payment.STATUS_SENT_TO_FSP,
         delivered_quantity=None,
         delivered_quantity_usd=None,
@@ -74,14 +74,14 @@ def sent_to_fsp_payment(payment_plan):
 
 
 @pytest.fixture
-def service_with_payment(sent_to_fsp_payment, payment_plan):
-    return XlsxPaymentPlanDeliveryImportService(payment_plan, io.BytesIO())
+def service_with_payment(sent_to_fsp_payment, payment_list):
+    return XlsxPaymentListDeliveryImportService(payment_list, io.BytesIO())
 
 
 @pytest.fixture
-def reconciled_payment(payment_plan):
+def reconciled_payment(payment_list):
     return PaymentFactory(
-        parent=payment_plan,
+        parent=payment_list,
         status=Payment.STATUS_DISTRIBUTION_PARTIAL,
         delivered_quantity=Decimal("50.00"),
         entitlement_quantity=Decimal("100.00"),
@@ -89,8 +89,8 @@ def reconciled_payment(payment_plan):
 
 
 @pytest.fixture
-def service_with_reconciled_payment(reconciled_payment, payment_plan):
-    return XlsxPaymentPlanDeliveryImportService(payment_plan, io.BytesIO())
+def service_with_reconciled_payment(reconciled_payment, payment_list):
+    return XlsxPaymentListDeliveryImportService(payment_list, io.BytesIO())
 
 
 def _make_row_cells(values: list) -> list:
@@ -103,9 +103,9 @@ def _make_row_cells(values: list) -> list:
     return cells
 
 
-def test_init_rejects_unsupported_null_delivery_policy(payment_plan, django_assert_num_queries):
+def test_init_rejects_unsupported_null_delivery_policy(payment_list, django_assert_num_queries):
     with django_assert_num_queries(0), pytest.raises(ValueError, match="Unsupported null delivery policy"):
-        XlsxPaymentPlanDeliveryImportService(payment_plan, io.BytesIO(), null_delivery_policy="unsupported")
+        XlsxPaymentListDeliveryImportService(payment_list, io.BytesIO(), null_delivery_policy="unsupported")
 
 
 # --- _get_optional_cell_value ---
@@ -140,12 +140,12 @@ def test_validate_headers_appends_error_when_required_column_missing(service):
 
 
 def test_validate_payment_id_appends_error_for_unknown_id(service):
-    service.sheetname = "Payment Plan - Payment List"
+    service.sheetname = "Payment List - Payment List"
     service.xlsx_headers = ["payment_id", "delivered_quantity"]
     row = _make_row_cells(["PP-0060-UNKNOWN", 100])
     service._validate_payment_id(row)
     assert len(service.errors) == 1
-    assert "is not in Payment Plan Payment List" in service.errors[0].message
+    assert "is not in Payment List" in service.errors[0].message
 
 
 def test_validate_payment_id_records_known_id(service_with_payment, sent_to_fsp_payment, django_assert_num_queries):
@@ -180,7 +180,7 @@ def test_should_skip_row_with_null_payment_id(service, django_assert_num_queries
 
 
 def test_should_skip_row_from_closed_plan(service_with_payment, sent_to_fsp_payment, django_assert_num_queries):
-    service_with_payment.payment_plan.status = PaymentPlan.Status.CLOSED
+    service_with_payment.payment_list.status = PaymentList.Status.CLOSED
 
     with django_assert_num_queries(0):
         result = service_with_payment._should_skip_row(str(sent_to_fsp_payment.unicef_id))
@@ -196,7 +196,7 @@ def test_should_skip_row_with_unknown_payment(service, django_assert_num_queries
 
 
 def test_get_row_action_skips_closed_plan(service_with_payment, sent_to_fsp_payment, django_assert_num_queries):
-    service_with_payment.payment_plan.status = PaymentPlan.Status.CLOSED
+    service_with_payment.payment_list.status = PaymentList.Status.CLOSED
 
     with django_assert_num_queries(0):
         action = service_with_payment._get_row_action(sent_to_fsp_payment, Decimal("100.00"))
@@ -314,7 +314,7 @@ def test_import_row_rejects_invalid_quantity(service_with_payment, sent_to_fsp_p
     with (
         django_assert_num_queries(0),
         pytest.raises(
-            XlsxPaymentPlanDeliveryImportService.XlsxPaymentPlanDeliveryImportServiceError,
+            XlsxPaymentListDeliveryImportService.XlsxPaymentListDeliveryImportServiceError,
             match="Invalid delivered_quantity",
         ),
     ):
@@ -330,7 +330,7 @@ def test_import_row_rejects_quantity_conflict(
     with (
         django_assert_num_queries(0),
         pytest.raises(
-            XlsxPaymentPlanDeliveryImportService.XlsxPaymentPlanDeliveryImportServiceError,
+            XlsxPaymentListDeliveryImportService.XlsxPaymentListDeliveryImportServiceError,
             match="Delivered quantity conflict",
         ),
     ):

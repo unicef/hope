@@ -9,7 +9,7 @@ from django.contrib.admin.options import get_content_type_for_model
 from django.core.files import File
 
 from hope.apps.payment.xlsx.base_xlsx_export_service import XlsxExportBaseService
-from hope.models import FileTemp, FollowUpInstruction, Payment, PaymentPlan
+from hope.models import FileTemp, FollowUpInstruction, Payment, PaymentList
 
 if TYPE_CHECKING:
     from openpyxl import Workbook
@@ -27,16 +27,16 @@ class XlsxFollowUpInstructionBaseExportService(XlsxExportBaseService, ABC):
 
     def __init__(self, instruction: FollowUpInstruction):
         self.instruction = instruction
-        self.payment_plan = self._get_representative_payment_plan()
+        self.payment_list = self._get_representative_payment_list()
         self.headers = self._prepare_headers()
 
-    def _get_representative_payment_plan(self) -> PaymentPlan:
-        payment_plan = (
-            self.instruction.payment_plans.select_related("delivery_mechanism").order_by("created_at").first()
+    def _get_representative_payment_list(self) -> PaymentList:
+        payment_list = (
+            self.instruction.payment_lists.select_related("delivery_mechanism").order_by("created_at").first()
         )
-        if payment_plan is None:
-            raise ValueError("Follow Up Instruction has no child Payment Plans.")
-        return payment_plan
+        if payment_list is None:
+            raise ValueError("Follow Up Instruction has no child Payment Lists.")
+        return payment_list
 
     def _prepare_headers(self) -> list[str]:
         headers = list(self.get_source_headers())

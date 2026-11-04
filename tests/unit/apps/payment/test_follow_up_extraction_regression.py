@@ -1,7 +1,7 @@
 """Regression guard for the extraction of the shared child-plan core.
 
 ``create_follow_up`` / ``create_follow_up_payments`` were refactored to share
-``_create_child_payment_plan`` / ``_copy_payments`` with the top-up flows. Unlike
+``_create_child_payment_list`` / ``_copy_payments`` with the top-up flows. Unlike
 top-up, follow-up must still COPY the source entitlement and keep ``is_follow_up``.
 """
 
@@ -16,15 +16,15 @@ from rest_framework.exceptions import ValidationError
 from extras.test_utils.factories import (
     BusinessAreaFactory,
     PaymentFactory,
+    PaymentListFactory,
     PaymentPlanFactory,
-    PaymentPlanGroupFactory,
     ProgramCycleFactory,
     ProgramFactory,
     UserFactory,
 )
-from hope.apps.payment.celery_tasks import prepare_child_payment_plan_async_task
-from hope.apps.payment.services.payment_plan_services import PaymentPlanService
-from hope.models import Payment, PaymentPlan, PaymentPlanGroup, ProgramCycle, User
+from hope.apps.payment.celery_tasks import prepare_child_payment_list_async_task
+from hope.apps.payment.services.payment_list_services import PaymentListService
+from hope.models import Payment, PaymentList, PaymentPlan, ProgramCycle, User
 
 pytestmark = pytest.mark.django_db
 
@@ -46,28 +46,28 @@ def cycle(business_area: Any) -> ProgramCycle:
 
 
 @pytest.fixture
-def regular_pp(business_area: Any, cycle: ProgramCycle) -> PaymentPlan:
-    return PaymentPlanFactory(
+def regular_pp(business_area: Any, cycle: ProgramCycle) -> PaymentList:
+    return PaymentListFactory(
         business_area=business_area,
         program_cycle=cycle,
-        plan_type=PaymentPlan.PlanType.REGULAR,
+        plan_type=PaymentList.PlanType.REGULAR,
         name="Test Payment Plan",
     )
 
 
 @pytest.fixture
-def follow_up_group(cycle: ProgramCycle, regular_pp: PaymentPlan) -> PaymentPlanGroup:
-    return PaymentPlanGroupFactory(
-        cycle=cycle, plan_type=PaymentPlan.PlanType.FOLLOW_UP, source_group=regular_pp.payment_plan_group
+def follow_up_group(cycle: ProgramCycle, regular_pp: PaymentList) -> PaymentPlan:
+    return PaymentPlanFactory(
+        cycle=cycle, plan_type=PaymentList.PlanType.FOLLOW_UP, source_payment_plan=regular_pp.payment_plan
     )
 
 
 @freeze_time("2023-10-10")
-@mock.patch("hope.models.payment_plan.PaymentPlan.get_exchange_rate", return_value=2.0)
+@mock.patch("hope.models.payment_list.PaymentList.get_exchange_rate", return_value=2.0)
 def test_create_follow_up_arrange_failed_payment_act_run_task_assert_entitlement_copied(
     get_exchange_rate_mock: Any,
     user: User,
-    regular_pp: PaymentPlan,
+    regular_pp: PaymentList,
     django_capture_on_commit_callbacks: Any,
     follow_up_group: Any,
 ) -> None:
@@ -76,12 +76,12 @@ def test_create_follow_up_arrange_failed_payment_act_run_task_assert_entitlement
     failed_payment.entitlement_quantity_usd = Decimal("125.00")
     failed_payment.save()
 
-    follow_up_pp = PaymentPlanService(regular_pp).create_follow_up(user, payment_plan_group=follow_up_group)
+    follow_up_pp = PaymentListService(regular_pp).create_follow_up(user, payment_plan=follow_up_group)
     with django_capture_on_commit_callbacks(execute=True):
-        prepare_child_payment_plan_async_task(follow_up_pp)
+        prepare_child_payment_list_async_task(follow_up_pp)
 
     follow_up_pp.refresh_from_db()
-    assert follow_up_pp.plan_type == PaymentPlan.PlanType.FOLLOW_UP
+    assert follow_up_pp.plan_type == PaymentList.PlanType.FOLLOW_UP
     assert follow_up_pp.name == "Test Payment Plan Follow Up"
     copied = follow_up_pp.payment_items.get()
     assert copied.source_payment == failed_payment
@@ -93,24 +93,24 @@ def test_create_follow_up_arrange_failed_payment_act_run_task_assert_entitlement
 def test_create_follow_up_arrange_follow_up_origin_act_create_assert_raises(
     user: User, business_area: Any, cycle: ProgramCycle, follow_up_group: Any
 ) -> None:
-    follow_up_pp = PaymentPlanFactory(
+    follow_up_pp = PaymentListFactory(
         business_area=business_area,
         program_cycle=cycle,
-        plan_type=PaymentPlan.PlanType.FOLLOW_UP,
+        plan_type=PaymentList.PlanType.FOLLOW_UP,
     )
 
     with pytest.raises(ValidationError) as error:
-        PaymentPlanService(follow_up_pp).create_follow_up(user, payment_plan_group=follow_up_group)
+        PaymentListService(follow_up_pp).create_follow_up(user, payment_plan=follow_up_group)
 
     assert "follow-up of a follow-up" in str(error.value.detail[0])
 
 
 def test_create_follow_up_arrange_no_unsuccessful_payments_act_create_assert_raises(
-    user: User, regular_pp: PaymentPlan, follow_up_group: Any
+    user: User, regular_pp: PaymentList, follow_up_group: Any
 ) -> None:
     PaymentFactory(parent=regular_pp, status=Payment.STATUS_DISTRIBUTION_SUCCESS)
 
     with pytest.raises(ValidationError) as error:
-        PaymentPlanService(regular_pp).create_follow_up(user, payment_plan_group=follow_up_group)
+        PaymentListService(regular_pp).create_follow_up(user, payment_plan=follow_up_group)
 
     assert "no unsuccessful payments" in str(error.value.detail[0])

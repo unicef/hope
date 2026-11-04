@@ -36,7 +36,7 @@ class Survey(UnicefIdentifiedModel, AdminUrlMixin, TimeStampedUUIDModel):
             "category",
             "number_of_recipient",
             "created_by",
-            "payment_plan",
+            "payment_list",
             "program",
             "sampling_type",
             "full_list_arguments",
@@ -74,12 +74,13 @@ class Survey(UnicefIdentifiedModel, AdminUrlMixin, TimeStampedUUIDModel):
         verbose_name=_("Created by"),
     )
     recipients = models.ManyToManyField("household.Household", related_name="surveys", blank=True)
-    payment_plan = models.ForeignKey(
-        "payment.PaymentPlan",
+    payment_list = models.ForeignKey(
+        "payment.PaymentList",
         related_name="surveys",
         blank=True,
         null=True,
         on_delete=models.SET_NULL,
+        db_column="payment_plan_id",
     )
     program = models.ForeignKey(
         "program.Program",

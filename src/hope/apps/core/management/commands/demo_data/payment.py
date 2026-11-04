@@ -28,8 +28,8 @@ from extras.test_utils.factories import (
 )
 from hope.apps.core.management.commands.demo_data.household import create_household
 from hope.apps.household.const import MALE, ROLE_ALTERNATE, ROLE_PRIMARY
-from hope.apps.payment.flows import PaymentPlanFlow
-from hope.apps.payment.services.payment_plan_services import PaymentPlanService
+from hope.apps.payment.flows import PaymentListFlow
+from hope.apps.payment.services.payment_list_services import PaymentListService
 from hope.apps.payment.utils import to_decimal
 from hope.models import (
     AccountType,
@@ -46,8 +46,8 @@ from hope.models import (
     IndividualRoleInHousehold,
     MergeStatusModel,
     Payment,
+    PaymentList,
     PaymentPlan,
-    PaymentPlanGroup,
     PaymentPlanPurpose,
     PaymentVerification,
     PaymentVerificationPlan,
@@ -216,11 +216,11 @@ def generate_delivery_mechanisms() -> None:
         FinancialInstitution.objects.get_or_create(name=fi_name, type=fi_type)
 
 
-def create_tp(payment_plan: PaymentPlan) -> None:
+def create_tp(payment_list: PaymentList) -> None:
     targeting_criteria_rule_pk = UUID("00000000-0000-0000-0000-feedb00c0009")
     targeting_criteria_rule = TargetingCriteriaRule.objects.update_or_create(
         pk=targeting_criteria_rule_pk,
-        payment_plan=payment_plan,
+        payment_list=payment_list,
     )[0]
 
     targeting_criteria_rule_condition_pk = UUID("00000000-0000-0000-0000-feedb00c0008")
@@ -232,7 +232,7 @@ def create_tp(payment_plan: PaymentPlan) -> None:
         arguments=["4d100000-0000-0000-0000-000000000000"],
     )
     tcr2 = TargetingCriteriaRuleFactory(
-        payment_plan=payment_plan,
+        payment_list=payment_list,
     )
     TargetingCriteriaRuleFilterFactory(
         targeting_criteria_rule=tcr2,
@@ -242,7 +242,7 @@ def create_tp(payment_plan: PaymentPlan) -> None:
     )
 
 
-def generate_payment_plan() -> None:  # noqa: PLR0915
+def generate_payment_list() -> None:  # noqa: PLR0915
     afghanistan = BusinessArea.objects.get(slug="afghanistan")
     root = User.objects.get(username="root")
     now = timezone.now()
@@ -374,9 +374,9 @@ def generate_payment_plan() -> None:  # noqa: PLR0915
     usd = CurrencyFactory(code="USD", name="United States Dollar")
     purpose, _ = PaymentPlanPurpose.objects.get_or_create(name="Default Purpose")
     program.payment_plan_purposes.add(purpose)
-    payment_plan_pk = UUID("00000000-feed-beef-0000-00000badf00d")
-    pp_name = "Test Payment Plan"
-    pp_group, _ = PaymentPlanGroup.objects.update_or_create(
+    payment_list_pk = UUID("00000000-feed-beef-0000-00000badf00d")
+    pp_name = "Test Payment List"
+    pp_group, _ = PaymentPlan.objects.update_or_create(
         cycle=program_cycle,
         name=f"{pp_name} Group",
         defaults={
@@ -386,19 +386,19 @@ def generate_payment_plan() -> None:  # noqa: PLR0915
             "dispersion_end_date": now + timedelta(days=14),
         },
     )
-    payment_plan = PaymentPlan.objects.update_or_create(
+    payment_list = PaymentList.objects.update_or_create(
         name=pp_name,
-        pk=payment_plan_pk,
+        pk=payment_list_pk,
         business_area=afghanistan,
         status_date=now,
         created_by=root,
         program_cycle=program_cycle,
-        payment_plan_group=pp_group,
+        payment_plan=pp_group,
         delivery_mechanism=delivery_mechanism_cash,
     )[0]
-    payment_plan.payment_plan_purposes.add(purpose)
+    payment_list.payment_plan_purposes.add(purpose)
 
-    create_tp(payment_plan)
+    create_tp(payment_list)
 
     # create primary collector role
     IndividualRoleInHouseholdFactory(household=household_1, individual=individual_1, role=ROLE_PRIMARY)
@@ -406,7 +406,7 @@ def generate_payment_plan() -> None:  # noqa: PLR0915
     payment_1_pk = UUID("10000000-feed-beef-0000-00000badf00d")
     Payment.objects.get_or_create(
         pk=payment_1_pk,
-        parent=payment_plan,
+        parent=payment_list,
         business_area=afghanistan,
         currency=usd,
         household=household_1,
@@ -421,7 +421,7 @@ def generate_payment_plan() -> None:  # noqa: PLR0915
     payment_2_pk = UUID("20000000-feed-beef-0000-00000badf00d")
     Payment.objects.get_or_create(
         pk=payment_2_pk,
-        parent=payment_plan,
+        parent=payment_list,
         business_area=afghanistan,
         currency=usd,
         household=household_2,
@@ -432,10 +432,10 @@ def generate_payment_plan() -> None:  # noqa: PLR0915
         status=Payment.STATUS_PENDING,
         program=program,
     )
-    payment_plan.update_population_count_fields()
+    payment_list.update_population_count_fields()
     # add one more PP
     pp2_name = "Test TP for PM (just click rebuild)"
-    pp2_group, _ = PaymentPlanGroup.objects.update_or_create(
+    pp2_group, _ = PaymentPlan.objects.update_or_create(
         cycle=program_cycle,
         name=f"{pp2_name} Group",
         defaults={
@@ -445,39 +445,39 @@ def generate_payment_plan() -> None:  # noqa: PLR0915
             "dispersion_end_date": now + timedelta(days=14),
         },
     )
-    pp2 = PaymentPlan.objects.update_or_create(
+    pp2 = PaymentList.objects.update_or_create(
         name=pp2_name,
-        status=PaymentPlan.Status.TP_OPEN,
+        status=PaymentList.Status.TP_OPEN,
         business_area=afghanistan,
         status_date=now,
         created_by=root,
         program_cycle=program_cycle,
-        payment_plan_group=pp2_group,
+        payment_plan=pp2_group,
         delivery_mechanism=delivery_mechanism_cash,
     )[0]
     pp2.payment_plan_purposes.add(purpose)
-    PaymentPlanService(payment_plan=pp2).full_rebuild()
-    pp3_name = "Test TP for PM (ready to create Payment Plan)"
-    pp3_group, _ = PaymentPlanGroup.objects.get_or_create(cycle=program_cycle, name=f"{pp3_name} Group")
-    pp3 = PaymentPlan.objects.update_or_create(
+    PaymentListService(payment_list=pp2).full_rebuild()
+    pp3_name = "Test TP for PM (ready to create Payment List)"
+    pp3_group, _ = PaymentPlan.objects.get_or_create(cycle=program_cycle, name=f"{pp3_name} Group")
+    pp3 = PaymentList.objects.update_or_create(
         name=pp3_name,
         program_cycle=program_cycle,
         defaults={
-            "status": PaymentPlan.Status.DRAFT,
+            "status": PaymentList.Status.DRAFT,
             "business_area": afghanistan,
             "status_date": now,
             "created_by": root,
-            "payment_plan_group": pp3_group,
+            "payment_plan": pp3_group,
             "financial_service_provider": fsp_1,
             "delivery_mechanism": delivery_mechanism_cash,
         },
     )[0]
     pp3.payment_plan_purposes.add(purpose)
-    PaymentPlanService(payment_plan=pp3).full_rebuild()
+    PaymentListService(payment_list=pp3).full_rebuild()
 
 
 def create_payment_verification_plan_with_status(
-    payment_plan: PaymentPlan,
+    payment_list: PaymentList,
     user: "User",
     business_area: BusinessArea,
     program: Program,
@@ -487,10 +487,10 @@ def create_payment_verification_plan_with_status(
     verification_channel = (kwargs.get("verification_channel"),)
     create_failed_payments = kwargs.get("create_failed_payments", False)
 
-    if not hasattr(payment_plan, "payment_verification_summary"):
-        PaymentVerificationSummary.objects.create(payment_plan=payment_plan)
+    if not hasattr(payment_list, "payment_verification_summary"):
+        PaymentVerificationSummary.objects.create(payment_list=payment_list)
 
-    payment_verification_plan = PaymentVerificationPlanFactory(payment_plan=payment_plan)
+    payment_verification_plan = PaymentVerificationPlanFactory(payment_list=payment_list)
     payment_verification_plan.status = status
     if verification_channel:
         payment_verification_plan.verification_channel = verification_channel
@@ -508,7 +508,7 @@ def create_payment_verification_plan_with_status(
             {"registration_data_import": registration_data_import},
         )
 
-        currency = payment_plan.currency
+        currency = payment_list.currency
         if currency is None:
             currency = CurrencyFactory(code="PLN", name="Polish Zloty")
 
@@ -527,7 +527,7 @@ def create_payment_verification_plan_with_status(
                     "status": Payment.STATUS_ERROR,
                 }
         payment_record = PaymentFactory(
-            parent=payment_plan,
+            parent=payment_list,
             household=household,
             currency=currency,
             **additional_args,
@@ -544,7 +544,7 @@ def create_payment_verification_plan_with_status(
     return payment_verification_plan
 
 
-def generate_reconciled_payment_plan() -> None:
+def generate_reconciled_payment_list() -> None:
     afghanistan = BusinessArea.objects.get(slug="afghanistan")
     root = User.objects.get(username="root")
     now = timezone.now()
@@ -556,8 +556,8 @@ def generate_reconciled_payment_plan() -> None:
     FspXlsxTemplatePerDeliveryMechanismFactory(financial_service_provider=fsp_1)
     usd = CurrencyFactory(code="USD", name="United States Dollar")
     program_cycle = program.cycles.first()
-    reconciled_name = "Reconciled Payment Plan"
-    reconciled_group, _ = PaymentPlanGroup.objects.update_or_create(
+    reconciled_name = "Reconciled Payment List"
+    reconciled_group, _ = PaymentPlan.objects.update_or_create(
         cycle=program_cycle,
         name=f"{reconciled_name} Group",
         defaults={
@@ -568,29 +568,29 @@ def generate_reconciled_payment_plan() -> None:
             "exchange_rate": 234.6742,
         },
     )
-    payment_plan = PaymentPlan.objects.update_or_create(
+    payment_list = PaymentList.objects.update_or_create(
         name=reconciled_name,
         unicef_id="PP-0060-22-11223344",
         business_area=afghanistan,
         status_date=now,
-        status=PaymentPlan.Status.ACCEPTED,
+        status=PaymentList.Status.ACCEPTED,
         created_by=root,
         program_cycle=program_cycle,
-        payment_plan_group=reconciled_group,
+        payment_plan=reconciled_group,
         total_delivered_quantity=999,
         total_entitled_quantity=2999,
-        plan_type=PaymentPlan.PlanType.REGULAR,
+        plan_type=PaymentList.PlanType.REGULAR,
         delivery_mechanism=dm_cash,
     )[0]
-    payment_plan.payment_plan_purposes.add(purpose)
+    payment_list.payment_plan_purposes.add(purpose)
     # update status
-    flow = PaymentPlanFlow(payment_plan)
+    flow = PaymentListFlow(payment_list)
     flow.status_finished()
-    payment_plan.save()
+    payment_list.save()
 
     # full approval chain so the PDF summary export (approval/authorization/release columns) works
     approval_process = ApprovalProcessFactory(
-        payment_plan=payment_plan,
+        payment_list=payment_list,
         sent_for_approval_by=root,
         sent_for_approval_date=now,
         sent_for_authorization_by=root,
@@ -607,7 +607,7 @@ def generate_reconciled_payment_plan() -> None:
     )
 
     create_payment_verification_plan_with_status(
-        payment_plan,
+        payment_list,
         root,
         afghanistan,
         program,
@@ -615,7 +615,7 @@ def generate_reconciled_payment_plan() -> None:
         verification_channel=PaymentVerificationPlan.VERIFICATION_CHANNEL_MANUAL,
         create_failed_payments=True,
     )
-    payment_plan.update_population_count_fields()
+    payment_list.update_population_count_fields()
 
 
 def update_fsps() -> None:
@@ -684,11 +684,11 @@ def _create_hh_for_large_pp(
     return household, [*members, primary, alternate]
 
 
-def generate_payment_plan_large() -> None:
-    """Seed a 300-household payment plan for locally reproducing ticket 311246 (payee-list slowness)."""
+def generate_payment_list_large() -> None:
+    """Seed a 300-household payment list for locally reproducing ticket 311246 (payee-list slowness)."""
     from extras.test_utils.factories import DocumentFactory
     from hope.apps.payment.services.payment_household_snapshot_service import (
-        create_payment_plan_snapshot_data,
+        create_payment_list_snapshot_data,
     )
 
     afghanistan = BusinessArea.objects.get(slug="afghanistan")
@@ -744,7 +744,7 @@ def generate_payment_plan_large() -> None:
     dm_cash = DeliveryMechanism.objects.get(code="cash")
     fsp = FinancialServiceProvider.objects.get(name="Test FSP 1")
     usd = CurrencyFactory(code="USD", name="United States Dollar")
-    large_pp_group = program_cycle.payment_plan_groups.first()
+    large_pp_group = program_cycle.payment_plans.first()
     large_pp_group.currency = usd
     large_pp_group.financial_service_provider = fsp
     large_pp_group.dispersion_start_date = now
@@ -752,25 +752,25 @@ def generate_payment_plan_large() -> None:
     large_pp_group.save(
         update_fields=["currency", "financial_service_provider", "dispersion_start_date", "dispersion_end_date"]
     )
-    payment_plan = PaymentPlan.objects.update_or_create(
+    payment_list = PaymentList.objects.update_or_create(
         pk=UUID("bbbbbbbb-0000-0000-0000-000000311246"),
         defaults={
-            "name": "Large Payment Plan (311246)",
+            "name": "Large Payment List (311246)",
             "business_area": afghanistan,
             "status_date": now,
             "created_by": root,
             "program_cycle": program_cycle,
-            "payment_plan_group": large_pp_group,
+            "payment_plan": large_pp_group,
             "delivery_mechanism": dm_cash,
-            "status": PaymentPlan.Status.LOCKED,
+            "status": PaymentList.Status.LOCKED,
         },
     )[0]
 
-    paid_household_ids = set(payment_plan.payment_items.values_list("household_id", flat=True))
+    paid_household_ids = set(payment_list.payment_items.values_list("household_id", flat=True))
     unpaid = Household.objects.filter(program=program).exclude(id__in=paid_household_ids)
     to_create = [
         Payment(
-            parent=payment_plan,
+            parent=payment_list,
             business_area=afghanistan,
             currency=usd,
             household=hh,
@@ -787,6 +787,6 @@ def generate_payment_plan_large() -> None:
     ]
     if to_create:
         Payment.objects.bulk_create(to_create)
-        payment_plan.update_population_count_fields()
+        payment_list.update_population_count_fields()
 
-    create_payment_plan_snapshot_data(payment_plan)
+    create_payment_list_snapshot_data(payment_list)

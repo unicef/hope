@@ -36,7 +36,7 @@ from hope.apps.core.api.mixins import (
 )
 from hope.apps.payment.api.filters import PaymentSearchFilter
 from hope.apps.payment.api.querysets import with_payment_related_data
-from hope.apps.payment.api.serializers import PaymentListSerializer
+from hope.apps.payment.api.serializers import PaymentRowSerializer
 from hope.apps.periodic_data_update.service.flexible_attribute_service import (
     FlexibleAttributeForPDUService,
 )
@@ -72,7 +72,7 @@ from hope.models import (
     BeneficiaryGroup,
     FlexibleAttribute,
     Payment,
-    PaymentPlan,
+    PaymentList,
     Program,
     ProgramCycle,
     log_create,
@@ -116,7 +116,7 @@ class ProgramViewSet(
         "update": ProgramUpdateSerializer,
         "update_partner_access": ProgramUpdatePartnerAccessSerializer,
         "copy": ProgramCopySerializer,
-        "payments": PaymentListSerializer,
+        "payments": PaymentRowSerializer,
     }
     filter_backends = (OrderingFilter, DjangoFilterBackend)
     filterset_class = ProgramFilter
@@ -189,14 +189,14 @@ class ProgramViewSet(
             raise ValidationError("Only active Program can be finished.")
         # check payment plans
         if (
-            PaymentPlan.objects.filter(program_cycle__in=program.cycles.all())
+            PaymentList.objects.filter(program_cycle__in=program.cycles.all())
             .exclude(
-                status__in=PaymentPlan.PRE_PAYMENT_PLAN_STATUSES
-                + (PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED),
+                status__in=PaymentList.PRE_PAYMENT_LIST_STATUSES
+                + (PaymentList.Status.ACCEPTED, PaymentList.Status.FINISHED),
             )
             .exists()
         ):
-            raise ValidationError("All Payment Plans and Follow-Up Payment Plans have to be Reconciled.")
+            raise ValidationError("All Payment Lists and Follow-Up Payment Lists have to be Reconciled.")
 
         # check for active cycles
         if program.cycles.filter(status=ProgramCycle.ACTIVE).exists():
@@ -403,7 +403,7 @@ class ProgramViewSet(
     @extend_schema(
         parameters=filterset_to_openapi_params(PaymentSearchFilter),
         responses={
-            200: PaymentListSerializer(many=True),
+            200: PaymentRowSerializer(many=True),
         },
     )
     @action(detail=True, methods=["get"])
@@ -492,11 +492,11 @@ class ProgramCycleViewSet(
         previous_end_date = cycle.end_date
 
         updated_cycle = serializer.save()
-        # update PaymentPlan start and end dates
+        # update PaymentList start and end dates
         if previous_start_date != updated_cycle.start_date:
-            PaymentPlan.objects.filter(program_cycle=cycle).update(start_date=updated_cycle.start_date)
+            PaymentList.objects.filter(program_cycle=cycle).update(start_date=updated_cycle.start_date)
         if previous_end_date != updated_cycle.end_date:
-            PaymentPlan.objects.filter(program_cycle=cycle).update(end_date=updated_cycle.end_date)
+            PaymentList.objects.filter(program_cycle=cycle).update(end_date=updated_cycle.end_date)
 
     def perform_destroy(self, program_cycle: ProgramCycle) -> None:
         if program_cycle.program.status != Program.ACTIVE:
@@ -508,7 +508,7 @@ class ProgramCycleViewSet(
         if program_cycle.program.cycles.count() == 1:
             raise ValidationError("Don't allow to delete last Cycle.")
 
-        if program_cycle.payment_plans.exists():
+        if program_cycle.payment_lists.exists():
             raise ValidationError("Don't allow to delete Cycle with assigned Target Population")
 
         program_cycle.delete()

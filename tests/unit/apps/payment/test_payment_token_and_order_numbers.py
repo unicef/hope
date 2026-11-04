@@ -9,13 +9,15 @@ from extras.test_utils.factories import (
     CountryFactory,
     HouseholdFactory,
     PaymentFactory,
-    PaymentPlanFactory,
+    PaymentListFactory,
     ProgramCycleFactory,
     ProgramFactory,
 )
 from hope.apps.payment.validators import payment_token_and_order_number_validator
-from hope.apps.payment.xlsx.xlsx_payment_plan_delivery_export_service import XlsxPaymentPlanDeliveryExportService
-from hope.models import Payment, PaymentPlan
+from hope.apps.payment.xlsx.xlsx_payment_list_delivery_export_service import (
+    XlsxPaymentListDeliveryExportService,
+)
+from hope.models import Payment, PaymentList
 
 pytestmark = pytest.mark.django_db
 
@@ -47,10 +49,10 @@ def program_cycle(program: Any) -> Any:
 
 
 @pytest.fixture
-def payment_plan(business_area: Any, program_cycle: Any) -> PaymentPlan:
-    return PaymentPlanFactory(
+def payment_list(business_area: Any, program_cycle: Any) -> PaymentList:
+    return PaymentListFactory(
         program_cycle=program_cycle,
-        status=PaymentPlan.Status.ACCEPTED,
+        status=PaymentList.Status.ACCEPTED,
         business_area=business_area,
     )
 
@@ -76,10 +78,10 @@ def households(program: Any, business_area: Any, country_origin: Any) -> list[An
 
 
 @pytest.fixture
-def payments(payment_plan: PaymentPlan, program: Any, households: list[Any]) -> list[Any]:
+def payments(payment_list: PaymentList, program: Any, households: list[Any]) -> list[Any]:
     return [
         PaymentFactory(
-            parent=payment_plan,
+            parent=payment_list,
             household=household,
             program=program,
         )
@@ -88,11 +90,11 @@ def payments(payment_plan: PaymentPlan, program: Any, households: list[Any]) -> 
 
 
 def test_generate_token_and_order_numbers_for_payments(
-    payment_plan: PaymentPlan, program: Any, payments: list[Payment]
+    payment_list: PaymentList, program: Any, payments: list[Payment]
 ) -> None:
-    service = XlsxPaymentPlanDeliveryExportService(payment_plan, None)
-    service.generate_token_and_order_numbers(payment_plan.eligible_payments.all(), program)
-    payment = payment_plan.eligible_payments.first()
+    service = XlsxPaymentListDeliveryExportService(payment_list, None)
+    service.generate_token_and_order_numbers(payment_list.eligible_payments.all(), program)
+    payment = payment_list.eligible_payments.first()
     assert len(str(payment.order_number)) == 9
     assert len(str(payment.token_number)) == 7
 

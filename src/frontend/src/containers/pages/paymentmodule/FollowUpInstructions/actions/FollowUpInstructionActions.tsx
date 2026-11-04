@@ -226,7 +226,7 @@ export function FollowUpInstructionActions({
       )}
       {(status === 'ACCEPTED' || status === 'FINISHED') && (
         <>
-          {can(PERMISSIONS.PM_VIEW_LIST) && (
+          {can(PERMISSIONS.PM_PAYMENT_PLAN_EXPORT_XLSX) && (
             <SimpleWorkflowButton
               label="Export XLSX"
               instruction={instruction}

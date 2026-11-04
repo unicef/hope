@@ -18,7 +18,7 @@ from e2e.page_object.payment_verification.payment_verification import (
 from e2e.page_object.payment_verification.payment_verification_details import (
     PaymentVerificationDetails,
 )
-from e2e.payment_module.test_e2e_payment_plans import find_file
+from e2e.payment_module.test_e2e_payment_lists import find_file
 from extras.test_utils.factories import (
     AccountTypeFactory,
     DataCollectingTypeFactory,
@@ -26,7 +26,7 @@ from extras.test_utils.factories import (
     FinancialServiceProviderFactory,
     HouseholdFactory,
     PaymentFactory,
-    PaymentPlanFactory,
+    PaymentListFactory,
     PaymentVerificationFactory,
     PaymentVerificationPlanFactory,
     ProgramFactory,
@@ -38,7 +38,7 @@ from hope.models import (
     DataCollectingType,
     DeliveryMechanism,
     Payment,
-    PaymentPlan,
+    PaymentList,
     PaymentVerification,
     PaymentVerificationPlan,
     Program,
@@ -124,14 +124,14 @@ def payment_verification_multiple_verification_plans(
         )
         households.append(household)
 
-    payment_plan = PaymentPlanFactory(
+    payment_list = PaymentListFactory(
         program_cycle=program.cycles.first(),
-        status=PaymentPlan.Status.FINISHED,
+        status=PaymentList.Status.FINISHED,
         business_area=BusinessArea.objects.filter(slug="afghanistan").first(),
     )
     payments = [
         PaymentFactory(
-            parent=payment_plan,
+            parent=payment_list,
             business_area=BusinessArea.objects.first(),
             household=hh,
             head_of_household=hh.head_of_household,
@@ -145,7 +145,7 @@ def payment_verification_multiple_verification_plans(
 
     for payment in payments:
         payment_verification_plan = PaymentVerificationPlanFactory(
-            payment_plan=payment_plan,
+            payment_list=payment_list,
             verification_channel=PaymentVerificationPlan.VERIFICATION_CHANNEL_MANUAL,
         )
 
@@ -169,13 +169,13 @@ def empty_payment_verification(social_worker_program: Program) -> None:
         business_area=business_area,
     )
 
-    payment_plan = PaymentPlanFactory(
+    payment_list = PaymentListFactory(
         program_cycle=program.cycles.first(),
-        status=PaymentPlan.Status.FINISHED,
+        status=PaymentList.Status.FINISHED,
         business_area=business_area,
     )
     PaymentFactory(
-        parent=payment_plan,
+        parent=payment_list,
         business_area=business_area,
         household=household,
         head_of_household=household.head_of_household,
@@ -260,9 +260,9 @@ def payment_verification_creator(
     fsp = FinancialServiceProviderFactory()
     fsp.delivery_mechanisms.set([dm_cash])
 
-    payment_plan = PaymentPlanFactory(
+    payment_list = PaymentListFactory(
         name="TEST",
-        status=PaymentPlan.Status.FINISHED,
+        status=PaymentList.Status.FINISHED,
         program_cycle=program.cycles.first(),
         business_area=business_area,
         start_date=datetime.now() - relativedelta(months=1),
@@ -272,10 +272,10 @@ def payment_verification_creator(
         delivery_mechanism=dm_cash,
     )
 
-    payment_plan.unicef_id = "PP-0000-00-1122334"
-    payment_plan.save()
+    payment_list.unicef_id = "PP-0000-00-1122334"
+    payment_list.save()
     payment = PaymentFactory(
-        parent=payment_plan,
+        parent=payment_list,
         household=household,
         head_of_household=household.head_of_household,
         entitlement_quantity=21.36,
@@ -285,7 +285,7 @@ def payment_verification_creator(
         status=Payment.STATUS_DISTRIBUTION_SUCCESS,
     )
     payment_verification_plan = PaymentVerificationPlanFactory(
-        payment_plan=payment_plan,
+        payment_list=payment_list,
         verification_channel=channel,
         sample_size=0,
         responded_count=0,
@@ -344,7 +344,7 @@ class TestSmokePaymentVerification:
         page_payment_verification.get_cash_plan_table_row().click()
         page_payment_verification_details.assert_page_header_title("Payment Plan PP-0000-00-1122334")
         assert "CREATE VERIFICATION PLAN" in page_payment_verification_details.get_button_new_plan().text
-        assert "Payment Plan Details" in page_payment_verification_details.get_div_payment_plan_details().text
+        assert "Payment Plan Details" in page_payment_verification_details.get_div_payment_list_details().text
         assert "Active Program" in page_payment_verification_details.get_label_programme_name().text
         page_payment_verification_details.get_label_payment_records()
         page_payment_verification_details.get_label_start_date()

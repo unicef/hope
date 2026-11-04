@@ -4,7 +4,7 @@ from extras.test_utils.factories import (
     BusinessAreaFactory,
     HouseholdFactory,
     IndividualFactory,
-    PaymentPlanFactory,
+    PaymentListFactory,
     ProgramFactory,
     UserFactory,
 )
@@ -76,7 +76,7 @@ def test_from_input_to_targeting_criteria_creates_expected_objects(user, busines
 
     IndividualFactory(household=hh1, program=program)
     ind2 = IndividualFactory(household=hh2, program=program)
-    payment_plan = PaymentPlanFactory(program_cycle=program.cycles.first())
+    payment_list = PaymentListFactory(program_cycle=program.cycles.first())
 
     assert TargetingCriteriaRule.objects.count() == 0
     assert TargetingCriteriaRuleFilter.objects.count() == 0
@@ -114,7 +114,7 @@ def test_from_input_to_targeting_criteria_creates_expected_objects(user, busines
         ],
     }
 
-    from_input_to_targeting_criteria(targeting_criteria_input, program, payment_plan)
+    from_input_to_targeting_criteria(targeting_criteria_input, program, payment_list)
 
     assert TargetingCriteriaRule.objects.count() == 1
     assert TargetingCriteriaRuleFilter.objects.count() == 1

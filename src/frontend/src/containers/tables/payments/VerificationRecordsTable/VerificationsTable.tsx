@@ -1,8 +1,8 @@
 import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { createApiParams } from '@utils/apiUtils';
-import type { PaginatedPaymentListList } from '@restgenerated/models/PaginatedPaymentListList';
-import type { PaymentList } from '@restgenerated/models/PaymentList';
+import type { PaginatedPaymentRowList } from '@restgenerated/models/PaginatedPaymentRowList';
+import type { PaymentRow } from '@restgenerated/models/PaymentRow';
 import { RestService } from '@restgenerated/services/RestService';
 import { restQueryKey } from '@utils/queryKeys';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
@@ -17,14 +17,14 @@ import { VerificationRecordsTableRow } from './VerificationRecordsTableRow';
 import { headCells } from './VerificationsHeadCells';
 
 interface VerificationsTableProps {
-  paymentPlanId?: string;
+  paymentListId?: string;
   filter;
   canViewRecordDetails: boolean;
   businessArea: string;
 }
 
 export function VerificationsTable({
-  paymentPlanId,
+  paymentListId,
   filter,
   canViewRecordDetails,
   businessArea,
@@ -38,9 +38,9 @@ export function VerificationsTable({
       ...filter,
       businessAreaSlug: businessArea,
       programCode: programId,
-      paymentVerificationPk: paymentPlanId,
+      paymentVerificationPk: paymentListId,
     }),
-    [filter, businessArea, programId, paymentPlanId],
+    [filter, businessArea, programId, paymentListId],
   );
 
   const table = useTableState({ resetPageOn: filterVariables });
@@ -54,7 +54,7 @@ export function VerificationsTable({
   const verificationsCountParams = {
     businessAreaSlug: businessArea,
     programCode: programId,
-    paymentVerificationPk: paymentPlanId,
+    paymentVerificationPk: paymentListId,
     ...filterVariables,
   };
   const { data: verificationCountData } = useQuery({
@@ -75,7 +75,7 @@ export function VerificationsTable({
     {
       businessAreaSlug: businessArea,
       programCode: programId,
-      paymentVerificationPk: paymentPlanId,
+      paymentVerificationPk: paymentListId,
     },
     listVariables,
   );
@@ -84,7 +84,7 @@ export function VerificationsTable({
     isLoading,
     isFetching,
     error,
-  } = useQuery<PaginatedPaymentListList>({
+  } = useQuery<PaginatedPaymentRowList>({
     queryKey: restQueryKey(
       RestService.restBusinessAreasProgramsPaymentVerificationsVerificationsList,
       verificationsListParams,
@@ -127,12 +127,12 @@ export function VerificationsTable({
       tableState={table}
       data={paymentsData}
       itemsCount={itemsCount}
-      renderRow={(payment: PaymentList) => (
+      renderRow={(payment: PaymentRow) => (
         <VerificationRecordsTableRow
           key={payment.id}
           payment={payment}
           canViewRecordDetails={canViewRecordDetails}
-          paymentPlanId={paymentPlanId}
+          paymentListId={paymentListId}
           showStatusColumn={false}
         />
       )}

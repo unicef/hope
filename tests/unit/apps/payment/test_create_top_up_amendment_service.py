@@ -8,16 +8,16 @@ from rest_framework.exceptions import ValidationError
 from extras.test_utils.factories import (
     BusinessAreaFactory,
     PaymentFactory,
+    PaymentListFactory,
     PaymentPlanFactory,
-    PaymentPlanGroupFactory,
     PaymentPlanPurposeFactory,
     ProgramCycleFactory,
     ProgramFactory,
     UserFactory,
 )
-from hope.apps.payment.celery_tasks import prepare_child_payment_plan_async_task
-from hope.apps.payment.services.payment_plan_services import PaymentPlanService
-from hope.models import Payment, PaymentPlan, PaymentPlanGroup, ProgramCycle, User
+from hope.apps.payment.celery_tasks import prepare_child_payment_list_async_task
+from hope.apps.payment.services.payment_list_services import PaymentListService
+from hope.models import Payment, PaymentList, PaymentPlan, ProgramCycle, User
 
 pytestmark = pytest.mark.django_db
 
@@ -46,11 +46,11 @@ def purpose(cycle: ProgramCycle) -> Any:
 
 
 @pytest.fixture
-def regular_pp(business_area: Any, cycle: ProgramCycle) -> PaymentPlan:
-    return PaymentPlanFactory(
+def regular_pp(business_area: Any, cycle: ProgramCycle) -> PaymentList:
+    return PaymentListFactory(
         business_area=business_area,
         program_cycle=cycle,
-        plan_type=PaymentPlan.PlanType.REGULAR,
+        plan_type=PaymentList.PlanType.REGULAR,
     )
 
 
@@ -60,29 +60,29 @@ def top_up_pp(
     cycle: ProgramCycle,
     user: User,
     purpose: Any,
-    regular_pp: PaymentPlan,
-) -> PaymentPlan:
-    return PaymentPlanFactory(
+    regular_pp: PaymentList,
+) -> PaymentList:
+    return PaymentListFactory(
         business_area=business_area,
         program_cycle=cycle,
         created_by=user,
-        plan_type=PaymentPlan.PlanType.TOP_UP,
-        status=PaymentPlan.Status.ACCEPTED,
-        source_payment_plan=regular_pp,
+        plan_type=PaymentList.PlanType.TOP_UP,
+        status=PaymentList.Status.ACCEPTED,
+        source_payment_list=regular_pp,
         name="Test Plan Top Up",
         payment_plan_purposes=[purpose],
     )
 
 
 @pytest.fixture
-def amendment_group(cycle: ProgramCycle, top_up_pp: PaymentPlan) -> PaymentPlanGroup:
-    return PaymentPlanGroupFactory(
-        cycle=cycle, plan_type=PaymentPlan.PlanType.TOP_UP_AMENDMENT, source_group=top_up_pp.payment_plan_group
+def amendment_group(cycle: ProgramCycle, top_up_pp: PaymentList) -> PaymentPlan:
+    return PaymentPlanFactory(
+        cycle=cycle, plan_type=PaymentList.PlanType.TOP_UP_AMENDMENT, source_payment_plan=top_up_pp.payment_plan
     )
 
 
 @pytest.fixture
-def top_up_payments(top_up_pp: PaymentPlan) -> dict[str, Payment]:
+def top_up_payments(top_up_pp: PaymentList) -> dict[str, Payment]:
     return {
         "delivered": PaymentFactory(parent=top_up_pp, status=Payment.STATUS_DISTRIBUTION_SUCCESS),
         "pending": PaymentFactory(parent=top_up_pp, status=Payment.STATUS_PENDING),
@@ -90,44 +90,44 @@ def top_up_payments(top_up_pp: PaymentPlan) -> dict[str, Payment]:
 
 
 @freeze_time("2023-10-10")
-@mock.patch("hope.models.payment_plan.PaymentPlan.get_exchange_rate", return_value=2.0)
+@mock.patch("hope.models.payment_list.PaymentList.get_exchange_rate", return_value=2.0)
 def test_create_top_up_amendment_arrange_eligible_payments_act_create_assert_inherits_attributes(
     get_exchange_rate_mock: Any,
     user: User,
     purpose: Any,
-    top_up_pp: PaymentPlan,
+    top_up_pp: PaymentList,
     top_up_payments: dict[str, Payment],
     amendment_group: Any,
 ) -> None:
 
-    amendment_pp = PaymentPlanService(top_up_pp).create_top_up_amendment(user, payment_plan_group=amendment_group)
+    amendment_pp = PaymentListService(top_up_pp).create_top_up_amendment(user, payment_plan=amendment_group)
 
     amendment_pp.refresh_from_db()
-    assert amendment_pp.plan_type == PaymentPlan.PlanType.TOP_UP_AMENDMENT
-    assert amendment_pp.status == PaymentPlan.Status.OPEN
+    assert amendment_pp.plan_type == PaymentList.PlanType.TOP_UP_AMENDMENT
+    assert amendment_pp.status == PaymentList.Status.OPEN
     assert amendment_pp.name == "Test Plan Top Up Amendment"
-    assert amendment_pp.source_payment_plan == top_up_pp
-    assert amendment_pp.payment_plan_group == amendment_group
+    assert amendment_pp.source_payment_list == top_up_pp
+    assert amendment_pp.payment_plan == amendment_group
     assert amendment_pp.currency == top_up_pp.currency
     assert list(amendment_pp.payment_plan_purposes.values_list("pk", flat=True)) == [purpose.pk]
     assert top_up_pp.child_plans.count() == 1
 
 
 @freeze_time("2023-10-10")
-@mock.patch("hope.models.payment_plan.PaymentPlan.get_exchange_rate", return_value=2.0)
+@mock.patch("hope.models.payment_list.PaymentList.get_exchange_rate", return_value=2.0)
 def test_create_top_up_amendment_arrange_eligible_payments_act_run_task_assert_copies_every_status(
     get_exchange_rate_mock: Any,
     user: User,
-    top_up_pp: PaymentPlan,
+    top_up_pp: PaymentList,
     top_up_payments: dict[str, Payment],
     django_capture_on_commit_callbacks: Any,
     amendment_group: Any,
 ) -> None:
     """Delivered and pending alike are copied: payment status does not gate an amendment."""
-    amendment_pp = PaymentPlanService(top_up_pp).create_top_up_amendment(user, payment_plan_group=amendment_group)
+    amendment_pp = PaymentListService(top_up_pp).create_top_up_amendment(user, payment_plan=amendment_group)
 
     with django_capture_on_commit_callbacks(execute=True):
-        prepare_child_payment_plan_async_task(amendment_pp)
+        prepare_child_payment_list_async_task(amendment_pp)
 
     amendment_pp.refresh_from_db()
     assert set(amendment_pp.payment_items.values_list("source_payment_id", flat=True)) == {
@@ -141,46 +141,46 @@ def test_create_top_up_amendment_arrange_eligible_payments_act_run_task_assert_c
 
 
 @freeze_time("2023-10-10")
-@mock.patch("hope.models.payment_plan.PaymentPlan.get_exchange_rate", return_value=2.0)
+@mock.patch("hope.models.payment_list.PaymentList.get_exchange_rate", return_value=2.0)
 def test_create_top_up_amendment_arrange_query_budget_act_create_assert_within_limit(
     get_exchange_rate_mock: Any,
     user: User,
-    top_up_pp: PaymentPlan,
+    top_up_pp: PaymentList,
     top_up_payments: dict[str, Payment],
     django_assert_num_queries: Any,
     amendment_group: Any,
 ) -> None:
 
     with django_assert_num_queries(11):
-        PaymentPlanService(top_up_pp).create_top_up_amendment(user, payment_plan_group=amendment_group)
+        PaymentListService(top_up_pp).create_top_up_amendment(user, payment_plan=amendment_group)
 
 
 @pytest.mark.parametrize(
     "plan_type",
     [
-        PaymentPlan.PlanType.REGULAR,
-        PaymentPlan.PlanType.FOLLOW_UP,
-        PaymentPlan.PlanType.TOP_UP_AMENDMENT,
+        PaymentList.PlanType.REGULAR,
+        PaymentList.PlanType.FOLLOW_UP,
+        PaymentList.PlanType.TOP_UP_AMENDMENT,
     ],
 )
 def test_create_top_up_amendment_arrange_non_top_up_origin_act_create_assert_raises(
     user: User, business_area: Any, cycle: ProgramCycle, plan_type: str, amendment_group: Any
 ) -> None:
-    source_pp = PaymentPlanFactory(
+    source_pp = PaymentListFactory(
         business_area=business_area,
         program_cycle=cycle,
         plan_type=plan_type,
-        status=PaymentPlan.Status.ACCEPTED,
+        status=PaymentList.Status.ACCEPTED,
     )
 
     with pytest.raises(ValidationError) as error:
-        PaymentPlanService(source_pp).create_top_up_amendment(user, payment_plan_group=amendment_group)
+        PaymentListService(source_pp).create_top_up_amendment(user, payment_plan=amendment_group)
 
-    assert "Top Up plan" in str(error.value.detail[0])
+    assert "Top Up payment list" in str(error.value.detail[0])
 
 
 def test_create_top_up_amendment_arrange_no_eligible_payments_act_create_assert_raises(
-    user: User, top_up_pp: PaymentPlan, amendment_group: Any
+    user: User, top_up_pp: PaymentList, amendment_group: Any
 ) -> None:
     """A Top-Up with a withdrawn beneficiary and nothing else has nobody left to amend."""
     payment = PaymentFactory(parent=top_up_pp, status=Payment.STATUS_PENDING)
@@ -188,22 +188,22 @@ def test_create_top_up_amendment_arrange_no_eligible_payments_act_create_assert_
     payment.household.save()
 
     with pytest.raises(ValidationError) as error:
-        PaymentPlanService(top_up_pp).create_top_up_amendment(user, payment_plan_group=amendment_group)
+        PaymentListService(top_up_pp).create_top_up_amendment(user, payment_plan=amendment_group)
 
     assert "no eligible payments" in str(error.value.detail[0]).lower()
 
 
 @pytest.mark.parametrize(
     "status",
-    [PaymentPlan.Status.OPEN, PaymentPlan.Status.LOCKED, PaymentPlan.Status.CLOSED],
+    [PaymentList.Status.OPEN, PaymentList.Status.LOCKED, PaymentList.Status.CLOSED],
 )
 def test_create_top_up_amendment_arrange_source_outside_release_window_act_create_assert_raises(
-    user: User, top_up_pp: PaymentPlan, top_up_payments: dict[str, Payment], status: str, amendment_group: Any
+    user: User, top_up_pp: PaymentList, top_up_payments: dict[str, Payment], status: str, amendment_group: Any
 ) -> None:
     top_up_pp.status = status
     top_up_pp.save(update_fields=["status"])
 
     with pytest.raises(ValidationError) as error:
-        PaymentPlanService(top_up_pp).create_top_up_amendment(user, payment_plan_group=amendment_group)
+        PaymentListService(top_up_pp).create_top_up_amendment(user, payment_plan=amendment_group)
 
     assert "Accepted or Finished" in str(error.value.detail[0])

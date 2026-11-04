@@ -20,8 +20,8 @@ from extras.test_utils.factories import (
     HouseholdFactory,
     IndividualFactory,
     IndividualRoleInHouseholdFactory,
+    PaymentListFactory,
     PaymentPlanFactory,
-    PaymentPlanGroupFactory,
     PaymentPlanPurposeFactory,
     ProgramCycleFactory,
     ProgramFactory,
@@ -40,7 +40,7 @@ from hope.apps.household.const import (
     ROLE_PRIMARY,
     SEEING,
 )
-from hope.apps.payment.services.payment_plan_services import PaymentPlanService
+from hope.apps.payment.services.payment_list_services import PaymentListService
 from hope.apps.periodic_data_update.utils import (
     field_label_to_field_name,
 )
@@ -53,7 +53,7 @@ from hope.models import (
     FlexibleAttribute,
     Household,
     Individual,
-    PaymentPlan,
+    PaymentList,
     PeriodicFieldData,
     Program,
     ProgramCycle,
@@ -74,7 +74,7 @@ def sw_program() -> Program:
     )
     purpose = PaymentPlanPurposeFactory(name="Test Purpose")
     prog.payment_plan_purposes.add(purpose)
-    PaymentPlanGroupFactory(cycle=prog.cycles.first(), name="Test Group")
+    PaymentPlanFactory(cycle=prog.cycles.first(), name="Test Group")
     return prog
 
 
@@ -87,7 +87,7 @@ def non_sw_program() -> Program:
     )
     purpose = PaymentPlanPurposeFactory(name="Test Purpose")
     prog.payment_plan_purposes.add(purpose)
-    PaymentPlanGroupFactory(cycle=prog.cycles.first(), name="Test Group")
+    PaymentPlanFactory(cycle=prog.cycles.first(), name="Test Group")
     return prog
 
 
@@ -111,7 +111,7 @@ def program(business_area: BusinessArea) -> Program:
     )
     purpose = PaymentPlanPurposeFactory(name="Test Purpose")
     program.payment_plan_purposes.add(purpose)
-    PaymentPlanGroupFactory(cycle=cycle, name="Test Group")
+    PaymentPlanFactory(cycle=cycle, name="Test Group")
     return program
 
 
@@ -322,7 +322,7 @@ def delivery_mechanisms(account_types):
 
 
 @pytest.fixture
-def create_targeting(delivery_mechanisms) -> PaymentPlan:
+def create_targeting(delivery_mechanisms) -> PaymentList:
     test_program = Program.objects.get(name="Test Programm")
 
     dm_cash = DeliveryMechanism.objects.get(code="cash")
@@ -339,18 +339,18 @@ def create_targeting(delivery_mechanisms) -> PaymentPlan:
 
     purpose = PaymentPlanPurposeFactory(name="Test Purpose")
     test_program.payment_plan_purposes.add(purpose)
-    group = PaymentPlanGroupFactory(cycle=test_program.cycles.first(), name="Test Group")
+    group = PaymentPlanFactory(cycle=test_program.cycles.first(), name="Test Group")
 
-    pp = PaymentPlanFactory(
+    pp = PaymentListFactory(
         name="Test Target Population",
-        status=PaymentPlan.Status.TP_OPEN,
+        status=PaymentList.Status.TP_OPEN,
         program_cycle=test_program.cycles.first(),
-        build_status=PaymentPlan.BuildStatus.BUILD_STATUS_OK,
+        build_status=PaymentList.BuildStatus.BUILD_STATUS_OK,
         created_by=User.objects.filter(email="test@example.com").first(),
         updated_at=timezone.now(),
         delivery_mechanism=dm_cash,
         financial_service_provider=fsp_1,
-        payment_plan_group=group,
+        payment_plan=group,
         payment_plan_purposes=[purpose],
         business_area=business_area,
     )
@@ -452,7 +452,7 @@ def create_targeting(delivery_mechanisms) -> PaymentPlan:
     IndividualRoleInHouseholdFactory(individual=ind_2, household=household_2, role=ROLE_PRIMARY)
     rule = RuleFactory(
         name="Test Rule",
-        type=Rule.TYPE_PAYMENT_PLAN,
+        type=Rule.TYPE_PAYMENT_LIST,
         deprecated=False,
         enabled=True,
     )
@@ -469,9 +469,9 @@ def create_targeting(delivery_mechanisms) -> PaymentPlan:
     TargetingCriteriaRuleFactory(
         household_ids=f"{household_1.unicef_id}, {household_2.unicef_id}",
         individual_ids="",
-        payment_plan=pp,
+        payment_list=pp,
     )
-    PaymentPlanService.create_payments(pp)
+    PaymentListService.create_payments(pp)
     pp.update_population_count_fields()
     pp.refresh_from_db()
     return pp
@@ -497,13 +497,13 @@ class TestSmokeTargeting:
     def test_smoke_targeting_page(
         self,
         create_programs: None,
-        create_targeting: PaymentPlan,
+        create_targeting: PaymentList,
         page_targeting: Targeting,
     ) -> None:
-        PaymentPlanFactory(
+        PaymentListFactory(
             program_cycle=ProgramCycle.objects.get(program__name="Test Programm"),
             name="Copy TP",
-            status=PaymentPlan.Status.TP_OPEN,
+            status=PaymentList.Status.TP_OPEN,
         )
         page_targeting.select_global_program_filter("Test Programm")
         page_targeting.get_nav_targeting().click()
@@ -524,7 +524,7 @@ class TestSmokeTargeting:
     def test_smoke_targeting_create_use_filters(
         self,
         create_programs: None,
-        create_targeting: PaymentPlan,
+        create_targeting: PaymentList,
         page_targeting: Targeting,
         page_targeting_create: TargetingCreate,
     ) -> None:
@@ -543,7 +543,7 @@ class TestSmokeTargeting:
     def test_smoke_targeting_create_use_ids(
         self,
         create_programs: None,
-        create_targeting: PaymentPlan,
+        create_targeting: PaymentList,
         page_targeting: Targeting,
         page_targeting_create: TargetingCreate,
     ) -> None:
@@ -563,7 +563,7 @@ class TestSmokeTargeting:
     def test_smoke_targeting_details_page(
         self,
         create_programs: None,
-        create_targeting: PaymentPlan,
+        create_targeting: PaymentList,
         page_targeting: Targeting,
         page_targeting_details: TargetingDetails,
     ) -> None:
@@ -788,7 +788,7 @@ class TestCreateTargeting:
         assert "New Target Population" in page_targeting_create.get_title_page().text
         page_targeting_create.get_filters_program_cycle_autocomplete().click()
         page_targeting_create.select_listbox_element("First Cycle In Programme")
-        page_targeting_create.get_filters_payment_plan_group_autocomplete().click()
+        page_targeting_create.get_filters_payment_plan_autocomplete().click()
         page_targeting_create.select_listbox_element("Test Group")
         page_targeting_create.get_input_payment_plan_purposes().click()
         page_targeting_create.select_listbox_element("Test Purpose")
@@ -818,7 +818,7 @@ class TestCreateTargeting:
         assert page_targeting_details.get_title_page().text.split("\n")[0].strip() == targeting_name
         assert page_targeting_details.get_criteria_container().text == disability_expected_criteria_text
         assert Household.objects.count() == 2
-        assert PaymentPlan.objects.get(name=targeting_name).payment_items.count() == 1
+        assert PaymentList.objects.get(name=targeting_name).payment_items.count() == 1
         individual = household_with_disability.individuals.filter(full_name="Individual 1").first()
         page_targeting_details.wait_for_text(
             individual.unicef_id,
@@ -843,7 +843,7 @@ class TestCreateTargeting:
         assert "New Target Population" in page_targeting_create.get_title_page().text
         page_targeting_create.get_filters_program_cycle_autocomplete().click()
         page_targeting_create.select_listbox_element("First Cycle In Programme")
-        page_targeting_create.get_filters_payment_plan_group_autocomplete().click()
+        page_targeting_create.get_filters_payment_plan_autocomplete().click()
         page_targeting_create.select_listbox_element("Test Group")
         page_targeting_create.get_input_payment_plan_purposes().click()
         page_targeting_create.select_listbox_element("Test Purpose")
@@ -866,7 +866,7 @@ class TestCreateTargeting:
         assert page_targeting_details.get_title_page().text.split("\n")[0].strip() == targeting_name
         assert page_targeting_details.get_criteria_container().text == disability_expected_criteria_text
         assert Household.objects.count() == 3
-        assert PaymentPlan.objects.get(name=targeting_name).payment_items.count() == 1
+        assert PaymentList.objects.get(name=targeting_name).payment_items.count() == 1
         page_targeting_details.wait_for_text(
             household_refugee.unicef_id,
             page_targeting_details.household_table_cell.format(1, 1),
@@ -890,7 +890,7 @@ class TestCreateTargeting:
         assert "New Target Population" in page_targeting_create.get_title_page().text
         page_targeting_create.get_filters_program_cycle_autocomplete().click()
         page_targeting_create.select_listbox_element("Cycle In Programme")
-        page_targeting_create.get_filters_payment_plan_group_autocomplete().click()
+        page_targeting_create.get_filters_payment_plan_autocomplete().click()
         page_targeting_create.select_listbox_element("Test Group")
         page_targeting_create.get_input_payment_plan_purposes().click()
         page_targeting_create.select_listbox_element("Test Purpose")
@@ -914,7 +914,7 @@ class TestCreateTargeting:
         assert page_targeting_details.get_title_page().text.split("\n")[0].strip() == targeting_name
         assert page_targeting_details.get_criteria_container().text == expected_criteria_text
         assert Household.objects.count() == 3
-        assert PaymentPlan.objects.get(name=targeting_name).payment_items.count() == 1
+        assert PaymentList.objects.get(name=targeting_name).payment_items.count() == 1
         individual1 = Individual.objects.get(full_name="Test Individual 1")
         page_targeting_details.wait_for_text(
             individual1.household.unicef_id,
@@ -1042,7 +1042,7 @@ class TestCreateTargeting:
         assert page_targeting_details.get_title_page().text.split("\n")[0].strip() == targeting_name
         assert page_targeting_details.get_criteria_container().text == expected_criteria_text
         assert Household.objects.count() == 3
-        assert PaymentPlan.objects.get(name=targeting_name).payment_items.count() == 1
+        assert PaymentList.objects.get(name=targeting_name).payment_items.count() == 1
         page_targeting_details.wait_for_text(
             individual1.household.unicef_id,
             page_targeting_details.household_table_cell.format(1, 1),
@@ -1099,7 +1099,7 @@ class TestCreateTargeting:
         assert "New Target Population" in page_targeting_create.get_title_page().text
         page_targeting_create.get_filters_program_cycle_autocomplete().click()
         page_targeting_create.select_listbox_element("Cycle In Programme")
-        page_targeting_create.get_filters_payment_plan_group_autocomplete().click()
+        page_targeting_create.get_filters_payment_plan_autocomplete().click()
         page_targeting_create.select_listbox_element("Test Group")
         page_targeting_create.get_input_payment_plan_purposes().click()
         page_targeting_create.select_listbox_element("Test Purpose")
@@ -1155,7 +1155,7 @@ class TestCreateTargeting:
         assert "New Target Population" in page_targeting_create.get_title_page().text
         page_targeting_create.get_filters_program_cycle_autocomplete().click()
         page_targeting_create.select_listbox_element("Cycle In Programme")
-        page_targeting_create.get_filters_payment_plan_group_autocomplete().click()
+        page_targeting_create.get_filters_payment_plan_autocomplete().click()
         page_targeting_create.select_listbox_element("Test Group")
         page_targeting_create.get_input_payment_plan_purposes().click()
         page_targeting_create.select_listbox_element("Test Purpose")
@@ -1179,7 +1179,7 @@ class TestCreateTargeting:
         assert page_targeting_details.get_title_page().text.split("\n")[0].strip() == targeting_name
         assert page_targeting_details.get_criteria_container().text == expected_criteria_text
         assert Household.objects.count() == 3
-        assert PaymentPlan.objects.get(name=targeting_name).payment_items.count() == 1
+        assert PaymentList.objects.get(name=targeting_name).payment_items.count() == 1
         assert page_targeting_create.get_total_number_of_households_count().text == "1"
         individual3 = Individual.objects.get(full_name="Test Individual 3")
         page_targeting_details.wait_for_text(
@@ -1203,7 +1203,7 @@ class TestCreateTargeting:
         assert "New Target Population" in page_targeting_create.get_title_page().text
         page_targeting_create.get_filters_program_cycle_autocomplete().click()
         page_targeting_create.select_listbox_element("First Cycle In Programme")
-        page_targeting_create.get_filters_payment_plan_group_autocomplete().click()
+        page_targeting_create.get_filters_payment_plan_autocomplete().click()
         page_targeting_create.select_listbox_element("Test Group")
         page_targeting_create.get_input_payment_plan_purposes().click()
         page_targeting_create.select_listbox_element("Test Purpose")
@@ -1229,7 +1229,7 @@ class TestCreateTargeting:
         assert page_targeting_details.get_title_page().text.split("\n")[0].strip() == targeting_name
         assert page_targeting_details.get_criteria_container().text == expected_criteria_text
         assert Household.objects.count() == 3
-        assert PaymentPlan.objects.get(name=targeting_name).payment_items.count() == 1
+        assert PaymentList.objects.get(name=targeting_name).payment_items.count() == 1
         assert page_targeting_create.get_total_number_of_people_count().text == "1"
 
         individual1 = Individual.objects.get(full_name="Test Individual 1")
@@ -1248,7 +1248,7 @@ class TestTargeting:
         self,
         create_programs: None,
         household_with_disability: Household,
-        create_targeting: PaymentPlan,
+        create_targeting: PaymentList,
         page_targeting: Targeting,
         page_targeting_details: TargetingDetails,
         page_targeting_create: TargetingCreate,
@@ -1261,7 +1261,7 @@ class TestTargeting:
         assert "SAVE" in page_targeting_create.get_button_target_population_create().text
         page_targeting_create.get_filters_program_cycle_autocomplete().click()
         page_targeting_create.select_listbox_element("First Cycle In Programme")
-        page_targeting_create.get_filters_payment_plan_group_autocomplete().click()
+        page_targeting_create.get_filters_payment_plan_autocomplete().click()
         page_targeting_create.select_listbox_element("Test Group")
         page_targeting_create.get_input_payment_plan_purposes().click()
         page_targeting_create.select_listbox_element("Test Purpose")
@@ -1272,7 +1272,7 @@ class TestTargeting:
         page_targeting_create.get_no_validation_fsp_accept().click()
         page_targeting_create.get_input_name().send_keys(f"Target Population for {household_with_disability.unicef_id}")
         page_targeting_create.click_button_target_population_create()
-        target_population = PaymentPlan.objects.get(name__startswith="Target Population for")
+        target_population = PaymentList.objects.get(name__startswith="Target Population for")
         assert (
             str(target_population.total_individuals_count)
             == page_targeting_details.get_label_targeted_individuals().text
@@ -1288,7 +1288,7 @@ class TestTargeting:
         self,
         create_programs: None,
         household_with_disability: Household,
-        create_targeting: PaymentPlan,
+        create_targeting: PaymentList,
         page_targeting: Targeting,
         page_targeting_details: TargetingDetails,
         page_targeting_create: TargetingCreate,
@@ -1305,7 +1305,7 @@ class TestTargeting:
         page_targeting_create.get_input_name().send_keys(f"Target Population for {individual.unicef_id}")
         page_targeting_create.click_button_target_population_create()
         assert "OPEN" in page_targeting_details.get_label_status().text
-        target_population = PaymentPlan.objects.get(name__startswith="Target Population for")
+        target_population = PaymentList.objects.get(name__startswith="Target Population for")
         assert target_population.total_households_count == 1
         assert (
             str(target_population.total_individuals_count)
@@ -1316,7 +1316,7 @@ class TestTargeting:
     def test_copy_targeting(
         self,
         create_programs: None,
-        create_targeting: PaymentPlan,
+        create_targeting: PaymentList,
         page_targeting: Targeting,
         page_targeting_details: TargetingDetails,
         page_targeting_create: TargetingCreate,
@@ -1349,7 +1349,7 @@ class TestTargeting:
         self,
         create_programs: None,
         household_with_disability: Household,
-        create_targeting: PaymentPlan,
+        create_targeting: PaymentList,
         page_targeting: Targeting,
         page_targeting_details: TargetingDetails,
         page_targeting_create: TargetingCreate,
@@ -1400,7 +1400,7 @@ class TestTargeting:
         test_data: dict,
         create_programs: None,
         household_with_disability: Household,
-        create_targeting: PaymentPlan,
+        create_targeting: PaymentList,
         page_targeting: Targeting,
         page_targeting_details: TargetingDetails,
         page_targeting_create: TargetingCreate,
@@ -1443,7 +1443,7 @@ class TestTargeting:
         self,
         create_programs: None,
         household_with_disability: Household,
-        create_targeting: PaymentPlan,
+        create_targeting: PaymentList,
         page_targeting: Targeting,
     ) -> None:
         if not (user2 := User.objects.filter(pk="4196c2c5-c2dd-48d2-887f-3a9d39e88999").first()):
@@ -1452,10 +1452,10 @@ class TestTargeting:
                 first_name="ABC",
                 last_name="LastName",
             )
-        PaymentPlanFactory(
+        PaymentListFactory(
             program_cycle=ProgramCycle.objects.get(program__name="Test Programm"),
             name="A Copy TP",
-            status=PaymentPlan.Status.TP_LOCKED,
+            status=PaymentList.Status.TP_LOCKED,
             created_by=user2,
             total_households_count=1,
         )
@@ -1496,7 +1496,7 @@ class TestTargeting:
         self,
         create_programs: None,
         household_with_disability: Household,
-        create_targeting: PaymentPlan,
+        create_targeting: PaymentList,
         page_targeting: Targeting,
         page_targeting_details: TargetingDetails,
         page_targeting_create: TargetingCreate,
@@ -1508,7 +1508,7 @@ class TestTargeting:
         assert "New Target Population" in page_targeting_create.get_title_page().text
         page_targeting_create.get_filters_program_cycle_autocomplete().click()
         page_targeting_create.select_listbox_element("First Cycle In Programme")
-        page_targeting_create.get_filters_payment_plan_group_autocomplete().click()
+        page_targeting_create.get_filters_payment_plan_autocomplete().click()
         page_targeting_create.select_listbox_element("Test Group")
         page_targeting_create.get_input_payment_plan_purposes().click()
         page_targeting_create.select_listbox_element("Test Purpose")
@@ -1530,7 +1530,7 @@ class TestTargeting:
         self,
         create_programs: None,
         household_with_disability: Household,
-        create_targeting: PaymentPlan,
+        create_targeting: PaymentList,
         page_targeting: Targeting,
         page_targeting_details: TargetingDetails,
         page_targeting_create: TargetingCreate,

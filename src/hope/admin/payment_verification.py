@@ -20,17 +20,17 @@ class PaymentVerificationAdmin(ViewOnUiMixin, CursorPaginatorAdmin, HOPEModelAdm
         "status",
         "status_date",
         "received_amount",
-        "payment_plan_name",
+        "payment_list_name",
         "sent_to_rapid_pro",
     )
 
     list_filter = (
         (
-            "payment_verification_plan__payment_plan__program_cycle__program__business_area",
+            "payment_verification_plan__payment_list__program_cycle__program__business_area",
             AutoCompleteFilter,
         ),
         (
-            "payment_verification_plan__payment_plan__program_cycle__program",
+            "payment_verification_plan__payment_list__program_cycle__program",
             AutoCompleteFilter,
         ),
         DepotManager,
@@ -48,13 +48,13 @@ class PaymentVerificationAdmin(ViewOnUiMixin, CursorPaginatorAdmin, HOPEModelAdm
         program = plan.get_program
         return (
             f"/{plan.business_area.slug}/programs/{program.code}"
-            f"/payment-verification/payment-plan/{plan.payment_plan.id}"
+            f"/payment-verification/payment-list/{plan.payment_list.id}"
             f"/verification/payment/{obj.payment.id}"
         )
 
-    def payment_plan_name(self, obj: PaymentVerification) -> str:  # pragma: no cover
-        payment_plan = obj.payment_verification_plan.payment_plan
-        return getattr(payment_plan, "name", "~no name~")
+    def payment_list_name(self, obj: PaymentVerification) -> str:  # pragma: no cover
+        payment_list = obj.payment_verification_plan.payment_list
+        return getattr(payment_list, "name", "~no name~")
 
     def household(self, obj: PaymentVerification) -> str:  # pragma: no cover
         payment = obj.payment
@@ -70,8 +70,8 @@ class PaymentVerificationAdmin(ViewOnUiMixin, CursorPaginatorAdmin, HOPEModelAdm
             .prefetch_related(
                 "payment",
                 "payment__household",
-                "payment_verification_plan__payment_plan",
-                "payment_verification_plan__payment_plan__business_area",
+                "payment_verification_plan__payment_list",
+                "payment_verification_plan__payment_list__business_area",
             )
         )
 

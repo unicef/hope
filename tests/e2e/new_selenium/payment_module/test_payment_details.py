@@ -6,9 +6,9 @@ import pytest
 from e2e.new_selenium.conftest import grant_permission
 from extras.test_utils.selenium import HopeTestBrowser
 from hope.apps.account.permissions import Permissions
-from hope.models import BusinessArea, Payment, PaymentPlan, User
+from hope.models import BusinessArea, Payment, PaymentList, User
 
-from .conftest import PM_VIEW_PERMISSIONS, _lifecycle_payment_plan
+from .conftest import PM_VIEW_PERMISSIONS, _lifecycle_payment_list
 
 pytestmark = pytest.mark.django_db()
 
@@ -21,8 +21,8 @@ REVERT_SUBMIT = 'button[data-cy="button-revert-mark-as-failed-submit"]'
 DELIVERED_QUANTITY_INPUT = 'input[data-cy="input-deliveredQuantity"]'
 
 
-def program_url(payment_plan: PaymentPlan) -> str:
-    return f"/{payment_plan.business_area.slug}/programs/{payment_plan.program.code}"
+def program_url(payment_list: PaymentList) -> str:
+    return f"/{payment_list.business_area.slug}/programs/{payment_list.program.code}"
 
 
 def open_payment_as(browser: HopeTestBrowser, payment: Payment, status: str) -> None:
@@ -31,14 +31,14 @@ def open_payment_as(browser: HopeTestBrowser, payment: Payment, status: str) -> 
     browser.wait_for_text(status, PAYMENT_STATUS)
 
 
-def first_payment(payment_plan: PaymentPlan) -> Payment:
-    return payment_plan.payment_items.order_by("unicef_id").first()
+def first_payment(payment_list: PaymentList) -> Payment:
+    return payment_list.payment_items.order_by("unicef_id").first()
 
 
-def _delivered_payment_plan(business_area: BusinessArea, status: str, force_failed_count: int = 0) -> PaymentPlan:
+def _delivered_payment_list(business_area: BusinessArea, status: str, force_failed_count: int = 0) -> PaymentList:
     """Released plan with 3 fully delivered payments, the first `force_failed_count` of them marked failed."""
-    payment_plan = _lifecycle_payment_plan(business_area, status, status)
-    for index, payment in enumerate(payment_plan.payment_items.order_by("unicef_id")):
+    payment_list = _lifecycle_payment_list(business_area, status, status)
+    for index, payment in enumerate(payment_list.payment_items.order_by("unicef_id")):
         failed = index < force_failed_count
         payment.status = Payment.STATUS_FORCE_FAILED if failed else Payment.STATUS_DISTRIBUTION_SUCCESS
         payment.delivered_quantity = Decimal(0) if failed else payment.entitlement_quantity
@@ -48,32 +48,32 @@ def _delivered_payment_plan(business_area: BusinessArea, status: str, force_fail
         payment.household.total_cash_received = payment.delivered_quantity
         payment.household.total_cash_received_usd = payment.delivered_quantity_usd
         payment.household.save(update_fields=["total_cash_received", "total_cash_received_usd"])
-    payment_plan.update_money_fields()
-    return payment_plan
+    payment_list.update_money_fields()
+    return payment_list
 
 
 @pytest.fixture
-def delivered_payment_plan(business_area: BusinessArea) -> PaymentPlan:
-    return _delivered_payment_plan(business_area, PaymentPlan.Status.ACCEPTED)
+def delivered_payment_list(business_area: BusinessArea) -> PaymentList:
+    return _delivered_payment_list(business_area, PaymentList.Status.ACCEPTED)
 
 
 @pytest.fixture
-def finished_delivered_payment_plan(business_area: BusinessArea) -> PaymentPlan:
-    return _delivered_payment_plan(business_area, PaymentPlan.Status.FINISHED)
+def finished_delivered_payment_list(business_area: BusinessArea) -> PaymentList:
+    return _delivered_payment_list(business_area, PaymentList.Status.FINISHED)
 
 
 @pytest.fixture
-def payment_plan_with_force_failed_payment(business_area: BusinessArea) -> PaymentPlan:
-    return _delivered_payment_plan(business_area, PaymentPlan.Status.ACCEPTED, force_failed_count=1)
+def payment_list_with_force_failed_payment(business_area: BusinessArea) -> PaymentList:
+    return _delivered_payment_list(business_area, PaymentList.Status.ACCEPTED, force_failed_count=1)
 
 
 def test_mark_payment_as_failed(
     browser: HopeTestBrowser,
     user_with_no_permissions: User,
     business_area: BusinessArea,
-    delivered_payment_plan: PaymentPlan,
+    delivered_payment_list: PaymentList,
 ) -> None:
-    payment = first_payment(delivered_payment_plan)
+    payment = first_payment(delivered_payment_list)
     with grant_permission(
         user_with_no_permissions, business_area, *PM_VIEW_PERMISSIONS, Permissions.PM_MARK_PAYMENT_AS_FAILED
     ):
@@ -97,9 +97,9 @@ def test_revert_mark_as_failed(
     browser: HopeTestBrowser,
     user_with_no_permissions: User,
     business_area: BusinessArea,
-    payment_plan_with_force_failed_payment: PaymentPlan,
+    payment_list_with_force_failed_payment: PaymentList,
 ) -> None:
-    payment = first_payment(payment_plan_with_force_failed_payment)
+    payment = first_payment(payment_list_with_force_failed_payment)
     with grant_permission(
         user_with_no_permissions, business_area, *PM_VIEW_PERMISSIONS, Permissions.PM_MARK_PAYMENT_AS_FAILED
     ):
@@ -122,10 +122,10 @@ def test_revert_mark_as_failed(
 
 
 DELIVERED_PLAN_FIXTURES = pytest.mark.parametrize(
-    "payment_plan_fixture",
+    "payment_list_fixture",
     [
-        pytest.param("delivered_payment_plan", id="accepted"),
-        pytest.param("finished_delivered_payment_plan", id="finished"),
+        pytest.param("delivered_payment_list", id="accepted"),
+        pytest.param("finished_delivered_payment_list", id="finished"),
     ],
 )
 
@@ -136,9 +136,9 @@ def test_mark_as_failed_shown_with_permission(
     browser: HopeTestBrowser,
     user_with_no_permissions: User,
     business_area: BusinessArea,
-    payment_plan_fixture: str,
+    payment_list_fixture: str,
 ) -> None:
-    payment = first_payment(request.getfixturevalue(payment_plan_fixture))
+    payment = first_payment(request.getfixturevalue(payment_list_fixture))
     with grant_permission(
         user_with_no_permissions, business_area, *PM_VIEW_PERMISSIONS, Permissions.PM_MARK_PAYMENT_AS_FAILED
     ):
@@ -152,9 +152,9 @@ def test_mark_as_failed_hidden_without_permission(
     browser: HopeTestBrowser,
     user_with_no_permissions: User,
     business_area: BusinessArea,
-    payment_plan_fixture: str,
+    payment_list_fixture: str,
 ) -> None:
-    payment = first_payment(request.getfixturevalue(payment_plan_fixture))
+    payment = first_payment(request.getfixturevalue(payment_list_fixture))
     with grant_permission(user_with_no_permissions, business_area, *PM_VIEW_PERMISSIONS):
         open_payment_as(browser, payment, "DELIVERED FULLY")
         browser.assert_element_absent(MARK_AS_FAILED)

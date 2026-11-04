@@ -59,14 +59,14 @@ const TabsContainer = styled.div`
 
 export interface Props {
   paymentVerificationPlanNode: PaymentVerificationPlanDetails['paymentVerificationPlans'][number];
-  paymentPlanId: string;
+  paymentListId: string;
 }
 
 // Helper function to prepare sample size request for REST API
 function prepareSampleSizeRequest(
   selectedTab: number,
   formValues: any,
-  paymentPlanId: string,
+  paymentListId: string,
 ): MessageSampleSize {
   const samplingType =
     selectedTab === 0
@@ -99,7 +99,7 @@ function prepareSampleSizeRequest(
       : undefined;
 
   return {
-    paymentPlan: paymentPlanId,
+    paymentList: paymentListId,
     samplingType,
     fullListArguments,
     randomSamplingArguments,
@@ -108,7 +108,7 @@ function prepareSampleSizeRequest(
 
 export const EditVerificationPlan = ({
   paymentVerificationPlanNode,
-  paymentPlanId,
+  paymentListId,
 }: Props): ReactElement => {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
@@ -193,7 +193,7 @@ export const EditVerificationPlan = ({
       RestService.restBusinessAreasProgramsPaymentVerificationsUpdateVerificationPlanPartialUpdate(
         {
           businessAreaSlug: businessArea,
-          id: paymentPlanId,
+          id: paymentListId,
           programCode: programCode,
           verificationPlanId: paymentVerificationPlanNode.id,
           requestBody: requestData,
@@ -282,7 +282,7 @@ export const EditVerificationPlan = ({
       const requestBody = prepareSampleSizeRequest(
         selectedTab,
         formValues,
-        paymentPlanId,
+        paymentListId,
       );
 
       const result =
@@ -306,7 +306,7 @@ export const EditVerificationPlan = ({
     programCode,
     selectedTab,
     formValues,
-    paymentPlanId,
+    paymentListId,
     showMessage,
   ]);
 
@@ -372,7 +372,7 @@ export const EditVerificationPlan = ({
                 'RapidPro is not set up in your country, please contact your Roll Out Focal Point',
               ),
 
-              lastSuccessfulPage: `/${baseUrl}/payment-verification/payment-plan/${paymentPlanId}`,
+              lastSuccessfulPage: `/${baseUrl}/payment-verification/payment-list/${paymentListId}`,
             },
           });
         }

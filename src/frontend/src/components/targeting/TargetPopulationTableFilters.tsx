@@ -3,7 +3,7 @@ import { ResponsiveGrid, ResponsiveGridContainer } from 'src/responsive';
 import { Group, Person } from '@mui/icons-material';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { PaymentPlanStatusEnum } from '@restgenerated/models/PaymentPlanStatusEnum';
+import { PaymentListStatusEnum } from '@restgenerated/models/PaymentListStatusEnum';
 import { RestService } from '@restgenerated/services/RestService';
 import { restQueryKey } from '@utils/queryKeys';
 import { useQuery } from '@tanstack/react-query';
@@ -56,28 +56,31 @@ export const TargetPopulationTableFilters = ({
 
   const allowedStatusChoices = [
     'ASSIGNED',
-    PaymentPlanStatusEnum.DRAFT,
-    PaymentPlanStatusEnum.TP_OPEN,
-    PaymentPlanStatusEnum.TP_LOCKED,
-    PaymentPlanStatusEnum.STEFICON_RUN,
-    PaymentPlanStatusEnum.STEFICON_WAIT,
-    PaymentPlanStatusEnum.STEFICON_COMPLETED,
-    PaymentPlanStatusEnum.STEFICON_ERROR,
+    PaymentListStatusEnum.DRAFT,
+    PaymentListStatusEnum.TP_OPEN,
+    PaymentListStatusEnum.TP_LOCKED,
+    PaymentListStatusEnum.STEFICON_RUN,
+    PaymentListStatusEnum.STEFICON_WAIT,
+    PaymentListStatusEnum.STEFICON_COMPLETED,
+    PaymentListStatusEnum.STEFICON_ERROR,
   ];
 
   const { data: statusChoicesData } = useQuery({
-    queryKey: restQueryKey(RestService.restChoicesPaymentPlanStatusList),
-    queryFn: () => RestService.restChoicesPaymentPlanStatusList(),
+    queryKey: restQueryKey(RestService.restChoicesPaymentListStatusList),
+    queryFn: () => RestService.restChoicesPaymentListStatusList(),
   });
 
   const preparedStatusChoices =
     [
       { name: 'Assigned', value: 'ASSIGNED' },
-      { name: 'Ready for Payment Module', value: PaymentPlanStatusEnum.DRAFT },
+      {
+        name: 'Ready for Payment Module',
+        value: PaymentListStatusEnum.DRAFT,
+      },
       ...(statusChoicesData || []),
     ]
       ?.filter((el) =>
-        allowedStatusChoices.includes(el.value as PaymentPlanStatusEnum),
+        allowedStatusChoices.includes(el.value as PaymentListStatusEnum),
       )
       ?.filter((el) => el.name !== 'Draft') || [];
 

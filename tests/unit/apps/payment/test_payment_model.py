@@ -2,15 +2,19 @@ from decimal import Decimal
 
 import pytest
 
-from extras.test_utils.factories.payment import FinancialServiceProviderFactory, PaymentFactory, PaymentPlanFactory
+from extras.test_utils.factories.payment import (
+    FinancialServiceProviderFactory,
+    PaymentFactory,
+    PaymentListFactory,
+)
 from hope.models import Payment
 
 pytestmark = pytest.mark.django_db
 
 
 @pytest.fixture
-def payment_plan():
-    return PaymentPlanFactory()
+def payment_list():
+    return PaymentListFactory()
 
 
 @pytest.fixture
@@ -23,9 +27,9 @@ def fsp_xlsx():
 
 
 @pytest.fixture
-def payment_with_null_entitlement(payment_plan, fsp_xlsx):
+def payment_with_null_entitlement(payment_list, fsp_xlsx):
     return PaymentFactory(
-        parent=payment_plan,
+        parent=payment_list,
         entitlement_quantity=None,
         entitlement_quantity_usd=None,
         delivered_quantity=None,

@@ -14,14 +14,14 @@ from hope.apps.activity_log.utils import copy_model_object
 from hope.apps.core.api.mixins import BaseAPI
 from hope.apps.core.timezones import to_utc_midnight
 from hope.apps.core.utils import chunks
-from hope.apps.payment.flows import PaymentPlanFlow
-from hope.apps.payment.services.payment_plan_group_services import PaymentPlanGroupService
+from hope.apps.payment.flows import PaymentListFlow
+from hope.apps.payment.services.payment_plan_services import PaymentPlanService
 from hope.apps.payment.utils import (
     bulk_log_payment_changes,
     get_payment_delivered_quantity_status_and_value,
     get_quantity_in_usd,
     inactive_currency_reason,
-    log_payment_plan_change,
+    log_payment_list_change,
     to_decimal,
 )
 from hope.models import (
@@ -33,8 +33,8 @@ from hope.models import (
     FinancialServiceProvider,
     FspNameMapping,
     Payment,
-    PaymentPlan,
-    PaymentPlanSplit,
+    PaymentList,
+    PaymentListSplit,
     User,
 )
 
@@ -69,24 +69,24 @@ class PaymentInstructionStatus(Enum):
 class PaymentInstructionFromSplitSerializer(ReadOnlyModelSerializer):
     remote_id = serializers.CharField(source="id")
     external_code = serializers.SerializerMethodField()
-    fsp = serializers.CharField(source="payment_plan.financial_service_provider.payment_gateway_id", read_only=True)
+    fsp = serializers.CharField(source="payment_list.financial_service_provider.payment_gateway_id", read_only=True)
     payload = serializers.SerializerMethodField()
     country = serializers.SerializerMethodField()
-    delivery_mechanism = serializers.CharField(source="payment_plan.delivery_mechanism.code", read_only=True)
+    delivery_mechanism = serializers.CharField(source="payment_list.delivery_mechanism.code", read_only=True)
 
-    def get_country(self, obj: PaymentPlanSplit) -> str:
-        business_area = obj.payment_plan.business_area
+    def get_country(self, obj: PaymentListSplit) -> str:
+        business_area = obj.payment_list.business_area
         payment_country = business_area.payment_countries.first()
         return payment_country.iso_code3 if payment_country else ""
 
     def get_payload(self, obj: Any) -> dict:
-        business_area = obj.payment_plan.business_area
+        business_area = obj.payment_list.business_area
         payment_country = business_area.payment_countries.first()
         payload = {
-            "destination_currency": obj.payment_plan.currency.code if obj.payment_plan.currency else None,
+            "destination_currency": obj.payment_list.currency.code if obj.payment_list.currency else None,
             "user": self.context["user_email"],
             "config_key": business_area.code,
-            "delivery_mechanism": obj.payment_plan.delivery_mechanism.code,
+            "delivery_mechanism": obj.payment_list.delivery_mechanism.code,
             "office": business_area.slug,
             "country": payment_country.iso_code3 if payment_country else None,
         }
@@ -96,10 +96,10 @@ class PaymentInstructionFromSplitSerializer(ReadOnlyModelSerializer):
         return payload
 
     def get_external_code(self, obj: Any) -> str:
-        return f"{obj.payment_plan.unicef_id}-{obj.order}"  # pragma: no cover
+        return f"{obj.payment_list.unicef_id}-{obj.order}"  # pragma: no cover
 
     class Meta:
-        model = PaymentPlanSplit
+        model = PaymentListSplit
         fields = [
             "remote_id",
             "external_code",
@@ -455,24 +455,24 @@ class PaymentGatewayService:
         self.user = User.objects.filter(pk=user_id).first() if user_id else None
 
     @staticmethod
-    def _ensure_currency_is_active(payment_plan: PaymentPlan) -> None:
+    def _ensure_currency_is_active(payment_list: PaymentList) -> None:
         # Only outgoing calls are guarded: sync_records must still bring home the statuses of payments sent earlier.
-        if reason := inactive_currency_reason(payment_plan):
+        if reason := inactive_currency_reason(payment_list):
             raise ValueError(reason)
 
-    def _mark_reconciled(self, payment_plan: PaymentPlan, old_payment_plan: PaymentPlan) -> None:
-        if payment_plan.is_instruction_managed or payment_plan.payment_plan_group is None:
-            flow = PaymentPlanFlow(payment_plan)
+    def _mark_reconciled(self, payment_list: PaymentList, old_payment_list: PaymentList) -> None:
+        if payment_list.is_instruction_managed or payment_list.payment_plan is None:
+            flow = PaymentListFlow(payment_list)
             flow.status_finished()
-            payment_plan.save()
-            log_payment_plan_change(payment_plan, old_payment_plan, self.user_id)
+            payment_list.save()
+            log_payment_list_change(payment_list, old_payment_list, self.user_id)
             return
-        PaymentPlanGroupService(payment_plan.payment_plan_group).sync_finished(self.user_id)
+        PaymentPlanService(payment_list.payment_plan).sync_finished(self.user_id)
 
-    def create_payment_instructions(self, payment_plan: PaymentPlan, user_email: str) -> None:
-        if payment_plan.is_payment_gateway:
-            self._ensure_currency_is_active(payment_plan)
-            for split in payment_plan.splits.filter(sent_to_payment_gateway=False).order_by("order"):
+    def create_payment_instructions(self, payment_list: PaymentList, user_email: str) -> None:
+        if payment_list.is_payment_gateway:
+            self._ensure_currency_is_active(payment_list)
+            for split in payment_list.splits.filter(sent_to_payment_gateway=False).order_by("order"):
                 data = PaymentInstructionFromSplitSerializer(split, context={"user_email": user_email}).data
                 response = self.api.create_payment_instruction(data)
                 if response.remote_id != str(split.id):
@@ -487,10 +487,10 @@ class PaymentGatewayService:
     def change_payment_instruction_status(
         self,
         new_status: PaymentInstructionStatus,
-        obj: PaymentPlanSplit,
+        obj: PaymentListSplit,
         validate_response: bool = True,
     ) -> str | None:
-        if obj.payment_plan.is_payment_gateway:
+        if obj.payment_list.is_payment_gateway:
             response_status = self.api.change_payment_instruction_status(
                 new_status, obj.id, validate_response=validate_response
             )
@@ -515,7 +515,7 @@ class PaymentGatewayService:
         Payment.objects.bulk_update(payments, ["status", "sent_to_fsp_date"])
         bulk_log_payment_changes(list(zip(old_payments, payments, strict=True)), self.user)
 
-    def _add_records_to_container(self, payments: QuerySet[Payment], container: PaymentPlanSplit) -> None:
+    def _add_records_to_container(self, payments: QuerySet[Payment], container: PaymentListSplit) -> None:
         add_records_error = None
         for payments_chunk in chunks(payments, self.ADD_RECORDS_CHUNK_SIZE):
             response = self.api.add_records_to_payment_instruction(payments_chunk, container.id, validate_response=True)
@@ -534,14 +534,14 @@ class PaymentGatewayService:
             self.change_payment_instruction_status(PaymentInstructionStatus.READY, container)
 
     def add_records_to_payment_instructions(
-        self, payment_plan: PaymentPlan, id_filters: list[str] | None = None
+        self, payment_list: PaymentList, id_filters: list[str] | None = None
     ) -> None:
         if id_filters is None:
             id_filters = []
 
-        if payment_plan.is_payment_gateway:
-            self._ensure_currency_is_active(payment_plan)
-            for split in payment_plan.splits.filter(sent_to_payment_gateway=False).all().order_by("order"):
+        if payment_list.is_payment_gateway:
+            self._ensure_currency_is_active(payment_list)
+            for split in payment_list.splits.filter(sent_to_payment_gateway=False).all().order_by("order"):
                 payments_qs = (
                     split.split_payment_items.eligible()
                     .select_related("currency")
@@ -706,8 +706,8 @@ class PaymentGatewayService:
         *,
         payment: Payment,
         payment_records_by_remote_id: dict[str, PaymentRecordData],
-        container: PaymentPlanSplit,
-        payment_plan: PaymentPlan,
+        container: PaymentListSplit,
+        payment_list: PaymentList,
         exchange_rate: Decimal | float | None,
         log_pairs: "list[tuple[Payment, Payment]]",
     ) -> tuple[str, ...] | None:
@@ -744,9 +744,9 @@ class PaymentGatewayService:
             payment.delivered_quantity = to_decimal(delivered_quantity)
             payment.delivered_quantity_usd = get_quantity_in_usd(
                 amount=payment.delivered_quantity,
-                currency=payment_plan.currency,
+                currency=payment_list.currency,
                 exchange_rate=exchange_rate,
-                currency_exchange_date=payment_plan.currency_exchange_date,
+                currency_exchange_date=payment_list.currency_exchange_date,
             )
 
         log_pairs.append((old_payment, payment))
@@ -762,11 +762,11 @@ class PaymentGatewayService:
             )
 
     def sync_records(self) -> None:
-        payment_plans = (
-            PaymentPlan.objects.annotate(
+        payment_lists = (
+            PaymentList.objects.annotate(
                 has_eligible_payments=Exists(Payment.objects.eligible().filter(parent_id=OuterRef("pk"))),
             )
-            .select_related("payment_plan_group__currency", "payment_plan_group__financial_service_provider")
+            .select_related("payment_plan__currency", "payment_plan__financial_service_provider")
             .prefetch_related(
                 "splits",
                 Prefetch(
@@ -779,25 +779,25 @@ class PaymentGatewayService:
                 ),
             )
             .filter(
-                Exists(PaymentPlanSplit.objects.filter(payment_plan=OuterRef("pk"), sent_to_payment_gateway=True)),
-                Q(payment_plan_group__use_payment_gateway=True)
+                Exists(PaymentListSplit.objects.filter(payment_list=OuterRef("pk"), sent_to_payment_gateway=True)),
+                Q(payment_plan__use_payment_gateway=True)
                 | Q(
-                    payment_plan_group__financial_service_provider__communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API
+                    payment_plan__financial_service_provider__communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API
                 ),
-                status=PaymentPlan.Status.ACCEPTED,
-                payment_plan_group__financial_service_provider__isnull=False,
+                status=PaymentList.Status.ACCEPTED,
+                payment_plan__financial_service_provider__isnull=False,
             )
         )
 
-        for payment_plan in payment_plans:
-            exchange_rate = payment_plan.exchange_rate
-            has_eligible_payments: bool = payment_plan.__dict__.pop("has_eligible_payments")
-            pending_payments: list[Payment] = payment_plan.__dict__.pop("eligible_pending_payments", [])
-            old_payment_plan = cast("PaymentPlan", copy_model_object(payment_plan))
+        for payment_list in payment_lists:
+            exchange_rate = payment_list.exchange_rate
+            has_eligible_payments: bool = payment_list.__dict__.pop("has_eligible_payments")
+            pending_payments: list[Payment] = payment_list.__dict__.pop("eligible_pending_payments", [])
+            old_payment_list = cast("PaymentList", copy_model_object(payment_list))
             payment_log_pairs: list = []
 
-            if (not has_eligible_payments or pending_payments) and payment_plan.is_payment_gateway:
-                payment_instructions = [split for split in payment_plan.splits.all() if split.sent_to_payment_gateway]
+            if (not has_eligible_payments or pending_payments) and payment_list.is_payment_gateway:
+                payment_instructions = [split for split in payment_list.splits.all() if split.sent_to_payment_gateway]
                 pending_payments_by_split: dict[Any, list[Payment]] = {}
                 payments_by_update_fields: dict[tuple[str, ...], list[Payment]] = {}
                 for payment in pending_payments:
@@ -813,7 +813,7 @@ class PaymentGatewayService:
                                 payment=payment,
                                 payment_records_by_remote_id=payment_records_by_remote_id,
                                 container=instruction,
-                                payment_plan=payment_plan,
+                                payment_list=payment_list,
                                 exchange_rate=exchange_rate,
                                 log_pairs=payment_log_pairs,
                             )
@@ -822,20 +822,20 @@ class PaymentGatewayService:
 
                 self._bulk_update_payments(payments_by_update_fields)
                 bulk_log_payment_changes(payment_log_pairs, self.user)
-                payment_plan.update_money_fields()
+                payment_list.update_money_fields()
                 if has_eligible_payments and all(
                     payment.status not in Payment.PENDING_STATUSES for payment in pending_payments
                 ):
-                    self._mark_reconciled(payment_plan, old_payment_plan)
+                    self._mark_reconciled(payment_list, old_payment_list)
                     for instruction in payment_instructions:
                         self.change_payment_instruction_status(PaymentInstructionStatus.FINALIZED, instruction)
 
     def sync_record(self, payment: Payment) -> None:
-        payment_plan = payment.parent
-        if not payment_plan.is_payment_gateway:
+        payment_list = payment.parent
+        if not payment_list.is_payment_gateway:
             return  # pragma: no cover
 
-        old_payment_plan = cast("PaymentPlan", copy_model_object(payment_plan))
+        old_payment_list = cast("PaymentList", copy_model_object(payment_list))
         pg_payment_record = self.api.get_record(payment.id)
         if pg_payment_record:
             payment_log_pairs: list = []
@@ -843,32 +843,32 @@ class PaymentGatewayService:
                 payment=payment,
                 payment_records_by_remote_id={pg_payment_record.remote_id: pg_payment_record},
                 container=payment.parent_split,  # type: ignore[arg-type]
-                payment_plan=payment_plan,
-                exchange_rate=payment_plan.exchange_rate,
+                payment_list=payment_list,
+                exchange_rate=payment_list.exchange_rate,
                 log_pairs=payment_log_pairs,
             )
             if update_fields:
                 self._bulk_update_payments({update_fields: [payment]})
             bulk_log_payment_changes(payment_log_pairs, self.user)
-            payment_plan.update_money_fields()
+            payment_list.update_money_fields()
 
-            if payment_plan.is_reconciled:
-                self._mark_reconciled(payment_plan, old_payment_plan)
-                for instruction in payment_plan.splits.filter(sent_to_payment_gateway=True):
+            if payment_list.is_reconciled:
+                self._mark_reconciled(payment_list, old_payment_list)
+                for instruction in payment_list.splits.filter(sent_to_payment_gateway=True):
                     self.change_payment_instruction_status(
                         PaymentInstructionStatus.FINALIZED,
                         instruction,
                         validate_response=False,
                     )
 
-    def sync_payment_plan(self, payment_plan: PaymentPlan) -> None:
-        exchange_rate = payment_plan.exchange_rate
-        old_payment_plan = cast("PaymentPlan", copy_model_object(payment_plan))
+    def sync_payment_list(self, payment_list: PaymentList) -> None:
+        exchange_rate = payment_list.exchange_rate
+        old_payment_list = cast("PaymentList", copy_model_object(payment_list))
 
-        if not payment_plan.is_payment_gateway:
+        if not payment_list.is_payment_gateway:
             return  # pragma: no cover
 
-        payment_instructions = payment_plan.splits.filter(sent_to_payment_gateway=True)
+        payment_instructions = payment_list.splits.filter(sent_to_payment_gateway=True)
         # Flush logs per instruction so only one split's payments (with their household_snapshot) are
         # referenced at a time, matching the pre-logging per-split GC profile.
         for instruction in payment_instructions:
@@ -886,7 +886,7 @@ class PaymentGatewayService:
                     payment=payment,
                     payment_records_by_remote_id=payment_records_by_remote_id,
                     container=instruction,
-                    payment_plan=payment_plan,
+                    payment_list=payment_list,
                     exchange_rate=exchange_rate,
                     log_pairs=instruction_log_pairs,
                 )
@@ -895,9 +895,9 @@ class PaymentGatewayService:
             self._bulk_update_payments(payments_by_update_fields)
             bulk_log_payment_changes(instruction_log_pairs, self.user)
 
-        payment_plan.update_money_fields()
-        if payment_plan.is_reconciled:
-            self._mark_reconciled(payment_plan, old_payment_plan)
+        payment_list.update_money_fields()
+        if payment_list.is_reconciled:
+            self._mark_reconciled(payment_list, old_payment_list)
             for instruction in payment_instructions:
                 self.change_payment_instruction_status(
                     PaymentInstructionStatus.FINALIZED,
@@ -931,12 +931,12 @@ class PaymentGatewayService:
             unique_fields=["payment_gateway_id"],
         )
 
-    def add_missing_records_to_payment_instructions(self, payment_plan: PaymentPlan) -> None:
+    def add_missing_records_to_payment_instructions(self, payment_list: PaymentList) -> None:
         record_ids: list[str] = []
-        for payment in payment_plan.eligible_payments.all():
+        for payment in payment_list.eligible_payments.all():
             pg_payment_record = self.api.get_record(payment.id)
             if not pg_payment_record:
                 record_ids.append(str(payment.pk))
 
         if record_ids:
-            self.add_records_to_payment_instructions(payment_plan, record_ids)
+            self.add_records_to_payment_instructions(payment_list, record_ids)

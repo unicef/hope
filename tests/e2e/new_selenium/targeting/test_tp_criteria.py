@@ -5,7 +5,7 @@ from extras.test_utils.factories import TicketNeedsAdjudicationDetailsFactory
 from extras.test_utils.selenium import HopeTestBrowser
 from hope.apps.account.permissions import Permissions
 from hope.apps.grievance.models import GrievanceTicket
-from hope.models import BusinessArea, Household, PaymentPlan, PaymentPlanGroup, User
+from hope.models import BusinessArea, Household, PaymentList, PaymentPlan, User
 
 from .conftest import CYCLE_TITLE, GROUP_NAME, HOUSEHOLDS_COUNT, PURPOSE_NAME
 
@@ -17,19 +17,19 @@ CREATE_PERMISSIONS = (
     Permissions.TARGETING_VIEW_LIST,
     Permissions.TARGETING_VIEW_DETAILS,
     Permissions.TARGETING_CREATE,
-    Permissions.PM_PAYMENT_PLAN_GROUP_VIEW_LIST,
-    Permissions.PM_PAYMENT_PLAN_GROUP_VIEW_DETAIL,
+    Permissions.PM_PAYMENT_PLAN_VIEW_LIST,
+    Permissions.PM_PAYMENT_PLAN_VIEW_DETAIL,
     Permissions.PM_PROGRAMME_CYCLE_VIEW_LIST,
 )
 
 
-def open_new_tp_form(browser: HopeTestBrowser, group: PaymentPlanGroup, name: str) -> None:
+def open_new_tp_form(browser: HopeTestBrowser, group: PaymentPlan, name: str) -> None:
     program = group.cycle.program
     browser.open(f"/{program.business_area.slug}/programs/{program.code}/target-population/create")
     browser.click('[data-cy="filters-program-cycle-autocomplete"]')
     browser.select_listbox_element(CYCLE_TITLE)
-    browser.wait_for_element_clickable('[data-cy="filters-payment-plan-group-autocomplete"] input')
-    browser.click('[data-cy="filters-payment-plan-group-autocomplete"]')
+    browser.wait_for_element_clickable('[data-cy="filters-payment-plan-autocomplete"] input')
+    browser.click('[data-cy="filters-payment-plan-autocomplete"]')
     browser.select_listbox_element(GROUP_NAME)
     browser.type('input[data-cy="input-name"]', name)
     browser.select_chip_option(PURPOSE_NAME, '[data-cy="input-payment-plan-purposes"]')
@@ -50,13 +50,13 @@ def accept_missing_fsp_warning(browser: HopeTestBrowser) -> None:
     browser.wait_for_element_absent('[role="dialog"]')
 
 
-def save_new_tp(browser: HopeTestBrowser, name: str) -> PaymentPlan:
+def save_new_tp(browser: HopeTestBrowser, name: str) -> PaymentList:
     browser.click('button[data-cy="button-target-population-create"]')
     browser.wait_for_text(name, 'h5[data-cy="page-header-title"]', timeout=20)
-    return PaymentPlan.objects.get(name=name)
+    return PaymentList.objects.get(name=name)
 
 
-def targeted_household_ids(tp: PaymentPlan) -> set[str]:
+def targeted_household_ids(tp: PaymentList) -> set[str]:
     return set(tp.payment_items.values_list("household__unicef_id", flat=True))
 
 
@@ -75,7 +75,7 @@ def test_household_size_rule_targets_only_matching_households(
     browser: HopeTestBrowser,
     user_with_no_permissions: User,
     business_area: BusinessArea,
-    targeting_group: PaymentPlanGroup,
+    targeting_group: PaymentPlan,
     sized_households: list[Household],
 ) -> None:
     with grant_permission(user_with_no_permissions, business_area, *CREATE_PERMISSIONS):
@@ -95,7 +95,7 @@ def test_or_criteria_target_households_matching_either_rule(
     browser: HopeTestBrowser,
     user_with_no_permissions: User,
     business_area: BusinessArea,
-    targeting_group: PaymentPlanGroup,
+    targeting_group: PaymentPlan,
     sized_households: list[Household],
 ) -> None:
     smallest, middle, largest = sized_households
@@ -118,7 +118,7 @@ def test_exclude_active_adjudication_ticket_flag_drops_household(
     browser: HopeTestBrowser,
     user_with_no_permissions: User,
     business_area: BusinessArea,
-    targeting_group: PaymentPlanGroup,
+    targeting_group: PaymentPlan,
     sized_households: list[Household],
     smallest_household_in_adjudication: Household,
 ) -> None:
@@ -139,7 +139,7 @@ def test_exclude_household_id_in_standard_programme(
     browser: HopeTestBrowser,
     user_with_no_permissions: User,
     business_area: BusinessArea,
-    built_tp: PaymentPlan,
+    built_tp: PaymentList,
     sized_households: list[Household],
 ) -> None:
     excluded = sized_households[2]
@@ -150,8 +150,8 @@ def test_exclude_household_id_in_standard_programme(
         Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS,
         Permissions.TARGETING_VIEW_DETAILS,
         Permissions.TARGETING_UPDATE,
-        Permissions.PM_PAYMENT_PLAN_GROUP_VIEW_LIST,
-        Permissions.PM_PAYMENT_PLAN_GROUP_VIEW_DETAIL,
+        Permissions.PM_PAYMENT_PLAN_VIEW_LIST,
+        Permissions.PM_PAYMENT_PLAN_VIEW_DETAIL,
     ):
         browser.login(username="noperm_user")
         browser.open(f"/{business_area.slug}/programs/{program.code}/target-population/edit-tp/{built_tp.id}")

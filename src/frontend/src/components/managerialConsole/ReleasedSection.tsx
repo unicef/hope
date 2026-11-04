@@ -18,10 +18,10 @@ import type { FC } from 'react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ProgramSelect, useSortAndFilter } from './useSortAndFilter';
-import type { PaginatedPaymentPlanGroupManagerialList } from '@restgenerated/models/PaginatedPaymentPlanGroupManagerialList';
+import type { PaginatedPaymentPlanManagerialList } from '@restgenerated/models/PaginatedPaymentPlanManagerialList';
 
 interface ReleasedSectionProps {
-  releasedData: PaginatedPaymentPlanGroupManagerialList;
+  releasedData: PaginatedPaymentPlanManagerialList;
 }
 
 export const ReleasedSection: FC<ReleasedSectionProps> = ({ releasedData }) => {
@@ -52,7 +52,7 @@ export const ReleasedSection: FC<ReleasedSectionProps> = ({ releasedData }) => {
       width: 200,
       renderCell: (params) => (
         <BlackLink
-          to={`/${businessArea}/programs/${params.row.programCode}/payment-module/groups/${params.row.id}`}
+          to={`/${businessArea}/programs/${params.row.programCode}/payment-module/payment-plans/${params.row.id}`}
           newTab={true}
         >
           {params.value}

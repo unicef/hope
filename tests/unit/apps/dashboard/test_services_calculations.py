@@ -13,7 +13,7 @@ from extras.test_utils.factories import (
     DataCollectingTypeFactory,
     HouseholdFactory,
     PaymentFactory,
-    PaymentPlanFactory,
+    PaymentListFactory,
     PaymentVerificationPlanFactory,
     PaymentVerificationSummaryFactory,
     ProgramCycleFactory,
@@ -28,7 +28,7 @@ from hope.apps.dashboard.services import (
     get_kab_pwd_count_expression,
     get_pwd_count_expression,
 )
-from hope.models import Household, Payment, PaymentPlan
+from hope.models import Household, Payment, PaymentList
 
 
 @pytest.fixture
@@ -67,10 +67,10 @@ def afghanistan(db):
 
 @pytest.fixture
 def create_verification_plan_with_status(db):
-    def _create(payment_plan, status):
-        if not hasattr(payment_plan, "payment_verification_summary"):
-            PaymentVerificationSummaryFactory(payment_plan=payment_plan)
-        pvp = PaymentVerificationPlanFactory(payment_plan=payment_plan)
+    def _create(payment_list, status):
+        if not hasattr(payment_list, "payment_verification_summary"):
+            PaymentVerificationSummaryFactory(payment_list=payment_list)
+        pvp = PaymentVerificationPlanFactory(payment_list=payment_list)
         pvp.status = status
         pvp.save(update_fields=["status"])
         return pvp
@@ -222,7 +222,7 @@ def test_count_household_kab_individuals_and_pwd(
 
 
 @pytest.fixture
-def payment_plan_counts_data(create_verification_plan_with_status, db):
+def payment_list_counts_data(create_verification_plan_with_status, db):
     ba = BusinessAreaFactory()
     prog_a_sector_x = ProgramFactory(business_area=ba, sector="SectorX", name="ProgramA", cycle=False)
     prog_b_sector_y = ProgramFactory(business_area=ba, sector="SectorY", name="ProgramB", cycle=False)
@@ -233,11 +233,11 @@ def payment_plan_counts_data(create_verification_plan_with_status, db):
     cycle_a4 = ProgramCycleFactory(program=prog_a_sector_x, title="Cycle A4")
     cycle_b1 = ProgramCycleFactory(program=prog_b_sector_y, title="Cycle B1")
 
-    pp1 = PaymentPlanFactory(program_cycle=cycle_a1, business_area=ba)
-    pp2 = PaymentPlanFactory(program_cycle=cycle_a2, business_area=ba)
-    pp3 = PaymentPlanFactory(program_cycle=cycle_b1, business_area=ba)
-    pp4 = PaymentPlanFactory(program_cycle=cycle_a3, business_area=ba)
-    pp5 = PaymentPlanFactory(program_cycle=cycle_a4, business_area=ba)
+    pp1 = PaymentListFactory(program_cycle=cycle_a1, business_area=ba)
+    pp2 = PaymentListFactory(program_cycle=cycle_a2, business_area=ba)
+    pp3 = PaymentListFactory(program_cycle=cycle_b1, business_area=ba)
+    pp4 = PaymentListFactory(program_cycle=cycle_a3, business_area=ba)
+    pp5 = PaymentListFactory(program_cycle=cycle_a4, business_area=ba)
 
     create_verification_plan_with_status(pp2, "FINISHED")
     create_verification_plan_with_status(pp4, "FINISHED")
@@ -286,14 +286,14 @@ def payment_plan_counts_data(create_verification_plan_with_status, db):
 
 
 @pytest.mark.django_db
-def test_payment_plan_counts(payment_plan_counts_data) -> None:
-    data = payment_plan_counts_data
+def test_payment_list_counts(payment_list_counts_data) -> None:
+    data = payment_list_counts_data
     ba = data["ba"]
 
     base_payments_qs = Payment.objects.filter(business_area=ba)
     group_by_fields = ["year", "sector_name"]
 
-    result = DashboardCacheBase._get_payment_plan_counts(base_payments_qs, group_by_fields)
+    result = DashboardCacheBase._get_payment_list_counts(base_payments_qs, group_by_fields)
 
     expected_total_counts = {
         (2023, "SectorX"): 3,
@@ -309,7 +309,7 @@ def test_payment_plan_counts(payment_plan_counts_data) -> None:
     assert result["finished"] == expected_finished_counts, "Finished payment plan counts mismatch"
 
     group_by_fields_program = ["year", "program_name"]
-    result_program_grouping = DashboardCacheBase._get_payment_plan_counts(base_payments_qs, group_by_fields_program)
+    result_program_grouping = DashboardCacheBase._get_payment_list_counts(base_payments_qs, group_by_fields_program)
 
     expected_total_program = {
         (2023, "ProgramA"): 3,
@@ -324,7 +324,7 @@ def test_payment_plan_counts(payment_plan_counts_data) -> None:
     assert result_program_grouping["finished"] == expected_finished_program, "Finished plan counts (program grouping)"
 
     empty_plan_qs = Payment.objects.filter(pk__in=[])
-    result_empty = DashboardCacheBase._get_payment_plan_counts(empty_plan_qs, group_by_fields)
+    result_empty = DashboardCacheBase._get_payment_list_counts(empty_plan_qs, group_by_fields)
     assert result_empty["total"] == {}, "Expected empty total counts for no plans"
     assert result_empty["finished"] == {}, "Expected empty finished counts for no plans"
 
@@ -362,7 +362,7 @@ def individuals_count_test_data(afghanistan):
             program=program,
             business_area=afghanistan,
             delivery_date=TEST_DATE,
-            parent__status=PaymentPlan.Status.ACCEPTED,
+            parent__status=PaymentList.Status.ACCEPTED,
             status=status,
         )
 
@@ -455,7 +455,7 @@ def children_count_test_data(afghanistan):
             business_area=afghanistan,
             delivery_date=TEST_DATE,
             status=status,
-            parent__status=PaymentPlan.Status.ACCEPTED,
+            parent__status=PaymentList.Status.ACCEPTED,
         )
 
         return {

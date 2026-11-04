@@ -6,7 +6,7 @@ from django.urls import reverse
 
 from hope.apps.payment.utils import get_link
 from hope.apps.utils.pdf_generator import generate_pdf_from_html
-from hope.models import Approval, ApprovalProcess, FollowUpInstruction, Payment, PaymentPlan, PaymentPlanGroup
+from hope.models import Approval, ApprovalProcess, FollowUpInstruction, Payment, PaymentList, PaymentPlan
 
 if TYPE_CHECKING:
     from django.db.models import QuerySet
@@ -54,22 +54,22 @@ def approval_chain(approval_process: ApprovalProcess | None) -> dict:
     }
 
 
-class PaymentPlanGroupPDFExportService:
+class PaymentPlanPDFExportService:
     text_template = "payment/pdf_file_generated_email.txt"
     html_template = "payment/pdf_file_generated_email.html"
 
-    def __init__(self, payment_plan_group: PaymentPlanGroup):
-        self.payment_plan_group = payment_plan_group
+    def __init__(self, payment_plan: PaymentPlan):
+        self.payment_plan = payment_plan
         self.download_link: str = ""
-        self.payment_plan_group_link: str = ""
-        self.is_social_worker_program = payment_plan_group.program.is_social_worker_program
+        self.payment_plan_link: str = ""
+        self.is_social_worker_program = payment_plan.program.is_social_worker_program
 
     def generate_web_links(self) -> None:
-        group_id = str(self.payment_plan_group.id)
-        program_code = self.payment_plan_group.program.code
-        self.download_link = get_link(reverse("download-payment-plan-group-summary-pdf", args=[group_id]))
-        self.payment_plan_group_link = get_link(
-            f"/{self.payment_plan_group.business_area.slug}/programs/{program_code}/payment-module/groups/{group_id}"
+        payment_plan_id = str(self.payment_plan.id)
+        program_code = self.payment_plan.program.code
+        self.download_link = get_link(reverse("download-payment-plan-summary-pdf", args=[payment_plan_id]))
+        self.payment_plan_link = get_link(
+            f"/{self.payment_plan.business_area.slug}/programs/{program_code}/payment-module/payment-plans/{payment_plan_id}"
         )
 
     def get_email_context(self, user: "User") -> dict:
@@ -78,49 +78,49 @@ class PaymentPlanGroupPDFExportService:
             "last_name": getattr(user, "last_name", ""),
             "email": getattr(user, "email", ""),
             "message": (
-                "Payment Plan Group Summary PDF file has been generated, "
+                "Payment Plan Summary PDF file has been generated, "
                 "and below you will find the link to download the file."
             ),
             "link": self.download_link,
-            "title": "Payment Plan Group Summary file generated",
+            "title": "Payment Plan Summary file generated",
         }
 
     def generate_pdf_summary(self) -> tuple[bytes, str]:
         self.generate_web_links()
-        group = self.payment_plan_group
-        payment_plans = list(group.payment_plans.select_related("delivery_mechanism").order_by("unicef_id"))
-        totals = group.payment_plans.aggregate(
+        payment_plan = self.payment_plan
+        payment_lists = list(payment_plan.payment_lists.select_related("delivery_mechanism").order_by("unicef_id"))
+        totals = payment_plan.payment_lists.aggregate(
             households=Sum("total_households_count"),
             individuals=Sum("total_individuals_count"),
             entitled=Sum("total_entitled_quantity"),
             entitled_usd=Sum("total_entitled_quantity_usd"),
         )
-        approval_process = group.approval_process.first()
+        approval_process = payment_plan.approval_process.first()
         pdf_context_data = {
-            "title": group.unicef_id,
-            "unicef_id": group.unicef_id,
-            "program_name": group.program.name,
-            "name": group.name,
-            "cycle_title": group.cycle.title,
-            "status": group.get_status_display(),
-            "currency": group.currency,
-            "dispersion_start_date": group.dispersion_start_date,
-            "dispersion_end_date": group.dispersion_end_date,
-            "payment_plans": payment_plans,
+            "title": payment_plan.unicef_id,
+            "unicef_id": payment_plan.unicef_id,
+            "program_name": payment_plan.program.name,
+            "name": payment_plan.name,
+            "cycle_title": payment_plan.cycle.title,
+            "status": payment_plan.get_status_display(),
+            "currency": payment_plan.currency,
+            "dispersion_start_date": payment_plan.dispersion_start_date,
+            "dispersion_end_date": payment_plan.dispersion_end_date,
+            "payment_lists": payment_lists,
             "totals": totals,
             "is_social_worker_program": self.is_social_worker_program,
-            "fsp": group.financial_service_provider,
+            "fsp": payment_plan.financial_service_provider,
             "approval_process": approval_process,
-            "link": self.payment_plan_group_link,
+            "link": self.payment_plan_link,
             **approval_chain(approval_process),
             "reconciliation": reconciliation_summary(
-                Payment.objects.filter(parent__payment_plan_group=group).eligible()
+                Payment.objects.filter(parent__payment_plan=payment_plan).eligible()
             ),
         }
         pdf = generate_pdf_from_html(
             template_name="payment/payment_plan_summary_pdf_template.html", data=pdf_context_data
         )
-        return pdf, f"PaymentPlanGroupSummary-{group.unicef_id}.pdf"
+        return pdf, f"PaymentPlanSummary-{payment_plan.unicef_id}.pdf"
 
 
 class FollowUpInstructionPDFExportService:
@@ -157,10 +157,10 @@ class FollowUpInstructionPDFExportService:
     def generate_pdf_summary(self) -> tuple[bytes, str]:
         self.generate_web_links()
         instruction = self.instruction
-        payment_plans = list(
-            instruction.payment_plans.select_related("delivery_mechanism", "program_cycle").order_by("unicef_id")
+        payment_lists = list(
+            instruction.payment_lists.select_related("delivery_mechanism", "program_cycle").order_by("unicef_id")
         )
-        totals = instruction.payment_plans.aggregate(
+        totals = instruction.payment_lists.aggregate(
             households=Sum("total_households_count"),
             individuals=Sum("total_individuals_count"),
             entitled=Sum("total_entitled_quantity"),
@@ -172,12 +172,12 @@ class FollowUpInstructionPDFExportService:
             "unicef_id": instruction.unicef_id,
             "program_name": instruction.program.name,
             "name": "Follow-Up Instruction",
-            "cycle_title": ", ".join(sorted({payment_plan.program_cycle.title for payment_plan in payment_plans})),
-            "status": PaymentPlan.Status(instruction.status).label if instruction.status else "",
+            "cycle_title": ", ".join(sorted({payment_list.program_cycle.title for payment_list in payment_lists})),
+            "status": PaymentList.Status(instruction.status).label if instruction.status else "",
             "currency": instruction.currency,
             "dispersion_start_date": instruction.dispersion_start_date,
             "dispersion_end_date": instruction.dispersion_end_date,
-            "payment_plans": payment_plans,
+            "payment_lists": payment_lists,
             "totals": totals,
             "is_social_worker_program": self.is_social_worker_program,
             "fsp": instruction.financial_service_provider,

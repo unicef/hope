@@ -12,7 +12,7 @@ import openpyxl
 
 from hope.apps.activity_log.utils import copy_model_object
 from hope.apps.core.timezones import to_utc_midnight
-from hope.apps.payment.flows import PaymentPlanFlow
+from hope.apps.payment.flows import PaymentListFlow
 from hope.apps.payment.services.handle_total_cash_in_households import (
     handle_total_cash_in_specific_households,
 )
@@ -21,12 +21,12 @@ from hope.apps.payment.utils import (
     calculate_counts,
     get_payment_delivered_quantity_status_and_value,
     get_quantity_in_usd,
-    log_payment_plan_change,
+    log_payment_list_change,
     to_decimal,
 )
 from hope.apps.payment.xlsx.base_xlsx_import_service import XlsxImportBaseService
 from hope.apps.payment.xlsx.xlsx_error import XlsxError
-from hope.models import FollowUpInstruction, Payment, PaymentPlan, PaymentVerification, User
+from hope.models import FollowUpInstruction, Payment, PaymentList, PaymentVerification, User
 
 if TYPE_CHECKING:
     from openpyxl.cell.cell import Cell
@@ -49,11 +49,11 @@ class XlsxFollowUpInstructionReconciliationImportService(XlsxImportBaseService):
         self.payments_to_save: list[Payment] = []
         self.old_payments: dict = {}
         self.payment_verifications_to_save: list[PaymentVerification] = []
-        self.payment_plans_to_update: dict[str, PaymentPlan] = {}
+        self.payment_lists_to_update: dict[str, PaymentList] = {}
         self.payment_verification_plans_to_update: dict[str, Any] = {}
         self.is_updated = False
 
-        payment_list = (
+        payments = (
             Payment.objects.filter(parent__follow_up_instruction=instruction)
             .eligible()
             .select_related("currency", "household", "parent")
@@ -68,7 +68,7 @@ class XlsxFollowUpInstructionReconciliationImportService(XlsxImportBaseService):
         self.payments_by_household_unicef_id: dict[str, list[Payment]] = {}
         self.current_delivered_by_household: dict[str, Decimal] = {}
         self.total_entitled_by_household: dict[str, Decimal] = {}
-        for payment in payment_list:
+        for payment in payments:
             household_unicef_id = payment.household.unicef_id
             self.payments_by_household_unicef_id.setdefault(household_unicef_id, []).append(payment)
             self.current_delivered_by_household[household_unicef_id] = self.current_delivered_by_household.get(
@@ -262,7 +262,7 @@ class XlsxFollowUpInstructionReconciliationImportService(XlsxImportBaseService):
                 payment.status = status
                 payment.delivery_date = delivery_date
                 self.payments_to_save.append(payment)
-                self.payment_plans_to_update[str(payment.parent_id)] = payment.parent
+                self.payment_lists_to_update[str(payment.parent_id)] = payment.parent
                 self._update_payment_verification(payment, delivered_quantity_value)
             remaining_quantity -= allocated_quantity
 
@@ -286,13 +286,13 @@ class XlsxFollowUpInstructionReconciliationImportService(XlsxImportBaseService):
         for payment_verification_plan in self.payment_verification_plans_to_update.values():
             calculate_counts(payment_verification_plan)
             payment_verification_plan.save()
-        for payment_plan in self.payment_plans_to_update.values():
-            old_payment_plan = cast("PaymentPlan", copy_model_object(payment_plan))
-            payment_plan.update_money_fields()
-            if payment_plan.is_reconciled and payment_plan.status == PaymentPlan.Status.ACCEPTED:
-                flow = PaymentPlanFlow(payment_plan)
+        for payment_list in self.payment_lists_to_update.values():
+            old_payment_list = cast("PaymentList", copy_model_object(payment_list))
+            payment_list.update_money_fields()
+            if payment_list.is_reconciled and payment_list.status == PaymentList.Status.ACCEPTED:
+                flow = PaymentListFlow(payment_list)
                 flow.status_finished()
-                payment_plan.save()
-            payment_plan.program_cycle.save()
-            log_payment_plan_change(payment_plan, old_payment_plan, user_id)
+                payment_list.save()
+            payment_list.program_cycle.save()
+            log_payment_list_change(payment_list, old_payment_list, user_id)
         self.logger.info("Finished instruction reconciliation import")

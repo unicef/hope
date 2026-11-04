@@ -6,9 +6,9 @@ from unit.api_contract._helpers import HopeRecorder, JsonPostRecorder
 
 from extras.test_utils.factories.account import RoleAssignmentFactory, RoleFactory, UserFactory
 from extras.test_utils.factories.core import BusinessAreaFactory
-from extras.test_utils.factories.payment import PaymentPlanFactory
+from extras.test_utils.factories.payment import PaymentListFactory
 from extras.test_utils.factories.program import ProgramFactory
-from hope.models import PaymentPlan
+from hope.models import PaymentList
 
 pytestmark = pytest.mark.django_db
 
@@ -43,34 +43,34 @@ def role_assignment(request, db, superuser, business_area, role):
 
 
 @frozenfixture()
-def payment_plan(request, db, business_area, program, superuser):
+def payment_list(request, db, business_area, program, superuser):
     cycle = program.cycles.first()
-    return PaymentPlanFactory(
+    return PaymentListFactory(
         business_area=business_area,
         program_cycle=cycle,
         created_by=superuser,
-        status=PaymentPlan.Status.ACCEPTED,
+        status=PaymentList.Status.ACCEPTED,
     )
 
 
-def test_list_payment_verifications(superuser, business_area, program, role_assignment, payment_plan):
+def test_list_payment_verifications(superuser, business_area, program, role_assignment, payment_list):
     recorder = HopeRecorder(DATA_DIR, as_user=superuser)
     recorder.assertGET(f"/api/rest/business-areas/{business_area.slug}/programs/{program.code}/payment-verifications/")
 
 
-def test_retrieve_payment_verification(superuser, business_area, program, role_assignment, payment_plan):
+def test_retrieve_payment_verification(superuser, business_area, program, role_assignment, payment_list):
     recorder = HopeRecorder(DATA_DIR, as_user=superuser)
     recorder.assertGET(
         f"/api/rest/business-areas/{business_area.slug}/programs/{program.code}"
-        f"/payment-verifications/{payment_plan.pk}/"
+        f"/payment-verifications/{payment_list.pk}/"
     )
 
 
-def test_sample_size(superuser, business_area, program, role_assignment, payment_plan):
+def test_sample_size(superuser, business_area, program, role_assignment, payment_list):
     recorder = JsonPostRecorder(DATA_DIR, as_user=superuser)
     recorder.assertPOST(
         f"/api/rest/business-areas/{business_area.slug}/programs/{program.code}"
-        f"/payment-verifications/{payment_plan.pk}/sample-size/",
+        f"/payment-verifications/{payment_list.pk}/sample-size/",
         data={
             "sampling": "FULL_LIST",
             "verification_channel": "MANUAL",

@@ -37,7 +37,7 @@
             "status": "ACTIVE",
             "screen_beneficiary": false
         },
-        "payment_plan_group": {
+        "payment_plan": {
             "id": "b4081ca7-d4f4-4b08-9131-434c9118be8f",
             "unicef_id": "PPG-7",
             "name": "Default Group"
@@ -62,7 +62,7 @@
         "financial_service_provider": null,
         "failed_wallet_validation_collectors_ids": [],
         "version": 1735688653315202,
-        "admin_url": "/api/unicorn/payment/paymentplan/b768ba22-102d-4ac5-818d-fac5a8d6869b/change/",
+        "admin_url": "/api/unicorn/payment/paymentlist/b768ba22-102d-4ac5-818d-fac5a8d6869b/change/",
         "screen_beneficiary": false,
         "flag_exclude_if_on_sanction_list": false,
         "flag_exclude_if_active_adjudication_ticket": false,

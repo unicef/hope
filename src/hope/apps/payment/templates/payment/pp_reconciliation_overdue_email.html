@@ -1,6 +1,0 @@
-{% extends "core/base_greeting_email.html" %}
-
-{% block content %}
-    <p>{{ message }}</p>
-    {% if link %}{% include "core/_email_button.html" with label="View Payment Plan" %}{% endif %}
-{% endblock content %}

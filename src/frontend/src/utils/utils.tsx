@@ -1,8 +1,8 @@
 import type { HeadCell } from '@core/Table/EnhancedTableHead';
 import { Box, Typography } from '@mui/material';
-import { PaymentPlanBackgroundActionStatusEnum } from '@restgenerated/models/PaymentPlanBackgroundActionStatusEnum';
+import { PaymentListBackgroundActionStatusEnum } from '@restgenerated/models/PaymentListBackgroundActionStatusEnum';
 import { BuildStatusEnum } from '@restgenerated/models/BuildStatusEnum';
-import { PaymentPlanStatusEnum as PaymentPlanStatus } from '@restgenerated/models/PaymentPlanStatusEnum';
+import { PaymentListStatusEnum as PaymentListStatus } from '@restgenerated/models/PaymentListStatusEnum';
 import { PaymentStatusEnum } from '@restgenerated/models/PaymentStatusEnum';
 import { PaymentVerificationStatusEnum } from '@restgenerated/models/PaymentVerificationStatusEnum';
 import { PaymentVerificationSummaryStatusEnum } from '@restgenerated/models/PaymentVerificationSummaryStatusEnum';
@@ -14,7 +14,7 @@ import moment from 'moment';
 import type { ReactElement } from 'react';
 import type { useLocation, useNavigate } from 'react-router-dom';
 import type { theme as themeObj } from '../theme';
-import { GRIEVANCE_CATEGORIES, PAYMENT_PLAN_STATES } from './constants';
+import { GRIEVANCE_CATEGORIES, PAYMENT_LIST_STATES } from './constants';
 
 export function displayNameWithLatin(
   obj: Record<string, any> | null | undefined,
@@ -215,23 +215,23 @@ export function paymentStatusDisplayMap(status: string): string {
 
 export function targetPopulationStatusDisplayMap(status: string): string {
   switch (status) {
-    case PaymentPlanStatus.OPEN:
+    case PaymentListStatus.OPEN:
       return 'OPEN';
-    case PaymentPlanStatus.LOCKED:
+    case PaymentListStatus.LOCKED:
       return 'LOCKED';
-    case PaymentPlanStatus.TP_OPEN:
+    case PaymentListStatus.TP_OPEN:
       return 'OPEN';
-    case PaymentPlanStatus.DRAFT:
+    case PaymentListStatus.DRAFT:
       return 'READY FOR PAYMENT MODULE';
-    case PaymentPlanStatus.TP_LOCKED:
+    case PaymentListStatus.TP_LOCKED:
       return 'LOCKED';
-    case PaymentPlanStatus.STEFICON_WAIT:
+    case PaymentListStatus.STEFICON_WAIT:
       return 'STEFICON WAIT';
-    case PaymentPlanStatus.STEFICON_RUN:
+    case PaymentListStatus.STEFICON_RUN:
       return 'STEFICON RUN';
-    case PaymentPlanStatus.STEFICON_ERROR:
+    case PaymentListStatus.STEFICON_ERROR:
       return 'STEFICON ERROR';
-    case PaymentPlanStatus.STEFICON_COMPLETED:
+    case PaymentListStatus.STEFICON_COMPLETED:
       return 'STEFICON COMPLETED';
 
     //   if other PP statuses ==> ASSIGNED
@@ -290,30 +290,30 @@ export function registrationDataImportStatusToColor(
   }
 }
 
-export function paymentPlanStatusToColor(
+export function paymentListStatusToColor(
   theme: typeof themeObj,
   status: string,
 ): string {
   const colorsMap = {
     ['ASSIGNED']: theme.hctPalette.gray,
-    [PaymentPlanStatus.ACCEPTED]: theme.hctPalette.green,
-    [PaymentPlanStatus.DRAFT]: theme.hctPalette.lighterGray,
-    [PaymentPlanStatus.FINISHED]: theme.hctPalette.green,
-    [PaymentPlanStatus.IN_APPROVAL]: theme.hctPalette.blue,
-    [PaymentPlanStatus.IN_AUTHORIZATION]: theme.hctPalette.blue,
-    [PaymentPlanStatus.IN_REVIEW]: theme.hctPalette.blue,
-    [PaymentPlanStatus.LOCKED]: theme.hctPalette.gray,
-    [PaymentPlanStatus.LOCKED_FSP]: theme.hctPalette.gray,
-    [PaymentPlanStatus.OPEN]: theme.hctPalette.lighterGray,
-    [PaymentPlanStatus.STEFICON_COMPLETED]: theme.hctPalette.green,
-    [PaymentPlanStatus.STEFICON_ERROR]: theme.palette.error.main,
-    [PaymentPlanStatus.STEFICON_RUN]: theme.hctPalette.blue,
-    [PaymentPlanStatus.STEFICON_WAIT]: theme.hctPalette.orange,
-    [PaymentPlanStatus.TP_LOCKED]: theme.hctPalette.gray,
-    [PaymentPlanStatus.TP_OPEN]: theme.hctPalette.lighterGray,
-    [PaymentPlanStatus.ABORTED]: theme.hctPalette.red,
-    [PaymentPlanStatus.READY_FOR_CLOSURE]: theme.hctPalette.teal,
-    [PaymentPlanStatus.CLOSED]: theme.hctPalette.blue,
+    [PaymentListStatus.ACCEPTED]: theme.hctPalette.green,
+    [PaymentListStatus.DRAFT]: theme.hctPalette.lighterGray,
+    [PaymentListStatus.FINISHED]: theme.hctPalette.green,
+    [PaymentListStatus.IN_APPROVAL]: theme.hctPalette.blue,
+    [PaymentListStatus.IN_AUTHORIZATION]: theme.hctPalette.blue,
+    [PaymentListStatus.IN_REVIEW]: theme.hctPalette.blue,
+    [PaymentListStatus.LOCKED]: theme.hctPalette.gray,
+    [PaymentListStatus.LOCKED_FSP]: theme.hctPalette.gray,
+    [PaymentListStatus.OPEN]: theme.hctPalette.lighterGray,
+    [PaymentListStatus.STEFICON_COMPLETED]: theme.hctPalette.green,
+    [PaymentListStatus.STEFICON_ERROR]: theme.palette.error.main,
+    [PaymentListStatus.STEFICON_RUN]: theme.hctPalette.blue,
+    [PaymentListStatus.STEFICON_WAIT]: theme.hctPalette.orange,
+    [PaymentListStatus.TP_LOCKED]: theme.hctPalette.gray,
+    [PaymentListStatus.TP_OPEN]: theme.hctPalette.lighterGray,
+    [PaymentListStatus.ABORTED]: theme.hctPalette.red,
+    [PaymentListStatus.READY_FOR_CLOSURE]: theme.hctPalette.teal,
+    [PaymentListStatus.CLOSED]: theme.hctPalette.blue,
   };
   if (status in colorsMap) {
     return colorsMap[status];
@@ -321,7 +321,7 @@ export function paymentPlanStatusToColor(
   return theme.hctPalette.gray;
 }
 
-export function paymentPlanBuildStatusToColor(
+export function paymentListBuildStatusToColor(
   theme: typeof themeObj,
   status: string,
 ): string {
@@ -376,35 +376,35 @@ export function periodicDataUpdatesUpdatesStatusToColor(
   return theme.palette.error.main;
 }
 
-export function paymentPlanBackgroundActionStatusToColor(
+export function paymentListBackgroundActionStatusToColor(
   theme: typeof themeObj,
   status: string,
 ): string {
   const colorsMap = {
     RECALCULATING: theme.hctPalette.gray,
     RECALCULATING_ERROR: theme.palette.error.main,
-    [PaymentPlanBackgroundActionStatusEnum.RULE_ENGINE_RUN]:
+    [PaymentListBackgroundActionStatusEnum.RULE_ENGINE_RUN]:
       theme.hctPalette.gray,
-    [PaymentPlanBackgroundActionStatusEnum.RULE_ENGINE_ERROR]:
+    [PaymentListBackgroundActionStatusEnum.RULE_ENGINE_ERROR]:
       theme.palette.error.main,
-    [PaymentPlanBackgroundActionStatusEnum.XLSX_EXPORTING]:
+    [PaymentListBackgroundActionStatusEnum.XLSX_EXPORTING]:
       theme.hctPalette.gray,
-    [PaymentPlanBackgroundActionStatusEnum.XLSX_EXPORT_ERROR]:
+    [PaymentListBackgroundActionStatusEnum.XLSX_EXPORT_ERROR]:
       theme.palette.error.main,
-    [PaymentPlanBackgroundActionStatusEnum.XLSX_IMPORTING_ENTITLEMENTS]:
+    [PaymentListBackgroundActionStatusEnum.XLSX_IMPORTING_ENTITLEMENTS]:
       theme.hctPalette.gray,
-    [PaymentPlanBackgroundActionStatusEnum.XLSX_IMPORTING_RECONCILIATION]:
+    [PaymentListBackgroundActionStatusEnum.XLSX_IMPORTING_RECONCILIATION]:
       theme.hctPalette.gray,
-    [PaymentPlanBackgroundActionStatusEnum.XLSX_IMPORTING_FSP_EXTRA_FIELDS]:
+    [PaymentListBackgroundActionStatusEnum.XLSX_IMPORTING_FSP_EXTRA_FIELDS]:
       theme.hctPalette.gray,
-    [PaymentPlanBackgroundActionStatusEnum.XLSX_IMPORT_ERROR]:
+    [PaymentListBackgroundActionStatusEnum.XLSX_IMPORT_ERROR]:
       theme.palette.error.main,
-    [PaymentPlanBackgroundActionStatusEnum.SEND_TO_PAYMENT_GATEWAY]:
+    [PaymentListBackgroundActionStatusEnum.SEND_TO_PAYMENT_GATEWAY]:
       theme.hctPalette.gray,
-    [PaymentPlanBackgroundActionStatusEnum.SEND_TO_PAYMENT_GATEWAY_ERROR]:
+    [PaymentListBackgroundActionStatusEnum.SEND_TO_PAYMENT_GATEWAY_ERROR]:
       theme.palette.error.main,
-    [PaymentPlanBackgroundActionStatusEnum.REBUILDING]: theme.hctPalette.gray,
-    [PaymentPlanBackgroundActionStatusEnum.REBUILD_ERROR]:
+    [PaymentListBackgroundActionStatusEnum.REBUILDING]: theme.hctPalette.gray,
+    [PaymentListBackgroundActionStatusEnum.REBUILD_ERROR]:
       theme.palette.error.main,
   };
   if (status in colorsMap) {
@@ -761,8 +761,8 @@ export function formatFigure(
   }).format(numValue);
 }
 
-export function paymentPlanStatusMapping(status): string {
-  return PAYMENT_PLAN_STATES[status];
+export function paymentListStatusMapping(status): string {
+  return PAYMENT_LIST_STATES[status];
 }
 
 export function stableSort(array, comparator) {

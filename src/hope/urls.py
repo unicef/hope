@@ -48,14 +48,19 @@ api_patterns: list[URLPattern | URLResolver] = [
         name="download-payment-verification-plan",
     ),
     path(
-        "download-payment-plan-payment-list/<str:payment_plan_id>",
-        hope.apps.payment.views.download_payment_plan_payment_list,
-        name="download-payment-plan-payment-list",
+        "download-payment-list/<str:payment_list_id>",
+        hope.apps.payment.views.download_payment_list,
+        name="download-payment-list",
+    ),
+    # Released before the payment list rename: links in emails already sent.
+    path(
+        "download-payment-plan-payment-list/<str:payment_list_id>",
+        hope.apps.payment.views.download_payment_list,
     ),
     path(
-        "download-payment-plan-group-summary-pdf/<str:payment_plan_group_id>",
-        hope.apps.payment.views.download_payment_plan_group_summary_pdf,
-        name="download-payment-plan-group-summary-pdf",
+        "download-payment-plan-summary-pdf/<str:payment_plan_id>",
+        hope.apps.payment.views.download_payment_plan_summary_pdf,
+        name="download-payment-plan-summary-pdf",
     ),
     path(
         "download-follow-up-instruction-summary-pdf/<str:instruction_id>",
@@ -63,14 +68,24 @@ api_patterns: list[URLPattern | URLResolver] = [
         name="download-follow-up-instruction-summary-pdf",
     ),
     path(
-        "download-payment-plan-group-xlsx/<str:payment_plan_group_id>",
-        hope.apps.payment.views.download_payment_plan_group_xlsx,
-        name="download-payment-plan-group-xlsx",
+        "download-payment-plan-xlsx/<str:payment_plan_id>",
+        hope.apps.payment.views.download_payment_plan_xlsx,
+        name="download-payment-plan-xlsx",
     ),
     path(
+        "download-follow-up-instruction-xlsx/<str:instruction_id>",
+        hope.apps.payment.views.download_follow_up_instruction_xlsx,
+        name="download-follow-up-instruction-xlsx",
+    ),
+    path(
+        "download-payment-list-invoice-report-pdf/<str:report_id>",
+        hope.apps.payment.views.download_payment_list_invoice_report_pdf,
+        name="download-payment-list-invoice-report-pdf",
+    ),
+    # Released before the payment list rename: links in emails already sent.
+    path(
         "download-payment-plan-invoice-report-pdf/<str:report_id>",
-        hope.apps.payment.views.download_payment_plan_invoice_report_pdf,
-        name="download-payment-plan-invoice-report-pdf",
+        hope.apps.payment.views.download_payment_list_invoice_report_pdf,
     ),
     path(
         "download-sanction-template",

@@ -13,7 +13,7 @@ from django.utils.translation import gettext_lazy as _
 from hope.apps.steficon.config import config
 from hope.apps.steficon.interpreters import Interpreter, mapping
 from hope.apps.steficon.widget import ContentTypeChoiceField, PythonFormatterEditor
-from hope.models import PaymentPlan, Rule, RuleCommit
+from hope.models import PaymentList, Rule, RuleCommit
 
 if TYPE_CHECKING:
     from django.contrib.contenttypes.models import ContentType
@@ -119,7 +119,7 @@ class TPModelChoiceField(forms.ModelChoiceField):
         help_text: str = kwargs.get("help_text", "")
         to_field_name = kwargs.get("to_field_name")
         limit_choices_to = kwargs.get("limit_choices_to")
-        queryset = PaymentPlan.objects.all()
+        queryset = PaymentList.objects.all()
         super().__init__(
             queryset,
             empty_label=empty_label,

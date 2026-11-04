@@ -11,7 +11,7 @@ from hope.apps.payment.utils import generate_cache_key
 @pytest.fixture
 def lock_keys() -> list[str]:
     keys = [f"{prefix}1" for prefix in LOCK_KEY_PREFIXES] + [
-        generate_cache_key({"task_name": "prepare_payment_plan_async_task", "payment_plan_id": "1"}),
+        generate_cache_key({"task_name": "prepare_payment_list_async_task", "payment_list_id": "1"}),
     ]
     for key in keys:
         cache.set(key, True)

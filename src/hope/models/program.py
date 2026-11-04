@@ -26,7 +26,7 @@ from hope.models.beneficiary_group import BeneficiaryGroup
 from hope.models.data_collecting_type import DataCollectingType
 from hope.models.household import Household
 from hope.models.payment import Payment
-from hope.models.payment_plan import PaymentPlan
+from hope.models.payment_list import PaymentList
 from hope.models.payment_plan_purpose import PaymentPlanPurpose
 from hope.models.sanction_list import SanctionList
 from hope.models.utils import (
@@ -259,10 +259,10 @@ class Program(
     )
 
     reconciliation_window_in_days = models.PositiveIntegerField(
-        default=0, help_text="Payment Plan reconciliation window in days"
+        default=0, help_text="Payment List reconciliation window in days"
     )
     send_reconciliation_window_expiry_notifications = models.BooleanField(
-        default=False, help_text="Send Payment Plan reconciliation window expiry notifications"
+        default=False, help_text="Send Payment List reconciliation window expiry notifications"
     )
 
     objects: ProgramManager = ProgramManager()
@@ -325,7 +325,7 @@ class Program(
 
     @staticmethod
     def get_total_number_of_households_from_payments(
-        qs: models.QuerySet[PaymentPlan],
+        qs: models.QuerySet[PaymentList],
     ) -> int:
         return (
             qs.filter(payment_items__delivered_quantity__gt=0)

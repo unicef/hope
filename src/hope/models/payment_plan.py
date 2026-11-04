@@ -1,42 +1,22 @@
-from dataclasses import dataclass
-from datetime import date, datetime, timedelta
+from datetime import date
 from decimal import Decimal
 from functools import cached_property
-from typing import TYPE_CHECKING, Any, Callable, Optional
+from typing import TYPE_CHECKING, cast
 
-from dateutil.relativedelta import relativedelta
 from django.conf import settings
 from django.core.exceptions import ValidationError
-from django.core.validators import (
-    MaxLengthValidator,
-    MinLengthValidator,
-    MinValueValidator,
-    ProhibitNullCharactersValidator,
-)
 from django.db import models, transaction
 from django.db.backends.postgresql.psycopg_any import NumericRange
-from django.db.models import Count, Exists, OuterRef, Q, QuerySet, Sum, Value
+from django.db.models import Exists, OuterRef, Q, Sum
 from django.db.models.functions import Coalesce
 from django.utils import timezone
-from django.utils.text import Truncator
-from django.utils.timezone import now
 from django.utils.translation import gettext_lazy as _
-from model_utils.models import SoftDeletableModel
+from flags.state import flag_state
 
 from hope.apps.activity_log.utils import create_mapping_dict
-from hope.apps.core.exchange_rates import ExchangeRates
-from hope.apps.core.utils import map_unicef_ids_to_households_unicef_ids
-from hope.apps.household.const import FEMALE, MALE, NON_BENEFICIARY
-from hope.apps.targeting.services.targeting_service import TargetingCriteriaQueryingBase
-from hope.apps.utils.validators import DoubleSpaceValidator, StartEndSpaceValidator
+from hope.contrib.vision.choices import VisionStatus
 from hope.models.approval import COMMENT_MAX_LENGTH, Approval
-from hope.models.file_temp import FileTemp
-from hope.models.financial_service_provider import FinancialServiceProvider
-from hope.models.household import Household
-from hope.models.individual import Individual
-from hope.models.payment import Payment
-from hope.models.rule import Rule, RuleCommit
-from hope.models.storage_file import StorageFile
+from hope.models.payment_list import PaymentList, last_approval_step
 from hope.models.utils import (
     AdminUrlMixin,
     ConcurrencyModel,
@@ -47,116 +27,42 @@ from hope.models.utils import (
 )
 
 if TYPE_CHECKING:
-    from hope.apps.core.exchange_rates.api import ExchangeRateClient
-    from hope.models.acceptance_process_threshold import AcceptanceProcessThreshold
-    from hope.models.approval_process import ApprovalProcess
-    from hope.models.currency import Currency
-    from hope.models.follow_up_instruction import FollowUpInstruction
-    from hope.models.payment_plan_group import PaymentPlanGroup
-    from hope.models.payment_verification_plan import PaymentVerificationPlan
-    from hope.models.program import Program
-    from hope.models.user import User
+    from datetime import datetime
+
+    from django.db.models import QuerySet
+
+    from hope.models import AcceptanceProcessThreshold, BusinessArea, Program, User
 
 
-@dataclass
-class ModifiedData:
-    modified_date: datetime
-    modified_by: Optional["User"] = None
-
-
-def last_approval_step(approval_process: "ApprovalProcess | None", status: str, fallback: datetime) -> ModifiedData:
-    """Who took the approval step that led to ``status`` on a group (or an instruction-managed plan), and when."""
-    if approval_process:
-        if status == PaymentPlan.Status.IN_APPROVAL:
-            return ModifiedData(
-                approval_process.sent_for_approval_date,  # type: ignore[arg-type]
-                approval_process.sent_for_approval_by,
-            )
-        approval_type_by_status: dict[str, str] = {
-            PaymentPlan.Status.IN_AUTHORIZATION: Approval.APPROVAL,
-            PaymentPlan.Status.IN_REVIEW: Approval.AUTHORIZATION,
-            PaymentPlan.Status.ACCEPTED: Approval.FINANCE_RELEASE,
-        }
-        approval_type = approval_type_by_status.get(status)
-        if approval_type and (
-            approval := approval_process.approvals.filter(type=approval_type).order_by("created_at").last()
-        ):
-            return ModifiedData(approval.created_at, approval.created_by)
-    return ModifiedData(fallback)
-
-
-class PaymentPlan(
-    TimeStampedUUIDModel,
-    InternalDataFieldModel,
-    ConcurrencyModel,
-    SoftDeletableModel,
-    UnicefIdentifiedModel,
-    AdminUrlMixin,
-    TargetingCriteriaQueryingBase,
-):
+class PaymentPlan(TimeStampedUUIDModel, UnicefIdentifiedModel, InternalDataFieldModel, ConcurrencyModel, AdminUrlMixin):
     ACTIVITY_LOG_MAPPING = create_mapping_dict(
         [
             "name",
-            "created_by",
+            "cycle",
             "status",
-            "status_date",
-            "start_date",
-            "end_date",
-            "background_action_status",
-            "imported_file_date",
-            "imported_file",
-            "export_file_entitlement",
-            "steficon_rule",
-            "steficon_applied_date",
-            "steficon_rule_targeting",
-            "steficon_targeting_applied_date",
-            "exclusion_reason",
-            "delivery_mechanism",
+            "plan_type",
             "source_payment_plan",
-            "currency_exchange_date",
-            "male_children_count",
-            "female_children_count",
-            "male_adults_count",
-            "female_adults_count",
-            "total_households_count",
-            "total_individuals_count",
-            "targeting_criteria_string",
-            "excluded_ids",
+            "financial_service_provider",
+            "use_payment_gateway",
+            "exchange_rate",
+            "custom_exchange_rate",
+            "custom_exchange_rate_set_by",
+            "dispersion_start_date",
+            "dispersion_end_date",
+            "background_action_status",
+            "export_file_delivery",
+            "delivery_import_file",
+            "export_pdf_file_summary",
             "abort_comment",
             "closure_comment",
             "closed_by",
-            "reconciliation_import_file",
-            "flat_amount_value",
-            "total_entitled_quantity",
-            "total_entitled_quantity_usd",
-            "total_delivered_quantity",
-            "total_delivered_quantity_usd",
-            "total_undelivered_quantity",
-            "total_undelivered_quantity_usd",
         ],
-        {
-            "steficon_rule": "additional_formula",
-            "steficon_applied_date": "additional_formula_applied_date",
-            "steficon_rule_targeting": "additional_formula_targeting",
-            "steficon_targeting_applied_date": "additional_formula_targeting_applied_date",
-            "vulnerability_score_min": "score_min",
-            "vulnerability_score_max": "score_max",
-        },
+        {"currency.code": "currency", "currency.vision_code": "currency_vision_code"},
     )
 
     class Status(models.TextChoices):
-        # new from TP
-        TP_OPEN = "TP_OPEN", "Open"
-        TP_LOCKED = "TP_LOCKED", "Locked"
-        TP_STEFICON_WAIT = "STEFICON_WAIT", "Steficon Wait"
-        TP_STEFICON_RUN = "STEFICON_RUN", "Steficon Run"
-        TP_STEFICON_COMPLETED = "STEFICON_COMPLETED", "Steficon Completed"
-        TP_STEFICON_ERROR = "STEFICON_ERROR", "Steficon Error"
-        DRAFT = "DRAFT", "Draft"  # like ready for PP create
-
         OPEN = "OPEN", "Open"
         LOCKED = "LOCKED", "Locked"
-        LOCKED_FSP = "LOCKED_FSP", "Locked FSP"
         IN_APPROVAL = "IN_APPROVAL", "In Approval"
         IN_AUTHORIZATION = "IN_AUTHORIZATION", "In Authorization"
         IN_REVIEW = "IN_REVIEW", "In Review"
@@ -166,68 +72,11 @@ class PaymentPlan(
         READY_FOR_CLOSURE = "READY_FOR_CLOSURE", "Ready for Closure"
         CLOSED = "CLOSED", "Closed"
 
-        @staticmethod
-        def get_choices() -> list[tuple[str, str]]:
-            return PaymentPlan.Status.choices
-
-    # A child plan may be spun off a plan that is released but not yet closed: from Accepted, while
-    # money is still moving, and from Finished, once it is all reconciled.
-    CHILD_PLAN_SOURCE_STATUSES = (Status.ACCEPTED, Status.FINISHED)
-
-    PRE_PAYMENT_PLAN_STATUSES = (
-        Status.TP_OPEN,
-        Status.TP_LOCKED,
-        Status.TP_STEFICON_WAIT,
-        Status.TP_STEFICON_RUN,
-        Status.TP_STEFICON_COMPLETED,
-        Status.TP_STEFICON_ERROR,
-        Status.DRAFT,
-    )
-
-    HARD_CONFLICT_STATUSES = (
-        Status.LOCKED,
-        Status.LOCKED_FSP,
-        Status.IN_APPROVAL,
-        Status.IN_AUTHORIZATION,
-        Status.IN_REVIEW,
-        Status.ACCEPTED,
-        Status.FINISHED,
-        Status.READY_FOR_CLOSURE,
-        Status.CLOSED,
-    )
-
-    CAN_RUN_ENGINE_FORMULA_FOR_ENTITLEMENT = (Status.LOCKED,)
-    CAN_RUN_ENGINE_FORMULA_FOR_VULNERABILITY_SCORE = (
-        Status.TP_LOCKED,
-        Status.TP_STEFICON_COMPLETED,
-        Status.TP_STEFICON_ERROR,
-    )
-    CAN_RUN_ENGINE_FORMULA = CAN_RUN_ENGINE_FORMULA_FOR_ENTITLEMENT + CAN_RUN_ENGINE_FORMULA_FOR_VULNERABILITY_SCORE
-
-    class BuildStatus(models.TextChoices):
-        BUILD_STATUS_PENDING = "PENDING", "Pending"
-        BUILD_STATUS_BUILDING = "BUILDING", "Building"
-        BUILD_STATUS_FAILED = "FAILED", "Failed"
-        BUILD_STATUS_OK = "OK", "Ok"
-
-        @staticmethod
-        def get_choices() -> list[tuple[str, str]]:
-            return PaymentPlan.BuildStatus.choices
-
     class BackgroundActionStatus(models.TextChoices):
-        RULE_ENGINE_RUN = "RULE_ENGINE_RUN", "Rule Engine Running"
-        RULE_ENGINE_ERROR = "RULE_ENGINE_ERROR", "Rule Engine Errored"
+        RECALCULATING = "RECALCULATING", "Recalculating Payment List data"
+        RECALCULATING_ERROR = "RECALCULATING_ERROR", "Payment List recalculation error"
         XLSX_EXPORTING = "XLSX_EXPORTING", "Exporting XLSX file"
         XLSX_EXPORT_ERROR = "XLSX_EXPORT_ERROR", "Export XLSX file Error"
-        XLSX_IMPORT_ERROR = "XLSX_IMPORT_ERROR", "Import XLSX file Error"
-        XLSX_IMPORTING_ENTITLEMENTS = (
-            "XLSX_IMPORTING_ENTITLEMENTS",
-            "Importing Entitlements XLSX file",
-        )
-        IMPORTING_ENTITLEMENTS = (
-            "IMPORTING_ENTITLEMENTS",
-            "Importing Entitlements flat amount",
-        )
         XLSX_IMPORTING_RECONCILIATION = (
             "XLSX_IMPORTING_RECONCILIATION",
             "Importing Reconciliation XLSX file",
@@ -236,911 +85,315 @@ class PaymentPlan(
             "XLSX_IMPORTING_FSP_EXTRA_FIELDS",
             "Importing FSP Extra Fields XLSX file",
         )
-        EXCLUDE_BENEFICIARIES = "EXCLUDE_BENEFICIARIES", "Exclude Beneficiaries Running"
-        EXCLUDE_BENEFICIARIES_ERROR = (
-            "EXCLUDE_BENEFICIARIES_ERROR",
-            "Exclude Beneficiaries Error",
-        )
-        SEND_TO_PAYMENT_GATEWAY = (
-            "SEND_TO_PAYMENT_GATEWAY",
-            "Sending to Payment Gateway",
-        )
-        SEND_TO_PAYMENT_GATEWAY_ERROR = (
-            "SEND_TO_PAYMENT_GATEWAY_ERROR",
-            "Send to Payment Gateway Error",
-        )
+        XLSX_IMPORT_ERROR = "XLSX_IMPORT_ERROR", "Import XLSX file Error"
         REBUILDING = "REBUILDING", "Rebuilding"
         REBUILD_ERROR = "REBUILD_ERROR", "Rebuild Error"
 
-        @staticmethod
-        def get_choices() -> list[tuple[str, str]]:
-            return PaymentPlan.BackgroundActionStatus.choices
-
     BACKGROUND_ACTION_ERROR_STATES = [
+        BackgroundActionStatus.RECALCULATING_ERROR,
         BackgroundActionStatus.XLSX_EXPORT_ERROR,
         BackgroundActionStatus.XLSX_IMPORT_ERROR,
-        BackgroundActionStatus.RULE_ENGINE_ERROR,
-        BackgroundActionStatus.EXCLUDE_BENEFICIARIES_ERROR,
-        BackgroundActionStatus.SEND_TO_PAYMENT_GATEWAY_ERROR,
         BackgroundActionStatus.REBUILD_ERROR,
     ]
 
-    class Action(models.TextChoices):
-        TP_LOCK = "TP_LOCK", "Population Lock"
-        TP_UNLOCK = "TP_UNLOCK", "Population Unlock"
-        TP_REBUILD = "TP_REBUILD", "Population Rebuild"
-        DRAFT = "DRAFT", "Draft"
-        LOCK = "LOCK", "Lock"
-        LOCK_FSP = "LOCK_FSP", "Lock FSP"
-        UNLOCK = "UNLOCK", "Unlock"
-        UNLOCK_FSP = "UNLOCK_FSP", "Unlock FSP"
-        SEND_FOR_APPROVAL = "SEND_FOR_APPROVAL", "Send For Approval"
-        APPROVE = "APPROVE", "Approve"
-        AUTHORIZE = "AUTHORIZE", "Authorize"
-        REVIEW = "REVIEW", "Review"
-        REJECT = "REJECT", "Reject"
-        FINISH = "FINISH", "Finish"
-        MARK_READY_FOR_CLOSURE = "MARK_READY_FOR_CLOSURE", "Mark Ready for Closure"
-        SEND_BACK_TO_FINISHED = "SEND_BACK_TO_FINISHED", "Send Back to Finished"
-        SEND_TO_PAYMENT_GATEWAY = "SEND_TO_PAYMENT_GATEWAY", "Send to Payment Gateway"
-        SEND_XLSX_PASSWORD = "SEND_XLSX_PASSWORD", "Send XLSX Password"
+    CHILD_GROUP_SOURCE_STATUSES = (Status.ACCEPTED, Status.FINISHED)
+    # Statuses in which payments go out and come back: delivery export, send to Payment Gateway, reconciliation import.
+    DELIVERY_STATUSES = (Status.ACCEPTED, Status.FINISHED)
+    SUMMARY_PDF_STATUSES = (Status.IN_REVIEW, Status.ACCEPTED, Status.FINISHED)
+    LINKED_GROUP_SOURCE_PLAN_TYPES = {
+        PaymentList.PlanType.FOLLOW_UP: (
+            PaymentList.PlanType.REGULAR,
+            PaymentList.PlanType.TOP_UP,
+            PaymentList.PlanType.TOP_UP_AMENDMENT,
+        ),
+        PaymentList.PlanType.TOP_UP: (PaymentList.PlanType.REGULAR,),
+        PaymentList.PlanType.TOP_UP_AMENDMENT: (PaymentList.PlanType.TOP_UP,),
+    }
 
-    class PlanType(models.TextChoices):
-        REGULAR = "REGULAR", "Regular"
-        TOP_UP = "TOP_UP", "Top Up"
-        FOLLOW_UP = "FOLLOW_UP", "Follow Up"
-        TOP_UP_AMENDMENT = "TOP_UP_AMENDMENT", "Top Up Amendment"
-
-    usd_fields = [
-        "total_entitled_quantity_usd",
-        "total_entitled_quantity_revised_usd",
-        "total_delivered_quantity_usd",
-        "total_undelivered_quantity_usd",
-    ]
-
-    business_area = models.ForeignKey("core.BusinessArea", on_delete=models.PROTECT, help_text="Business Area")
-    program_cycle = models.ForeignKey(
+    cycle = models.ForeignKey(
         "program.ProgramCycle",
+        on_delete=models.CASCADE,
         related_name="payment_plans",
-        on_delete=models.PROTECT,
-        help_text="Program Cycle",
+        verbose_name=_("Programme Cycle"),
     )
-    payment_plan_group = models.ForeignKey(
-        "payment.PaymentPlanGroup",
+    name = models.CharField(max_length=255, default="Default Payment Plan")
+    status = models.CharField(
+        max_length=50,
+        default=Status.OPEN,
+        choices=Status.choices,
+    )
+    status_date = models.DateTimeField(blank=True, null=True)
+    financial_service_provider = models.ForeignKey(
+        "payment.FinancialServiceProvider",
         on_delete=models.PROTECT,
         related_name="payment_plans",
         null=True,
         blank=True,
     )
-    payment_plan_purposes = models.ManyToManyField(
-        "payment.PaymentPlanPurpose",
-        blank=True,
+    currency = models.ForeignKey(
+        "core.Currency",
+        on_delete=models.PROTECT,
         related_name="payment_plans",
-        help_text="Payment plan purposes",
-    )
-    delivery_mechanism = models.ForeignKey("payment.DeliveryMechanism", blank=True, null=True, on_delete=models.PROTECT)
-    imported_file = models.ForeignKey(
-        FileTemp,
         null=True,
         blank=True,
-        related_name="+",
+    )
+    dispersion_start_date = models.DateField(blank=True, null=True, help_text="Dispersion Start Date")
+    dispersion_end_date = models.DateField(blank=True, null=True, help_text="Dispersion End Date")
+    use_payment_gateway = models.BooleanField(
+        default=False,
+        help_text="Send the payment lists through the payment gateway regardless of the FSP communication channel",
+    )
+    exchange_rate = models.DecimalField(
+        decimal_places=8, blank=True, null=True, max_digits=15, help_text="Exchange Rate [sys]"
+    )
+    custom_exchange_rate = models.BooleanField(default=False, help_text="Custom Exchange Rate flag [sys]")
+    custom_exchange_rate_set_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        blank=True,
+        null=True,
         on_delete=models.SET_NULL,
-        help_text="Imported File",
-    )
-    export_file_entitlement = models.ForeignKey(
-        FileTemp,
-        null=True,
-        blank=True,
         related_name="+",
-        on_delete=models.SET_NULL,
-        help_text="Export File Entitlement",
-    )
-    reconciliation_import_file = models.ForeignKey(
-        FileTemp,
-        null=True,
-        blank=True,
-        related_name="+",
-        on_delete=models.SET_NULL,
-        help_text="Reconciliation Import File",
-    )
-    steficon_rule = models.ForeignKey(
-        RuleCommit,
-        null=True,
-        on_delete=models.PROTECT,
-        related_name="payment_plans",
-        blank=True,
-        help_text="Engine Formula for calculation entitlement value",
-    )
-    steficon_rule_targeting = models.ForeignKey(
-        RuleCommit,
-        null=True,
-        on_delete=models.PROTECT,
-        related_name="payment_plans_target",
-        blank=True,
-        help_text="Engine Formula for calculation vulnerability score value",
+        help_text="User who set the custom exchange rate [sys]",
     )
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
-        on_delete=models.PROTECT,
-        related_name="created_payment_plans",
-        help_text="Created by user",
+        on_delete=models.SET_NULL,
+        related_name="+",
+        null=True,
+        blank=True,
     )
+    abort_comment = models.CharField(max_length=COMMENT_MAX_LENGTH, blank=True)
+    closure_comment = models.TextField(null=True, blank=True)
     closed_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
-        null=True,
-        blank=True,
         on_delete=models.PROTECT,
-        related_name="closed_payment_plans",
-        help_text="User who closed the payment plan",
-    )
-    closure_comment = models.TextField(
+        related_name="+",
         null=True,
         blank=True,
-        help_text="Justification comment provided at closure",
     )
-    source_payment_plan = models.ForeignKey(
-        "self",
+    export_file_delivery = models.ForeignKey(
+        "core.FileTemp",
         null=True,
         blank=True,
-        on_delete=models.PROTECT,
-        related_name="child_plans",
-        help_text="Source Payment Plan (applicable for follow-up and top-up Payment Plans)",
-    )
-    follow_up_instruction = models.ForeignKey(
-        "payment.FollowUpInstruction",
-        null=True,
-        blank=True,
-        on_delete=models.PROTECT,
-        related_name="payment_plans",
-    )
-
-    storage_file = models.OneToOneField(
-        StorageFile,
-        blank=True,
-        null=True,
         on_delete=models.SET_NULL,
-        help_text="Storage File",
+        related_name="+",
+        help_text="Generated payment list XLSX for the FSP [sys]",
     )
-
-    name = models.CharField(
-        max_length=255,
-        validators=[
-            MinLengthValidator(3),
-            MaxLengthValidator(255),
-            DoubleSpaceValidator,
-            StartEndSpaceValidator,
-            ProhibitNullCharactersValidator(),
-        ],
+    delivery_import_file = models.ForeignKey(
+        "core.FileTemp",
         null=True,
         blank=True,
-        help_text="Name",
+        on_delete=models.SET_NULL,
+        related_name="+",
+        help_text="Uploaded reconciliation XLSX [sys]",
     )
-    start_date = models.DateTimeField(
-        blank=True,
-        null=True,
-        help_text="Payment Plan start date",
-    )
-    end_date = models.DateTimeField(
-        blank=True,
-        null=True,
-        help_text="Payment Plan end date",
-    )
-    excluded_ids = models.TextField(blank=True, null=True, help_text="Targeting level exclusion IDs")
-    exclusion_reason = models.TextField(blank=True, null=True, help_text="Exclusion reason (Targeting level)")
-    vulnerability_score_min = models.DecimalField(
-        null=True,
-        decimal_places=3,
-        max_digits=6,
-        help_text="Written by a tool such as Engine Formula",
-        blank=True,
-    )
-    vulnerability_score_max = models.DecimalField(
-        null=True,
-        decimal_places=3,
-        max_digits=6,
-        help_text="Written by a tool such as Engine Formula",
-        blank=True,
-    )
-    abort_comment = models.CharField(
-        max_length=COMMENT_MAX_LENGTH,
-        blank=True,
-        help_text="Reason for aborting",
-    )
-    flat_amount_value = models.DecimalField(
-        decimal_places=2,
-        max_digits=15,
-        validators=[MinValueValidator(Decimal("0.00"))],
+    export_pdf_file_summary = models.ForeignKey(
+        "core.FileTemp",
         null=True,
         blank=True,
-        help_text="Apply a fixed amount of entitlement for all payment records within a payment plan",
-    )
-    # System fields
-    status = models.CharField(
-        max_length=50,
-        default=Status.TP_OPEN,
-        choices=Status.get_choices,
-        help_text="Status [sys]",
+        on_delete=models.SET_NULL,
+        related_name="+",
+        help_text="Generated summary PDF [sys]",
     )
     background_action_status = models.CharField(
         max_length=50,
         default=None,
         blank=True,
         null=True,
-        choices=BackgroundActionStatus.get_choices,
-        help_text="Background Action Status for celery task [sys]",
+        choices=BackgroundActionStatus.choices,
+        help_text="Background Action Status for asynchronous payment plan tasks [sys]",
     )
-    build_status = models.CharField(
-        max_length=50,
-        choices=BuildStatus.get_choices,
-        default=None,
-        null=True,
-        blank=True,
-        help_text="Build Status for celery task [sys]",
-    )
-    built_at = models.DateTimeField(null=True, blank=True, help_text="Built at [sys]")
-    female_children_count = models.PositiveIntegerField(default=0, help_text="Female Children Count [sys]")
-    male_children_count = models.PositiveIntegerField(default=0, help_text="Male Children Count [sys]")
-    female_adults_count = models.PositiveIntegerField(default=0, help_text="Female Adults Count [sys]")
-    male_adults_count = models.PositiveIntegerField(default=0, help_text="Male Adults Count [sys]")
-    total_households_count = models.PositiveIntegerField(default=0, help_text="Total Households Count [sys]")
-    total_individuals_count = models.PositiveIntegerField(default=0, help_text="Total Individuals Count [sys]")
-    imported_file_date = models.DateTimeField(blank=True, null=True, help_text="Imported File Date [sys]")
-    total_entitled_quantity = models.DecimalField(
-        decimal_places=2,
-        max_digits=15,
-        validators=[MinValueValidator(Decimal(0))],
-        null=True,
-        blank=True,
-        help_text="Total Entitled Quantity [sys]",
-    )
-    total_entitled_quantity_usd = models.DecimalField(
-        decimal_places=2,
-        max_digits=15,
-        validators=[MinValueValidator(Decimal(0))],
-        null=True,
-        blank=True,
-        help_text="Total Entitled Quantity USD [sys]",
-    )
-    total_entitled_quantity_revised = models.DecimalField(
-        decimal_places=2,
-        max_digits=15,
-        validators=[MinValueValidator(Decimal(0))],
-        null=True,
-        blank=True,
-        help_text="Total Entitled Quantity Revised [sys]",
-    )
-    total_entitled_quantity_revised_usd = models.DecimalField(
-        decimal_places=2,
-        max_digits=15,
-        validators=[MinValueValidator(Decimal(0))],
-        null=True,
-        blank=True,
-        help_text="Total Entitled Quantity Revised USD [sys]",
-    )
-    total_delivered_quantity = models.DecimalField(
-        decimal_places=2,
-        max_digits=15,
-        validators=[MinValueValidator(Decimal(0))],
-        null=True,
-        blank=True,
-        help_text="Total Delivered Quantity [sys]",
-    )
-    total_delivered_quantity_usd = models.DecimalField(
-        decimal_places=2,
-        max_digits=15,
-        validators=[MinValueValidator(Decimal(0))],
-        null=True,
-        blank=True,
-        help_text="Total Delivered Quantity USD [sys]",
-    )
-    total_undelivered_quantity = models.DecimalField(
-        decimal_places=2,
-        max_digits=15,
-        validators=[MinValueValidator(Decimal(0))],
-        null=True,
-        blank=True,
-        help_text="Total Undelivered Quantity [sys]",
-    )
-    total_undelivered_quantity_usd = models.DecimalField(
-        decimal_places=2,
-        max_digits=15,
-        validators=[MinValueValidator(Decimal(0))],
-        null=True,
-        blank=True,
-        help_text="Total Undelivered Quantity USD [sys]",
-    )
-    steficon_targeting_applied_date = models.DateTimeField(
-        blank=True,
-        null=True,
-        help_text="Engine Formula applied date for targeting [sys]",
-    )
-    steficon_applied_date = models.DateTimeField(blank=True, null=True, help_text="Engine Formula applied date [sys]")
     plan_type = models.CharField(
         max_length=20,
-        choices=PlanType.choices,
-        default=PlanType.REGULAR,
-        help_text="Payment Plan type [sys]",
-    )
-    exclude_household_error = models.TextField(
-        blank=True, null=True, help_text="Exclusion reason (Targeting level) [sys]"
-    )
-    status_date = models.DateTimeField(help_text="Date and time of Payment Plan status [sys]")
-    is_cash_assist = models.BooleanField(default=False, help_text="Cash Assist Flag [sys]")
-
-    """
-    Filtering criteria flags and a set of ORed Rules. Rules are either applied for a candidate list
-    (against Golden Record) or for a final list (against the approved candidate list).
-    If flag is applied, target population needs to be filtered by it as an AND condition to the existing set of rules.
-    """
-    flag_exclude_if_active_adjudication_ticket = models.BooleanField(
-        default=False,
-        help_text=_(
-            "Exclude households with individuals (members or collectors) that have active adjudication ticket(s)."
+        choices=PaymentList.PlanType.choices,
+        default=PaymentList.PlanType.REGULAR,
+        help_text=(
+            "Type of the Payment Lists the payment plan runs; "
+            "a Follow-Up / Top-Up / Amendment payment plan is linked [sys]"
         ),
     )
-    flag_exclude_if_on_sanction_list = models.BooleanField(
-        default=False,
-        help_text=_("Exclude households with individuals (members or collectors) on sanction list."),
+    source_payment_plan = models.ForeignKey(
+        "self",
+        on_delete=models.PROTECT,
+        related_name="linked_payment_plans",
+        null=True,
+        blank=True,
+        help_text="The payment plan this Follow-Up / Top-Up / Amendment payment plan was created from [sys]",
+        db_column="source_group_id",
     )
 
     class Meta:
         app_label = "payment"
+        db_table = "payment_paymentplangroup"
         verbose_name = "Payment Plan"
+        unique_together = ("cycle", "name")
         ordering = ["created_at"]
-        permissions = (
-            ("recalculate_exchange_rate", "Can recalculate USD values based on exchange rate"),
-            ("restart_preparing_payment_plan", "Can restart Preparing Payment Plans"),
-            ("restart_exporting_template_for_entitlement", "Can restart Exporting Template for Entitlements"),
-            ("restart_exporting_payment_plan_list", "Can restart Exporting Payment Plans"),
-            ("restart_importing_reconciliation_xlsx_file", "Can restart Importing Reconciliation XLSX File"),
-            ("pm_sync_payment_plan_with_pg", "Can sync payment plan with payment gateway"),
-            ("pm_manage_vision_workflow", "Can manage Payment Plan Vision workflow"),
-            ("download_payment_instruction", "Can download payment instruction from payment gateway"),
-        )
         constraints = [
             models.CheckConstraint(
-                condition=Q(is_removed=True)
-                | Q(payment_plan_group__isnull=False, follow_up_instruction__isnull=True)
-                | Q(payment_plan_group__isnull=True, follow_up_instruction__isnull=False),
-                name="payment_plan_in_group_or_instruction_unless_removed",
+                condition=Q(plan_type=PaymentList.PlanType.REGULAR, source_payment_plan__isnull=True)
+                | (~Q(plan_type=PaymentList.PlanType.REGULAR) & Q(source_payment_plan__isnull=False)),
+                name="payment_plan_group_source_group_only_on_linked",
             ),
         ]
         indexes = [
-            LongNameIndex(fields=["created_at"], name="payment_paymentplan_created_at_029b4d04"),
-            LongNameIndex(fields=["updated_at"], name="payment_paymentplan_updated_at_4f87ddb1"),
-            LongNameIndex(fields=["unicef_id"], name="payment_paymentplan_unicef_id_ba96bd54"),
-            LongNameIndex(fields=["start_date"], name="payment_paymentplan_start_date_2c9849e2"),
-            LongNameIndex(fields=["end_date"], name="payment_paymentplan_end_date_04e45bb0"),
-            LongNameIndex(fields=["status"], name="payment_paymentplan_status_864b68ea"),
+            LongNameIndex(fields=["created_at"], name="payment_paymentplangroup_created_at_14a802c0"),
+            LongNameIndex(fields=["updated_at"], name="payment_paymentplangroup_updated_at_b23558fe"),
+            LongNameIndex(fields=["unicef_id"], name="payment_paymentplangroup_unicef_id_3fb17c90"),
             LongNameIndex(
-                fields=["status"], opclasses=["varchar_pattern_ops"], name="payment_paymentplan_status_864b68ea_like"
+                fields=["unicef_id"],
+                opclasses=["varchar_pattern_ops"],
+                name="payment_paymentplangroup_unicef_id_3fb17c90_like",
             ),
             LongNameIndex(
-                fields=["background_action_status"], name="payment_paymentplan_background_action_status_0334335b"
+                fields=["background_action_status"], name="payment_paymentplangroup_background_action_status_2aeaeb44"
             ),
             LongNameIndex(
                 fields=["background_action_status"],
                 opclasses=["varchar_pattern_ops"],
-                name="payment_paymentplan_background_action_status_0334335b_like",
+                name="payment_paymentplangroup_background_action_status_2aeaeb44_like",
             ),
-            LongNameIndex(fields=["build_status"], name="payment_paymentplan_build_status_d3880ed4"),
+            LongNameIndex(fields=["status"], name="payment_paymentplangroup_status_c68e4ae6"),
             LongNameIndex(
-                fields=["build_status"],
+                fields=["status"],
                 opclasses=["varchar_pattern_ops"],
-                name="payment_paymentplan_build_status_d3880ed4_like",
+                name="payment_paymentplangroup_status_c68e4ae6_like",
             ),
-            LongNameIndex(
-                fields=["total_entitled_quantity"], name="payment_paymentplan_total_entitled_quantity_4edacc55"
-            ),
-            LongNameIndex(
-                fields=["total_entitled_quantity_revised"],
-                name="payment_paymentplan_total_entitled_quantity_revised_be7a6766",
-            ),
-            LongNameIndex(
-                fields=["total_delivered_quantity"], name="payment_paymentplan_total_delivered_quantity_fd076625"
-            ),
-            LongNameIndex(
-                fields=["total_undelivered_quantity"], name="payment_paymentplan_total_undelivered_quantity_2652642a"
-            ),
-            LongNameIndex(fields=["plan_type"], name="payment_paymentplan_plan_type_b827c7b8"),
+            LongNameIndex(fields=["plan_type"], name="payment_paymentplangroup_plan_type_1e21f341"),
             LongNameIndex(
                 fields=["plan_type"],
                 opclasses=["varchar_pattern_ops"],
-                name="payment_paymentplan_plan_type_b827c7b8_like",
+                name="payment_paymentplangroup_plan_type_1e21f341_like",
             ),
         ]
 
-    @property
-    def admin_url(self) -> str:
-        from django.urls import reverse
-
-        if self.status in self.PRE_PAYMENT_PLAN_STATUSES:
-            return reverse("admin:payment_targetpopulation_change", args=[self.id])
-        return super().admin_url
+    def delete(self, *args: object, **kwargs: object) -> tuple[int, dict]:
+        with transaction.atomic():
+            cycle_payment_plan_pks = list(
+                PaymentPlan.objects.filter(cycle_id=self.cycle_id).values_list("pk", flat=True).select_for_update()
+            )
+            if len(cycle_payment_plan_pks) <= 1:
+                raise ValidationError("Cannot delete the last payment plan in a cycle.")
+            return super().delete(*args, **kwargs)  # type: ignore
 
     def __str__(self) -> str:
-        return self.unicef_id or ""
-
-    def clean(self) -> None:
-        if self.payment_plan_group_id and self.program_cycle_id != self.payment_plan_group.cycle_id:
-            raise ValidationError("PaymentPlan's program_cycle must match its PaymentPlanGroup's cycle.")
-        if self.steficon_rule_targeting and self.steficon_rule_targeting.rule.type != Rule.TYPE_TARGETING:
-            raise ValidationError(
-                f"The selected RuleCommit must be associated with a Rule of type {Rule.TYPE_TARGETING}."
-            )
-        if self.steficon_rule and self.steficon_rule.rule.type != Rule.TYPE_PAYMENT_PLAN:
-            raise ValidationError(
-                f"The selected RuleCommit must be associated with a Rule of type {Rule.TYPE_PAYMENT_PLAN}."
-            )
-        if not self._state.adding:
-            purposes = self.payment_plan_purposes.all()
-            count = purposes.count()
-            if count == 0:
-                raise ValidationError("PaymentPlan must have at least one Payment Plan Purpose.")
-            if purposes.exclude(programs=self.program_cycle.program).exists():
-                raise ValidationError("All PaymentPlan purposes must be a subset of the program's purposes.")
-
-    def save(self, *args: Any, **kwargs: Any) -> None:
-        self.clean()
-        super().save(*args, **kwargs)
-
-    def update_population_count_fields(self) -> None:
-        households_ids = self.eligible_payments.values_list("household_id", flat=True)
-
-        delta18 = relativedelta(years=+18)
-        date18ago = datetime.now() - delta18
-
-        active_beneficiary = Q(withdrawn=False, duplicate=False) & ~Q(relationship=NON_BENEFICIARY)
-
-        targeted_individuals = Individual.objects.filter(
-            active_beneficiary, household__id__in=households_ids
-        ).aggregate(
-            male_children_count=Count("id", distinct=True, filter=Q(birth_date__gt=date18ago, sex=MALE)),
-            female_children_count=Count("id", distinct=True, filter=Q(birth_date__gt=date18ago, sex=FEMALE)),
-            male_adults_count=Count("id", distinct=True, filter=Q(birth_date__lte=date18ago, sex=MALE)),
-            female_adults_count=Count("id", distinct=True, filter=Q(birth_date__lte=date18ago, sex=FEMALE)),
-            total_individuals_count=Count("id", distinct=True),
-        )
-
-        self.female_children_count = targeted_individuals.get("female_children_count", 0)
-        self.male_children_count = targeted_individuals.get("male_children_count", 0)
-        self.female_adults_count = targeted_individuals.get("female_adults_count", 0)
-        self.male_adults_count = targeted_individuals.get("male_adults_count", 0)
-        self.total_households_count = households_ids.count()
-        self.total_individuals_count = targeted_individuals.get("total_individuals_count", 0)
-
-        self.save(
-            update_fields=[
-                "female_children_count",
-                "male_children_count",
-                "female_adults_count",
-                "male_adults_count",
-                "total_households_count",
-                "total_individuals_count",
-            ]
-        )
-
-    def update_money_fields(self) -> None:
-        """Update money fields only for PaymentPlan with currency."""
-        if self.status not in self.PRE_PAYMENT_PLAN_STATUSES:
-            payments = self.eligible_payments.aggregate(
-                total_entitled_quantity=Coalesce(Sum("entitlement_quantity"), Decimal(0.0)),
-                total_entitled_quantity_usd=Coalesce(Sum("entitlement_quantity_usd"), Decimal(0.0)),
-                total_delivered_quantity=Coalesce(Sum("delivered_quantity"), Decimal(0.0)),
-                total_delivered_quantity_usd=Coalesce(Sum("delivered_quantity_usd"), Decimal(0.0)),
-            )
-
-            self.total_entitled_quantity = payments.get("total_entitled_quantity", 0.00)
-            self.total_entitled_quantity_usd = payments.get("total_entitled_quantity_usd", 0.00)
-            self.total_delivered_quantity = payments.get("total_delivered_quantity", 0.00)
-            self.total_delivered_quantity_usd = payments.get("total_delivered_quantity_usd", 0.00)
-
-            self.total_undelivered_quantity = self.total_entitled_quantity - self.total_delivered_quantity
-            self.total_undelivered_quantity_usd = self.total_entitled_quantity_usd - self.total_delivered_quantity_usd
-
-            self.save(
-                update_fields=[
-                    "total_entitled_quantity",
-                    "total_entitled_quantity_usd",
-                    "total_delivered_quantity",
-                    "total_delivered_quantity_usd",
-                    "total_undelivered_quantity",
-                    "total_undelivered_quantity_usd",
-                ]
-            )
-
-    def is_population_open(self) -> bool:
-        return self.status == self.Status.TP_OPEN
-
-    def is_population_locked(self) -> bool:
-        return self.status in (
-            self.Status.TP_LOCKED,
-            self.Status.TP_STEFICON_COMPLETED,
-            self.Status.TP_STEFICON_ERROR,
-        )
-
-    def get_criteria_string(self) -> str:
-        try:
-            return super().get_criteria_string()
-        except ValueError:
-            return ""
-
-    def remove_export_file_entitlement(self) -> None:
-        file_field = self.export_file_entitlement.file
-        self.export_file_entitlement.delete()
-        self.export_file_entitlement = None
-        # Storage delete is not transactional: delete the file when the transaction commits
-        transaction.on_commit(lambda: file_field.delete(save=False))
-
-    def remove_export_files(self) -> None:
-        if self.status == PaymentPlan.Status.LOCKED and self.export_file_entitlement:
-            self.remove_export_file_entitlement()
-
-    def remove_imported_file(self) -> None:
-        if self.imported_file:
-            self.imported_file.file.delete(save=False)
-            self.imported_file.delete()
-            self.imported_file = None
-            self.imported_file_date = None
-
-    def unsuccessful_payments(self) -> "QuerySet":
-        return self.eligible_payments.filter(status__in=Payment.FAILED_STATUSES)
-
-    def unsuccessful_payments_for_follow_up(self) -> "QuerySet":
-        """Select unsuccessful payments to create FPP.
-
-        Need to call from source_payment_plan level
-        like payment_plan.source_payment_plan.unsuccessful_payments_for_follow_up()
-        """
-        # Exclude beneficiaries who are currently in different follow-up Payment Plan
-        # within the same cycle (contains excluded from other follow-ups)
-        follow_up_households = Payment.objects.filter(
-            is_follow_up=True,
-            parent__source_payment_plan=self,
-            parent__program_cycle=self.program_cycle,
-            excluded=False,
-            household_id=OuterRef("household_id"),
-        ).exclude(parent=self)
-        return (
-            self.unsuccessful_payments()
-            .exclude(household__withdrawn=True)  # Exclude beneficiaries who have been withdrawn
-            .exclude(Exists(follow_up_households))
-        )
-
-    def payments_used_in_follow_payment_plans(self) -> "QuerySet":
-        return Payment.objects.filter(parent__source_payment_plan_id=self.id, excluded=False)
-
-    def eligible_payments_for_top_up(self) -> "QuerySet":
-        """Select payments eligible for top-up, whatever their delivery status.
-
-        Must be called on the source (Standard) Payment Plan. Payment status is
-        deliberately not filtered: a beneficiary may be topped up whether their
-        original payment was delivered, is still pending, or failed.
-
-        Excludes withdrawn households and beneficiaries that already appear in
-        another TopUp under the same source plan (slide 10 "Not Allowed #1": one
-        top-up per beneficiary per cycle). Membership alone blocks: beneficiaries
-        left at zero in the amount file are never copied into the TopUp, so they
-        stay available for a later one.
-        """
-        top_up_households = Payment.objects.filter(
-            parent__plan_type=PaymentPlan.PlanType.TOP_UP,
-            parent__source_payment_plan=self,
-            household_id=OuterRef("household_id"),
-        )
-        return self.eligible_payments.exclude(household__withdrawn=True).exclude(Exists(top_up_households))
-
-    def eligible_payments_for_top_up_amendment(self) -> "QuerySet":
-        """Select payments of a TopUp plan eligible for an amendment, whatever their status.
-
-        Must be called on the source TopUp Payment Plan. Mirrors top-up eligibility: payment
-        status does not gate an amendment either, so a beneficiary can be adjusted whether the
-        TopUp payment was delivered, is still pending, or failed. Excludes withdrawn households
-        and beneficiaries already covered by another Amendment under the same TopUp — membership
-        alone blocks, so excluding someone from an Amendment does not recycle them into the pool.
-        """
-        amended_households = Payment.objects.filter(
-            parent__plan_type=PaymentPlan.PlanType.TOP_UP_AMENDMENT,
-            parent__source_payment_plan=self,
-            household_id=OuterRef("household_id"),
-        )
-        return self.eligible_payments.exclude(household__withdrawn=True).exclude(Exists(amended_households))
-
-    @property
-    def has_newer_sibling_plan(self) -> bool:
-        return PaymentPlan.objects.filter(
-            source_payment_plan=self.source_payment_plan,
-            plan_type=self.plan_type,
-            created_at__gt=self.created_at,
-        ).exists()
-
-    @property
-    def can_delete(self) -> bool:
-        """Mirror of PaymentPlanService.delete() validations, so the UI can hide the delete button."""
-        if self.status not in (PaymentPlan.Status.OPEN, PaymentPlan.Status.TP_OPEN):
-            return False
-        if self.plan_type == PaymentPlan.PlanType.REGULAR:
-            return True
-        return not self.has_newer_sibling_plan
-
-    def eligible_payments_for_child_plan(self) -> "QuerySet":
-        """Payments eligible for the child plan this plan can spawn.
-
-        A Standard plan spawns a TopUp, a TopUp spawns an Amendment; both are funded the same
-        way, so the amount template and its parser only need to know which pool to work from.
-        """
-        if self.plan_type == PaymentPlan.PlanType.TOP_UP:
-            return self.eligible_payments_for_top_up_amendment()
-        return self.eligible_payments_for_top_up()
-
-    @property
-    def last_approval_process(self) -> "ApprovalProcess | None":
-        """The approval process of the plan's group or Follow-Up Instruction, which approves all its plans together."""
-        if self.payment_plan_group_id:
-            return self.payment_plan_group.approval_process.first()
-        if self.follow_up_instruction_id:
-            return self.follow_up_instruction.approval_process.first()
-        return self.approval_process.first()
-
-    def _get_last_approval_process_data(self) -> ModifiedData:
-        return last_approval_step(self.last_approval_process, self.status, self.updated_at)
-
-    # from generic pp
-    def get_exchange_rate(
-        self, exchange_rates_client: "ExchangeRates | ExchangeRateClient | None" = None
-    ) -> float | None:
-        if self.custom_exchange_rate and self.exchange_rate is not None:
-            return float(self.exchange_rate)
-
-        return self.get_unore_exchange_rate(exchange_rates_client)
-
-    def get_unore_exchange_rate(
-        self, exchange_rates_client: "ExchangeRates | ExchangeRateClient | None" = None
-    ) -> float | None:
-        if not self.currency:
-            raise ValueError("Cannot get exchange rate for PaymentPlan without currency")
-
-        if self.currency.code == "USDC":
-            # exchange rate for Digital currency USDC to USD
-            return 1.0
-
-        if exchange_rates_client is None:
-            exchange_rates_client = ExchangeRates()
-
-        return exchange_rates_client.get_exchange_rate_for_currency_code(
-            self.currency.vision_code, self.currency_exchange_date
-        )
-
-    def available_payment_records(
-        self,
-        payment_verification_plan: Optional["PaymentVerificationPlan"] = None,
-        extra_validation: Callable | None = None,
-    ) -> QuerySet:
-        from hope.models.payment_verification_plan import PaymentVerificationPlan
-
-        params = Q(status__in=Payment.ALLOW_CREATE_VERIFICATION, delivered_quantity__gt=0)
-
-        if payment_verification_plan:
-            params &= Q(
-                Q(payment_verifications__isnull=True)
-                | Q(payment_verifications__payment_verification_plan=payment_verification_plan)
-            )
-        else:
-            # exclude PaymentVerificationPlan with in statuses Error or Invalid
-            params &= Q(
-                Q(payment_verifications__isnull=True)
-                | Q(
-                    payment_verifications__payment_verification_plan__status__in=[
-                        PaymentVerificationPlan.STATUS_INVALID,
-                        PaymentVerificationPlan.STATUS_RAPID_PRO_ERROR,
-                    ]
-                )
-            )
-
-        payment_records = self.eligible_payments.select_related("head_of_household").filter(params).distinct()
-
-        if extra_validation:
-            payment_records_ids = [pr.pk for pr in filter(extra_validation, payment_records)]
-            payment_records = Payment.objects.filter(pk__in=payment_records_ids)
-
-        return payment_records
+        return f"{self.name} for {self.cycle}"
 
     @property
     def program(self) -> "Program":
-        return self.program_cycle.program
+        return self.cycle.program
 
     @property
-    def is_social_worker_program(self) -> bool:
-        return self.program_cycle.program.is_social_worker_program
+    def business_area(self) -> "BusinessArea":
+        return self.cycle.program.business_area
 
     @property
-    def household_list(self) -> "QuerySet":
-        """Get household list.
-
-        Copied from TP and used in:
-        1) create PP.create_payments() all list just filter by targeting_criteria, PaymentPlan.Status.TP_OPEN
-        """
-        all_households = Household.objects.filter(
-            business_area=self.business_area, program=self.program_cycle.program
-        ).prefetch_related("individuals")
-        households = all_households.filter(self.get_query()).order_by("unicef_id")
-        return households.distinct()
-
-    @property
-    def household_count(self) -> int:
-        return self.household_list.count()
-
-    @property
-    def eligible_payments(self) -> QuerySet:
-        return self.payment_items.eligible()
-
-    def _with_no_payment_plan_conflicts(self, qs: QuerySet) -> QuerySet:
-        return qs.annotate(
-            payment_plan_hard_conflicted=Value(False, output_field=models.BooleanField()),
-            payment_plan_hard_conflicted_data=Value([], output_field=models.JSONField()),
-            payment_plan_soft_conflicted=Value(False, output_field=models.BooleanField()),
-            payment_plan_soft_conflicted_data=Value([], output_field=models.JSONField()),
-        )
-
-    @property
-    def eligible_payments_with_conflicts(self) -> QuerySet:
-        if self.is_instruction_managed:
-            # Follow-up instructions intentionally allow the same household to be paid multiple times
-            # across instruction-managed child plans, so child-plan conflict annotations are bypassed.
-            return self._with_no_payment_plan_conflicts(self.eligible_payments)
-        return self.payment_items.eligible_with_conflicts_data(self.program_cycle.id)
-
-    @property
-    def can_be_locked(self) -> bool:
-        if self.status != PaymentPlan.Status.OPEN:
+    def vision_managed(self) -> bool:
+        if (
+            self.plan_type == PaymentList.PlanType.FOLLOW_UP
+            or not flag_state("VISION_INTEGRATION_ACTIVE")
+            or not self.business_area.vision_integration_active
+        ):
             return False
-
-        return self.eligible_payments_with_conflicts.filter(
-            Q(payment_plan_hard_conflicted=False) & Q(excluded=False)
-        ).exists()
-
-    @property
-    def is_payment_gateway_and_all_sent_to_fsp(self) -> bool:
-        """Export MTCN file xlsx file with password.
-
-        Note: change XlsxPaymentPlanGroupDeliveryExportService._get_plans_with_blocking_payments
-        when changing this function.
-        """
-        has_blocking_payments = self.eligible_payments.filter(
-            status__in=(Payment.STATUS_PENDING, Payment.STATUS_SENT_TO_PG)
-        ).exists()
-        return self.is_payment_gateway and not has_blocking_payments
+        if self.status == self.Status.IN_REVIEW:
+            return self.payment_lists.exists()
+        return self.vision_status != VisionStatus.NOT_SENT.value
 
     @property
-    def financial_service_provider(self) -> "FinancialServiceProvider | None":
-        if self.payment_plan_group_id:
-            return self.payment_plan_group.financial_service_provider
-        return self.follow_up_instruction.financial_service_provider if self.follow_up_instruction_id else None
+    def vision_data(self) -> dict:
+        data = (self.internal_data or {}).get("vision", {})
+        return data if isinstance(data, dict) else {}
 
     @property
-    def currency(self) -> "Currency | None":
-        if self.payment_plan_group_id:
-            return self.payment_plan_group.currency
-        return self.follow_up_instruction.currency if self.follow_up_instruction_id else None
+    def vision_status(self) -> str:
+        return str(self.vision_data.get("status") or VisionStatus.NOT_SENT.value)
 
     @property
-    def dispersion_start_date(self) -> date | None:
-        if self.payment_plan_group_id:
-            return self.payment_plan_group.dispersion_start_date
-        return self.follow_up_instruction.dispersion_start_date if self.follow_up_instruction_id else None
+    def sent_to_vision(self) -> bool:
+        return bool(self.vision_data.get("sent"))
 
     @property
-    def dispersion_end_date(self) -> date | None:
-        if self.payment_plan_group_id:
-            return self.payment_plan_group.dispersion_end_date
-        return self.follow_up_instruction.dispersion_end_date if self.follow_up_instruction_id else None
-
-    @property
-    def use_payment_gateway(self) -> bool:
-        if self.payment_plan_group_id:
-            return self.payment_plan_group.use_payment_gateway
-        return self.follow_up_instruction.use_payment_gateway if self.follow_up_instruction_id else False
-
-    @property
-    def exchange_rate_owner(self) -> "PaymentPlanGroup | FollowUpInstruction | None":
-        if self.payment_plan_group_id:
-            return self.payment_plan_group
-        return self.follow_up_instruction if self.follow_up_instruction_id else None
-
-    @property
-    def exchange_rate(self) -> Decimal | None:
-        owner = self.exchange_rate_owner
-        return owner.exchange_rate if owner else None
-
-    @property
-    def custom_exchange_rate(self) -> bool:
-        owner = self.exchange_rate_owner
-        return owner.custom_exchange_rate if owner else False
-
-    @property
-    def custom_exchange_rate_set_by(self) -> "User | None":
-        owner = self.exchange_rate_owner
-        return owner.custom_exchange_rate_set_by if owner else None
-
-    @property
-    def is_payment_gateway(self) -> bool:  # pragma: no cover
-        if not getattr(self, "financial_service_provider", None):
-            return False
-        return self.use_payment_gateway or (
-            self.financial_service_provider.communication_channel == FinancialServiceProvider.COMMUNICATION_CHANNEL_API
-        )
-
-    @property
-    def is_instruction_managed(self) -> bool:
-        return self.follow_up_instruction_id is not None
-
-    @property
-    def excluded_household_ids_targeting_level(self) -> list[str]:
-        return map_unicef_ids_to_households_unicef_ids(self.excluded_ids) if self.excluded_ids else []
-
-    @property
-    def targeting_criteria_string(self) -> str:
-        return Truncator(self.get_criteria_string()).chars(390, "...")
-
-    def get_query(self) -> Q:
-        query = super().get_query()
-        if self.status != PaymentPlan.Status.TP_OPEN:
-            query &= Q(size__gt=0)
-        return query
-
-    @property
-    def excluded_beneficiaries_ids(self) -> list[str | None]:
-        """Return HH or Ind IDs based on Program DCT."""
+    def can_send_to_vision(self) -> bool:
         return (
-            list(self.payment_items.filter(excluded=True).values_list("household__individuals__unicef_id", flat=True))
-            if self.is_social_worker_program
-            else list(self.payment_items.filter(excluded=True).values_list("household__unicef_id", flat=True))
+            self.status == self.Status.IN_REVIEW
+            and self.vision_managed
+            and self.vision_status in {VisionStatus.NOT_SENT.value, VisionStatus.SEND_FAILED.value}
+            and not self.sent_to_vision
         )
+
+    @property
+    def can_assign_funds_commitments(self) -> bool:
+        if self.status != self.Status.IN_REVIEW or self.plan_type == PaymentList.PlanType.FOLLOW_UP:
+            return False
+        return not self.vision_managed and self.payment_lists.exists()
+
+    @property
+    def funds_commitment_source_payment_plan(self) -> "PaymentPlan":
+        if self.plan_type == PaymentList.PlanType.FOLLOW_UP:
+            return cast("PaymentPlan", self.source_payment_plan)
+        return self
+
+    def payment_lists_qualifying_for_linked_payment_plan(self, plan_type: "PaymentList.PlanType") -> list[PaymentList]:
+        """Payment lists that a linked Follow-Up / Top-Up / Amendment payment plan would get a child list for."""
+        if self.plan_type not in self.LINKED_GROUP_SOURCE_PLAN_TYPES[plan_type]:
+            return []
+        payment_lists = list(self.payment_lists.order_by("created_at"))
+        if plan_type == PaymentList.PlanType.FOLLOW_UP:
+            return [plan for plan in payment_lists if plan.unsuccessful_payments_for_follow_up().exists()]
+        if self.status not in self.CHILD_GROUP_SOURCE_STATUSES:
+            return []
+        return [plan for plan in payment_lists if plan.eligible_payments_for_child_plan().exists()]
 
     @property
     def currency_exchange_date(self) -> date:
-        owner = self.exchange_rate_owner
-        return owner.currency_exchange_date if owner else timezone.now().date()
+        if self.status in (
+            self.Status.ACCEPTED,
+            self.Status.FINISHED,
+            self.Status.READY_FOR_CLOSURE,
+            self.Status.CLOSED,
+        ):
+            process = self.approval_process.first()
+            if process and (approval := process.approvals.filter(type=Approval.FINANCE_RELEASE).first()):
+                return approval.created_at.date()
+        today = timezone.now().date()
+        return min(today, self.dispersion_end_date) if self.dispersion_end_date else today
 
     @property
-    def can_create_payment_verification_plan(self) -> int:
-        return self.available_payment_records().count() > 0
+    def last_approval_process_date(self) -> "datetime | None":
+        return last_approval_step(self.approval_process.first(), self.status, self.updated_at).modified_date
 
     @property
-    def has_entitlement_file(self) -> bool:
-        try:
-            return self.export_file_entitlement is not None
-        except FileTemp.DoesNotExist:
-            return False
+    def last_approval_process_by(self) -> "User | None":
+        return last_approval_step(self.approval_process.first(), self.status, self.updated_at).modified_by
 
     @property
-    def entitlement_export_file_link(self) -> str | None:
-        """Return the entitlement export file link (payment-list download is entitlement-only)."""
-        file_obj = self.export_file_entitlement
-        return file_obj.file.url if file_obj and file_obj.file else None
+    def can_split(self) -> bool:
+        from hope.models import PaymentListSplit
 
-    @property
-    def imported_file_name(self) -> str:
-        """Get file to import entitlements."""
-        try:
-            return (self.imported_file.file.name or "") if self.imported_file else ""
-        except FileTemp.DoesNotExist:
-            return ""
+        return (
+            self.status == PaymentPlan.Status.ACCEPTED
+            and not PaymentListSplit.objects.filter(
+                payment_list__payment_plan=self, sent_to_payment_gateway=True
+            ).exists()
+        )
 
     @property
     def is_reconciled(self) -> bool:
-        if not self.eligible_payments.exists():
-            return False
+        from hope.models import Payment
 
-        return (
-            self.eligible_payments.exclude(status__in=Payment.PENDING_STATUSES).count()
-            == self.eligible_payments.count()
-        )
+        eligible_payments = Payment.objects.filter(parent__payment_plan=self).eligible()
+        return eligible_payments.exists() and not eligible_payments.filter(status__in=Payment.PENDING_STATUSES).exists()
+
+    @property
+    def total_entitled_quantity_usd(self) -> Decimal:
+        return self.payment_lists.aggregate(total=Coalesce(Sum("total_entitled_quantity_usd"), Decimal(0)))["total"]
+
+    @property
+    def total_entitled_quantity(self) -> Decimal:
+        return self.payment_lists.aggregate(total=Coalesce(Sum("total_entitled_quantity"), Decimal(0)))["total"]
 
     @cached_property
-    def acceptance_process_threshold(self) -> Optional["AcceptanceProcessThreshold"]:
-        total_entitled_quantity_usd = int(self.total_entitled_quantity_usd or 0)
-
+    def acceptance_process_threshold(self) -> "AcceptanceProcessThreshold | None":
+        total_entitled_quantity_usd = int(self.total_entitled_quantity_usd)
         return self.business_area.acceptance_process_thresholds.filter(
             payments_range_usd__contains=NumericRange(
                 total_entitled_quantity_usd, total_entitled_quantity_usd, bounds="[]"
@@ -1149,60 +402,83 @@ class PaymentPlan(
 
     @property
     def approval_number_required(self) -> int:
-        if not self.acceptance_process_threshold:
-            return 1
-
-        return self.acceptance_process_threshold.approval_number_required
+        return self.acceptance_process_threshold.approval_number_required if self.acceptance_process_threshold else 1
 
     @property
     def authorization_number_required(self) -> int:
-        if not self.acceptance_process_threshold:
-            return 1
-
-        return self.acceptance_process_threshold.authorization_number_required
+        threshold = self.acceptance_process_threshold
+        return threshold.authorization_number_required if threshold else 1
 
     @property
     def finance_release_number_required(self) -> int:
-        if not self.acceptance_process_threshold:
-            return 1
-        return self.acceptance_process_threshold.finance_release_number_required
+        threshold = self.acceptance_process_threshold
+        return threshold.finance_release_number_required if threshold else 1
 
     @property
-    def last_approval_process_date(self) -> datetime | None:
-        return self._get_last_approval_process_data().modified_date
-
-    @property
-    def last_approval_process_by(self) -> str | None:
-        return self._get_last_approval_process_data().modified_by
-
-    @property
-    def can_send_to_payment_gateway(self) -> bool:
-        # PaymentPlanGroup.sendable_to_payment_gateway_plans mirrors these conditions at the
-        # DB level; keep the two aligned when changing the logic here.
-        if self.is_instruction_managed:
-            return False
-        status_accepted = self.status == PaymentPlan.Status.ACCEPTED
-        has_payment_gateway_fsp = bool(self.financial_service_provider and self.is_payment_gateway)
-        has_not_sent_to_payment_gateway_splits = self.splits.filter(
-            sent_to_payment_gateway=False,
-        ).exists()
-        return status_accepted and has_payment_gateway_fsp and has_not_sent_to_payment_gateway_splits
-
-    @property
-    def has_payments_reconciliation_overdue(self) -> bool:
-        reconciliation_window_in_days = self.program.reconciliation_window_in_days
-        if not reconciliation_window_in_days:
-            return False
-
-        due_date = self.dispersion_start_date + timedelta(days=reconciliation_window_in_days)  # type: ignore[operator]
-        is_overdue = due_date <= now().date()  # type: ignore[operator]
-
+    def can_start_background_action(self) -> bool:
+        """Whether a new background action can start: the payment plan is idle or in an error state."""
         return (
-            self.status == PaymentPlan.Status.ACCEPTED
-            and is_overdue
-            and self.eligible_payments.exclude(status__in=Payment.FAILED_STATUSES)
-            .filter(
-                delivered_quantity__isnull=True,
-            )
-            .exists()
+            self.background_action_status is None
+            or self.background_action_status in PaymentPlan.BACKGROUND_ACTION_ERROR_STATES
         )
+
+    @property
+    def export_file_link(self) -> str | None:
+        if self.export_file_delivery_id and self.export_file_delivery.file:
+            return self.export_file_delivery.file.url
+        return None
+
+    @property
+    def can_export(self) -> bool:
+        """Released and not exported yet; exporting again once a file exists is `can_regenerate_export`."""
+        return self.status in self.DELIVERY_STATUSES and self.export_file_delivery_id is None
+
+    @property
+    def can_regenerate_export(self) -> bool:
+        return self.status in self.DELIVERY_STATUSES and self.export_file_delivery_id is not None
+
+    def remove_export_file_delivery(self) -> None:
+        file_temp = self.export_file_delivery
+        if file_temp is None:
+            return
+        self.export_file_delivery = None
+        file_field = file_temp.file
+        file_temp.delete()
+        # Storage delete is not transactional: delete the file when the transaction commits
+        transaction.on_commit(lambda: file_field.delete(save=False))
+
+    def sendable_to_payment_gateway_plans(self) -> "QuerySet[PaymentList]":
+        """Narrow the payment plan's payment lists to the ones that can be sent to the payment gateway.
+
+        A plan qualifies when it is ACCEPTED, has an FSP routed through the payment gateway
+        (the payment plan's use_payment_gateway is True or the FSP communication_channel is API), still has splits
+        not yet sent to the gateway, and is not already being sent. With Vision active, plans
+        in a payment plan with Vision status other than NOT_SENT are excluded, except Follow-Up payment lists.
+        """
+        from hope.models import FinancialServiceProvider, PaymentListSplit
+
+        if self.financial_service_provider is None or not (
+            self.use_payment_gateway
+            or self.financial_service_provider.communication_channel
+            == FinancialServiceProvider.COMMUNICATION_CHANNEL_API
+        ):
+            return self.payment_lists.none()
+        payment_lists = self.payment_lists.annotate(
+            has_unsent_splits=Exists(
+                PaymentListSplit.objects.filter(payment_list=OuterRef("pk"), sent_to_payment_gateway=False)
+            )
+        ).filter(
+            Q(status=PaymentList.Status.ACCEPTED)
+            & Q(has_unsent_splits=True)
+            & ~Q(background_action_status=PaymentList.BackgroundActionStatus.SEND_TO_PAYMENT_GATEWAY)
+        )
+        # A payment plan accepted while Vision was disabled still has NOT_SENT status and needs manual PG sending.
+        # Payment Plans sent to Vision use automatic PG dispatch; Follow-Up payment lists remain eligible here,
+        # and failed automatic sends are retried in Django admin.
+        if (
+            self.vision_status != VisionStatus.NOT_SENT.value
+            and flag_state("VISION_INTEGRATION_ACTIVE")
+            and self.business_area.vision_integration_active
+        ):
+            return payment_lists.filter(plan_type=PaymentList.PlanType.FOLLOW_UP)
+        return payment_lists

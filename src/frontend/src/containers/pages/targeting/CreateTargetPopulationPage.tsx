@@ -1,7 +1,7 @@
 import { AutoSubmitFormOnEnter } from '@components/core/AutoSubmitFormOnEnter';
 import { PermissionDenied } from '@components/core/PermissionDenied';
 import withErrorBoundary from '@components/core/withErrorBoundary';
-import { CreatePaymentPlanGroupModal } from '@components/paymentmodule/CreatePaymentPlanGroupModal';
+import { CreatePaymentPlanModal } from '@components/paymentmodule/CreatePaymentPlanModal';
 import CreateTargetPopulationHeader from '@components/targeting/CreateTargetPopulation/CreateTargetPopulationHeader';
 import Exclusions from '@components/targeting/CreateTargetPopulation/Exclusions';
 import { PaperContainer } from '@components/targeting/PaperContainer';
@@ -14,7 +14,7 @@ import type { BusinessArea } from '@restgenerated/models/BusinessArea';
 import { RestService } from '@restgenerated/services/RestService';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
 import { FormikChipAutocomplete } from '@shared/Formik/FormikChipAutocomplete/FormikChipAutocomplete';
-import { PaymentPlanGroupAutocompleteRest } from '@shared/autocompletes/rest/PaymentPlanGroupAutocompleteRest';
+import { PaymentPlanAutocompleteRest } from '@shared/autocompletes/rest/PaymentPlanAutocompleteRest';
 import { ProgramCycleAutocompleteRest } from '@shared/autocompletes/rest/ProgramCycleAutocompleteRest';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { restQueryKey } from '@utils/queryKeys';
@@ -46,7 +46,7 @@ const CreateTargetPopulationPage = (): ReactElement => {
       value: '',
       name: '',
     },
-    paymentPlanGroupId: {
+    paymentPlanId: {
       value: '',
       name: '',
     },
@@ -105,7 +105,8 @@ const CreateTargetPopulationPage = (): ReactElement => {
       }),
   });
 
-  const [createGroupModalOpen, setCreateGroupModalOpen] = useState(false);
+  const [createPaymentPlanModalOpen, setCreatePaymentPlanModalOpen] =
+    useState(false);
 
   if (permissions === null) return null;
   if (!businessAreaData) return null;
@@ -132,7 +133,7 @@ const CreateTargetPopulationPage = (): ReactElement => {
     programCycleId: Yup.object().shape({
       value: Yup.string().required('Programme Cycle is required'),
     }),
-    paymentPlanGroupId: Yup.object().shape({
+    paymentPlanId: Yup.object().shape({
       value: Yup.string().required('Payment Plan is required'),
     }),
   });
@@ -141,7 +142,7 @@ const CreateTargetPopulationPage = (): ReactElement => {
     const deliveryMechanism = values.criterias[0]?.deliveryMechanism || null;
     const requestBody = {
       programCycleId: values.programCycleId.value,
-      paymentPlanGroupId: values.paymentPlanGroupId.value,
+      paymentPlanId: values.paymentPlanId.value,
       name: values.name,
       excludedIds: values.excludedIds,
       exclusionReason: values.exclusionReason,
@@ -205,7 +206,7 @@ const CreateTargetPopulationPage = (): ReactElement => {
                         'programCycleId',
                         e ?? { value: '', name: '' },
                       );
-                      await setFieldValue('paymentPlanGroupId', {
+                      await setFieldValue('paymentPlanId', {
                         value: '',
                         name: '',
                       });
@@ -223,46 +224,46 @@ const CreateTargetPopulationPage = (): ReactElement => {
                       gap: 2,
                     }}
                   >
-                    <PaymentPlanGroupAutocompleteRest
-                      value={values.paymentPlanGroupId}
+                    <PaymentPlanAutocompleteRest
+                      value={values.paymentPlanId}
                       onChange={async (e) => {
-                        await setFieldValue('paymentPlanGroupId', e);
+                        await setFieldValue('paymentPlanId', e);
                       }}
                       cycleId={values.programCycleId?.value ?? ''}
                       disabled={!values.programCycleId?.value}
                       required
                       // @ts-ignore
-                      error={errors.paymentPlanGroupId?.value}
+                      error={errors.paymentPlanId?.value}
                     />
                     {hasPermissions(
-                      PERMISSIONS.PM_PAYMENT_PLAN_GROUP_CREATE,
+                      PERMISSIONS.PM_PAYMENT_PLAN_CREATE,
                       permissions,
                     ) && (
                       <Button
                         variant="outlined"
                         color="primary"
-                        onClick={() => setCreateGroupModalOpen(true)}
+                        onClick={() => setCreatePaymentPlanModalOpen(true)}
                         disabled={!values.programCycleId?.value}
                         data-cy="button-create-group"
                         sx={{ whiteSpace: 'nowrap', flexShrink: 0, mt: 1 }}
                       >
-                        {t('Create Group')}
+                        {t('Create Payment Plan')}
                       </Button>
                     )}
                   </Box>
                 </Grid>
               </Grid>
-              <CreatePaymentPlanGroupModal
-                open={createGroupModalOpen}
-                onClose={() => setCreateGroupModalOpen(false)}
+              <CreatePaymentPlanModal
+                open={createPaymentPlanModalOpen}
+                onClose={() => setCreatePaymentPlanModalOpen(false)}
                 cycleId={values.programCycleId?.value ?? ''}
                 cycleTitle={values.programCycleId?.name ?? ''}
-                onSuccess={(group) => {
-                  setFieldValue('paymentPlanGroupId', {
-                    value: group.id,
-                    name: group.name,
+                onSuccess={(paymentPlan) => {
+                  setFieldValue('paymentPlanId', {
+                    value: paymentPlan.id,
+                    name: paymentPlan.name,
                   });
-                  setCreateGroupModalOpen(false);
+                  setCreatePaymentPlanModalOpen(false);
                 }}
               />
               <Grid container spacing={3}>
@@ -309,7 +310,7 @@ const CreateTargetPopulationPage = (): ReactElement => {
                       screenBeneficiary={screenBeneficiary}
                       isStandardDctType={isStandardDctType}
                       isSocialDctType={isSocialDctType}
-                      paymentPlanGroupId={values.paymentPlanGroupId?.value}
+                      paymentPlanId={values.paymentPlanId?.value}
                       isEdit
                     />
                   )}

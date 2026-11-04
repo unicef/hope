@@ -11,15 +11,15 @@ from extras.test_utils.factories.account import PartnerFactory, UserFactory
 from extras.test_utils.factories.core import BusinessAreaFactory
 from extras.test_utils.factories.payment import (
     FollowUpInstructionFactory,
+    PaymentListFactory,
     PaymentPlanFactory,
-    PaymentPlanGroupFactory,
 )
 from extras.test_utils.factories.program import ProgramFactory
 from hope.apps.account.permissions import Permissions
 from hope.apps.core.timezones import format_human_datetime
-from hope.apps.payment.notifications import PaymentNotification, PaymentPlanGroupReconciliationImportNotification
+from hope.apps.payment.notifications import PaymentNotification, PaymentPlanReconciliationImportNotification
 from hope.apps.payment.xlsx.xlsx_error import XlsxError
-from hope.models import PaymentPlan, Role, RoleAssignment, User
+from hope.models import PaymentList, Role, RoleAssignment, User
 
 pytestmark = pytest.mark.django_db
 
@@ -28,8 +28,8 @@ ACTION_DATETIME = datetime(2026, 8, 21, 12, 30, tzinfo=UTC)
 
 @pytest.fixture
 def reconciliation_notification():
-    return PaymentPlanGroupReconciliationImportNotification(
-        PaymentPlanGroupFactory(),
+    return PaymentPlanReconciliationImportNotification(
+        PaymentPlanFactory(),
         UserFactory(username="uploader", email="uploader@example.com"),
         "reconciliation.xlsx",
     )
@@ -37,8 +37,8 @@ def reconciliation_notification():
 
 @pytest.fixture
 def reconciliation_notification_without_email():
-    return PaymentPlanGroupReconciliationImportNotification(
-        PaymentPlanGroupFactory(),
+    return PaymentPlanReconciliationImportNotification(
+        PaymentPlanFactory(),
         UserFactory(username="uploader-without-email", email=""),
         "reconciliation.xlsx",
     )
@@ -181,14 +181,14 @@ def notification_setup(
     create_partner_role_with_permissions,
 ):
     partner_empty = PartnerFactory(name="Empty Partner")
-    user_payment_plan_creator = UserFactory(
-        username="user_payment_plan_creator", email="user_payment_plan_creator@example.com", partner=partner_empty
+    user_payment_list_creator = UserFactory(
+        username="user_payment_list_creator", email="user_payment_list_creator@example.com", partner=partner_empty
     )
     user_action_user = UserFactory(username="user_action_user", email="user_action_user@example.com")
 
-    payment_plan = PaymentPlanFactory(
+    payment_list = PaymentListFactory(
         business_area=business_area,
-        created_by=user_payment_plan_creator,
+        created_by=user_payment_list_creator,
         program_cycle=program.cycles.first(),
     )
 
@@ -618,33 +618,33 @@ def notification_setup(
     )
 
     return {
-        "payment_plan": payment_plan,
+        "payment_list": payment_list,
         "user_action_user": user_action_user,
         "users": users,
     }
 
 
 @pytest.fixture
-def distinct_timezone_notification_data(notification_setup: dict) -> tuple[PaymentPlan, User]:
+def distinct_timezone_notification_data(notification_setup: dict) -> tuple[PaymentList, User]:
     action_user = notification_setup["user_action_user"]
     action_user.timezone = "America/New_York"
     action_user.save(update_fields=("timezone",))
     recipient = notification_setup["users"]["user_with_action_permissions"]
     recipient.timezone = "Europe/Warsaw"
     recipient.save(update_fields=("timezone",))
-    return notification_setup["payment_plan"], action_user
+    return notification_setup["payment_list"], action_user
 
 
 @pytest.fixture
-def notification_data_without_recipients(notification_setup: dict) -> tuple[PaymentPlan, User]:
+def notification_data_without_recipients(notification_setup: dict) -> tuple[PaymentList, User]:
     RoleAssignment.objects.all().delete()
-    return notification_setup["payment_plan"], notification_setup["user_action_user"]
+    return notification_setup["payment_list"], notification_setup["user_action_user"]
 
 
 def test_prepare_user_recipients_for_send_for_approval(notification_setup: dict) -> None:
     payment_notification = PaymentNotification(
-        notification_setup["payment_plan"],
-        PaymentPlan.Action.SEND_FOR_APPROVAL.name,
+        notification_setup["payment_list"],
+        PaymentList.Action.SEND_FOR_APPROVAL.name,
         notification_setup["user_action_user"],
         ACTION_DATETIME,
     )
@@ -675,8 +675,8 @@ def test_prepare_user_recipients_for_send_for_approval(notification_setup: dict)
 
 def test_prepare_user_recipients_for_approve(notification_setup: dict) -> None:
     payment_notification = PaymentNotification(
-        notification_setup["payment_plan"],
-        PaymentPlan.Action.APPROVE.name,
+        notification_setup["payment_list"],
+        PaymentList.Action.APPROVE.name,
         notification_setup["user_action_user"],
         ACTION_DATETIME,
     )
@@ -698,8 +698,8 @@ def test_prepare_user_recipients_for_approve(notification_setup: dict) -> None:
 
 def test_prepare_user_recipients_for_authorize(notification_setup: dict) -> None:
     payment_notification = PaymentNotification(
-        notification_setup["payment_plan"],
-        PaymentPlan.Action.AUTHORIZE.name,
+        notification_setup["payment_list"],
+        PaymentList.Action.AUTHORIZE.name,
         notification_setup["user_action_user"],
         ACTION_DATETIME,
     )
@@ -721,8 +721,8 @@ def test_prepare_user_recipients_for_authorize(notification_setup: dict) -> None
 
 def test_prepare_user_recipients_for_release(notification_setup: dict) -> None:
     payment_notification = PaymentNotification(
-        notification_setup["payment_plan"],
-        PaymentPlan.Action.REVIEW.name,
+        notification_setup["payment_list"],
+        PaymentList.Action.REVIEW.name,
         notification_setup["user_action_user"],
         ACTION_DATETIME,
     )
@@ -744,8 +744,8 @@ def test_prepare_user_recipients_for_release(notification_setup: dict) -> None:
 
 def test_prepare_user_recipients_for_mark_ready_for_closure(notification_setup: dict) -> None:
     payment_notification = PaymentNotification(
-        notification_setup["payment_plan"],
-        PaymentPlan.Action.MARK_READY_FOR_CLOSURE.name,
+        notification_setup["payment_list"],
+        PaymentList.Action.MARK_READY_FOR_CLOSURE.name,
         notification_setup["user_action_user"],
         ACTION_DATETIME,
     )
@@ -767,8 +767,8 @@ def test_prepare_user_recipients_for_mark_ready_for_closure(notification_setup: 
 
 def test_prepare_user_recipients_for_send_back_to_finished(notification_setup: dict) -> None:
     payment_notification = PaymentNotification(
-        notification_setup["payment_plan"],
-        PaymentPlan.Action.SEND_BACK_TO_FINISHED.name,
+        notification_setup["payment_list"],
+        PaymentList.Action.SEND_BACK_TO_FINISHED.name,
         notification_setup["user_action_user"],
         ACTION_DATETIME,
     )
@@ -788,15 +788,15 @@ def test_prepare_user_recipients_for_send_back_to_finished(notification_setup: d
     ]
 
 
-def test_prepare_notification_from_refetched_payment_plan_stays_within_query_budget(
+def test_prepare_notification_from_refetched_payment_list_stays_within_query_budget(
     notification_setup: dict, django_assert_num_queries: Any
 ) -> None:
-    payment_plan = PaymentPlan.objects.get(pk=notification_setup["payment_plan"].pk)
+    payment_list = PaymentList.objects.get(pk=notification_setup["payment_list"].pk)
 
     with django_assert_num_queries(5):
         PaymentNotification(
-            payment_plan,
-            PaymentPlan.Action.MARK_READY_FOR_CLOSURE.name,
+            payment_list,
+            PaymentList.Action.MARK_READY_FOR_CLOSURE.name,
             notification_setup["user_action_user"],
             ACTION_DATETIME,
         )
@@ -807,8 +807,8 @@ def test_action_user_is_ccd_and_excluded_from_recipients_for_mark_ready_for_clos
 ) -> None:
     action_user = notification_setup["user_action_user"]
     payment_notification = PaymentNotification(
-        notification_setup["payment_plan"],
-        PaymentPlan.Action.MARK_READY_FOR_CLOSURE.name,
+        notification_setup["payment_list"],
+        PaymentList.Action.MARK_READY_FOR_CLOSURE.name,
         action_user,
         ACTION_DATETIME,
     )
@@ -823,8 +823,8 @@ def test_action_user_is_ccd_and_excluded_from_recipients_for_mark_ready_for_clos
 def test_send_email_notification_subject_mark_ready_for_closure(notification_setup: dict, mocker: Any) -> None:
     mocker.patch("hope.apps.payment.notifications.MailjetClient.send_email")
     payment_notification = PaymentNotification(
-        notification_setup["payment_plan"],
-        PaymentPlan.Action.MARK_READY_FOR_CLOSURE.name,
+        notification_setup["payment_list"],
+        PaymentList.Action.MARK_READY_FOR_CLOSURE.name,
         notification_setup["user_action_user"],
         ACTION_DATETIME,
     )
@@ -836,8 +836,8 @@ def test_send_email_notification_subject_mark_ready_for_closure(notification_set
 def test_send_email_notification_mark_ready_for_closure(notification_setup: dict, mocker: Any) -> None:
     mock_send = mocker.patch("hope.apps.payment.notifications.MailjetClient.send_email")
     payment_notification = PaymentNotification(
-        notification_setup["payment_plan"],
-        PaymentPlan.Action.MARK_READY_FOR_CLOSURE.name,
+        notification_setup["payment_list"],
+        PaymentList.Action.MARK_READY_FOR_CLOSURE.name,
         notification_setup["user_action_user"],
         ACTION_DATETIME,
     )
@@ -849,8 +849,8 @@ def test_send_email_notification_mark_ready_for_closure(notification_setup: dict
 def test_send_email_notification_subject_send_back_to_finished(notification_setup: dict, mocker: Any) -> None:
     mocker.patch("hope.apps.payment.notifications.MailjetClient.send_email")
     payment_notification = PaymentNotification(
-        notification_setup["payment_plan"],
-        PaymentPlan.Action.SEND_BACK_TO_FINISHED.name,
+        notification_setup["payment_list"],
+        PaymentList.Action.SEND_BACK_TO_FINISHED.name,
         notification_setup["user_action_user"],
         ACTION_DATETIME,
     )
@@ -862,8 +862,8 @@ def test_send_email_notification_subject_send_back_to_finished(notification_setu
 def test_send_email_notification_send_back_to_finished(notification_setup: dict, mocker: Any) -> None:
     mock_send = mocker.patch("hope.apps.payment.notifications.MailjetClient.send_email")
     payment_notification = PaymentNotification(
-        notification_setup["payment_plan"],
-        PaymentPlan.Action.SEND_BACK_TO_FINISHED.name,
+        notification_setup["payment_list"],
+        PaymentList.Action.SEND_BACK_TO_FINISHED.name,
         notification_setup["user_action_user"],
         ACTION_DATETIME,
     )
@@ -875,8 +875,8 @@ def test_send_email_notification_send_back_to_finished(notification_setup: dict,
 def test_send_email_notification(notification_setup: dict, mocker: Any) -> None:
     mock_send = mocker.patch("hope.apps.payment.notifications.MailjetClient.send_email")
     payment_notification = PaymentNotification(
-        notification_setup["payment_plan"],
-        PaymentPlan.Action.SEND_FOR_APPROVAL.name,
+        notification_setup["payment_list"],
+        PaymentList.Action.SEND_FOR_APPROVAL.name,
         notification_setup["user_action_user"],
         ACTION_DATETIME,
     )
@@ -888,8 +888,8 @@ def test_send_email_notification(notification_setup: dict, mocker: Any) -> None:
 def test_send_email_notification_subject_send_for_approval(notification_setup: dict, mocker: Any) -> None:
     mocker.patch("hope.apps.payment.notifications.MailjetClient.send_email")
     payment_notification = PaymentNotification(
-        notification_setup["payment_plan"],
-        PaymentPlan.Action.SEND_FOR_APPROVAL.name,
+        notification_setup["payment_list"],
+        PaymentList.Action.SEND_FOR_APPROVAL.name,
         notification_setup["user_action_user"],
         ACTION_DATETIME,
     )
@@ -906,8 +906,8 @@ def test_send_email_notification_subject_send_for_approval(notification_setup: d
 def test_send_email_notification_catch_all_email(notification_setup: dict, mocker: Any) -> None:
     mock_post = mocker.patch("hope.apps.utils.celery_tasks.requests.post")
     payment_notification = PaymentNotification(
-        notification_setup["payment_plan"],
-        PaymentPlan.Action.SEND_FOR_APPROVAL.name,
+        notification_setup["payment_list"],
+        PaymentList.Action.SEND_FOR_APPROVAL.name,
         notification_setup["user_action_user"],
         ACTION_DATETIME,
     )
@@ -927,8 +927,8 @@ def test_send_email_notification_catch_all_email(notification_setup: dict, mocke
 def test_send_email_notification_without_catch_all_email(notification_setup: dict, mocker: Any) -> None:
     mock_post = mocker.patch("hope.apps.utils.celery_tasks.requests.post")
     payment_notification = PaymentNotification(
-        notification_setup["payment_plan"],
-        PaymentPlan.Action.SEND_FOR_APPROVAL.name,
+        notification_setup["payment_list"],
+        PaymentList.Action.SEND_FOR_APPROVAL.name,
         notification_setup["user_action_user"],
         ACTION_DATETIME,
     )
@@ -971,8 +971,8 @@ def test_send_email_notification_exclude_superuser(notification_setup: dict, moc
     users["user_with_partner_unicef_hq"].save()
 
     payment_notification = PaymentNotification(
-        notification_setup["payment_plan"],
-        PaymentPlan.Action.SEND_FOR_APPROVAL.name,
+        notification_setup["payment_list"],
+        PaymentList.Action.SEND_FOR_APPROVAL.name,
         notification_setup["user_action_user"],
         ACTION_DATETIME,
     )
@@ -1014,8 +1014,8 @@ def test_send_email_notification_exclude_staff_user(notification_setup: dict, mo
     users["user_with_partner_unicef_hq"].save()
 
     payment_notification = PaymentNotification(
-        notification_setup["payment_plan"],
-        PaymentPlan.Action.SEND_FOR_APPROVAL.name,
+        notification_setup["payment_list"],
+        PaymentList.Action.SEND_FOR_APPROVAL.name,
         notification_setup["user_action_user"],
         ACTION_DATETIME,
     )
@@ -1059,8 +1059,8 @@ def test_send_email_notification_include_internal_users(notification_setup: dict
     users["user_with_partner_unicef_hq"].save()
 
     payment_notification = PaymentNotification(
-        notification_setup["payment_plan"],
-        PaymentPlan.Action.SEND_FOR_APPROVAL.name,
+        notification_setup["payment_list"],
+        PaymentList.Action.SEND_FOR_APPROVAL.name,
         notification_setup["user_action_user"],
         ACTION_DATETIME,
     )
@@ -1072,8 +1072,8 @@ def test_send_email_notification_include_internal_users(notification_setup: dict
 
 def test_notification_formats_action_datetime_in_requested_timezone(notification_setup: dict) -> None:
     payment_notification = PaymentNotification(
-        notification_setup["payment_plan"],
-        PaymentPlan.Action.SEND_FOR_APPROVAL.name,
+        notification_setup["payment_list"],
+        PaymentList.Action.SEND_FOR_APPROVAL.name,
         notification_setup["user_action_user"],
         ACTION_DATETIME,
     )
@@ -1087,13 +1087,13 @@ def test_notification_formats_action_datetime_in_requested_timezone(notification
 
 
 def test_notification_groups_recipients_and_action_user_by_timezone(
-    distinct_timezone_notification_data: tuple[PaymentPlan, User],
+    distinct_timezone_notification_data: tuple[PaymentList, User],
 ) -> None:
-    payment_plan, action_user = distinct_timezone_notification_data
+    payment_list, action_user = distinct_timezone_notification_data
 
     payment_notification = PaymentNotification(
-        payment_plan,
-        PaymentPlan.Action.SEND_FOR_APPROVAL.name,
+        payment_list,
+        PaymentList.Action.SEND_FOR_APPROVAL.name,
         action_user,
         ACTION_DATETIME,
     )
@@ -1108,13 +1108,13 @@ def test_notification_groups_recipients_and_action_user_by_timezone(
 
 
 def test_notification_without_permission_recipients_notifies_action_user(
-    notification_data_without_recipients: tuple[PaymentPlan, User],
+    notification_data_without_recipients: tuple[PaymentList, User],
 ) -> None:
-    payment_plan, action_user = notification_data_without_recipients
+    payment_list, action_user = notification_data_without_recipients
 
     payment_notification = PaymentNotification(
-        payment_plan,
-        PaymentPlan.Action.SEND_FOR_APPROVAL.name,
+        payment_list,
+        PaymentList.Action.SEND_FOR_APPROVAL.name,
         action_user,
         ACTION_DATETIME,
     )
@@ -1126,15 +1126,15 @@ def test_notification_without_permission_recipients_notifies_action_user(
 
 def test_group_notification_links_to_the_group_page(business_area: Any, program: Any) -> None:
     creator = UserFactory()
-    payment_plan_group = PaymentPlanGroupFactory(cycle=program.cycles.first(), created_by=creator)
+    payment_plan = PaymentPlanFactory(cycle=program.cycles.first(), created_by=creator)
 
     payment_notification = PaymentNotification(
-        payment_plan_group, PaymentNotification.ACTION_SEND_FOR_APPROVAL, UserFactory(), datetime.now(UTC)
+        payment_plan, PaymentNotification.ACTION_SEND_FOR_APPROVAL, UserFactory(), datetime.now(UTC)
     )
 
     body_variables = payment_notification._prepare_body_variables("Europe/Warsaw")
-    assert body_variables["payment_plan_url"].endswith(f"/payment-module/groups/{payment_plan_group.id}")
-    assert body_variables["payment_plan_id"] == payment_plan_group.unicef_id
+    assert body_variables["payment_plan_url"].endswith(f"/payment-module/payment-plans/{payment_plan.id}")
+    assert body_variables["payment_plan_id"] == payment_plan.unicef_id
     assert body_variables["payment_plan_creator"] == creator.get_full_name()
     assert body_variables["program_name"] == program.name
 

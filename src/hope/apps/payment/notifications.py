@@ -14,23 +14,23 @@ from hope.apps.payment.xlsx.xlsx_error import XlsxError
 from hope.apps.utils.external_urls import frontend_url
 from hope.apps.utils.mailjet import MailjetClient
 from hope.apps.utils.recipients import users_with_permissions
-from hope.models import FollowUpInstruction, PaymentPlan, PaymentPlanGroup, User
+from hope.models import FollowUpInstruction, PaymentList, PaymentPlan, User
 
 logger = logging.getLogger(__name__)
 
 
-class PaymentPlanGroupReconciliationImportNotification:
-    html_template = "payment/payment_plan_group_reconciliation_import_email.html"
-    text_template = "payment/payment_plan_group_reconciliation_import_email.txt"
+class PaymentPlanReconciliationImportNotification:
+    html_template = "payment/payment_plan_reconciliation_import_email.html"
+    text_template = "payment/payment_plan_reconciliation_import_email.txt"
 
-    def __init__(self, payment_plan_group: PaymentPlanGroup, user: User, file_name: str) -> None:
-        self.payment_plan_group = payment_plan_group
+    def __init__(self, payment_plan: PaymentPlan, user: User, file_name: str) -> None:
+        self.payment_plan = payment_plan
         self.user = user
         self.file_name = Path(file_name).name
 
     def send_conflict(self, errors: Sequence[XlsxError], conflict_count: int) -> None:
         self._send(
-            title=f"Reconciliation import failed for {self.payment_plan_group.name}",
+            title=f"Reconciliation import failed for {self.payment_plan.name}",
             message=(
                 f'Reconciliation file "{self.file_name}" was not imported because delivered quantities conflict '
                 f"with existing Payment data. Number of conflicts: {conflict_count}. "
@@ -55,14 +55,14 @@ class PaymentPlanGroupReconciliationImportNotification:
                 "ignored_rows": ignored_rows,
             }
         self._send(
-            title=f"Reconciliation import completed for {self.payment_plan_group.name}",
+            title=f"Reconciliation import completed for {self.payment_plan.name}",
             message=f'Reconciliation processing completed for file "{self.file_name}".',
             statistics=statistics,
         )
 
     def send_background_failure(self, errors: Sequence[XlsxError]) -> None:
         self._send(
-            title=f"Reconciliation import failed for {self.payment_plan_group.name}",
+            title=f"Reconciliation import failed for {self.payment_plan.name}",
             message=(
                 f'Reconciliation file "{self.file_name}" was not imported because background validation failed. '
                 f"Number of errors: {len(errors)}. No Payments were changed."
@@ -73,7 +73,7 @@ class PaymentPlanGroupReconciliationImportNotification:
     def send_processing_failure(self) -> None:
         file_description = f'Reconciliation file "{self.file_name}"'
         self._send(
-            title=f"Reconciliation import failed for {self.payment_plan_group.name}",
+            title=f"Reconciliation import failed for {self.payment_plan.name}",
             message=f"{file_description} could not be imported because background processing failed.",
         )
 
@@ -88,13 +88,13 @@ class PaymentPlanGroupReconciliationImportNotification:
             logger.warning("Reconciliation import notification skipped because user %s has no email", self.user.pk)
             return
 
-        program = self.payment_plan_group.cycle.program
+        program = self.payment_plan.cycle.program
         context = {
             "first_name": self.user.first_name or self.user.username,
             "last_name": self.user.last_name,
             "title": title,
             "message": message,
-            "payment_plan_group": self.payment_plan_group.name,
+            "payment_plan": self.payment_plan.name,
             "file_name": self.file_name,
             "errors": [
                 {
@@ -105,8 +105,7 @@ class PaymentPlanGroupReconciliationImportNotification:
             ],
             "statistics": statistics,
             "link": frontend_url(
-                f"/{program.business_area.slug}/programs/{program.code}/payment-module/groups/"
-                f"{self.payment_plan_group.pk}"
+                f"/{program.business_area.slug}/programs/{program.code}/payment-module/payment-plans/{self.payment_plan.pk}"
             ),
         }
         try:
@@ -120,14 +119,14 @@ class PaymentPlanGroupReconciliationImportNotification:
 
 
 class PaymentNotification:
-    ACTION_SEND_FOR_APPROVAL = PaymentPlan.Action.SEND_FOR_APPROVAL.name
-    ACTION_APPROVE = PaymentPlan.Action.APPROVE.name
-    ACTION_AUTHORIZE = PaymentPlan.Action.AUTHORIZE.name
-    ACTION_REVIEW = PaymentPlan.Action.REVIEW.name  # payment plan release
-    ACTION_MARK_READY_FOR_CLOSURE = PaymentPlan.Action.MARK_READY_FOR_CLOSURE.name
-    ACTION_SEND_BACK_TO_FINISHED = PaymentPlan.Action.SEND_BACK_TO_FINISHED.name
+    ACTION_SEND_FOR_APPROVAL = PaymentList.Action.SEND_FOR_APPROVAL.name
+    ACTION_APPROVE = PaymentList.Action.APPROVE.name
+    ACTION_AUTHORIZE = PaymentList.Action.AUTHORIZE.name
+    ACTION_REVIEW = PaymentList.Action.REVIEW.name  # payment plan release
+    ACTION_MARK_READY_FOR_CLOSURE = PaymentList.Action.MARK_READY_FOR_CLOSURE.name
+    ACTION_SEND_BACK_TO_FINISHED = PaymentList.Action.SEND_BACK_TO_FINISHED.name
 
-    PAGE_PATHS = {PaymentPlanGroup: "groups", FollowUpInstruction: "follow-up-instructions"}
+    PAGE_PATHS = {PaymentPlan: "payment-plans", FollowUpInstruction: "follow-up-instructions"}
 
     ACTION_TO_RECIPIENTS_PERMISSIONS_MAP = {
         ACTION_SEND_FOR_APPROVAL: Permissions.PM_ACCEPTANCE_PROCESS_APPROVE.name,
@@ -173,31 +172,31 @@ class PaymentNotification:
 
     def __init__(
         self,
-        payment_plan: PaymentPlan | PaymentPlanGroup | FollowUpInstruction,
+        payment_list: PaymentList | PaymentPlan | FollowUpInstruction,
         action: str,
         action_user: User,
         action_date: datetime,
     ) -> None:
-        self.payment_plan = payment_plan
-        self.page_path = self.PAGE_PATHS.get(type(payment_plan), "payment-plans")
+        self.payment_list = payment_list
+        self.page_path = self.PAGE_PATHS.get(type(payment_list), "payment-lists")
         self.action = action
         self.action_user = action_user
         self.action_date = action_date
-        self.payment_plan_creator = self.payment_plan.created_by
-        self.payment_plan_creation_date = self.payment_plan.created_at
+        self.payment_list_creator = self.payment_list.created_by
+        self.payment_list_creation_date = self.payment_list.created_at
         self.email_subject = self.ACTION_PREPARE_EMAIL_BODIES_MAP[self.action]["subject"]
         self.action_name = self.ACTION_PREPARE_EMAIL_BODIES_MAP[self.action]["action_name"]
         self.recipient_title = self.ACTION_PREPARE_EMAIL_BODIES_MAP[self.action]["recipient_title"]
         self.user_recipients = self._prepare_user_recipients()
         self.emails = self._prepare_emails()
-        self.enable_email_notification = self.payment_plan.business_area.enable_email_notification
+        self.enable_email_notification = self.payment_list.business_area.enable_email_notification
 
     def _prepare_user_recipients(self) -> QuerySet[User]:
         permission = PaymentNotification.ACTION_TO_RECIPIENTS_PERMISSIONS_MAP[self.action]
         return users_with_permissions(
-            self.payment_plan.business_area,
+            self.payment_list.business_area,
             [permission],
-            [self.payment_plan.program],
+            [self.payment_list.program],
         ).exclude(id=self.action_user.id)
 
     def _prepare_emails(self) -> list[MailjetClient]:
@@ -205,13 +204,13 @@ class PaymentNotification:
         for user_recipient in self.user_recipients:
             timezone_name = resolve_timezone_name(
                 user=user_recipient,
-                business_area=self.payment_plan.business_area,
+                business_area=self.payment_list.business_area,
             )
             recipients_by_timezone[timezone_name].append(user_recipient.email)
 
         action_user_timezone = resolve_timezone_name(
             user=self.action_user,
-            business_area=self.payment_plan.business_area,
+            business_area=self.payment_list.business_area,
         )
         emails = [
             MailjetClient(
@@ -250,7 +249,7 @@ class PaymentNotification:
                 for email in self.emails:
                     email.send_email()
             except Exception:  # pragma: no cover
-                logger.exception("Failed to send payment plan notification")
+                logger.exception("Failed to send payment list notification")
 
     def _prepare_body_variables(self, timezone_name: str) -> dict[str, str | None]:
         return {
@@ -258,16 +257,16 @@ class PaymentNotification:
             "last_name": self.recipient_title,
             "action_name": self.action_name,
             "payment_plan_url": frontend_url(
-                f"{self.payment_plan.business_area.slug}/programs/"
-                f"{self.payment_plan.program.code}/payment-module/{self.page_path}/"
-                f"{self.payment_plan.id}"
+                f"{self.payment_list.business_area.slug}/programs/"
+                f"{self.payment_list.program.code}/payment-module/{self.page_path}/"
+                f"{self.payment_list.id}"
             ),
-            "payment_plan_id": self.payment_plan.unicef_id,
-            "payment_plan_creator": self.payment_plan_creator.get_full_name()
-            if self.payment_plan_creator
+            "payment_plan_id": self.payment_list.unicef_id,
+            "payment_plan_creator": self.payment_list_creator.get_full_name()
+            if self.payment_list_creator
             else "Unknown",
             "payment_plan_creation_date": format_human_datetime(
-                self.payment_plan_creation_date,
+                self.payment_list_creation_date,
                 timezone_name=timezone_name,
             ),
             "action_user": self.action_user.get_full_name(),
@@ -275,5 +274,5 @@ class PaymentNotification:
                 self.action_date,
                 timezone_name=timezone_name,
             ),
-            "program_name": self.payment_plan.program.name,
+            "program_name": self.payment_list.program.name,
         }

@@ -12,7 +12,7 @@ from extras.test_utils.factories import (
     GrievanceTicketFactory,
     HouseholdFactory,
     PaymentFactory,
-    PaymentPlanFactory,
+    PaymentListFactory,
     PaymentVerificationFactory,
     PaymentVerificationPlanFactory,
     PaymentVerificationSummaryFactory,
@@ -27,7 +27,7 @@ from hope.models import (
     DataCollectingType,
     ImportData,
     Payment,
-    PaymentPlan,
+    PaymentList,
     PaymentVerification,
     PaymentVerificationPlan,
     Program,
@@ -40,11 +40,11 @@ pytestmark = pytest.mark.django_db()
 
 
 @pytest.fixture
-def create_payment_plan(business_area: BusinessArea) -> None:
+def create_payment_list(business_area: BusinessArea) -> None:
     program_1 = ProgramFactory(business_area=business_area)
     program_2 = ProgramFactory(business_area=business_area)
 
-    pp = PaymentPlan.objects.update_or_create(
+    pp = PaymentList.objects.update_or_create(
         name="Test Payment Plan 1",
         unicef_id="PP-0060-22-11223344",
         business_area=business_area,
@@ -52,28 +52,28 @@ def create_payment_plan(business_area: BusinessArea) -> None:
         end_date=datetime.now() + relativedelta(days=30),
         currency=Currency.objects.get(code="USD"),
         status_date=datetime.now(),
-        status=PaymentPlan.Status.ACCEPTED,
+        status=PaymentList.Status.ACCEPTED,
         created_by=User.objects.first(),
         total_delivered_quantity=999,
         total_entitled_quantity=2999,
-        plan_type=PaymentPlan.PlanType.REGULAR,
+        plan_type=PaymentList.PlanType.REGULAR,
         program_cycle=program_1.cycles.first(),
     )
     pp[0].unicef_id = "PP-0060-22-11223344"
     pp[0].save()
 
-    PaymentPlan.objects.update_or_create(
+    PaymentList.objects.update_or_create(
         name="Test Payment Plan 2",
         business_area=business_area,
         start_date=datetime.now(),
         end_date=datetime.now() + relativedelta(days=30),
         currency=Currency.objects.get(code="USD"),
         status_date=datetime.now(),
-        status=PaymentPlan.Status.ACCEPTED,
+        status=PaymentList.Status.ACCEPTED,
         created_by=User.objects.first(),
         total_delivered_quantity=999,
         total_entitled_quantity=2999,
-        plan_type=PaymentPlan.PlanType.REGULAR,
+        plan_type=PaymentList.PlanType.REGULAR,
         program_cycle=program_2.cycles.first(),
     )
 
@@ -147,7 +147,7 @@ def add_household(business_area: BusinessArea) -> None:
 
 def payment_verification_creator(
     channel: str = PaymentVerificationPlan.VERIFICATION_CHANNEL_MANUAL,
-    payment_plan_id: str = "PP-0060-22-11223344",
+    payment_list_id: str = "PP-0060-22-11223344",
 ) -> PaymentVerification:
     business_area = BusinessArea.objects.filter(slug="afghanistan").first()
     registration_data_import = RegistrationDataImportFactory(
@@ -161,9 +161,9 @@ def payment_verification_creator(
         business_area=business_area,
     )
 
-    payment_plan = PaymentPlanFactory(
+    payment_list = PaymentListFactory(
         name="TEST",
-        status=PaymentPlan.Status.FINISHED,
+        status=PaymentList.Status.FINISHED,
         program_cycle=program.cycles.first(),
         business_area=BusinessArea.objects.first(),
         start_date=datetime.now() - relativedelta(months=1),
@@ -173,11 +173,11 @@ def payment_verification_creator(
         create_payment_verification_summary=False,
     )
 
-    payment_plan.unicef_id = payment_plan_id
-    payment_plan.save()
+    payment_list.unicef_id = payment_list_id
+    payment_list.save()
 
     payment = PaymentFactory(
-        parent=payment_plan,
+        parent=payment_list,
         household=household,
         head_of_household=household.head_of_household,
         entitlement_quantity=21.36,
@@ -185,11 +185,11 @@ def payment_verification_creator(
         currency=Currency.objects.get(code="PLN"),
         status=Payment.STATUS_DISTRIBUTION_SUCCESS,
     )
-    pv_summary = PaymentVerificationSummaryFactory(payment_plan=payment_plan)
+    pv_summary = PaymentVerificationSummaryFactory(payment_list=payment_list)
     pv_summary.activation_date = datetime.now() - relativedelta(months=1)
     pv_summary.save()
     payment_verification_plan = PaymentVerificationPlanFactory(
-        payment_plan=payment_plan,
+        payment_list=payment_list,
         verification_channel=channel,
     )
     return PaymentVerificationFactory(
@@ -201,8 +201,8 @@ def payment_verification_creator(
 
 @pytest.fixture
 def add_payment_verification() -> None:
-    payment_verification_creator(payment_plan_id="PP-0060-22-11223344")
-    payment_verification_creator(payment_plan_id="PP-0000-00-11223344")
+    payment_verification_creator(payment_list_id="PP-0060-22-11223344")
+    payment_verification_creator(payment_list_id="PP-0000-00-11223344")
 
 
 @pytest.fixture
@@ -210,19 +210,19 @@ def create_targeting(create_programs: None) -> None:
     user = User.objects.first()
     business_area = BusinessArea.objects.get(slug="afghanistan")
     cycle = Program.objects.get(name="Test Programm").cycles.first()
-    PaymentPlanFactory(
+    PaymentListFactory(
         name="Test",
         created_by=user,
         business_area=business_area,
         program_cycle=cycle,
-        status=PaymentPlan.Status.TP_OPEN,
+        status=PaymentList.Status.TP_OPEN,
     )
-    PaymentPlanFactory(
+    PaymentListFactory(
         name="Targeting 2",
         created_by=user,
         business_area=business_area,
         program_cycle=cycle,
-        status=PaymentPlan.Status.TP_OPEN,
+        status=PaymentList.Status.TP_OPEN,
     )
 
 

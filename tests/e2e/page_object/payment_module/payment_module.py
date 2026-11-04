@@ -5,7 +5,7 @@ from selenium.webdriver.remote.webelement import WebElement
 from e2e.page_object.base_components import BaseComponents
 
 if TYPE_CHECKING:
-    from hope.models import PaymentPlan
+    from hope.models import PaymentList
 
 
 class PaymentModule(BaseComponents):
@@ -22,11 +22,11 @@ class PaymentModule(BaseComponents):
     table_pagination = 'div[data-cy="table-pagination"]'
     rows = '[role="checkbox"]'
 
-    def open_payment_plan(self, payment_plan: "PaymentPlan") -> None:
-        """Open a Payment Plan Component page; the Payment Plans list shows groups, not components."""
+    def open_payment_list(self, payment_list: "PaymentList") -> None:
+        """Open a Payment List page; the Payment Plans list shows payment plans, not payment lists."""
         self.driver.get(
-            f"{self.get_page_url(payment_plan.business_area.slug, payment_plan.program_cycle.program.code)}"
-            f"/payment-module/payment-plans/{payment_plan.id}"
+            f"{self.get_page_url(payment_list.business_area.slug, payment_list.program_cycle.program.code)}"
+            f"/payment-module/payment-lists/{payment_list.id}"
         )
 
     def get_business_area_container(self) -> WebElement:

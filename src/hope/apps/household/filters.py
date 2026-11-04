@@ -542,7 +542,7 @@ class HouseholdOfficeSearchFilter(OfficeSearchFilterMixin, HouseholdFilter):
         )
         return queryset.filter(q_filters).distinct()
 
-    def filter_by_payment_plan_for_office_search(self, queryset: QuerySet, unicef_id: str) -> QuerySet:
+    def filter_by_payment_list_for_office_search(self, queryset: QuerySet, unicef_id: str) -> QuerySet:
         return queryset.filter(
             pk__in=Payment.objects.filter(parent__unicef_id=unicef_id).values_list("household_id", flat=True)
         )
@@ -611,7 +611,7 @@ class IndividualOfficeSearchFilter(OfficeSearchFilterMixin, IndividualFilter):
         )
         return queryset.filter(q_filters).distinct()
 
-    def filter_by_payment_plan_for_office_search(self, queryset: QuerySet, unicef_id: str) -> QuerySet:
+    def filter_by_payment_list_for_office_search(self, queryset: QuerySet, unicef_id: str) -> QuerySet:
         return queryset.filter(
             pk__in=Payment.objects.filter(parent__unicef_id=unicef_id).values_list("head_of_household_id", flat=True)
         )

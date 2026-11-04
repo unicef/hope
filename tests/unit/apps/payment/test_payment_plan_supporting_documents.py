@@ -9,7 +9,7 @@ from rest_framework.test import APIClient, APIRequestFactory
 
 from extras.test_utils.factories import (
     BusinessAreaFactory,
-    PaymentPlanGroupFactory,
+    PaymentPlanFactory,
     PaymentPlanSupportingDocumentFactory,
     ProgramCycleFactory,
     ProgramFactory,
@@ -21,7 +21,7 @@ from hope.apps.payment.api.serializers import PaymentPlanSupportingDocumentSeria
 from hope.models import (
     FollowUpInstruction,
     LogEntry,
-    PaymentPlanGroup,
+    PaymentPlan,
     PaymentPlanSupportingDocument,
     Program,
     User,
@@ -41,8 +41,8 @@ def program(business_area: Any) -> Program:
 
 
 @pytest.fixture
-def group(program: Program) -> PaymentPlanGroup:
-    return PaymentPlanGroupFactory(cycle=ProgramCycleFactory(program=program))
+def group(program: Program) -> PaymentPlan:
+    return PaymentPlanFactory(cycle=ProgramCycleFactory(program=program))
 
 
 @pytest.fixture
@@ -66,10 +66,10 @@ def upload_file() -> SimpleUploadedFile:
 
 
 @pytest.fixture
-def serializer_context(group: PaymentPlanGroup, user: User) -> dict[str, Any]:
+def serializer_context(group: PaymentPlan, user: User) -> dict[str, Any]:
     request = APIRequestFactory().post("")
     request.user = user
-    return {"owner": {"payment_plan_group": group}, "request": request}
+    return {"owner": {"payment_plan": group}, "request": request}
 
 
 @pytest.fixture
@@ -95,7 +95,7 @@ def detail_user(business_area: Any, program: Program, create_user_role_with_perm
     user = UserFactory()
     create_user_role_with_permissions(
         user,
-        [Permissions.PM_PAYMENT_PLAN_GROUP_VIEW_DETAIL, Permissions.PM_VIEW_DETAILS],
+        [Permissions.PM_PAYMENT_PLAN_VIEW_DETAIL, Permissions.PM_VIEW_DETAILS],
         business_area,
         program=program,
     )
@@ -103,8 +103,8 @@ def detail_user(business_area: Any, program: Program, create_user_role_with_perm
 
 
 @pytest.fixture
-def group_document(group: PaymentPlanGroup) -> PaymentPlanSupportingDocument:
-    return PaymentPlanSupportingDocumentFactory(payment_plan_group=group, title="Group contract")
+def group_document(group: PaymentPlan) -> PaymentPlanSupportingDocument:
+    return PaymentPlanSupportingDocumentFactory(payment_plan=group, title="Group contract")
 
 
 @pytest.fixture
@@ -113,27 +113,27 @@ def instruction_document(instruction: FollowUpInstruction) -> PaymentPlanSupport
 
 
 @pytest.fixture
-def group_documents_url(business_area: Any, program: Program, group: PaymentPlanGroup) -> str:
+def group_documents_url(business_area: Any, program: Program, group: PaymentPlan) -> str:
     return reverse(
-        "api:payments:payment-plan-group-supporting-documents-list",
+        "api:payments:payment-plan-supporting-documents-list",
         kwargs={
             "business_area_slug": business_area.slug,
             "program_code": program.code,
-            "payment_plan_group_pk": str(group.id),
+            "payment_plan_pk": str(group.id),
         },
     )
 
 
 @pytest.fixture
 def group_document_url(
-    business_area: Any, program: Program, group: PaymentPlanGroup, group_document: PaymentPlanSupportingDocument
+    business_area: Any, program: Program, group: PaymentPlan, group_document: PaymentPlanSupportingDocument
 ) -> str:
     return reverse(
-        "api:payments:payment-plan-group-supporting-documents-detail",
+        "api:payments:payment-plan-supporting-documents-detail",
         kwargs={
             "business_area_slug": business_area.slug,
             "program_code": program.code,
-            "payment_plan_group_pk": str(group.id),
+            "payment_plan_pk": str(group.id),
             "file_id": str(group_document.id),
         },
     )
@@ -141,14 +141,14 @@ def group_document_url(
 
 @pytest.fixture
 def group_document_download_url(
-    business_area: Any, program: Program, group: PaymentPlanGroup, group_document: PaymentPlanSupportingDocument
+    business_area: Any, program: Program, group: PaymentPlan, group_document: PaymentPlanSupportingDocument
 ) -> str:
     return reverse(
-        "api:payments:payment-plan-group-supporting-documents-download",
+        "api:payments:payment-plan-supporting-documents-download",
         kwargs={
             "business_area_slug": business_area.slug,
             "program_code": program.code,
-            "payment_plan_group_pk": str(group.id),
+            "payment_plan_pk": str(group.id),
             "file_id": str(group_document.id),
         },
     )
@@ -203,9 +203,9 @@ def instruction_document_download_url(
 
 
 @pytest.fixture
-def group_detail_url(business_area: Any, program: Program, group: PaymentPlanGroup) -> str:
+def group_detail_url(business_area: Any, program: Program, group: PaymentPlan) -> str:
     return reverse(
-        "api:payments:payment-plan-groups-detail",
+        "api:payments:payment-plans-detail",
         kwargs={"business_area_slug": business_area.slug, "program_code": program.code, "pk": str(group.id)},
     )
 
@@ -219,10 +219,8 @@ def instruction_detail_url(business_area: Any, program: Program, instruction: Fo
 
 
 @pytest.fixture
-def full_group(group: PaymentPlanGroup) -> PaymentPlanGroup:
-    PaymentPlanSupportingDocumentFactory.create_batch(
-        PaymentPlanSupportingDocument.FILE_LIMIT, payment_plan_group=group
-    )
+def full_group(group: PaymentPlan) -> PaymentPlan:
+    PaymentPlanSupportingDocumentFactory.create_batch(PaymentPlanSupportingDocument.FILE_LIMIT, payment_plan=group)
     return group
 
 
@@ -280,7 +278,7 @@ def test_validate_file_extension_failure(serializer_context: dict[str, Any]) -> 
     assert serializer.errors["file"][0] == "Unsupported file type."
 
 
-def test_validate_file_limit_failure(full_group: PaymentPlanGroup, serializer_context: dict[str, Any]) -> None:
+def test_validate_file_limit_failure(full_group: PaymentPlan, serializer_context: dict[str, Any]) -> None:
     serializer = PaymentPlanSupportingDocumentSerializer(
         data={"file": SimpleUploadedFile("test.pdf", b"123", content_type="application/pdf"), "title": "test"},
         context=serializer_context,
@@ -289,13 +287,13 @@ def test_validate_file_limit_failure(full_group: PaymentPlanGroup, serializer_co
     assert not serializer.is_valid()
     assert (
         serializer.errors["non_field_errors"][0]
-        == f"Payment plan already has the maximum of {PaymentPlanSupportingDocument.FILE_LIMIT} supporting documents."
+        == f"Payment list already has the maximum of {PaymentPlanSupportingDocument.FILE_LIMIT} supporting documents."
     )
 
 
 @pytest.mark.enable_activity_log
 def test_upload_to_group_attaches_document_to_group_and_logs_it(
-    api_client: APIClient, group_documents_url: str, upload_user: User, group: PaymentPlanGroup
+    api_client: APIClient, group_documents_url: str, upload_user: User, group: PaymentPlan
 ) -> None:
     api_client.force_authenticate(user=upload_user)
 
@@ -307,7 +305,7 @@ def test_upload_to_group_attaches_document_to_group_and_logs_it(
 
     assert response.status_code == status.HTTP_201_CREATED
     document = PaymentPlanSupportingDocument.objects.get()
-    assert document.payment_plan_group == group
+    assert document.payment_plan == group
     assert document.follow_up_instruction is None
     assert document.created_by == upload_user
     assert response.data["title"] == "Test"
@@ -374,7 +372,7 @@ def test_upload_to_instruction_attaches_document_to_instruction(
     assert response.status_code == status.HTTP_201_CREATED
     document = PaymentPlanSupportingDocument.objects.get()
     assert document.follow_up_instruction == instruction
-    assert document.payment_plan_group is None
+    assert document.payment_plan is None
 
 
 def test_delete_instruction_document(

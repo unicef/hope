@@ -11,7 +11,7 @@ from extras.test_utils.factories import (
     HouseholdFactory,
     IndividualFactory,
     PaymentFactory,
-    PaymentPlanFactory,
+    PaymentListFactory,
     ProgramFactory,
     UserFactory,
 )
@@ -90,19 +90,19 @@ def complaint_context(afghanistan: BusinessArea, program: Program, user: User) -
     household2.save(update_fields=["head_of_household"])
 
     program_cycle = program.cycles.first()
-    payment_plan = PaymentPlanFactory(program_cycle=program_cycle, business_area=afghanistan, created_by=user)
+    payment_list = PaymentListFactory(program_cycle=program_cycle, business_area=afghanistan, created_by=user)
     payment = PaymentFactory(
         household=household,
         collector=individual,
         business_area=afghanistan,
-        parent=payment_plan,
+        parent=payment_list,
         currency=CurrencyFactory(code="PLN", name="Polish Zloty"),
     )
     second_payment = PaymentFactory(
         household=household2,
         collector=individual2,
         business_area=afghanistan,
-        parent=payment_plan,
+        parent=payment_list,
         currency=CurrencyFactory(code="PLN", name="Polish Zloty"),
     )
     return {

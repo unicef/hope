@@ -18,10 +18,10 @@ class SurveyCrudServices:
             body=input_data.get("body", ""),
         )
 
-        if payment_plan := input_data.get("payment_plan"):
-            households = Household.objects.filter(payment__parent=payment_plan)
-            survey.payment_plan = payment_plan
-            survey.program = payment_plan.program_cycle.program
+        if payment_list := input_data.get("payment_list"):
+            households = Household.objects.filter(payment__parent=payment_list)
+            survey.payment_list = payment_list
+            survey.program = payment_list.program_cycle.program
         elif program := input_data.get("program"):
             obj = get_object_or_404(Program, id=program)
             households = obj.households_with_payments_in_program

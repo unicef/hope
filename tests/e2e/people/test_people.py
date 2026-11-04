@@ -18,7 +18,7 @@ from extras.test_utils.factories import (
     HouseholdFactory,
     IndividualFactory,
     PaymentFactory,
-    PaymentPlanFactory,
+    PaymentListFactory,
     ProgramFactory,
 )
 from hope.apps.household.const import HOST, SEEING
@@ -73,7 +73,7 @@ def add_people(social_worker_program: Program) -> List:
 def add_people_with_payment_record(add_people: List) -> Payment:
     program = Program.objects.filter(name="Worker Program").first()
 
-    payment_plan = PaymentPlanFactory(
+    payment_list = PaymentListFactory(
         name="TEST",
         program_cycle=program.cycles.first(),
         business_area=BusinessArea.objects.first(),
@@ -82,7 +82,7 @@ def add_people_with_payment_record(add_people: List) -> Payment:
     )
     payment = PaymentFactory(
         household=add_people[1],
-        parent=payment_plan,
+        parent=payment_list,
         entitlement_quantity=21.36,
         delivered_quantity=21.36,
         currency=Currency.objects.get(code="PLN"),

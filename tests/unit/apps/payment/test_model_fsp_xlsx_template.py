@@ -17,11 +17,11 @@ from extras.test_utils.factories.household import (
     HouseholdFactory,
     IndividualIdentityFactory,
 )
-from extras.test_utils.factories.payment import PaymentFactory, PaymentPlanFactory
+from extras.test_utils.factories.payment import PaymentFactory, PaymentListFactory
 from extras.test_utils.factories.program import ProgramFactory
 from hope.apps.household.const import UNHCR, WFP
 from hope.apps.payment.fields import DynamicChoiceArrayField, DynamicChoiceField
-from hope.apps.payment.services.payment_household_snapshot_service import create_payment_plan_snapshot_data
+from hope.apps.payment.services.payment_household_snapshot_service import create_payment_list_snapshot_data
 from hope.models import DataCollectingType, FinancialServiceProviderXlsxTemplate, MergeStatusModel
 
 pytestmark = pytest.mark.django_db
@@ -31,7 +31,7 @@ pytestmark = pytest.mark.django_db
 def payment_with_collector_identities():
     household = HouseholdFactory(size=1)
     collector = household.head_of_household
-    payment = PaymentFactory(parent=PaymentPlanFactory(), household=household, collector=collector)
+    payment = PaymentFactory(parent=PaymentListFactory(), household=household, collector=collector)
     IndividualIdentityFactory(
         individual=collector,
         partner=PartnerFactory(name=UNHCR),
@@ -44,7 +44,7 @@ def payment_with_collector_identities():
         number="WFP-88",
         country=CountryFactory(iso_code3="KEN"),
     )
-    create_payment_plan_snapshot_data(payment.parent)
+    create_payment_list_snapshot_data(payment.parent)
     payment.refresh_from_db()
     return payment
 
@@ -53,11 +53,11 @@ def payment_with_collector_identities():
 def payment_without_collector_identities():
     household = HouseholdFactory(size=1)
     payment = PaymentFactory(
-        parent=PaymentPlanFactory(),
+        parent=PaymentListFactory(),
         household=household,
         collector=household.head_of_household,
     )
-    create_payment_plan_snapshot_data(payment.parent)
+    create_payment_list_snapshot_data(payment.parent)
     payment.refresh_from_db()
     return payment
 
@@ -77,7 +77,7 @@ def test_fsp_template_get_column_from_core_field():
     beneficiary_group = BeneficiaryGroupFactory(name="People", master_detail=False)
     program = ProgramFactory(data_collecting_type=data_collecting_type, beneficiary_group=beneficiary_group)
     program_cycle = program.cycles.first()
-    payment_plan = PaymentPlanFactory(program_cycle=program_cycle)
+    payment_list = PaymentListFactory(program_cycle=program_cycle)
     household = HouseholdFactory(size=1)
     primary = household.head_of_household
     primary.given_name = "John"
@@ -102,7 +102,7 @@ def test_fsp_template_get_column_from_core_field():
     household.save()
 
     payment = PaymentFactory(
-        parent=payment_plan,
+        parent=payment_list,
         household=household,
         collector=primary,
     )
@@ -122,7 +122,7 @@ def test_fsp_template_get_column_from_core_field():
     )
     assert none_resp is None
 
-    create_payment_plan_snapshot_data(payment.parent)
+    create_payment_list_snapshot_data(payment.parent)
     payment.refresh_from_db()
 
     result = FinancialServiceProviderXlsxTemplate.get_column_from_core_field(

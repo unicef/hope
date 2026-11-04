@@ -8,10 +8,10 @@ import requests
 
 from hope.apps.core.api.mixins import BaseAPI
 from hope.apps.utils.external_urls import build_url
-from hope.contrib.api.serializers.vision import PaymentPlanGroupPayloadSerializer
+from hope.contrib.api.serializers.vision import PaymentPlanPayloadSerializer
 from hope.contrib.vision.choices import VISION_SEND_MUTABLE_STATUSES, VisionLogEntryType, VisionStatus
 from hope.contrib.vision.services import VisionService
-from hope.models import PaymentPlanGroup
+from hope.models import PaymentPlan
 
 
 class VisionAPIError(Exception):
@@ -32,7 +32,7 @@ class VisionAPI(BaseAPI):
     def __init__(self) -> None:
         super().__init__()
         self.token_url = build_url(self.api_url, "v1/OAuthService/GenerateToken")
-        self.payment_plan_creation_url = build_url(self.api_url, "ps/ezcash/PaymentPlan")
+        self.payment_list_creation_url = build_url(self.api_url, "ps/ezcash/PaymentList")
         self._token_expiry: datetime | None = None
 
     def _acquire_token(self) -> None:
@@ -70,19 +70,19 @@ class VisionAPI(BaseAPI):
     @classmethod
     def _persist_result(
         cls,
-        group: PaymentPlanGroup,
+        payment_plan: PaymentPlan,
         entry: dict,
         vision_status: VisionStatus | None = None,
         *,
         initial_request_succeeded: bool = False,
     ) -> None:
         with transaction.atomic():
-            locked_group = PaymentPlanGroup.objects.select_for_update().get(pk=group.pk)
-            vision_data = VisionService.vision_data(locked_group)
+            locked_payment_plan = PaymentPlan.objects.select_for_update().get(pk=payment_plan.pk)
+            vision_data = VisionService.vision_data(locked_payment_plan)
             vision_data.setdefault("log", []).append(entry)
 
             current_status = str(vision_data.get("status") or VisionStatus.NOT_SENT.value)
-            group_is_still_in_review = locked_group.status == PaymentPlanGroup.Status.IN_REVIEW
+            payment_plan_is_still_in_review = locked_payment_plan.status == PaymentPlan.Status.IN_REVIEW
             vision_attempt_has_not_been_reset = current_status != VisionStatus.NOT_SENT.value
             send_result_updates_status = vision_status is not None
             current_status_can_be_changed_by_send_result = current_status in cls.SEND_MUTABLE_STATUSES
@@ -95,7 +95,7 @@ class VisionAPI(BaseAPI):
                 # The initial POST to Vision returned successfully.
                 initial_request_succeeded
                 # The plan has not been released, rejected, or aborted.
-                and group_is_still_in_review
+                and payment_plan_is_still_in_review
                 # The Vision attempt was not reset while the request was running.
                 and vision_attempt_has_not_been_reset
             ):
@@ -105,17 +105,19 @@ class VisionAPI(BaseAPI):
                 # Initial sends and retries provide a local status to record; status notifications do not.
                 send_result_updates_status
                 # A late HTTP response must not change an aborted, rejected, or released plan.
-                and group_is_still_in_review
+                and payment_plan_is_still_in_review
                 # Preserve a newer callback status such as PP_CREATED, FC_NOT_FOUND, or CALLBACK_FAILED.
                 and current_status_can_be_changed_by_send_result
             ):
-                VisionService.set_status(locked_group, cast("VisionStatus", vision_status))
+                VisionService.set_status(locked_payment_plan, cast("VisionStatus", vision_status))
 
-            PaymentPlanGroup.objects.filter(pk=locked_group.pk).update(internal_data=locked_group.internal_data)
+            PaymentPlan.objects.filter(pk=locked_payment_plan.pk).update(
+                internal_data=locked_payment_plan.internal_data
+            )
 
-    def _post_payment_plan_group(
+    def _post_payment_plan(
         self,
-        group: PaymentPlanGroup,
+        payment_plan: PaymentPlan,
         payload: dict,
         log_entry_type: VisionLogEntryType,
     ) -> dict:
@@ -130,36 +132,36 @@ class VisionAPI(BaseAPI):
         }
         try:
             self._ensure_token()
-            response, _ = self._post(self.payment_plan_creation_url, payload)
+            response, _ = self._post(self.payment_list_creation_url, payload)
             entry["response"] = response
         except VisionAPIMissingCredentialsError:
             entry["response"] = {"error": "Vision API credentials are not configured"}
-            self._persist_result(group, entry, failure_status)
+            self._persist_result(payment_plan, entry, failure_status)
             raise
         except (BaseAPI.APIError, VisionAPIError, requests.RequestException) as error:
             entry["response"] = {"error": str(error)}
-            self._persist_result(group, entry, failure_status)
+            self._persist_result(payment_plan, entry, failure_status)
             raise VisionAPIError(str(error)) from error
 
         self._persist_result(
-            group,
+            payment_plan,
             entry,
             success_status,
             initial_request_succeeded=is_initial_send,
         )
         return response
 
-    def send_payment_plan_group(self, group: PaymentPlanGroup) -> dict:
-        if group.sent_to_vision:
-            raise VisionAPIError("Payment Plan Group has already been sent to Vision")
+    def send_payment_plan(self, payment_plan: PaymentPlan) -> dict:
+        if payment_plan.sent_to_vision:
+            raise VisionAPIError("Payment Plan has already been sent to Vision")
 
-        return self._post_payment_plan_group(
-            group,
-            dict(PaymentPlanGroupPayloadSerializer(group).data),
+        return self._post_payment_plan(
+            payment_plan,
+            dict(PaymentPlanPayloadSerializer(payment_plan).data),
             VisionLogEntryType.API_CALL,
         )
 
-    def notify_payment_plan_group_status(self, group: PaymentPlanGroup, vision_status: str) -> dict:
-        payload = dict(PaymentPlanGroupPayloadSerializer(group).data)
+    def notify_payment_plan_status(self, payment_plan: PaymentPlan, vision_status: str) -> dict:
+        payload = dict(PaymentPlanPayloadSerializer(payment_plan).data)
         payload["status"] = vision_status
-        return self._post_payment_plan_group(group, payload, VisionLogEntryType.STATUS_NOTIFICATION)
+        return self._post_payment_plan(payment_plan, payload, VisionLogEntryType.STATUS_NOTIFICATION)

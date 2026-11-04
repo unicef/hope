@@ -37,7 +37,7 @@ from extras.test_utils.factories.grievance import (
 from extras.test_utils.factories.payment import (
     FinancialServiceProviderFactory,
     PaymentFactory,
-    PaymentPlanFactory,
+    PaymentListFactory,
     PaymentVerificationFactory,
     PaymentVerificationPlanFactory,
     PaymentVerificationSummaryFactory,
@@ -500,20 +500,20 @@ def tickets(
 
     # Create payment related objects
     program_cycle = program_afghanistan1.cycles.first()
-    payment_plan = PaymentPlanFactory(
+    payment_list = PaymentListFactory(
         id="689ba2ea-8ffb-4787-98e4-ae12797ee4da",
         name="TEST",
         business_area=afghanistan,
         program_cycle=program_cycle,
     )
-    PaymentVerificationSummaryFactory(payment_plan=payment_plan)
+    PaymentVerificationSummaryFactory(payment_list=payment_list)
     payment_verification_plan = PaymentVerificationPlanFactory(
-        payment_plan=payment_plan,
+        payment_list=payment_list,
         status=PaymentVerificationPlan.STATUS_ACTIVE,
     )
     financial_service_provider1 = FinancialServiceProviderFactory(name="Filter Value")
     payment1 = PaymentFactory(
-        parent=payment_plan,
+        parent=payment_list,
         household=data["household1"],
         currency=CurrencyFactory(code="PLN", name="Polish Zloty"),
         head_of_household=data["individuals1"][0],
@@ -537,20 +537,20 @@ def tickets(
         payment_verification=payment_verification1,
     )
 
-    payment_plan2 = PaymentPlanFactory(
+    payment_list2 = PaymentListFactory(
         name="TEST2",
         business_area=afghanistan,
         program_cycle=program_cycle,
     )
-    PaymentVerificationSummaryFactory(payment_plan=payment_plan2)
+    PaymentVerificationSummaryFactory(payment_list=payment_list2)
     payment_verification_plan2 = PaymentVerificationPlanFactory(
-        payment_plan=payment_plan2,
+        payment_list=payment_list2,
         status=PaymentVerificationPlan.STATUS_ACTIVE,
     )
     financial_service_provider2 = FinancialServiceProviderFactory(name="Value")
     payment2 = PaymentFactory(
         id="f1c2d3e4-f5a6-7b8c-9d0e-f1a2b3c4d5e6",
-        parent=payment_plan,
+        parent=payment_list,
         household=data["household2"],
         head_of_household=data["individuals2"][0],
         currency=CurrencyFactory(code="PLN", name="Polish Zloty"),
@@ -622,7 +622,7 @@ def tickets(
         "financial_service_provider2": financial_service_provider2,
         "payment1": payment1,
         "payment2": payment2,
-        "payment_plan": payment_plan,
+        "payment_list": payment_list,
     }
 
 

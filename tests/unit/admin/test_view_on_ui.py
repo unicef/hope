@@ -16,8 +16,8 @@ from extras.test_utils.factories import (
     HouseholdFactory,
     IndividualFactory,
     PaymentFactory,
+    PaymentListFactory,
     PaymentPlanFactory,
-    PaymentPlanGroupFactory,
     PaymentVerificationFactory,
     PaymentVerificationPlanFactory,
     PDUOnlineEditFactory,
@@ -37,8 +37,8 @@ from hope.models import (
     Individual,
     Message,
     Payment,
+    PaymentList,
     PaymentPlan,
-    PaymentPlanGroup,
     PaymentVerification,
     PaymentVerificationPlan,
     PDUOnlineEdit,
@@ -124,62 +124,62 @@ def test_frontend_url_target_population(program, cycle):
 
 
 @pytest.mark.django_db
-def test_frontend_url_payment_plan(program, cycle):
-    plan = PaymentPlanFactory(program_cycle=cycle(program()))
+def test_frontend_url_payment_list(program, cycle):
+    plan = PaymentListFactory(program_cycle=cycle(program()))
     assert (
-        site._registry[PaymentPlan].frontend_url(plan) == f"/afg/programs/TEST/payment-module/payment-plans/{plan.id}"
+        site._registry[PaymentList].frontend_url(plan) == f"/afg/programs/TEST/payment-module/payment-lists/{plan.id}"
     )
 
 
 @pytest.mark.django_db
-def test_frontend_url_payment_plan_pre_payment_status(program, cycle):
-    plan = PaymentPlanFactory(program_cycle=cycle(program()), status=PaymentPlan.Status.TP_OPEN)
-    assert site._registry[PaymentPlan].frontend_url(plan) == f"/afg/programs/TEST/target-population/{plan.id}"
+def test_frontend_url_payment_list_pre_payment_status(program, cycle):
+    plan = PaymentListFactory(program_cycle=cycle(program()), status=PaymentList.Status.TP_OPEN)
+    assert site._registry[PaymentList].frontend_url(plan) == f"/afg/programs/TEST/target-population/{plan.id}"
 
 
 @pytest.mark.django_db
-def test_frontend_url_payment_plan_follow_up(program, cycle):
-    plan = PaymentPlanFactory(
+def test_frontend_url_payment_list_follow_up(program, cycle):
+    plan = PaymentListFactory(
         program_cycle=cycle(program()),
-        status=PaymentPlan.Status.ACCEPTED,
-        plan_type=PaymentPlan.PlanType.FOLLOW_UP,
+        status=PaymentList.Status.ACCEPTED,
+        plan_type=PaymentList.PlanType.FOLLOW_UP,
     )
     assert (
-        site._registry[PaymentPlan].frontend_url(plan)
-        == f"/afg/programs/TEST/payment-module/followup-payment-plans/{plan.id}"
+        site._registry[PaymentList].frontend_url(plan)
+        == f"/afg/programs/TEST/payment-module/followup-payment-lists/{plan.id}"
     )
 
 
 @pytest.mark.django_db
 @pytest.mark.parametrize(
     "plan_type",
-    [PaymentPlan.PlanType.TOP_UP, PaymentPlan.PlanType.TOP_UP_AMENDMENT],
+    [PaymentList.PlanType.TOP_UP, PaymentList.PlanType.TOP_UP_AMENDMENT],
 )
-def test_frontend_url_payment_plan_top_up(plan_type, program, cycle):
-    plan = PaymentPlanFactory(
+def test_frontend_url_payment_list_top_up(plan_type, program, cycle):
+    plan = PaymentListFactory(
         program_cycle=cycle(program()),
-        status=PaymentPlan.Status.ACCEPTED,
+        status=PaymentList.Status.ACCEPTED,
         plan_type=plan_type,
     )
     assert (
-        site._registry[PaymentPlan].frontend_url(plan)
-        == f"/afg/programs/TEST/payment-module/top-up-payment-plans/{plan.id}"
+        site._registry[PaymentList].frontend_url(plan)
+        == f"/afg/programs/TEST/payment-module/top-up-payment-lists/{plan.id}"
     )
 
 
 @pytest.mark.django_db
 def test_frontend_url_payment(program, cycle):
     program = program()
-    plan = PaymentPlanFactory(program_cycle=cycle(program))
+    plan = PaymentListFactory(program_cycle=cycle(program))
     payment = PaymentFactory(parent=plan, program=program)
     assert site._registry[Payment].frontend_url(payment) == f"/afg/programs/TEST/payment-module/payments/{payment.id}"
 
 
 @pytest.mark.django_db
-def test_frontend_url_payment_plan_group(program, cycle):
-    group = PaymentPlanGroupFactory(cycle=cycle(program()))
+def test_frontend_url_payment_plan(program, cycle):
+    group = PaymentPlanFactory(cycle=cycle(program()))
     assert (
-        site._registry[PaymentPlanGroup].frontend_url(group) == f"/afg/programs/TEST/payment-module/groups/{group.id}"
+        site._registry[PaymentPlan].frontend_url(group) == f"/afg/programs/TEST/payment-module/payment-plans/{group.id}"
     )
 
 
@@ -255,11 +255,11 @@ def test_frontend_url_grievance_ticket_without_program():
 
 @pytest.mark.django_db
 def test_frontend_url_payment_verification_plan(program, cycle):
-    plan = PaymentPlanFactory(program_cycle=cycle(program()), status=PaymentPlan.Status.FINISHED)
-    verification_plan = PaymentVerificationPlanFactory(payment_plan=plan)
+    plan = PaymentListFactory(program_cycle=cycle(program()), status=PaymentList.Status.FINISHED)
+    verification_plan = PaymentVerificationPlanFactory(payment_list=plan)
     assert (
         site._registry[PaymentVerificationPlan].frontend_url(verification_plan)
-        == f"/afg/programs/TEST/payment-verification/payment-plan/{plan.id}"
+        == f"/afg/programs/TEST/payment-verification/payment-list/{plan.id}"
     )
 
 
@@ -327,10 +327,10 @@ def test_frontend_url_pdu_online_edit(program):
 
 @pytest.mark.django_db
 def test_frontend_url_payment_verification(program, cycle):
-    plan = PaymentPlanFactory(program_cycle=cycle(program()), status=PaymentPlan.Status.FINISHED)
-    verification_plan = PaymentVerificationPlanFactory(payment_plan=plan)
+    plan = PaymentListFactory(program_cycle=cycle(program()), status=PaymentList.Status.FINISHED)
+    verification_plan = PaymentVerificationPlanFactory(payment_list=plan)
     verification = PaymentVerificationFactory(payment_verification_plan=verification_plan)
     expected = (
-        f"/afg/programs/TEST/payment-verification/payment-plan/{plan.id}/verification/payment/{verification.payment.id}"
+        f"/afg/programs/TEST/payment-verification/payment-list/{plan.id}/verification/payment/{verification.payment.id}"
     )
     assert site._registry[PaymentVerification].frontend_url(verification) == expected

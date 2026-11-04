@@ -13,7 +13,7 @@ import {
   Grid,
   Typography,
 } from '@mui/material';
-import type { PaymentPlanGroupDetail } from '@restgenerated/models/PaymentPlanGroupDetail';
+import type { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 import { FormikSelectField } from '@shared/Formik/FormikSelectField';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
 import {
@@ -175,7 +175,7 @@ interface TargetingCriteriaFormPropTypes {
   individualFiltersAvailable: boolean;
   householdFiltersAvailable: boolean;
   criteriaIndex: number;
-  paymentPlanGroup?: PaymentPlanGroupDetail;
+  paymentPlan?: PaymentPlanDetail;
 }
 
 const associatedWith = (type) => (item) => item.associatedWith === type;
@@ -189,7 +189,7 @@ export const TargetingCriteriaForm = ({
   individualFiltersAvailable,
   householdFiltersAvailable,
   criteriaIndex,
-  paymentPlanGroup,
+  paymentPlan,
 }: TargetingCriteriaFormPropTypes): ReactElement => {
   const { t } = useTranslation();
   const { businessArea, isAllPrograms } = useBaseUrl();
@@ -306,7 +306,7 @@ export const TargetingCriteriaForm = ({
     return bag.resetForm();
   };
 
-  const groupFsp = paymentPlanGroup?.financialServiceProvider;
+  const groupFsp = paymentPlan?.financialServiceProvider;
   const validationSchema =
     criteriaIndex === 0 && openPaymentChannelCollapse && groupFsp
       ? requiredSchema
@@ -329,7 +329,7 @@ export const TargetingCriteriaForm = ({
             groupFsp?.id,
           );
           let deliveryMechanismHint = '';
-          if (!paymentPlanGroup) {
+          if (!paymentPlan) {
             deliveryMechanismHint = t('Select a Payment Plan first.');
           } else if (!groupFsp) {
             deliveryMechanismHint = t(

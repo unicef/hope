@@ -1,0 +1,478 @@
+from collections.abc import Sequence
+from decimal import Decimal
+from tempfile import NamedTemporaryFile
+
+import pytest
+
+from extras.test_utils.factories import (
+    CurrencyFactory,
+    DeliveryMechanismFactory,
+    FinancialServiceProviderFactory,
+    HouseholdFactory,
+    PaymentFactory,
+    PaymentHouseholdSnapshotFactory,
+    PaymentListFactory,
+)
+from extras.test_utils.factories.program import ProgramCycleFactory, ProgramFactory
+from extras.test_utils.selenium import HopeTestBrowser
+from hope.apps.payment.services.top_up_amount_service import TopUpAmountTemplateService
+from hope.apps.payment.xlsx.xlsx_payment_list_base_service import XlsxPaymentListBaseService
+from hope.models import BusinessArea, DeliveryMechanism, Payment, PaymentList, Program
+
+pytestmark = pytest.mark.django_db()
+
+
+def _fill_date(browser: HopeTestBrowser, name: str, value: str) -> None:
+    browser.fill_date(f'input[name="{name}"]', value)
+
+
+def _fill_fixed_amount(browser: HopeTestBrowser, amount: str) -> None:
+    # FormikTextField derives its data-cy from the field name.
+    field = browser.wait_for_element_clickable('input[data-cy="input-fixedAmount"]')
+    field.click()
+    field.send_keys(amount)
+
+
+def _open_group_of(browser: HopeTestBrowser, business_area: BusinessArea, plan: PaymentList) -> None:
+    """Follow-up, Top-Up and Amendment are created from the Payment Plan (group) page."""
+    group = plan.payment_plan
+    browser.open(f"/{business_area.slug}/programs/{plan.program.code}/payment-module/payment-plans/{group.id}")
+    browser.wait_for_text(group.name, 'h5[data-cy="page-header-title"]')
+
+
+def _amount_file_funding_first_beneficiary(source_plan: PaymentList) -> str:
+    """Amount template funding only the first of three eligible beneficiaries. Returns its path.
+
+    The second row carries an explicit zero and the third is left blank: both mean "not part of
+    this Top-Up", and the two are worth distinguishing because only the zero is something the
+    operator actually typed.
+    """
+    workbook = TopUpAmountTemplateService([source_plan]).generate_workbook()
+    worksheet = workbook.active
+    headers = [cell.value for cell in worksheet[1]]
+    amount_column = headers.index(XlsxPaymentListBaseService.COLUMN_ENTITLEMENT_QUANTITY) + 1
+    worksheet.cell(row=2, column=amount_column).value = 40
+    worksheet.cell(row=3, column=amount_column).value = 0
+    with NamedTemporaryFile(suffix=".xlsx", delete=False) as tmp:
+        workbook.save(tmp.name)
+        return tmp.name
+
+
+def _create_source_plan(
+    program: Program,
+    *,
+    payment_statuses: Sequence[str],
+    plan_status: str = PaymentList.Status.ACCEPTED,
+    excluded: bool = False,
+) -> PaymentList:
+    """Released Standard (REGULAR) plan with one payment per entry in ``payment_statuses``.
+
+    Top-up eligibility requires a REGULAR plan in Accepted or Finished status with at least one
+    payment on a non-withdrawn household. Payment status does not gate it — pass ``excluded`` to
+    build a plan with nobody left to top up.
+    """
+    ba = program.business_area
+    currency = CurrencyFactory(code="USD")
+    # payment_gateway_id is unique, so a second plan in the same test has to reuse the mechanism.
+    delivery_mechanism = DeliveryMechanism.objects.filter(code="dm-topup-cash").first() or DeliveryMechanismFactory(
+        code="dm-topup-cash", name="TopUp Cash", payment_gateway_id="dm-topup-cash"
+    )
+    fsp = FinancialServiceProviderFactory()
+    fsp.delivery_mechanisms.add(delivery_mechanism)
+    cycle = ProgramCycleFactory(program=program)
+
+    plan = PaymentListFactory(
+        name="Top-Up Source Plan",
+        program_cycle=cycle,
+        business_area=ba,
+        currency=currency,
+        delivery_mechanism=delivery_mechanism,
+        financial_service_provider=fsp,
+        plan_type=PaymentList.PlanType.REGULAR,
+        status=plan_status,
+    )
+    # Linked groups are created from the group, which must itself be Accepted or Finished.
+    group = plan.payment_plan
+    group.status = plan_status
+    group.save(update_fields=["status"])
+
+    for payment_status in payment_statuses:
+        household = HouseholdFactory(business_area=ba, program=program)
+        payment = PaymentFactory(
+            parent=plan,
+            household=household,
+            collector=household.head_of_household,
+            head_of_household=household.head_of_household,
+            program=program,
+            currency=currency,
+            delivery_type=delivery_mechanism,
+            financial_service_provider=fsp,
+            entitlement_quantity=Decimal("100.00"),
+            entitlement_quantity_usd=Decimal("100.00"),
+            delivered_quantity=Decimal("100.00"),
+            status=payment_status,
+            excluded=excluded,
+        )
+        # The amount template renders from snapshots, which a released plan always carries.
+        PaymentHouseholdSnapshotFactory(
+            payment=payment,
+            snapshot_data={
+                "unicef_id": household.unicef_id,
+                "size": household.size,
+                "primary_collector": {
+                    "unicef_id": household.head_of_household.unicef_id,
+                    "full_name": household.head_of_household.full_name,
+                },
+                "alternate_collector": {},
+            },
+        )
+    return plan
+
+
+@pytest.fixture
+def topup_program(business_area: BusinessArea) -> Program:
+    return ProgramFactory(
+        name="Top-Up E2E Program",
+        status=Program.ACTIVE,
+        business_area=business_area,
+    )
+
+
+@pytest.fixture
+def topup_eligible_plan(topup_program: Program) -> PaymentList:
+    # Delivered payment → eligible_payments_for_top_up() non-empty → canCreateTopUp True.
+    return _create_source_plan(topup_program, payment_statuses=[Payment.STATUS_SUCCESS])
+
+
+@pytest.fixture
+def topup_finished_plan_with_mixed_payments(topup_program: Program) -> PaymentList:
+    # Neither the payment status nor the plan having moved past Accepted disqualifies anybody.
+    return _create_source_plan(
+        topup_program,
+        payment_statuses=[Payment.STATUS_SUCCESS, Payment.STATUS_PENDING, Payment.STATUS_ERROR],
+        plan_status=PaymentList.Status.FINISHED,
+    )
+
+
+@pytest.fixture
+def mixed_plan_amount_file(topup_finished_plan_with_mixed_payments: PaymentList) -> str:
+    return _amount_file_funding_first_beneficiary(topup_finished_plan_with_mixed_payments)
+
+
+@pytest.fixture
+def topup_ineligible_plan(topup_program: Program) -> PaymentList:
+    return _create_source_plan(topup_program, payment_statuses=[Payment.STATUS_SUCCESS], excluded=True)
+
+
+def test_create_top_up_payment_list(
+    login: HopeTestBrowser,
+    business_area: BusinessArea,
+    topup_program: Program,
+    topup_eligible_plan: PaymentList,
+) -> None:
+    source = topup_eligible_plan
+
+    _open_group_of(login, business_area, source)
+    login.wait_for_text("ACCEPTED")
+
+    # Top-up creation is a group action, available only on an Accepted/Finished
+    # Standard group with eligible payments.
+    login.wait_for_element_clickable('[data-cy="button-create-topup"]').click()
+
+    login.wait_for_element_visible('input[name="dispersionStartDate"]')
+    # Both labels are asserted because a trailing colon inside t() is swallowed by i18next,
+    # which silently renders an empty label.
+    login.assert_text("Fixed:")
+    login.assert_text("Custom / per Beneficiary:")
+    _fill_date(login, "dispersionStartDate", "2027-01-01")
+    # The end date is disabled until a start date is set.
+    login.wait_for_element_clickable('input[name="dispersionEndDate"]')
+    _fill_date(login, "dispersionEndDate", "2027-12-31")
+    _fill_fixed_amount(login, "25")
+    login.click('[data-cy="button-submit"]')
+
+    login.wait_for_text("Payment Plan Created")
+
+    # A Top-Up group with a child plan is created and the UI navigates to the new group.
+    new_pp = PaymentList.objects.get(source_payment_list=source, plan_type=PaymentList.PlanType.TOP_UP)
+    new_group = new_pp.payment_plan
+    assert new_group.source_payment_plan_id == source.payment_plan_id
+    login.wait_for_text(new_group.name, 'h5[data-cy="page-header-title"]')
+    assert str(new_group.id) in login.get_current_url()
+
+
+def test_top_up_button_hidden_when_no_eligible_payments(
+    login: HopeTestBrowser,
+    business_area: BusinessArea,
+    topup_program: Program,
+    topup_ineligible_plan: PaymentList,
+) -> None:
+    source = topup_ineligible_plan
+
+    _open_group_of(login, business_area, source)
+    login.wait_for_text("ACCEPTED")
+
+    # Accepted-state header renders, but the Top-Up action is gated by canCreateTopUp.
+    login.assert_element_absent('[data-cy="button-create-topup"]')
+
+
+def test_create_top_up_from_finished_plan_with_mixed_payment_statuses(
+    login: HopeTestBrowser,
+    business_area: BusinessArea,
+    topup_program: Program,
+    topup_finished_plan_with_mixed_payments: PaymentList,
+) -> None:
+    """Delivered, pending and failed are all topped up alike when a flat amount is given."""
+    source = topup_finished_plan_with_mixed_payments
+
+    _open_group_of(login, business_area, source)
+    login.wait_for_element_clickable('[data-cy="button-create-topup"]').click()
+
+    login.wait_for_element_visible('input[name="dispersionStartDate"]')
+    _fill_date(login, "dispersionStartDate", "2027-01-01")
+    login.wait_for_element_clickable('input[name="dispersionEndDate"]')
+    _fill_date(login, "dispersionEndDate", "2027-12-31")
+    _fill_fixed_amount(login, "25")
+    login.click('[data-cy="button-submit"]')
+
+    login.wait_for_text("Payment Plan Created")
+    top_up = PaymentList.objects.get(source_payment_list=source, plan_type=PaymentList.PlanType.TOP_UP)
+    assert top_up.payment_items.count() == 3
+    assert set(top_up.payment_items.values_list("entitlement_quantity", flat=True)) == {Decimal("25.00")}
+
+
+def test_create_top_up_with_amount_file_funds_only_listed_beneficiaries(
+    login: HopeTestBrowser,
+    business_area: BusinessArea,
+    topup_program: Program,
+    topup_finished_plan_with_mixed_payments: PaymentList,
+    mixed_plan_amount_file: str,
+) -> None:
+    """Only rows carrying a positive amount are funded; a zero and a blank both stay out."""
+    source = topup_finished_plan_with_mixed_payments
+    amount_file = mixed_plan_amount_file
+
+    _open_group_of(login, business_area, source)
+    login.wait_for_element_clickable('[data-cy="button-create-topup"]').click()
+
+    login.wait_for_element_visible('input[name="dispersionStartDate"]')
+    _fill_date(login, "dispersionStartDate", "2027-01-01")
+    login.wait_for_element_clickable('input[name="dispersionEndDate"]')
+    _fill_date(login, "dispersionEndDate", "2027-12-31")
+    # The file wins on submit, so a fixed amount typed first must not survive the upload.
+    _fill_fixed_amount(login, "25")
+    login.choose_file('input[type="file"]', amount_file)
+    # The count is read from the workbook in the browser, before anything is sent.
+    login.wait_for_text("New Top-Up will be created for 1 payment", '[data-cy="top-up-funded-rows"]')
+    login.assert_value('input[data-cy="input-fixedAmount"]', "")
+    login.assert_attribute('input[data-cy="input-fixedAmount"]', "disabled")
+    # Clearing the amount must not leave its error standing next to a file that satisfies it.
+    login.assert_text_not_visible("Enter a fixed amount or upload an amount file")
+    login.click('[data-cy="button-submit"]')
+
+    login.wait_for_text("Payment Plan Created")
+    top_up = PaymentList.objects.get(source_payment_list=source, plan_type=PaymentList.PlanType.TOP_UP)
+    assert top_up.payment_items.count() == 1
+    assert top_up.payment_items.first().entitlement_quantity == Decimal("40.00")
+    assert source.eligible_payments_for_top_up().count() == 2
+
+
+def test_top_up_dialog_without_dispersion_dates_shows_validation_errors(
+    login: HopeTestBrowser,
+    business_area: BusinessArea,
+    topup_program: Program,
+    topup_eligible_plan: PaymentList,
+) -> None:
+    """Submitting with the required dates empty must say so rather than sit silent."""
+    source = topup_eligible_plan
+
+    _open_group_of(login, business_area, source)
+    login.wait_for_element_clickable('[data-cy="button-create-topup"]').click()
+
+    login.wait_for_element_visible('input[name="dispersionStartDate"]')
+    _fill_fixed_amount(login, "25")
+    login.click('[data-cy="button-submit"]')
+
+    login.assert_text("Dispersion Start Date is required")
+
+
+def test_top_up_requires_a_fixed_amount_or_an_amount_file(
+    login: HopeTestBrowser,
+    business_area: BusinessArea,
+    topup_program: Program,
+    topup_eligible_plan: PaymentList,
+) -> None:
+    """Submitting with neither funding source is caught in the dialog, not by the server."""
+    source = topup_eligible_plan
+
+    _open_group_of(login, business_area, source)
+    login.wait_for_element_clickable('[data-cy="button-create-topup"]').click()
+
+    login.wait_for_element_visible('input[name="dispersionStartDate"]')
+    _fill_date(login, "dispersionStartDate", "2027-01-01")
+    login.wait_for_element_clickable('input[name="dispersionEndDate"]')
+    _fill_date(login, "dispersionEndDate", "2027-12-31")
+    login.click('[data-cy="button-submit"]')
+
+    login.wait_for_text("Enter a fixed amount or upload an amount file")
+    assert not PaymentList.objects.filter(source_payment_list=source, plan_type=PaymentList.PlanType.TOP_UP).exists()
+
+
+@pytest.fixture
+def topup_plan_with_pending_payments(topup_program: Program, topup_eligible_plan: PaymentList) -> PaymentList:
+    """An Accepted Top-Up whose own payments are still pending — already amendable."""
+    top_up = _create_source_plan(topup_program, payment_statuses=[Payment.STATUS_PENDING] * 2)
+    top_up.plan_type = PaymentList.PlanType.TOP_UP
+    top_up.source_payment_list = topup_eligible_plan
+    top_up.save(update_fields=["plan_type", "source_payment_list"])
+    top_up_group = top_up.payment_plan
+    top_up_group.plan_type = PaymentList.PlanType.TOP_UP
+    top_up_group.source_payment_plan = topup_eligible_plan.payment_plan
+    top_up_group.save(update_fields=["plan_type", "source_payment_plan"])
+    return top_up
+
+
+@pytest.fixture
+def pending_top_up_amount_file(topup_plan_with_pending_payments: PaymentList) -> str:
+    return _amount_file_funding_first_beneficiary(topup_plan_with_pending_payments)
+
+
+def test_create_top_up_amendment_from_pending_top_up(
+    login: HopeTestBrowser,
+    business_area: BusinessArea,
+    topup_program: Program,
+    topup_plan_with_pending_payments: PaymentList,
+) -> None:
+    """The Amendment dialog funds the same two ways a Top-Up does, on payments of any status."""
+    source = topup_plan_with_pending_payments
+
+    _open_group_of(login, business_area, source)
+    login.wait_for_element_clickable('[data-cy="button-create-amendment"]').click()
+
+    login.wait_for_element_visible('input[name="dispersionStartDate"]')
+    # The amount section is the Top-Up one, reused verbatim.
+    login.assert_text("Fixed:")
+    login.assert_text("Custom / per Beneficiary:")
+    _fill_date(login, "dispersionStartDate", "2027-01-01")
+    login.wait_for_element_clickable('input[name="dispersionEndDate"]')
+    _fill_date(login, "dispersionEndDate", "2027-12-31")
+    _fill_fixed_amount(login, "30")
+    login.click('[data-cy="button-submit"]')
+
+    login.wait_for_text("Payment Plan Created")
+    amendment = PaymentList.objects.get(source_payment_list=source, plan_type=PaymentList.PlanType.TOP_UP_AMENDMENT)
+    assert amendment.payment_items.count() == 2
+    assert set(amendment.payment_items.values_list("entitlement_quantity", flat=True)) == {Decimal("30.00")}
+
+
+def test_create_second_top_up_for_the_beneficiaries_left_over(
+    login: HopeTestBrowser,
+    business_area: BusinessArea,
+    topup_program: Program,
+    topup_finished_plan_with_mixed_payments: PaymentList,
+    mixed_plan_amount_file: str,
+) -> None:
+    """Beneficiaries left out of the first Top-Up can be picked up by a second one."""
+    source = topup_finished_plan_with_mixed_payments
+    amount_file = mixed_plan_amount_file
+
+    _open_group_of(login, business_area, source)
+    login.wait_for_element_clickable('[data-cy="button-create-topup"]').click()
+    login.wait_for_element_visible('input[name="dispersionStartDate"]')
+    _fill_date(login, "dispersionStartDate", "2027-01-01")
+    login.wait_for_element_clickable('input[name="dispersionEndDate"]')
+    _fill_date(login, "dispersionEndDate", "2027-12-31")
+    login.choose_file('input[type="file"]', amount_file)
+    login.click('[data-cy="button-submit"]')
+    login.wait_for_text("Payment Plan Created")
+
+    # Back on the source group the action is still offered, because two beneficiaries are free.
+    _open_group_of(login, business_area, source)
+    login.wait_for_element_clickable('[data-cy="button-create-topup"]').click()
+    login.wait_for_element_visible('input[name="dispersionStartDate"]')
+    _fill_date(login, "dispersionStartDate", "2027-01-01")
+    login.wait_for_element_clickable('input[name="dispersionEndDate"]')
+    _fill_date(login, "dispersionEndDate", "2027-12-31")
+    _fill_fixed_amount(login, "15")
+    login.click('[data-cy="button-submit"]')
+    login.wait_for_text("Payment Plan Created")
+
+    first, second = PaymentList.objects.filter(
+        source_payment_list=source, plan_type=PaymentList.PlanType.TOP_UP
+    ).order_by("created_at")
+    assert first.payment_items.count() == 1
+    assert second.payment_items.count() == 2
+    assert not set(first.payment_items.values_list("household_id", flat=True)) & set(
+        second.payment_items.values_list("household_id", flat=True)
+    )
+    assert source.eligible_payments_for_top_up().count() == 0
+
+
+@pytest.fixture
+def topup_plan_with_failed_payments(topup_program: Program, topup_eligible_plan: PaymentList) -> PaymentList:
+    """A Finished Top-Up whose own payments failed — the raw material for a Follow-Up."""
+    top_up = _create_source_plan(
+        topup_program,
+        payment_statuses=[Payment.STATUS_ERROR] * 2,
+        plan_status=PaymentList.Status.FINISHED,
+    )
+    top_up.plan_type = PaymentList.PlanType.TOP_UP
+    top_up.source_payment_list = topup_eligible_plan
+    top_up.save(update_fields=["plan_type", "source_payment_list"])
+    top_up_group = top_up.payment_plan
+    top_up_group.plan_type = PaymentList.PlanType.TOP_UP
+    top_up_group.source_payment_plan = topup_eligible_plan.payment_plan
+    top_up_group.save(update_fields=["plan_type", "source_payment_plan"])
+    return top_up
+
+
+def test_create_follow_up_from_top_up_with_failed_payments(
+    login: HopeTestBrowser,
+    business_area: BusinessArea,
+    topup_program: Program,
+    topup_plan_with_failed_payments: PaymentList,
+) -> None:
+    """A Top-Up is an ordinary plan for Follow-Up purposes: its failures can be retried."""
+    source = topup_plan_with_failed_payments
+
+    _open_group_of(login, business_area, source)
+    login.wait_for_element_clickable('[data-cy="button-create-followup"]').click()
+
+    login.wait_for_element_visible('input[name="dispersionStartDate"]')
+    _fill_date(login, "dispersionStartDate", "2027-01-01")
+    login.wait_for_element_clickable('input[name="dispersionEndDate"]')
+    _fill_date(login, "dispersionEndDate", "2027-12-31")
+    login.click('[data-cy="button-submit"]')
+
+    login.wait_for_text("Payment Plan Created")
+    follow_up = PaymentList.objects.get(source_payment_list=source, plan_type=PaymentList.PlanType.FOLLOW_UP)
+    assert follow_up.payment_items.count() == 2
+
+
+def test_create_top_up_amendment_with_amount_file(
+    login: HopeTestBrowser,
+    business_area: BusinessArea,
+    topup_program: Program,
+    topup_plan_with_pending_payments: PaymentList,
+    pending_top_up_amount_file: str,
+) -> None:
+    """The Amendment upload goes out through its own generated client, so it is worth its own run."""
+    source = topup_plan_with_pending_payments
+    amount_file = pending_top_up_amount_file
+
+    _open_group_of(login, business_area, source)
+    login.wait_for_element_clickable('[data-cy="button-create-amendment"]').click()
+
+    login.wait_for_element_visible('input[name="dispersionStartDate"]')
+    _fill_date(login, "dispersionStartDate", "2027-01-01")
+    login.wait_for_element_clickable('input[name="dispersionEndDate"]')
+    _fill_date(login, "dispersionEndDate", "2027-12-31")
+    login.choose_file('input[type="file"]', amount_file)
+    login.wait_for_text("New Top-Up Amendment will be created for 1 payment", '[data-cy="top-up-funded-rows"]')
+    login.click('[data-cy="button-submit"]')
+
+    login.wait_for_text("Payment Plan Created")
+    amendment = PaymentList.objects.get(source_payment_list=source, plan_type=PaymentList.PlanType.TOP_UP_AMENDMENT)
+    assert amendment.payment_items.count() == 1
+    assert amendment.payment_items.first().entitlement_quantity == Decimal("40.00")
+    assert source.eligible_payments_for_top_up_amendment().count() == 1

@@ -110,25 +110,25 @@ class ProgramCycle(AdminUrlMixin, TimeStampedUUIDModel, UnicefIdentifiedModel, C
 
     @property
     def can_remove_cycle(self) -> bool:
-        return not self.payment_plans.exists() and self.program.cycles.count() > 1 and self.status == ProgramCycle.DRAFT
+        return not self.payment_lists.exists() and self.program.cycles.count() > 1 and self.status == ProgramCycle.DRAFT
 
     @property
     def total_entitled_quantity_usd(self) -> Decimal:
-        total_entitled_usd = self.payment_plans.aggregate(total_entitled_usd=Sum("total_entitled_quantity_usd"))[
+        total_entitled_usd = self.payment_lists.aggregate(total_entitled_usd=Sum("total_entitled_quantity_usd"))[
             "total_entitled_usd"
         ]
         return total_entitled_usd or Decimal(0.0)
 
     @property
     def total_undelivered_quantity_usd(self) -> Decimal:
-        total_undelivered_usd = self.payment_plans.aggregate(
+        total_undelivered_usd = self.payment_lists.aggregate(
             total_undelivered_usd=Sum("total_undelivered_quantity_usd")
         )["total_undelivered_usd"]
         return total_undelivered_usd or Decimal(0.0)
 
     @property
     def total_delivered_quantity_usd(self) -> Decimal:
-        total_delivered_usd = self.payment_plans.aggregate(total_delivered_usd=Sum("total_delivered_quantity_usd"))[
+        total_delivered_usd = self.payment_lists.aggregate(total_delivered_usd=Sum("total_delivered_quantity_usd"))[
             "total_delivered_usd"
         ]
         return total_delivered_usd or Decimal(0.0)
@@ -150,19 +150,19 @@ class ProgramCycle(AdminUrlMixin, TimeStampedUUIDModel, UnicefIdentifiedModel, C
         if self.program.status != Program.ACTIVE:
             raise DRFValidationError("Program should be within Active status.")
 
-    def validate_payment_plan_status(self) -> None:
+    def validate_payment_list_status(self) -> None:
         """Validate status for Finishing Cycle."""
-        from hope.models.payment_plan import PaymentPlan
+        from hope.models.payment_list import PaymentList
 
         if (
-            PaymentPlan.objects.filter(program_cycle=self)
+            PaymentList.objects.filter(program_cycle=self)
             .exclude(
-                status__in=PaymentPlan.PRE_PAYMENT_PLAN_STATUSES
-                + (PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED),
+                status__in=PaymentList.PRE_PAYMENT_LIST_STATUSES
+                + (PaymentList.Status.ACCEPTED, PaymentList.Status.FINISHED),
             )
             .exists()
         ):
-            raise DRFValidationError("All Payment Plans and Follow-Up Payment Plans have to be Reconciled.")
+            raise DRFValidationError("All Payment Lists and Follow-Up Payment Lists have to be Reconciled.")
 
     def set_active(self) -> None:
         self.validate_program_active_status()
@@ -178,7 +178,7 @@ class ProgramCycle(AdminUrlMixin, TimeStampedUUIDModel, UnicefIdentifiedModel, C
 
     def set_finish(self) -> None:
         self.validate_program_active_status()
-        self.validate_payment_plan_status()
+        self.validate_payment_list_status()
         if self.status == ProgramCycle.ACTIVE:
             self.status = ProgramCycle.FINISHED
             self.save()

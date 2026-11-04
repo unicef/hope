@@ -1,8 +1,8 @@
 import { useTranslation } from 'react-i18next';
 import withErrorBoundary from '@components/core/withErrorBoundary';
-import { PaymentPlansFilters } from '@containers/pages/paymentmodule/ProgramCycle/ProgramCycleDetails/PaymentPlansFilters';
-import { PaymentPlansTable } from '@containers/pages/paymentmodule/ProgramCycle/ProgramCycleDetails/PaymentPlansTable';
-import { PaymentPlanGroupsTable } from '@containers/pages/paymentmodule/Groups/PaymentPlanGroupsTable';
+import { PaymentListsFilters } from '@containers/pages/paymentmodule/ProgramCycle/ProgramCycleDetails/PaymentListsFilters';
+import { PaymentListsTable } from '@containers/pages/paymentmodule/ProgramCycle/ProgramCycleDetails/PaymentListsTable';
+import { PaymentPlansTable } from '@containers/pages/paymentmodule/PaymentPlans/PaymentPlansTable';
 import { ProgramCycleDetailsHeader } from '@containers/pages/paymentmodule/ProgramCycle/ProgramCycleDetails/ProgramCycleDetailsHeader';
 import { ProgramCycleDetailsSection } from '@containers/pages/paymentmodule/ProgramCycle/ProgramCycleDetails/ProgramCycleDetailsSection';
 import { TableWrapper } from '@core/TableWrapper';
@@ -71,18 +71,15 @@ export const ProgramCycleDetailsPage = (): ReactElement => {
     <>
       <ProgramCycleDetailsHeader programCycle={data} />
       <ProgramCycleDetailsSection programCycle={data} />
-      {hasPermissions(
-        PERMISSIONS.PM_PAYMENT_PLAN_GROUP_VIEW_LIST,
-        permissions,
-      ) && (
+      {hasPermissions(PERMISSIONS.PM_PAYMENT_PLAN_VIEW_LIST, permissions) && (
         <TableWrapper>
-          <PaymentPlanGroupsTable filter={{ cycle: data.id }} />
+          <PaymentPlansTable filter={{ cycle: data.id }} />
         </TableWrapper>
       )}
       {hasPermissions(PERMISSIONS.PM_VIEW_LIST, permissions) && (
         <>
           <TableWrapper>
-            <PaymentPlansFilters
+            <PaymentListsFilters
               filter={filter}
               setFilter={setFilter}
               initialFilter={initialFilter}
@@ -95,9 +92,9 @@ export const ProgramCycleDetailsPage = (): ReactElement => {
           </TableWrapper>
           <div ref={tableRef}>
             <TableWrapper>
-              <PaymentPlansTable
+              <PaymentListsTable
                 programCycle={data}
-                title={t('Payment Plan Components')}
+                title={t('Payment Lists')}
                 filter={appliedFilter}
                 canViewDetails={hasPermissions(
                   PERMISSIONS.PM_VIEW_DETAILS,

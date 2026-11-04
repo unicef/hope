@@ -7,7 +7,7 @@ from unit.api_contract._helpers import HopeRecorder
 from extras.test_utils.factories.account import RoleAssignmentFactory, RoleFactory, UserFactory
 from extras.test_utils.factories.core import BusinessAreaFactory
 from extras.test_utils.factories.household import HouseholdFactory, IndividualRoleInHouseholdFactory
-from extras.test_utils.factories.payment import PaymentFactory, PaymentPlanFactory
+from extras.test_utils.factories.payment import PaymentFactory, PaymentListFactory
 from extras.test_utils.factories.program import ProgramFactory
 
 pytestmark = pytest.mark.django_db
@@ -43,9 +43,9 @@ def role_assignment(request, db, superuser, business_area, role):
 
 
 @frozenfixture()
-def payment_plan(request, db, business_area, program, superuser):
+def payment_list(request, db, business_area, program, superuser):
     cycle = program.cycles.first()
-    return PaymentPlanFactory(business_area=business_area, program_cycle=cycle, created_by=superuser)
+    return PaymentListFactory(business_area=business_area, program_cycle=cycle, created_by=superuser)
 
 
 @frozenfixture()
@@ -64,15 +64,15 @@ def household_role(request, db, household):
 
 
 @frozenfixture()
-def payment(request, db, payment_plan, household, household_role):
-    return PaymentFactory(parent=payment_plan, household=household, collector=household.head_of_household)
+def payment(request, db, payment_list, household, household_role):
+    return PaymentFactory(parent=payment_list, household=household, collector=household.head_of_household)
 
 
 def test_list_payments(superuser, business_area, program, role_assignment, payment):
     recorder = HopeRecorder(DATA_DIR, as_user=superuser)
     recorder.assertGET(
         f"/api/rest/business-areas/{business_area.slug}/programs/{program.code}"
-        f"/payment-plans/{payment.parent.pk}/payments/"
+        f"/payment-lists/{payment.parent.pk}/payments/"
     )
 
 
@@ -80,5 +80,5 @@ def test_retrieve_payment(superuser, business_area, program, role_assignment, pa
     recorder = HopeRecorder(DATA_DIR, as_user=superuser)
     recorder.assertGET(
         f"/api/rest/business-areas/{business_area.slug}/programs/{program.code}"
-        f"/payment-plans/{payment.parent.pk}/payments/{payment.pk}/"
+        f"/payment-lists/{payment.parent.pk}/payments/{payment.pk}/"
     )

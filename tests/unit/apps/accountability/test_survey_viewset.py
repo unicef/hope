@@ -16,7 +16,7 @@ from extras.test_utils.factories import (
     IndividualFactory,
     PartnerFactory,
     PaymentFactory,
-    PaymentPlanFactory,
+    PaymentListFactory,
     ProgramFactory,
     RegistrationDataImportFactory,
     SurveyFactory,
@@ -25,7 +25,7 @@ from extras.test_utils.factories import (
 from hope.apps.account.permissions import Permissions
 from hope.apps.accountability.api.serializers import SurveySerializer
 from hope.apps.core.services.rapid_pro.api import TokenNotProvidedError
-from hope.models import PaymentPlan, Program, Survey
+from hope.models import PaymentList, Program, Survey
 
 pytestmark = pytest.mark.django_db
 
@@ -87,9 +87,9 @@ def household_1(program_active, business_area):
 
 
 @pytest.fixture
-def payment_plan(user, business_area, program_active):
-    return PaymentPlanFactory(
-        status=PaymentPlan.Status.TP_LOCKED,
+def payment_list(user, business_area, program_active):
+    return PaymentListFactory(
+        status=PaymentList.Status.TP_LOCKED,
         created_by=user,
         business_area=business_area,
         program_cycle=program_active.cycles.first(),
@@ -97,9 +97,9 @@ def payment_plan(user, business_area, program_active):
 
 
 @pytest.fixture
-def payment(payment_plan, program_active, household_1, business_area):
+def payment(payment_list, program_active, household_1, business_area):
     return PaymentFactory(
-        parent=payment_plan,
+        parent=payment_list,
         program=program_active,
         household=household_1,
         business_area=business_area,
@@ -108,7 +108,7 @@ def payment(payment_plan, program_active, household_1, business_area):
 
 
 @pytest.fixture
-def srv(program_active, business_area, user, payment_plan):
+def srv(program_active, business_area, user, payment_list):
     return SurveyFactory(
         program=program_active,
         business_area=business_area,
@@ -120,12 +120,12 @@ def srv(program_active, business_area, user, payment_plan):
         sample_file_generated_at=None,
         sampling_type=Survey.SAMPLING_FULL_LIST,
         category=Survey.CATEGORY_SMS,
-        payment_plan=payment_plan,
+        payment_list=payment_list,
     )
 
 
 @pytest.fixture
-def srv_2(program_active, business_area, user_creator, payment_plan):
+def srv_2(program_active, business_area, user_creator, payment_list):
     return SurveyFactory(
         program=program_active,
         business_area=business_area,
@@ -137,12 +137,12 @@ def srv_2(program_active, business_area, user_creator, payment_plan):
         sample_file_generated_at=None,
         sampling_type=Survey.SAMPLING_RANDOM,
         category=Survey.CATEGORY_MANUAL,
-        payment_plan=payment_plan,
+        payment_list=payment_list,
     )
 
 
 @pytest.fixture
-def srv_created_2021(program_active, business_area, user, payment_plan):
+def srv_created_2021(program_active, business_area, user, payment_list):
     srv = SurveyFactory(
         program=program_active,
         business_area=business_area,
@@ -152,7 +152,7 @@ def srv_created_2021(program_active, business_area, user, payment_plan):
         flow_id="id2021",
         sampling_type=Survey.SAMPLING_FULL_LIST,
         category=Survey.CATEGORY_SMS,
-        payment_plan=payment_plan,
+        payment_list=payment_list,
     )
     srv.created_at = timezone.make_aware(datetime.datetime(year=2021, month=3, day=12))
     srv.save()
@@ -160,7 +160,7 @@ def srv_created_2021(program_active, business_area, user, payment_plan):
 
 
 @pytest.fixture
-def srv_created_2020(program_active, business_area, user_creator, payment_plan):
+def srv_created_2020(program_active, business_area, user_creator, payment_list):
     srv = SurveyFactory(
         program=program_active,
         business_area=business_area,
@@ -170,7 +170,7 @@ def srv_created_2020(program_active, business_area, user_creator, payment_plan):
         flow_id="id2020",
         sampling_type=Survey.SAMPLING_RANDOM,
         category=Survey.CATEGORY_MANUAL,
-        payment_plan=payment_plan,
+        payment_list=payment_list,
     )
     srv.created_at = timezone.make_aware(datetime.datetime(year=2020, month=5, day=15))
     srv.save()
@@ -262,9 +262,9 @@ def hh_empty_phone(program_active, business_area, rdi_for_phone_tests, hoh_empty
 
 
 @pytest.fixture
-def payment_empty_phone(payment_plan, program_active, business_area, hh_empty_phone, hoh_empty_phone):
+def payment_empty_phone(payment_list, program_active, business_area, hh_empty_phone, hoh_empty_phone):
     return PaymentFactory(
-        parent=payment_plan,
+        parent=payment_list,
         program=program_active,
         household=hh_empty_phone,
         business_area=business_area,
@@ -295,9 +295,9 @@ def hh_invalid_phone(program_active, business_area, rdi_for_phone_tests, hoh_inv
 
 
 @pytest.fixture
-def payment_invalid_phone(payment_plan, program_active, business_area, hh_invalid_phone, hoh_invalid_phone):
+def payment_invalid_phone(payment_list, program_active, business_area, hh_invalid_phone, hoh_invalid_phone):
     return PaymentFactory(
-        parent=payment_plan,
+        parent=payment_list,
         program=program_active,
         household=hh_invalid_phone,
         business_area=business_area,
@@ -328,9 +328,9 @@ def hh_valid_phone(program_active, business_area, rdi_for_phone_tests, hoh_valid
 
 
 @pytest.fixture
-def payment_valid_phone(payment_plan, program_active, business_area, hh_valid_phone, hoh_valid_phone):
+def payment_valid_phone(payment_list, program_active, business_area, hh_valid_phone, hoh_valid_phone):
     return PaymentFactory(
-        parent=payment_plan,
+        parent=payment_list,
         program=program_active,
         household=hh_valid_phone,
         business_area=business_area,
@@ -361,9 +361,9 @@ def hh_valid_phone2(program_active, business_area, rdi_for_phone_tests, hoh_vali
 
 
 @pytest.fixture
-def payment_valid_phone2(payment_plan, program_active, business_area, hh_valid_phone2, hoh_valid_phone2):
+def payment_valid_phone2(payment_list, program_active, business_area, hh_valid_phone2, hoh_valid_phone2):
     return PaymentFactory(
-        parent=payment_plan,
+        parent=payment_list,
         program=program_active,
         household=hh_valid_phone2,
         business_area=business_area,
@@ -372,9 +372,9 @@ def payment_valid_phone2(payment_plan, program_active, business_area, hh_valid_p
 
 
 @pytest.fixture
-def payment_plan_all_invalid(user, business_area, program_active):
-    return PaymentPlanFactory(
-        status=PaymentPlan.Status.TP_LOCKED,
+def payment_list_all_invalid(user, business_area, program_active):
+    return PaymentListFactory(
+        status=PaymentList.Status.TP_LOCKED,
         created_by=user,
         business_area=business_area,
         program_cycle=program_active.cycles.first(),
@@ -409,9 +409,9 @@ def hh_invalid_1(program_active, business_area, rdi_for_invalid_tests, hoh_inval
 
 
 @pytest.fixture
-def payment_invalid_1(payment_plan_all_invalid, program_active, business_area, hh_invalid_1, hoh_invalid_1):
+def payment_invalid_1(payment_list_all_invalid, program_active, business_area, hh_invalid_1, hoh_invalid_1):
     return PaymentFactory(
-        parent=payment_plan_all_invalid,
+        parent=payment_list_all_invalid,
         program=program_active,
         household=hh_invalid_1,
         business_area=business_area,
@@ -442,9 +442,9 @@ def hh_invalid_2(program_active, business_area, rdi_for_invalid_tests, hoh_inval
 
 
 @pytest.fixture
-def payment_invalid_2(payment_plan_all_invalid, program_active, business_area, hh_invalid_2, hoh_invalid_2):
+def payment_invalid_2(payment_list_all_invalid, program_active, business_area, hh_invalid_2, hoh_invalid_2):
     return PaymentFactory(
-        parent=payment_plan_all_invalid,
+        parent=payment_list_all_invalid,
         program=program_active,
         household=hh_invalid_2,
         business_area=business_area,
@@ -453,9 +453,9 @@ def payment_invalid_2(payment_plan_all_invalid, program_active, business_area, h
 
 
 @pytest.fixture
-def payment_plan_mixed(user, business_area, program_active):
-    return PaymentPlanFactory(
-        status=PaymentPlan.Status.TP_LOCKED,
+def payment_list_mixed(user, business_area, program_active):
+    return PaymentListFactory(
+        status=PaymentList.Status.TP_LOCKED,
         created_by=user,
         business_area=business_area,
         program_cycle=program_active.cycles.first(),
@@ -490,9 +490,9 @@ def hh_valid_mixed(program_active, business_area, rdi_for_mixed_tests, hoh_valid
 
 
 @pytest.fixture
-def payment_valid_mixed(payment_plan_mixed, program_active, business_area, hh_valid_mixed, hoh_valid_mixed):
+def payment_valid_mixed(payment_list_mixed, program_active, business_area, hh_valid_mixed, hoh_valid_mixed):
     return PaymentFactory(
-        parent=payment_plan_mixed,
+        parent=payment_list_mixed,
         program=program_active,
         household=hh_valid_mixed,
         business_area=business_area,
@@ -523,9 +523,9 @@ def hh_invalid_mixed(program_active, business_area, rdi_for_mixed_tests, hoh_inv
 
 
 @pytest.fixture
-def payment_invalid_mixed(payment_plan_mixed, program_active, business_area, hh_invalid_mixed, hoh_invalid_mixed):
+def payment_invalid_mixed(payment_list_mixed, program_active, business_area, hh_invalid_mixed, hoh_invalid_mixed):
     return PaymentFactory(
-        parent=payment_plan_mixed,
+        parent=payment_list_mixed,
         program=program_active,
         household=hh_invalid_mixed,
         business_area=business_area,
@@ -534,9 +534,9 @@ def payment_invalid_mixed(payment_plan_mixed, program_active, business_area, hh_
 
 
 @pytest.fixture
-def payment_plan_creation_invalid(user, business_area, program_active):
-    return PaymentPlanFactory(
-        status=PaymentPlan.Status.TP_LOCKED,
+def payment_list_creation_invalid(user, business_area, program_active):
+    return PaymentListFactory(
+        status=PaymentList.Status.TP_LOCKED,
         created_by=user,
         business_area=business_area,
         program_cycle=program_active.cycles.first(),
@@ -567,10 +567,10 @@ def hh_creation_invalid(program_active, business_area, rdi_for_mixed_tests, hoh_
 
 @pytest.fixture
 def payment_creation_invalid(
-    payment_plan_creation_invalid, program_active, business_area, hh_creation_invalid, hoh_creation_invalid
+    payment_list_creation_invalid, program_active, business_area, hh_creation_invalid, hoh_creation_invalid
 ):
     return PaymentFactory(
-        parent=payment_plan_creation_invalid,
+        parent=payment_list_creation_invalid,
         program=program_active,
         household=hh_creation_invalid,
         business_area=business_area,
@@ -708,7 +708,7 @@ def test_create_survey_returns_created_with_permission(
     user,
     business_area,
     program_active,
-    payment_plan,
+    payment_list,
     payment,
     url_list,
 ) -> None:
@@ -723,7 +723,7 @@ def test_create_survey_returns_created_with_permission(
             "category": "MANUAL",
             "sampling_type": Survey.SAMPLING_FULL_LIST,
             "full_list_arguments": {"excluded_admin_areas": []},
-            "payment_plan": str(payment_plan.pk),
+            "payment_list": str(payment_list.pk),
         },
         format="json",
     )
@@ -734,13 +734,13 @@ def test_create_survey_returns_created_with_permission(
     assert resp_data["body"] == "LGTM"
 
 
-def test_create_survey_with_payment_plan(
+def test_create_survey_with_payment_list(
     create_user_role_with_permissions: Any,
     authenticated_client,
     user,
     business_area,
     program_active,
-    payment_plan,
+    payment_list,
     payment,
     url_list,
 ) -> None:
@@ -756,7 +756,7 @@ def test_create_survey_with_payment_plan(
             "sampling_type": Survey.SAMPLING_FULL_LIST,
             "full_list_arguments": {"excluded_admin_areas": []},
             "random_sampling_arguments": None,
-            "payment_plan": str(payment_plan.pk),
+            "payment_list": str(payment_list.pk),
         },
         format="json",
     )
@@ -764,12 +764,12 @@ def test_create_survey_with_payment_plan(
     resp_data = response.json()
     assert "id" in resp_data
     assert resp_data["title"] == "New SRV with TP"
-    assert Survey.objects.get(title="New SRV with TP").payment_plan_id == payment_plan.pk
+    assert Survey.objects.get(title="New SRV with TP").payment_list_id == payment_list.pk
 
 
 def test_create_survey_returns_403_without_permission(
     authenticated_client,
-    payment_plan,
+    payment_list,
     payment,
     url_list,
 ) -> None:
@@ -781,7 +781,7 @@ def test_create_survey_returns_403_without_permission(
             "category": "MANUAL",
             "sampling_type": Survey.SAMPLING_FULL_LIST,
             "full_list_arguments": {"excluded_admin_areas": []},
-            "payment_plan": str(payment_plan.pk),
+            "payment_list": str(payment_list.pk),
         },
         format="json",
     )
@@ -989,7 +989,7 @@ def test_sample_size(
     user,
     business_area,
     program_active,
-    payment_plan,
+    payment_list,
     payment,
 ) -> None:
     create_user_role_with_permissions(
@@ -1006,7 +1006,7 @@ def test_sample_size(
         },
     )
     data = {
-        "payment_plan": str(payment_plan.pk),
+        "payment_list": str(payment_list.pk),
         "sampling_type": Survey.SAMPLING_RANDOM,
         "random_sampling_arguments": {
             "age": {"max": 80, "min": 30},
@@ -1045,7 +1045,7 @@ def test_sample_size_with_excluded_recipients_phone_validation(
     user,
     business_area,
     program_active,
-    payment_plan,
+    payment_list,
     payment,
     payment_empty_phone,
     payment_invalid_phone,
@@ -1068,7 +1068,7 @@ def test_sample_size_with_excluded_recipients_phone_validation(
     )
 
     data = {
-        "payment_plan": str(payment_plan.pk),
+        "payment_list": str(payment_list.pk),
         "sampling_type": Survey.SAMPLING_FULL_LIST,
         "full_list_arguments": {"excluded_admin_areas": []},
     }
@@ -1088,7 +1088,7 @@ def test_sample_size_all_excluded_recipients(
     user,
     business_area,
     program_active,
-    payment_plan_all_invalid,
+    payment_list_all_invalid,
     payment_invalid_1,
     payment_invalid_2,
 ) -> None:
@@ -1108,7 +1108,7 @@ def test_sample_size_all_excluded_recipients(
     )
 
     data = {
-        "payment_plan": str(payment_plan_all_invalid.pk),
+        "payment_list": str(payment_list_all_invalid.pk),
         "sampling_type": Survey.SAMPLING_FULL_LIST,
         "full_list_arguments": {"excluded_admin_areas": []},
     }
@@ -1128,7 +1128,7 @@ def test_survey_creation_with_mixed_phone_validation(
     user,
     business_area,
     program_active,
-    payment_plan_mixed,
+    payment_list_mixed,
     payment_valid_mixed,
     payment_invalid_mixed,
     url_list,
@@ -1144,7 +1144,7 @@ def test_survey_creation_with_mixed_phone_validation(
         "title": "Test Survey with Mixed Recipients",
         "body": "Test survey body",
         "category": Survey.CATEGORY_SMS,
-        "payment_plan": str(payment_plan_mixed.pk),
+        "payment_list": str(payment_list_mixed.pk),
         "sampling_type": Survey.SAMPLING_FULL_LIST,
         "full_list_arguments": {"excluded_admin_areas": []},
     }
@@ -1164,7 +1164,7 @@ def test_survey_creation_fails_with_all_invalid_phones(
     user,
     business_area,
     program_active,
-    payment_plan_creation_invalid,
+    payment_list_creation_invalid,
     payment_creation_invalid,
     url_list,
 ) -> None:
@@ -1179,7 +1179,7 @@ def test_survey_creation_fails_with_all_invalid_phones(
         "title": "Test Survey All Invalid",
         "body": "Test survey body",
         "category": Survey.CATEGORY_SMS,
-        "payment_plan": str(payment_plan_creation_invalid.pk),
+        "payment_list": str(payment_list_creation_invalid.pk),
         "sampling_type": Survey.SAMPLING_FULL_LIST,
         "full_list_arguments": {"excluded_admin_areas": []},
     }

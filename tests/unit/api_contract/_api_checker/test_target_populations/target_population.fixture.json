@@ -1,7 +1,7 @@
 {
     "target_population": {
         "master": {
-            "model": "payment.paymentplan",
+            "model": "payment.paymentlist",
             "pk": "dc3a1c71-5942-47d6-ae45-7f10f562b9c4",
             "fields": {
                 "is_removed": false,
@@ -19,7 +19,7 @@
                 "steficon_rule": null,
                 "steficon_rule_targeting": null,
                 "created_by": "c2b655d9-3590-4ef5-8c8d-fa5baabb500c",
-                "source_payment_plan": null,
+                "source_payment_list": null,
                 "storage_file": null,
                 "name": null,
                 "start_date": null,
@@ -56,12 +56,12 @@
                 "is_cash_assist": false,
                 "flag_exclude_if_active_adjudication_ticket": false,
                 "flag_exclude_if_on_sanction_list": false,
-                "payment_plan_group": "251cfde4-439d-470e-905c-b25958ce0d5e"
+                "payment_plan": "251cfde4-439d-470e-905c-b25958ce0d5e"
             }
         },
         "deps": [
             {
-                "model": "payment.paymentplangroup",
+                "model": "payment.paymentplan",
                 "pk": "251cfde4-439d-470e-905c-b25958ce0d5e",
                 "fields": {
                     "created_at": "2025-01-01T00:00:00Z",

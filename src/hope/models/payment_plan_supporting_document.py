@@ -4,14 +4,19 @@ from django.db.models import Q
 
 
 class PaymentPlanSupportingDocument(models.Model):
-    """A file attached to a Payment Plan Group, or to a Follow-Up Instruction for its plans."""
+    """A file attached to a Payment Plan, or to a Follow-Up Instruction for its plans."""
 
-    FILE_LIMIT = 10  # max 10 files per group or instruction
+    FILE_LIMIT = 10  # max 10 files per payment plan or instruction
     FILE_SIZE_LIMIT = 10 * 1024 * 1024  # 10 MB
 
     title = models.CharField(max_length=255)
-    payment_plan_group = models.ForeignKey(
-        "payment.PaymentPlanGroup", on_delete=models.CASCADE, null=True, blank=True, related_name="documents"
+    payment_plan = models.ForeignKey(
+        "payment.PaymentPlan",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="documents",
+        db_column="payment_plan_group_id",
     )
     follow_up_instruction = models.ForeignKey(
         "payment.FollowUpInstruction", on_delete=models.CASCADE, null=True, blank=True, related_name="documents"
@@ -27,8 +32,8 @@ class PaymentPlanSupportingDocument(models.Model):
         ordering = ["uploaded_at"]
         constraints = [
             models.CheckConstraint(
-                condition=Q(payment_plan_group__isnull=False, follow_up_instruction__isnull=True)
-                | Q(payment_plan_group__isnull=True, follow_up_instruction__isnull=False),
+                condition=Q(payment_plan__isnull=False, follow_up_instruction__isnull=True)
+                | Q(payment_plan__isnull=True, follow_up_instruction__isnull=False),
                 name="supporting_document_has_one_owner",
             )
         ]

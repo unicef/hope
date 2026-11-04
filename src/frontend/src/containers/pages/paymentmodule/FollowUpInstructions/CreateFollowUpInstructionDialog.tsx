@@ -17,7 +17,7 @@ import {
 } from '@mui/material';
 import type { FollowUpInstructionCreate } from '@restgenerated/models/FollowUpInstructionCreate';
 import type { FollowUpInstructionDetail } from '@restgenerated/models/FollowUpInstructionDetail';
-import type { PaginatedPaymentPlanGroupListList } from '@restgenerated/models/PaginatedPaymentPlanGroupListList';
+import type { PaginatedPaymentPlanListList } from '@restgenerated/models/PaginatedPaymentPlanListList';
 import { RestService } from '@restgenerated/services/RestService';
 import { FormikDateField } from '@shared/Formik/FormikDateField';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -32,15 +32,15 @@ import { useNavigate } from 'react-router-dom';
 import * as Yup from 'yup';
 
 interface FormValues {
-  paymentPlanGroupIds: string[];
+  paymentPlanIds: string[];
   dispersionStartDate: string | null;
   dispersionEndDate: string | null;
 }
 
 const validationSchema = Yup.object({
-  paymentPlanGroupIds: Yup.array()
+  paymentPlanIds: Yup.array()
     .of(Yup.string())
-    .min(1, 'At least one group is required'),
+    .min(1, 'At least one payment plan is required'),
   dispersionStartDate: Yup.date()
     .nullable()
     .required('Dispersion Start Date is required'),
@@ -50,7 +50,7 @@ const validationSchema = Yup.object({
 });
 
 const initialValues: FormValues = {
-  paymentPlanGroupIds: [],
+  paymentPlanIds: [],
   dispersionStartDate: null,
   dispersionEndDate: null,
 };
@@ -63,24 +63,24 @@ export function CreateFollowUpInstructionDialog(): ReactElement {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
 
-  const groupsListParams = {
+  const paymentPlansListParams = {
     businessAreaSlug: businessArea,
     programCode: programId,
     limit: 200,
   };
-  const { data: groupsData } = useQuery<PaginatedPaymentPlanGroupListList>({
+  const { data: paymentPlansData } = useQuery<PaginatedPaymentPlanListList>({
     queryKey: restQueryKey(
-      RestService.restBusinessAreasProgramsPaymentPlanGroupsList,
-      groupsListParams,
+      RestService.restBusinessAreasProgramsPaymentPlansList,
+      paymentPlansListParams,
     ),
     queryFn: () =>
-      RestService.restBusinessAreasProgramsPaymentPlanGroupsList(
-        groupsListParams,
+      RestService.restBusinessAreasProgramsPaymentPlansList(
+        paymentPlansListParams,
       ),
     enabled: open && !!businessArea && !!programId,
   });
 
-  const groupOptions = (groupsData?.results ?? []).map((g) => ({
+  const paymentPlanOptions = (paymentPlansData?.results ?? []).map((g) => ({
     id: g.id,
     label: g.unicefId ?? g.name ?? g.id,
   }));
@@ -101,7 +101,7 @@ export function CreateFollowUpInstructionDialog(): ReactElement {
   const handleSubmit = async (values: FormValues): Promise<void> => {
     try {
       const body: FollowUpInstructionCreate = {
-        paymentPlanGroupIds: values.paymentPlanGroupIds,
+        paymentPlanIds: values.paymentPlanIds,
         dispersionStartDate: values.dispersionStartDate
           ? format(new Date(values.dispersionStartDate), 'yyyy-MM-dd')
           : '',
@@ -159,13 +159,13 @@ export function CreateFollowUpInstructionDialog(): ReactElement {
                   <Grid size={{ xs: 12 }}>
                     <Autocomplete
                       multiple
-                      options={groupOptions}
-                      value={groupOptions.filter((opt) =>
-                        values.paymentPlanGroupIds.includes(opt.id),
+                      options={paymentPlanOptions}
+                      value={paymentPlanOptions.filter((opt) =>
+                        values.paymentPlanIds.includes(opt.id),
                       )}
                       onChange={(_, selected) => {
                         setFieldValue(
-                          'paymentPlanGroupIds',
+                          'paymentPlanIds',
                           selected.map((s) => s.id),
                         );
                       }}
@@ -192,12 +192,12 @@ export function CreateFollowUpInstructionDialog(): ReactElement {
                           label={t('Payment Plans')}
                           required
                           error={
-                            touched.paymentPlanGroupIds &&
-                            Boolean(errors.paymentPlanGroupIds)
+                            touched.paymentPlanIds &&
+                            Boolean(errors.paymentPlanIds)
                           }
                           helperText={
-                            touched.paymentPlanGroupIds &&
-                            (errors.paymentPlanGroupIds as string)
+                            touched.paymentPlanIds &&
+                            (errors.paymentPlanIds as string)
                           }
                         />
                       )}

@@ -10,18 +10,18 @@ from hope.apps.payment.utils import get_number_of_samples
 from hope.models import PaymentVerificationPlan
 
 if TYPE_CHECKING:
-    from hope.models import Payment, PaymentPlan  # pragma: no cover
+    from hope.models import Payment, PaymentList  # pragma: no cover
 
 
 class Sampling:
     def __init__(
         self,
         input_data: dict,
-        payment_plan: "PaymentPlan",
+        payment_list: "PaymentList",
         payment_records: QuerySet["Payment"],
     ) -> None:
         self.input_data = input_data
-        self.payment_plan = payment_plan
+        self.payment_list = payment_list
         self.payment_records = payment_records
 
     def process_sampling(

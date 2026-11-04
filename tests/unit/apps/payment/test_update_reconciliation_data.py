@@ -13,15 +13,15 @@ from extras.test_utils.factories import (
     BusinessAreaFactory,
     HouseholdFactory,
     PaymentFactory,
+    PaymentListFactory,
     PaymentPlanFactory,
-    PaymentPlanGroupFactory,
     ProgramFactory,
     UserFactory,
 )
-from hope.apps.payment.xlsx.xlsx_payment_plan_delivery_import_service import (
-    XlsxPaymentPlanDeliveryImportService,
+from hope.apps.payment.xlsx.xlsx_payment_list_delivery_import_service import (
+    XlsxPaymentListDeliveryImportService,
 )
-from hope.models import Approval, Payment, PaymentPlan, Program
+from hope.models import Approval, Payment, PaymentList, Program
 
 pytestmark = pytest.mark.django_db
 
@@ -73,20 +73,20 @@ def program(business_area: Any) -> Program:
 
 
 @pytest.fixture
-def payment_plan_context(business_area: Any, user: Any, program: Program) -> dict[str, Any]:
+def payment_list_context(business_area: Any, user: Any, program: Program) -> dict[str, Any]:
     cycle = program.cycles.first()
-    group = PaymentPlanGroupFactory(
+    group = PaymentPlanFactory(
         cycle=cycle,
         dispersion_start_date=date(2020, 8, 10),
         dispersion_end_date=date(2020, 12, 10),
         exchange_rate=2.0,
     )
-    payment_plan = PaymentPlanFactory(
+    payment_list = PaymentListFactory(
         created_by=user,
         business_area=business_area,
         program_cycle=cycle,
-        payment_plan_group=group,
-        status=PaymentPlan.Status.ACCEPTED,
+        payment_plan=group,
+        status=PaymentList.Status.ACCEPTED,
     )
     payment_ids = [
         "RCPT-0060-24-0.000.001",
@@ -97,7 +97,7 @@ def payment_plan_context(business_area: Any, user: Any, program: Program) -> dic
     for unicef_id in payment_ids:
         household = HouseholdFactory(program=program, business_area=business_area)
         payment = PaymentFactory(
-            parent=payment_plan,
+            parent=payment_list,
             household=household,
             head_of_household=household.head_of_household,
             collector=household.head_of_household,
@@ -110,29 +110,29 @@ def payment_plan_context(business_area: Any, user: Any, program: Program) -> dic
         payments.append(payment)
 
     return {
-        "payment_plan": payment_plan,
+        "payment_list": payment_list,
         "payments": payments,
     }
 
 
 def test_equal_quantity_does_not_change_delivery_dates(
-    payment_plan_context: dict[str, Any],
+    payment_list_context: dict[str, Any],
     file_without_delivery_dates: BytesIO,
 ) -> None:
-    payment_1, payment_2, payment_3 = payment_plan_context["payments"]
+    payment_1, payment_2, payment_3 = payment_list_context["payments"]
     payment_1.delivery_date = None
     payment_1.save(update_fields=["delivery_date"])
     old_delivery_date2 = payment_2.delivery_date
     old_delivery_date3 = payment_3.delivery_date
     with (
-        patch("hope.models.payment_plan.PaymentPlan.get_exchange_rate", return_value=2.0),
+        patch("hope.models.payment_list.PaymentList.get_exchange_rate", return_value=2.0),
         patch(
-            "hope.apps.payment.xlsx.xlsx_payment_plan_delivery_import_service.timezone.now",
+            "hope.apps.payment.xlsx.xlsx_payment_list_delivery_import_service.timezone.now",
             return_value=datetime(2024, 11, 22).replace(tzinfo=UTC),
         ),
     ):
-        import_service = XlsxPaymentPlanDeliveryImportService(
-            payment_plan_context["payment_plan"],
+        import_service = XlsxPaymentListDeliveryImportService(
+            payment_list_context["payment_list"],
             file_without_delivery_dates,
         )
         import_service.open_workbook()
@@ -148,12 +148,12 @@ def test_equal_quantity_does_not_change_delivery_dates(
 
 
 def test_uploading_xlsx_file_with_existing_dates_throws_error(
-    payment_plan_context: dict[str, Any],
+    payment_list_context: dict[str, Any],
     file_with_existing_delivery_dates: BytesIO,
 ) -> None:
-    with patch("hope.models.payment_plan.PaymentPlan.get_exchange_rate", return_value=2.0):
-        import_service = XlsxPaymentPlanDeliveryImportService(
-            payment_plan_context["payment_plan"],
+    with patch("hope.models.payment_list.PaymentList.get_exchange_rate", return_value=2.0):
+        import_service = XlsxPaymentListDeliveryImportService(
+            payment_list_context["payment_list"],
             file_with_existing_delivery_dates,
         )
         import_service.open_workbook()
@@ -176,16 +176,16 @@ def test_uploading_xlsx_file_with_existing_dates_throws_error(
 
 
 def test_equal_quantity_does_not_override_payment_date(
-    payment_plan_context: dict[str, Any],
+    payment_list_context: dict[str, Any],
     file_one_record: BytesIO,
 ) -> None:
-    payment_1, payment_2, payment_3 = payment_plan_context["payments"]
+    payment_1, payment_2, payment_3 = payment_list_context["payments"]
 
     with (
-        patch("hope.models.payment_plan.PaymentPlan.get_exchange_rate", return_value=2.0),
+        patch("hope.models.payment_list.PaymentList.get_exchange_rate", return_value=2.0),
     ):
-        import_service = XlsxPaymentPlanDeliveryImportService(
-            payment_plan_context["payment_plan"],
+        import_service = XlsxPaymentListDeliveryImportService(
+            payment_list_context["payment_list"],
             file_one_record,
         )
         import_service.open_workbook()
@@ -208,20 +208,20 @@ def test_upload_reference_id(
     file_reference_id: BytesIO,
 ) -> None:
     cycle = program.cycles.first()
-    group = PaymentPlanGroupFactory(
+    group = PaymentPlanFactory(
         cycle=cycle,
         dispersion_start_date=date(2024, 2, 10),
         dispersion_end_date=date(2024, 12, 10),
         exchange_rate=2.0,
     )
-    payment_plan = PaymentPlanFactory(
-        status=PaymentPlan.Status.ACCEPTED,
+    payment_list = PaymentListFactory(
+        status=PaymentList.Status.ACCEPTED,
         business_area=business_area,
         program_cycle=cycle,
-        payment_plan_group=group,
+        payment_plan=group,
         created_by=user,
     )
-    approval_process = ApprovalProcessFactory(payment_plan=payment_plan)
+    approval_process = ApprovalProcessFactory(payment_list=payment_list)
     ApprovalFactory(
         approval_process=approval_process,
         type=Approval.FINANCE_RELEASE,
@@ -230,7 +230,7 @@ def test_upload_reference_id(
     )
 
     payment_1 = PaymentFactory(
-        parent=payment_plan,
+        parent=payment_list,
         entitlement_quantity=212,
         delivered_quantity=150,
         status=Payment.STATUS_DISTRIBUTION_PARTIAL,
@@ -239,7 +239,7 @@ def test_upload_reference_id(
     payment_1.save(update_fields=["unicef_id"])
 
     payment_2 = PaymentFactory(
-        parent=payment_plan,
+        parent=payment_list,
         entitlement_quantity=212,
         delivered_quantity=150,
         status=Payment.STATUS_DISTRIBUTION_PARTIAL,
@@ -247,8 +247,8 @@ def test_upload_reference_id(
     payment_2.unicef_id = "RCPT-0060-24-0.000.666"
     payment_2.save(update_fields=["unicef_id"])
 
-    with patch("hope.models.payment_plan.PaymentPlan.get_exchange_rate", return_value=2.0):
-        import_service = XlsxPaymentPlanDeliveryImportService(payment_plan, file_reference_id, override=True)
+    with patch("hope.models.payment_list.PaymentList.get_exchange_rate", return_value=2.0):
+        import_service = XlsxPaymentListDeliveryImportService(payment_list, file_reference_id, override=True)
         import_service.open_workbook()
         import_service.validate()
         import_service.import_payment_list()
@@ -267,20 +267,20 @@ def test_upload_transaction_status_blockchain_link(
     file_reference_id: BytesIO,
 ) -> None:
     cycle = program.cycles.first()
-    group = PaymentPlanGroupFactory(
+    group = PaymentPlanFactory(
         cycle=cycle,
         dispersion_start_date=date(2024, 2, 10),
         dispersion_end_date=date(2024, 12, 10),
         exchange_rate=1.0,
     )
-    payment_plan = PaymentPlanFactory(
-        status=PaymentPlan.Status.ACCEPTED,
+    payment_list = PaymentListFactory(
+        status=PaymentList.Status.ACCEPTED,
         business_area=business_area,
         program_cycle=cycle,
-        payment_plan_group=group,
+        payment_plan=group,
         created_by=user,
     )
-    approval_process = ApprovalProcessFactory(payment_plan=payment_plan)
+    approval_process = ApprovalProcessFactory(payment_list=payment_list)
     ApprovalFactory(
         approval_process=approval_process,
         type=Approval.FINANCE_RELEASE,
@@ -288,7 +288,7 @@ def test_upload_transaction_status_blockchain_link(
         created_at=datetime(2023, 5, 5).replace(tzinfo=UTC),
     )
     payment_1 = PaymentFactory(
-        parent=payment_plan,
+        parent=payment_list,
         entitlement_quantity=212,
         delivered_quantity=150,
         status=Payment.STATUS_DISTRIBUTION_PARTIAL,
@@ -297,7 +297,7 @@ def test_upload_transaction_status_blockchain_link(
     payment_1.save(update_fields=["unicef_id"])
 
     payment_2 = PaymentFactory(
-        parent=payment_plan,
+        parent=payment_list,
         entitlement_quantity=212,
         delivered_quantity=150,
         status=Payment.STATUS_DISTRIBUTION_PARTIAL,
@@ -305,8 +305,8 @@ def test_upload_transaction_status_blockchain_link(
     payment_2.unicef_id = "RCPT-0060-24-0.000.666"
     payment_2.save(update_fields=["unicef_id"])
 
-    with patch("hope.models.payment_plan.PaymentPlan.get_exchange_rate", return_value=1.0):
-        import_service = XlsxPaymentPlanDeliveryImportService(payment_plan, file_reference_id, override=True)
+    with patch("hope.models.payment_list.PaymentList.get_exchange_rate", return_value=1.0):
+        import_service = XlsxPaymentListDeliveryImportService(payment_list, file_reference_id, override=True)
         import_service.open_workbook()
         import_service.validate()
         import_service.import_payment_list()

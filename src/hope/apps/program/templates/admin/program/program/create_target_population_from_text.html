@@ -2,24 +2,24 @@
 {% block extrahead %}{{ block.super }}
 <script>
 (function () {
-  const groupsByCycle = {{ groups_by_cycle_json|safe }};
-  function updateGroups(cycleId) {
-    const sel = document.getElementById('id_payment_plan_group');
+  const paymentPlansByCycle = {{ payment_plans_by_cycle_json|safe }};
+  function updatePaymentPlans(cycleId) {
+    const sel = document.getElementById('id_payment_plan');
     if (!sel) return;
-    const groups = groupsByCycle[cycleId] || [];
+    const paymentPlans = paymentPlansByCycle[cycleId] || [];
     sel.innerHTML = '<option value="">---------</option>';
-    groups.forEach(function (g) {
+    paymentPlans.forEach(function (p) {
       const opt = document.createElement('option');
-      opt.value = g.id;
-      opt.textContent = g.name;
+      opt.value = p.id;
+      opt.textContent = p.name;
       sel.appendChild(opt);
     });
   }
   document.addEventListener('DOMContentLoaded', function () {
     const cycleSel = document.getElementById('id_program_cycle');
     if (!cycleSel) return;
-    updateGroups(cycleSel.value);
-    cycleSel.addEventListener('change', function () { updateGroups(this.value); });
+    updatePaymentPlans(cycleSel.value);
+    cycleSel.addEventListener('change', function () { updatePaymentPlans(this.value); });
   });
 })();
 </script>

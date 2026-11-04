@@ -43,8 +43,8 @@ class FollowUpInstruction(TimeStampedUUIDModel, UnicefIdentifiedModel, Concurren
         ABORTED = "ABORTED"
 
     class BackgroundActionStatus(models.TextChoices):
-        RECALCULATING = "RECALCULATING", "Recalculating Payment Plan data"
-        RECALCULATING_ERROR = "RECALCULATING_ERROR", "Payment Plan recalculation error"
+        RECALCULATING = "RECALCULATING", "Recalculating Payment List data"
+        RECALCULATING_ERROR = "RECALCULATING_ERROR", "Payment List recalculation error"
         XLSX_EXPORTING = "XLSX_EXPORTING", "Exporting XLSX"
         XLSX_IMPORTING_RECONCILIATION = "XLSX_IMPORTING_RECONCILIATION", "Importing Reconciliation from XLSX"
         XLSX_EXPORT_ERROR = "XLSX_EXPORT_ERROR", "Error while exporting XLSX"
@@ -95,7 +95,7 @@ class FollowUpInstruction(TimeStampedUUIDModel, UnicefIdentifiedModel, Concurren
     dispersion_end_date = models.DateField(blank=True, null=True, help_text="Dispersion End Date")
     use_payment_gateway = models.BooleanField(
         default=False,
-        help_text="Send the payment plans through the payment gateway regardless of the FSP communication channel",
+        help_text="Send the payment lists through the payment gateway regardless of the FSP communication channel",
     )
     exchange_rate = models.DecimalField(
         decimal_places=8, blank=True, null=True, max_digits=15, help_text="Exchange Rate [sys]"
@@ -171,7 +171,7 @@ class FollowUpInstruction(TimeStampedUUIDModel, UnicefIdentifiedModel, Concurren
     @property
     def status(self) -> str | None:
         # Proxy status: return the earliest workflow stage still present among child payment plans.
-        statuses = list(self.payment_plans.values_list("status", flat=True))
+        statuses = list(self.payment_lists.values_list("status", flat=True))
         if not statuses:
             return None
         for candidate in self.STATUS_PRECEDENCE:
@@ -190,7 +190,7 @@ class FollowUpInstruction(TimeStampedUUIDModel, UnicefIdentifiedModel, Concurren
 
     @property
     def total_entitled_quantity_usd(self) -> Decimal:
-        return self.payment_plans.aggregate(total=Coalesce(Sum("total_entitled_quantity_usd"), Decimal(0)))["total"]
+        return self.payment_lists.aggregate(total=Coalesce(Sum("total_entitled_quantity_usd"), Decimal(0)))["total"]
 
     @cached_property
     def acceptance_process_threshold(self) -> "AcceptanceProcessThreshold | None":
@@ -235,7 +235,7 @@ class FollowUpInstruction(TimeStampedUUIDModel, UnicefIdentifiedModel, Concurren
     def payments_summary(self) -> dict[str, Any]:
         payments = Payment.objects.filter(parent__follow_up_instruction=self).eligible()
         summary = payments.aggregate(
-            child_payment_plans_count=Count("parent_id", distinct=True),
+            child_payment_lists_count=Count("parent_id", distinct=True),
             households_count=Count("household_id", distinct=True),
             total_entitled_quantity=Sum("entitlement_quantity"),
             total_entitled_quantity_usd=Sum("entitlement_quantity_usd"),
@@ -247,7 +247,7 @@ class FollowUpInstruction(TimeStampedUUIDModel, UnicefIdentifiedModel, Concurren
         total_delivered_quantity = summary["total_delivered_quantity"] or Decimal(0)
         total_delivered_quantity_usd = summary["total_delivered_quantity_usd"] or Decimal(0)
         return {
-            "child_payment_plans_count": summary["child_payment_plans_count"] or 0,
+            "child_payment_lists_count": summary["child_payment_lists_count"] or 0,
             "households_count": summary["households_count"] or 0,
             "total_entitled_quantity": total_entitled_quantity,
             "total_entitled_quantity_usd": total_entitled_quantity_usd,

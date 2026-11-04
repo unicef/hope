@@ -16,9 +16,9 @@ from extras.test_utils.factories.payment import (
     FinancialServiceProviderFactory,
     FollowUpInstructionFactory,
     PaymentFactory,
+    PaymentListFactory,
+    PaymentListSplitFactory,
     PaymentPlanFactory,
-    PaymentPlanGroupFactory,
-    PaymentPlanSplitFactory,
 )
 from extras.test_utils.factories.program import ProgramCycleFactory
 from hope.apps.core.celery_tasks import async_retry_job_task
@@ -36,7 +36,7 @@ from hope.apps.payment.services.payment_gateway import (
     PaymentRecordData,
     PaymentSerializer,
 )
-from hope.apps.payment.services.payment_household_snapshot_service import create_payment_plan_snapshot_data
+from hope.apps.payment.services.payment_household_snapshot_service import create_payment_list_snapshot_data
 from hope.models import (
     AsyncRetryJob,
     DeliveryMechanism,
@@ -48,9 +48,9 @@ from hope.models import (
     LogEntry,
     Payment,
     PaymentHouseholdSnapshot,
+    PaymentList,
+    PaymentListSplit,
     PaymentPlan,
-    PaymentPlanGroup,
-    PaymentPlanSplit,
     PeriodicAsyncRetryJob,
 )
 from hope.models.utils import MergeStatusModel
@@ -169,35 +169,35 @@ def uba_fsp():
 
 
 @pytest.fixture
-def payment_plan(user, program_cycle, pg_fsp, delivery_mechanisms, currency_usd):
-    group = PaymentPlanGroupFactory(
+def payment_list(user, program_cycle, pg_fsp, delivery_mechanisms, currency_usd):
+    group = PaymentPlanFactory(
         cycle=program_cycle,
-        status=PaymentPlanGroup.Status.ACCEPTED,
+        status=PaymentPlan.Status.ACCEPTED,
         financial_service_provider=pg_fsp,
         currency=currency_usd,
         exchange_rate=Decimal("2.0"),
     )
-    return PaymentPlanFactory(
-        status=PaymentPlan.Status.ACCEPTED,
+    return PaymentListFactory(
+        status=PaymentList.Status.ACCEPTED,
         created_by=user,
-        payment_plan_group=group,
+        payment_plan=group,
         delivery_mechanism=delivery_mechanisms["cash_over_the_counter"],
         program_cycle=program_cycle,
     )
 
 
 @pytest.fixture
-def payment_plan_splits(payment_plan):
-    split_1 = PaymentPlanSplitFactory(
-        payment_plan=payment_plan,
-        split_type=PaymentPlanSplit.SplitType.BY_COLLECTOR,
+def payment_list_splits(payment_list):
+    split_1 = PaymentListSplitFactory(
+        payment_list=payment_list,
+        split_type=PaymentListSplit.SplitType.BY_COLLECTOR,
         chunks_no=1,
         order=0,
         sent_to_payment_gateway=False,
     )
-    split_2 = PaymentPlanSplitFactory(
-        payment_plan=payment_plan,
-        split_type=PaymentPlanSplit.SplitType.BY_COLLECTOR,
+    split_2 = PaymentListSplitFactory(
+        payment_list=payment_list,
+        split_type=PaymentListSplit.SplitType.BY_COLLECTOR,
         chunks_no=1,
         order=1,
         sent_to_payment_gateway=False,
@@ -236,19 +236,19 @@ def collectors_and_households(program_cycle):
 
 @pytest.fixture
 def payment_gateway_setup(
-    payment_plan,
-    payment_plan_splits,
+    payment_list,
+    payment_list_splits,
     collectors_and_households,
     delivery_mechanisms,
     pg_fsp,
 ):
-    split_1, split_2 = payment_plan_splits
+    split_1, split_2 = payment_list_splits
     collector_1, collector_2 = collectors_and_households["collectors"]
     household_1, household_2 = collectors_and_households["households"]
 
     payments = [
         PaymentFactory(
-            parent=payment_plan,
+            parent=payment_list,
             parent_split=split_2,
             household=household_2,
             status=Payment.STATUS_PENDING,
@@ -262,7 +262,7 @@ def payment_gateway_setup(
             entitlement_quantity_usd=Decimal("50.00"),
         ),
         PaymentFactory(
-            parent=payment_plan,
+            parent=payment_list,
             parent_split=split_1,
             household=household_1,
             status=Payment.STATUS_PENDING,
@@ -277,13 +277,13 @@ def payment_gateway_setup(
         ),
     ]
 
-    create_payment_plan_snapshot_data(payment_plan)
+    create_payment_list_snapshot_data(payment_list)
     for payment in payments:
         payment.refresh_from_db()
 
     return {
-        "payment_plan": payment_plan,
-        "splits": payment_plan_splits,
+        "payment_list": payment_list,
+        "splits": payment_list_splits,
         "payments": payments,
         "fsp": pg_fsp,
         "delivery_mechanisms": delivery_mechanisms,
@@ -311,7 +311,7 @@ def unmatched_payment_gateway_record():
 def error_records_by_payment_instruction(payment_gateway_setup):
     split_1, split_2 = payment_gateway_setup["splits"]
     payment_1, payment_2 = payment_gateway_setup["payments"]
-    PaymentPlanSplit.objects.filter(pk__in=[split_1.pk, split_2.pk]).update(sent_to_payment_gateway=True)
+    PaymentListSplit.objects.filter(pk__in=[split_1.pk, split_2.pk]).update(sent_to_payment_gateway=True)
     return {
         split_1.id: [
             PaymentRecordData(
@@ -350,9 +350,9 @@ def error_records_by_payment_instruction(payment_gateway_setup):
 def payment_gateway_setup_with_unsent_pending_payment(payment_gateway_setup):
     split_1, _ = payment_gateway_setup["splits"]
     payment_1, payment_2 = payment_gateway_setup["payments"]
-    PaymentPlanSplit.objects.filter(pk=split_1.pk).update(sent_to_payment_gateway=True)
+    PaymentListSplit.objects.filter(pk=split_1.pk).update(sent_to_payment_gateway=True)
     return {
-        "payment_plan": payment_gateway_setup["payment_plan"],
+        "payment_list": payment_gateway_setup["payment_list"],
         "sent_split": split_1,
         "unsent_payment": payment_1,
         "sent_payment": payment_2,
@@ -377,10 +377,10 @@ def payment_gateway_setup_with_unsent_pending_payment(payment_gateway_setup):
 @pytest.fixture
 def payment_gateway_setup_in_inactive_currency(payment_gateway_setup, currency_syp_deprecated):
     """The plan's group and its payments priced in a currency deactivated after they were created."""
-    payment_plan = payment_gateway_setup["payment_plan"]
-    PaymentPlanGroup.objects.filter(pk=payment_plan.payment_plan_group_id).update(currency=currency_syp_deprecated)
-    Payment.objects.filter(parent=payment_plan).update(currency=currency_syp_deprecated)
-    payment_plan.refresh_from_db()
+    payment_list = payment_gateway_setup["payment_list"]
+    PaymentPlan.objects.filter(pk=payment_list.payment_plan_id).update(currency=currency_syp_deprecated)
+    Payment.objects.filter(parent=payment_list).update(currency=currency_syp_deprecated)
+    payment_list.refresh_from_db()
     return payment_gateway_setup
 
 
@@ -391,7 +391,7 @@ def test_sync_records_batches_updates_and_uses_prefetched_reconciliation(error_r
     )
 
     with (
-        mock.patch.object(PaymentPlan, "is_reconciled", new_callable=mock.PropertyMock) as is_reconciled_mock,
+        mock.patch.object(PaymentList, "is_reconciled", new_callable=mock.PropertyMock) as is_reconciled_mock,
         mock.patch.object(pg_service, "change_payment_instruction_status"),
         mock.patch.object(
             pg_service,
@@ -416,7 +416,7 @@ def test_sync_records_keeps_plan_unreconciled_when_pending_payment_is_not_in_sen
     pg_service.api.get_records_for_payment_instruction = Mock(return_value=setup["gateway_records"])
 
     with (
-        mock.patch.object(PaymentPlan, "is_reconciled", new_callable=mock.PropertyMock) as is_reconciled_mock,
+        mock.patch.object(PaymentList, "is_reconciled", new_callable=mock.PropertyMock) as is_reconciled_mock,
         mock.patch.object(pg_service, "change_payment_instruction_status") as change_status_mock,
     ):
         pg_service.sync_records()
@@ -424,10 +424,10 @@ def test_sync_records_keeps_plan_unreconciled_when_pending_payment_is_not_in_sen
     is_reconciled_mock.assert_not_called()
     change_status_mock.assert_not_called()
     pg_service.api.get_records_for_payment_instruction.assert_called_once_with(setup["sent_split"].id)
-    setup["payment_plan"].refresh_from_db()
+    setup["payment_list"].refresh_from_db()
     setup["unsent_payment"].refresh_from_db()
     setup["sent_payment"].refresh_from_db()
-    assert setup["payment_plan"].status == PaymentPlan.Status.ACCEPTED
+    assert setup["payment_list"].status == PaymentList.Status.ACCEPTED
     assert setup["unsent_payment"].status == Payment.STATUS_PENDING
     assert setup["sent_payment"].status == Payment.STATUS_ERROR
 
@@ -436,7 +436,7 @@ def test_sync_records_keeps_plan_unreconciled_when_pending_payment_is_not_in_sen
     "hope.apps.payment.services.payment_gateway.PaymentGatewayAPI.change_payment_instruction_status",
     return_value="FINALIZED",
 )
-@mock.patch("hope.models.payment_plan.PaymentPlan.get_exchange_rate", return_value=2.0)
+@mock.patch("hope.models.payment_list.PaymentList.get_exchange_rate", return_value=2.0)
 @mock.patch("hope.apps.payment.services.payment_gateway.PaymentGatewayAPI.get_records_for_payment_instruction")
 @mock.patch(
     "hope.apps.payment.services.payment_gateway.get_quantity_in_usd",
@@ -451,7 +451,7 @@ def test_sync_records_for_split(
 ) -> None:
     split_1, split_2 = payment_gateway_setup["splits"]
     payments = payment_gateway_setup["payments"]
-    payment_plan = payment_gateway_setup["payment_plan"]
+    payment_list = payment_gateway_setup["payment_list"]
 
     split_1.sent_to_payment_gateway = True
     split_2.sent_to_payment_gateway = True
@@ -512,23 +512,23 @@ def test_sync_records_for_split(
     assert get_records_for_payment_instruction_mock.call_count == 0
 
     assert change_payment_instruction_status_mock.call_count == 2
-    payment_plan.refresh_from_db()
-    assert payment_plan.status == PaymentPlan.Status.FINISHED
+    payment_list.refresh_from_db()
+    assert payment_list.status == PaymentList.Status.FINISHED
 
     # add more coverage
-    payment_plan.status = PaymentPlan.Status.ACCEPTED
-    payment_plan.save()
+    payment_list.status = PaymentList.Status.ACCEPTED
+    payment_list.save()
     pg_service.sync_records()
     # no updates in records
-    payment_plan.refresh_from_db()
-    assert payment_plan.status == PaymentPlan.Status.ACCEPTED
+    payment_list.refresh_from_db()
+    assert payment_list.status == PaymentList.Status.ACCEPTED
 
 
 @mock.patch(
     "hope.apps.payment.services.payment_gateway.PaymentGatewayAPI.change_payment_instruction_status",
     return_value="FINALIZED",
 )
-@mock.patch("hope.models.payment_plan.PaymentPlan.get_exchange_rate", return_value=2.0)
+@mock.patch("hope.models.payment_list.PaymentList.get_exchange_rate", return_value=2.0)
 @mock.patch("hope.apps.payment.services.payment_gateway.PaymentGatewayAPI.get_records_for_payment_instruction")
 @mock.patch(
     "hope.apps.payment.services.payment_gateway.get_quantity_in_usd",
@@ -543,7 +543,7 @@ def test_sync_records_error_messages(
 ) -> None:
     split_1, split_2 = payment_gateway_setup["splits"]
     payments = payment_gateway_setup["payments"]
-    payment_plan = payment_gateway_setup["payment_plan"]
+    payment_list = payment_gateway_setup["payment_list"]
 
     split_1.sent_to_payment_gateway = True
     split_2.sent_to_payment_gateway = True
@@ -579,12 +579,12 @@ def test_sync_records_error_messages(
     pg_service = PaymentGatewayService()
     pg_service.api.get_records_for_payment_instruction = get_records_for_payment_instruction_mock  # type: ignore
 
-    assert payment_plan.splits.exists() is True
-    assert payment_plan.is_reconciled is False
+    assert payment_list.splits.exists() is True
+    assert payment_list.is_reconciled is False
 
     pg_service.sync_records()
     assert get_records_for_payment_instruction_mock.call_count == 2
-    payment_plan.refresh_from_db()
+    payment_list.refresh_from_db()
     payments[0].refresh_from_db()
     payments[1].refresh_from_db()
     assert payments[0].status == Payment.STATUS_SENT_TO_PG
@@ -593,7 +593,7 @@ def test_sync_records_error_messages(
     assert payments[1].status == Payment.STATUS_DISTRIBUTION_PARTIAL
     assert payments[1].fsp_auth_code == "2"
     assert payments[1].delivered_quantity == payments[1].entitlement_quantity - Decimal(10.00)
-    assert payment_plan.is_reconciled is False
+    assert payment_list.is_reconciled is False
     assert change_payment_instruction_status_mock.call_count == 0
 
     get_records_for_payment_instruction_mock.return_value = [
@@ -639,7 +639,7 @@ def test_sync_records_error_messages(
     assert change_payment_instruction_status_mock.call_count == 2
 
 
-@mock.patch("hope.models.payment_plan.PaymentPlan.get_exchange_rate", return_value=2.0)
+@mock.patch("hope.models.payment_list.PaymentList.get_exchange_rate", return_value=2.0)
 @mock.patch("hope.apps.payment.services.payment_gateway.PaymentGatewayAPI.get_records_for_payment_instruction")
 def test_sync_records_ignores_unmatched_gateway_records(
     get_records_for_payment_instruction_mock: Any,
@@ -669,7 +669,7 @@ def sent_splits_with_xlsx_fsp(payment_gateway_setup: dict) -> dict:
     fsp = payment_gateway_setup["fsp"]
     fsp.communication_channel = FinancialServiceProvider.COMMUNICATION_CHANNEL_XLSX
     fsp.save(update_fields=["communication_channel"])
-    PaymentPlanSplit.objects.filter(payment_plan=payment_gateway_setup["payment_plan"]).update(
+    PaymentListSplit.objects.filter(payment_list=payment_gateway_setup["payment_list"]).update(
         sent_to_payment_gateway=True
     )
     return payment_gateway_setup
@@ -677,13 +677,13 @@ def sent_splits_with_xlsx_fsp(payment_gateway_setup: dict) -> dict:
 
 @pytest.fixture
 def sent_splits_with_xlsx_fsp_in_payment_gateway_group(sent_splits_with_xlsx_fsp: dict) -> dict:
-    PaymentPlanGroup.objects.filter(pk=sent_splits_with_xlsx_fsp["payment_plan"].payment_plan_group_id).update(
+    PaymentPlan.objects.filter(pk=sent_splits_with_xlsx_fsp["payment_list"].payment_plan_id).update(
         use_payment_gateway=True
     )
     return sent_splits_with_xlsx_fsp
 
 
-@mock.patch("hope.models.payment_plan.PaymentPlan.get_exchange_rate", return_value=2.0)
+@mock.patch("hope.models.payment_list.PaymentList.get_exchange_rate", return_value=2.0)
 @mock.patch(
     "hope.apps.payment.services.payment_gateway.PaymentGatewayAPI.get_records_for_payment_instruction",
     return_value=[],
@@ -698,7 +698,7 @@ def test_sync_records_syncs_xlsx_fsp_plan_of_group_using_payment_gateway(
     assert get_records_for_payment_instruction_mock.call_count == 2
 
 
-@mock.patch("hope.models.payment_plan.PaymentPlan.get_exchange_rate", return_value=2.0)
+@mock.patch("hope.models.payment_list.PaymentList.get_exchange_rate", return_value=2.0)
 @mock.patch(
     "hope.apps.payment.services.payment_gateway.PaymentGatewayAPI.get_records_for_payment_instruction",
     return_value=[],
@@ -743,13 +743,13 @@ def test_bulk_update_payments_uses_one_query_and_persists_signatures(
     "hope.apps.payment.services.payment_gateway.PaymentGatewayAPI.change_payment_instruction_status",
     return_value="FINALIZED",
 )
-@mock.patch("hope.models.payment_plan.PaymentPlan.get_exchange_rate", return_value=2.0)
+@mock.patch("hope.models.payment_list.PaymentList.get_exchange_rate", return_value=2.0)
 @mock.patch("hope.apps.payment.services.payment_gateway.PaymentGatewayAPI.get_records_for_payment_instruction")
 @mock.patch(
     "hope.apps.payment.services.payment_gateway.get_quantity_in_usd",
     return_value=100.00,
 )
-def test_sync_payment_plan(
+def test_sync_payment_list(
     get_quantity_in_usd_mock: Any,
     get_records_for_payment_instruction_mock: Any,
     get_exchange_rate_mock: Any,
@@ -758,7 +758,7 @@ def test_sync_payment_plan(
 ) -> None:
     split_1, split_2 = payment_gateway_setup["splits"]
     payments = payment_gateway_setup["payments"]
-    payment_plan = payment_gateway_setup["payment_plan"]
+    payment_list = payment_gateway_setup["payment_list"]
 
     split_1.sent_to_payment_gateway = True
     split_2.sent_to_payment_gateway = True
@@ -805,7 +805,7 @@ def test_sync_payment_plan(
     pg_service = PaymentGatewayService()
     pg_service.api.get_records_for_payment_instruction = get_records_for_payment_instruction_mock  # type: ignore
 
-    pg_service.sync_payment_plan(payment_plan)
+    pg_service.sync_payment_list(payment_list)
     assert get_records_for_payment_instruction_mock.call_count == 2
     payments[0].refresh_from_db()
     assert payments[0].status == Payment.STATUS_DISTRIBUTION_SUCCESS
@@ -819,17 +819,17 @@ def test_sync_payment_plan(
     assert payments[1].delivered_quantity is None
     assert payments[1].reason_for_unsuccessful_payment == "Error"
 
-    payment_plan.refresh_from_db()
-    assert payment_plan.status == PaymentPlan.Status.FINISHED
-    assert payment_plan.total_delivered_quantity == Decimal("100.00")
-    assert payment_plan.total_delivered_quantity_usd == Decimal("100.00")
-    assert payment_plan.total_undelivered_quantity == Decimal("100.00")
-    assert payment_plan.total_undelivered_quantity_usd == Decimal("0.00")
+    payment_list.refresh_from_db()
+    assert payment_list.status == PaymentList.Status.FINISHED
+    assert payment_list.total_delivered_quantity == Decimal("100.00")
+    assert payment_list.total_delivered_quantity_usd == Decimal("100.00")
+    assert payment_list.total_undelivered_quantity == Decimal("100.00")
+    assert payment_list.total_undelivered_quantity_usd == Decimal("0.00")
 
 
-@mock.patch("hope.models.payment_plan.PaymentPlan.get_exchange_rate", return_value=2.0)
+@mock.patch("hope.models.payment_list.PaymentList.get_exchange_rate", return_value=2.0)
 @mock.patch("hope.apps.payment.services.payment_gateway.PaymentGatewayAPI.get_records_for_payment_instruction")
-def test_sync_payment_plan_ignores_unmatched_gateway_records(
+def test_sync_payment_list_ignores_unmatched_gateway_records(
     get_records_for_payment_instruction_mock: Any,
     get_exchange_rate_mock: Any,
     payment_gateway_setup: dict,
@@ -843,7 +843,7 @@ def test_sync_payment_plan_ignores_unmatched_gateway_records(
     split_2.save(update_fields=["sent_to_payment_gateway"])
     get_records_for_payment_instruction_mock.return_value = [unmatched_payment_gateway_record]
 
-    PaymentGatewayService().sync_payment_plan(payment_gateway_setup["payment_plan"])
+    PaymentGatewayService().sync_payment_list(payment_gateway_setup["payment_list"])
 
     payment_1.refresh_from_db()
     payment_2.refresh_from_db()
@@ -857,13 +857,13 @@ def test_sync_payment_plan_ignores_unmatched_gateway_records(
     "hope.apps.payment.services.payment_gateway.PaymentGatewayAPI.change_payment_instruction_status",
     return_value="FINALIZED",
 )
-@mock.patch("hope.models.payment_plan.PaymentPlan.get_exchange_rate", return_value=2.0)
+@mock.patch("hope.models.payment_list.PaymentList.get_exchange_rate", return_value=2.0)
 @mock.patch("hope.apps.payment.services.payment_gateway.PaymentGatewayAPI.get_records_for_payment_instruction")
 @mock.patch(
     "hope.apps.payment.services.payment_gateway.get_quantity_in_usd",
     return_value=100.00,
 )
-def test_sync_payment_plan_logs_payment_changes_with_user(
+def test_sync_payment_list_logs_payment_changes_with_user(
     get_quantity_in_usd_mock: Any,
     get_records_for_payment_instruction_mock: Any,
     get_exchange_rate_mock: Any,
@@ -872,7 +872,7 @@ def test_sync_payment_plan_logs_payment_changes_with_user(
 ) -> None:
     split_1, split_2 = payment_gateway_setup["splits"]
     payments = payment_gateway_setup["payments"]
-    payment_plan = payment_gateway_setup["payment_plan"]
+    payment_list = payment_gateway_setup["payment_list"]
     user = UserFactory()
 
     split_1.sent_to_payment_gateway = True
@@ -920,7 +920,7 @@ def test_sync_payment_plan_logs_payment_changes_with_user(
     pg_service = PaymentGatewayService(user_id=str(user.pk))
     pg_service.api.get_records_for_payment_instruction = get_records_for_payment_instruction_mock  # type: ignore
 
-    pg_service.sync_payment_plan(payment_plan)
+    pg_service.sync_payment_list(payment_list)
 
     payment_logs = LogEntry.objects.filter(object_id__in=[str(p.id) for p in payments])
     assert payment_logs.count() == 2
@@ -933,7 +933,7 @@ def test_sync_payment_plan_logs_payment_changes_with_user(
     "hope.apps.payment.services.payment_gateway.PaymentGatewayAPI.change_payment_instruction_status",
     return_value="FINALIZED",
 )
-@mock.patch("hope.models.payment_plan.PaymentPlan.get_exchange_rate", return_value=2.0)
+@mock.patch("hope.models.payment_list.PaymentList.get_exchange_rate", return_value=2.0)
 @mock.patch("hope.apps.payment.services.payment_gateway.PaymentGatewayAPI.get_record")
 @mock.patch(
     "hope.apps.payment.services.payment_gateway.get_quantity_in_usd",
@@ -947,7 +947,7 @@ def test_sync_record(
     payment_gateway_setup: dict,
 ) -> None:
     payments = payment_gateway_setup["payments"]
-    payment_plan = payment_gateway_setup["payment_plan"]
+    payment_list = payment_gateway_setup["payment_list"]
     split_1, split_2 = payment_gateway_setup["splits"]
 
     payments[0].status = Payment.STATUS_ERROR
@@ -988,33 +988,33 @@ def test_sync_record(
     assert payments[0].delivered_quantity == payments[0].entitlement_quantity
     assert payments[0].delivered_quantity_usd == 100.0
 
-    payment_plan.refresh_from_db()
-    assert payment_plan.status == PaymentPlan.Status.FINISHED
-    assert payment_plan.total_delivered_quantity == Decimal("100.00")
-    assert payment_plan.total_delivered_quantity_usd == Decimal("100.00")
-    assert payment_plan.total_undelivered_quantity == Decimal("100.00")
-    assert payment_plan.total_undelivered_quantity_usd == Decimal("0.00")
+    payment_list.refresh_from_db()
+    assert payment_list.status == PaymentList.Status.FINISHED
+    assert payment_list.total_delivered_quantity == Decimal("100.00")
+    assert payment_list.total_delivered_quantity_usd == Decimal("100.00")
+    assert payment_list.total_undelivered_quantity == Decimal("100.00")
+    assert payment_list.total_undelivered_quantity_usd == Decimal("0.00")
     assert change_payment_instruction_status_mock.call_count == 2
 
 
 @pytest.fixture
 def instruction_managed_payment_gateway_setup(payment_gateway_setup: dict) -> dict:
-    payment_plan = payment_gateway_setup["payment_plan"]
-    payment_plan.follow_up_instruction = FollowUpInstructionFactory(
-        program=payment_plan.program_cycle.program,
-        business_area=payment_plan.business_area,
+    payment_list = payment_gateway_setup["payment_list"]
+    payment_list.follow_up_instruction = FollowUpInstructionFactory(
+        program=payment_list.program_cycle.program,
+        business_area=payment_list.business_area,
         financial_service_provider=payment_gateway_setup["fsp"],
-        currency=payment_plan.currency,
+        currency=payment_list.currency,
         exchange_rate=Decimal("2.00"),
     )
-    payment_plan.payment_plan_group = None
-    payment_plan.save(update_fields=["follow_up_instruction", "payment_plan_group"])
+    payment_list.payment_plan = None
+    payment_list.save(update_fields=["follow_up_instruction", "payment_plan"])
     first_payment, second_payment = payment_gateway_setup["payments"]
     first_payment.status = Payment.STATUS_ERROR
     first_payment.save(update_fields=["status"])
     second_payment.status = Payment.STATUS_DISTRIBUTION_SUCCESS
     second_payment.save(update_fields=["status"])
-    PaymentPlanSplit.objects.filter(payment_plan=payment_plan).update(sent_to_payment_gateway=True)
+    PaymentListSplit.objects.filter(payment_list=payment_list).update(sent_to_payment_gateway=True)
     return payment_gateway_setup
 
 
@@ -1022,7 +1022,7 @@ def instruction_managed_payment_gateway_setup(payment_gateway_setup: dict) -> di
     "hope.apps.payment.services.payment_gateway.PaymentGatewayAPI.change_payment_instruction_status",
     return_value="FINALIZED",
 )
-@mock.patch("hope.models.payment_plan.PaymentPlan.get_exchange_rate", return_value=2.0)
+@mock.patch("hope.models.payment_list.PaymentList.get_exchange_rate", return_value=2.0)
 @mock.patch("hope.apps.payment.services.payment_gateway.PaymentGatewayAPI.get_record")
 @mock.patch(
     "hope.apps.payment.services.payment_gateway.get_quantity_in_usd",
@@ -1036,7 +1036,7 @@ def test_sync_record_finishes_reconciled_instruction_managed_plan_on_its_own(
     instruction_managed_payment_gateway_setup: dict,
 ) -> None:
     payment = instruction_managed_payment_gateway_setup["payments"][0]
-    payment_plan = instruction_managed_payment_gateway_setup["payment_plan"]
+    payment_list = instruction_managed_payment_gateway_setup["payment_list"]
     get_record_mock.return_value = PaymentRecordData(
         id=1,
         remote_id=str(payment.id),
@@ -1052,11 +1052,11 @@ def test_sync_record_finishes_reconciled_instruction_managed_plan_on_its_own(
 
     PaymentGatewayService().sync_record(payment)
 
-    payment_plan.refresh_from_db()
-    assert payment_plan.status == PaymentPlan.Status.FINISHED
+    payment_list.refresh_from_db()
+    assert payment_list.status == PaymentList.Status.FINISHED
 
 
-@mock.patch("hope.models.payment_plan.PaymentPlan.get_exchange_rate", return_value=2.0)
+@mock.patch("hope.models.payment_list.PaymentList.get_exchange_rate", return_value=2.0)
 @mock.patch("hope.apps.payment.services.payment_gateway.PaymentGatewayAPI.get_record")
 def test_sync_record_ignores_unmatched_gateway_record(
     get_record_mock: Any,
@@ -1114,7 +1114,7 @@ def test_sync_record_skips_when_parent_split_is_none(
     "hope.apps.payment.services.payment_gateway.PaymentGatewayAPI.change_payment_instruction_status",
     return_value="FINALIZED",
 )
-@mock.patch("hope.models.payment_plan.PaymentPlan.get_exchange_rate", return_value=2.0)
+@mock.patch("hope.models.payment_list.PaymentList.get_exchange_rate", return_value=2.0)
 @mock.patch("hope.apps.payment.services.payment_gateway.PaymentGatewayAPI.get_record")
 @mock.patch(
     "hope.apps.payment.services.payment_gateway.get_quantity_in_usd",
@@ -1198,7 +1198,7 @@ def test_add_records_to_payment_instructions_for_split(
 ) -> None:
     split_1, split_2 = payment_gateway_setup["splits"]
     payments = payment_gateway_setup["payments"]
-    payment_plan = payment_gateway_setup["payment_plan"]
+    payment_list = payment_gateway_setup["payment_list"]
 
     split_1.sent_to_payment_gateway = False
     split_2.sent_to_payment_gateway = False
@@ -1219,7 +1219,7 @@ def test_add_records_to_payment_instructions_for_split(
     ]
     pg_service = PaymentGatewayService()
     pg_service.api.add_records_to_payment_instruction = add_records_to_payment_instruction_mock
-    pg_service.add_records_to_payment_instructions(payment_plan)
+    pg_service.add_records_to_payment_instructions(payment_list)
 
     split_1.refresh_from_db()
     split_2.refresh_from_db()
@@ -1244,7 +1244,7 @@ def test_add_records_to_payment_instructions_for_split_error(
 ) -> None:
     split_1, split_2 = payment_gateway_setup["splits"]
     payments = payment_gateway_setup["payments"]
-    payment_plan = payment_gateway_setup["payment_plan"]
+    payment_list = payment_gateway_setup["payment_list"]
 
     split_1.sent_to_payment_gateway = False
     split_2.sent_to_payment_gateway = False
@@ -1265,7 +1265,7 @@ def test_add_records_to_payment_instructions_for_split_error(
     )
     pg_service = PaymentGatewayService()
     pg_service.api.add_records_to_payment_instruction = add_records_to_payment_instruction_mock
-    pg_service.add_records_to_payment_instructions(payment_plan)
+    pg_service.add_records_to_payment_instructions(payment_list)
 
     split_1.refresh_from_db()
     split_2.refresh_from_db()
@@ -1283,12 +1283,12 @@ def test_add_records_to_payment_instructions_for_split_error(
 def test_create_payment_instructions_refuses_plan_in_inactive_currency(
     payment_gateway_setup_in_inactive_currency: dict,
 ) -> None:
-    payment_plan = payment_gateway_setup_in_inactive_currency["payment_plan"]
+    payment_list = payment_gateway_setup_in_inactive_currency["payment_list"]
     pg_service = PaymentGatewayService()
     pg_service.api.create_payment_instruction = Mock()
 
     with pytest.raises(ValueError, match=r"currency SYP - Syrian Pound \(old\) is inactive"):
-        pg_service.create_payment_instructions(payment_plan, "user@example.com")
+        pg_service.create_payment_instructions(payment_list, "user@example.com")
 
     pg_service.api.create_payment_instruction.assert_not_called()
 
@@ -1296,15 +1296,15 @@ def test_create_payment_instructions_refuses_plan_in_inactive_currency(
 def test_add_records_to_payment_instructions_refuses_plan_in_inactive_currency(
     payment_gateway_setup_in_inactive_currency: dict,
 ) -> None:
-    payment_plan = payment_gateway_setup_in_inactive_currency["payment_plan"]
+    payment_list = payment_gateway_setup_in_inactive_currency["payment_list"]
     pg_service = PaymentGatewayService()
     pg_service.api.add_records_to_payment_instruction = Mock()
 
     with pytest.raises(ValueError, match=r"currency SYP - Syrian Pound \(old\) is inactive"):
-        pg_service.add_records_to_payment_instructions(payment_plan)
+        pg_service.add_records_to_payment_instructions(payment_list)
 
     pg_service.api.add_records_to_payment_instruction.assert_not_called()
-    assert set(payment_plan.payment_items.values_list("status", flat=True)) == {Payment.STATUS_PENDING}
+    assert set(payment_list.payment_items.values_list("status", flat=True)) == {Payment.STATUS_PENDING}
 
 
 def test_sync_records_updates_payments_of_plan_in_inactive_currency(
@@ -1312,7 +1312,7 @@ def test_sync_records_updates_payments_of_plan_in_inactive_currency(
     payment_gateway_setup_in_inactive_currency: dict,
 ) -> None:
     # Payments sent before the currency was deactivated must still get their final status.
-    payment_plan = payment_gateway_setup_in_inactive_currency["payment_plan"]
+    payment_list = payment_gateway_setup_in_inactive_currency["payment_list"]
     pg_service = PaymentGatewayService()
     pg_service.api.get_records_for_payment_instruction = Mock(
         side_effect=error_records_by_payment_instruction.__getitem__
@@ -1321,7 +1321,7 @@ def test_sync_records_updates_payments_of_plan_in_inactive_currency(
     with mock.patch.object(pg_service, "change_payment_instruction_status"):
         pg_service.sync_records()
 
-    assert set(payment_plan.payment_items.values_list("status", flat=True)) == {Payment.STATUS_ERROR}
+    assert set(payment_list.payment_items.values_list("status", flat=True)) == {Payment.STATUS_ERROR}
 
 
 @mock.patch("hope.apps.payment.services.payment_gateway.PaymentGatewayAPI._post")
@@ -1329,7 +1329,7 @@ def test_api_add_records_to_payment_instruction(
     post_mock: Any,
     payment_gateway_setup: dict,
 ) -> None:
-    payment_plan = payment_gateway_setup["payment_plan"]
+    payment_list = payment_gateway_setup["payment_list"]
     payments = payment_gateway_setup["payments"]
     delivery_mechanisms = payment_gateway_setup["delivery_mechanisms"]
 
@@ -1344,8 +1344,8 @@ def test_api_add_records_to_payment_instruction(
         200,
     )
 
-    payment_plan.delivery_mechanism = delivery_mechanisms["cash_over_the_counter"]
-    payment_plan.save()
+    payment_list.delivery_mechanism = delivery_mechanisms["cash_over_the_counter"]
+    payment_list.save()
     PaymentGatewayAPI().add_records_to_payment_instruction([payments[0]], "123")
     post_mock.assert_called_once_with(
         "TEST/payment_instructions/123/add_records/",
@@ -1410,7 +1410,7 @@ def test_api_add_records_to_payment_instruction_wallet_integration_mobile(
     assert PaymentHouseholdSnapshot.objects.count() == 0
     assert Payment.objects.count() == 2
 
-    create_payment_plan_snapshot_data(payments[0].parent)
+    create_payment_list_snapshot_data(payments[0].parent)
     assert PaymentHouseholdSnapshot.objects.count() == 2
     payments[0].refresh_from_db()
 
@@ -1485,7 +1485,7 @@ def test_api_add_records_to_payment_instruction_wallet_integration_bank(
     assert PaymentHouseholdSnapshot.objects.count() == 0
     assert Payment.objects.count() == 2
 
-    create_payment_plan_snapshot_data(payments[0].parent)
+    create_payment_list_snapshot_data(payments[0].parent)
     assert PaymentHouseholdSnapshot.objects.count() == 2
     payments[0].refresh_from_db()
 
@@ -1503,7 +1503,7 @@ def test_api_add_records_to_payment_instruction_wallet_integration_bank(
     payments[0].financial_service_provider = uba_fsp
     payments[0].save()
     PaymentHouseholdSnapshot.objects.all().delete()
-    create_payment_plan_snapshot_data(payments[0].parent)
+    create_payment_list_snapshot_data(payments[0].parent)
     payments[0].refresh_from_db()
     payments[0].collector.refresh_from_db()
     payments[0].household_snapshot.refresh_from_db()
@@ -1559,7 +1559,7 @@ def test_api_add_records_to_payment_instruction_wallet_integration_bank(
     )
 
     PaymentHouseholdSnapshot.objects.all().delete()
-    create_payment_plan_snapshot_data(payments[0].parent)
+    create_payment_list_snapshot_data(payments[0].parent)
     payments[0].refresh_from_db()
     payments[0].collector.refresh_from_db()
     payments[0].household_snapshot.refresh_from_db()
@@ -1695,22 +1695,22 @@ def test_api_get_download_payment_instruction_url() -> None:
 
 
 def test_payment_instruction_payload_includes_business_area_office_and_payment_country(
-    payment_plan_splits: list[PaymentPlanSplit],
+    payment_list_splits: list[PaymentListSplit],
 ) -> None:
-    split = payment_plan_splits[0]
-    business_area = split.payment_plan.business_area
+    split = payment_list_splits[0]
+    business_area = split.payment_list.business_area
     business_area.payment_countries.clear()
     business_area.payment_countries.add(CountryFactory(iso_code2="AF", iso_code3="AFG"))
 
     data = PaymentInstructionFromSplitSerializer(split, context={"user_email": "user@example.com"}).data
 
     assert data["country"] == "AFG"
-    assert data["delivery_mechanism"] == split.payment_plan.delivery_mechanism.code
+    assert data["delivery_mechanism"] == split.payment_list.delivery_mechanism.code
     assert data["payload"] == {
-        "destination_currency": split.payment_plan.currency.code,
+        "destination_currency": split.payment_list.currency.code,
         "user": "user@example.com",
         "config_key": business_area.code,
-        "delivery_mechanism": split.payment_plan.delivery_mechanism.code,
+        "delivery_mechanism": split.payment_list.delivery_mechanism.code,
         "office": business_area.slug,
         "country": "AFG",
         "destination_country_iso_code3": "AFG",
@@ -1719,31 +1719,31 @@ def test_payment_instruction_payload_includes_business_area_office_and_payment_c
 
 
 def test_payment_instruction_payload_sets_country_to_none_when_payment_country_is_missing(
-    payment_plan_splits: list[PaymentPlanSplit],
+    payment_list_splits: list[PaymentListSplit],
 ) -> None:
-    split = payment_plan_splits[0]
-    business_area = split.payment_plan.business_area
+    split = payment_list_splits[0]
+    business_area = split.payment_list.business_area
     business_area.payment_countries.clear()
 
     data = PaymentInstructionFromSplitSerializer(split, context={"user_email": "user@example.com"}).data
 
     assert data["country"] == ""
-    assert data["delivery_mechanism"] == split.payment_plan.delivery_mechanism.code
+    assert data["delivery_mechanism"] == split.payment_list.delivery_mechanism.code
     assert data["payload"] == {
-        "destination_currency": split.payment_plan.currency.code,
+        "destination_currency": split.payment_list.currency.code,
         "user": "user@example.com",
         "config_key": business_area.code,
-        "delivery_mechanism": split.payment_plan.delivery_mechanism.code,
+        "delivery_mechanism": split.payment_list.delivery_mechanism.code,
         "office": business_area.slug,
         "country": None,
     }
 
 
 def test_payment_instruction_get_payload_sets_destination_country_iso_fields_only_when_payment_country_exists(
-    payment_plan_splits: list[PaymentPlanSplit],
+    payment_list_splits: list[PaymentListSplit],
 ) -> None:
-    split = payment_plan_splits[0]
-    business_area = split.payment_plan.business_area
+    split = payment_list_splits[0]
+    business_area = split.payment_list.business_area
     serializer = PaymentInstructionFromSplitSerializer(context={"user_email": "user@example.com"})
 
     business_area.payment_countries.clear()
@@ -1765,12 +1765,12 @@ def test_payment_instruction_get_payload_sets_destination_country_iso_fields_onl
 
 
 def test_payment_instruction_payload_uses_destination_country_iso_code2(
-    payment_plan_splits: list[PaymentPlanSplit],
+    payment_list_splits: list[PaymentListSplit],
 ) -> None:
     from hope.models import Country
 
-    split = payment_plan_splits[0]
-    business_area = split.payment_plan.business_area
+    split = payment_list_splits[0]
+    business_area = split.payment_list.business_area
     business_area.payment_countries.clear()
     business_area.payment_countries.add(
         Country.objects.create(
@@ -1785,7 +1785,7 @@ def test_payment_instruction_payload_uses_destination_country_iso_code2(
     data = PaymentInstructionFromSplitSerializer(split, context={"user_email": "user@example.com"}).data
 
     assert data["country"] == "AFG"
-    assert data["delivery_mechanism"] == split.payment_plan.delivery_mechanism.code
+    assert data["delivery_mechanism"] == split.payment_list.delivery_mechanism.code
     assert data["payload"]["country"] == "AFG"
     assert data["payload"]["destination_country_iso_code3"] == "AFG"
     assert data["payload"]["destination_country_iso_code2"] == "AF"
@@ -2273,9 +2273,9 @@ def test_add_missing_records_to_payment_instructions(
     change_payment_instruction_status_mock: Any,
     payment_gateway_setup: dict,
 ) -> None:
-    payment_plan = payment_gateway_setup["payment_plan"]
+    payment_list = payment_gateway_setup["payment_list"]
     # Fetch payments in the same order as eligible_payments.all() to match production iteration order
-    payments = list(payment_plan.eligible_payments.all())
+    payments = list(payment_list.eligible_payments.all())
 
     get_record_mock.side_effect = [
         PaymentRecordData(
@@ -2307,7 +2307,7 @@ def test_add_missing_records_to_payment_instructions(
     with patch.object(pg_service.api, "add_records_to_payment_instruction"):
         pg_service.api.add_records_to_payment_instruction = add_records_to_payment_instruction_mock
 
-        pg_service.add_missing_records_to_payment_instructions(payment_plan)
+        pg_service.add_missing_records_to_payment_instructions(payment_list)
         assert get_record_mock.call_count == 2
 
         called_payments, called_split = (
@@ -2462,8 +2462,8 @@ def test_change_payment_instruction_status_returns_none_for_non_payment_gateway_
     fsp = FinancialServiceProviderFactory(
         communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_XLSX,
     )
-    payment_plan = PaymentPlanFactory(financial_service_provider=fsp, use_payment_gateway=False)
-    split = PaymentPlanSplitFactory(payment_plan=payment_plan)
+    payment_list = PaymentListFactory(financial_service_provider=fsp, use_payment_gateway=False)
+    split = PaymentListSplitFactory(payment_list=payment_list)
     pg_service = PaymentGatewayService()
     pg_service.api.change_payment_instruction_status = Mock()  # type: ignore
 

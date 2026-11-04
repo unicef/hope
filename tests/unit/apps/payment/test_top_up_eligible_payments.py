@@ -5,11 +5,11 @@ import pytest
 from extras.test_utils.factories import (
     BusinessAreaFactory,
     PaymentFactory,
-    PaymentPlanFactory,
+    PaymentListFactory,
     ProgramCycleFactory,
     ProgramFactory,
 )
-from hope.models import Payment, PaymentPlan, ProgramCycle
+from hope.models import Payment, PaymentList, ProgramCycle
 
 pytestmark = pytest.mark.django_db
 
@@ -26,21 +26,21 @@ def cycle(business_area: Any) -> ProgramCycle:
 
 
 @pytest.fixture
-def regular_pp(business_area: Any, cycle: ProgramCycle) -> PaymentPlan:
-    return PaymentPlanFactory(
+def regular_pp(business_area: Any, cycle: ProgramCycle) -> PaymentList:
+    return PaymentListFactory(
         business_area=business_area,
         program_cycle=cycle,
-        plan_type=PaymentPlan.PlanType.REGULAR,
+        plan_type=PaymentList.PlanType.REGULAR,
     )
 
 
 @pytest.fixture
-def top_up_pp(business_area: Any, cycle: ProgramCycle, regular_pp: PaymentPlan) -> PaymentPlan:
-    return PaymentPlanFactory(
+def top_up_pp(business_area: Any, cycle: ProgramCycle, regular_pp: PaymentList) -> PaymentList:
+    return PaymentListFactory(
         business_area=business_area,
         program_cycle=cycle,
-        plan_type=PaymentPlan.PlanType.TOP_UP,
-        source_payment_plan=regular_pp,
+        plan_type=PaymentList.PlanType.TOP_UP,
+        source_payment_list=regular_pp,
     )
 
 
@@ -56,7 +56,7 @@ def top_up_pp(business_area: Any, cycle: ProgramCycle, regular_pp: PaymentPlan) 
     ],
 )
 def test_eligible_payments_for_top_up_arrange_eligible_status_act_query_assert_included(
-    regular_pp: PaymentPlan, status: str, django_assert_num_queries: Any
+    regular_pp: PaymentList, status: str, django_assert_num_queries: Any
 ) -> None:
     payment = PaymentFactory(parent=regular_pp, status=status)
 
@@ -76,7 +76,7 @@ def test_eligible_payments_for_top_up_arrange_eligible_status_act_query_assert_i
     ],
 )
 def test_eligible_payments_for_top_up_arrange_failed_status_act_query_assert_included(
-    regular_pp: PaymentPlan, status: str
+    regular_pp: PaymentList, status: str
 ) -> None:
     """A failed payment can still be topped up — payment status does not gate Top-Up eligibility."""
     payment = PaymentFactory(parent=regular_pp, status=status)
@@ -87,7 +87,7 @@ def test_eligible_payments_for_top_up_arrange_failed_status_act_query_assert_inc
 
 
 def test_eligible_payments_for_top_up_arrange_withdrawn_household_act_query_assert_excluded(
-    regular_pp: PaymentPlan,
+    regular_pp: PaymentList,
 ) -> None:
     payment = PaymentFactory(parent=regular_pp, status=Payment.STATUS_DISTRIBUTION_SUCCESS)
     payment.household.withdrawn = True
@@ -99,7 +99,7 @@ def test_eligible_payments_for_top_up_arrange_withdrawn_household_act_query_asse
 
 
 def test_eligible_payments_for_top_up_arrange_already_topped_up_act_query_assert_excluded(
-    regular_pp: PaymentPlan, top_up_pp: PaymentPlan
+    regular_pp: PaymentList, top_up_pp: PaymentList
 ) -> None:
     payment = PaymentFactory(parent=regular_pp, status=Payment.STATUS_DISTRIBUTION_SUCCESS)
     PaymentFactory(parent=top_up_pp, household=payment.household, status=Payment.STATUS_PENDING)
@@ -110,7 +110,7 @@ def test_eligible_payments_for_top_up_arrange_already_topped_up_act_query_assert
 
 
 def test_eligible_payments_for_top_up_amendment_arrange_delivered_payment_act_query_assert_included(
-    top_up_pp: PaymentPlan, django_assert_num_queries: Any
+    top_up_pp: PaymentList, django_assert_num_queries: Any
 ) -> None:
     payment = PaymentFactory(parent=top_up_pp, status=Payment.STATUS_DISTRIBUTION_SUCCESS)
 
@@ -125,7 +125,7 @@ def test_eligible_payments_for_top_up_amendment_arrange_delivered_payment_act_qu
     [Payment.STATUS_PENDING, Payment.STATUS_SENT_TO_PG, Payment.STATUS_SENT_TO_FSP],
 )
 def test_eligible_payments_for_top_up_amendment_arrange_pending_payment_act_query_assert_included(
-    top_up_pp: PaymentPlan, status: str
+    top_up_pp: PaymentList, status: str
 ) -> None:
     """Payment status does not gate an amendment, exactly as it does not gate a top-up."""
     payment = PaymentFactory(parent=top_up_pp, status=status)
@@ -136,7 +136,7 @@ def test_eligible_payments_for_top_up_amendment_arrange_pending_payment_act_quer
 
 
 def test_eligible_payments_for_top_up_amendment_arrange_withdrawn_household_act_query_assert_excluded(
-    top_up_pp: PaymentPlan,
+    top_up_pp: PaymentList,
 ) -> None:
     payment = PaymentFactory(parent=top_up_pp, status=Payment.STATUS_DISTRIBUTION_SUCCESS)
     payment.household.withdrawn = True
@@ -148,14 +148,14 @@ def test_eligible_payments_for_top_up_amendment_arrange_withdrawn_household_act_
 
 
 def test_eligible_payments_for_top_up_amendment_arrange_already_amended_act_query_assert_excluded(
-    business_area: Any, cycle: ProgramCycle, top_up_pp: PaymentPlan
+    business_area: Any, cycle: ProgramCycle, top_up_pp: PaymentList
 ) -> None:
     payment = PaymentFactory(parent=top_up_pp, status=Payment.STATUS_DISTRIBUTION_SUCCESS)
-    amendment_pp = PaymentPlanFactory(
+    amendment_pp = PaymentListFactory(
         business_area=business_area,
         program_cycle=cycle,
-        plan_type=PaymentPlan.PlanType.TOP_UP_AMENDMENT,
-        source_payment_plan=top_up_pp,
+        plan_type=PaymentList.PlanType.TOP_UP_AMENDMENT,
+        source_payment_list=top_up_pp,
     )
     PaymentFactory(parent=amendment_pp, household=payment.household, status=Payment.STATUS_PENDING)
 
@@ -165,15 +165,15 @@ def test_eligible_payments_for_top_up_amendment_arrange_already_amended_act_quer
 
 
 def test_eligible_payments_for_top_up_amendment_arrange_excluded_amendment_payment_act_query_assert_still_blocked(
-    business_area: Any, cycle: ProgramCycle, top_up_pp: PaymentPlan
+    business_area: Any, cycle: ProgramCycle, top_up_pp: PaymentList
 ) -> None:
     """Membership alone blocks, exactly as for top-ups: exclusion does not recycle a beneficiary."""
     payment = PaymentFactory(parent=top_up_pp, status=Payment.STATUS_DISTRIBUTION_SUCCESS)
-    amendment_pp = PaymentPlanFactory(
+    amendment_pp = PaymentListFactory(
         business_area=business_area,
         program_cycle=cycle,
-        plan_type=PaymentPlan.PlanType.TOP_UP_AMENDMENT,
-        source_payment_plan=top_up_pp,
+        plan_type=PaymentList.PlanType.TOP_UP_AMENDMENT,
+        source_payment_list=top_up_pp,
     )
     PaymentFactory(parent=amendment_pp, household=payment.household, status=Payment.STATUS_PENDING, excluded=True)
 

@@ -4,7 +4,7 @@ from django.contrib.contenttypes.models import ContentType
 import pytest
 
 from extras.test_utils.factories.account import UserFactory
-from extras.test_utils.factories.payment import PaymentFactory, PaymentPlanFactory
+from extras.test_utils.factories.payment import PaymentFactory, PaymentListFactory
 from extras.test_utils.factories.program import ProgramFactory
 from hope.apps.activity_log.utils import copy_model_object
 from hope.apps.core.utils import nested_getattr
@@ -12,10 +12,10 @@ from hope.apps.payment.services.mark_as_failed import mark_as_failed as mark_as_
 from hope.apps.payment.utils import (
     bulk_log_payment_changes,
     log_payment_change,
-    log_payment_plan_approval,
+    log_payment_list_approval,
     log_payment_plan_supporting_document,
 )
-from hope.models import LogEntry, Payment, PaymentPlan, Program, User
+from hope.models import LogEntry, Payment, PaymentList, Program, User
 
 pytestmark = pytest.mark.django_db
 
@@ -31,15 +31,15 @@ def program() -> Program:
 
 
 @pytest.fixture
-def payment_plan(program: Program) -> PaymentPlan:
-    return PaymentPlanFactory(program_cycle__program=program)
+def payment_list(program: Program) -> PaymentList:
+    return PaymentListFactory(program_cycle__program=program)
 
 
 @pytest.fixture
-def payments(payment_plan: PaymentPlan, program: Program) -> list[Payment]:
+def payments(payment_list: PaymentList, program: Program) -> list[Payment]:
     return [
-        PaymentFactory(parent=payment_plan, program=program, status=Payment.STATUS_PENDING),
-        PaymentFactory(parent=payment_plan, program=program, status=Payment.STATUS_PENDING),
+        PaymentFactory(parent=payment_list, program=program, status=Payment.STATUS_PENDING),
+        PaymentFactory(parent=payment_list, program=program, status=Payment.STATUS_PENDING),
     ]
 
 
@@ -106,12 +106,12 @@ def test_mark_as_failed_service_logs_single_payment(payments: list[Payment], use
 
 
 @pytest.mark.enable_activity_log
-def test_log_payment_plan_approval_records_actor_and_comment(
-    payment_plan: PaymentPlan, user: User, program: Program
+def test_log_payment_list_approval_records_actor_and_comment(
+    payment_list: PaymentList, user: User, program: Program
 ) -> None:
-    log_payment_plan_approval(payment_plan, user, "AUTHORIZATION", "Looks good")
+    log_payment_list_approval(payment_list, user, "AUTHORIZATION", "Looks good")
 
-    log = LogEntry.objects.get(object_id=payment_plan.pk)
+    log = LogEntry.objects.get(object_id=payment_list.pk)
     assert log.user == user
     assert log.changes["acceptance_process"]["to"] == "AUTHORIZATION"
     assert log.changes["comment"]["to"] == "Looks good"
@@ -119,11 +119,11 @@ def test_log_payment_plan_approval_records_actor_and_comment(
 
 
 @pytest.mark.enable_activity_log
-def test_log_payment_plan_supporting_document_create_and_delete(payment_plan: PaymentPlan, user: User) -> None:
-    log_payment_plan_supporting_document(payment_plan, user, "contract.pdf", created=True)
-    log_payment_plan_supporting_document(payment_plan, user, "contract.pdf", created=False)
+def test_log_payment_plan_supporting_document_create_and_delete(payment_list: PaymentList, user: User) -> None:
+    log_payment_plan_supporting_document(payment_list, user, "contract.pdf", created=True)
+    log_payment_plan_supporting_document(payment_list, user, "contract.pdf", created=False)
 
-    logs = LogEntry.objects.filter(object_id=payment_plan.pk).order_by("timestamp")
+    logs = LogEntry.objects.filter(object_id=payment_list.pk).order_by("timestamp")
     assert logs.count() == 2
     assert logs[0].changes["supporting_document"]["to"] == "contract.pdf"
     assert logs[1].changes["supporting_document"]["from"] == "contract.pdf"
@@ -217,10 +217,10 @@ def test_bulk_log_payment_changes_records_create_when_old_is_none(payments: list
 
 
 @pytest.mark.enable_activity_log
-def test_log_payment_plan_approval_without_comment(payment_plan: PaymentPlan, user: User) -> None:
-    log_payment_plan_approval(payment_plan, user, "APPROVAL", None)
+def test_log_payment_list_approval_without_comment(payment_list: PaymentList, user: User) -> None:
+    log_payment_list_approval(payment_list, user, "APPROVAL", None)
 
-    log = LogEntry.objects.get(object_id=payment_plan.pk)
+    log = LogEntry.objects.get(object_id=payment_list.pk)
     assert log.changes["acceptance_process"]["to"] == "APPROVAL"
     assert "comment" not in log.changes
 

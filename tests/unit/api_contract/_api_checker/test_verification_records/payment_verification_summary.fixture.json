@@ -9,12 +9,12 @@
                 "status": "PENDING",
                 "activation_date": null,
                 "completion_date": null,
-                "payment_plan": "cb35a199-c561-4206-a989-065b41e8f319"
+                "payment_list": "cb35a199-c561-4206-a989-065b41e8f319"
             }
         },
         "deps": [
             {
-                "model": "payment.paymentplan",
+                "model": "payment.paymentlist",
                 "pk": "cb35a199-c561-4206-a989-065b41e8f319",
                 "fields": {
                     "is_removed": false,
@@ -25,7 +25,7 @@
                     "internal_data": {},
                     "business_area": "7dedb4da-fee1-4b5a-b06a-b2d123a89990",
                     "program_cycle": "bc857d24-a581-406b-8031-cd93ded0513f",
-                    "payment_plan_group": "f45bdafc-e7b7-49fd-b386-62c27f335260",
+                    "payment_plan": "f45bdafc-e7b7-49fd-b386-62c27f335260",
                     "delivery_mechanism": null,
                     "imported_file": null,
                     "export_file_entitlement": null,
@@ -33,7 +33,7 @@
                     "steficon_rule": null,
                     "steficon_rule_targeting": null,
                     "created_by": "cb1d9191-462f-4c17-b837-591e45d5c141",
-                    "source_payment_plan": null,
+                    "source_payment_list": null,
                     "follow_up_instruction": null,
                     "storage_file": null,
                     "name": null,
@@ -222,7 +222,7 @@
                 }
             },
             {
-                "model": "payment.paymentplangroup",
+                "model": "payment.paymentplan",
                 "pk": "f45bdafc-e7b7-49fd-b386-62c27f335260",
                 "fields": {
                     "created_at": "2025-01-01T00:00:00Z",

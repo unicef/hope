@@ -18,11 +18,21 @@ class ApprovalProcess(TimeStampedUUIDModel):
         settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, related_name="+", null=True, blank=True
     )
     sent_for_finance_release_date = models.DateTimeField(null=True, blank=True)
-    payment_plan = models.ForeignKey(
-        "payment.PaymentPlan", on_delete=models.CASCADE, related_name="approval_process", null=True, blank=True
+    payment_list = models.ForeignKey(
+        "payment.PaymentList",
+        on_delete=models.CASCADE,
+        related_name="approval_process",
+        null=True,
+        blank=True,
+        db_column="payment_plan_id",
     )
-    payment_plan_group = models.ForeignKey(
-        "payment.PaymentPlanGroup", on_delete=models.CASCADE, related_name="approval_process", null=True, blank=True
+    payment_plan = models.ForeignKey(
+        "payment.PaymentPlan",
+        on_delete=models.CASCADE,
+        related_name="approval_process",
+        null=True,
+        blank=True,
+        db_column="payment_plan_group_id",
     )
     follow_up_instruction = models.ForeignKey(
         "payment.FollowUpInstruction",
@@ -42,11 +52,9 @@ class ApprovalProcess(TimeStampedUUIDModel):
         verbose_name_plural = "Approval Processes"
         constraints = [
             models.CheckConstraint(
-                condition=Q(
-                    payment_plan__isnull=False, payment_plan_group__isnull=True, follow_up_instruction__isnull=True
-                )
-                | Q(payment_plan__isnull=True, payment_plan_group__isnull=False, follow_up_instruction__isnull=True)
-                | Q(payment_plan__isnull=True, payment_plan_group__isnull=True, follow_up_instruction__isnull=False),
+                condition=Q(payment_list__isnull=False, payment_plan__isnull=True, follow_up_instruction__isnull=True)
+                | Q(payment_list__isnull=True, payment_plan__isnull=False, follow_up_instruction__isnull=True)
+                | Q(payment_list__isnull=True, payment_plan__isnull=True, follow_up_instruction__isnull=False),
                 name="approval_process_has_one_owner",
             )
         ]

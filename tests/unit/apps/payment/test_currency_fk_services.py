@@ -12,13 +12,13 @@ from extras.test_utils.factories import (
     DeliveryMechanismFactory,
     HouseholdFactory,
     PaymentFactory,
-    PaymentPlanFactory,
+    PaymentListFactory,
 )
 from hope.apps.household.api.serializers.household import DeliveredQuantitySerializer
 from hope.apps.household.services.household_programs_with_delivered_quantity import (
     delivered_quantity_service,
 )
-from hope.apps.payment.services.payment_plan_services import PaymentPlanService
+from hope.apps.payment.services.payment_list_services import PaymentListService
 from hope.apps.payment.utils import get_quantity_in_usd
 from hope.models import DeliveryMechanism, Household
 from hope.models.currency import Currency
@@ -80,7 +80,7 @@ def test_get_quantity_in_usd_with_currency_instance_and_provided_rate(
 def test_delivered_quantity_service_returns_currency_codes(
     currency_usd: Currency, currency_pln: Currency, django_assert_num_queries
 ) -> None:
-    pp = PaymentPlanFactory()
+    pp = PaymentListFactory()
     household = HouseholdFactory(
         currency=currency_usd,
         business_area=pp.business_area,
@@ -93,7 +93,7 @@ def test_delivered_quantity_service_returns_currency_codes(
         delivered_quantity=Decimal("100.00"),
         delivered_quantity_usd=Decimal("100.00"),
     )
-    pp2 = PaymentPlanFactory(
+    pp2 = PaymentListFactory(
         program_cycle=pp.program_cycle,
         business_area=pp.business_area,
     )
@@ -120,7 +120,7 @@ def test_delivered_quantity_service_returns_currency_codes(
 def test_delivered_quantity_service_excludes_usd_from_per_currency(
     currency_usd: Currency, django_assert_num_queries
 ) -> None:
-    pp = PaymentPlanFactory()
+    pp = PaymentListFactory()
     household = HouseholdFactory(
         currency=currency_usd,
         business_area=pp.business_area,
@@ -147,7 +147,7 @@ def test_validate_currency_rejects_usdc_with_non_digital_delivery_mechanism(
     dm = DeliveryMechanismFactory(transfer_type=DeliveryMechanism.TransferType.CASH)
 
     with django_assert_num_queries(0), pytest.raises(ValidationError, match="Transfer to Digital Wallet"):
-        PaymentPlanService.validate_currency_for_delivery_mechanism(currency_usdc, dm)
+        PaymentListService.validate_currency_for_delivery_mechanism(currency_usdc, dm)
 
 
 def test_validate_currency_rejects_non_usdc_with_digital_delivery_mechanism(
@@ -156,7 +156,7 @@ def test_validate_currency_rejects_non_usdc_with_digital_delivery_mechanism(
     dm = DeliveryMechanismFactory(transfer_type=DeliveryMechanism.TransferType.DIGITAL)
 
     with django_assert_num_queries(0), pytest.raises(ValidationError, match="Transfer to Digital Wallet"):
-        PaymentPlanService.validate_currency_for_delivery_mechanism(currency_pln, dm)
+        PaymentListService.validate_currency_for_delivery_mechanism(currency_pln, dm)
 
 
 def test_validate_currency_accepts_usdc_with_digital_delivery_mechanism(
@@ -165,7 +165,7 @@ def test_validate_currency_accepts_usdc_with_digital_delivery_mechanism(
     dm = DeliveryMechanismFactory(transfer_type=DeliveryMechanism.TransferType.DIGITAL)
 
     with django_assert_num_queries(0):
-        PaymentPlanService.validate_currency_for_delivery_mechanism(currency_usdc, dm)
+        PaymentListService.validate_currency_for_delivery_mechanism(currency_usdc, dm)
 
 
 @pytest.fixture
@@ -181,7 +181,7 @@ def household_paid_in_both_syp_denominations(
     currency_usd: Currency, syp_denominations: tuple[Currency, Currency]
 ) -> Household:
     deprecated_syp, active_syp = syp_denominations
-    pp = PaymentPlanFactory()
+    pp = PaymentListFactory()
     household = HouseholdFactory(
         currency=currency_usd,
         business_area=pp.business_area,
@@ -195,7 +195,7 @@ def household_paid_in_both_syp_denominations(
         delivered_quantity_usd=Decimal("1.00"),
     )
     # One Payment per (plan, household), so the second denomination needs its own plan.
-    pp2 = PaymentPlanFactory(program_cycle=pp.program_cycle, business_area=pp.business_area)
+    pp2 = PaymentListFactory(program_cycle=pp.program_cycle, business_area=pp.business_area)
     PaymentFactory(
         parent=pp2,
         household=household,
@@ -208,7 +208,7 @@ def household_paid_in_both_syp_denominations(
 
 @pytest.fixture
 def household_paid_in_pln(currency_usd: Currency, currency_pln: Currency) -> Household:
-    pp = PaymentPlanFactory()
+    pp = PaymentListFactory()
     household = HouseholdFactory(
         currency=currency_usd,
         business_area=pp.business_area,

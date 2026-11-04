@@ -12,7 +12,7 @@
                 "created_by": "df7e1ae7-1fd6-44a9-98fc-22b2d761ea27",
                 "number_of_recipients": 0,
                 "business_area": "06e0d68e-f5d1-4da7-af5d-db35afe71e4b",
-                "payment_plan": null,
+                "payment_list": null,
                 "registration_data_import": null,
                 "sampling_type": "FULL_LIST",
                 "full_list_arguments": {

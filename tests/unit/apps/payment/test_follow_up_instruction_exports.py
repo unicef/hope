@@ -18,7 +18,7 @@ from extras.test_utils.factories import (
     HouseholdFactory,
     PaymentFactory,
     PaymentHouseholdSnapshotFactory,
-    PaymentPlanFactory,
+    PaymentListFactory,
     ProgramCycleFactory,
     ProgramFactory,
     UserFactory,
@@ -32,10 +32,10 @@ from hope.apps.payment.xlsx.xlsx_follow_up_instruction_base_export_service impor
 from hope.apps.payment.xlsx.xlsx_follow_up_instruction_delivery_export_service import (
     XlsxFollowUpInstructionDeliveryExportService,
 )
-from hope.apps.payment.xlsx.xlsx_payment_plan_delivery_export_service import (
-    XlsxPaymentPlanDeliveryExportService,
+from hope.apps.payment.xlsx.xlsx_payment_list_delivery_export_service import (
+    XlsxPaymentListDeliveryExportService,
 )
-from hope.models import FileTemp, FollowUpInstruction, Payment, PaymentPlan
+from hope.models import FileTemp, FollowUpInstruction, Payment, PaymentList
 
 pytestmark = pytest.mark.django_db
 
@@ -91,33 +91,33 @@ def instruction(user, program, business_area):
 
 
 @pytest.fixture
-def child_payment_plans(instruction, cycle, business_area, currency, delivery_mechanism, fsp):
-    plan_one = PaymentPlanFactory(
+def child_payment_lists(instruction, cycle, business_area, currency, delivery_mechanism, fsp):
+    plan_one = PaymentListFactory(
         program_cycle=cycle,
         business_area=business_area,
         currency=currency,
         delivery_mechanism=delivery_mechanism,
         financial_service_provider=fsp,
         follow_up_instruction=instruction,
-        plan_type=PaymentPlan.PlanType.FOLLOW_UP,
-        status=PaymentPlan.Status.ACCEPTED,
+        plan_type=PaymentList.PlanType.FOLLOW_UP,
+        status=PaymentList.Status.ACCEPTED,
     )
-    plan_two = PaymentPlanFactory(
+    plan_two = PaymentListFactory(
         program_cycle=cycle,
         business_area=business_area,
         currency=currency,
         delivery_mechanism=delivery_mechanism,
         financial_service_provider=fsp,
         follow_up_instruction=instruction,
-        plan_type=PaymentPlan.PlanType.FOLLOW_UP,
-        status=PaymentPlan.Status.ACCEPTED,
+        plan_type=PaymentList.PlanType.FOLLOW_UP,
+        status=PaymentList.Status.ACCEPTED,
     )
     return plan_one, plan_two
 
 
 @pytest.fixture
-def instruction_payments(child_payment_plans, fsp, delivery_mechanism, currency):
-    plan_one, plan_two = child_payment_plans
+def instruction_payments(child_payment_lists, fsp, delivery_mechanism, currency):
+    plan_one, plan_two = child_payment_lists
     shared_household = HouseholdFactory(business_area=plan_one.business_area, program=plan_one.program)
     payment_one = PaymentFactory(
         parent=plan_one,
@@ -195,10 +195,10 @@ def delivery_template(fsp, delivery_mechanism):
 
 
 @pytest.fixture
-def child_payment_plans_in_inactive_currency(instruction, child_payment_plans, currency_syp_deprecated):
+def child_payment_lists_in_inactive_currency(instruction, child_payment_lists, currency_syp_deprecated):
     instruction.currency = currency_syp_deprecated
     instruction.save(update_fields=["currency"])
-    return child_payment_plans
+    return child_payment_lists
 
 
 @pytest.fixture
@@ -285,7 +285,7 @@ def test_delivery_export_includes_fsp_extra_field_from_later_child_plan(
 
 def test_delivery_export_refuses_instruction_in_inactive_currency(
     instruction,
-    child_payment_plans_in_inactive_currency,
+    child_payment_lists_in_inactive_currency,
     delivery_template,
 ):
     with pytest.raises(ValueError, match=r"currency SYP - Syrian Pound \(old\) is inactive"):
@@ -313,12 +313,12 @@ class _MinimalExportService(XlsxFollowUpInstructionBaseExportService):
         return {}
 
 
-def test_get_representative_payment_plan_raises_when_no_child_plans(instruction: Any) -> None:
-    with pytest.raises(ValueError, match="Follow Up Instruction has no child Payment Plans."):
+def test_get_representative_payment_list_raises_when_no_child_plans(instruction: Any) -> None:
+    with pytest.raises(ValueError, match="Follow Up Instruction has no child Payment Lists."):
         _MinimalExportService(instruction)
 
 
-def test_prepare_headers_removes_household_unicef_id(instruction: Any, child_payment_plans: Any) -> None:
+def test_prepare_headers_removes_household_unicef_id(instruction: Any, child_payment_lists: Any) -> None:
     class _ServiceWithUnicefId(_MinimalExportService):
         def get_source_headers(self) -> list[str]:
             return ["household_unicef_id", "entitlement_quantity"]
@@ -388,7 +388,7 @@ def test_merge_rows_keeps_existing_non_summable_field_when_already_set() -> None
 
 def test_save_xlsx_file_removes_existing_export_file(
     instruction: Any,
-    child_payment_plans: Any,
+    child_payment_lists: Any,
     user: Any,
 ) -> None:
     old_file = FileTempFactory()
@@ -412,7 +412,7 @@ def test_save_xlsx_file_removes_existing_export_file(
 def test_delivery_export_marks_xlsx_export_error_on_exception(
     mock_save_xlsx_file: Mock,
     instruction,
-    child_payment_plans,
+    child_payment_lists,
     delivery_template,
     user,
 ) -> None:
@@ -426,27 +426,27 @@ def test_delivery_export_marks_xlsx_export_error_on_exception(
     assert instruction.background_action_status == FollowUpInstruction.BackgroundActionStatus.XLSX_EXPORT_ERROR
 
 
-def test_get_source_headers_raises_when_child_plan_has_no_fsp(instruction, child_payment_plans) -> None:
+def test_get_source_headers_raises_when_child_plan_has_no_fsp(instruction, child_payment_lists) -> None:
     instruction.financial_service_provider = None
     instruction.save(update_fields=["financial_service_provider"])
 
     with pytest.raises(
-        ValueError, match="Child Payment Plans must define Financial Service Provider and Delivery Mechanism."
+        ValueError, match="Child Payment Lists must define Financial Service Provider and Delivery Mechanism."
     ):
         XlsxFollowUpInstructionDeliveryExportService(instruction)
 
 
-def test_get_source_headers_raises_when_fsp_xlsx_template_not_found(instruction, child_payment_plans) -> None:
-    with patch.object(XlsxPaymentPlanDeliveryExportService, "get_template", return_value=None):
-        with pytest.raises(ValueError, match="FSP XLSX template not found for child Payment Plan delivery export."):
+def test_get_source_headers_raises_when_fsp_xlsx_template_not_found(instruction, child_payment_lists) -> None:
+    with patch.object(XlsxPaymentListDeliveryExportService, "get_template", return_value=None):
+        with pytest.raises(ValueError, match="FSP XLSX template not found for child Payment List delivery export."):
             XlsxFollowUpInstructionDeliveryExportService(instruction)
 
 
 def test_get_payment_row_data_raises_when_service_not_initialized(
-    instruction, child_payment_plans, delivery_template
+    instruction, child_payment_lists, delivery_template
 ) -> None:
     service = XlsxFollowUpInstructionDeliveryExportService(instruction)
-    service.payment_plan_delivery_export_service = None
+    service.payment_list_delivery_export_service = None
 
-    with pytest.raises(ValueError, match="Payment Plan delivery export service is not initialized."):
+    with pytest.raises(ValueError, match="Payment List delivery export service is not initialized."):
         service.get_payment_row_data(Mock())

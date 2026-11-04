@@ -12,7 +12,7 @@ from extras.test_utils.factories import (
     CurrencyFactory,
     PaymentFactory,
     PaymentHouseholdSnapshotFactory,
-    PaymentPlanFactory,
+    PaymentListFactory,
     PaymentPlanPurposeFactory,
     ProgramCycleFactory,
     ProgramFactory,
@@ -20,8 +20,8 @@ from extras.test_utils.factories import (
 )
 from hope.apps.account.permissions import Permissions
 from hope.apps.payment.services.top_up_amount_service import TopUpAmountTemplateService
-from hope.apps.payment.xlsx.xlsx_payment_plan_base_service import XlsxPaymentPlanBaseService
-from hope.models import Payment, PaymentPlan, PaymentPlanGroup, Program
+from hope.apps.payment.xlsx.xlsx_payment_list_base_service import XlsxPaymentListBaseService
+from hope.models import Payment, PaymentList, PaymentPlan, Program
 
 pytestmark = pytest.mark.django_db
 
@@ -36,12 +36,12 @@ def top_up_context(api_client: Callable, create_user_role_with_permissions: Any)
     cycle = ProgramCycleFactory(program=program)
     purpose = PaymentPlanPurposeFactory()
     program.payment_plan_purposes.add(purpose)
-    source_pp = PaymentPlanFactory(
+    source_pp = PaymentListFactory(
         name="Standard PP",
         business_area=business_area,
         program_cycle=cycle,
-        plan_type=PaymentPlan.PlanType.REGULAR,
-        status=PaymentPlan.Status.ACCEPTED,
+        plan_type=PaymentList.PlanType.REGULAR,
+        status=PaymentList.Status.ACCEPTED,
         currency=CurrencyFactory(code="USD"),
         payment_plan_purposes=[purpose],
     )
@@ -53,31 +53,31 @@ def top_up_context(api_client: Callable, create_user_role_with_permissions: Any)
             snapshot_data={"unicef_id": payment.household.unicef_id, "size": payment.household.size},
         )
     create_user_role_with_permissions(user, [Permissions.PM_CREATE], business_area, program)
-    source_group = source_pp.payment_plan_group
-    source_group.status = PaymentPlanGroup.Status.ACCEPTED
-    source_group.save(update_fields=["status"])
+    source_payment_plan = source_pp.payment_plan
+    source_payment_plan.status = PaymentPlan.Status.ACCEPTED
+    source_payment_plan.save(update_fields=["status"])
     url_kwargs = {
         "business_area_slug": business_area.slug,
         "program_code": program.code,
-        "pk": source_group.pk,
+        "pk": source_payment_plan.pk,
     }
     return {
         "source_pp": source_pp,
-        "source_group": source_group,
+        "source_payment_plan": source_payment_plan,
         "payments": payments,
         "client": api_client(user),
-        "template_url": reverse("api:payments:payment-plan-groups-top-up-amount-template", kwargs=url_kwargs),
-        "create_url": reverse("api:payments:payment-plan-groups-create-top-up", kwargs=url_kwargs),
+        "template_url": reverse("api:payments:payment-plans-top-up-amount-template", kwargs=url_kwargs),
+        "create_url": reverse("api:payments:payment-plans-create-top-up", kwargs=url_kwargs),
     }
 
 
-def _amount_file(source_pp: PaymentPlan, amounts_by_payment_id: dict[str, str | None]) -> SimpleUploadedFile:
+def _amount_file(source_pp: PaymentList, amounts_by_payment_id: dict[str, str | None]) -> SimpleUploadedFile:
     """Build a filled-in amount template. Payment ids missing from the mapping are left blank."""
     workbook = TopUpAmountTemplateService([source_pp]).generate_workbook()
     worksheet = workbook.active
     headers = [cell.value for cell in worksheet[1]]
-    payment_id_column = headers.index(XlsxPaymentPlanBaseService.COLUMN_PAYMENT_ID) + 1
-    amount_column = headers.index(XlsxPaymentPlanBaseService.COLUMN_ENTITLEMENT_QUANTITY) + 1
+    payment_id_column = headers.index(XlsxPaymentListBaseService.COLUMN_PAYMENT_ID) + 1
+    amount_column = headers.index(XlsxPaymentListBaseService.COLUMN_ENTITLEMENT_QUANTITY) + 1
     for row_index in range(2, worksheet.max_row + 1):
         payment_id = worksheet.cell(row=row_index, column=payment_id_column).value
         worksheet.cell(row=row_index, column=amount_column).value = amounts_by_payment_id.get(str(payment_id))
@@ -95,7 +95,7 @@ def test_top_up_amount_template_arrange_eligible_payments_act_get_assert_rows_wi
     assert response.status_code == status.HTTP_200_OK
     worksheet = openpyxl.load_workbook(BytesIO(response.content)).active
     headers = [cell.value for cell in worksheet[1]]
-    amount_column = headers.index(XlsxPaymentPlanBaseService.COLUMN_ENTITLEMENT_QUANTITY) + 1
+    amount_column = headers.index(XlsxPaymentListBaseService.COLUMN_ENTITLEMENT_QUANTITY) + 1
     assert worksheet.max_row == 4
     assert {worksheet.cell(row=row, column=amount_column).value for row in range(2, 5)} == {None}
 
@@ -126,7 +126,7 @@ def test_create_top_up_arrange_amount_file_act_post_assert_only_funded_copied(
         )
 
     assert response.status_code == status.HTTP_201_CREATED
-    top_up = PaymentPlan.objects.get(payment_plan_group_id=response.json()["id"])
+    top_up = PaymentList.objects.get(payment_plan_id=response.json()["id"])
     assert list(top_up.payment_items.values_list("source_payment_id", flat=True)) == [funded.id]
 
 
@@ -169,8 +169,8 @@ def test_create_top_up_arrange_amount_file_with_foreign_payment_act_post_assert_
     workbook = TopUpAmountTemplateService([top_up_context["source_pp"]]).generate_workbook()
     worksheet = workbook.active
     headers = [cell.value for cell in worksheet[1]]
-    worksheet.cell(row=2, column=headers.index(XlsxPaymentPlanBaseService.COLUMN_PAYMENT_ID) + 1).value = "RCPT-NOPE"
-    worksheet.cell(row=2, column=headers.index(XlsxPaymentPlanBaseService.COLUMN_ENTITLEMENT_QUANTITY) + 1).value = 5
+    worksheet.cell(row=2, column=headers.index(XlsxPaymentListBaseService.COLUMN_PAYMENT_ID) + 1).value = "RCPT-NOPE"
+    worksheet.cell(row=2, column=headers.index(XlsxPaymentListBaseService.COLUMN_ENTITLEMENT_QUANTITY) + 1).value = 5
     buffer = BytesIO()
     workbook.save(buffer)
     buffer.seek(0)
@@ -197,11 +197,11 @@ def test_create_top_up_arrange_negative_amount_in_file_act_post_assert_400(top_u
 
 
 def test_top_up_amount_template_arrange_open_group_act_get_assert_400(top_up_context: dict[str, Any]) -> None:
-    source_group = top_up_context["source_group"]
-    source_group.status = PaymentPlanGroup.Status.OPEN
-    source_group.save(update_fields=["status"])
+    source_payment_plan = top_up_context["source_payment_plan"]
+    source_payment_plan.status = PaymentPlan.Status.OPEN
+    source_payment_plan.save(update_fields=["status"])
 
     response = top_up_context["client"].get(top_up_context["template_url"])
 
     assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert "No Payment Plan in this group qualifies for a Top Up" in str(response.json())
+    assert "No Payment List in this payment plan qualifies for a Top Up" in str(response.json())

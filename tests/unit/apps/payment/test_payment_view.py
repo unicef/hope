@@ -15,14 +15,14 @@ from extras.test_utils.factories import (
     IndividualFactory,
     IndividualRoleInHouseholdFactory,
     PaymentFactory,
-    PaymentPlanFactory,
+    PaymentListFactory,
     ProgramCycleFactory,
     ProgramFactory,
     UserFactory,
 )
 from hope.apps.account.permissions import Permissions
 from hope.apps.household.const import ROLE_ALTERNATE
-from hope.models import DataCollectingType, Payment, PaymentPlan, Program
+from hope.models import DataCollectingType, Payment, PaymentList, Program
 
 pytestmark = pytest.mark.django_db
 
@@ -65,16 +65,16 @@ def payment_context(
     cycle: Any,
     fsp_xlsx: Any,
 ) -> dict[str, Any]:
-    payment_plan = PaymentPlanFactory(
+    payment_list = PaymentListFactory(
         name="Payment Plan",
         business_area=business_area,
         program_cycle=cycle,
-        status=PaymentPlan.Status.DRAFT,
+        status=PaymentList.Status.DRAFT,
         created_by=user,
         financial_service_provider=fsp_xlsx,
     )
     payment = PaymentFactory(
-        parent=payment_plan,
+        parent=payment_list,
         status=Payment.STATUS_SUCCESS,
         delivered_quantity=999,
         entitlement_quantity=112,
@@ -86,12 +86,12 @@ def payment_context(
     url_kwargs = {
         "business_area_slug": business_area.slug,
         "program_code": program_active.code,
-        "payment_plan_pk": payment_plan.pk,
+        "payment_list_pk": payment_list.pk,
     }
     url_kwargs_with_payment = {
         "business_area_slug": business_area.slug,
         "program_code": program_active.code,
-        "payment_plan_pk": payment_plan.pk,
+        "payment_list_pk": payment_list.pk,
         "payment_id": payment.pk,
     }
     return {
@@ -99,7 +99,7 @@ def payment_context(
         "user": user,
         "program_active": program_active,
         "client": api_client(user),
-        "payment_plan": payment_plan,
+        "payment_list": payment_list,
         "payment": payment,
         "url_list": reverse("api:payments:payments-list", kwargs=url_kwargs),
         "url_details": reverse("api:payments:payments-detail", kwargs=url_kwargs_with_payment),
@@ -123,13 +123,13 @@ def not_eligible_payment_context(
     payment.conflicted = True
     payment.save(update_fields=["status", "conflicted"])
     excluded_payment = PaymentFactory(
-        parent=payment_context["payment_plan"],
+        parent=payment_context["payment_list"],
         program=payment_context["program_active"],
         status=Payment.STATUS_NOT_ELIGIBLE,
         excluded=True,
     )
     invalid_wallet_payment = PaymentFactory(
-        parent=payment_context["payment_plan"],
+        parent=payment_context["payment_list"],
         program=payment_context["program_active"],
         status=Payment.STATUS_NOT_ELIGIBLE,
         has_valid_wallet=False,
@@ -137,7 +137,7 @@ def not_eligible_payment_context(
     url_kwargs = {
         "business_area_slug": payment_context["business_area"].slug,
         "program_code": payment_context["program_active"].code,
-        "payment_plan_pk": payment_context["payment_plan"].pk,
+        "payment_list_pk": payment_context["payment_list"].pk,
     }
     return {
         **payment_context,
@@ -196,11 +196,11 @@ def payment_people_context(
         cycle=False,
     )
     cycle = ProgramCycleFactory(program=program, title="Cycle Payments People")
-    payment_plan = PaymentPlanFactory(
+    payment_list = PaymentListFactory(
         name="Payment Plan",
         business_area=business_area,
         program_cycle=cycle,
-        status=PaymentPlan.Status.DRAFT,
+        status=PaymentList.Status.DRAFT,
         created_by=user,
     )
     head = IndividualFactory(
@@ -218,7 +218,7 @@ def payment_people_context(
     )
     IndividualRoleInHouseholdFactory(household=household, individual=head, role=ROLE_ALTERNATE)
     payment = PaymentFactory(
-        parent=payment_plan,
+        parent=payment_list,
         status=Payment.STATUS_SUCCESS,
         delivered_quantity=999,
         entitlement_quantity=112,
@@ -231,14 +231,14 @@ def payment_people_context(
     url_kwargs = {
         "business_area_slug": business_area.slug,
         "program_code": program.code,
-        "payment_plan_pk": payment_plan.pk,
+        "payment_list_pk": payment_list.pk,
     }
     return {
         "business_area": business_area,
         "user": user,
         "program_active": program,
         "client": api_client(user),
-        "payment_plan": payment_plan,
+        "payment_list": payment_list,
         "payment": payment,
         "url_list": reverse("api:payments:payments-list", kwargs=url_kwargs),
     }
@@ -284,7 +284,7 @@ def test_get_list_for_people(
         payment_people_context["business_area"],
         payment_people_context["program_active"],
     )
-    assert payment_people_context["payment_plan"].is_social_worker_program is True
+    assert payment_people_context["payment_list"].is_social_worker_program is True
 
     response = payment_people_context["client"].get(payment_people_context["url_list"])
 
@@ -606,7 +606,7 @@ def test_non_superuser_cannot_access_not_eligible_payment_collections(
         kwargs={
             "business_area_slug": authorized_payment_context["business_area"].slug,
             "program_code": authorized_payment_context["program_active"].code,
-            "payment_plan_pk": authorized_payment_context["payment_plan"].pk,
+            "payment_list_pk": authorized_payment_context["payment_list"].pk,
         },
     )
 
@@ -637,8 +637,8 @@ def test_filter_by_individual_unicef_id(
     )
     payment_people_context["program_active"].data_collecting_type.type = DataCollectingType.Type.SOCIAL
     payment_people_context["program_active"].data_collecting_type.save()
-    payment_people_context["payment_plan"].refresh_from_db()
-    assert payment_people_context["payment_plan"].is_social_worker_program is True
+    payment_people_context["payment_list"].refresh_from_db()
+    assert payment_people_context["payment_list"].is_social_worker_program is True
     ind = payment_people_context["payment"].household.head_of_household
     response = payment_people_context["client"].get(
         payment_people_context["url_list"] + f"?individual_unicef_id={ind.unicef_id}"

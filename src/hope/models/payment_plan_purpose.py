@@ -6,7 +6,7 @@ from django.db import models
 from django.db.models import Exists, OuterRef, QuerySet
 from django.utils.translation import gettext_lazy as _
 
-from hope.models.payment_plan import PaymentPlan
+from hope.models.payment_list import PaymentList
 from hope.models.utils import LongNameIndex, TimeStampedUUIDModel, UnicefIdentifiedModel
 
 if TYPE_CHECKING:
@@ -45,7 +45,7 @@ class PaymentPlanPurpose(TimeStampedUUIDModel, UnicefIdentifiedModel):
     ) -> QuerySet["PaymentPlanPurpose"]:
         return qs.annotate(
             is_used_in_pp=Exists(
-                PaymentPlan.objects.filter(
+                PaymentList.objects.filter(
                     program_cycle__program=program,
                     payment_plan_purposes=OuterRef("pk"),
                 )

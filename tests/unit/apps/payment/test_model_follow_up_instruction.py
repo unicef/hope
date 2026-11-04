@@ -13,13 +13,13 @@ from extras.test_utils.factories import (
     FollowUpInstructionFactory,
     HouseholdFactory,
     PaymentFactory,
-    PaymentPlanFactory,
+    PaymentListFactory,
     ProgramCycleFactory,
     ProgramFactory,
     UserFactory,
 )
 from hope.apps.payment.flows import FollowUpInstructionFlow
-from hope.models import Approval, FollowUpInstruction, PaymentPlan
+from hope.models import Approval, FollowUpInstruction, PaymentList
 
 pytestmark = pytest.mark.django_db
 
@@ -69,13 +69,13 @@ def released_instruction(user, business_area, program, cycle):
         program=program,
         dispersion_end_date=date(2000, 11, 11),
     )
-    plan = PaymentPlanFactory(
+    plan = PaymentListFactory(
         program_cycle=cycle,
         business_area=business_area,
         follow_up_instruction=instruction,
-        payment_plan_group=None,
-        plan_type=PaymentPlan.PlanType.FOLLOW_UP,
-        status=PaymentPlan.Status.ACCEPTED,
+        payment_plan=None,
+        plan_type=PaymentList.PlanType.FOLLOW_UP,
+        status=PaymentList.Status.ACCEPTED,
     )
     process = ApprovalProcessFactory(follow_up_instruction=instruction)
     approval = ApprovalFactory(approval_process=process, type=Approval.FINANCE_RELEASE)
@@ -94,7 +94,7 @@ def test_instruction_currency_exchange_date_uses_finance_release(released_instru
     assert plan_exchange_date == instruction_exchange_date
 
 
-def test_follow_up_instruction_status_uses_child_payment_plan_precedence(
+def test_follow_up_instruction_status_uses_child_payment_list_precedence(
     user,
     business_area,
     program,
@@ -108,25 +108,25 @@ def test_follow_up_instruction_status_uses_child_payment_plan_precedence(
         program=program,
         created_by=user,
     )
-    PaymentPlanFactory(
+    PaymentListFactory(
         program_cycle=cycle,
         business_area=business_area,
         currency=currency,
         delivery_mechanism=delivery_mechanism,
         financial_service_provider=fsp,
         follow_up_instruction=instruction,
-        plan_type=PaymentPlan.PlanType.FOLLOW_UP,
-        status=PaymentPlan.Status.ACCEPTED,
+        plan_type=PaymentList.PlanType.FOLLOW_UP,
+        status=PaymentList.Status.ACCEPTED,
     )
-    PaymentPlanFactory(
+    PaymentListFactory(
         program_cycle=cycle,
         business_area=business_area,
         currency=currency,
         delivery_mechanism=delivery_mechanism,
         financial_service_provider=fsp,
         follow_up_instruction=instruction,
-        plan_type=PaymentPlan.PlanType.FOLLOW_UP,
-        status=PaymentPlan.Status.OPEN,
+        plan_type=PaymentList.PlanType.FOLLOW_UP,
+        status=PaymentList.Status.OPEN,
     )
 
     assert instruction.status == FollowUpInstruction.Status.OPEN
@@ -146,31 +146,31 @@ def test_follow_up_instruction_payments_summary_aggregates_only_eligible_payment
         program=program,
         created_by=user,
     )
-    payment_plan_one = PaymentPlanFactory(
+    payment_list_one = PaymentListFactory(
         program_cycle=cycle,
         business_area=business_area,
         currency=currency,
         delivery_mechanism=delivery_mechanism,
         financial_service_provider=fsp,
         follow_up_instruction=instruction,
-        plan_type=PaymentPlan.PlanType.FOLLOW_UP,
+        plan_type=PaymentList.PlanType.FOLLOW_UP,
     )
-    payment_plan_two = PaymentPlanFactory(
+    payment_list_two = PaymentListFactory(
         program_cycle=cycle,
         business_area=business_area,
         currency=currency,
         delivery_mechanism=delivery_mechanism,
         financial_service_provider=fsp,
         follow_up_instruction=instruction,
-        plan_type=PaymentPlan.PlanType.FOLLOW_UP,
+        plan_type=PaymentList.PlanType.FOLLOW_UP,
     )
-    shared_household = HouseholdFactory(business_area=payment_plan_one.business_area, program=payment_plan_one.program)
+    shared_household = HouseholdFactory(business_area=payment_list_one.business_area, program=payment_list_one.program)
     PaymentFactory(
-        parent=payment_plan_one,
+        parent=payment_list_one,
         household=shared_household,
         collector=shared_household.head_of_household,
         head_of_household=shared_household.head_of_household,
-        program=payment_plan_one.program,
+        program=payment_list_one.program,
         currency=currency,
         delivery_type=delivery_mechanism,
         financial_service_provider=fsp,
@@ -178,11 +178,11 @@ def test_follow_up_instruction_payments_summary_aggregates_only_eligible_payment
         delivered_quantity=Decimal("10.00"),
     )
     PaymentFactory(
-        parent=payment_plan_two,
+        parent=payment_list_two,
         household=shared_household,
         collector=shared_household.head_of_household,
         head_of_household=shared_household.head_of_household,
-        program=payment_plan_two.program,
+        program=payment_list_two.program,
         currency=currency,
         delivery_type=delivery_mechanism,
         financial_service_provider=fsp,
@@ -190,8 +190,8 @@ def test_follow_up_instruction_payments_summary_aggregates_only_eligible_payment
         delivered_quantity=Decimal("5.00"),
     )
     PaymentFactory(
-        parent=payment_plan_two,
-        program=payment_plan_two.program,
+        parent=payment_list_two,
+        program=payment_list_two.program,
         currency=currency,
         delivery_type=delivery_mechanism,
         financial_service_provider=fsp,
@@ -202,14 +202,14 @@ def test_follow_up_instruction_payments_summary_aggregates_only_eligible_payment
 
     summary = instruction.payments_summary()
 
-    assert summary["child_payment_plans_count"] == 2
+    assert summary["child_payment_lists_count"] == 2
     assert summary["households_count"] == 1
     assert summary["total_entitled_quantity"] == Decimal("140.00")
     assert summary["total_delivered_quantity"] == Decimal("15.00")
     assert summary["total_undelivered_quantity"] == Decimal("125.00")
 
 
-def test_instruction_managed_payment_plan_exposes_no_conflict_annotations(
+def test_instruction_managed_payment_list_exposes_no_conflict_annotations(
     user,
     business_area,
     program,
@@ -223,46 +223,46 @@ def test_instruction_managed_payment_plan_exposes_no_conflict_annotations(
         program=program,
         created_by=user,
     )
-    payment_plan = PaymentPlanFactory(
+    payment_list = PaymentListFactory(
         program_cycle=cycle,
         business_area=business_area,
         currency=currency,
         delivery_mechanism=delivery_mechanism,
         financial_service_provider=fsp,
         follow_up_instruction=instruction,
-        plan_type=PaymentPlan.PlanType.FOLLOW_UP,
+        plan_type=PaymentList.PlanType.FOLLOW_UP,
     )
     payment = PaymentFactory(
-        parent=payment_plan,
-        program=payment_plan.program,
+        parent=payment_list,
+        program=payment_list.program,
         currency=currency,
         delivery_type=delivery_mechanism,
         financial_service_provider=fsp,
     )
 
-    annotated_payment = payment_plan.eligible_payments_with_conflicts.get(pk=payment.pk)
+    annotated_payment = payment_list.eligible_payments_with_conflicts.get(pk=payment.pk)
 
-    assert payment_plan.is_instruction_managed is True
-    assert annotated_payment.payment_plan_hard_conflicted is False
-    assert annotated_payment.payment_plan_hard_conflicted_data == []
-    assert annotated_payment.payment_plan_soft_conflicted is False
-    assert annotated_payment.payment_plan_soft_conflicted_data == []
+    assert payment_list.is_instruction_managed is True
+    assert annotated_payment.payment_list_hard_conflicted is False
+    assert annotated_payment.payment_list_hard_conflicted_data == []
+    assert annotated_payment.payment_list_soft_conflicted is False
+    assert annotated_payment.payment_list_soft_conflicted_data == []
 
 
 def test_follow_up_instruction_flow_xlsx_export_error_from_exporting() -> None:
     instruction = FollowUpInstructionFactory(
-        background_action_status=PaymentPlan.BackgroundActionStatus.XLSX_EXPORTING,
+        background_action_status=PaymentList.BackgroundActionStatus.XLSX_EXPORTING,
     )
     FollowUpInstructionFlow(instruction).background_action_status_xlsx_export_error()
-    assert instruction.background_action_status == PaymentPlan.BackgroundActionStatus.XLSX_EXPORT_ERROR
+    assert instruction.background_action_status == PaymentList.BackgroundActionStatus.XLSX_EXPORT_ERROR
 
 
 def test_follow_up_instruction_flow_xlsx_import_error_from_importing_reconciliation() -> None:
     instruction = FollowUpInstructionFactory(
-        background_action_status=PaymentPlan.BackgroundActionStatus.XLSX_IMPORTING_RECONCILIATION,
+        background_action_status=PaymentList.BackgroundActionStatus.XLSX_IMPORTING_RECONCILIATION,
     )
     FollowUpInstructionFlow(instruction).background_action_status_xlsx_import_error()
-    assert instruction.background_action_status == PaymentPlan.BackgroundActionStatus.XLSX_IMPORT_ERROR
+    assert instruction.background_action_status == PaymentList.BackgroundActionStatus.XLSX_IMPORT_ERROR
 
 
 @pytest.fixture

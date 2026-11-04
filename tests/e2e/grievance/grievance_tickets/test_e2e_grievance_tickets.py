@@ -24,7 +24,7 @@ from extras.test_utils.factories import (
     IndividualFactory,
     IndividualRoleInHouseholdFactory,
     PaymentFactory,
-    PaymentPlanFactory,
+    PaymentListFactory,
     ProgramFactory,
     RegistrationDataImportFactory,
 )
@@ -140,13 +140,13 @@ def household_social_worker() -> Household:
 
 @pytest.fixture
 def hh_with_payment_record(household_without_disabilities: Household) -> Payment:
-    payment_plan = PaymentPlanFactory(
+    payment_list = PaymentListFactory(
         program_cycle=household_without_disabilities.program.cycles.first(),
         business_area=household_without_disabilities.business_area,
         created_by=User.objects.first(),
     )
     return PaymentFactory(
-        parent=payment_plan,
+        parent=payment_list,
         household=household_without_disabilities,
         delivered_quantity_usd=None,
         business_area=household_without_disabilities.business_area,
@@ -515,8 +515,8 @@ class TestSmokeGrievanceTickets:
         assert "Referral" in page_grievance_details_page.get_ticket_category().text
         assert "HH-20-0000.0002" in page_grievance_details_page.get_ticket_target_id().text
         assert "-" in page_grievance_details_page.get_ticket_payment_label().text
-        assert "-" in page_grievance_details_page.get_label_payment_plan().text
-        assert "-" in page_grievance_details_page.get_label_payment_plan_verification().text
+        assert "-" in page_grievance_details_page.get_label_payment_list().text
+        assert "-" in page_grievance_details_page.get_label_payment_list_verification().text
         assert "Shakardara" in page_grievance_details_page.get_administrative_level().text
         assert "English | English" in page_grievance_details_page.get_languages_spoken().text
         assert "-" in page_grievance_details_page.get_documentation().text
@@ -551,8 +551,8 @@ class TestSmokeGrievanceTickets:
         assert "Referral" in page_grievance_details_page.get_ticket_category().text
         assert "HH-20-0000.0002" in page_grievance_details_page.get_ticket_household_id().text
         assert "IND-74-0000.0001" in page_grievance_details_page.get_ticket_individual_id().text
-        assert "-" in page_grievance_details_page.get_label_payment_plan().text
-        assert "-" in page_grievance_details_page.get_label_payment_plan_verification().text
+        assert "-" in page_grievance_details_page.get_label_payment_list().text
+        assert "-" in page_grievance_details_page.get_label_payment_list_verification().text
         assert "Test Program" in page_grievance_details_page.get_label_programme().text
         assert "Shakardara" in page_grievance_details_page.get_administrative_level().text
         assert "Village 1" in page_grievance_details_page.get_area_village().text

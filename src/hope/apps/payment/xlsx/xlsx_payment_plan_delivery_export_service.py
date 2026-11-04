@@ -1,430 +1,309 @@
-from collections.abc import Iterable
-from io import BytesIO
-import logging
 from tempfile import NamedTemporaryFile
 from typing import TYPE_CHECKING, cast
-import zipfile
 
-from django.db.models import Q, QuerySet
+from django.contrib.admin.options import get_content_type_for_model
+from django.core.files import File
+from django.db import transaction
 from django.shortcuts import get_object_or_404
-from django.template.loader import render_to_string
-import msoffcrypto
+from django.urls import reverse
+from django.utils import timezone
+from django.utils.crypto import get_random_string
 import openpyxl
-from openpyxl import Workbook
-from openpyxl.worksheet.worksheet import Worksheet
+import pyzipper
 
-from hope.apps.core.field_attributes.core_fields_attributes import (
-    FieldFactory,
-    get_core_fields_attributes,
-)
-from hope.apps.payment.validators import generate_numeric_token
+from hope.apps.activity_log.utils import copy_model_object
+from hope.apps.payment.api.caches import invalidate_payment_list_list_cache
+from hope.apps.payment.utils import bulk_log_payment_changes, get_link, inactive_currency_reason
 from hope.apps.payment.xlsx.base_xlsx_export_service import XlsxExportBaseService
-from hope.apps.utils.exceptions import log_and_raise
+from hope.apps.payment.xlsx.xlsx_payment_list_delivery_export_service import (
+    XlsxPaymentListDeliveryExportService,
+)
 from hope.models import (
-    DeliveryMechanism,
-    DocumentType,
     FileTemp,
     FinancialServiceProviderXlsxTemplate,
-    FlexibleAttribute,
     FspXlsxTemplatePerDeliveryMechanism,
     Payment,
-    PaymentPlan,
-    Program,
+    PaymentList,
 )
 
 if TYPE_CHECKING:
-    from hope.models import FinancialServiceProvider, User
+    from hope.models import PaymentPlan, Program, User
 
-logger = logging.getLogger(__name__)
+
+class UnexportablePaymentListsError(Exception):
+    """Raised when at least one payment list of the payment plan cannot go into the export file.
+
+    The export is all or nothing: the FSP receives one file for the whole payment plan.
+    """
+
+    MESSAGE = "Export refused: not every payment list in the payment plan can be exported."
+
+    def __init__(self, skipped_reasons: list[str]) -> None:
+        self.skipped_reasons = skipped_reasons
+        super().__init__(self.MESSAGE)
 
 
 class XlsxPaymentPlanDeliveryExportService(XlsxExportBaseService):
-    @staticmethod
-    def build_shared_lookups() -> dict:
-        """Program-global lookups shared by every plan in a group/batch export.
+    """Export every payment list of a payment plan into one single-sheet xlsx.
 
-        These reference tables (areas, countries, document types, flexible attributes, core
-        fields) do not depend on the individual payment plan. Building them once and passing them
-        into each per-plan service avoids reloading the full Area/Country/DocumentType tables for
-        every payment plan in a group export.
-        """
-        return {
-            "flexible_attributes": {
-                flexible_attribute.name: flexible_attribute for flexible_attribute in FlexibleAttribute.objects.all()
-            },
-            "core_fields_attributes": FieldFactory(get_core_fields_attributes()).to_dict_by("name"),
-            "admin_areas_dict": FinancialServiceProviderXlsxTemplate.get_areas_dict(),
-            "countries_dict": FinancialServiceProviderXlsxTemplate.get_countries_dict(),
-            "all_document_types": DocumentType.get_all_doc_types(),
-        }
+    A payment plan is bound to a single FSP, so every exported payment list shares the same FSP XLSX
+    template and the sheet has a single, flat header. Exporting again replaces the payment plan's file.
+    """
+
+    TITLE = "Payment Plan - Payment List"
+    batch_size = 2000
 
     def __init__(
         self,
-        payment_plan: PaymentPlan,
+        payment_plan: "PaymentPlan",
         fsp_xlsx_template_id: str | None = None,
-        shared_lookups: dict | None = None,
-        fsp_extra_fields_headers: list[str] | None = None,
-    ):
-        self.batch_size = 2000
+    ) -> None:
         self.payment_plan = payment_plan
-        self.is_social_worker_program = self.payment_plan.is_social_worker_program
-        # TODO: in future will be per BA or program flag?
         self.payment_generate_token_and_order_numbers = True
-        if shared_lookups is None:
-            shared_lookups = self.build_shared_lookups()
-
-        self.flexible_attributes = shared_lookups["flexible_attributes"]
-        self.allow_export_fsp_auth_code = self.payment_plan.is_payment_gateway_and_all_sent_to_fsp
-        self.fsp_xlsx_template_id = fsp_xlsx_template_id
-        self.fsp_xlsx_template: FinancialServiceProviderXlsxTemplate | None = None
-        self.account_fields_headers = self.get_account_fields_headers(self.payment_plan)
-        self.add_accounts_fields = False
-        self.header_list = []
-        self.template_columns = []
-        self.core_fields = []
-        self.flex_fields = []
-        self.document_fields = []
-        self.fsp_extra_fields_headers = (
-            fsp_extra_fields_headers
-            if fsp_extra_fields_headers is not None
-            else self.get_fsp_extra_fields_headers(self.payment_plan.eligible_payments.only("extras"))
+        self.allow_export_fsp_auth_code = False
+        self.payment_lists = list(
+            payment_plan.payment_lists.select_related(
+                "payment_plan__financial_service_provider", "payment_plan__currency", "delivery_mechanism"
+            ).order_by("unicef_id")
         )
-        self.core_fields_attributes = shared_lookups["core_fields_attributes"]
-        self.admin_areas_dict = shared_lookups["admin_areas_dict"]
-        self.countries_dict = shared_lookups["countries_dict"]
-        self.all_document_types = shared_lookups["all_document_types"]
-
-    @staticmethod
-    def get_fsp_extra_fields_headers(payments: QuerySet[Payment]) -> list[str]:
-        headers: set[str] = set()
-        for payment in payments.iterator(chunk_size=2000):
-            headers.update(payment.fsp_extra_fields)
-        return sorted(headers)
-
-    @staticmethod
-    def generate_token_and_order_numbers(
-        qs: QuerySet[Payment],
-        program: Program,
-    ) -> None:
-        """Ensure order_number/token_number for all rows in qs."""
-        existing_orders: set[int] = cast(
-            "set[int]",
-            set(
-                Payment.objects.filter(order_number__isnull=False, parent__program_cycle__program=program).values_list(
-                    "order_number", flat=True
-                )
-            ),
+        self.plan_type: str = payment_plan.plan_type
+        self.exported_plan_ids: list = []
+        self.payments_to_mark_sent: list[Payment] = []
+        self.skipped_reasons: list[str] = []
+        self.fsp_xlsx_template: FinancialServiceProviderXlsxTemplate | None = (
+            get_object_or_404(FinancialServiceProviderXlsxTemplate, pk=fsp_xlsx_template_id)
+            if fsp_xlsx_template_id
+            else None
         )
-        existing_tokens: set[int] = cast(
-            "set[int]",
-            set(
-                Payment.objects.filter(token_number__isnull=False, parent__program_cycle__program=program).values_list(
-                    "token_number", flat=True
-                )
-            ),
-        )
+        self._template_map: dict[tuple, FinancialServiceProviderXlsxTemplate] | None = None
+        self._plans_with_blocking_payments: set | None = None
 
-        missing_qs = qs.filter(Q(order_number__isnull=True) | Q(token_number__isnull=True))
-        payments_ids = list(missing_qs.order_by("id").values_list("id", flat=True))
+    def _get_template_map(self) -> dict[tuple, FinancialServiceProviderXlsxTemplate]:
+        """Resolve every plan's (fsp, delivery_mechanism) -> xlsx_template in a single query."""
+        if self._template_map is None:
+            pairs = {
+                (pp.payment_plan.financial_service_provider_id, pp.delivery_mechanism_id)
+                for pp in self.payment_lists
+                if pp.payment_plan.financial_service_provider_id and pp.delivery_mechanism_id
+            }
+            mappings = FspXlsxTemplatePerDeliveryMechanism.objects.filter(
+                financial_service_provider_id__in={fsp_id for fsp_id, _ in pairs},
+                delivery_mechanism_id__in={dm_id for _, dm_id in pairs},
+            ).select_related("xlsx_template")
+            self._template_map = {
+                (m.financial_service_provider_id, m.delivery_mechanism_id): m.xlsx_template
+                for m in mappings
+                if (m.financial_service_provider_id, m.delivery_mechanism_id) in pairs
+            }
+        return self._template_map
 
-        if not payments_ids:
-            return
+    def _get_plans_with_blocking_payments(self) -> set:
+        """Plan ids that still have eligible payments not yet sent to the payment gateway.
 
-        payments: list[Payment] = list(qs.only("id", "order_number", "token_number"))
-        if not payments:  # pragma: no cover
-            return
-
-        to_update: list[Payment] = []
-
-        for payment in payments:
-            need_order = payment.order_number is None
-            need_token = payment.token_number is None
-
-            if not (need_order or need_token):  # pragma: no cover
-                continue
-
-            if need_order:
-                n9 = generate_numeric_token(9)
-                while n9 in existing_orders:  # pragma: no cover
-                    n9 = generate_numeric_token(9)
-                payment.order_number = n9
-                existing_orders.add(n9)
-
-            if need_token:
-                n7 = generate_numeric_token(7)
-                while n7 in existing_tokens:  # pragma: no cover
-                    n7 = generate_numeric_token(7)
-                payment.token_number = n7
-                existing_tokens.add(n7)
-
-            to_update.append(payment)
-
-        if to_update:
-            Payment.objects.bulk_update(to_update, ["order_number", "token_number"])
-
-    @staticmethod
-    def get_account_fields_headers(payment_plan: PaymentPlan) -> list[str]:
-        # Iterate over eligible payments to find the first with valid account_data.
-        # Use values_list to avoid Payment instances with deferred fields (N+1 on parent_id).
-        snapshot_data_qs = (
-            payment_plan.eligible_payments.filter(
-                Q(household_snapshot__snapshot_data__primary_collector__has_key="account_data")
-                | Q(household_snapshot__snapshot_data__alternate_collector__has_key="account_data")
+        Equivalent to PaymentList.is_payment_gateway_and_all_sent_to_fsp.
+        """
+        if self._plans_with_blocking_payments is None:
+            self._plans_with_blocking_payments = set(
+                Payment.objects.filter(parent__in=self.payment_lists)
+                .eligible()
+                .filter(status__in=(Payment.STATUS_PENDING, Payment.STATUS_SENT_TO_PG))
+                .values_list("parent_id", flat=True)
+                .distinct()
             )
-            .order_by("unicef_id")
-            .values_list("household_snapshot__snapshot_data", flat=True)
-        )
-        for snapshot_data_dict in snapshot_data_qs:
-            snapshot_data = snapshot_data_dict or {}
-            collector_data = (
-                snapshot_data.get("primary_collector", {}) or snapshot_data.get("alternate_collector", {}) or {}
-            )
-            account_data = collector_data.get("account_data", {})
-            if account_data:
-                headers = list(account_data.keys())
-                if "financial_institution_pk" not in headers:
-                    headers.append("financial_institution_pk")
-                if "financial_institution_name" not in headers:
-                    headers.append("financial_institution_name")
-                if "number" not in headers:
-                    headers.append("number")
-                return headers
-        return []
+        return self._plans_with_blocking_payments
 
-    @classmethod
-    def get_system_controlled_headers(
-        cls,
-        payment_plans: Iterable[PaymentPlan],
-    ) -> frozenset[str]:
-        headers = set(FinancialServiceProviderXlsxTemplate.DEFAULT_COLUMNS)
-        template_fields = FinancialServiceProviderXlsxTemplate.objects.values_list(
-            "core_fields",
-            "flex_fields",
-            "document_types",
-        )
-        for core_fields, flex_fields, document_types in template_fields.iterator():
-            headers.update(core_fields or ())
-            headers.update(flex_fields or ())
-            headers.update(document_types or ())
-        for payment_plan in payment_plans:
-            headers.update(cls.get_account_fields_headers(payment_plan))
-        return frozenset(headers)
-
-    def open_workbook(self, title: str) -> tuple[Workbook, Worksheet]:
-        wb = openpyxl.Workbook()
-        ws = wb.active
-        ws.title = title
-
-        return wb, ws
-
-    def get_template(
-        self, fsp: "FinancialServiceProvider", delivery_mechanism: DeliveryMechanism
-    ) -> FinancialServiceProviderXlsxTemplate | None:
-        if self.fsp_xlsx_template_id:
-            self.fsp_xlsx_template = get_object_or_404(
-                FinancialServiceProviderXlsxTemplate, pk=self.fsp_xlsx_template_id
-            )
+    def _resolve_template(self, payment_list: PaymentList) -> FinancialServiceProviderXlsxTemplate | None:
+        if self.fsp_xlsx_template is not None:
             return self.fsp_xlsx_template
+        fsp_id = payment_list.payment_plan.financial_service_provider_id
+        if not fsp_id or not payment_list.delivery_mechanism_id:
+            return None
+        return self._get_template_map().get((fsp_id, payment_list.delivery_mechanism_id))
 
-        fsp_xlsx_template_per_delivery_mechanism = FspXlsxTemplatePerDeliveryMechanism.objects.filter(
-            delivery_mechanism=delivery_mechanism,
-            financial_service_provider=fsp,
-        ).first()
-
-        if not fsp_xlsx_template_per_delivery_mechanism:
-            msg = (
-                f"Not possible to generate export file. "
-                f"There isn't any FSP XLSX Template assigned to Payment Plan {self.payment_plan.unicef_id} "
-                f"for FSP {fsp.name} and delivery mechanism {delivery_mechanism}."
+    def _skip_reason(
+        self, payment_list: PaymentList, template: FinancialServiceProviderXlsxTemplate | None
+    ) -> str | None:
+        """Return why `payment_list` would be left out of the export, or None if it would be included."""
+        if reason := inactive_currency_reason(payment_list):
+            return reason
+        if template is None:
+            return f"Payment List {payment_list.unicef_id}: no FSP XLSX Template for its FSP and delivery mechanism."
+        if (
+            payment_list.is_payment_gateway
+            and "fsp_auth_code" in template.columns
+            and payment_list.id in self._get_plans_with_blocking_payments()
+        ):
+            return (
+                f"Payment List {payment_list.unicef_id}: template requires fsp_auth_code "
+                f"but not all payments have been sent to the payment gateway yet."
             )
-            log_and_raise(msg)
-        self.fsp_xlsx_template = fsp_xlsx_template_per_delivery_mechanism.xlsx_template
-        return self.fsp_xlsx_template
+        return None
 
-    def _remove_column_for_people(self, fsp_template_columns: list[str]) -> list[str]:
-        """Remove columns and return list."""
-        if self.is_social_worker_program:
-            return list(
-                filter(
-                    lambda col_name: col_name not in ["household_id", "household_size"],
-                    fsp_template_columns,
-                )
-            )
-        return list(filter(lambda col_name: col_name != "individual_id", fsp_template_columns))
-
-    def _remove_core_fields_for_people(self, fsp_template_core_fields: list[str]) -> list[str]:
-        """Remove columns and return list."""
-        if self.is_social_worker_program:
-            return list(
-                filter(
-                    lambda col_name: col_name != "household_unicef_id",
-                    fsp_template_core_fields,
-                )
-            )
-        return list(fsp_template_core_fields)
-
-    def prepare_headers(self, fsp_xlsx_template: "FinancialServiceProviderXlsxTemplate") -> list[str]:
-        # get headers
-        column_list = list(FinancialServiceProviderXlsxTemplate.DEFAULT_COLUMNS)
-        if fsp_xlsx_template and fsp_xlsx_template.columns:
-            template_column_list = fsp_xlsx_template.columns
-            diff_columns = list(set(template_column_list).difference(set(column_list)))
-            if diff_columns:
-                msg = f"Please contact admin because we can't export columns: {diff_columns}"
-                log_and_raise(msg)
-            column_list = list(template_column_list)
-
-        # remove fsp_auth_code if exporting is not allowed
-        if not self.allow_export_fsp_auth_code and "fsp_auth_code" in column_list:
-            column_list.remove("fsp_auth_code")
-
-        self.add_accounts_fields = "account_data" in column_list
-        if self.add_accounts_fields:
-            column_list.remove("account_data")
-
-        column_list = self._remove_column_for_people(column_list)
-        self.template_columns = column_list.copy()
-
-        self.core_fields = self._remove_core_fields_for_people(fsp_xlsx_template.core_fields)
-        column_list.extend(self.core_fields)
-
-        self.flex_fields = list(fsp_xlsx_template.flex_fields)
-        column_list.extend(self.flex_fields)
-
-        self.document_fields = list(fsp_xlsx_template.document_types)
-        column_list.extend(self.document_fields)
-
-        # add headers for Account from FSP in PaymentPlan
-        if self.add_accounts_fields:
-            column_list.extend(self.account_fields_headers)
-
-        self.fsp_extra_fields_headers = [
-            header for header in self.fsp_extra_fields_headers if header not in column_list
+    def unexportable_reasons(self) -> list[str]:
+        """One reason per payment list that would keep the export from running; empty when it can run."""
+        return [
+            reason
+            for payment_list in self.payment_lists
+            if (reason := self._skip_reason(payment_list, self._resolve_template(payment_list))) is not None
         ]
-        column_list.extend(self.fsp_extra_fields_headers)
 
-        self.header_list = column_list
-        return self.header_list
+    def generate_token_and_order_numbers(self, program: "Program") -> None:
+        all_eligible = Payment.objects.filter(parent__in=self.payment_lists).eligible()
+        XlsxPaymentListDeliveryExportService.generate_token_and_order_numbers(all_eligible, program)
 
-    def get_payment_row(self, payment: Payment) -> list[str]:
-        payment_row = [
-            FinancialServiceProviderXlsxTemplate.get_column_value_from_payment(
-                payment, column_name, self.admin_areas_dict, self.all_document_types
-            )
-            for column_name in self.template_columns
-        ]
-        core_fields_row = [
-            FinancialServiceProviderXlsxTemplate.get_column_from_core_field(
-                payment, column_name, self.admin_areas_dict, self.countries_dict
-            )
-            for column_name in self.core_fields
-        ]
-        payment_row.extend(core_fields_row)
-        flex_field_row = [self._get_flex_field_by_name(column_name, payment) for column_name in self.flex_fields]
-        payment_row.extend(flex_field_row)
-        # get document number by document type key
-        documents_row = [
-            FinancialServiceProviderXlsxTemplate.get_column_value_from_payment(
-                payment,
-                doc_type_key,
-                self.admin_areas_dict,
-                self.all_document_types,
-            )
-            for doc_type_key in self.document_fields
-        ]
-        payment_row.extend(documents_row)
-
-        if self.add_accounts_fields:
-            accounts_row = [
-                FinancialServiceProviderXlsxTemplate.get_account_value_from_payment(payment, account_key)
-                for account_key in self.account_fields_headers
-            ]
-            payment_row.extend(accounts_row)
-
-        payment_row.extend(payment.fsp_extra_fields.get(header, "") for header in self.fsp_extra_fields_headers)
-
-        return list(map(self.right_format_for_xlsx, payment_row))
-
-    def _get_flex_field_by_name(self, name: str, payment: Payment) -> str:
-        attribute: FlexibleAttribute = self.flexible_attributes[name]
-
-        snapshot = getattr(payment, "household_snapshot", None)
-        if not snapshot:
-            logger.error(f"Not found snapshot for Payment {payment.unicef_id}")
+    def _filename_suffix(self) -> str:
+        if self.plan_type == PaymentList.PlanType.REGULAR:
             return ""
+        return f"_{self.plan_type.lower()}"
 
-        snapshot_data = snapshot.snapshot_data
-        primary_collector = snapshot_data.get("primary_collector", {})
-        alternate_collector = snapshot_data.get("alternate_collector", {})
-        collector_data = primary_collector or alternate_collector or {}
-
-        if attribute.associated_with == FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL:
-            return collector_data.get("flex_fields", {}).get(name, "")
-        return snapshot_data.get("flex_fields", {}).get(name, "")
-
-    @staticmethod
-    def save_workbook(
-        zip_file: zipfile.ZipFile,
-        wb: "Workbook",
-        filename: str,
-        password: str | None = None,
-    ) -> None:
-        with NamedTemporaryFile() as tmp:
-            wb.save(tmp.name)
-            tmp.seek(0)
-
-            if password:
-                # encrypt workbook
-                output = BytesIO()
-                office_file = msoffcrypto.OfficeFile(tmp)
-                office_file.load_key(password=password)
-                office_file.encrypt(password, output)
-                output.seek(0)
-                # add xlsx to zip
-                zip_file.writestr(filename, output.getvalue())
-            else:
-                # add xlsx to zip
-                zip_file.writestr(filename, tmp.read())
-
-    @staticmethod
-    def _send_file_passwords(user: "User", file_temp: FileTemp | None, title: str) -> None:
-        text_template = "payment/xlsx_file_password_email.txt"
-        html_template = "payment/xlsx_file_password_email.html"
-        zip_password = XlsxPaymentPlanDeliveryExportService._as_plain_text(file_temp.password if file_temp else None)
-        xlsx_password = XlsxPaymentPlanDeliveryExportService._as_plain_text(
-            file_temp.xlsx_password if file_temp else None
-        )
-        msg = (
-            f"{title} export file's Passwords.\n"
-            f"ZIP file password: {zip_password}\n"
-            f"XLSX file password: {xlsx_password}\n"
-        )
-        context = {
-            "first_name": getattr(user, "first_name", "") or getattr(user, "username", ""),
+    def get_email_context(self, user: "User") -> dict:
+        payment_plan = self.payment_plan
+        link = get_link(reverse("download-payment-plan-xlsx", args=[str(payment_plan.id)]))
+        return {
+            "first_name": getattr(user, "first_name", ""),
             "last_name": getattr(user, "last_name", ""),
             "email": getattr(user, "email", ""),
-            "message": msg,
-            "zip_password": zip_password,
-            "xlsx_password": xlsx_password,
-            "title": f"{title} file's Passwords",
-            "link": "",
+            "message": (
+                f"Payment Plan {payment_plan.unicef_id} Payment List xlsx file "
+                "was generated and below you have the link to download this file."
+            ),
+            "link": link or "",
+            "title": f"Payment Plan {payment_plan.unicef_id} Payment List Generated",
         }
-        user.email_user(
-            subject=context["title"],
-            html_body=render_to_string(html_template, context=context),
-            text_body=render_to_string(text_template, context=context),
+
+    def _invalidate_list_cache(self) -> None:
+        program = self.payment_plan.cycle.program
+        invalidate_payment_list_list_cache(program.business_area.slug, program.code)
+
+    def generate_workbook(self) -> openpyxl.Workbook:
+        self._create_workbook()
+
+        header: list[str] = []
+        prepared_services: list[XlsxPaymentListDeliveryExportService] = []
+        self.exported_plan_ids = []
+        self.payments_to_mark_sent = []
+        self.skipped_reasons = []
+
+        shared_lookups = XlsxPaymentListDeliveryExportService.build_shared_lookups()
+        payment_plan_fsp_extra_fields_headers = XlsxPaymentListDeliveryExportService.get_fsp_extra_fields_headers(
+            Payment.objects.filter(parent__in=self.payment_lists).eligible().only("extras")
         )
 
-    @staticmethod
-    def send_delivery_passwords_for_file(user: "User", file_temp: FileTemp | None, label: str) -> None:
-        XlsxPaymentPlanDeliveryExportService._send_file_passwords(user, file_temp, label)
+        for payment_list in self.payment_lists:
+            template = self._resolve_template(payment_list)
+            reason = self._skip_reason(payment_list, template)
+            if reason:
+                self.skipped_reasons.append(reason)
+                continue
+            per_fsp_service = XlsxPaymentListDeliveryExportService(
+                payment_list,
+                shared_lookups=shared_lookups,
+                fsp_extra_fields_headers=payment_plan_fsp_extra_fields_headers,
+            )
+            per_fsp_service.prepare_headers(cast("FinancialServiceProviderXlsxTemplate", template))
+            if not prepared_services:
+                self.allow_export_fsp_auth_code = per_fsp_service.allow_export_fsp_auth_code
+            header.extend(column for column in per_fsp_service.header_list if column not in header)
+            prepared_services.append(per_fsp_service)
+            self.exported_plan_ids.append(payment_list.id)
 
-    @staticmethod
-    def _as_plain_text(value: str | bytes | memoryview | None) -> str:
-        if value is None:
-            return ""
-        if isinstance(value, memoryview):
-            value = value.tobytes()
-        if isinstance(value, bytes):
-            return value.decode()
-        return str(value)
+        self.ws_export_list.append(header)
+
+        for per_fsp_service in prepared_services:
+            payments = per_fsp_service.payment_list.eligible_payments.select_related(
+                "household_snapshot", "currency", "delivery_type", "financial_service_provider", "parent"
+            ).order_by("unicef_id")
+            for payment in payments.iterator(chunk_size=self.batch_size):
+                payment_row = dict(
+                    zip(
+                        per_fsp_service.header_list,
+                        per_fsp_service.get_payment_row(payment),
+                        strict=True,
+                    )
+                )
+                self.ws_export_list.append([payment_row.get(column, "") for column in header])
+                if (
+                    not per_fsp_service.payment_list.is_payment_gateway
+                    and payment.status == Payment.STATUS_PENDING
+                    and payment.delivered_quantity is None
+                ):
+                    self.payments_to_mark_sent.append(payment)
+
+        self._adjust_column_width_from_col(ws=self.ws_export_list)
+        return self.wb
+
+    def save_xlsx_file(self, user: "User") -> None:
+        payment_plan = self.payment_plan
+        self.generate_workbook()
+        if self.skipped_reasons or not self.exported_plan_ids:
+            raise UnexportablePaymentListsError(self.skipped_reasons)
+
+        if self.allow_export_fsp_auth_code:
+            self._save_xlsx_file_with_auth_code(payment_plan, user)
+        else:
+            self._save_plain_xlsx_file(payment_plan, user)
+
+    def _mark_exported_payments_as_sent(self, user: "User") -> None:
+        if not self.payments_to_mark_sent:
+            return
+
+        status_date = timezone.now()
+        old_new_pairs: list[tuple[Payment | None, Payment]] = []
+        for payment in self.payments_to_mark_sent:
+            old_payment = cast("Payment", copy_model_object(payment))
+            payment.status = Payment.STATUS_SENT_TO_FSP
+            payment.status_date = status_date
+            payment.sent_to_fsp_date = status_date
+            old_new_pairs.append((old_payment, payment))
+
+        Payment.signature_manager.bulk_update_with_signature(
+            self.payments_to_mark_sent,
+            ("status", "status_date", "sent_to_fsp_date"),
+            batch_size=self.batch_size,
+        )
+        bulk_log_payment_changes(old_new_pairs, user)
+
+    def _attach_file(self, payment_plan: "PaymentPlan", file_temp: FileTemp, user: "User") -> None:
+        with transaction.atomic():
+            payment_plan.remove_export_file_delivery()
+            payment_plan.export_file_delivery = file_temp
+            payment_plan.save(update_fields=["export_file_delivery", "updated_at"])
+            self._mark_exported_payments_as_sent(user)
+            self._invalidate_list_cache()
+
+    def _save_plain_xlsx_file(self, payment_plan: "PaymentPlan", user: "User") -> None:
+        filename = f"payment_plan_{payment_plan.unicef_id}_payment_list{self._filename_suffix()}.xlsx"
+        with NamedTemporaryFile() as tmp:
+            file_temp = FileTemp(
+                object_id=str(payment_plan.pk),
+                content_type=get_content_type_for_model(payment_plan),
+                created_by=user,
+            )
+            self.wb.save(tmp.name)
+            tmp.seek(0)
+            file_temp.file.save(filename, File(tmp))
+            self._attach_file(payment_plan, file_temp, user)
+
+    def _save_xlsx_file_with_auth_code(self, payment_plan: "PaymentPlan", user: "User") -> None:
+        zip_password = get_random_string(12)
+        xlsx_password = get_random_string(12)
+        zip_filename = f"payment_plan_{payment_plan.unicef_id}_payment_list{self._filename_suffix()}.zip"
+        xlsx_filename = f"payment_plan_{payment_plan.unicef_id}_payment_list{self._filename_suffix()}.xlsx"
+
+        with NamedTemporaryFile(suffix=".zip") as tmp_zip:
+            with pyzipper.AESZipFile(
+                tmp_zip, mode="w", compression=pyzipper.ZIP_DEFLATED, encryption=pyzipper.WZ_AES
+            ) as zf:
+                zf.setpassword(zip_password.encode("utf-8"))
+                XlsxPaymentListDeliveryExportService.save_workbook(zf, self.wb, xlsx_filename, xlsx_password)
+
+            file_temp = FileTemp(
+                object_id=str(payment_plan.pk),
+                content_type=get_content_type_for_model(payment_plan),
+                created_by=user,
+                password=zip_password,
+                xlsx_password=xlsx_password,
+            )
+            tmp_zip.seek(0)
+            file_temp.file.save(zip_filename, File(tmp_zip))
+            self._attach_file(payment_plan, file_temp, user)

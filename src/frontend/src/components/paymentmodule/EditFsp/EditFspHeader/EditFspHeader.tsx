@@ -22,7 +22,7 @@ export function EditFspHeader({
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
       title: t('Payment Module'),
-      to: `/${baseUrl}/payment-module/payment-plans`,
+      to: `/${baseUrl}/payment-module/payment-lists`,
     },
   ];
 
@@ -49,7 +49,7 @@ export function EditFspHeader({
         >
           <Button
             component={Link}
-            to={`/${baseUrl}/payment-module/payment-plans`}
+            to={`/${baseUrl}/payment-module/payment-lists`}
           >
             {t('Cancel')}
           </Button>

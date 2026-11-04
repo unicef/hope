@@ -4,7 +4,7 @@ from hope.models import Individual, IndividualRoleInHousehold, Payment
 
 
 def with_payment_related_data(queryset: QuerySet[Payment]) -> QuerySet[Payment]:
-    """Preload the relations PaymentListSerializer reads."""
+    """Preload the relations PaymentRowSerializer reads."""
     role_prefetch = Prefetch(
         "households_and_roles",
         queryset=IndividualRoleInHousehold.all_objects.only("id", "role", "individual_id", "household_id"),
@@ -27,8 +27,8 @@ def with_payment_related_data(queryset: QuerySet[Payment]) -> QuerySet[Payment]:
             "program__business_area",
             "parent__program_cycle__program__data_collecting_type",
             "parent__delivery_mechanism",
-            "parent__payment_plan_group__financial_service_provider",
-            "parent__payment_plan_group",
+            "parent__payment_plan__financial_service_provider",
+            "parent__payment_plan",
         )
         .prefetch_related(
             individual_prefetch,

@@ -31,12 +31,12 @@ const StyledLink = styled.a`
 
 interface VerificationPlanActionsProps {
   verificationPlan: PaymentVerificationPlanDetails['paymentVerificationPlans'][number];
-  paymentPlanNode: PaymentVerificationPlanDetails;
+  paymentListNode: PaymentVerificationPlanDetails;
 }
 
 export function VerificationPlanActions({
   verificationPlan,
-  paymentPlanNode,
+  paymentListNode,
 }: VerificationPlanActionsProps): ReactElement {
   const { t } = useTranslation();
   const permissions = usePermissions();
@@ -50,7 +50,7 @@ export function VerificationPlanActions({
       RestService.restBusinessAreasProgramsPaymentVerificationsExportXlsxCreate(
         {
           businessAreaSlug: businessArea,
-          id: paymentPlanNode.id,
+          id: paymentListNode.id,
           programCode: programCode,
           verificationPlanId: verificationPlan.id,
         },
@@ -90,7 +90,7 @@ export function VerificationPlanActions({
       RestService.restBusinessAreasProgramsPaymentVerificationsInvalidVerificationPlanCreate(
         {
           businessAreaSlug: businessArea,
-          id: paymentPlanNode.id,
+          id: paymentListNode.id,
           programCode: programCode,
           verificationPlanId: verificationPlan.id,
         },
@@ -162,7 +162,7 @@ export function VerificationPlanActions({
             >
               {canDelete && (
                 <DeleteVerificationPlan
-                  paymentPlanId={paymentPlanNode.id}
+                  paymentListId={paymentListNode.id}
                   paymentVerificationPlanId={verificationPlan.id}
                 />
               )}
@@ -170,7 +170,7 @@ export function VerificationPlanActions({
             {canEdit && (
               <EditVerificationPlan
                 paymentVerificationPlanNode={verificationPlan}
-                paymentPlanId={paymentPlanNode.id}
+                paymentListId={paymentListNode.id}
               />
             )}
             {canActivate && (
@@ -182,7 +182,7 @@ export function VerificationPlanActions({
               >
                 <ActivateVerificationPlan
                   paymentVerificationPlanId={verificationPlan.id}
-                  paymentPlanId={paymentPlanNode.id}
+                  paymentListId={paymentListNode.id}
                 />
               </Box>
             )}
@@ -269,7 +269,7 @@ export function VerificationPlanActions({
                   >
                     <ImportXlsx
                       paymentVerificationPlanId={verificationPlan.id}
-                      paymentPlanId={paymentPlanNode.id}
+                      paymentListId={paymentListNode.id}
                     />
                   </Box>
                 )}
@@ -277,7 +277,7 @@ export function VerificationPlanActions({
                 {canFinish && verificationPlan.xlsxFileImported && (
                   <FinishVerificationPlan
                     verificationPlan={verificationPlan}
-                    paymentPlanId={paymentPlanNode.id}
+                    paymentListId={paymentListNode.id}
                   />
                 )}
                 {canDiscard &&
@@ -285,7 +285,7 @@ export function VerificationPlanActions({
                   !verificationPlan.xlsxFileImported && (
                     <DiscardVerificationPlan
                       paymentVerificationPlanId={verificationPlan.id}
-                      paymentPlanId={paymentPlanNode.id}
+                      paymentListId={paymentListNode.id}
                     />
                   )}
                 {canMarkInvalid && (
@@ -322,13 +322,13 @@ export function VerificationPlanActions({
                 {canFinish && (
                   <FinishVerificationPlan
                     verificationPlan={verificationPlan}
-                    paymentPlanId={paymentPlanNode.id}
+                    paymentListId={paymentListNode.id}
                   />
                 )}
                 {canDiscard && (
                   <DiscardVerificationPlan
                     paymentVerificationPlanId={verificationPlan.id}
-                    paymentPlanId={paymentPlanNode.id}
+                    paymentListId={paymentListNode.id}
                   />
                 )}
               </>

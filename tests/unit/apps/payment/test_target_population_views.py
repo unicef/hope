@@ -20,8 +20,8 @@ from extras.test_utils.factories import (
     HouseholdFactory,
     PartnerFactory,
     PaymentFactory,
+    PaymentListFactory,
     PaymentPlanFactory,
-    PaymentPlanGroupFactory,
     PaymentPlanPurposeFactory,
     ProgramCycleFactory,
     ProgramFactory,
@@ -30,7 +30,7 @@ from extras.test_utils.factories import (
 )
 from hope.apps.account.permissions import Permissions
 from hope.apps.payment.api.views import TargetPopulationViewSet
-from hope.models import Payment, PaymentPlan, Program, ProgramCycle, Rule
+from hope.models import Payment, PaymentList, Program, ProgramCycle, Rule
 
 pytestmark = pytest.mark.django_db
 
@@ -49,17 +49,17 @@ def target_population_list_context(
     user = UserFactory(partner=partner)
     program_active = ProgramFactory(business_area=business_area, status=Program.ACTIVE, cycle=False)
     cycle = ProgramCycleFactory(program=program_active, title="Cycle TP List")
-    tp = PaymentPlanFactory(
+    tp = PaymentListFactory(
         name="Test new TP",
         business_area=business_area,
         program_cycle=cycle,
-        status=PaymentPlan.Status.TP_OPEN,
+        status=PaymentList.Status.TP_OPEN,
         created_by=user,
     )
-    pp = PaymentPlanFactory(
+    pp = PaymentListFactory(
         business_area=business_area,
         program_cycle=cycle,
-        status=PaymentPlan.Status.LOCKED_FSP,
+        status=PaymentList.Status.LOCKED_FSP,
         created_by=user,
     )
     tp_list_url = reverse(
@@ -101,10 +101,10 @@ def target_population_detail_context(
     program_active = ProgramFactory(business_area=business_area, status=Program.ACTIVE, cycle=False)
     cycle = ProgramCycleFactory(program=program_active, title="Cycle TP Detail")
 
-    tp = PaymentPlanFactory(
+    tp = PaymentListFactory(
         business_area=business_area,
         program_cycle=cycle,
-        status=PaymentPlan.Status.TP_LOCKED,
+        status=PaymentList.Status.TP_LOCKED,
         created_by=user,
         name="TP Detail",
     )
@@ -127,7 +127,7 @@ def target_population_detail_context(
         "cycle": cycle,
         "tp": tp,
         "purpose": purpose,
-        "group": tp.payment_plan_group,
+        "group": tp.payment_plan,
         "tp_detail_url": tp_detail_url,
     }
 
@@ -143,27 +143,27 @@ def target_population_filter_context(
     program_active = ProgramFactory(business_area=business_area, status=Program.ACTIVE, cycle=False)
     cycle = ProgramCycleFactory(program=program_active, title="Cycle TP Filter")
 
-    tp = PaymentPlanFactory(
+    tp = PaymentListFactory(
         name="OPEN",
         business_area=business_area,
         program_cycle=cycle,
-        status=PaymentPlan.Status.TP_OPEN,
+        status=PaymentList.Status.TP_OPEN,
         created_by=user,
         total_households_count=999,
     )
-    tp_locked = PaymentPlanFactory(
+    tp_locked = PaymentListFactory(
         name="LOCKED",
         business_area=business_area,
         program_cycle=cycle,
-        status=PaymentPlan.Status.TP_LOCKED,
+        status=PaymentList.Status.TP_LOCKED,
         created_by=user,
         total_households_count=888,
     )
-    tp_assigned = PaymentPlanFactory(
+    tp_assigned = PaymentListFactory(
         name="Assigned TP",
         business_area=business_area,
         program_cycle=cycle,
-        status=PaymentPlan.Status.FINISHED,
+        status=PaymentList.Status.FINISHED,
         created_by=user,
         total_households_count=777,
     )
@@ -206,10 +206,10 @@ def target_population_create_update_context(
     purpose = program_active.payment_plan_purposes.first()
     cycle = ProgramCycleFactory(program=program_active, title="Cycle TP Create")
 
-    tp = PaymentPlanFactory(
+    tp = PaymentListFactory(
         business_area=business_area,
         program_cycle=cycle,
-        status=PaymentPlan.Status.TP_OPEN,
+        status=PaymentList.Status.TP_OPEN,
         created_by=user,
     )
     create_url = reverse(
@@ -269,14 +269,14 @@ def target_population_actions_context(
     cycle = ProgramCycleFactory(program=program_active, title="Cycle TP Actions")
 
     client = api_client(user)
-    target_population = PaymentPlanFactory(
+    target_population = PaymentListFactory(
         name="TP_OPEN",
         business_area=business_area,
         program_cycle=cycle,
-        status=PaymentPlan.Status.TP_OPEN,
+        status=PaymentList.Status.TP_OPEN,
         created_by=user,
         created_at=timezone.datetime(2022, 2, 24, tzinfo=dt_timezone.utc),
-        build_status=PaymentPlan.BuildStatus.BUILD_STATUS_OK,
+        build_status=PaymentList.BuildStatus.BUILD_STATUS_OK,
     )
     purpose = PaymentPlanPurposeFactory()
     program_active.payment_plan_purposes.add(purpose)
@@ -316,11 +316,11 @@ def pending_payments_context(
     user = UserFactory(partner=partner)
     client = api_client(user)
 
-    target_population = PaymentPlanFactory(
+    target_population = PaymentListFactory(
         name="TP_OPEN",
         business_area=business_area,
         program_cycle=cycle,
-        status=PaymentPlan.Status.TP_OPEN,
+        status=PaymentList.Status.TP_OPEN,
         created_by=user,
         created_at=timezone.datetime(2022, 2, 24, tzinfo=dt_timezone.utc),
     )
@@ -484,7 +484,7 @@ def test_target_population_caching(
         assert etag_second_call == etag
 
     with TestCase.captureOnCommitCallbacks(execute=True):
-        target_population_list_context["tp"].status = PaymentPlan.Status.TP_LOCKED
+        target_population_list_context["tp"].status = PaymentList.Status.TP_LOCKED
         target_population_list_context["tp"].save()
     with CaptureQueriesContext(connection) as ctx:
         response = target_population_list_context["client"].get(target_population_list_context["tp_list_url"])
@@ -565,7 +565,7 @@ def test_target_population_detail(
     assert tp["payment_plan_purposes"] == [{"id": str(purpose.id), "name": purpose.name}]
     assert tp["is_purposes_editable"] is True
     group = target_population_detail_context["group"]
-    assert tp["payment_plan_group"] == {
+    assert tp["payment_plan"] == {
         "id": str(group.id),
         "unicef_id": group.unicef_id,
         "name": group.name,
@@ -575,7 +575,7 @@ def test_target_population_detail(
 def test_filter_by_status(target_population_filter_context: dict[str, Any]) -> None:
     response = target_population_filter_context["client"].get(
         target_population_filter_context["list_url"],
-        {"status": PaymentPlan.Status.TP_LOCKED.value},
+        {"status": PaymentList.Status.TP_LOCKED.value},
     )
     target_population_filter_context["tp_locked"].refresh_from_db()
     assert response.status_code == status.HTTP_200_OK
@@ -602,11 +602,11 @@ def test_filter_by_program_cycle(
 ) -> None:
     new_cycle = ProgramCycleFactory(program=target_population_filter_context["program_active"], title="Cycle QWOOL")
 
-    new_tp = PaymentPlanFactory(
+    new_tp = PaymentListFactory(
         name="TEST_ABC_QWOOL",
         business_area=target_population_filter_context["business_area"],
         program_cycle=new_cycle,
-        status=PaymentPlan.Status.TP_STEFICON_RUN,
+        status=PaymentList.Status.TP_STEFICON_RUN,
         created_by=target_population_filter_context["user"],
     )
     response = target_population_filter_context["client"].get(
@@ -621,19 +621,19 @@ def test_filter_by_program_cycle(
 
 
 def test_filter_by_number_of_hh(target_population_filter_context: dict[str, Any]) -> None:
-    PaymentPlanFactory(
+    PaymentListFactory(
         name="PP_1",
         business_area=target_population_filter_context["business_area"],
         program_cycle=target_population_filter_context["cycle"],
-        status=PaymentPlan.Status.TP_LOCKED,
+        status=PaymentList.Status.TP_LOCKED,
         created_by=target_population_filter_context["user"],
         total_households_count=100,
     )
-    PaymentPlanFactory(
+    PaymentListFactory(
         name="PP_2",
         business_area=target_population_filter_context["business_area"],
         program_cycle=target_population_filter_context["cycle"],
-        status=PaymentPlan.Status.TP_LOCKED,
+        status=PaymentList.Status.TP_LOCKED,
         created_by=target_population_filter_context["user"],
         total_households_count=200,
     )
@@ -658,20 +658,20 @@ def test_filter_by_number_of_hh(target_population_filter_context: dict[str, Any]
 
 
 def test_filter_by_created_date(target_population_filter_context: dict[str, Any]) -> None:
-    tp_1 = PaymentPlanFactory(
+    tp_1 = PaymentListFactory(
         name="TP_Mmmmmmm",
         business_area=target_population_filter_context["business_area"],
         program_cycle=target_population_filter_context["cycle"],
-        status=PaymentPlan.Status.LOCKED_FSP,
+        status=PaymentList.Status.LOCKED_FSP,
         created_by=target_population_filter_context["user"],
     )
     tp_1.created_at = timezone.datetime(2022, 2, 24, tzinfo=dt_timezone.utc)
     tp_1.save(update_fields=["created_at"])
-    tp_2 = PaymentPlanFactory(
+    tp_2 = PaymentListFactory(
         name="TP_Uuuuu_Aaaaa",
         business_area=target_population_filter_context["business_area"],
         program_cycle=target_population_filter_context["cycle"],
-        status=PaymentPlan.Status.LOCKED_FSP,
+        status=PaymentList.Status.LOCKED_FSP,
         created_by=target_population_filter_context["user"],
     )
     tp_2.created_at = timezone.datetime(2022, 1, 1, tzinfo=dt_timezone.utc)
@@ -702,7 +702,7 @@ def test_filter_by_created_date(target_population_filter_context: dict[str, Any]
         ([], status.HTTP_403_FORBIDDEN),
     ],
 )
-def test_create_payment_plan_success(
+def test_create_payment_list_success(
     target_population_create_update_context: dict[str, Any],
     permissions: list,
     expected_status: int,
@@ -717,7 +717,7 @@ def test_create_payment_plan_success(
     data = {
         "name": "New Payment Plan",
         "program_cycle_id": target_population_create_update_context["cycle"].id,
-        "payment_plan_group_id": target_population_create_update_context["cycle"].payment_plan_groups.first().id,
+        "payment_plan_id": target_population_create_update_context["cycle"].payment_plans.first().id,
         "rules": target_population_create_update_context["rules"],
         "excluded_ids": "IND-123",
         "exclusion_reason": "Just MMM Qwool Test",
@@ -741,7 +741,7 @@ def test_create_payment_plan_success(
         assert response.data["flag_exclude_if_active_adjudication_ticket"] is False
 
 
-def test_create_payment_plan_invalid_data(
+def test_create_payment_list_invalid_data(
     target_population_create_update_context: dict[str, Any],
     create_user_role_with_permissions: Any,
 ) -> None:
@@ -774,7 +774,7 @@ def test_create_payment_plan_invalid_data(
         ([], status.HTTP_403_FORBIDDEN),
     ],
 )
-def test_update_payment_plan_success(
+def test_update_payment_list_success(
     target_population_create_update_context: dict[str, Any],
     permissions: list,
     expected_status: int,
@@ -807,7 +807,7 @@ def test_update_payment_plan_success(
         assert response.data["excluded_ids"] == update_data["excluded_ids"]
 
 
-def test_update_payment_plan_invalid_data(
+def test_update_payment_list_invalid_data(
     target_population_create_update_context: dict[str, Any],
     create_user_role_with_permissions: Any,
 ) -> None:
@@ -831,7 +831,7 @@ def test_update_payment_plan_invalid_data(
     assert "name" in response.data
 
 
-def test_update_payment_plan_group_success(
+def test_update_payment_plan_success(
     target_population_create_update_context: dict[str, Any],
     create_user_role_with_permissions: Any,
 ) -> None:
@@ -843,13 +843,13 @@ def test_update_payment_plan_group_success(
     )
     tp = target_population_create_update_context["tp"]
     cycle = target_population_create_update_context["cycle"]
-    new_group = PaymentPlanGroupFactory(cycle=cycle)
+    new_group = PaymentPlanFactory(cycle=cycle)
 
     response = target_population_create_update_context["client"].patch(
         target_population_create_update_context["update_url"],
         {
             "program_cycle_id": str(cycle.id),
-            "payment_plan_group_id": str(new_group.id),
+            "payment_plan_id": str(new_group.id),
             "version": tp.version,
         },
         format="json",
@@ -857,10 +857,10 @@ def test_update_payment_plan_group_success(
 
     assert response.status_code == status.HTTP_200_OK
     tp.refresh_from_db()
-    assert tp.payment_plan_group == new_group
+    assert tp.payment_plan == new_group
 
 
-def test_update_payment_plan_group_rejects_group_from_wrong_cycle(
+def test_update_payment_plan_rejects_group_from_wrong_cycle(
     target_population_create_update_context: dict[str, Any],
     create_user_role_with_permissions: Any,
 ) -> None:
@@ -873,20 +873,20 @@ def test_update_payment_plan_group_rejects_group_from_wrong_cycle(
     tp = target_population_create_update_context["tp"]
     cycle = target_population_create_update_context["cycle"]
     other_cycle = ProgramCycleFactory(program=target_population_create_update_context["program_active"])
-    group_from_other_cycle = PaymentPlanGroupFactory(cycle=other_cycle)
+    group_from_other_cycle = PaymentPlanFactory(cycle=other_cycle)
 
     response = target_population_create_update_context["client"].patch(
         target_population_create_update_context["update_url"],
         {
             "program_cycle_id": str(cycle.id),
-            "payment_plan_group_id": str(group_from_other_cycle.id),
+            "payment_plan_id": str(group_from_other_cycle.id),
             "version": tp.version,
         },
         format="json",
     )
 
     assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert "Payment Plan Group does not exist in the given Programme Cycle." in str(response.data)
+    assert "Payment Plan does not exist in the given Programme Cycle." in str(response.data)
 
 
 def test_create_tp_copies_group_fsp(
@@ -902,7 +902,7 @@ def test_create_tp_copies_group_fsp(
     purpose = target_population_create_update_context["purpose"]
     cycle = target_population_create_update_context["cycle"]
     fsp = FinancialServiceProviderFactory()
-    group = PaymentPlanGroupFactory(cycle=cycle, financial_service_provider=fsp)
+    group = PaymentPlanFactory(cycle=cycle, financial_service_provider=fsp)
     dm = DeliveryMechanismFactory()
 
     response = target_population_create_update_context["client"].post(
@@ -910,7 +910,7 @@ def test_create_tp_copies_group_fsp(
         {
             "name": "TP with group FSP",
             "program_cycle_id": str(cycle.id),
-            "payment_plan_group_id": str(group.id),
+            "payment_plan_id": str(group.id),
             "delivery_mechanism_code": dm.code,
             "rules": target_population_create_update_context["rules"],
             "flag_exclude_if_on_sanction_list": False,
@@ -921,7 +921,7 @@ def test_create_tp_copies_group_fsp(
     )
 
     assert response.status_code == status.HTTP_201_CREATED
-    created = PaymentPlan.objects.get(name="TP with group FSP")
+    created = PaymentList.objects.get(name="TP with group FSP")
     assert created.financial_service_provider == fsp
     assert created.delivery_mechanism == dm
 
@@ -939,12 +939,12 @@ def test_update_tp_group_change_copies_group_fsp(
     tp = target_population_create_update_context["tp"]
     cycle = target_population_create_update_context["cycle"]
     fsp = FinancialServiceProviderFactory()
-    new_group = PaymentPlanGroupFactory(cycle=cycle, financial_service_provider=fsp)
+    new_group = PaymentPlanFactory(cycle=cycle, financial_service_provider=fsp)
 
     response = target_population_create_update_context["client"].patch(
         target_population_create_update_context["update_url"],
         {
-            "payment_plan_group_id": str(new_group.id),
+            "payment_plan_id": str(new_group.id),
             "version": tp.version,
         },
         format="json",
@@ -952,7 +952,7 @@ def test_update_tp_group_change_copies_group_fsp(
 
     assert response.status_code == status.HTTP_200_OK
     tp.refresh_from_db()
-    assert tp.payment_plan_group == new_group
+    assert tp.payment_plan == new_group
     assert tp.financial_service_provider == fsp
 
 
@@ -1002,7 +1002,7 @@ def test_unlock(
         target_population_actions_context["business_area"],
         target_population_actions_context["program_active"],
     )
-    target_population_actions_context["target_population"].status = PaymentPlan.Status.TP_LOCKED
+    target_population_actions_context["target_population"].status = PaymentList.Status.TP_LOCKED
     target_population_actions_context["target_population"].save()
 
     response = target_population_actions_context["client"].get(target_population_actions_context["url_unlock"])
@@ -1057,17 +1057,17 @@ def test_mark_ready(
         target_population_actions_context["business_area"],
         target_population_actions_context["program_active"],
     )
-    group = target_population_actions_context["target_population"].payment_plan_group
+    group = target_population_actions_context["target_population"].payment_plan
     group.financial_service_provider = FinancialServiceProviderFactory()
     group.save(update_fields=["financial_service_provider"])
     target_population_actions_context["target_population"].delivery_mechanism = DeliveryMechanismFactory()
-    target_population_actions_context["target_population"].status = PaymentPlan.Status.TP_LOCKED
+    target_population_actions_context["target_population"].status = PaymentList.Status.TP_LOCKED
     target_population_actions_context["target_population"].save()
 
     response = target_population_actions_context["client"].get(target_population_actions_context["url_mark_ready"])
     assert response.status_code == expected_status
     if expected_status == status.HTTP_200_OK:
-        assert response.json() == {"message": "Target Population ready for Payment Plan"}
+        assert response.json() == {"message": "Target Population ready for Payment List"}
 
 
 @pytest.mark.parametrize(
@@ -1093,7 +1093,7 @@ def test_copy_tp(
     data = {
         "name": "Copied TP test 123",
         "program_cycle_id": target_population_actions_context["cycle"].pk,
-        "payment_plan_group_id": target_population_actions_context["target_population"].payment_plan_group.pk,
+        "payment_plan_id": target_population_actions_context["target_population"].payment_plan.pk,
         "payment_plan_purposes": [str(purpose.id)],
     }
     response = target_population_actions_context["client"].post(
@@ -1105,11 +1105,11 @@ def test_copy_tp(
     assert response.status_code == expected_status
     if expected_status == status.HTTP_201_CREATED:
         assert "id" in response.json()
-        assert PaymentPlan.objects.filter(name="Copied TP test 123").count() == 1
-        assert PaymentPlan.objects.all().count() == 2
+        assert PaymentList.objects.filter(name="Copied TP test 123").count() == 1
+        assert PaymentList.objects.all().count() == 2
         tp = target_population_actions_context["target_population"]
-        copied = PaymentPlan.objects.get(name="Copied TP test 123")
-        assert copied.payment_plan_group == tp.payment_plan_group
+        copied = PaymentList.objects.get(name="Copied TP test 123")
+        assert copied.payment_plan == tp.payment_plan
         assert list(copied.payment_plan_purposes.values_list("pk", flat=True)) == [purpose.pk]
 
 
@@ -1126,16 +1126,16 @@ def test_copy_tp_validation_errors(
     cycle = ProgramCycleFactory(program=target_population_actions_context["program_active"], title="Cycle123")
     purpose = target_population_actions_context["purpose"]
 
-    PaymentPlanFactory(
+    PaymentListFactory(
         name="Copied TP AGAIN",
         business_area=target_population_actions_context["business_area"],
         program_cycle=cycle,
     )
-    group = PaymentPlanGroupFactory(cycle=cycle)
+    group = PaymentPlanFactory(cycle=cycle)
     data = {
         "name": "Copied TP AGAIN",
         "program_cycle_id": cycle.pk,
-        "payment_plan_group_id": group.pk,
+        "payment_plan_id": group.pk,
         "payment_plan_purposes": [str(purpose.id)],
     }
     response = target_population_actions_context["client"].post(
@@ -1166,7 +1166,7 @@ def test_copy_tp_validation_errors(
     assert response_3.status_code == status.HTTP_400_BAD_REQUEST
     assert "name" in response_3.data
     assert "program_cycle_id" in response_3.data
-    assert "payment_plan_group_id" in response_3.data
+    assert "payment_plan_id" in response_3.data
     assert "payment_plan_purposes" in response_3.data
 
 
@@ -1181,12 +1181,12 @@ def test_copy_tp_rejects_group_from_wrong_cycle(
         target_population_actions_context["program_active"],
     )
     other_cycle = ProgramCycleFactory(program=target_population_actions_context["program_active"])
-    group_from_other_cycle = PaymentPlanGroupFactory(cycle=other_cycle)
+    group_from_other_cycle = PaymentPlanFactory(cycle=other_cycle)
 
     data = {
         "name": "Copied TP wrong group",
         "program_cycle_id": target_population_actions_context["cycle"].pk,
-        "payment_plan_group_id": group_from_other_cycle.pk,
+        "payment_plan_id": group_from_other_cycle.pk,
         "payment_plan_purposes": [str(target_population_actions_context["purpose"].id)],
     }
     response = target_population_actions_context["client"].post(
@@ -1196,7 +1196,7 @@ def test_copy_tp_rejects_group_from_wrong_cycle(
     )
 
     assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert "Payment Plan Group does not exist in the given Programme Cycle." in response.data
+    assert "Payment Plan does not exist in the given Programme Cycle." in response.data
 
 
 def test_copy_tp_requires_at_least_one_purpose(
@@ -1212,7 +1212,7 @@ def test_copy_tp_requires_at_least_one_purpose(
     data = {
         "name": "Copied TP no purpose",
         "program_cycle_id": target_population_actions_context["cycle"].pk,
-        "payment_plan_group_id": target_population_actions_context["target_population"].payment_plan_group.pk,
+        "payment_plan_id": target_population_actions_context["target_population"].payment_plan.pk,
         "payment_plan_purposes": [],
     }
     response = target_population_actions_context["client"].post(
@@ -1239,7 +1239,7 @@ def test_copy_tp_rejects_purpose_not_in_program(
     data = {
         "name": "Copied TP bad purpose",
         "program_cycle_id": target_population_actions_context["cycle"].pk,
-        "payment_plan_group_id": target_population_actions_context["target_population"].payment_plan_group.pk,
+        "payment_plan_id": target_population_actions_context["target_population"].payment_plan.pk,
         "payment_plan_purposes": [str(unrelated_purpose.id)],
     }
     response = target_population_actions_context["client"].post(
@@ -1249,7 +1249,7 @@ def test_copy_tp_rejects_purpose_not_in_program(
     )
 
     assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert response.data["payment_plan_purposes"][0] == "All purposes must be assigned to the payment plan's program."
+    assert response.data["payment_plan_purposes"][0] == "All purposes must be assigned to the payment list's program."
 
 
 @pytest.mark.parametrize(
@@ -1278,7 +1278,7 @@ def test_apply_engine_formula_tp(
         is_release=True,
     ).rule
     rule_for_tp.allowed_business_areas.add(target_population_actions_context["business_area"])
-    target_population_actions_context["target_population"].status = PaymentPlan.Status.TP_LOCKED
+    target_population_actions_context["target_population"].status = PaymentList.Status.TP_LOCKED
     target_population_actions_context["target_population"].save()
     data = {
         "engine_formula_rule_id": str(rule_for_tp.pk),
@@ -1310,7 +1310,7 @@ def test_apply_engine_formula_tp_validation_errors(
     )
     rule_for_tp = RuleCommitFactory(rule__type=Rule.TYPE_TARGETING, rule__enabled=False, version=22).rule
     rule_for_tp.allowed_business_areas.add(target_population_actions_context["business_area"])
-    target_population_actions_context["target_population"].status = PaymentPlan.Status.TP_STEFICON_ERROR
+    target_population_actions_context["target_population"].status = PaymentList.Status.TP_STEFICON_ERROR
     target_population_actions_context["target_population"].save()
 
     data = {
@@ -1326,7 +1326,7 @@ def test_apply_engine_formula_tp_validation_errors(
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert "This engine rule is not enabled or is deprecated." in response.data
 
-    target_population_actions_context["target_population"].status = PaymentPlan.Status.TP_OPEN
+    target_population_actions_context["target_population"].status = PaymentList.Status.TP_OPEN
     target_population_actions_context["target_population"].save()
     data = {
         "engine_formula_rule_id": rule_for_tp.pk,
@@ -1369,11 +1369,11 @@ def test_tp_delete(
         target_population_actions_context["business_area"],
         target_population_actions_context["program_active"],
     )
-    tp = PaymentPlanFactory(
+    tp = PaymentListFactory(
         name="TP_to_delete",
         business_area=target_population_actions_context["business_area"],
         program_cycle=target_population_actions_context["cycle"],
-        status=PaymentPlan.Status.TP_OPEN,
+        status=PaymentList.Status.TP_OPEN,
         created_by=target_population_actions_context["user"],
     )
     delete_url = reverse(
@@ -1388,8 +1388,8 @@ def test_tp_delete(
 
     assert response.status_code == expected_status
     if expected_status == status.HTTP_204_NO_CONTENT:
-        assert PaymentPlan.objects.filter(name="TP_to_delete").count() == 0
-        assert PaymentPlan.all_objects.filter(name="TP_to_delete").count() == 1
+        assert PaymentList.objects.filter(name="TP_to_delete").count() == 0
+        assert PaymentList.all_objects.filter(name="TP_to_delete").count() == 1
 
 
 def test_vulnerability_score_filter_applies_correctly(
@@ -1439,7 +1439,7 @@ def test_vulnerability_score_filter_applies_correctly(
         collector=household3.head_of_household,
     )
 
-    target_population_actions_context["target_population"].status = PaymentPlan.Status.TP_LOCKED
+    target_population_actions_context["target_population"].status = PaymentList.Status.TP_LOCKED
     steficon_rule_commit = RuleCommitFactory(
         rule__type=Rule.TYPE_TARGETING, rule__enabled=True, enabled=True, is_release=True
     )
@@ -1480,7 +1480,7 @@ def test_vulnerability_score_filter_applies_correctly(
             assert response.status_code == status.HTTP_200_OK
 
     target_population_actions_context["target_population"].refresh_from_db()
-    assert target_population_actions_context["target_population"].status == PaymentPlan.Status.TP_STEFICON_COMPLETED
+    assert target_population_actions_context["target_population"].status == PaymentList.Status.TP_STEFICON_COMPLETED
 
     assert target_population_actions_context["target_population"].payment_items.count() == 3
     payment1 = target_population_actions_context["target_population"].payment_items.get(household=household1)
@@ -1575,7 +1575,7 @@ def test_vulnerability_score_filter_set_before_engine_formula(
         collector=household3.head_of_household,
     )
 
-    target_population_actions_context["target_population"].status = PaymentPlan.Status.TP_LOCKED
+    target_population_actions_context["target_population"].status = PaymentList.Status.TP_LOCKED
     steficon_rule_commit = RuleCommitFactory(
         rule__type=Rule.TYPE_TARGETING, rule__enabled=True, enabled=True, is_release=True
     )
@@ -1651,7 +1651,7 @@ def test_vulnerability_score_filter_set_before_engine_formula(
             assert response.status_code == status.HTTP_200_OK
 
     target_population_actions_context["target_population"].refresh_from_db()
-    assert target_population_actions_context["target_population"].status == PaymentPlan.Status.TP_STEFICON_COMPLETED
+    assert target_population_actions_context["target_population"].status == PaymentList.Status.TP_STEFICON_COMPLETED
 
     payment1.refresh_from_db()
     payment2.refresh_from_db()
@@ -1774,7 +1774,7 @@ def test_apply_engine_formula_tp_without_version_skips_concurrency_check(
         is_release=True,
     ).rule
     rule_for_tp.allowed_business_areas.add(target_population_actions_context["business_area"])
-    target_population_actions_context["target_population"].status = PaymentPlan.Status.TP_LOCKED
+    target_population_actions_context["target_population"].status = PaymentList.Status.TP_LOCKED
     target_population_actions_context["target_population"].save()
 
     response = target_population_actions_context["client"].post(
@@ -1807,7 +1807,7 @@ def test_pending_payments_without_pagination_returns_flat_response(
     assert len(body) == 3
 
 
-def test_create_payment_plan_with_purposes(
+def test_create_payment_list_with_purposes(
     target_population_create_update_context: dict[str, Any],
     create_user_role_with_permissions: Any,
 ) -> None:
@@ -1824,7 +1824,7 @@ def test_create_payment_plan_with_purposes(
         {
             "name": "TP with purposes",
             "program_cycle_id": target_population_create_update_context["cycle"].id,
-            "payment_plan_group_id": target_population_create_update_context["cycle"].payment_plan_groups.first().id,
+            "payment_plan_id": target_population_create_update_context["cycle"].payment_plans.first().id,
             "rules": target_population_create_update_context["rules"],
             "flag_exclude_if_on_sanction_list": False,
             "flag_exclude_if_active_adjudication_ticket": False,
@@ -1834,11 +1834,11 @@ def test_create_payment_plan_with_purposes(
     )
 
     assert response.status_code == status.HTTP_201_CREATED
-    plan = PaymentPlan.objects.get(pk=response.data["id"])
+    plan = PaymentList.objects.get(pk=response.data["id"])
     assert list(plan.payment_plan_purposes.values_list("id", flat=True)) == [purpose.id]
 
 
-def test_create_payment_plan_requires_at_least_one_purpose(
+def test_create_payment_list_requires_at_least_one_purpose(
     target_population_create_update_context: dict[str, Any],
     create_user_role_with_permissions: Any,
 ) -> None:
@@ -1854,7 +1854,7 @@ def test_create_payment_plan_requires_at_least_one_purpose(
         {
             "name": "TP without purposes",
             "program_cycle_id": target_population_create_update_context["cycle"].id,
-            "payment_plan_group_id": target_population_create_update_context["cycle"].payment_plan_groups.first().id,
+            "payment_plan_id": target_population_create_update_context["cycle"].payment_plans.first().id,
             "rules": target_population_create_update_context["rules"],
             "flag_exclude_if_on_sanction_list": False,
             "flag_exclude_if_active_adjudication_ticket": False,
@@ -1867,7 +1867,7 @@ def test_create_payment_plan_requires_at_least_one_purpose(
     assert response.data["payment_plan_purposes"][0] == "At least one Payment Plan Purpose is required."
 
 
-def test_create_payment_plan_rejects_purpose_not_in_program(
+def test_create_payment_list_rejects_purpose_not_in_program(
     target_population_create_update_context: dict[str, Any],
     create_user_role_with_permissions: Any,
 ) -> None:
@@ -1886,7 +1886,7 @@ def test_create_payment_plan_rejects_purpose_not_in_program(
         {
             "name": "TP with bad purpose",
             "program_cycle_id": target_population_create_update_context["cycle"].id,
-            "payment_plan_group_id": target_population_create_update_context["cycle"].payment_plan_groups.first().id,
+            "payment_plan_id": target_population_create_update_context["cycle"].payment_plans.first().id,
             "rules": target_population_create_update_context["rules"],
             "flag_exclude_if_on_sanction_list": False,
             "flag_exclude_if_active_adjudication_ticket": False,
@@ -1896,7 +1896,7 @@ def test_create_payment_plan_rejects_purpose_not_in_program(
     )
 
     assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert response.data["payment_plan_purposes"][0] == "All purposes must be assigned to the payment plan's program."
+    assert response.data["payment_plan_purposes"][0] == "All purposes must be assigned to the payment list's program."
 
 
 def test_edit_purposes_allowed_on_last_plan(
@@ -1928,13 +1928,13 @@ def test_edit_purposes_blocked_on_non_last_plan(
     create_user_role_with_permissions: Any,
 ) -> None:
     first_plan = target_population_create_update_context["tp"]
-    PaymentPlanFactory(
+    PaymentListFactory(
         business_area=target_population_create_update_context["business_area"],
         program_cycle=target_population_create_update_context["cycle"],
-        status=PaymentPlan.Status.TP_OPEN,
+        status=PaymentList.Status.TP_OPEN,
         created_by=target_population_create_update_context["user"],
     )
-    PaymentPlan.objects.filter(pk=first_plan.pk).update(created_at=timezone.now() - timedelta(hours=1))
+    PaymentList.objects.filter(pk=first_plan.pk).update(created_at=timezone.now() - timedelta(hours=1))
     create_user_role_with_permissions(
         target_population_create_update_context["user"],
         [Permissions.TARGETING_UPDATE],
@@ -1988,13 +1988,13 @@ def test_is_purposes_editable_false_for_non_latest_plan(
 ) -> None:
     first_plan = target_population_create_update_context["tp"]
     first_plan.payment_plan_purposes.add(target_population_create_update_context["purpose"])
-    PaymentPlanFactory(
+    PaymentListFactory(
         business_area=target_population_create_update_context["business_area"],
         program_cycle=target_population_create_update_context["cycle"],
-        status=PaymentPlan.Status.TP_OPEN,
+        status=PaymentList.Status.TP_OPEN,
         created_by=target_population_create_update_context["user"],
     )
-    PaymentPlan.objects.filter(pk=first_plan.pk).update(created_at=timezone.now() - timedelta(hours=1))
+    PaymentList.objects.filter(pk=first_plan.pk).update(created_at=timezone.now() - timedelta(hours=1))
     create_user_role_with_permissions(
         target_population_create_update_context["user"],
         [Permissions.TARGETING_VIEW_DETAILS],
@@ -2014,3 +2014,50 @@ def test_is_purposes_editable_false_for_non_latest_plan(
 
     assert response.status_code == status.HTTP_200_OK
     assert response.data["is_purposes_editable"] is False
+
+
+@pytest.fixture
+def target_populations_in_same_named_plans(target_population_filter_context: dict[str, Any]) -> list[PaymentList]:
+    first_cycle = target_population_filter_context["cycle"]
+    second_cycle = ProgramCycleFactory(program=target_population_filter_context["program_active"], title="Cycle 2")
+    first_cash = PaymentPlanFactory(cycle=first_cycle, name="Cash")
+    second_cash = PaymentPlanFactory(cycle=second_cycle, name="Cash")
+    older_second = PaymentListFactory(
+        program_cycle=second_cycle,
+        payment_plan=second_cash,
+        status=PaymentList.Status.TP_OPEN,
+        created_by=target_population_filter_context["user"],
+    )
+    older_first = PaymentListFactory(
+        program_cycle=first_cycle,
+        payment_plan=first_cash,
+        status=PaymentList.Status.TP_OPEN,
+        created_by=target_population_filter_context["user"],
+    )
+    newer_second = PaymentListFactory(
+        program_cycle=second_cycle,
+        payment_plan=second_cash,
+        status=PaymentList.Status.TP_OPEN,
+        created_by=target_population_filter_context["user"],
+    )
+    newer_first = PaymentListFactory(
+        program_cycle=first_cycle,
+        payment_plan=first_cash,
+        status=PaymentList.Status.TP_OPEN,
+        created_by=target_population_filter_context["user"],
+    )
+    return [newer_first, older_first, newer_second, older_second]
+
+
+def test_list_ordered_by_payment_plan_keeps_same_named_plans_apart(
+    target_population_filter_context: dict[str, Any], target_populations_in_same_named_plans: list[PaymentList]
+) -> None:
+    response = target_population_filter_context["client"].get(
+        target_population_filter_context["list_url"],
+        {"ordering": "payment_plan_name,payment_plan,-created_at"},
+    )
+
+    assert response.status_code == status.HTTP_200_OK
+    assert [r["id"] for r in response.json()["results"]][:4] == [
+        str(tp.id) for tp in target_populations_in_same_named_plans
+    ]

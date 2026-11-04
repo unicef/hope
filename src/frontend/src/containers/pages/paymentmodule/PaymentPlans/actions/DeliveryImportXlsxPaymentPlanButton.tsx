@@ -1,0 +1,127 @@
+import { XlsxImportDialog } from '@core/XlsxImportDialog';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { usePermissions } from '@hooks/usePermissions';
+import {
+  Checkbox,
+  FormControl,
+  FormControlLabel,
+  FormHelperText,
+  InputLabel,
+  MenuItem,
+  Select,
+} from '@mui/material';
+import type { PaymentPlanImportFile } from '@restgenerated/models/PaymentPlanImportFile';
+import { RestService } from '@restgenerated/services/RestService';
+import { restQueryKey } from '@utils/queryKeys';
+import type { ReactElement } from 'react';
+import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { hasPermissions, PERMISSIONS } from '../../../../../config/permissions';
+import type { PaymentPlanDetail } from '../types';
+import { isPaymentPlanBackgroundActionBusy } from '../utils';
+
+interface DeliveryImportXlsxPaymentPlanButtonProps {
+  paymentPlan: PaymentPlanDetail | null;
+}
+
+type NullDeliveryPolicy = 'reset' | 'ignore';
+type PaymentPlanReconciliationImportFile = PaymentPlanImportFile & {
+  override: boolean;
+  null_delivery_policy: NullDeliveryPolicy;
+};
+
+export function DeliveryImportXlsxPaymentPlanButton({
+  paymentPlan,
+}: DeliveryImportXlsxPaymentPlanButtonProps): ReactElement | null {
+  const { t } = useTranslation();
+  const { businessArea, programId } = useBaseUrl();
+  const permissions = usePermissions();
+  const [override, setOverride] = useState(false);
+  const [nullDeliveryPolicy, setNullDeliveryPolicy] =
+    useState<NullDeliveryPolicy>('reset');
+  const canOverride = hasPermissions(
+    PERMISSIONS.PM_IMPORT_XLSX_WITH_RECONCILIATION_OVERRIDE,
+    permissions,
+  );
+
+  const resetOptions = (): void => {
+    setOverride(false);
+    setNullDeliveryPolicy('reset');
+  };
+
+  if (!hasPermissions(PERMISSIONS.PM_PAYMENT_PLAN_IMPORT_XLSX, permissions))
+    return null;
+
+  return (
+    <XlsxImportDialog<PaymentPlanReconciliationImportFile>
+      mutationFn={(formData) =>
+        RestService.restBusinessAreasProgramsPaymentPlansDeliveryImportXlsxCreate(
+          {
+            businessAreaSlug: businessArea,
+            id: paymentPlan?.id,
+            programCode: programId,
+            formData,
+          },
+        )
+      }
+      invalidateQueryKey={restQueryKey(
+        RestService.restBusinessAreasProgramsPaymentPlansRetrieve,
+      )}
+      successMessage={t('Delivery reconciliation import started')}
+      errorFallback={t('Import failed')}
+      buttonLabel={t('Upload Reconciliation')}
+      buttonVariant="contained"
+      buttonMargin={2}
+      disabled={!paymentPlan || isPaymentPlanBackgroundActionBusy(paymentPlan)}
+      buildMutationVariables={(file) => ({
+        file: file as unknown as string,
+        override,
+        null_delivery_policy: nullDeliveryPolicy,
+      })}
+      onReset={resetOptions}
+      options={
+        canOverride ? (
+          <>
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={override}
+                  onChange={(event) => setOverride(event.target.checked)}
+                />
+              }
+              label={t('This upload will overwrite existing matches')}
+            />
+            {override ? (
+              <FormControl fullWidth margin="normal">
+                <InputLabel id="null-delivery-policy-label">
+                  {t('When delivered_quantity is empty')}
+                </InputLabel>
+                <Select
+                  labelId="null-delivery-policy-label"
+                  value={nullDeliveryPolicy}
+                  label={t('When delivered_quantity is empty')}
+                  onChange={(event) =>
+                    setNullDeliveryPolicy(event.target.value)
+                  }
+                >
+                  <MenuItem value="reset">
+                    {t('Reset rows with empty/null delivered_quantity')}
+                  </MenuItem>
+                  <MenuItem value="ignore">
+                    {t('Ignore rows with empty/null delivered_quantity')}
+                  </MenuItem>
+                </Select>
+                <FormHelperText>
+                  {t(
+                    'Any non-empty delivered quantity in this upload will replace the existing reconciliation result. The selected option only controls rows with an empty delivered quantity.',
+                  )}
+                </FormHelperText>
+              </FormControl>
+            ) : null}
+          </>
+        ) : null
+      }
+      dataCySuffix="delivery-import-xlsx-group"
+    />
+  );
+}

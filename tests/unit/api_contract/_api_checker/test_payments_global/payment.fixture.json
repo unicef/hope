@@ -61,7 +61,7 @@
                 }
             },
             {
-                "model": "payment.paymentplan",
+                "model": "payment.paymentlist",
                 "pk": "1dcee178-f68f-4f17-af6e-f3689e807688",
                 "fields": {
                     "is_removed": false,
@@ -79,7 +79,7 @@
                     "steficon_rule": null,
                     "steficon_rule_targeting": null,
                     "created_by": "048f0b0c-fd0a-4989-85a5-117b081d27fc",
-                    "source_payment_plan": null,
+                    "source_payment_list": null,
                     "storage_file": null,
                     "name": null,
                     "start_date": null,
@@ -117,11 +117,11 @@
                     "is_cash_assist": false,
                     "flag_exclude_if_active_adjudication_ticket": false,
                     "flag_exclude_if_on_sanction_list": false,
-                    "payment_plan_group": "4ed70e02-b683-4469-bd6d-c4e625d119e0"
+                    "payment_plan": "4ed70e02-b683-4469-bd6d-c4e625d119e0"
                 }
             },
             {
-                "model": "payment.paymentplangroup",
+                "model": "payment.paymentplan",
                 "pk": "4ed70e02-b683-4469-bd6d-c4e625d119e0",
                 "fields": {
                     "created_at": "2025-01-01T00:00:00Z",

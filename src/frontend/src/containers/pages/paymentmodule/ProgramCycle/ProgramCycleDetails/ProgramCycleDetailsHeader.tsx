@@ -15,7 +15,7 @@ import {
   DialogTitle,
   TextField,
 } from '@mui/material';
-import type { PaymentPlanGroupCreate } from '@restgenerated/models/PaymentPlanGroupCreate';
+import type { PaymentPlanCreate } from '@restgenerated/models/PaymentPlanCreate';
 import type { ProgramCycleList } from '@restgenerated/models/ProgramCycleList';
 import { RestService } from '@restgenerated/index';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
@@ -39,8 +39,8 @@ export const ProgramCycleDetailsHeader = ({
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const { businessArea, programId } = useBaseUrl();
-  const [createGroupOpen, setCreateGroupOpen] = useState(false);
-  const [newGroupName, setNewGroupName] = useState('');
+  const [createPaymentPlanOpen, setCreatePaymentPlanOpen] = useState(false);
+  const [newPaymentPlanName, setNewPaymentPlanName] = useState('');
 
   const { mutateAsync: finishMutation, isPending: isPendingFinishing } =
     useMutation({
@@ -96,28 +96,29 @@ export const ProgramCycleDetailsHeader = ({
       },
     });
 
-  const { mutateAsync: createGroup, isPending: creatingGroup } = useMutation({
-    mutationFn: (name: string) =>
-      RestService.restBusinessAreasProgramsPaymentPlanGroupsCreate({
-        businessAreaSlug: businessArea,
-        programCode: programId,
-        // Generated PaymentPlanGroupCreate marks readonly id/unicefId as
-        // required; only name + cycle are accepted on create.
-        // The generated PaymentPlanGroupCreate model doesn't match the actual
-        // create payload ({ name, cycle }); cast until codegen is corrected.
-        requestBody: {
-          name,
-          cycle: programCycle.id,
-        } as unknown as PaymentPlanGroupCreate,
-      }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: restQueryKey(
-          RestService.restBusinessAreasProgramsPaymentPlanGroupsList,
-        ),
-      });
-    },
-  });
+  const { mutateAsync: createPaymentPlan, isPending: creatingPaymentPlan } =
+    useMutation({
+      mutationFn: (name: string) =>
+        RestService.restBusinessAreasProgramsPaymentPlansCreate({
+          businessAreaSlug: businessArea,
+          programCode: programId,
+          // Generated PaymentPlanCreate marks readonly id/unicefId as
+          // required; only name + cycle are accepted on create.
+          // The generated PaymentPlanCreate model doesn't match the actual
+          // create payload ({ name, cycle }); cast until codegen is corrected.
+          requestBody: {
+            name,
+            cycle: programCycle.id,
+          } as unknown as PaymentPlanCreate,
+        }),
+      onSuccess: () => {
+        queryClient.invalidateQueries({
+          queryKey: restQueryKey(
+            RestService.restBusinessAreasProgramsPaymentPlansList,
+          ),
+        });
+      },
+    });
 
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
@@ -156,12 +157,12 @@ export const ProgramCycleDetailsHeader = ({
     }
   };
 
-  const handleCreateGroup = async (): Promise<void> => {
+  const handleCreatePaymentPlan = async (): Promise<void> => {
     try {
-      await createGroup(newGroupName.trim());
+      await createPaymentPlan(newPaymentPlanName.trim());
       showMessage(t('Payment Plan created'));
-      setCreateGroupOpen(false);
-      setNewGroupName('');
+      setCreatePaymentPlanOpen(false);
+      setNewPaymentPlanName('');
     } catch (e) {
       showApiErrorMessages(e, showMessage);
     }
@@ -178,27 +179,24 @@ export const ProgramCycleDetailsHeader = ({
                 color="primary"
                 component={Link}
                 startIcon={<AddIcon />}
-                to="payment-plans/new-plan"
-                data-cy="button-create-payment-plan"
+                to="payment-lists/new-plan"
+                data-cy="button-create-payment-list"
                 data-perm={PERMISSIONS.PM_CREATE}
               >
-                {t('Create Payment Plan Component')}
+                {t('Create Payment List')}
               </Button>
             </Box>
           )}
 
-        {hasPermissions(
-          PERMISSIONS.PM_PAYMENT_PLAN_GROUP_CREATE,
-          permissions,
-        ) && (
+        {hasPermissions(PERMISSIONS.PM_PAYMENT_PLAN_CREATE, permissions) && (
           <Box>
             <Button
               variant="contained"
               color="primary"
               startIcon={<AddIcon />}
-              onClick={() => setCreateGroupOpen(true)}
-              data-cy="button-create-payment-plan-group"
-              data-perm={PERMISSIONS.PM_PAYMENT_PLAN_GROUP_CREATE}
+              onClick={() => setCreatePaymentPlanOpen(true)}
+              data-cy="button-create-payment-plan"
+              data-perm={PERMISSIONS.PM_PAYMENT_PLAN_CREATE}
             >
               {t('Create Payment Plan')}
             </Button>
@@ -244,8 +242,8 @@ export const ProgramCycleDetailsHeader = ({
       </HeaderActions>
 
       <Dialog
-        open={createGroupOpen}
-        onClose={() => setCreateGroupOpen(false)}
+        open={createPaymentPlanOpen}
+        onClose={() => setCreatePaymentPlanOpen(false)}
         maxWidth="xs"
         fullWidth
       >
@@ -257,18 +255,18 @@ export const ProgramCycleDetailsHeader = ({
             label={t('Payment Plan Name')}
             name="groupName"
             fullWidth
-            value={newGroupName}
-            onChange={(e) => setNewGroupName(e.target.value)}
+            value={newPaymentPlanName}
+            onChange={(e) => setNewPaymentPlanName(e.target.value)}
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setCreateGroupOpen(false)}>
+          <Button onClick={() => setCreatePaymentPlanOpen(false)}>
             {t('Cancel')}
           </Button>
           <Button
-            onClick={handleCreateGroup}
+            onClick={handleCreatePaymentPlan}
             variant="contained"
-            disabled={!newGroupName.trim() || creatingGroup}
+            disabled={!newPaymentPlanName.trim() || creatingPaymentPlan}
             data-cy="button-create-group-submit"
           >
             {t('Create')}

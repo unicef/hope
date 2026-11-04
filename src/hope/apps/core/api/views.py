@@ -62,7 +62,7 @@ from hope.models import (
     DocumentType,
     Feedback,
     LogEntry,
-    PaymentPlan,
+    PaymentList,
     PaymentVerification,
     PaymentVerificationPlan,
     PaymentVerificationSummary,
@@ -225,21 +225,21 @@ class ChoicesViewSet(ViewSet):
         return Response(ChoiceSerializer(TIMEZONE_CHOICES, many=True).data)
 
     @extend_schema(responses={200: ChoiceSerializer(many=True)})
-    @action(detail=False, methods=["get"], url_path="payment-plan-status")
-    def payment_plan_status(self, request: Request) -> Response:
-        resp = ChoiceSerializer(to_choice_object(PaymentPlan.Status.choices), many=True).data
+    @action(detail=False, methods=["get"], url_path="payment-list-status")
+    def payment_list_status(self, request: Request) -> Response:
+        resp = ChoiceSerializer(to_choice_object(PaymentList.Status.choices), many=True).data
         return Response(resp)
 
     @extend_schema(responses={200: ChoiceSerializer(many=True)})
-    @action(detail=False, methods=["get"], url_path="payment-plan-background-action-status")
-    def payment_plan_background_action_status(self, request: Request) -> Response:
-        resp = ChoiceSerializer(to_choice_object(PaymentPlan.BackgroundActionStatus.choices), many=True).data
+    @action(detail=False, methods=["get"], url_path="payment-list-background-action-status")
+    def payment_list_background_action_status(self, request: Request) -> Response:
+        resp = ChoiceSerializer(to_choice_object(PaymentList.BackgroundActionStatus.choices), many=True).data
         return Response(resp)
 
     @extend_schema(responses={200: ChoiceSerializer(many=True)})
-    @action(detail=False, methods=["get"], url_path="payment-plan-type")
-    def payment_plan_type(self, request: Request) -> Response:
-        resp = ChoiceSerializer(to_choice_object(PaymentPlan.PlanType.choices), many=True).data
+    @action(detail=False, methods=["get"], url_path="payment-list-type")
+    def payment_list_type(self, request: Request) -> Response:
+        resp = ChoiceSerializer(to_choice_object(PaymentList.PlanType.choices), many=True).data
         return Response(resp)
 
     @extend_schema(responses={200: ChoiceSerializer(many=True)})

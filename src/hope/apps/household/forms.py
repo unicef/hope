@@ -12,7 +12,7 @@ from hope.models import (
     BusinessArea,
     Household,
     Individual,
-    PaymentPlanGroup,
+    PaymentPlan,
     PendingDocument,
     PendingHousehold,
     PendingIndividual,
@@ -169,9 +169,9 @@ class CreateTargetPopulationTextForm(forms.Form):
             label="Programme Cycle",
         )
 
-        self.fields["payment_plan_group"] = forms.ModelChoiceField(
-            queryset=PaymentPlanGroup.objects.filter(cycle__program=self.program),
-            label="Payment Plan Group",
+        self.fields["payment_plan"] = forms.ModelChoiceField(
+            queryset=PaymentPlan.objects.filter(cycle__program=self.program),
+            label="Payment Plan",
         )
 
         if read_only:
@@ -180,7 +180,7 @@ class CreateTargetPopulationTextForm(forms.Form):
             self.fields["target_field"].widget = HiddenInput()
             self.fields["separator"].widget = HiddenInput()
             self.fields["program_cycle"].widget = HiddenInput()
-            self.fields["payment_plan_group"].widget = HiddenInput()
+            self.fields["payment_plan"].widget = HiddenInput()
 
     def clean_criteria(self) -> list | None:
         try:

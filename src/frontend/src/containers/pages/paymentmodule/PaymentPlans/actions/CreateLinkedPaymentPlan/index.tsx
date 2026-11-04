@@ -1,0 +1,1 @@
+export { CreateLinkedPaymentPlanButton } from './CreateLinkedPaymentPlanButton';

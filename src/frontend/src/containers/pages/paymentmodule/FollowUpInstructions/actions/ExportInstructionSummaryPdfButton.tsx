@@ -40,7 +40,7 @@ export function ExportInstructionSummaryPdfButton({
         },
       ),
     onSuccess: () => {
-      showMessage(t('Payment Plan Summary is being generated.'));
+      showMessage(t('Follow-Up Instruction Summary is being generated.'));
       queryClient.invalidateQueries({
         queryKey: restQueryKey(
           RestService.restBusinessAreasProgramsFollowUpInstructionsRetrieve,
@@ -69,7 +69,7 @@ export function ExportInstructionSummaryPdfButton({
           download
           data-cy="button-download-instruction-summary-pdf"
         >
-          {t('Download Payment Plan Summary')}
+          {t('Download Follow-Up Instruction Summary')}
         </Button>
       )}
       {canGenerate && (
@@ -83,8 +83,8 @@ export function ExportInstructionSummaryPdfButton({
           data-perm={PERMISSIONS.PM_EXPORT_PDF_SUMMARY}
         >
           {instruction.exportPdfFileSummary
-            ? t('Regenerate Payment Plan Summary')
-            : t('Generate Payment Plan Summary')}
+            ? t('Regenerate Follow-Up Instruction Summary')
+            : t('Generate Follow-Up Instruction Summary')}
         </LoadingButton>
       )}
     </Box>

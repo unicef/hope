@@ -2,7 +2,7 @@ import { Box, Chip, Typography } from '@mui/material';
 import { ResponsiveGrid, ResponsiveGridContainer } from 'src/responsive';
 import { useTranslation } from 'react-i18next';
 import {
-  paymentPlanStatusToColor,
+  paymentListStatusToColor,
   targetPopulationStatusDisplayMap,
 } from '@utils/utils';
 import { ContainerColumnWithBorder } from '@core/ContainerColumnWithBorder';
@@ -37,7 +37,7 @@ function TargetPopulationDetails({
               <StatusBox
                 dataCy="target-population-status"
                 status={targetPopulation.status}
-                statusToColor={paymentPlanStatusToColor}
+                statusToColor={paymentListStatusToColor}
                 statusNameMapping={targetPopulationStatusDisplayMap}
               />
             </LabelizedField>
@@ -65,9 +65,9 @@ function TargetPopulationDetails({
           </ResponsiveGrid>
           <ResponsiveGrid size="third" mobileSize="half">
             <LabelizedField
-              dataCy="payment-plan-group-name"
+              dataCy="payment-plan-name"
               label={t('Payment Plan')}
-              value={targetPopulation.paymentPlanGroup?.name ?? '-'}
+              value={targetPopulation.paymentPlan?.name ?? '-'}
             />
           </ResponsiveGrid>
           {targetPopulation.paymentPlanPurposes?.length > 0 && (

@@ -1,5 +1,5 @@
 import { AutoSubmitFormOnEnter } from '@core/AutoSubmitFormOnEnter';
-import { PaymentPlanStatusEnum } from '@restgenerated/models/PaymentPlanStatusEnum';
+import { PaymentListStatusEnum } from '@restgenerated/models/PaymentListStatusEnum';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { useSnackbar } from '@hooks/useSnackBar';
@@ -11,7 +11,7 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
-import { CreatePaymentPlanGroupModal } from '@components/paymentmodule/CreatePaymentPlanGroupModal';
+import { CreatePaymentPlanModal } from '@components/paymentmodule/CreatePaymentPlanModal';
 import { ProgramCycleAutocompleteRest } from '@shared/autocompletes/rest/ProgramCycleAutocompleteRest';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
 import { FormikChipAutocomplete } from '@shared/Formik/FormikChipAutocomplete/FormikChipAutocomplete';
@@ -44,12 +44,12 @@ import { showApiErrorMessages } from '@utils/utils';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 
 interface EditTargetPopulationProps {
-  paymentPlan: TargetPopulationDetail;
+  paymentList: TargetPopulationDetail;
   screenBeneficiary: boolean;
 }
 
 const EditTargetPopulation = ({
-  paymentPlan,
+  paymentList,
   screenBeneficiary,
 }: EditTargetPopulationProps): ReactElement => {
   const navigate = useNavigate();
@@ -66,48 +66,49 @@ const EditTargetPopulation = ({
     PERMISSIONS.PM_PROGRAMME_CYCLE_VIEW_LIST,
     permissions,
   );
-  const [createGroupModalOpen, setCreateGroupModalOpen] = useState(false);
+  const [createPaymentPlanModalOpen, setCreatePaymentPlanModalOpen] =
+    useState(false);
   const [modalCycle, setModalCycle] = useState<{ value: string; name: string }>(
     {
-      value: paymentPlan.programCycle.id,
-      name: paymentPlan.programCycle.title,
+      value: paymentList.programCycle.id,
+      name: paymentList.programCycle.title,
     },
   );
 
   const targetingCriteriaCopy =
-    paymentPlan.rules.map((rule) => ({
+    paymentList.rules.map((rule) => ({
       ...rule,
       deliveryMechanism: undefined,
     })) || [];
 
   if (targetingCriteriaCopy.length > 0) {
     targetingCriteriaCopy[0].deliveryMechanism =
-      paymentPlan.deliveryMechanism?.code;
+      paymentList.deliveryMechanism?.code;
   }
 
   const initialValues = {
-    id: paymentPlan.id,
-    name: paymentPlan.name || '',
-    program: paymentPlan.program?.id || '',
+    id: paymentList.id,
+    name: paymentList.name || '',
+    program: paymentList.program?.id || '',
     targetingCriteria: targetingCriteriaCopy || [],
-    excludedIds: paymentPlan.excludedIds || '',
-    exclusionReason: paymentPlan.exclusionReason || '',
+    excludedIds: paymentList.excludedIds || '',
+    exclusionReason: paymentList.exclusionReason || '',
     flagExcludeIfActiveAdjudicationTicket:
-      paymentPlan.flagExcludeIfActiveAdjudicationTicket || false,
+      paymentList.flagExcludeIfActiveAdjudicationTicket || false,
     flagExcludeIfOnSanctionList:
-      paymentPlan.flagExcludeIfOnSanctionList || false,
+      paymentList.flagExcludeIfOnSanctionList || false,
     programCycleId: {
-      value: paymentPlan.programCycle.id,
-      name: paymentPlan.programCycle.title,
+      value: paymentList.programCycle.id,
+      name: paymentList.programCycle.title,
     },
-    paymentPlanGroupId: {
-      value: paymentPlan.paymentPlanGroup?.id ?? '',
-      name: paymentPlan.paymentPlanGroup?.name ?? '',
+    paymentPlanId: {
+      value: paymentList.paymentPlan?.id ?? '',
+      name: paymentList.paymentPlan?.name ?? '',
     },
     alternativeCollectorsIds:
-      paymentPlan.rules?.[0]?.alternativeCollectorsIds || '',
+      paymentList.rules?.[0]?.alternativeCollectorsIds || '',
     paymentPlanPurposes:
-      paymentPlan.paymentPlanPurposes?.map((p) => p.id) ?? [],
+      paymentList.paymentPlanPurposes?.map((p) => p.id) ?? [],
   };
 
   const { data: programData } = useQuery<ProgramDetail>({
@@ -120,7 +121,7 @@ const EditTargetPopulation = ({
         businessAreaSlug: businessArea,
         code: programCode,
       }),
-    enabled: paymentPlan.isPurposesEditable,
+    enabled: paymentList.isPurposesEditable,
   });
   const programPurposes = (programData?.paymentPlanPurposes ?? []).map((p) => ({
     value: p.id,
@@ -166,7 +167,7 @@ const EditTargetPopulation = ({
 
   const handleValidate = (
     values,
-  ): { targetingCriteria?: string; paymentPlanGroupId?: { value: string } } => {
+  ): { targetingCriteria?: string; paymentPlanId?: { value: string } } => {
     const {
       targetingCriteria,
       householdIds,
@@ -175,7 +176,7 @@ const EditTargetPopulation = ({
     } = values;
     const errors: {
       targetingCriteria?: string;
-      paymentPlanGroupId?: { value: string };
+      paymentPlanId?: { value: string };
     } = {};
     if (
       !targetingCriteria.length &&
@@ -188,10 +189,10 @@ const EditTargetPopulation = ({
       );
     }
     if (
-      values.programCycleId.value !== paymentPlan.programCycle.id &&
-      !values.paymentPlanGroupId?.value
+      values.programCycleId.value !== paymentList.programCycle.id &&
+      !values.paymentPlanId?.value
     ) {
-      errors.paymentPlanGroupId = { value: 'Payment Plan is required' };
+      errors.paymentPlanId = { value: 'Payment Plan is required' };
     }
     return errors;
   };
@@ -216,14 +217,14 @@ const EditTargetPopulation = ({
         excludedIds: values.excludedIds,
         exclusionReason: values.exclusionReason,
         deliveryMechanismCode: values.targetingCriteria[0]?.deliveryMechanism,
-        ...((values.programCycleId.value !== paymentPlan.programCycle.id ||
-          (values.paymentPlanGroupId?.value &&
-            values.paymentPlanGroupId.value !==
-              (paymentPlan.paymentPlanGroup?.id ?? ''))) && {
+        ...((values.programCycleId.value !== paymentList.programCycle.id ||
+          (values.paymentPlanId?.value &&
+            values.paymentPlanId.value !==
+              (paymentList.paymentPlan?.id ?? ''))) && {
           programCycleId: values.programCycleId.value,
-          paymentPlanGroupId: values.paymentPlanGroupId.value,
+          paymentPlanId: values.paymentPlanId.value,
         }),
-        ...(paymentPlan.status === PaymentPlanStatusEnum.TP_OPEN && {
+        ...(paymentList.status === PaymentListStatusEnum.TP_OPEN && {
           name: values.name,
         }),
         ...getTargetingCriteriaVariables({
@@ -232,7 +233,7 @@ const EditTargetPopulation = ({
           flagExcludeIfOnSanctionList: values.flagExcludeIfOnSanctionList,
           criterias: values.targetingCriteria,
         }),
-        ...(paymentPlan.isPurposesEditable && {
+        ...(paymentList.isPurposesEditable && {
           paymentPlanPurposes: values.paymentPlanPurposes,
         }),
       };
@@ -270,7 +271,7 @@ const EditTargetPopulation = ({
             values={values}
             loading={loadingUpdate}
             baseUrl={baseUrl}
-            targetPopulation={paymentPlan}
+            targetPopulation={paymentList}
             data-cy="edit-target-population-header"
           />
           <PaperContainer data-cy="paper-container">
@@ -297,13 +298,13 @@ const EditTargetPopulation = ({
                       'programCycleId',
                       e ?? { value: '', name: '' },
                     );
-                    if (e?.value && e.value !== paymentPlan.programCycle.id) {
-                      await setFieldValue('paymentPlanGroupId', {
+                    if (e?.value && e.value !== paymentList.programCycle.id) {
+                      await setFieldValue('paymentPlanId', {
                         value: '',
                         name: '',
                       });
                       setModalCycle(e);
-                      setCreateGroupModalOpen(true);
+                      setCreatePaymentPlanModalOpen(true);
                     }
                   }}
                   required
@@ -324,15 +325,15 @@ const EditTargetPopulation = ({
                 >
                   <TextField
                     label={t('Payment Plan')}
-                    value={values.paymentPlanGroupId?.name || ''}
+                    value={values.paymentPlanId?.name || ''}
                     disabled
                     fullWidth
                     variant="outlined"
                     size="small"
                   />
-                  {paymentPlan.status === PaymentPlanStatusEnum.TP_OPEN &&
+                  {paymentList.status === PaymentListStatusEnum.TP_OPEN &&
                     hasPermissions(
-                      PERMISSIONS.PM_PAYMENT_PLAN_GROUP_CREATE,
+                      PERMISSIONS.PM_PAYMENT_PLAN_CREATE,
                       permissions,
                     ) && (
                       <Button
@@ -340,28 +341,28 @@ const EditTargetPopulation = ({
                         color="primary"
                         onClick={() => {
                           setModalCycle(values.programCycleId);
-                          setCreateGroupModalOpen(true);
+                          setCreatePaymentPlanModalOpen(true);
                         }}
                         data-cy="button-change-group"
                         sx={{ whiteSpace: 'nowrap', flexShrink: 0 }}
                       >
-                        {t('Change Group')}
+                        {t('Change Payment Plan')}
                       </Button>
                     )}
                 </Box>
               </Grid>
             </Grid>
-            <CreatePaymentPlanGroupModal
-              open={createGroupModalOpen}
-              onClose={() => setCreateGroupModalOpen(false)}
+            <CreatePaymentPlanModal
+              open={createPaymentPlanModalOpen}
+              onClose={() => setCreatePaymentPlanModalOpen(false)}
               cycleId={modalCycle.value}
               cycleTitle={modalCycle.name}
-              onSuccess={(group) => {
-                setFieldValue('paymentPlanGroupId', {
-                  value: group.id,
-                  name: group.name,
+              onSuccess={(paymentPlan) => {
+                setFieldValue('paymentPlanId', {
+                  value: paymentPlan.id,
+                  name: paymentPlan.name,
                 });
-                setCreateGroupModalOpen(false);
+                setCreatePaymentPlanModalOpen(false);
               }}
             />
             <Grid container spacing={3}>
@@ -374,10 +375,10 @@ const EditTargetPopulation = ({
                   required
                   component={FormikTextField}
                   variant="outlined"
-                  disabled={paymentPlan.status === 'LOCKED'}
+                  disabled={paymentList.status === 'LOCKED'}
                 />
               </Grid>
-              {paymentPlan.isPurposesEditable && (
+              {paymentList.isPurposesEditable && (
                 <Grid size={responsiveGridSize('half')}>
                   <Field
                     name="paymentPlanPurposes"
@@ -408,8 +409,8 @@ const EditTargetPopulation = ({
                   screenBeneficiary={screenBeneficiary}
                   isStandardDctType={isStandardDctType}
                   isSocialDctType={isSocialDctType}
-                  targetPopulation={paymentPlan}
-                  paymentPlanGroupId={values.paymentPlanGroupId?.value}
+                  targetPopulation={paymentList}
+                  paymentPlanId={values.paymentPlanId?.value}
                   data-cy="add-filter-targeting-criteria-display"
                 />
               )}

@@ -6,10 +6,10 @@ from unit.api_contract._helpers import HopeRecorder
 
 from extras.test_utils.factories.account import RoleAssignmentFactory, RoleFactory, UserFactory
 from extras.test_utils.factories.core import BusinessAreaFactory
-from extras.test_utils.factories.payment import PaymentPlanFactory, PaymentPlanGroupFactory
+from extras.test_utils.factories.payment import PaymentListFactory, PaymentPlanFactory
 from extras.test_utils.factories.program import ProgramCycleFactory, ProgramFactory
+from hope.models.payment_list import PaymentList
 from hope.models.payment_plan import PaymentPlan
-from hope.models.payment_plan_group import PaymentPlanGroup
 
 pytestmark = pytest.mark.django_db
 
@@ -44,28 +44,26 @@ def role_assignment(request, db, superuser, business_area, role):
 
 
 @frozenfixture()
-def payment_plan_group(request, db, program, superuser):
-    return PaymentPlanGroupFactory(
+def payment_plan(request, db, program, superuser):
+    return PaymentPlanFactory(
         cycle=ProgramCycleFactory(program=program),
         name="Managerial Group",
-        status=PaymentPlanGroup.Status.IN_APPROVAL,
+        status=PaymentPlan.Status.IN_APPROVAL,
         created_by=superuser,
     )
 
 
 @frozenfixture()
-def payment_plan(request, db, business_area, program, superuser, payment_plan_group):
-    return PaymentPlanFactory(
+def payment_list(request, db, business_area, program, superuser, payment_plan):
+    return PaymentListFactory(
         business_area=business_area,
-        program_cycle=payment_plan_group.cycle,
-        payment_plan_group=payment_plan_group,
+        program_cycle=payment_plan.cycle,
+        payment_plan=payment_plan,
         created_by=superuser,
-        status=PaymentPlan.Status.IN_APPROVAL,
+        status=PaymentList.Status.IN_APPROVAL,
     )
 
 
-def test_list_payment_plans_managerial(
-    superuser, business_area, program, role_assignment, payment_plan_group, payment_plan
-):
+def test_list_payment_plans_managerial(superuser, business_area, program, role_assignment, payment_plan, payment_list):
     recorder = HopeRecorder(DATA_DIR, as_user=superuser)
     recorder.assertGET(f"/api/rest/business-areas/{business_area.slug}/payments/payment-plans-managerial/")

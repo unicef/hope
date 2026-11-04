@@ -2,8 +2,8 @@ import withErrorBoundary from '@components/core/withErrorBoundary';
 import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import type { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
-import type { PaginatedPaymentListList } from '@restgenerated/models/PaginatedPaymentListList';
-import type { PaymentList } from '@restgenerated/models/PaymentList';
+import type { PaginatedPaymentRowList } from '@restgenerated/models/PaginatedPaymentRowList';
+import type { PaymentRow } from '@restgenerated/models/PaymentRow';
 import type { CountResponse } from '@restgenerated/models/CountResponse';
 import { RestService } from '@restgenerated/services/RestService';
 import { restQueryKey } from '@utils/queryKeys';
@@ -52,7 +52,7 @@ function PaymentsHouseholdTable({
     isLoading,
     isFetching,
     error,
-  } = useQuery<PaginatedPaymentListList>({
+  } = useQuery<PaginatedPaymentRowList>({
     queryKey: restQueryKey(
       RestService.restBusinessAreasProgramsHouseholdsPaymentsList,
       paymentsListParams,
@@ -108,7 +108,7 @@ function PaymentsHouseholdTable({
       isFetching={isFetching}
       tableState={table}
       itemsCount={itemsCount}
-      renderRow={(row: PaymentList) => (
+      renderRow={(row: PaymentRow) => (
         <PaymentsHouseholdTableRow
           key={row.id}
           payment={row}

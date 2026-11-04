@@ -7,7 +7,7 @@ from extras.test_utils.factories import (
     AreaFactory,
     FinancialServiceProviderFactory,
     PaymentFactory,
-    PaymentPlanFactory,
+    PaymentListFactory,
 )
 from hope.apps.payment.api.filters import PaymentSearchFilter
 from hope.models import Payment
@@ -17,7 +17,7 @@ pytestmark = pytest.mark.django_db
 
 @pytest.fixture
 def payments_with_distinct_created_at() -> tuple[Payment, Payment, Payment]:
-    plan = PaymentPlanFactory()
+    plan = PaymentListFactory()
     now = timezone.now()
     oldest = PaymentFactory(parent=plan)
     middle = PaymentFactory(parent=plan)
@@ -84,7 +84,7 @@ def test_payment_search_filter_orders_by_created_at_descending(
     ],
 )
 def test_payment_search_filter_orders_by_column(ordering: str, first_kwargs, second_kwargs) -> None:
-    plan = PaymentPlanFactory()
+    plan = PaymentListFactory()
     # Created in reverse so the assertion cannot pass on insertion order alone.
     second = PaymentFactory(parent=plan, **second_kwargs())
     first = PaymentFactory(parent=plan, **first_kwargs())
@@ -96,7 +96,7 @@ def test_payment_search_filter_orders_by_column(ordering: str, first_kwargs, sec
 
 def test_payment_search_filter_orders_by_reconciliation_rank() -> None:
     """Statuses outside the reconciled/failed set must sort with their peers, not in a NULL clump."""
-    plan = PaymentPlanFactory()
+    plan = PaymentListFactory()
     sent_to_fsp = PaymentFactory(parent=plan, status=Payment.STATUS_SENT_TO_FSP)
     not_distributed = PaymentFactory(parent=plan, status=Payment.STATUS_NOT_DISTRIBUTED)
     transaction_successful = PaymentFactory(parent=plan, status=Payment.STATUS_SUCCESS)
@@ -114,7 +114,7 @@ def test_payment_search_filter_orders_by_reconciliation_rank() -> None:
 
 def test_payment_search_filter_ranks_every_payment_status() -> None:
     """No status may fall through the Case: NULL sorts arbitrarily, and 99 is the unranked sentinel."""
-    plan = PaymentPlanFactory()
+    plan = PaymentListFactory()
     for status, _label in Payment.STATUS_CHOICE:
         payment = PaymentFactory(parent=plan)
         Payment.objects.filter(pk=payment.pk).update(status=status)
@@ -128,7 +128,7 @@ def test_payment_search_filter_ranks_every_payment_status() -> None:
 
 def test_payment_search_filter_breaks_ties_deterministically() -> None:
     """Ties need a unique tie-breaker, otherwise LIMIT/OFFSET paging can repeat or skip a row."""
-    plan = PaymentPlanFactory()
+    plan = PaymentListFactory()
     payments = [PaymentFactory(parent=plan, status=Payment.STATUS_PENDING) for _ in range(5)]
 
     result = PaymentSearchFilter(data={"ordering": "reconciliation_rank"}, queryset=Payment.objects.all()).qs
@@ -137,7 +137,7 @@ def test_payment_search_filter_breaks_ties_deterministically() -> None:
 
 
 def test_payment_search_filter_breaks_ties_deterministically_without_ordering() -> None:
-    plan = PaymentPlanFactory()
+    plan = PaymentListFactory()
     now = timezone.now()
     payments = [PaymentFactory(parent=plan) for _ in range(5)]
     Payment.objects.filter(pk__in=[payment.pk for payment in payments]).update(created_at=now)

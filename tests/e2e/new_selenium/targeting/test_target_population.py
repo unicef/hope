@@ -3,7 +3,15 @@ import pytest
 from e2e.new_selenium.conftest import grant_permission
 from extras.test_utils.selenium import HopeTestBrowser
 from hope.apps.account.permissions import Permissions
-from hope.models import BusinessArea, Household, PaymentPlan, PaymentPlanGroup, PaymentPlanPurpose, ProgramCycle, User
+from hope.models import (
+    BusinessArea,
+    Household,
+    PaymentList,
+    PaymentPlan,
+    PaymentPlanPurpose,
+    ProgramCycle,
+    User,
+)
 
 from .conftest import (
     CYCLE_TITLE,
@@ -21,7 +29,7 @@ def test_tp_list_shows_group_header_row(
     browser: HopeTestBrowser,
     user_with_no_permissions: User,
     business_area: BusinessArea,
-    targeting_tp: PaymentPlan,
+    targeting_tp: PaymentList,
 ) -> None:
     program = targeting_tp.program_cycle.program
     with grant_permission(
@@ -40,7 +48,7 @@ def test_tp_details_shows_group_and_purpose(
     browser: HopeTestBrowser,
     user_with_no_permissions: User,
     business_area: BusinessArea,
-    targeting_tp: PaymentPlan,
+    targeting_tp: PaymentList,
 ) -> None:
     program = targeting_tp.program_cycle.program
     with grant_permission(
@@ -60,7 +68,7 @@ def test_create_tp_with_group_and_purpose(
     browser: HopeTestBrowser,
     user_with_no_permissions: User,
     business_area: BusinessArea,
-    targeting_group: PaymentPlanGroup,
+    targeting_group: PaymentPlan,
     tp_purpose: PaymentPlanPurpose,
     targeting_household: Household,
 ) -> None:
@@ -72,8 +80,8 @@ def test_create_tp_with_group_and_purpose(
         Permissions.TARGETING_VIEW_DETAILS,
         Permissions.TARGETING_CREATE,
         Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS,
-        Permissions.PM_PAYMENT_PLAN_GROUP_VIEW_DETAIL,
-        Permissions.PM_PAYMENT_PLAN_GROUP_VIEW_LIST,
+        Permissions.PM_PAYMENT_PLAN_VIEW_DETAIL,
+        Permissions.PM_PAYMENT_PLAN_VIEW_LIST,
         Permissions.PM_PROGRAMME_CYCLE_VIEW_LIST,
     ):
         browser.login(username="noperm_user")
@@ -84,8 +92,8 @@ def test_create_tp_with_group_and_purpose(
         browser.click('[data-cy="filters-program-cycle-autocomplete"]')
         browser.select_listbox_element(CYCLE_TITLE)
 
-        browser.wait_for_element_clickable('[data-cy="filters-payment-plan-group-autocomplete"] input')
-        browser.click('[data-cy="filters-payment-plan-group-autocomplete"]')
+        browser.wait_for_element_clickable('[data-cy="filters-payment-plan-autocomplete"] input')
+        browser.click('[data-cy="filters-payment-plan-autocomplete"]')
         browser.select_listbox_element(GROUP_NAME)
 
         browser.wait_for_element_visible('input[data-cy="input-name"]')
@@ -113,8 +121,8 @@ def test_create_tp_dropdowns_show_only_relevant_options(
     browser: HopeTestBrowser,
     user_with_no_permissions: User,
     business_area: BusinessArea,
-    targeting_group: PaymentPlanGroup,
-    second_targeting_group: PaymentPlanGroup,
+    targeting_group: PaymentPlan,
+    second_targeting_group: PaymentPlan,
     other_purpose: PaymentPlanPurpose,
 ) -> None:
     program = targeting_group.cycle.program
@@ -124,7 +132,7 @@ def test_create_tp_dropdowns_show_only_relevant_options(
         Permissions.TARGETING_VIEW_LIST,
         Permissions.TARGETING_CREATE,
         Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS,
-        Permissions.PM_PAYMENT_PLAN_GROUP_VIEW_LIST,
+        Permissions.PM_PAYMENT_PLAN_VIEW_LIST,
         Permissions.PM_PROGRAMME_CYCLE_VIEW_LIST,
     ):
         browser.login(username="noperm_user")
@@ -141,8 +149,8 @@ def test_create_tp_dropdowns_show_only_relevant_options(
 
         browser.click('[data-cy="filters-program-cycle-autocomplete"]')
         browser.select_listbox_element(CYCLE_TITLE)
-        browser.wait_for_element_clickable('[data-cy="filters-payment-plan-group-autocomplete"] input')
-        browser.click('[data-cy="filters-payment-plan-group-autocomplete"]')
+        browser.wait_for_element_clickable('[data-cy="filters-payment-plan-autocomplete"] input')
+        browser.click('[data-cy="filters-payment-plan-autocomplete"]')
         browser.wait_for_text(GROUP_NAME, 'ul[role="listbox"]')
         browser.assert_text_not_visible(SECOND_GROUP_NAME, 'ul[role="listbox"]')
 
@@ -151,7 +159,7 @@ def test_edit_tp_shows_group_and_purpose(
     browser: HopeTestBrowser,
     user_with_no_permissions: User,
     business_area: BusinessArea,
-    targeting_tp: PaymentPlan,
+    targeting_tp: PaymentList,
     second_targeting_cycle: ProgramCycle,
 ) -> None:
     program = targeting_tp.program_cycle.program
@@ -161,9 +169,9 @@ def test_edit_tp_shows_group_and_purpose(
         Permissions.TARGETING_VIEW_DETAILS,
         Permissions.TARGETING_UPDATE,
         Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS,
-        Permissions.PM_PAYMENT_PLAN_GROUP_VIEW_DETAIL,
-        Permissions.PM_PAYMENT_PLAN_GROUP_VIEW_LIST,
-        Permissions.PM_PAYMENT_PLAN_GROUP_CREATE,
+        Permissions.PM_PAYMENT_PLAN_VIEW_DETAIL,
+        Permissions.PM_PAYMENT_PLAN_VIEW_LIST,
+        Permissions.PM_PAYMENT_PLAN_CREATE,
         Permissions.PM_PROGRAMME_CYCLE_VIEW_LIST,
     ):
         browser.login(username="noperm_user")
@@ -195,8 +203,8 @@ def test_duplicate_tp_with_group_and_purpose(
     browser: HopeTestBrowser,
     user_with_no_permissions: User,
     business_area: BusinessArea,
-    targeting_tp: PaymentPlan,
-    targeting_group: PaymentPlanGroup,
+    targeting_tp: PaymentList,
+    targeting_group: PaymentPlan,
     tp_purpose: PaymentPlanPurpose,
 ) -> None:
     program = targeting_tp.program_cycle.program
@@ -206,7 +214,7 @@ def test_duplicate_tp_with_group_and_purpose(
         Permissions.TARGETING_VIEW_DETAILS,
         Permissions.TARGETING_DUPLICATE,
         Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS,
-        Permissions.PM_PAYMENT_PLAN_GROUP_VIEW_LIST,
+        Permissions.PM_PAYMENT_PLAN_VIEW_LIST,
         Permissions.PM_PROGRAMME_CYCLE_VIEW_LIST,
     ):
         browser.login(username="noperm_user")
@@ -220,8 +228,8 @@ def test_duplicate_tp_with_group_and_purpose(
         browser.click('[data-cy="filters-program-cycle-autocomplete"]')
         browser.select_listbox_element(CYCLE_TITLE)
 
-        browser.wait_for_element_clickable('[data-cy="filters-payment-plan-group-autocomplete"] input')
-        browser.click('[data-cy="filters-payment-plan-group-autocomplete"]')
+        browser.wait_for_element_clickable('[data-cy="filters-payment-plan-autocomplete"] input')
+        browser.click('[data-cy="filters-payment-plan-autocomplete"]')
         browser.select_listbox_element(GROUP_NAME)
 
         browser.select_chip_option(PURPOSE_NAME, '[data-cy="input-payment-plan-purposes"]')
@@ -238,7 +246,7 @@ def test_edit_latest_tp_purposes_are_editable(
     browser: HopeTestBrowser,
     user_with_no_permissions: User,
     business_area: BusinessArea,
-    targeting_tp: PaymentPlan,
+    targeting_tp: PaymentList,
 ) -> None:
     program = targeting_tp.program_cycle.program
     with grant_permission(
@@ -247,7 +255,7 @@ def test_edit_latest_tp_purposes_are_editable(
         Permissions.TARGETING_VIEW_DETAILS,
         Permissions.TARGETING_UPDATE,
         Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS,
-        Permissions.PM_PAYMENT_PLAN_GROUP_VIEW_DETAIL,
+        Permissions.PM_PAYMENT_PLAN_VIEW_DETAIL,
     ):
         browser.login(username="noperm_user")
         browser.open(f"/{business_area.slug}/programs/{program.code}/target-population/edit-tp/{targeting_tp.id}")
@@ -259,8 +267,8 @@ def test_edit_non_latest_tp_purposes_not_editable(
     browser: HopeTestBrowser,
     user_with_no_permissions: User,
     business_area: BusinessArea,
-    targeting_tp: PaymentPlan,
-    later_tp: PaymentPlan,
+    targeting_tp: PaymentList,
+    later_tp: PaymentList,
 ) -> None:
     program = targeting_tp.program_cycle.program
     with grant_permission(
@@ -269,7 +277,7 @@ def test_edit_non_latest_tp_purposes_not_editable(
         Permissions.TARGETING_VIEW_DETAILS,
         Permissions.TARGETING_UPDATE,
         Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS,
-        Permissions.PM_PAYMENT_PLAN_GROUP_VIEW_DETAIL,
+        Permissions.PM_PAYMENT_PLAN_VIEW_DETAIL,
     ):
         browser.login(username="noperm_user")
         browser.open(f"/{business_area.slug}/programs/{program.code}/target-population/edit-tp/{targeting_tp.id}")
@@ -281,7 +289,7 @@ def test_edit_tp_without_cycle_list_permission_keeps_its_cycle(
     browser: HopeTestBrowser,
     user_with_no_permissions: User,
     business_area: BusinessArea,
-    targeting_tp: PaymentPlan,
+    targeting_tp: PaymentList,
 ) -> None:
     program = targeting_tp.program_cycle.program
     with grant_permission(
@@ -290,7 +298,7 @@ def test_edit_tp_without_cycle_list_permission_keeps_its_cycle(
         Permissions.TARGETING_VIEW_DETAILS,
         Permissions.TARGETING_UPDATE,
         Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS,
-        Permissions.PM_PAYMENT_PLAN_GROUP_VIEW_DETAIL,
+        Permissions.PM_PAYMENT_PLAN_VIEW_DETAIL,
     ):
         browser.login(username="noperm_user")
         browser.open(f"/{business_area.slug}/programs/{program.code}/target-population/edit-tp/{targeting_tp.id}")
@@ -312,7 +320,7 @@ def test_create_tp_without_cycle_list_permission_shows_permission_denied(
     browser: HopeTestBrowser,
     user_with_no_permissions: User,
     business_area: BusinessArea,
-    targeting_tp: PaymentPlan,
+    targeting_tp: PaymentList,
 ) -> None:
     program = targeting_tp.program_cycle.program
     with grant_permission(
@@ -333,7 +341,7 @@ def test_duplicate_hidden_without_cycle_list_permission(
     browser: HopeTestBrowser,
     user_with_no_permissions: User,
     business_area: BusinessArea,
-    targeting_tp: PaymentPlan,
+    targeting_tp: PaymentList,
 ) -> None:
     program = targeting_tp.program_cycle.program
     with grant_permission(

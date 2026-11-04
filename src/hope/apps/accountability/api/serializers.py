@@ -6,7 +6,7 @@ from hope.apps.core.api.mixins import AdminUrlSerializerMixin
 from hope.apps.geo.api.serializers import AreaSimpleSerializer
 from hope.apps.household.api.serializers.household import HouseholdSmallSerializer
 from hope.apps.payment.api.serializers import (
-    FollowUpPaymentPlanSerializer,
+    FollowUpPaymentListSerializer,
     FullListSerializer,
     RandomSamplingSerializer,
 )
@@ -14,7 +14,15 @@ from hope.apps.registration_data.api.serializers import (
     RegistrationDataImportListSerializer,
 )
 from hope.apps.utils.external_urls import build_url
-from hope.models import Feedback, FeedbackMessage, Household, Message, PaymentPlan, RegistrationDataImport, Survey
+from hope.models import (
+    Feedback,
+    FeedbackMessage,
+    Household,
+    Message,
+    PaymentList,
+    RegistrationDataImport,
+    Survey,
+)
 from hope.models.survey import SampleFileExpiredError
 
 
@@ -166,14 +174,14 @@ class MessageListSerializer(serializers.ModelSerializer):
 
 class MessageDetailSerializer(AdminUrlSerializerMixin, MessageListSerializer):
     households = HouseholdSmallSerializer(many=True, read_only=True)
-    payment_plan = FollowUpPaymentPlanSerializer(read_only=True)
+    payment_list = FollowUpPaymentListSerializer(read_only=True)
     registration_data_import = RegistrationDataImportListSerializer(read_only=True)
 
     class Meta(MessageListSerializer.Meta):
         fields = MessageListSerializer.Meta.fields + (  # type: ignore
             "body",
             "households",
-            "payment_plan",
+            "payment_list",
             "registration_data_import",
             "sampling_type",
             "full_list_arguments",
@@ -189,8 +197,8 @@ class MessageCreateSerializer(serializers.Serializer):
     sampling_type = serializers.ChoiceField(choices=Message.SamplingChoices)  # type: ignore[arg-type]
     full_list_arguments = FullListSerializer(required=False, allow_null=True)
     random_sampling_arguments = RandomSamplingSerializer(required=False, allow_null=True)
-    payment_plan = ScopedRelatedField(
-        queryset=PaymentPlan.objects.all(),
+    payment_list = ScopedRelatedField(
+        queryset=PaymentList.objects.all(),
         scope="program",
         scope_path="program_cycle__program",
         required=False,
@@ -227,15 +235,15 @@ class SurveySerializer(serializers.ModelSerializer):
     body = serializers.CharField(required=False, allow_blank=True)
     sampling_type = serializers.CharField()
     flow = serializers.CharField(required=False, write_only=True, allow_blank=True)
-    payment_plan = ScopedSlugRelatedField(
+    payment_list = ScopedSlugRelatedField(
         slug_field="id",
         scope="program",
         scope_path="program_cycle__program",
         required=False,
         allow_null=True,
-        queryset=PaymentPlan.objects.all(),
+        queryset=PaymentList.objects.all(),
     )
-    payment_plan_name = serializers.CharField(source="payment_plan.name", read_only=True)
+    payment_list_name = serializers.CharField(source="payment_list.name", read_only=True)
     full_list_arguments = AccountabilityFullListArgumentsSerializer(write_only=True, required=False, allow_null=True)
     random_sampling_arguments = AccountabilityRandomSamplingArgumentsSerializer(
         write_only=True, required=False, allow_null=True
@@ -257,8 +265,8 @@ class SurveySerializer(serializers.ModelSerializer):
             "sampling_type",
             "flow",
             "flow_id",
-            "payment_plan",
-            "payment_plan_name",
+            "payment_list",
+            "payment_list_name",
             "full_list_arguments",
             "random_sampling_arguments",
             "sample_file_path",
@@ -298,8 +306,8 @@ class SurveyRapidProFlowSerializer(serializers.Serializer):
 
 
 class SurveySampleSizeSerializer(serializers.Serializer):
-    payment_plan = ScopedRelatedField(
-        queryset=PaymentPlan.objects.all(),
+    payment_list = ScopedRelatedField(
+        queryset=PaymentList.objects.all(),
         scope="program",
         scope_path="program_cycle__program",
         required=False,
@@ -322,8 +330,8 @@ class MessageSampleSizeSerializer(serializers.Serializer):
         required=False,
         allow_empty=True,
     )
-    payment_plan = ScopedRelatedField(
-        queryset=PaymentPlan.objects.all(),
+    payment_list = ScopedRelatedField(
+        queryset=PaymentList.objects.all(),
         scope="program",
         scope_path="program_cycle__program",
         required=False,

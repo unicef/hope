@@ -7,8 +7,8 @@ from hope.apps.targeting.api.utils import filter_choices, get_field_by_name
 from hope.apps.targeting.choices import FlexFieldClassification
 from hope.models import (
     FlexibleAttribute,
+    PaymentList,
     PaymentPlan,
-    PaymentPlanGroup,
     Program,
     TargetingCriteriaRule,
     TargetingCriteriaRuleFilter,
@@ -17,19 +17,19 @@ from hope.models import (
 )
 
 
-class PaymentPlanGroupSmallSerializer(serializers.ModelSerializer):
+class PaymentPlanSmallSerializer(serializers.ModelSerializer):
     class Meta:
-        model = PaymentPlanGroup
+        model = PaymentPlan
         fields = ["id", "unicef_id", "name"]
 
 
 class TargetPopulationListSerializer(serializers.ModelSerializer):
     status = serializers.SerializerMethodField(method_name="get_status")
     created_by = serializers.CharField(source="created_by.get_full_name", default="")
-    payment_plan_group = PaymentPlanGroupSmallSerializer(read_only=True)
+    payment_plan = PaymentPlanSmallSerializer(read_only=True)
 
     class Meta:
-        model = PaymentPlan
+        model = PaymentList
         fields = (
             "id",
             "name",
@@ -39,12 +39,12 @@ class TargetPopulationListSerializer(serializers.ModelSerializer):
             "total_households_count",
             "total_individuals_count",
             "updated_at",
-            "payment_plan_group",
+            "payment_plan",
         )
 
     @staticmethod
-    def get_status(obj: PaymentPlan) -> str:
-        return obj.get_status_display().upper() if obj.status in PaymentPlan.PRE_PAYMENT_PLAN_STATUSES else "ASSIGNED"
+    def get_status(obj: PaymentList) -> str:
+        return obj.get_status_display().upper() if obj.status in PaymentList.PRE_PAYMENT_LIST_STATUSES else "ASSIGNED"
 
 
 class TargetingIndividualBlockRuleFilterSerializer(serializers.ModelSerializer):
@@ -65,7 +65,7 @@ class TargetingIndividualBlockRuleFilterSerializer(serializers.ModelSerializer):
         if obj.flex_field_classification == FlexFieldClassification.NOT_FLEX_FIELD:
             field_attribute = get_field_by_name(
                 obj.field_name,
-                obj.individuals_filters_block.targeting_criteria_rule.payment_plan,
+                obj.individuals_filters_block.targeting_criteria_rule.payment_list,
             )
             result = filter_choices(field_attribute, obj.arguments)
             return FieldAttributeSerializer(result).data
@@ -114,7 +114,7 @@ class TargetingCriteriaRuleFilterSerializer(serializers.ModelSerializer):
 
     def get_field_attribute(self, obj: TargetingCriteriaRuleFilter) -> Any:
         if obj.flex_field_classification == FlexFieldClassification.NOT_FLEX_FIELD:
-            field_attribute = get_field_by_name(obj.field_name, obj.targeting_criteria_rule.payment_plan)
+            field_attribute = get_field_by_name(obj.field_name, obj.targeting_criteria_rule.payment_list)
             result = filter_choices(field_attribute, obj.arguments)
             return FieldAttributeSerializer(result).data
         program = None

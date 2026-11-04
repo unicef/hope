@@ -15,8 +15,8 @@ from hope.models import (
     FollowUpInstruction,
     LogEntry,
     Payment,
+    PaymentList,
     PaymentPlan,
-    PaymentPlanGroup,
     PaymentVerification,
     PaymentVerificationPlan,
     User,
@@ -47,7 +47,7 @@ def _log_update(
     resolves programs.
 
     The mappings include FK fields, which the diff dereferences to get a readable label, so each
-    call costs a few extra SELECTs - fine for writes that happen once per plan or group, never per
+    call costs a few extra SELECTs - fine for writes that happen once per payment list or payment plan, never per
     payment. ``user_id`` is None when a system task made the change.
     """
     if not changes:
@@ -63,6 +63,26 @@ def _log_update(
     log.programs.add(program_pk)
 
 
+def log_payment_list_change(
+    payment_list: PaymentList,
+    old_payment_list: PaymentList,
+    user_id: str | None,
+) -> None:
+    """Log a PaymentList change made outside a logging view.
+
+    Async tasks and the gateway/file sync flows touch the plan after the dispatching view took its
+    ``log_create()`` snapshot, or without any view at all, so the status, steficon rule and totals
+    they change would otherwise go unlogged.
+    """
+    _log_update(
+        payment_list,
+        create_diff(old_payment_list, payment_list, PaymentList.ACTIVITY_LOG_MAPPING),
+        business_area=payment_list.business_area,
+        program_pk=payment_list.program.pk,
+        user_id=user_id,
+    )
+
+
 def log_payment_plan_change(
     payment_plan: PaymentPlan,
     old_payment_plan: PaymentPlan,
@@ -70,34 +90,14 @@ def log_payment_plan_change(
 ) -> None:
     """Log a PaymentPlan change made outside a logging view.
 
-    Async tasks and the gateway/file sync flows touch the plan after the dispatching view took its
-    ``log_create()`` snapshot, or without any view at all, so the status, steficon rule and totals
-    they change would otherwise go unlogged.
-    """
-    _log_update(
-        payment_plan,
-        create_diff(old_payment_plan, payment_plan, PaymentPlan.ACTIVITY_LOG_MAPPING),
-        business_area=payment_plan.business_area,
-        program_pk=payment_plan.program.pk,
-        user_id=user_id,
-    )
-
-
-def log_payment_plan_group_change(
-    payment_plan_group: PaymentPlanGroup,
-    old_payment_plan_group: PaymentPlanGroup,
-    user_id: str | None,
-) -> None:
-    """Log a PaymentPlanGroup change made outside a logging view.
-
     The export and import tasks flip ``background_action_status`` after the dispatching view took
     its ``log_create()`` snapshot, so how the run ended - finished or error - would otherwise go
     unlogged.
     """
-    program = payment_plan_group.cycle.program
+    program = payment_plan.cycle.program
     _log_update(
-        payment_plan_group,
-        create_diff(old_payment_plan_group, payment_plan_group, PaymentPlanGroup.ACTIVITY_LOG_MAPPING),
+        payment_plan,
+        create_diff(old_payment_plan, payment_plan, PaymentPlan.ACTIVITY_LOG_MAPPING),
         business_area=program.business_area,
         program_pk=program.pk,
         user_id=user_id,
@@ -118,51 +118,51 @@ def log_follow_up_instruction_change(
     )
 
 
-def _log_payment_plan_event(
-    payment_plan: PaymentPlan | PaymentPlanGroup | FollowUpInstruction,
+def _log_payment_list_event(
+    payment_list: PaymentList | PaymentPlan | FollowUpInstruction,
     user: "AbstractBaseUser | AnonymousUser | None",
     changes: dict[str, Any],
 ) -> None:
-    """Attach a free-form activity-log entry to a plan, group or instruction (events the field-diff cannot express)."""
+    """Log a free-form entry on a payment list, payment plan or instruction (events the field diff cannot express)."""
     log = LogEntry.objects.create(
         action=LogEntry.UPDATE,
-        content_object=payment_plan,
+        content_object=payment_list,
         user=user,
-        business_area=payment_plan.business_area,
-        object_repr=str(payment_plan),
+        business_area=payment_list.business_area,
+        object_repr=str(payment_list),
         changes=changes,
     )
     # program_cycle is a non-null FK and ProgramCycle.program is non-null, so program is always set.
-    log.programs.add(payment_plan.program.pk)
+    log.programs.add(payment_list.program.pk)
 
 
-def log_payment_plan_approval(
-    payment_plan: PaymentPlan | PaymentPlanGroup | FollowUpInstruction,
+def log_payment_list_approval(
+    payment_list: PaymentList | PaymentPlan | FollowUpInstruction,
     user: "AbstractBaseUser | AnonymousUser | None",
     approval_type: str,
     comment: str | None,
 ) -> None:
-    """Record an approval-workflow event (approve/authorize/release/reject) on the PaymentPlan.
+    """Record an approval-workflow event (approve/authorize/release/reject) on the PaymentList.
 
-    The PaymentPlan status transition is logged separately; this adds a readable entry capturing
+    The PaymentList status transition is logged separately; this adds a readable entry capturing
     WHO acted at which stage and any comment, which the field-diff log cannot express.
     """
     changes: dict[str, Any] = {"acceptance_process": {"from": None, "to": approval_type}}
     if comment:
         changes["comment"] = {"from": None, "to": comment}
-    _log_payment_plan_event(payment_plan, user, changes)
+    _log_payment_list_event(payment_list, user, changes)
 
 
 def log_payment_plan_supporting_document(
-    payment_plan: PaymentPlan | PaymentPlanGroup | FollowUpInstruction,
+    payment_list: PaymentList | PaymentPlan | FollowUpInstruction,
     user: "AbstractBaseUser | AnonymousUser | None",
     title: str,
     *,
     created: bool,
 ) -> None:
-    """Record upload/removal of a supporting (compliance) document on a plan, group or instruction."""
+    """Record upload/removal of a supporting (compliance) document on a plan, payment plan or instruction."""
     changes = {"supporting_document": {"from": None, "to": title} if created else {"from": title, "to": None}}
-    _log_payment_plan_event(payment_plan, user, changes)
+    _log_payment_list_event(payment_list, user, changes)
 
 
 def _value_repr(value: Any) -> str | None:
@@ -328,7 +328,7 @@ def get_quantity_in_usd(
 
 
 def get_owner_unore_exchange_rate(
-    owner: PaymentPlanGroup | FollowUpInstruction, exchange_date: datetime.date | None = None
+    owner: PaymentPlan | FollowUpInstruction, exchange_date: datetime.date | None = None
 ) -> float | None:
     if owner.currency is None:
         return None
@@ -338,17 +338,17 @@ def get_owner_unore_exchange_rate(
     return ExchangeRates().get_exchange_rate_for_currency_code(owner.currency.vision_code, date)
 
 
-def inactive_currency_reason(payment_plan: PaymentPlan) -> str | None:
+def inactive_currency_reason(payment_list: PaymentList) -> str | None:
     """Why the plan's amounts must not be sent to a Financial Service Provider, or None when they may.
 
     FSPs receive only the ISO code, which after a redenomination names the active variant, so amounts
     in an inactive variant would be paid out in the wrong denomination.
     """
-    currency = payment_plan.currency
+    currency = payment_list.currency
     if currency is None or currency.active:
         return None
     return (
-        f"Payment Plan {payment_plan.unicef_id}: currency {currency} is inactive; "
+        f"Payment List {payment_list.unicef_id}: currency {currency} is inactive; "
         f"its amounts cannot be sent to the Financial Service Provider."
     )
 
@@ -389,12 +389,12 @@ def get_payment_delivered_quantity_status_and_value(
     raise ValueError(f"Invalid delivered quantity {delivered_quantity}")
 
 
-PREPARE_PAYMENT_PLAN_LOCK_PREFIX = "prepare_payment_plan_async_task_"
+PREPARE_PAYMENT_LIST_LOCK_PREFIX = "prepare_payment_list_async_task_"
 
 
 def generate_cache_key(data: dict[str, Any]) -> str:
     task_params_str = json.dumps(data)
-    return PREPARE_PAYMENT_PLAN_LOCK_PREFIX + hashlib.sha256(task_params_str.encode()).hexdigest()
+    return PREPARE_PAYMENT_LIST_LOCK_PREFIX + hashlib.sha256(task_params_str.encode()).hexdigest()
 
 
 def get_link(api_url: str) -> str:

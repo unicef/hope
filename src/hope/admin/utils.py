@@ -31,7 +31,7 @@ from smart_admin.mixins import DisplayAllMixin as SmartDisplayAllMixin
 from hope.apps.administration.widgets import JsonWidget
 from hope.apps.payment.utils import generate_cache_key, get_link
 from hope.apps.utils.security import is_root
-from hope.models import AsyncJob, BusinessArea, PaymentPlan
+from hope.models import AsyncJob, BusinessArea, PaymentList
 
 if TYPE_CHECKING:
     from django.contrib.admin import ModelAdmin
@@ -240,7 +240,7 @@ def is_enabled(btn: StandardButton) -> bool:
     return btn.request.user.is_superuser
 
 
-def is_payment_plan_in_status(btn: StandardButton, status: str) -> bool:
+def is_payment_list_in_status(btn: StandardButton, status: str) -> bool:
     return btn.original.status == status
 
 
@@ -248,39 +248,39 @@ def is_background_action_in_status(btn: StandardButton, background_status: str) 
     return btn.original.background_action_status == background_status
 
 
-def is_preparing_payment_plan(btn: StandardButton) -> bool:
-    return is_payment_plan_in_status(btn, PaymentPlan.Status.OPEN)
+def is_preparing_payment_list(btn: StandardButton) -> bool:
+    return is_payment_list_in_status(btn, PaymentList.Status.OPEN)
 
 
-def is_locked_payment_plan(btn: StandardButton) -> bool:
-    return is_payment_plan_in_status(btn, PaymentPlan.Status.LOCKED)
+def is_locked_payment_list(btn: StandardButton) -> bool:
+    return is_payment_list_in_status(btn, PaymentList.Status.LOCKED)
 
 
 def is_importing_entitlements_xlsx_file(btn: StandardButton) -> bool:
-    return is_background_action_in_status(btn, PaymentPlan.BackgroundActionStatus.XLSX_IMPORTING_ENTITLEMENTS)
+    return is_background_action_in_status(btn, PaymentList.BackgroundActionStatus.XLSX_IMPORTING_ENTITLEMENTS)
 
 
 def is_exporting_xlsx_file(btn: StandardButton) -> bool:
-    return is_background_action_in_status(btn, PaymentPlan.BackgroundActionStatus.XLSX_EXPORTING)
+    return is_background_action_in_status(btn, PaymentList.BackgroundActionStatus.XLSX_EXPORTING)
 
 
-class PaymentPlanCeleryTasksMixin:
-    prepare_payment_plan_async_task = "prepare_payment_plan_async_task"
-    import_payment_plan_payment_list_from_xlsx_async_task = "import_payment_plan_payment_list_from_xlsx_async_task"
-    create_payment_plan_payment_list_xlsx_async_task = "create_payment_plan_payment_list_xlsx_async_task"
+class PaymentListCeleryTasksMixin:
+    prepare_payment_list_async_task = "prepare_payment_list_async_task"
+    import_payment_list_from_xlsx_async_task = "import_payment_list_from_xlsx_async_task"
+    create_payment_list_xlsx_async_task = "create_payment_list_xlsx_async_task"
 
-    url = "admin:payment_paymentplan_change"
+    url = "admin:payment_paymentlist_change"
 
-    def _get_active_payment_plan_jobs(self, payment_plan: PaymentPlan, task_name: str) -> list[AsyncJob]:
+    def _get_active_payment_list_jobs(self, payment_list: PaymentList, task_name: str) -> list[AsyncJob]:
         jobs = AsyncJob.objects.filter(
-            content_type=get_content_type_for_model(payment_plan),
-            object_id=str(payment_plan.pk),
+            content_type=get_content_type_for_model(payment_list),
+            object_id=str(payment_list.pk),
             job_name=task_name,
         ).order_by("-datetime_queued", "-pk")
         return [job for job in jobs if job.task_status in job.ACTIVE_STATUSES]
 
-    def _terminate_active_payment_plan_jobs(self, payment_plan: PaymentPlan, task_name: str) -> bool:
-        jobs = self._get_active_payment_plan_jobs(payment_plan, task_name)
+    def _terminate_active_payment_list_jobs(self, payment_list: PaymentList, task_name: str) -> bool:
+        jobs = self._get_active_payment_list_jobs(payment_list, task_name)
         if not jobs:
             return False
 
@@ -289,75 +289,75 @@ class PaymentPlanCeleryTasksMixin:
         return True
 
     @button(
-        visible=is_preparing_payment_plan,
+        visible=is_preparing_payment_list,
         enabled=is_enabled,
         permission=lambda request, obj, handler: (
-            is_root(request) and request.user.has_perm("payment.restart_preparing_payment_plan")
+            is_root(request) and request.user.has_perm("payment.restart_preparing_payment_list")
         ),
     )
-    def restart_preparing_payment_plan(self, request: HttpRequest, pk: str) -> HttpResponse | None:
-        """Prepare Payment Plan."""
-        from hope.apps.payment.celery_tasks import prepare_payment_plan_async_task
+    def restart_preparing_payment_list(self, request: HttpRequest, pk: str) -> HttpResponse | None:
+        """Prepare Payment List."""
+        from hope.apps.payment.celery_tasks import prepare_payment_list_async_task
 
-        payment_plan = PaymentPlan.objects.get(pk=pk)
-        if payment_plan.status != PaymentPlan.Status.OPEN:
+        payment_list = PaymentList.objects.get(pk=pk)
+        if payment_list.status != PaymentList.Status.OPEN:
             messages.add_message(
                 request,
                 messages.ERROR,
-                f"The Payment Plan must has the status {PaymentPlan.Status.OPEN}",
+                f"The Payment List must has the status {PaymentList.Status.OPEN}",
             )
             return redirect(reverse(self.url, args=[pk]))
         # check if no task in a queue
         cache_key = generate_cache_key(
             {
-                "task_name": "prepare_payment_plan_async_task",
-                "payment_plan_id": pk,
+                "task_name": "prepare_payment_list_async_task",
+                "payment_list_id": pk,
             }
         )
         if cache.get(cache_key):
             messages.add_message(
                 request,
                 messages.ERROR,
-                f"Task is already running for Payment Plan {payment_plan.unicef_id}.",
+                f"Task is already running for Payment List {payment_list.unicef_id}.",
             )
             return redirect(reverse(self.url, args=[pk]))
 
         if request.method == "POST":
-            prepare_payment_plan_async_task(payment_plan)
+            prepare_payment_list_async_task(payment_list)
             messages.add_message(
                 request,
                 messages.SUCCESS,
-                f"Task restarted for Payment Plan: {payment_plan.unicef_id}",
+                f"Task restarted for Payment List: {payment_list.unicef_id}",
             )
 
             return redirect(reverse(self.url, args=[pk]))
         return confirm_action(
             modeladmin=self,
             request=request,
-            action=self.restart_preparing_payment_plan,
-            message="Do you confirm to restart preparing Payment Plan task?",
+            action=self.restart_preparing_payment_list,
+            message="Do you confirm to restart preparing Payment List task?",
         )
 
     @button(
-        visible=lambda btn: is_exporting_xlsx_file(btn) and is_locked_payment_plan(btn),
+        visible=lambda btn: is_exporting_xlsx_file(btn) and is_locked_payment_list(btn),
         enabled=is_enabled,
         permission="payment.restart_exporting_template_for_entitlement",
     )
     def restart_exporting_template_for_entitlement(self, request: HttpRequest, pk: str) -> HttpResponse | None:
         """Export template for entitlement."""
-        from hope.apps.payment.celery_tasks import create_payment_plan_payment_list_xlsx_async_task
+        from hope.apps.payment.celery_tasks import create_payment_list_xlsx_async_task
 
         if request.method == "POST":
-            task_name = self.create_payment_plan_payment_list_xlsx_async_task
-            payment_plan = PaymentPlan.objects.get(pk=pk)
-            if self._terminate_active_payment_plan_jobs(payment_plan, task_name):
-                create_payment_plan_payment_list_xlsx_async_task(payment_plan, str(request.user.id))
+            task_name = self.create_payment_list_xlsx_async_task
+            payment_list = PaymentList.objects.get(pk=pk)
+            if self._terminate_active_payment_list_jobs(payment_list, task_name):
+                create_payment_list_xlsx_async_task(payment_list, str(request.user.id))
                 messages.add_message(request, messages.INFO, "Successfully executed.")
             else:
                 messages.add_message(
                     request,
                     messages.ERROR,
-                    f"There is no current {task_name} for this payment plan",
+                    f"There is no current {task_name} for this payment list",
                 )
 
             return redirect(reverse(self.url, args=[pk]))
@@ -369,28 +369,28 @@ class PaymentPlanCeleryTasksMixin:
         )
 
     @button(
-        visible=lambda btn: is_importing_entitlements_xlsx_file(btn) and is_locked_payment_plan(btn),
+        visible=lambda btn: is_importing_entitlements_xlsx_file(btn) and is_locked_payment_list(btn),
         enabled=is_enabled,
         permission="payment.restart_importing_entitlements_xlsx_file",
     )
     def restart_importing_entitlements_xlsx_file(self, request: HttpRequest, pk: str) -> HttpResponse | None:
         """Import entitlement file."""
         from hope.apps.payment.celery_tasks import (
-            import_payment_plan_payment_list_from_xlsx_async_task,
+            import_payment_list_from_xlsx_async_task,
         )
 
         if request.method == "POST":
-            task_name = self.import_payment_plan_payment_list_from_xlsx_async_task
-            payment_plan = PaymentPlan.objects.get(pk=pk)
-            if self._terminate_active_payment_plan_jobs(payment_plan, task_name):
-                import_payment_plan_payment_list_from_xlsx_async_task(payment_plan, str(request.user.pk))
+            task_name = self.import_payment_list_from_xlsx_async_task
+            payment_list = PaymentList.objects.get(pk=pk)
+            if self._terminate_active_payment_list_jobs(payment_list, task_name):
+                import_payment_list_from_xlsx_async_task(payment_list, str(request.user.pk))
 
                 messages.add_message(request, messages.INFO, "Successfully executed.")
             else:
                 messages.add_message(
                     request,
                     messages.ERROR,
-                    f"There is no current {task_name} for this payment plan",
+                    f"There is no current {task_name} for this payment list",
                 )
 
             return redirect(reverse(self.url, args=[pk]))

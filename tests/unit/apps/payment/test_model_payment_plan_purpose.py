@@ -4,7 +4,7 @@ import pytest
 
 from extras.test_utils.factories import (
     BusinessAreaFactory,
-    PaymentPlanFactory,
+    PaymentListFactory,
     PaymentPlanPurposeFactory,
     ProgramCycleFactory,
     ProgramFactory,
@@ -49,11 +49,11 @@ def test_program_can_have_multiple_purposes(business_area_afghanistan: BusinessA
     assert program.payment_plan_purposes.count() == 2
 
 
-def test_payment_plan_requires_at_least_one_purpose(business_area_afghanistan: BusinessArea) -> None:
-    plan = PaymentPlanFactory(program_cycle__program__business_area=business_area_afghanistan)
+def test_payment_list_requires_at_least_one_purpose(business_area_afghanistan: BusinessArea) -> None:
+    plan = PaymentListFactory(program_cycle__program__business_area=business_area_afghanistan)
     plan.payment_plan_purposes.clear()
 
-    with pytest.raises(ValidationError, match="PaymentPlan must have at least one Payment Plan Purpose."):
+    with pytest.raises(ValidationError, match="PaymentList must have at least one Payment Plan Purpose."):
         plan.save()
 
 
@@ -63,10 +63,10 @@ def test_payment_plan_purpose_must_be_subset_of_program_purposes(business_area_a
     unrelated_purpose = PaymentPlanPurposeFactory()
     program.payment_plan_purposes.add(purpose_for_program)
     cycle = ProgramCycleFactory(program=program)
-    plan = PaymentPlanFactory(program_cycle=cycle)
+    plan = PaymentListFactory(program_cycle=cycle)
     plan.payment_plan_purposes.add(unrelated_purpose)
 
-    with pytest.raises(ValidationError, match="All PaymentPlan purposes must be a subset of the program's purposes."):
+    with pytest.raises(ValidationError, match="All PaymentList purposes must be a subset of the program's purposes."):
         plan.clean()
 
 

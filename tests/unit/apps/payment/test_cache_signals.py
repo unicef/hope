@@ -4,17 +4,17 @@ import pytest
 
 from extras.test_utils.factories import (
     BusinessAreaFactory,
-    PaymentPlanFactory,
+    PaymentListFactory,
     PaymentVerificationPlanFactory,
     PaymentVerificationSummaryFactory,
     ProgramCycleFactory,
     ProgramFactory,
 )
 from hope.api.caches import get_or_create_cache_key
-from hope.apps.payment.api.caches import invalidate_payment_plan_list_cache
+from hope.apps.payment.api.caches import invalidate_payment_list_list_cache
 from hope.models import (
     BusinessArea,
-    PaymentPlan,
+    PaymentList,
     PaymentVerificationPlan,
     PaymentVerificationSummary,
     Program,
@@ -55,82 +55,82 @@ def program_cycle(program: Program) -> ProgramCycle:
 
 
 @pytest.fixture
-def payment_plan(program_cycle: ProgramCycle) -> PaymentPlan:
-    return PaymentPlanFactory(program_cycle=program_cycle)
+def payment_list(program_cycle: ProgramCycle) -> PaymentList:
+    return PaymentListFactory(program_cycle=program_cycle)
 
 
 @pytest.fixture
-def payment_verification_summary(payment_plan: PaymentPlan) -> PaymentVerificationSummary:
-    return PaymentVerificationSummaryFactory(payment_plan=payment_plan)
+def payment_verification_summary(payment_list: PaymentList) -> PaymentVerificationSummary:
+    return PaymentVerificationSummaryFactory(payment_list=payment_list)
 
 
 @pytest.fixture
 def payment_verification_plan(
-    payment_plan: PaymentPlan, payment_verification_summary: PaymentVerificationSummary
+    payment_list: PaymentList, payment_verification_summary: PaymentVerificationSummary
 ) -> PaymentVerificationPlan:
-    return PaymentVerificationPlanFactory(payment_plan=payment_plan)
+    return PaymentVerificationPlanFactory(payment_list=payment_list)
 
 
-def test_payment_plan_save_increments_payment_plan_list_cache(payment_plan: PaymentPlan, program: Program) -> None:
+def test_payment_list_save_increments_payment_list_list_cache(payment_list: PaymentList, program: Program) -> None:
     cache.clear()
-    version_key = _version_key(program.business_area.slug, program.code, "payment_plans_list")
+    version_key = _version_key(program.business_area.slug, program.code, "payment_lists_list")
     initial_version = get_or_create_cache_key(version_key, 0)
 
     with TestCase.captureOnCommitCallbacks(execute=True):
-        payment_plan.name = "Updated Payment Plan"
-        payment_plan.save()
+        payment_list.name = "Updated Payment Plan"
+        payment_list.save()
 
     assert get_or_create_cache_key(version_key, 0) > initial_version
 
 
-def test_payment_plan_save_increments_target_population_list_cache(payment_plan: PaymentPlan, program: Program) -> None:
+def test_payment_list_save_increments_target_population_list_cache(payment_list: PaymentList, program: Program) -> None:
     cache.clear()
     version_key = _version_key(program.business_area.slug, program.code, "target_populations_list")
     initial_version = get_or_create_cache_key(version_key, 0)
 
     with TestCase.captureOnCommitCallbacks(execute=True):
-        payment_plan.name = "Updated Payment Plan"
-        payment_plan.save()
+        payment_list.name = "Updated Payment Plan"
+        payment_list.save()
 
     assert get_or_create_cache_key(version_key, 0) > initial_version
 
 
-def test_payment_plan_soft_delete_increments_payment_plan_list_cache(
-    payment_plan: PaymentPlan, program: Program
+def test_payment_list_soft_delete_increments_payment_list_list_cache(
+    payment_list: PaymentList, program: Program
 ) -> None:
     cache.clear()
-    version_key = _version_key(program.business_area.slug, program.code, "payment_plans_list")
+    version_key = _version_key(program.business_area.slug, program.code, "payment_lists_list")
     initial_version = get_or_create_cache_key(version_key, 0)
 
     with TestCase.captureOnCommitCallbacks(execute=True):
-        payment_plan.delete()
+        payment_list.delete()
 
     assert get_or_create_cache_key(version_key, 0) > initial_version
 
 
-def test_payment_plan_hard_delete_increments_payment_plan_list_cache(
-    payment_plan: PaymentPlan, program: Program
+def test_payment_list_hard_delete_increments_payment_list_list_cache(
+    payment_list: PaymentList, program: Program
 ) -> None:
     cache.clear()
-    version_key = _version_key(program.business_area.slug, program.code, "payment_plans_list")
+    version_key = _version_key(program.business_area.slug, program.code, "payment_lists_list")
     initial_version = get_or_create_cache_key(version_key, 0)
 
     with TestCase.captureOnCommitCallbacks(execute=True):
-        payment_plan.delete(soft=False)
+        payment_list.delete(soft=False)
 
     assert get_or_create_cache_key(version_key, 0) > initial_version
 
 
-def test_payment_plan_save_does_not_affect_other_program(
-    payment_plan: PaymentPlan, other_program: Program, business_area: BusinessArea
+def test_payment_list_save_does_not_affect_other_program(
+    payment_list: PaymentList, other_program: Program, business_area: BusinessArea
 ) -> None:
     cache.clear()
-    version_key = _version_key(business_area.slug, other_program.code, "payment_plans_list")
+    version_key = _version_key(business_area.slug, other_program.code, "payment_lists_list")
     initial_version = get_or_create_cache_key(version_key, 0)
 
     with TestCase.captureOnCommitCallbacks(execute=True):
-        payment_plan.name = "Updated Payment Plan"
-        payment_plan.save()
+        payment_list.name = "Updated Payment Plan"
+        payment_list.save()
 
     assert get_or_create_cache_key(version_key, 0) == initial_version
 
@@ -163,11 +163,11 @@ def test_payment_verification_summary_save_increments_verification_list_cache(
     assert get_or_create_cache_key(version_key, 0) > initial_version
 
 
-def test_payment_verification_plan_save_does_not_increment_payment_plan_list_cache(
+def test_payment_verification_plan_save_does_not_increment_payment_list_list_cache(
     payment_verification_plan: PaymentVerificationPlan, program: Program
 ) -> None:
     cache.clear()
-    version_key = _version_key(program.business_area.slug, program.code, "payment_plans_list")
+    version_key = _version_key(program.business_area.slug, program.code, "payment_lists_list")
     initial_version = get_or_create_cache_key(version_key, 0)
 
     with TestCase.captureOnCommitCallbacks(execute=True):
@@ -177,49 +177,49 @@ def test_payment_verification_plan_save_does_not_increment_payment_plan_list_cac
     assert get_or_create_cache_key(version_key, 0) == initial_version
 
 
-def test_invalidate_payment_plan_list_cache_helper(program: Program) -> None:
+def test_invalidate_payment_list_list_cache_helper(program: Program) -> None:
     cache.clear()
-    version_key = _version_key(program.business_area.slug, program.code, "payment_plans_list")
+    version_key = _version_key(program.business_area.slug, program.code, "payment_lists_list")
     initial_version = get_or_create_cache_key(version_key, 0)
 
     with TestCase.captureOnCommitCallbacks(execute=True):
-        invalidate_payment_plan_list_cache(program.business_area.slug, program.code)
+        invalidate_payment_list_list_cache(program.business_area.slug, program.code)
 
     assert get_or_create_cache_key(version_key, 0) > initial_version
 
 
 @pytest.mark.parametrize(
-    "payment_plan_status",
+    "payment_list_status",
     [
-        PaymentPlan.Status.IN_APPROVAL,
-        PaymentPlan.Status.IN_AUTHORIZATION,
-        PaymentPlan.Status.IN_REVIEW,
-        PaymentPlan.Status.ACCEPTED,
+        PaymentList.Status.IN_APPROVAL,
+        PaymentList.Status.IN_AUTHORIZATION,
+        PaymentList.Status.IN_REVIEW,
+        PaymentList.Status.ACCEPTED,
     ],
 )
-def test_payment_plan_managerial_status_increments_managerial_list_cache(
-    payment_plan: PaymentPlan, business_area: BusinessArea, payment_plan_status: PaymentPlan.Status
+def test_payment_list_managerial_status_increments_managerial_list_cache(
+    payment_list: PaymentList, business_area: BusinessArea, payment_list_status: PaymentList.Status
 ) -> None:
     cache.clear()
-    version_key = _business_area_version_key(business_area.slug, "management_payment_plans_list")
+    version_key = _business_area_version_key(business_area.slug, "management_payment_lists_list")
     initial_version = get_or_create_cache_key(version_key, 0)
 
     with TestCase.captureOnCommitCallbacks(execute=True):
-        payment_plan.status = payment_plan_status
-        payment_plan.save()
+        payment_list.status = payment_list_status
+        payment_list.save()
 
     assert get_or_create_cache_key(version_key, 0) > initial_version
 
 
-def test_payment_plan_open_does_not_increment_managerial_list_cache(
-    payment_plan: PaymentPlan, business_area: BusinessArea
+def test_payment_list_open_does_not_increment_managerial_list_cache(
+    payment_list: PaymentList, business_area: BusinessArea
 ) -> None:
     cache.clear()
-    version_key = _business_area_version_key(business_area.slug, "management_payment_plans_list")
+    version_key = _business_area_version_key(business_area.slug, "management_payment_lists_list")
     initial_version = get_or_create_cache_key(version_key, 0)
 
     with TestCase.captureOnCommitCallbacks(execute=True):
-        payment_plan.status = PaymentPlan.Status.OPEN
-        payment_plan.save()
+        payment_list.status = PaymentList.Status.OPEN
+        payment_list.save()
 
     assert get_or_create_cache_key(version_key, 0) == initial_version

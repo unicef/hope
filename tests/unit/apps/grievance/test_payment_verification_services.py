@@ -7,7 +7,7 @@ from extras.test_utils.factories import BusinessAreaFactory, ProgramFactory
 from extras.test_utils.factories.grievance import TicketPaymentVerificationDetailsFactory
 from extras.test_utils.factories.payment import (
     PaymentFactory,
-    PaymentPlanFactory,
+    PaymentListFactory,
     PaymentVerificationFactory,
     PaymentVerificationPlanFactory,
     PaymentVerificationSummaryFactory,
@@ -34,17 +34,17 @@ def program(business_area: BusinessArea) -> Program:
 
 @pytest.fixture
 def payment_verification(business_area: BusinessArea, program: Program) -> PaymentVerification:
-    payment_plan = PaymentPlanFactory(
+    payment_list = PaymentListFactory(
         program_cycle=program.cycles.first(),
         business_area=business_area,
     )
-    PaymentVerificationSummaryFactory(payment_plan=payment_plan)
+    PaymentVerificationSummaryFactory(payment_list=payment_list)
     verification_plan = PaymentVerificationPlanFactory(
-        payment_plan=payment_plan,
+        payment_list=payment_list,
         status=PaymentVerificationPlan.STATUS_ACTIVE,
     )
     payment = PaymentFactory(
-        parent=payment_plan,
+        parent=payment_list,
         program=program,
         delivered_quantity=Decimal("100.00"),
     )

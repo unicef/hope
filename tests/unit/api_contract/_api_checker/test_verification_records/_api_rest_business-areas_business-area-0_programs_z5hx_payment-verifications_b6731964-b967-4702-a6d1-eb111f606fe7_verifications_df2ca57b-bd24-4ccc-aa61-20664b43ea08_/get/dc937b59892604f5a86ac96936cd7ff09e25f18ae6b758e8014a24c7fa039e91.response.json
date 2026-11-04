@@ -53,10 +53,10 @@
             "version": 1735688653315201,
             "is_manually_editable": true
         },
-        "payment_plan_hard_conflicted": false,
-        "payment_plan_hard_conflicted_data": [],
-        "payment_plan_soft_conflicted": false,
-        "payment_plan_soft_conflicted_data": [],
+        "payment_list_hard_conflicted": false,
+        "payment_list_hard_conflicted_data": [],
+        "payment_list_soft_conflicted": false,
+        "payment_list_soft_conflicted_data": [],
         "people_individual": null,
         "program_name": "Program 0",
         "program_code": "z5hx",
@@ -89,7 +89,7 @@
                 "status": "ACTIVE",
                 "screen_beneficiary": false
             },
-            "payment_plan_group": {
+            "payment_plan": {
                 "id": "59c1d336-d67c-40e4-9f63-2f43e43a1d5f",
                 "unicef_id": "PPG-6",
                 "name": "Default Group"
@@ -180,7 +180,7 @@
             "male_adults_count": 0,
             "female_adults_count": 0,
             "steficon_rule": null,
-            "source_payment_plan": null,
+            "source_payment_list": null,
             "exchange_rate": null,
             "custom_exchange_rate": false,
             "unore_exchange_rate": null,
@@ -216,7 +216,7 @@
                     "admin_url": "/api/unicorn/payment/paymentverificationplan/f5d604d1-b2e6-4c9b-9539-c1d1fb8b00eb/change/"
                 }
             ],
-            "admin_url": "/api/unicorn/payment/paymentplan/b6731964-b967-4702-a6d1-eb111f606fe7/change/",
+            "admin_url": "/api/unicorn/payment/paymentlist/b6731964-b967-4702-a6d1-eb111f606fe7/change/",
             "abort_comment": "",
             "flat_amount_value": null,
             "payment_plan_purposes": [

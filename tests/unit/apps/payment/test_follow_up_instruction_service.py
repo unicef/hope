@@ -19,8 +19,8 @@ from extras.test_utils.factories import (
     FinancialServiceProviderFactory,
     FollowUpInstructionFactory,
     PaymentFactory,
+    PaymentListFactory,
     PaymentPlanFactory,
-    PaymentPlanGroupFactory,
     ProgramCycleFactory,
     ProgramFactory,
     UserFactory,
@@ -33,7 +33,7 @@ from hope.models import (
     FollowUpInstruction,
     LogEntry,
     Payment,
-    PaymentPlan,
+    PaymentList,
 )
 
 pytestmark = pytest.mark.django_db
@@ -99,20 +99,20 @@ def fsp(delivery_mechanism):
 @pytest.fixture
 def aborted_follow_up_payment(user, cycle, business_area, currency, delivery_mechanism, fsp):
     instruction = FollowUpInstructionFactory(program=cycle.program, business_area=business_area, created_by=user)
-    payment_plan = PaymentPlanFactory(
+    payment_list = PaymentListFactory(
         program_cycle=cycle,
         business_area=business_area,
         currency=currency,
         delivery_mechanism=delivery_mechanism,
         financial_service_provider=fsp,
         follow_up_instruction=instruction,
-        plan_type=PaymentPlan.PlanType.FOLLOW_UP,
-        status=PaymentPlan.Status.ABORTED,
-        build_status=PaymentPlan.BuildStatus.BUILD_STATUS_OK,
+        plan_type=PaymentList.PlanType.FOLLOW_UP,
+        status=PaymentList.Status.ABORTED,
+        build_status=PaymentList.BuildStatus.BUILD_STATUS_OK,
     )
     return PaymentFactory(
-        parent=payment_plan,
-        program=payment_plan.program,
+        parent=payment_list,
+        program=payment_list.program,
         currency=currency,
         delivery_type=delivery_mechanism,
         financial_service_provider=fsp,
@@ -122,7 +122,7 @@ def aborted_follow_up_payment(user, cycle, business_area, currency, delivery_mec
     )
 
 
-def _create_source_payment_plan(
+def _create_source_payment_list(
     *,
     cycle: Any,
     group: Any,
@@ -131,20 +131,20 @@ def _create_source_payment_plan(
     delivery_mechanism: Any,
     fsp: Any,
     with_failed_payment: bool,
-) -> PaymentPlan:
-    payment_plan = PaymentPlanFactory(
+) -> PaymentList:
+    payment_list = PaymentListFactory(
         name=f"Source payment plan {group.id}",
         program_cycle=cycle,
-        payment_plan_group=group,
+        payment_plan=group,
         business_area=business_area,
         currency=currency,
         delivery_mechanism=delivery_mechanism,
         financial_service_provider=fsp,
-        status=PaymentPlan.Status.FINISHED,
+        status=PaymentList.Status.FINISHED,
     )
     PaymentFactory(
-        parent=payment_plan,
-        program=payment_plan.program,
+        parent=payment_list,
+        program=payment_list.program,
         currency=currency,
         delivery_type=delivery_mechanism,
         financial_service_provider=fsp,
@@ -152,10 +152,10 @@ def _create_source_payment_plan(
         entitlement_quantity_usd=Decimal("100.00"),
         status=Payment.STATUS_ERROR if with_failed_payment else Payment.STATUS_SUCCESS,
     )
-    return payment_plan
+    return payment_list
 
 
-def _create_instruction_child_payment_plan(
+def _create_instruction_child_payment_list(
     *,
     instruction: FollowUpInstruction,
     cycle: Any,
@@ -164,20 +164,20 @@ def _create_instruction_child_payment_plan(
     delivery_mechanism: Any,
     fsp: Any,
     status: str,
-) -> PaymentPlan:
-    payment_plan = PaymentPlanFactory(
+) -> PaymentList:
+    payment_list = PaymentListFactory(
         program_cycle=cycle,
         business_area=business_area,
         currency=currency,
         delivery_mechanism=delivery_mechanism,
         financial_service_provider=fsp,
         follow_up_instruction=instruction,
-        plan_type=PaymentPlan.PlanType.FOLLOW_UP,
+        plan_type=PaymentList.PlanType.FOLLOW_UP,
         status=status,
     )
     PaymentFactory(
-        parent=payment_plan,
-        program=payment_plan.program,
+        parent=payment_list,
+        program=payment_list.program,
         currency=currency,
         delivery_type=delivery_mechanism,
         financial_service_provider=fsp,
@@ -185,7 +185,7 @@ def _create_instruction_child_payment_plan(
         entitlement_quantity_usd=Decimal("10.00"),
         status=Payment.STATUS_PENDING,
     )
-    return payment_plan
+    return payment_list
 
 
 def test_create_creates_follow_up_instruction_from_multiple_groups(
@@ -198,9 +198,9 @@ def test_create_creates_follow_up_instruction_from_multiple_groups(
     delivery_mechanism,
     fsp,
 ):
-    group_one = PaymentPlanGroupFactory(cycle=cycle)
-    group_two = PaymentPlanGroupFactory(cycle=second_cycle)
-    source_one = _create_source_payment_plan(
+    group_one = PaymentPlanFactory(cycle=cycle)
+    group_two = PaymentPlanFactory(cycle=second_cycle)
+    source_one = _create_source_payment_list(
         cycle=cycle,
         group=group_one,
         business_area=business_area,
@@ -209,7 +209,7 @@ def test_create_creates_follow_up_instruction_from_multiple_groups(
         fsp=fsp,
         with_failed_payment=True,
     )
-    source_two = _create_source_payment_plan(
+    source_two = _create_source_payment_list(
         cycle=second_cycle,
         group=group_two,
         business_area=business_area,
@@ -221,21 +221,21 @@ def test_create_creates_follow_up_instruction_from_multiple_groups(
 
     instruction = FollowUpInstructionService(program).create(
         user=user,
-        payment_plan_group_ids=[str(group_one.id), str(group_two.id)],
+        payment_plan_ids=[str(group_one.id), str(group_two.id)],
         dispersion_start_date=source_one.dispersion_start_date + timedelta(days=1),
         dispersion_end_date=source_one.dispersion_end_date + timedelta(days=1),
     )
 
-    child_plans = list(instruction.payment_plans.order_by("created_at"))
+    child_plans = list(instruction.payment_lists.order_by("created_at"))
     assert len(child_plans) == 2
-    assert {child.source_payment_plan_id for child in child_plans} == {source_one.id, source_two.id}
-    assert all(child.plan_type == PaymentPlan.PlanType.FOLLOW_UP for child in child_plans)
+    assert {child.source_payment_list_id for child in child_plans} == {source_one.id, source_two.id}
+    assert all(child.plan_type == PaymentList.PlanType.FOLLOW_UP for child in child_plans)
 
 
 @pytest.fixture
 def instruction_over_one_group(user, program, cycle, business_area, currency, delivery_mechanism, fsp):
-    group = PaymentPlanGroupFactory(cycle=cycle)
-    _create_source_payment_plan(
+    group = PaymentPlanFactory(cycle=cycle)
+    _create_source_payment_list(
         cycle=cycle,
         group=group,
         business_area=business_area,
@@ -246,7 +246,7 @@ def instruction_over_one_group(user, program, cycle, business_area, currency, de
     )
     return FollowUpInstructionService(program).create(
         user=user,
-        payment_plan_group_ids=[str(group.id)],
+        payment_plan_ids=[str(group.id)],
         dispersion_start_date=cycle.start_date + timedelta(days=1),
         dispersion_end_date=cycle.start_date + timedelta(days=2),
     )
@@ -258,7 +258,7 @@ def test_create_takes_fsp_and_currency_from_the_source_group(instruction_over_on
 
 
 def test_create_stores_dispersion_dates_on_the_instruction(instruction_over_one_group, cycle):
-    child_plan = instruction_over_one_group.payment_plans.get()
+    child_plan = instruction_over_one_group.payment_lists.get()
 
     assert instruction_over_one_group.dispersion_start_date == cycle.start_date + timedelta(days=1)
     assert instruction_over_one_group.dispersion_end_date == cycle.start_date + timedelta(days=2)
@@ -266,18 +266,18 @@ def test_create_stores_dispersion_dates_on_the_instruction(instruction_over_one_
     assert child_plan.dispersion_end_date == instruction_over_one_group.dispersion_end_date
 
 
-def test_create_leaves_child_payment_plans_outside_any_group(instruction_over_one_group, fsp, currency):
-    child_plan = instruction_over_one_group.payment_plans.get()
+def test_create_leaves_child_payment_lists_outside_any_group(instruction_over_one_group, fsp, currency):
+    child_plan = instruction_over_one_group.payment_lists.get()
 
-    assert child_plan.payment_plan_group_id is None
+    assert child_plan.payment_plan_id is None
     assert child_plan.financial_service_provider == fsp
     assert child_plan.currency == currency
 
 
 @pytest.fixture
 def instruction_over_one_payment_gateway_group(user, program, cycle, business_area, currency, delivery_mechanism, fsp):
-    group = PaymentPlanGroupFactory(cycle=cycle, use_payment_gateway=True)
-    _create_source_payment_plan(
+    group = PaymentPlanFactory(cycle=cycle, use_payment_gateway=True)
+    _create_source_payment_list(
         cycle=cycle,
         group=group,
         business_area=business_area,
@@ -288,21 +288,21 @@ def instruction_over_one_payment_gateway_group(user, program, cycle, business_ar
     )
     return FollowUpInstructionService(program).create(
         user=user,
-        payment_plan_group_ids=[str(group.id)],
+        payment_plan_ids=[str(group.id)],
         dispersion_start_date=cycle.start_date + timedelta(days=1),
         dispersion_end_date=cycle.start_date + timedelta(days=2),
     )
 
 
 def test_create_takes_use_payment_gateway_from_the_source_group(instruction_over_one_payment_gateway_group):
-    child_plan = instruction_over_one_payment_gateway_group.payment_plans.get()
+    child_plan = instruction_over_one_payment_gateway_group.payment_lists.get()
 
     assert instruction_over_one_payment_gateway_group.use_payment_gateway is True
     assert child_plan.use_payment_gateway is True
 
 
 @pytest.mark.enable_activity_log
-def test_create_logs_activity_for_each_child_payment_plan(
+def test_create_logs_activity_for_each_child_payment_list(
     user,
     program,
     cycle,
@@ -312,9 +312,9 @@ def test_create_logs_activity_for_each_child_payment_plan(
     delivery_mechanism,
     fsp,
 ):
-    group_one = PaymentPlanGroupFactory(cycle=cycle)
-    group_two = PaymentPlanGroupFactory(cycle=second_cycle)
-    source_one = _create_source_payment_plan(
+    group_one = PaymentPlanFactory(cycle=cycle)
+    group_two = PaymentPlanFactory(cycle=second_cycle)
+    source_one = _create_source_payment_list(
         cycle=cycle,
         group=group_one,
         business_area=business_area,
@@ -323,7 +323,7 @@ def test_create_logs_activity_for_each_child_payment_plan(
         fsp=fsp,
         with_failed_payment=True,
     )
-    _create_source_payment_plan(
+    _create_source_payment_list(
         cycle=second_cycle,
         group=group_two,
         business_area=business_area,
@@ -335,12 +335,12 @@ def test_create_logs_activity_for_each_child_payment_plan(
 
     instruction = FollowUpInstructionService(program).create(
         user=user,
-        payment_plan_group_ids=[str(group_one.id), str(group_two.id)],
+        payment_plan_ids=[str(group_one.id), str(group_two.id)],
         dispersion_start_date=source_one.dispersion_start_date + timedelta(days=1),
         dispersion_end_date=source_one.dispersion_end_date + timedelta(days=1),
     )
 
-    child_ids = list(instruction.payment_plans.values_list("id", flat=True))
+    child_ids = list(instruction.payment_lists.values_list("id", flat=True))
     create_logs = LogEntry.objects.filter(object_id__in=child_ids, action=LogEntry.CREATE)
     assert create_logs.count() == 2
     assert all(log.user == user for log in create_logs)
@@ -355,8 +355,8 @@ def test_create_excludes_source_plans_with_existing_follow_up_child(
     delivery_mechanism,
     fsp,
 ):
-    group = PaymentPlanGroupFactory(cycle=cycle)
-    source_one = _create_source_payment_plan(
+    group = PaymentPlanFactory(cycle=cycle)
+    source_one = _create_source_payment_list(
         cycle=cycle,
         group=group,
         business_area=business_area,
@@ -365,7 +365,7 @@ def test_create_excludes_source_plans_with_existing_follow_up_child(
         fsp=fsp,
         with_failed_payment=True,
     )
-    source_two = _create_source_payment_plan(
+    source_two = _create_source_payment_list(
         cycle=cycle,
         group=group,
         business_area=business_area,
@@ -379,27 +379,27 @@ def test_create_excludes_source_plans_with_existing_follow_up_child(
         program=program,
         created_by=user,
     )
-    PaymentPlanFactory(
+    PaymentListFactory(
         program_cycle=cycle,
         business_area=business_area,
         currency=currency,
         delivery_mechanism=delivery_mechanism,
         financial_service_provider=fsp,
         follow_up_instruction=existing_instruction,
-        plan_type=PaymentPlan.PlanType.FOLLOW_UP,
-        source_payment_plan=source_one,
+        plan_type=PaymentList.PlanType.FOLLOW_UP,
+        source_payment_list=source_one,
     )
 
     instruction = FollowUpInstructionService(program).create(
         user=user,
-        payment_plan_group_ids=[str(group.id)],
+        payment_plan_ids=[str(group.id)],
         dispersion_start_date=source_two.dispersion_start_date + timedelta(days=1),
         dispersion_end_date=source_two.dispersion_end_date + timedelta(days=1),
     )
 
-    child_plans = list(instruction.payment_plans.all())
+    child_plans = list(instruction.payment_lists.all())
     assert len(child_plans) == 1
-    assert child_plans[0].source_payment_plan_id == source_two.id
+    assert child_plans[0].source_payment_list_id == source_two.id
 
 
 def test_create_excludes_source_plans_with_manual_follow_up_child(
@@ -411,8 +411,8 @@ def test_create_excludes_source_plans_with_manual_follow_up_child(
     delivery_mechanism,
     fsp,
 ):
-    group = PaymentPlanGroupFactory(cycle=cycle)
-    source_one = _create_source_payment_plan(
+    group = PaymentPlanFactory(cycle=cycle)
+    source_one = _create_source_payment_list(
         cycle=cycle,
         group=group,
         business_area=business_area,
@@ -421,7 +421,7 @@ def test_create_excludes_source_plans_with_manual_follow_up_child(
         fsp=fsp,
         with_failed_payment=True,
     )
-    source_two = _create_source_payment_plan(
+    source_two = _create_source_payment_list(
         cycle=cycle,
         group=group,
         business_area=business_area,
@@ -430,26 +430,26 @@ def test_create_excludes_source_plans_with_manual_follow_up_child(
         fsp=fsp,
         with_failed_payment=True,
     )
-    PaymentPlanFactory(
+    PaymentListFactory(
         program_cycle=cycle,
         business_area=business_area,
         currency=currency,
         delivery_mechanism=delivery_mechanism,
         financial_service_provider=fsp,
-        plan_type=PaymentPlan.PlanType.FOLLOW_UP,
-        source_payment_plan=source_one,
+        plan_type=PaymentList.PlanType.FOLLOW_UP,
+        source_payment_list=source_one,
     )
 
     instruction = FollowUpInstructionService(program).create(
         user=user,
-        payment_plan_group_ids=[str(group.id)],
+        payment_plan_ids=[str(group.id)],
         dispersion_start_date=source_two.dispersion_start_date + timedelta(days=1),
         dispersion_end_date=source_two.dispersion_end_date + timedelta(days=1),
     )
 
-    child_plans = list(instruction.payment_plans.all())
+    child_plans = list(instruction.payment_lists.all())
     assert len(child_plans) == 1
-    assert child_plans[0].source_payment_plan_id == source_two.id
+    assert child_plans[0].source_payment_list_id == source_two.id
 
 
 def test_create_does_not_exclude_source_plans_with_top_up_child(
@@ -461,8 +461,8 @@ def test_create_does_not_exclude_source_plans_with_top_up_child(
     delivery_mechanism,
     fsp,
 ):
-    group = PaymentPlanGroupFactory(cycle=cycle)
-    source_one = _create_source_payment_plan(
+    group = PaymentPlanFactory(cycle=cycle)
+    source_one = _create_source_payment_list(
         cycle=cycle,
         group=group,
         business_area=business_area,
@@ -471,7 +471,7 @@ def test_create_does_not_exclude_source_plans_with_top_up_child(
         fsp=fsp,
         with_failed_payment=True,
     )
-    source_two = _create_source_payment_plan(
+    source_two = _create_source_payment_list(
         cycle=cycle,
         group=group,
         business_area=business_area,
@@ -480,26 +480,26 @@ def test_create_does_not_exclude_source_plans_with_top_up_child(
         fsp=fsp,
         with_failed_payment=True,
     )
-    PaymentPlanFactory(
+    PaymentListFactory(
         program_cycle=cycle,
         business_area=business_area,
         currency=currency,
         delivery_mechanism=delivery_mechanism,
         financial_service_provider=fsp,
-        plan_type=PaymentPlan.PlanType.TOP_UP,
-        source_payment_plan=source_one,
+        plan_type=PaymentList.PlanType.TOP_UP,
+        source_payment_list=source_one,
     )
 
     instruction = FollowUpInstructionService(program).create(
         user=user,
-        payment_plan_group_ids=[str(group.id)],
+        payment_plan_ids=[str(group.id)],
         dispersion_start_date=source_one.dispersion_start_date + timedelta(days=1),
         dispersion_end_date=source_one.dispersion_end_date + timedelta(days=1),
     )
 
-    child_plans = list(instruction.payment_plans.all())
+    child_plans = list(instruction.payment_lists.all())
     assert len(child_plans) == 2
-    assert {child.source_payment_plan_id for child in child_plans} == {source_one.id, source_two.id}
+    assert {child.source_payment_list_id for child in child_plans} == {source_one.id, source_two.id}
 
 
 def test_create_raises_validation_error_when_no_applicable_source_plans(
@@ -511,8 +511,8 @@ def test_create_raises_validation_error_when_no_applicable_source_plans(
     delivery_mechanism,
     fsp,
 ):
-    group = PaymentPlanGroupFactory(cycle=cycle)
-    _create_source_payment_plan(
+    group = PaymentPlanFactory(cycle=cycle)
+    _create_source_payment_list(
         cycle=cycle,
         group=group,
         business_area=business_area,
@@ -522,10 +522,10 @@ def test_create_raises_validation_error_when_no_applicable_source_plans(
         with_failed_payment=False,
     )
 
-    with pytest.raises(ValidationError, match="No applicable Payment Plans were found"):
+    with pytest.raises(ValidationError, match="No applicable Payment Lists were found"):
         FollowUpInstructionService(program).create(
             user=user,
-            payment_plan_group_ids=[str(group.id)],
+            payment_plan_ids=[str(group.id)],
             dispersion_start_date=cycle.start_date + timedelta(days=1),
             dispersion_end_date=cycle.start_date + timedelta(days=2),
         )
@@ -541,9 +541,9 @@ def test_create_raises_validation_error_for_mixed_currency(
     delivery_mechanism,
     fsp,
 ):
-    group = PaymentPlanGroupFactory(cycle=cycle)
-    other_group = PaymentPlanGroupFactory(cycle=cycle)
-    _create_source_payment_plan(
+    group = PaymentPlanFactory(cycle=cycle)
+    other_group = PaymentPlanFactory(cycle=cycle)
+    _create_source_payment_list(
         cycle=cycle,
         group=group,
         business_area=business_area,
@@ -552,7 +552,7 @@ def test_create_raises_validation_error_for_mixed_currency(
         fsp=fsp,
         with_failed_payment=True,
     )
-    _create_source_payment_plan(
+    _create_source_payment_list(
         cycle=cycle,
         group=other_group,
         business_area=business_area,
@@ -565,7 +565,7 @@ def test_create_raises_validation_error_for_mixed_currency(
     with pytest.raises(ValidationError, match="must share the same Currency"):
         FollowUpInstructionService(program).create(
             user=user,
-            payment_plan_group_ids=[str(group.id), str(other_group.id)],
+            payment_plan_ids=[str(group.id), str(other_group.id)],
             dispersion_start_date=cycle.start_date + timedelta(days=1),
             dispersion_end_date=cycle.start_date + timedelta(days=2),
         )
@@ -580,9 +580,9 @@ def test_create_raises_validation_error_for_mixed_use_payment_gateway(
     delivery_mechanism,
     fsp,
 ):
-    group = PaymentPlanGroupFactory(cycle=cycle, use_payment_gateway=True)
-    other_group = PaymentPlanGroupFactory(cycle=cycle)
-    _create_source_payment_plan(
+    group = PaymentPlanFactory(cycle=cycle, use_payment_gateway=True)
+    other_group = PaymentPlanFactory(cycle=cycle)
+    _create_source_payment_list(
         cycle=cycle,
         group=group,
         business_area=business_area,
@@ -591,7 +591,7 @@ def test_create_raises_validation_error_for_mixed_use_payment_gateway(
         fsp=fsp,
         with_failed_payment=True,
     )
-    _create_source_payment_plan(
+    _create_source_payment_list(
         cycle=cycle,
         group=other_group,
         business_area=business_area,
@@ -604,7 +604,7 @@ def test_create_raises_validation_error_for_mixed_use_payment_gateway(
     with pytest.raises(ValidationError, match="must share the same Use Payment Gateway setting"):
         FollowUpInstructionService(program).create(
             user=user,
-            payment_plan_group_ids=[str(group.id), str(other_group.id)],
+            payment_plan_ids=[str(group.id), str(other_group.id)],
             dispersion_start_date=cycle.start_date + timedelta(days=1),
             dispersion_end_date=cycle.start_date + timedelta(days=2),
         )
@@ -612,8 +612,8 @@ def test_create_raises_validation_error_for_mixed_use_payment_gateway(
 
 @pytest.fixture
 def group_ids_paid_in_both_syp_denominations(cycle, business_area, deprecated_syp, active_syp, delivery_mechanism, fsp):
-    deprecated_group = PaymentPlanGroupFactory(cycle=cycle)
-    _create_source_payment_plan(
+    deprecated_group = PaymentPlanFactory(cycle=cycle)
+    _create_source_payment_list(
         cycle=cycle,
         group=deprecated_group,
         business_area=business_area,
@@ -622,8 +622,8 @@ def group_ids_paid_in_both_syp_denominations(cycle, business_area, deprecated_sy
         fsp=fsp,
         with_failed_payment=True,
     )
-    active_group = PaymentPlanGroupFactory(cycle=cycle)
-    _create_source_payment_plan(
+    active_group = PaymentPlanFactory(cycle=cycle)
+    _create_source_payment_list(
         cycle=cycle,
         group=active_group,
         business_area=business_area,
@@ -644,7 +644,7 @@ def test_create_rejects_currency_variants_sharing_a_code_and_names_both(
     with pytest.raises(ValidationError, match=re.escape("Found: SYP (SYP01) - Syrian Pound, SYP - Syrian Pound.")):
         FollowUpInstructionService(program).create(
             user=user,
-            payment_plan_group_ids=group_ids_paid_in_both_syp_denominations,
+            payment_plan_ids=group_ids_paid_in_both_syp_denominations,
             dispersion_start_date=cycle.start_date + timedelta(days=1),
             dispersion_end_date=cycle.start_date + timedelta(days=2),
         )
@@ -665,14 +665,14 @@ def test_export_xlsx_allows_retry_after_background_error(
         created_by=user,
         background_action_status=FollowUpInstruction.BackgroundActionStatus.XLSX_EXPORT_ERROR,
     )
-    _create_instruction_child_payment_plan(
+    _create_instruction_child_payment_list(
         instruction=instruction,
         cycle=cycle,
         business_area=business_area,
         currency=currency,
         delivery_mechanism=delivery_mechanism,
         fsp=fsp,
-        status=PaymentPlan.Status.LOCKED,
+        status=PaymentList.Status.LOCKED,
     )
 
 
@@ -687,10 +687,10 @@ def test_get_source_groups_raises_when_group_not_in_program(
 ) -> None:
     other_program = ProgramFactory(business_area=business_area)
     other_cycle = ProgramCycleFactory(program=other_program)
-    group = PaymentPlanGroupFactory(cycle=other_cycle)
+    group = PaymentPlanFactory(cycle=other_cycle)
 
-    with pytest.raises(ValidationError, match="One or more Payment Plan Groups do not exist"):
-        FollowUpInstructionService(program)._get_source_groups([str(group.id)])
+    with pytest.raises(ValidationError, match="One or more Payment Plans do not exist"):
+        FollowUpInstructionService(program)._get_source_payment_plans([str(group.id)])
 
 
 def test_validate_shared_configuration_raises_for_mixed_fsp(
@@ -701,14 +701,14 @@ def test_validate_shared_configuration_raises_for_mixed_fsp(
 ) -> None:
     fsp_one = FinancialServiceProviderFactory()
     fsp_two = FinancialServiceProviderFactory()
-    plan_one = PaymentPlanFactory(
+    plan_one = PaymentListFactory(
         program_cycle=cycle,
         business_area=business_area,
         currency=currency,
         delivery_mechanism=delivery_mechanism,
         financial_service_provider=fsp_one,
     )
-    plan_two = PaymentPlanFactory(
+    plan_two = PaymentListFactory(
         program_cycle=cycle,
         business_area=business_area,
         currency=currency,
@@ -728,14 +728,14 @@ def test_validate_shared_configuration_raises_for_mixed_delivery_mechanism(
     fsp: Any,
 ) -> None:
     second_delivery_mechanism = DeliveryMechanismFactory()
-    plan_one = PaymentPlanFactory(
+    plan_one = PaymentListFactory(
         program_cycle=cycle,
         business_area=business_area,
         currency=currency,
         delivery_mechanism=delivery_mechanism,
         financial_service_provider=fsp,
     )
-    plan_two = PaymentPlanFactory(
+    plan_two = PaymentListFactory(
         program_cycle=cycle,
         business_area=business_area,
         currency=currency,
@@ -756,7 +756,7 @@ def test_require_instruction_raises_when_instruction_is_none(
         service._require_instruction()
 
 
-def test_validate_child_payment_plans_statuses_raises_when_no_child_plans(
+def test_validate_child_payment_lists_statuses_raises_when_no_child_plans(
     user: Any,
     program: Any,
     business_area: Any,
@@ -768,11 +768,11 @@ def test_validate_child_payment_plans_statuses_raises_when_no_child_plans(
     )
     service = FollowUpInstructionService(instruction=instruction)
 
-    with pytest.raises(ValidationError, match="no child Payment Plans"):
-        service._validate_child_payment_plans_statuses({PaymentPlan.Status.LOCKED}, "Test action")
+    with pytest.raises(ValidationError, match="no child Payment Lists"):
+        service._validate_child_payment_lists_statuses({PaymentList.Status.LOCKED}, "Test action")
 
 
-def test_validate_child_payment_plans_statuses_raises_for_wrong_status(
+def test_validate_child_payment_lists_statuses_raises_for_wrong_status(
     user: Any,
     program: Any,
     cycle: Any,
@@ -786,19 +786,19 @@ def test_validate_child_payment_plans_statuses_raises_for_wrong_status(
         program=program,
         created_by=user,
     )
-    _create_instruction_child_payment_plan(
+    _create_instruction_child_payment_list(
         instruction=instruction,
         cycle=cycle,
         business_area=business_area,
         currency=currency,
         delivery_mechanism=delivery_mechanism,
         fsp=fsp,
-        status=PaymentPlan.Status.OPEN,
+        status=PaymentList.Status.OPEN,
     )
     service = FollowUpInstructionService(instruction=instruction)
 
-    with pytest.raises(ValidationError, match="not available for child Payment Plans outside statuses"):
-        service._validate_child_payment_plans_statuses({PaymentPlan.Status.LOCKED}, "Test action")
+    with pytest.raises(ValidationError, match="not available for child Payment Lists outside statuses"):
+        service._validate_child_payment_lists_statuses({PaymentList.Status.LOCKED}, "Test action")
 
 
 def test_validate_instruction_has_eligible_payments_raises_when_no_payments(
@@ -829,12 +829,12 @@ def test_validate_delivery_template_exists_raises_when_fsp_is_none(
         program=program,
         created_by=user,
     )
-    PaymentPlanFactory(
+    PaymentListFactory(
         program_cycle=cycle,
         business_area=business_area,
         currency=currency,
         follow_up_instruction=instruction,
-        plan_type=PaymentPlan.PlanType.FOLLOW_UP,
+        plan_type=PaymentList.PlanType.FOLLOW_UP,
         financial_service_provider=None,
     )
     service = FollowUpInstructionService(instruction=instruction)
@@ -857,14 +857,14 @@ def test_validate_delivery_template_exists_raises_when_no_xlsx_template(
         program=program,
         created_by=user,
     )
-    PaymentPlanFactory(
+    PaymentListFactory(
         program_cycle=cycle,
         business_area=business_area,
         currency=currency,
         delivery_mechanism=delivery_mechanism,
         financial_service_provider=fsp,
         follow_up_instruction=instruction,
-        plan_type=PaymentPlan.PlanType.FOLLOW_UP,
+        plan_type=PaymentList.PlanType.FOLLOW_UP,
     )
     service = FollowUpInstructionService(instruction=instruction)
 
@@ -889,7 +889,7 @@ def test_validate_no_background_action_in_progress_raises_when_exporting(
         service._validate_no_background_action_in_progress("Test action")
 
 
-def test_abort_transitions_child_payment_plans_to_aborted(
+def test_abort_transitions_child_payment_lists_to_aborted(
     user: Any,
     program: Any,
     cycle: Any,
@@ -903,24 +903,24 @@ def test_abort_transitions_child_payment_plans_to_aborted(
         program=program,
         created_by=user,
     )
-    child_plan = _create_instruction_child_payment_plan(
+    child_plan = _create_instruction_child_payment_list(
         instruction=instruction,
         cycle=cycle,
         business_area=business_area,
         currency=currency,
         delivery_mechanism=delivery_mechanism,
         fsp=fsp,
-        status=PaymentPlan.Status.LOCKED,
+        status=PaymentList.Status.LOCKED,
     )
 
     result = FollowUpInstructionService(instruction=instruction).abort(user=user, abort_comment="stopping")
 
     child_plan.refresh_from_db()
     assert result == instruction
-    assert child_plan.status == PaymentPlan.Status.ABORTED
+    assert child_plan.status == PaymentList.Status.ABORTED
 
 
-def test_reactivate_abort_transitions_child_payment_plans_to_open(
+def test_reactivate_abort_transitions_child_payment_lists_to_open(
     user: Any,
     program: Any,
     cycle: Any,
@@ -934,43 +934,43 @@ def test_reactivate_abort_transitions_child_payment_plans_to_open(
         program=program,
         created_by=user,
     )
-    child_plan = _create_instruction_child_payment_plan(
+    child_plan = _create_instruction_child_payment_list(
         instruction=instruction,
         cycle=cycle,
         business_area=business_area,
         currency=currency,
         delivery_mechanism=delivery_mechanism,
         fsp=fsp,
-        status=PaymentPlan.Status.ABORTED,
+        status=PaymentList.Status.ABORTED,
     )
 
     result = FollowUpInstructionService(instruction=instruction).reactivate_abort(user=user)
 
     child_plan.refresh_from_db()
     assert result == instruction
-    assert child_plan.status == PaymentPlan.Status.OPEN
+    assert child_plan.status == PaymentList.Status.OPEN
 
 
-def test_reactivate_abort_keeps_child_payment_plan_payments(
+def test_reactivate_abort_keeps_child_payment_list_payments(
     user: Any,
     aborted_follow_up_payment: Any,
     django_capture_on_commit_callbacks: Any,
 ) -> None:
-    payment_plan = aborted_follow_up_payment.parent
+    payment_list = aborted_follow_up_payment.parent
 
     with django_capture_on_commit_callbacks(execute=True):
-        FollowUpInstructionService(instruction=payment_plan.follow_up_instruction).reactivate_abort(user=user)
+        FollowUpInstructionService(instruction=payment_list.follow_up_instruction).reactivate_abort(user=user)
 
-    payment_plan.refresh_from_db()
-    assert payment_plan.status == PaymentPlan.Status.OPEN
-    assert payment_plan.build_status == PaymentPlan.BuildStatus.BUILD_STATUS_OK
-    assert list(Payment.all_objects.filter(parent=payment_plan).values_list("pk", "entitlement_quantity")) == [
+    payment_list.refresh_from_db()
+    assert payment_list.status == PaymentList.Status.OPEN
+    assert payment_list.build_status == PaymentList.BuildStatus.BUILD_STATUS_OK
+    assert list(Payment.all_objects.filter(parent=payment_list).values_list("pk", "entitlement_quantity")) == [
         (aborted_follow_up_payment.pk, Decimal("10.00"))
     ]
 
 
-@patch("hope.apps.payment.services.payment_plan_services.send_payment_notification_emails_async_task")
-def test_close_transitions_child_payment_plans_to_closed_without_notification(
+@patch("hope.apps.payment.services.payment_list_services.send_payment_notification_emails_async_task")
+def test_close_transitions_child_payment_lists_to_closed_without_notification(
     mock_notify: Any,
     user: Any,
     program: Any,
@@ -981,21 +981,21 @@ def test_close_transitions_child_payment_plans_to_closed_without_notification(
     fsp: Any,
 ) -> None:
     instruction = FollowUpInstructionFactory(program=program, created_by=user)
-    child_plan = _create_instruction_child_payment_plan(
+    child_plan = _create_instruction_child_payment_list(
         instruction=instruction,
         cycle=cycle,
         business_area=business_area,
         currency=currency,
         delivery_mechanism=delivery_mechanism,
         fsp=fsp,
-        status=PaymentPlan.Status.READY_FOR_CLOSURE,
+        status=PaymentList.Status.READY_FOR_CLOSURE,
     )
 
     result = FollowUpInstructionService(instruction=instruction).close(user=user, closure_comment="all paid")
 
     child_plan.refresh_from_db()
     assert result == instruction
-    assert child_plan.status == PaymentPlan.Status.CLOSED
+    assert child_plan.status == PaymentList.Status.CLOSED
     mock_notify.assert_not_called()
 
 
@@ -1005,13 +1005,13 @@ def test_status_returns_first_status_when_no_precedence_match(user, program, bus
         program=program,
         created_by=user,
     )
-    PaymentPlanFactory(
+    PaymentListFactory(
         follow_up_instruction=instruction,
         program_cycle=cycle,
-        status=PaymentPlan.Status.DRAFT,
+        status=PaymentList.Status.DRAFT,
     )
 
-    assert instruction.status == PaymentPlan.Status.DRAFT
+    assert instruction.status == PaymentList.Status.DRAFT
 
 
 def test_export_file_link_returns_none_when_file_not_found(user, program, business_area) -> None:
@@ -1043,15 +1043,15 @@ def approval_instruction(user, program, business_area) -> FollowUpInstruction:
 
 
 @pytest.fixture
-def locked_fsp_children(approval_instruction, cycle, business_area, currency) -> list[PaymentPlan]:
+def locked_fsp_children(approval_instruction, cycle, business_area, currency) -> list[PaymentList]:
     return [
-        PaymentPlanFactory(
+        PaymentListFactory(
             program_cycle=cycle,
             business_area=business_area,
             currency=currency,
             follow_up_instruction=approval_instruction,
-            plan_type=PaymentPlan.PlanType.FOLLOW_UP,
-            status=PaymentPlan.Status.LOCKED_FSP,
+            plan_type=PaymentList.PlanType.FOLLOW_UP,
+            status=PaymentList.Status.LOCKED_FSP,
             total_entitled_quantity_usd=Decimal("100.00"),
         )
         for _ in range(2)
@@ -1073,11 +1073,14 @@ def threshold_above_one_child(business_area) -> AcceptanceProcessThreshold:
     "hope.apps.payment.services.follow_up_instruction_service.send_follow_up_instruction_notification_emails_async_task"
 )
 def test_send_for_approval_moves_every_child_to_in_approval(
-    mock_notify: Any, user: Any, approval_instruction: FollowUpInstruction, locked_fsp_children: list[PaymentPlan]
+    mock_notify: Any,
+    user: Any,
+    approval_instruction: FollowUpInstruction,
+    locked_fsp_children: list[PaymentList],
 ) -> None:
     FollowUpInstructionService(instruction=approval_instruction).send_for_approval(user)
 
-    assert set(approval_instruction.payment_plans.values_list("status", flat=True)) == {PaymentPlan.Status.IN_APPROVAL}
+    assert set(approval_instruction.payment_lists.values_list("status", flat=True)) == {PaymentList.Status.IN_APPROVAL}
 
 
 @patch(
@@ -1087,7 +1090,7 @@ def test_send_for_approval_creates_one_process_on_the_instruction_sized_by_its_t
     mock_notify: Any,
     user: Any,
     approval_instruction: FollowUpInstruction,
-    locked_fsp_children: list[PaymentPlan],
+    locked_fsp_children: list[PaymentList],
     threshold_above_one_child: AcceptanceProcessThreshold,
 ) -> None:
     FollowUpInstructionService(instruction=approval_instruction).send_for_approval(user)
@@ -1104,50 +1107,53 @@ def test_send_for_approval_creates_one_process_on_the_instruction_sized_by_its_t
     "hope.apps.payment.services.follow_up_instruction_service.send_follow_up_instruction_notification_emails_async_task"
 )
 def test_send_for_approval_notifies_once_for_the_instruction(
-    mock_notify: Any, user: Any, approval_instruction: FollowUpInstruction, locked_fsp_children: list[PaymentPlan]
+    mock_notify: Any,
+    user: Any,
+    approval_instruction: FollowUpInstruction,
+    locked_fsp_children: list[PaymentList],
 ) -> None:
     FollowUpInstructionService(instruction=approval_instruction).send_for_approval(user)
 
     mock_notify.assert_called_once()
     assert mock_notify.call_args.args[:3] == (
         approval_instruction,
-        PaymentPlan.Action.SEND_FOR_APPROVAL.value,
+        PaymentList.Action.SEND_FOR_APPROVAL.value,
         str(user.pk),
     )
 
 
 @pytest.fixture
-def locked_child(approval_instruction, cycle, business_area, currency) -> PaymentPlan:
-    return PaymentPlanFactory(
+def locked_child(approval_instruction, cycle, business_area, currency) -> PaymentList:
+    return PaymentListFactory(
         program_cycle=cycle,
         business_area=business_area,
         currency=currency,
         follow_up_instruction=approval_instruction,
-        plan_type=PaymentPlan.PlanType.FOLLOW_UP,
-        status=PaymentPlan.Status.LOCKED,
+        plan_type=PaymentList.PlanType.FOLLOW_UP,
+        status=PaymentList.Status.LOCKED,
     )
 
 
 def test_send_for_approval_rejects_children_outside_locked_fsp(
     user: Any,
     approval_instruction: FollowUpInstruction,
-    locked_fsp_children: list[PaymentPlan],
-    locked_child: PaymentPlan,
+    locked_fsp_children: list[PaymentList],
+    locked_child: PaymentList,
 ) -> None:
     with pytest.raises(ValidationError, match="Send for Approval is not available"):
         FollowUpInstructionService(instruction=approval_instruction).send_for_approval(user)
 
 
 @pytest.fixture
-def in_approval_children(approval_instruction, cycle, business_area, currency) -> list[PaymentPlan]:
+def in_approval_children(approval_instruction, cycle, business_area, currency) -> list[PaymentList]:
     return [
-        PaymentPlanFactory(
+        PaymentListFactory(
             program_cycle=cycle,
             business_area=business_area,
             currency=currency,
             follow_up_instruction=approval_instruction,
-            plan_type=PaymentPlan.PlanType.FOLLOW_UP,
-            status=PaymentPlan.Status.IN_APPROVAL,
+            plan_type=PaymentList.PlanType.FOLLOW_UP,
+            status=PaymentList.Status.IN_APPROVAL,
         )
         for _ in range(2)
     ]
@@ -1165,15 +1171,15 @@ def test_approve_below_the_required_count_keeps_children_in_approval(
     mock_notify: Any,
     user: Any,
     approval_instruction: FollowUpInstruction,
-    in_approval_children: list[PaymentPlan],
+    in_approval_children: list[PaymentList],
     instruction_approval_process: ApprovalProcess,
 ) -> None:
     FollowUpInstructionService(instruction=approval_instruction).acceptance_process(
-        PaymentPlan.Action.APPROVE.value, user, "looks good"
+        PaymentList.Action.APPROVE.value, user, "looks good"
     )
 
     assert instruction_approval_process.approvals.get().comment == "looks good"
-    assert set(approval_instruction.payment_plans.values_list("status", flat=True)) == {PaymentPlan.Status.IN_APPROVAL}
+    assert set(approval_instruction.payment_lists.values_list("status", flat=True)) == {PaymentList.Status.IN_APPROVAL}
     mock_notify.assert_not_called()
 
 
@@ -1189,20 +1195,20 @@ def test_approve_reaching_the_required_count_moves_every_child_to_in_authorizati
     mock_notify: Any,
     user: Any,
     approval_instruction: FollowUpInstruction,
-    in_approval_children: list[PaymentPlan],
+    in_approval_children: list[PaymentList],
     first_approval: Approval,
 ) -> None:
     FollowUpInstructionService(instruction=approval_instruction).acceptance_process(
-        PaymentPlan.Action.APPROVE.value, user
+        PaymentList.Action.APPROVE.value, user
     )
 
     first_approval.approval_process.refresh_from_db()
-    assert set(approval_instruction.payment_plans.values_list("status", flat=True)) == {
-        PaymentPlan.Status.IN_AUTHORIZATION
+    assert set(approval_instruction.payment_lists.values_list("status", flat=True)) == {
+        PaymentList.Status.IN_AUTHORIZATION
     }
     assert first_approval.approval_process.sent_for_authorization_by == user
     mock_notify.assert_called_once()
-    assert mock_notify.call_args.args[1] == PaymentPlan.Action.APPROVE.value
+    assert mock_notify.call_args.args[1] == PaymentList.Action.APPROVE.value
 
 
 @pytest.mark.enable_activity_log
@@ -1213,11 +1219,11 @@ def test_approve_logs_the_approval_on_the_instruction(
     mock_notify: Any,
     user: Any,
     approval_instruction: FollowUpInstruction,
-    in_approval_children: list[PaymentPlan],
+    in_approval_children: list[PaymentList],
     instruction_approval_process: ApprovalProcess,
 ) -> None:
     FollowUpInstructionService(instruction=approval_instruction).acceptance_process(
-        PaymentPlan.Action.APPROVE.value, user, "looks good"
+        PaymentList.Action.APPROVE.value, user, "looks good"
     )
 
     log_entry = LogEntry.objects.get(
@@ -1236,40 +1242,40 @@ def test_reject_moves_every_child_back_to_locked_fsp(
     mock_notify: Any,
     user: Any,
     approval_instruction: FollowUpInstruction,
-    in_approval_children: list[PaymentPlan],
+    in_approval_children: list[PaymentList],
     instruction_approval_process: ApprovalProcess,
 ) -> None:
     FollowUpInstructionService(instruction=approval_instruction).acceptance_process(
-        PaymentPlan.Action.REJECT.value, user, "wrong amounts"
+        PaymentList.Action.REJECT.value, user, "wrong amounts"
     )
 
-    assert set(approval_instruction.payment_plans.values_list("status", flat=True)) == {PaymentPlan.Status.LOCKED_FSP}
+    assert set(approval_instruction.payment_lists.values_list("status", flat=True)) == {PaymentList.Status.LOCKED_FSP}
     mock_notify.assert_not_called()
 
 
 def test_authorize_outside_in_authorization_raises(
     user: Any,
     approval_instruction: FollowUpInstruction,
-    in_approval_children: list[PaymentPlan],
+    in_approval_children: list[PaymentList],
     instruction_approval_process: ApprovalProcess,
 ) -> None:
     with pytest.raises(ValidationError, match="Not possible to create AUTHORIZE for Follow Up Instruction"):
         FollowUpInstructionService(instruction=approval_instruction).acceptance_process(
-            PaymentPlan.Action.AUTHORIZE.value, user
+            PaymentList.Action.AUTHORIZE.value, user
         )
 
 
 def test_approve_without_an_approval_process_raises(
-    user: Any, approval_instruction: FollowUpInstruction, in_approval_children: list[PaymentPlan]
+    user: Any, approval_instruction: FollowUpInstruction, in_approval_children: list[PaymentList]
 ) -> None:
     with pytest.raises(ValidationError, match="Approval Process object not found for Follow Up Instruction"):
         FollowUpInstructionService(instruction=approval_instruction).acceptance_process(
-            PaymentPlan.Action.APPROVE.value, user
+            PaymentList.Action.APPROVE.value, user
         )
 
 
 def test_abort_stores_the_comment_on_the_instruction(
-    user: Any, approval_instruction: FollowUpInstruction, in_approval_children: list[PaymentPlan]
+    user: Any, approval_instruction: FollowUpInstruction, in_approval_children: list[PaymentList]
 ) -> None:
     FollowUpInstructionService(instruction=approval_instruction).abort(user=user, abort_comment="wrong list")
 
@@ -1278,15 +1284,15 @@ def test_abort_stores_the_comment_on_the_instruction(
 
 
 @pytest.fixture
-def finished_children(approval_instruction, cycle, business_area, currency) -> list[PaymentPlan]:
+def finished_children(approval_instruction, cycle, business_area, currency) -> list[PaymentList]:
     return [
-        PaymentPlanFactory(
+        PaymentListFactory(
             program_cycle=cycle,
             business_area=business_area,
             currency=currency,
             follow_up_instruction=approval_instruction,
-            plan_type=PaymentPlan.PlanType.FOLLOW_UP,
-            status=PaymentPlan.Status.FINISHED,
+            plan_type=PaymentList.PlanType.FOLLOW_UP,
+            status=PaymentList.Status.FINISHED,
         )
         for _ in range(2)
     ]
@@ -1296,53 +1302,56 @@ def finished_children(approval_instruction, cycle, business_area, currency) -> l
     "hope.apps.payment.services.follow_up_instruction_service.send_follow_up_instruction_notification_emails_async_task"
 )
 def test_ready_for_closure_moves_every_child_to_ready_for_closure(
-    mock_notify: Any, user: Any, approval_instruction: FollowUpInstruction, finished_children: list[PaymentPlan]
+    mock_notify: Any,
+    user: Any,
+    approval_instruction: FollowUpInstruction,
+    finished_children: list[PaymentList],
 ) -> None:
     FollowUpInstructionService(instruction=approval_instruction).ready_for_closure(user)
 
-    assert set(approval_instruction.payment_plans.values_list("status", flat=True)) == {
-        PaymentPlan.Status.READY_FOR_CLOSURE
+    assert set(approval_instruction.payment_lists.values_list("status", flat=True)) == {
+        PaymentList.Status.READY_FOR_CLOSURE
     }
     assert approval_instruction.status == FollowUpInstruction.Status.READY_FOR_CLOSURE
     assert mock_notify.call_args.args[:3] == (
         approval_instruction,
-        PaymentPlan.Action.MARK_READY_FOR_CLOSURE.value,
+        PaymentList.Action.MARK_READY_FOR_CLOSURE.value,
         str(user.pk),
     )
 
 
 @pytest.fixture
-def accepted_child(approval_instruction, cycle, business_area, currency) -> PaymentPlan:
-    return PaymentPlanFactory(
+def accepted_child(approval_instruction, cycle, business_area, currency) -> PaymentList:
+    return PaymentListFactory(
         program_cycle=cycle,
         business_area=business_area,
         currency=currency,
         follow_up_instruction=approval_instruction,
-        plan_type=PaymentPlan.PlanType.FOLLOW_UP,
-        status=PaymentPlan.Status.ACCEPTED,
+        plan_type=PaymentList.PlanType.FOLLOW_UP,
+        status=PaymentList.Status.ACCEPTED,
     )
 
 
 def test_ready_for_closure_rejects_children_that_are_not_finished(
     user: Any,
     approval_instruction: FollowUpInstruction,
-    finished_children: list[PaymentPlan],
-    accepted_child: PaymentPlan,
+    finished_children: list[PaymentList],
+    accepted_child: PaymentList,
 ) -> None:
     with pytest.raises(ValidationError, match="Mark as Ready for Closure is not available"):
         FollowUpInstructionService(instruction=approval_instruction).ready_for_closure(user)
 
 
 @pytest.fixture
-def ready_for_closure_children(approval_instruction, cycle, business_area, currency) -> list[PaymentPlan]:
+def ready_for_closure_children(approval_instruction, cycle, business_area, currency) -> list[PaymentList]:
     return [
-        PaymentPlanFactory(
+        PaymentListFactory(
             program_cycle=cycle,
             business_area=business_area,
             currency=currency,
             follow_up_instruction=approval_instruction,
-            plan_type=PaymentPlan.PlanType.FOLLOW_UP,
-            status=PaymentPlan.Status.READY_FOR_CLOSURE,
+            plan_type=PaymentList.PlanType.FOLLOW_UP,
+            status=PaymentList.Status.READY_FOR_CLOSURE,
         )
         for _ in range(2)
     ]
@@ -1355,45 +1364,45 @@ def test_send_back_moves_every_child_to_finished(
     mock_notify: Any,
     user: Any,
     approval_instruction: FollowUpInstruction,
-    ready_for_closure_children: list[PaymentPlan],
+    ready_for_closure_children: list[PaymentList],
 ) -> None:
     FollowUpInstructionService(instruction=approval_instruction).send_back_to_finished(user)
 
-    assert set(approval_instruction.payment_plans.values_list("status", flat=True)) == {PaymentPlan.Status.FINISHED}
+    assert set(approval_instruction.payment_lists.values_list("status", flat=True)) == {PaymentList.Status.FINISHED}
     assert mock_notify.call_args.args[:3] == (
         approval_instruction,
-        PaymentPlan.Action.SEND_BACK_TO_FINISHED.value,
+        PaymentList.Action.SEND_BACK_TO_FINISHED.value,
         str(user.pk),
     )
 
 
 def test_send_back_rejects_children_that_are_not_ready_for_closure(
-    user: Any, approval_instruction: FollowUpInstruction, finished_children: list[PaymentPlan]
+    user: Any, approval_instruction: FollowUpInstruction, finished_children: list[PaymentList]
 ) -> None:
     with pytest.raises(ValidationError, match="Send Back is not available"):
         FollowUpInstructionService(instruction=approval_instruction).send_back_to_finished(user)
 
 
 def test_close_rejects_children_that_are_not_ready_for_closure(
-    user: Any, approval_instruction: FollowUpInstruction, finished_children: list[PaymentPlan]
+    user: Any, approval_instruction: FollowUpInstruction, finished_children: list[PaymentList]
 ) -> None:
     with pytest.raises(ValidationError, match="Close instruction is not available"):
         FollowUpInstructionService(instruction=approval_instruction).close(user=user, closure_comment="paid out")
 
 
 def test_close_stores_the_comment_and_user_on_the_instruction_and_its_children(
-    user: Any, approval_instruction: FollowUpInstruction, ready_for_closure_children: list[PaymentPlan]
+    user: Any, approval_instruction: FollowUpInstruction, ready_for_closure_children: list[PaymentList]
 ) -> None:
     FollowUpInstructionService(instruction=approval_instruction).close(user=user, closure_comment="paid out")
 
     approval_instruction.refresh_from_db()
     assert approval_instruction.closure_comment == "paid out"
     assert approval_instruction.closed_by == user
-    assert set(approval_instruction.payment_plans.values_list("closure_comment", flat=True)) == {"paid out"}
+    assert set(approval_instruction.payment_lists.values_list("closure_comment", flat=True)) == {"paid out"}
 
 
 def test_close_without_a_comment_raises_when_nothing_was_verified(
-    user: Any, approval_instruction: FollowUpInstruction, ready_for_closure_children: list[PaymentPlan]
+    user: Any, approval_instruction: FollowUpInstruction, ready_for_closure_children: list[PaymentList]
 ) -> None:
     with pytest.raises(ValidationError, match="Closure comment is required"):
         FollowUpInstructionService(instruction=approval_instruction).close(user=user, closure_comment=None)

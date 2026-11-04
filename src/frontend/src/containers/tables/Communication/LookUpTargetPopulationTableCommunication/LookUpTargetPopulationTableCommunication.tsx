@@ -8,7 +8,7 @@ import { useTableState } from '@hooks/useTableState';
 import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
 import { headCells } from './LookUpTargetPopulationTableHeadCellsCommunication';
 import { LookUpTargetPopulationTableRowCommunication } from './LookUpTargetPopulationTableRowCommunication';
-import { PaymentPlanStatusEnum } from '@restgenerated/models/PaymentPlanStatusEnum';
+import { PaymentListStatusEnum } from '@restgenerated/models/PaymentListStatusEnum';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { RestService } from '@restgenerated/services/RestService';
 import { restQueryKey } from '@utils/queryKeys';
@@ -58,7 +58,7 @@ const LookUpTargetPopulationTableCommunication = ({
         min: filter.createdAtRangeMin || null,
         max: filter.createdAtRangeMax || null,
       }),
-      statusNot: PaymentPlanStatusEnum.OPEN,
+      statusNot: PaymentListStatusEnum.OPEN,
       isTargetPopulation: true,
       businessAreaSlug: businessArea,
       programCode: programId,
@@ -90,7 +90,7 @@ const LookUpTargetPopulationTableCommunication = ({
     listVariables,
   );
   const {
-    data: paymentPlansData,
+    data: paymentListsData,
     isLoading,
     isFetching,
     error,
@@ -116,7 +116,7 @@ const LookUpTargetPopulationTableCommunication = ({
       <UniversalRestTable
         title={noTitle ? null : t('Target Populations')}
         headCells={enableRadioButton ? headCells : headCells.slice(1)}
-        data={paymentPlansData}
+        data={paymentListsData}
         isLoading={isLoading}
         isFetching={isFetching}
         error={error}

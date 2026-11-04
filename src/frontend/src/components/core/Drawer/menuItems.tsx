@@ -176,17 +176,17 @@ export const menuItems: MenuItem[] = [
       },
       {
         name: 'Payment Plans',
-        href: '/payment-module/groups',
+        href: '/payment-module/payment-plans',
         selectedRegexp:
-          /^\/payment-module\/(groups|payment-plans|followup-payment-plans|top-up-payment-plans).*$/,
+          /^\/payment-module\/(payment-plans|payment-lists|followup-payment-lists|top-up-payment-lists).*$/,
         icon: <PaymentIcon />,
         permissions: [
-          PERMISSIONS.PM_PAYMENT_PLAN_GROUP_VIEW_LIST,
-          PERMISSIONS.PM_PAYMENT_PLAN_GROUP_VIEW_DETAIL,
+          PERMISSIONS.PM_PAYMENT_PLAN_VIEW_LIST,
+          PERMISSIONS.PM_PAYMENT_PLAN_VIEW_DETAIL,
         ],
         permissionModule: PERMISSION_MODULES.PM,
         scopes: [SCOPE_PROGRAM],
-        dataPerm: PERMISSIONS.PM_PAYMENT_PLAN_GROUP_VIEW_LIST,
+        dataPerm: PERMISSIONS.PM_PAYMENT_PLAN_VIEW_LIST,
       },
       {
         name: 'Follow-up Instructions',

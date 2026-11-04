@@ -7,7 +7,7 @@ from selenium.webdriver.common.by import By
 from e2e.page_object.managerial_console.managerial_console import ManagerialConsole
 from extras.test_utils.factories import (
     ApprovalProcessFactory,
-    PaymentPlanFactory,
+    PaymentListFactory,
     ProgramFactory,
     UserFactory,
 )
@@ -15,8 +15,8 @@ from hope.models import (
     BeneficiaryGroup,
     BusinessArea,
     DataCollectingType,
+    PaymentList,
     PaymentPlan,
-    PaymentPlanGroup,
     Program,
     User,
 )
@@ -53,41 +53,41 @@ def create_program(
 
 
 @pytest.fixture
-def create_payment_plan(create_active_test_program: Program, second_test_program: Program) -> PaymentPlan:
+def create_payment_list(create_active_test_program: Program, second_test_program: Program) -> PaymentList:
     program_cycle_second = second_test_program.cycles.first()
     ba = BusinessArea.objects.get(slug="afghanistan")
-    other_plan = PaymentPlanFactory(
+    other_plan = PaymentListFactory(
         program_cycle=program_cycle_second,
-        status=PaymentPlan.Status.IN_APPROVAL,
+        status=PaymentList.Status.IN_APPROVAL,
         business_area=ba,
     )
     _set_group_in_approval(other_plan)
 
-    payment_plan = PaymentPlanFactory(
+    payment_list = PaymentListFactory(
         name="Test Payment Plan",
         currency=Currency.objects.get(code="USD"),
-        status=PaymentPlan.Status.IN_APPROVAL,
+        status=PaymentList.Status.IN_APPROVAL,
         created_by=User.objects.first(),
         program_cycle=create_active_test_program.cycles.first(),
         total_delivered_quantity=999,
         total_entitled_quantity=2999,
-        plan_type=PaymentPlan.PlanType.REGULAR,
+        plan_type=PaymentList.PlanType.REGULAR,
     )
     approval_user = UserFactory()
     approval_date = datetime(2000, 10, 10, tzinfo=dt_timezone.utc)
-    group = _set_group_in_approval(payment_plan)
+    group = _set_group_in_approval(payment_list)
     ApprovalProcessFactory(
-        payment_plan_group=group,
+        payment_plan=group,
         sent_for_approval_date=approval_date,
         sent_for_approval_by=approval_user,
     )
-    return payment_plan
+    return payment_list
 
 
-def _set_group_in_approval(payment_plan: PaymentPlan) -> PaymentPlanGroup:
+def _set_group_in_approval(payment_list: PaymentList) -> PaymentPlan:
     """The console lists and approves Payment Plans (groups), so the group carries the status."""
-    group = payment_plan.payment_plan_group
-    group.status = PaymentPlanGroup.Status.IN_APPROVAL
+    group = payment_list.payment_plan
+    group.status = PaymentPlan.Status.IN_APPROVAL
     group.save(update_fields=["status"])
     return group
 
@@ -112,7 +112,7 @@ def test_managerial_console_renders_all_sections(page_managerial_console: Manage
 @pytest.mark.usefixtures("login")
 def test_managerial_console_happy_path(
     page_managerial_console: ManagerialConsole,
-    create_payment_plan: PaymentPlan,
+    create_payment_list: PaymentList,
 ) -> None:
     page_managerial_console.get_nav_managerial_console().click()
     # Approve Payment Plan
@@ -137,6 +137,6 @@ def test_managerial_console_happy_path(
     page_managerial_console.get_release_button().click()
     page_managerial_console.get_button_save().click()
     # Check Released Payment Plans
-    group = create_payment_plan.payment_plan_group
+    group = create_payment_list.payment_plan
     group.refresh_from_db()
     assert group.unicef_id in page_managerial_console.get_column_field_released().text

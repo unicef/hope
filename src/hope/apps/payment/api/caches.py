@@ -13,20 +13,20 @@ from hope.api.caches import (
 )
 from hope.models import BusinessArea
 
-PAYMENT_PLAN_LIST_CACHE_KEYS = (
-    "payment_plans_list",
+PAYMENT_LIST_LIST_CACHE_KEYS = (
+    "payment_lists_list",
     "target_populations_list",
     "payment_verifications_list",
 )
 PAYMENT_VERIFICATION_LIST_CACHE_KEYS = ("payment_verifications_list",)
 
 
-def invalidate_payment_plan_list_cache(
+def invalidate_payment_list_list_cache(
     business_area_slug: Any,
     program_code: Any,
-    specific_view_cache_keys: tuple[str, ...] = PAYMENT_PLAN_LIST_CACHE_KEYS,
+    specific_view_cache_keys: tuple[str, ...] = PAYMENT_LIST_LIST_CACHE_KEYS,
 ) -> None:
-    """Invalidate the payment plan list caches for a program."""
+    """Invalidate the payment list list caches for a program."""
 
     def _increment() -> None:
         for specific_view_cache_key in specific_view_cache_keys:
@@ -36,15 +36,15 @@ def invalidate_payment_plan_list_cache(
 
 
 class ManagerialPaymentPlanListVersionsKeyBit(BusinessAreaKeyBitMixin):
-    specific_view_cache_key = "management_payment_plans_list"
+    specific_view_cache_key = "management_payment_lists_list"
+
+
+class PaymentListListKeyBit(BusinessAreaAndProgramKeyBitMixin):
+    specific_view_cache_key = "payment_lists_list"
 
 
 class PaymentPlanListKeyBit(BusinessAreaAndProgramKeyBitMixin):
     specific_view_cache_key = "payment_plans_list"
-
-
-class PaymentPlanGroupListKeyBit(BusinessAreaAndProgramKeyBitMixin):
-    specific_view_cache_key = "payment_plan_groups_list"
 
 
 class PaymentPlanPurposeListVersionsKeyBit(KeyBitBase):
@@ -89,20 +89,20 @@ class PaymentPlanProgramsPermissionsKeyBit(KeyBitBase):
 
 
 class PaymentPlanKeyConstructor(KeyConstructorMixin):
-    managerial_payment_plan_list_version = ManagerialPaymentPlanListVersionsKeyBit()
+    managerial_payment_list_list_version = ManagerialPaymentPlanListVersionsKeyBit()
     permissions_to_programs = PaymentPlanProgramsPermissionsKeyBit()
 
 
-class PaymentPlanListKeyConstructor(KeyConstructorMixin):
-    payment_plan_list = PaymentPlanListKeyBit()
+class PaymentListListKeyConstructor(KeyConstructorMixin):
+    payment_list_list = PaymentListListKeyBit()
 
 
 class TargetPopulationListKeyConstructor(KeyConstructorMixin):
     target_population_list = TargetPopulationListKeyBit()
 
 
-class PaymentPlanGroupListKeyConstructor(KeyConstructorMixin):
-    payment_plan_group_list = PaymentPlanGroupListKeyBit()
+class PaymentPlanListKeyConstructor(KeyConstructorMixin):
+    payment_plan_list = PaymentPlanListKeyBit()
 
 
 class PaymentPlanPurposeListKeyConstructor(KeyConstructorMixin):

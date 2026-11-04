@@ -15,7 +15,7 @@ from hope.models import PaymentVerificationPlan
 if TYPE_CHECKING:
     from collections.abc import Iterable
 
-    from hope.models import Payment, PaymentPlan  # pragma: no cover
+    from hope.models import Payment, PaymentList  # pragma: no cover
 
 
 logger = logging.getLogger(__name__)
@@ -29,26 +29,26 @@ def does_payment_record_have_right_hoh_phone_number(record: "Payment") -> bool:
     return bool(hoh.phone_no_valid or hoh.phone_no_alternative_valid)
 
 
-def get_payment_records(payment_plan: "PaymentPlan", verification_channel: Any | None) -> QuerySet:
+def get_payment_records(payment_list: "PaymentList", verification_channel: Any | None) -> QuerySet:
     if verification_channel == PaymentVerificationPlan.VERIFICATION_CHANNEL_RAPIDPRO:
-        return payment_plan.available_payment_records(extra_validation=does_payment_record_have_right_hoh_phone_number)
-    return payment_plan.available_payment_records()
+        return payment_list.available_payment_records(extra_validation=does_payment_record_have_right_hoh_phone_number)
+    return payment_list.available_payment_records()
 
 
 class VerificationPlanCrudServices:
     @classmethod
-    def create(cls, payment_plan: "PaymentPlan", input_data: dict) -> PaymentVerificationPlan:
+    def create(cls, payment_list: "PaymentList", input_data: dict) -> PaymentVerificationPlan:
         verifier = PaymentVerificationArgumentVerifier(input_data)
         verifier.verify("sampling")
         verifier.verify("verification_channel")
 
         payment_verification_plan = PaymentVerificationPlan()
-        payment_verification_plan.payment_plan = payment_plan
+        payment_verification_plan.payment_list = payment_list
 
         payment_verification_plan.verification_channel = input_data.get("verification_channel", "")
 
-        payment_records = get_payment_records(payment_plan, payment_verification_plan.verification_channel)
-        sampling = Sampling(input_data, payment_plan, payment_records)
+        payment_records = get_payment_records(payment_list, payment_verification_plan.verification_channel)
+        sampling = Sampling(input_data, payment_list, payment_records)
         payment_verification_plan, payment_records_qs = sampling.process_sampling(payment_verification_plan)
 
         ProcessVerification(input_data, payment_verification_plan).process()
@@ -65,13 +65,13 @@ class VerificationPlanCrudServices:
         verifier.verify("verification_channel")
 
         if payment_verification_plan.status != PaymentVerificationPlan.STATUS_PENDING:  # pragma: no cover
-            raise ValidationError("You can only edit PENDING Payment Plan Verification")
+            raise ValidationError("You can only edit PENDING Payment List Verification")
 
         payment_records = get_payment_records(
-            payment_verification_plan.payment_plan,
+            payment_verification_plan.payment_list,
             payment_verification_plan.verification_channel,
         )
-        sampling = Sampling(input_data, payment_verification_plan.payment_plan, payment_records)
+        sampling = Sampling(input_data, payment_verification_plan.payment_list, payment_records)
         pv_plan, payment_records_qs = sampling.process_sampling(payment_verification_plan)
 
         ProcessVerification(input_data, pv_plan).process()

@@ -4,7 +4,7 @@ import { AnonTableCell } from '@components/core/Table/AnonTableCell';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { TableRow } from '@mui/material';
 import TableCell from '@mui/material/TableCell';
-import type { PaymentList } from '@restgenerated/models/PaymentList';
+import type { PaymentRow } from '@restgenerated/models/PaymentRow';
 import {
   formatCurrencyWithSymbol,
   householdStatusToColor,
@@ -13,21 +13,21 @@ import {
 import type { ReactElement } from 'react';
 
 interface VerificationRecordsTableRowProps {
-  payment: PaymentList;
+  payment: PaymentRow;
   canViewRecordDetails: boolean;
   showStatusColumn?: boolean;
-  paymentPlanId: string;
+  paymentListId: string;
 }
 
 export function VerificationRecordsTableRow({
   payment,
   canViewRecordDetails,
-  paymentPlanId,
+  paymentListId,
   showStatusColumn = true,
 }: VerificationRecordsTableRowProps): ReactElement {
   const { baseUrl } = useBaseUrl();
 
-  const linkPath = `/${baseUrl}/payment-verification/payment-plan/${paymentPlanId}/verification/payment/${payment.id}`;
+  const linkPath = `/${baseUrl}/payment-verification/payment-list/${paymentListId}/verification/payment/${payment.id}`;
 
   return (
     <TableRow hover role="checkbox" key={payment.id}>

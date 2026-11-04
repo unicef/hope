@@ -16,16 +16,16 @@ from extras.test_utils.factories import (
     HouseholdFactory,
     IndividualFactory,
     PaymentFactory,
-    PaymentPlanFactory,
+    PaymentListFactory,
     PaymentPlanPurposeFactory,
     ProgramCycleFactory,
     ProgramFactory,
     UserFactory,
 )
-from hope.apps.payment.celery_tasks import prepare_payment_plan_async_task
-from hope.apps.payment.services.payment_household_snapshot_service import create_payment_plan_snapshot_data
-from hope.apps.payment.services.payment_plan_services import PaymentPlanService
-from hope.models import Payment, PaymentPlan, Program
+from hope.apps.payment.celery_tasks import prepare_payment_list_async_task
+from hope.apps.payment.services.payment_household_snapshot_service import create_payment_list_snapshot_data
+from hope.apps.payment.services.payment_list_services import PaymentListService
+from hope.models import Payment, PaymentList, Program
 
 pytestmark = pytest.mark.django_db
 
@@ -95,26 +95,26 @@ def program_cycle(program: Program) -> Any:
 
 
 @pytest.fixture
-def payment_plan(user: Any, business_area: Any, program_cycle: Any) -> PaymentPlan:
-    return PaymentPlanFactory(
-        status=PaymentPlan.Status.OPEN,
+def payment_list(user: Any, business_area: Any, program_cycle: Any) -> PaymentList:
+    return PaymentListFactory(
+        status=PaymentList.Status.OPEN,
         created_by=user,
         business_area=business_area,
         program_cycle=program_cycle,
     )
 
 
-def test_payment_single_signature(payment_plan: PaymentPlan) -> None:
-    (payment,) = PaymentFactory.create_batch(1, parent=payment_plan)
-    create_payment_plan_snapshot_data(payment_plan)
+def test_payment_single_signature(payment_list: PaymentList) -> None:
+    (payment,) = PaymentFactory.create_batch(1, parent=payment_list)
+    create_payment_list_snapshot_data(payment_list)
     payment.refresh_from_db()
     payment.save()
     assert payment.signature_hash == calculate_hash_manually(payment)
 
 
-def test_bulk_update(payment_plan: PaymentPlan) -> None:
-    (payment,) = PaymentFactory.create_batch(1, parent=payment_plan)
-    create_payment_plan_snapshot_data(payment_plan)
+def test_bulk_update(payment_list: PaymentList) -> None:
+    (payment,) = PaymentFactory.create_batch(1, parent=payment_list)
+    create_payment_list_snapshot_data(payment_list)
     payment.refresh_from_db()
     payment.save()
     old_signature = calculate_hash_manually(payment)
@@ -127,7 +127,7 @@ def test_bulk_update(payment_plan: PaymentPlan) -> None:
 
 
 @freeze_time("2020-10-10")
-def test_signature_after_prepare_payment_plan(
+def test_signature_after_prepare_payment_list(
     business_area: Any,
     user: Any,
     program: Program,
@@ -177,9 +177,9 @@ def test_signature_after_prepare_payment_plan(
     program.payment_plan_purposes.add(purpose)
     input_data = {
         "business_area_slug": business_area.slug,
-        "name": "paymentPlanName",
+        "name": "paymentListName",
         "program_cycle_id": str(program_cycle.id),
-        "payment_plan_group_id": str(program_cycle.payment_plan_groups.first().id),
+        "payment_plan_id": str(program_cycle.payment_plans.first().id),
         "rules": rules,
         "flag_exclude_if_active_adjudication_ticket": False,
         "flag_exclude_if_on_sanction_list": False,
@@ -189,23 +189,23 @@ def test_signature_after_prepare_payment_plan(
     }
 
     with (
-        mock.patch("hope.models.payment_plan.PaymentPlan.get_exchange_rate", return_value=2.0),
-        mock.patch("hope.apps.payment.services.payment_plan_services.prepare_payment_plan_async_task"),
+        mock.patch("hope.models.payment_list.PaymentList.get_exchange_rate", return_value=2.0),
+        mock.patch("hope.apps.payment.services.payment_list_services.prepare_payment_list_async_task"),
     ):
-        pp = PaymentPlanService.create(
+        pp = PaymentListService.create(
             input_data=input_data,
             user=user,
             program=program,
         )
 
     pp.refresh_from_db()
-    assert pp.build_status == PaymentPlan.BuildStatus.BUILD_STATUS_PENDING
+    assert pp.build_status == PaymentList.BuildStatus.BUILD_STATUS_PENDING
 
     with django_capture_on_commit_callbacks(execute=True):
-        prepare_payment_plan_async_task(pp)
+        prepare_payment_list_async_task(pp)
     pp.refresh_from_db()
 
-    assert pp.build_status == PaymentPlan.BuildStatus.BUILD_STATUS_OK
+    assert pp.build_status == PaymentList.BuildStatus.BUILD_STATUS_OK
 
     payment1 = pp.payment_items.all()[0]
     payment2 = pp.payment_items.all()[1]

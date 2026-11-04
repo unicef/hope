@@ -10,20 +10,20 @@ from e2e.new_selenium.conftest import grant_permission
 from extras.test_utils.factories import (
     DataCollectingTypeFactory,
     HouseholdFactory,
-    PaymentPlanGroupFactory,
+    PaymentPlanFactory,
     PaymentPlanPurposeFactory,
     TargetingCriteriaRuleFactory,
 )
-from extras.test_utils.factories.payment import PaymentPlanFactory
+from extras.test_utils.factories.payment import PaymentListFactory
 from extras.test_utils.factories.program import ProgramCycleFactory, ProgramFactory
 from extras.test_utils.selenium import HopeTestBrowser
 from hope.apps.account.permissions import Permissions
-from hope.apps.payment.services.payment_plan_services import PaymentPlanService
+from hope.apps.payment.services.payment_list_services import PaymentListService
 from hope.models import (
     BeneficiaryGroup,
     BusinessArea,
     DataCollectingType,
-    PaymentPlan,
+    PaymentList,
     PaymentPlanPurpose,
     Program,
     User,
@@ -77,26 +77,26 @@ def social_tp(
     social_program: Program,
     social_purpose: PaymentPlanPurpose,
     social_people: dict,
-) -> PaymentPlan:
+) -> PaymentList:
     cycle = ProgramCycleFactory(program=social_program, title="Social Worker Cycle")
-    group = PaymentPlanGroupFactory(cycle=cycle, name="Social Worker Group")
+    group = PaymentPlanFactory(cycle=cycle, name="Social Worker Group")
     ind1 = social_people["ind1"]
     ind2 = social_people["ind2"]
 
-    tp = PaymentPlanFactory(
+    tp = PaymentListFactory(
         name="Exclusion Regression TP",
         program_cycle=cycle,
-        payment_plan_group=group,
-        status=PaymentPlan.Status.TP_OPEN,
+        payment_plan=group,
+        status=PaymentList.Status.TP_OPEN,
         business_area=social_program.business_area,
     )
     tp.payment_plan_purposes.add(social_purpose)
     # Include both people by individual ID. TargetingCriteriaRule.get_query() splits on ", ".
-    TargetingCriteriaRuleFactory(payment_plan=tp, individual_ids=f"{ind1.unicef_id}, {ind2.unicef_id}")
+    TargetingCriteriaRuleFactory(payment_list=tp, individual_ids=f"{ind1.unicef_id}, {ind2.unicef_id}")
 
     # Build the population so the People list starts with both people.
-    PaymentPlanService(tp).full_rebuild()
-    tp.build_status = PaymentPlan.BuildStatus.BUILD_STATUS_OK
+    PaymentListService(tp).full_rebuild()
+    tp.build_status = PaymentList.BuildStatus.BUILD_STATUS_OK
     tp.save(update_fields=["build_status"])
     tp.refresh_from_db()
     return tp
@@ -106,7 +106,7 @@ def test_exclude_individual_id_removes_person_in_social_program(
     browser: HopeTestBrowser,
     user_with_no_permissions: User,
     business_area: BusinessArea,
-    social_tp: PaymentPlan,
+    social_tp: PaymentList,
     social_people: dict,
 ) -> None:
     program = social_tp.program_cycle.program
@@ -118,8 +118,8 @@ def test_exclude_individual_id_removes_person_in_social_program(
         Permissions.TARGETING_VIEW_DETAILS,
         Permissions.TARGETING_UPDATE,
         Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS,
-        Permissions.PM_PAYMENT_PLAN_GROUP_VIEW_DETAIL,
-        Permissions.PM_PAYMENT_PLAN_GROUP_VIEW_LIST,
+        Permissions.PM_PAYMENT_PLAN_VIEW_DETAIL,
+        Permissions.PM_PAYMENT_PLAN_VIEW_LIST,
     ):
         browser.login(username="noperm_user")
 

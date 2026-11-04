@@ -23,13 +23,13 @@ class MessagesFilter(FilterSet):
     sampling_type = ChoiceFilter(field_name="sampling_type", choices=Message.SamplingChoices.choices)
 
     def filter_program(self, queryset: QuerySet, name: str, value: str) -> QuerySet[Message]:
-        return queryset.filter(payment_plan__program_cycle__program=value)
+        return queryset.filter(payment_list__program_cycle__program=value)
 
     class Meta:
         model = Message
         fields = {
             "number_of_recipients": ["exact", "gte", "lte"],
-            "payment_plan": ["exact"],
+            "payment_list": ["exact"],
             "created_by": ["exact"],
         }
 
@@ -108,7 +108,7 @@ class SurveyFilter(FilterSet):
         model = Survey
         fields = {
             "program": ["exact"],
-            "payment_plan": ["exact"],
+            "payment_list": ["exact"],
         }
 
     order_by = CustomOrderingFilter(

@@ -8,11 +8,11 @@ from extras.test_utils.factories import (
     CurrencyFactory,
     HouseholdFactory,
     PaymentFactory,
-    PaymentPlanFactory,
+    PaymentListFactory,
 )
 from hope.apps.activity_log.utils import create_diff
-from hope.apps.payment.services.payment_household_snapshot_service import create_payment_plan_snapshot_data
-from hope.models import Household, Payment, PaymentPlan, PaymentPlanGroup
+from hope.apps.payment.services.payment_household_snapshot_service import create_payment_list_snapshot_data
+from hope.models import Household, Payment, PaymentList, PaymentPlan
 from hope.models.currency import Currency
 
 pytestmark = pytest.mark.django_db
@@ -24,50 +24,50 @@ def test_currency_str_returns_code_and_name(currency_usd: Currency, django_asser
 
 
 @pytest.fixture
-def payment_plan_usdc(currency_usdc: Currency) -> PaymentPlan:
-    return PaymentPlanFactory(currency=currency_usdc)
+def payment_list_usdc(currency_usdc: Currency) -> PaymentList:
+    return PaymentListFactory(currency=currency_usdc)
 
 
 @pytest.fixture
-def payment_plan_pln(currency_pln: Currency) -> PaymentPlan:
-    return PaymentPlanFactory(currency=currency_pln)
+def payment_list_pln(currency_pln: Currency) -> PaymentList:
+    return PaymentListFactory(currency=currency_pln)
 
 
 @pytest.fixture
-def payment_plan_no_currency() -> PaymentPlan:
-    return PaymentPlanFactory(currency=None)
+def payment_list_no_currency() -> PaymentList:
+    return PaymentListFactory(currency=None)
 
 
 @pytest.fixture
-def payment_plan_usd(currency_usd: Currency) -> PaymentPlan:
-    return PaymentPlanFactory(currency=currency_usd)
+def payment_list_usd(currency_usd: Currency) -> PaymentList:
+    return PaymentListFactory(currency=currency_usd)
 
 
 @pytest.fixture
-def payment_with_snapshot(payment_plan_pln: PaymentPlan, currency_pln: Currency) -> Payment:
-    payment = PaymentFactory(parent=payment_plan_pln, currency=currency_pln)
-    create_payment_plan_snapshot_data(payment_plan_pln)
+def payment_with_snapshot(payment_list_pln: PaymentList, currency_pln: Currency) -> Payment:
+    payment = PaymentFactory(parent=payment_list_pln, currency=currency_pln)
+    create_payment_list_snapshot_data(payment_list_pln)
     payment.refresh_from_db()
     return payment
 
 
-def test_get_unore_exchange_rate_returns_1_for_usdc(payment_plan_usdc: PaymentPlan, django_assert_num_queries) -> None:
+def test_get_unore_exchange_rate_returns_1_for_usdc(payment_list_usdc: PaymentList, django_assert_num_queries) -> None:
     with django_assert_num_queries(0):
-        assert payment_plan_usdc.get_unore_exchange_rate() == 1.0
+        assert payment_list_usdc.get_unore_exchange_rate() == 1.0
 
 
 def test_get_unore_exchange_rate_calls_client_with_currency_code(
-    payment_plan_pln: PaymentPlan, django_assert_num_queries
+    payment_list_pln: PaymentList, django_assert_num_queries
 ) -> None:
     with django_assert_num_queries(0):
         mock_client = mock.Mock()
         mock_client.get_exchange_rate_for_currency_code.return_value = 3.75
 
-        result = payment_plan_pln.get_unore_exchange_rate(exchange_rates_client=mock_client)
+        result = payment_list_pln.get_unore_exchange_rate(exchange_rates_client=mock_client)
 
         assert result == 3.75
         mock_client.get_exchange_rate_for_currency_code.assert_called_once_with(
-            "PLN", payment_plan_pln.currency_exchange_date
+            "PLN", payment_list_pln.currency_exchange_date
         )
 
 
@@ -77,29 +77,31 @@ def current_syp() -> Currency:
 
 
 @pytest.fixture
-def payment_plan_syp(current_syp: Currency) -> PaymentPlan:
-    return PaymentPlanFactory(currency=current_syp)
+def payment_list_syp(current_syp: Currency) -> PaymentList:
+    return PaymentListFactory(currency=current_syp)
 
 
-def test_get_unore_exchange_rate_uses_vision_code_when_different_from_code(payment_plan_syp: PaymentPlan) -> None:
-    payment_plan = payment_plan_syp
+def test_get_unore_exchange_rate_uses_vision_code_when_different_from_code(
+    payment_list_syp: PaymentList,
+) -> None:
+    payment_list = payment_list_syp
     mock_client = mock.Mock()
     mock_client.get_exchange_rate_for_currency_code.return_value = 0.01
 
-    result = payment_plan.get_unore_exchange_rate(exchange_rates_client=mock_client)
+    result = payment_list.get_unore_exchange_rate(exchange_rates_client=mock_client)
 
     assert result == 0.01
     mock_client.get_exchange_rate_for_currency_code.assert_called_once_with(
-        "SYP01", payment_plan.currency_exchange_date
+        "SYP01", payment_list.currency_exchange_date
     )
 
 
 def test_get_unore_exchange_rate_raises_for_null_currency(
-    payment_plan_no_currency: PaymentPlan, django_assert_num_queries
+    payment_list_no_currency: PaymentList, django_assert_num_queries
 ) -> None:
     with django_assert_num_queries(0):
-        with pytest.raises(ValueError, match="Cannot get exchange rate for PaymentPlan without currency"):
-            payment_plan_no_currency.get_unore_exchange_rate()
+        with pytest.raises(ValueError, match="Cannot get exchange rate for PaymentList without currency"):
+            payment_list_no_currency.get_unore_exchange_rate()
 
 
 def _calculate_expected_hash(payment: Payment) -> str:
@@ -135,9 +137,9 @@ def deprecated_syp() -> Currency:
 
 @pytest.fixture
 def payment_on_deprecated_syp(deprecated_syp: Currency) -> Payment:
-    payment_plan = PaymentPlanFactory(currency=deprecated_syp)
-    payment = PaymentFactory(parent=payment_plan, currency=deprecated_syp)
-    create_payment_plan_snapshot_data(payment_plan)
+    payment_list = PaymentListFactory(currency=deprecated_syp)
+    payment = PaymentFactory(parent=payment_list, currency=deprecated_syp)
+    create_payment_list_snapshot_data(payment_list)
     payment.refresh_from_db()
     payment.save()
     return payment
@@ -157,9 +159,9 @@ def test_payment_signature_changes_when_currency_moves_to_another_variant_of_the
 @pytest.fixture
 def payment_on_syp01_before_redenomination() -> Payment:
     currency = CurrencyFactory(code="SYP01", name="Syrian Pound", vision_code="SYP01")
-    payment_plan = PaymentPlanFactory(currency=currency)
-    payment = PaymentFactory(parent=payment_plan, currency=currency)
-    create_payment_plan_snapshot_data(payment_plan)
+    payment_list = PaymentListFactory(currency=currency)
+    payment = PaymentFactory(parent=payment_list, currency=currency)
+    create_payment_list_snapshot_data(payment_list)
     payment.refresh_from_db()
     payment.save()
     return payment
@@ -177,16 +179,16 @@ def test_payment_signature_survives_redenomination_renaming_the_code(
     assert payment_on_syp01_before_redenomination.signature_hash == signature_before
 
 
-def test_payment_plan_group_activity_log_diff_reports_currency_code(
-    payment_plan_usd: PaymentPlan,
-    payment_plan_pln: PaymentPlan,
+def test_payment_plan_activity_log_diff_reports_currency_code(
+    payment_list_usd: PaymentList,
+    payment_list_pln: PaymentList,
     django_assert_num_queries,
 ) -> None:
-    group_usd = payment_plan_usd.payment_plan_group
-    group_pln = payment_plan_pln.payment_plan_group
+    group_usd = payment_list_usd.payment_plan
+    group_pln = payment_list_pln.payment_plan
 
     with django_assert_num_queries(0):
-        diff = create_diff(group_usd, group_pln, PaymentPlanGroup.ACTIVITY_LOG_MAPPING)
+        diff = create_diff(group_usd, group_pln, PaymentPlan.ACTIVITY_LOG_MAPPING)
 
     assert "currency" in diff
     assert diff["currency"]["from"] == "USD"
@@ -195,17 +197,17 @@ def test_payment_plan_group_activity_log_diff_reports_currency_code(
 
 
 @pytest.fixture
-def payment_plan_deprecated_syp(deprecated_syp: Currency) -> PaymentPlan:
-    return PaymentPlanFactory(currency=deprecated_syp)
+def payment_list_deprecated_syp(deprecated_syp: Currency) -> PaymentList:
+    return PaymentListFactory(currency=deprecated_syp)
 
 
-def test_payment_plan_group_activity_log_diff_reports_variant_change_within_the_same_code(
-    payment_plan_deprecated_syp: PaymentPlan, payment_plan_syp: PaymentPlan
+def test_payment_plan_activity_log_diff_reports_variant_change_within_the_same_code(
+    payment_list_deprecated_syp: PaymentList, payment_list_syp: PaymentList
 ) -> None:
     diff = create_diff(
-        payment_plan_deprecated_syp.payment_plan_group,
-        payment_plan_syp.payment_plan_group,
-        PaymentPlanGroup.ACTIVITY_LOG_MAPPING,
+        payment_list_deprecated_syp.payment_plan,
+        payment_list_syp.payment_plan,
+        PaymentPlan.ACTIVITY_LOG_MAPPING,
     )
 
     assert "currency" not in diff

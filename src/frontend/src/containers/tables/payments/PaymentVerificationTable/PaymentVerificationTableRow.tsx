@@ -23,7 +23,7 @@ export function PaymentVerificationTableRow({
 }: PaymentVerificationTableRowProps): ReactElement {
   const navigate = useNavigate();
   const { baseUrl } = useBaseUrl();
-  const planVerificationPath = `/${baseUrl}/payment-verification/payment-plan/${plan.id}`;
+  const planVerificationPath = `/${baseUrl}/payment-verification/payment-list/${plan.id}`;
   const handleClick = (): void => {
     navigate(planVerificationPath);
   };

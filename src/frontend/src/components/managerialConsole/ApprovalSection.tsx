@@ -1,7 +1,7 @@
 import type { Dispatch, FC, SetStateAction } from 'react';
 import { useState } from 'react';
 import { BaseSection } from '@components/core/BaseSection';
-import type { PaginatedPaymentPlanGroupManagerialList } from '@restgenerated/models/PaginatedPaymentPlanGroupManagerialList';
+import type { PaginatedPaymentPlanManagerialList } from '@restgenerated/models/PaginatedPaymentPlanManagerialList';
 import type {
   BulkActionMutation,
   SelectAllHandler,
@@ -36,7 +36,7 @@ interface ApprovalSectionProps {
   setSelectedApproved: Dispatch<SetStateAction<string[]>>;
   handleSelect: SelectHandler;
   handleSelectAll: SelectAllHandler;
-  inApprovalData: PaginatedPaymentPlanGroupManagerialList;
+  inApprovalData: PaginatedPaymentPlanManagerialList;
   bulkAction: BulkActionMutation;
   enableSearch?: boolean;
 }
@@ -92,7 +92,7 @@ export const ApprovalSection: FC<ApprovalSectionProps> = ({
       width: 200,
       renderCell: (params) => (
         <BlackLink
-          to={`/${businessArea}/programs/${params.row.programCode}/payment-module/groups/${params.row.id}`}
+          to={`/${businessArea}/programs/${params.row.programCode}/payment-module/payment-plans/${params.row.id}`}
           newTab={true}
         >
           {params.value}

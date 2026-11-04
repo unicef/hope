@@ -116,10 +116,10 @@ function PaymentDetails({
             />
           </ResponsiveGrid>
           <ResponsiveGrid size="quarter" mobileSize="half">
-            <LabelizedField label={t('Original Payment Plan ID')}>
+            <LabelizedField label={t('Original Payment List ID')}>
               {payment.parent && (
                 <BlackLink
-                  to={`/${baseUrl}/payment-module/${payment.parent.planType === 'FOLLOW_UP' ? 'followup-payment-plans' : 'payment-plans'}/${payment.parent.id}`}
+                  to={`/${baseUrl}/payment-module/${payment.parent.planType === 'FOLLOW_UP' ? 'followup-payment-lists' : 'payment-lists'}/${payment.parent.id}`}
                 >
                   {payment.parent.unicefId}
                 </BlackLink>

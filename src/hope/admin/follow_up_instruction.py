@@ -43,8 +43,8 @@ class FollowUpInstructionAdmin(ViewOnUiMixin, HOPEModelAdminBase):
         return f"/{obj.business_area.slug}/programs/{obj.program.code}/payment-module/follow-up-instructions/{obj.id}"
 
     @button(permission="payment.view_followupinstruction")
-    def payment_plans(self, request: HttpRequest, pk: str) -> HttpResponseRedirect:
-        url = reverse("admin:payment_paymentplan_changelist")
+    def payment_lists(self, request: HttpRequest, pk: str) -> HttpResponseRedirect:
+        url = reverse("admin:payment_paymentlist_changelist")
         return HttpResponseRedirect(f"{url}?follow_up_instruction__id__exact={pk}")
 
     @button(
@@ -67,7 +67,7 @@ class FollowUpInstructionAdmin(ViewOnUiMixin, HOPEModelAdminBase):
             modeladmin=self,
             request=request,
             action=self.retry_usd_recalculation,
-            message="Retry USD recalculation for every Payment Plan in this instruction?",
+            message="Retry USD recalculation for every Payment List in this instruction?",
         )
 
     def has_add_permission(self, request: HttpRequest) -> bool:

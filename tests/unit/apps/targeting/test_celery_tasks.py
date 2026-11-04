@@ -5,7 +5,7 @@ import pytest
 
 from extras.test_utils.factories import (
     BusinessAreaFactory,
-    PaymentPlanGroupFactory,
+    PaymentPlanFactory,
     ProgramFactory,
     UserFactory,
 )
@@ -16,7 +16,7 @@ from hope.apps.targeting.celery_tasks import (
     create_tp_from_list_async_task,
     create_tp_from_list_async_task_action,
 )
-from hope.models import AsyncJob, PaymentPlan
+from hope.models import AsyncJob, PaymentList
 
 pytestmark = pytest.mark.django_db
 
@@ -54,12 +54,12 @@ def form_data(program_cycle):
 
 
 @pytest.fixture
-def payment_plan_group(program_cycle):
-    return PaymentPlanGroupFactory(cycle=program_cycle)
+def payment_plan(program_cycle):
+    return PaymentPlanFactory(cycle=program_cycle)
 
 
 @pytest.fixture
-def valid_form(program_cycle, payment_plan_group):
+def valid_form(program_cycle, payment_plan):
     form = Mock(spec=CreateTargetPopulationTextForm)
     form.is_valid.return_value = True
     form.cleaned_data = {
@@ -68,14 +68,14 @@ def valid_form(program_cycle, payment_plan_group):
         "separator": ",",
         "criteria": ["123,333"],
         "program_cycle": program_cycle,
-        "payment_plan_group": payment_plan_group,
+        "payment_plan": payment_plan,
     }
     return form
 
 
 @patch("hope.apps.targeting.celery_tasks.CreateTargetPopulationTextForm")
-@patch("hope.apps.payment.services.payment_plan_services.PaymentPlanService.create_payments")
-def test_create_tp_from_list_creates_payment_plan_and_triggers_payments(
+@patch("hope.apps.payment.services.payment_list_services.PaymentListService.create_payments")
+def test_create_tp_from_list_creates_payment_list_and_triggers_payments(
     mock_create_payments,
     mock_form_class,
     form_data,
@@ -94,13 +94,13 @@ def test_create_tp_from_list_creates_payment_plan_and_triggers_payments(
     job = AsyncJob.objects.latest("pk")
     async_job_task.run(job._meta.label_lower, job.pk, job.version)
 
-    payment_plan = PaymentPlan.objects.get(name="Test TP")
+    payment_list = PaymentList.objects.get(name="Test TP")
 
-    mock_create_payments.assert_called_once_with(payment_plan)
-    assert payment_plan.business_area == program.business_area
-    assert payment_plan.program_cycle == valid_form.cleaned_data["program_cycle"]
-    assert payment_plan.created_by == user
-    assert payment_plan.build_status == PaymentPlan.BuildStatus.BUILD_STATUS_OK
+    mock_create_payments.assert_called_once_with(payment_list)
+    assert payment_list.business_area == program.business_area
+    assert payment_list.program_cycle == valid_form.cleaned_data["program_cycle"]
+    assert payment_list.created_by == user
+    assert payment_list.build_status == PaymentList.BuildStatus.BUILD_STATUS_OK
 
 
 @patch("hope.apps.targeting.celery_tasks.logger.warning")

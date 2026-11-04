@@ -6,8 +6,8 @@ import { useTableState } from '@hooks/useTableState';
 import { headCells } from './LookUpPaymentRecordTableHeadCells';
 import { LookUpPaymentRecordTableRow } from './LookUpPaymentRecordTableRow';
 import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
-import type { PaginatedPaymentListList } from '@restgenerated/models/PaginatedPaymentListList';
-import type { PaymentList } from '@restgenerated/models/PaymentList';
+import type { PaginatedPaymentRowList } from '@restgenerated/models/PaginatedPaymentRowList';
+import type { PaymentRow } from '@restgenerated/models/PaymentRow';
 import { RestService } from '@restgenerated/services/RestService';
 import { restQueryKey } from '@utils/queryKeys';
 import { createApiParams } from '@utils/apiUtils';
@@ -48,7 +48,7 @@ export function LookUpPaymentRecordTable({
     isLoading,
     isFetching,
     error,
-  } = useQuery<PaginatedPaymentListList>({
+  } = useQuery<PaginatedPaymentRowList>({
     queryKey: isGlobal
       ? restQueryKey(
           RestService.restBusinessAreasPaymentsList,
@@ -142,7 +142,7 @@ export function LookUpPaymentRecordTable({
         isFetching={isFetching}
         error={error}
         tableState={table}
-        renderRow={(row: PaymentList) => (
+        renderRow={(row: PaymentRow) => (
           <LookUpPaymentRecordTableRow
             openInNewTab={openInNewTab}
             key={row.id}

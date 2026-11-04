@@ -60,7 +60,7 @@ const Border = styled.div`
 function prepareSampleSizeRequest(selectedSampleSizeType, values) {
   return {
     value: values.program,
-    paymentPlan: values.targetPopulation,
+    paymentList: values.targetPopulation,
     samplingType:
       selectedSampleSizeType === 0
         ? SurveySampleSizeSamplingTypeEnum.FULL_LIST
@@ -374,7 +374,7 @@ const CreateSurveyPage = (): ReactElement => {
       title: matchTitle(values),
       body: values.body,
       category: values.category,
-      paymentPlan: values.targetPopulation,
+      paymentList: values.targetPopulation,
       program: values.program,
       samplingType: selectedSampleSizeType === 0 ? 'FULL_LIST' : 'RANDOM',
       fullListArguments:
@@ -445,7 +445,7 @@ const CreateSurveyPage = (): ReactElement => {
                   title: variables.input.title,
                   body: variables.input.body,
                   category: variables.input.category,
-                  paymentPlan: variables.input.paymentPlan,
+                  paymentList: variables.input.paymentList,
                   program: variables.input.program,
                   samplingType: variables.input.samplingType,
                   fullListArguments: variables.input.fullListArguments,

@@ -53,10 +53,10 @@
             "version": 1735688653315200,
             "is_manually_editable": true
         },
-        "payment_plan_hard_conflicted": false,
-        "payment_plan_hard_conflicted_data": [],
-        "payment_plan_soft_conflicted": false,
-        "payment_plan_soft_conflicted_data": [],
+        "payment_list_hard_conflicted": false,
+        "payment_list_hard_conflicted_data": [],
+        "payment_list_soft_conflicted": false,
+        "payment_list_soft_conflicted_data": [],
         "people_individual": null,
         "program_name": "Program 0",
         "program_code": "43mc",
@@ -89,7 +89,7 @@
                 "status": "ACTIVE",
                 "screen_beneficiary": false
             },
-            "payment_plan_group": {
+            "payment_plan": {
                 "id": "e179bede-27a4-470f-aaa4-1ad441deef02",
                 "unicef_id": "PPG-0001",
                 "name": "Default Group"
@@ -180,7 +180,7 @@
             "male_adults_count": 0,
             "female_adults_count": 0,
             "steficon_rule": null,
-            "source_payment_plan": null,
+            "source_payment_list": null,
             "exchange_rate": null,
             "custom_exchange_rate": false,
             "unore_exchange_rate": null,
@@ -224,7 +224,7 @@
                 "number_of_verification_plans": 1,
                 "status_display": "Pending"
             },
-            "admin_url": "/api/unicorn/payment/paymentplan/b546a8d8-a5c1-4161-b3fb-6186f0ca192f/change/",
+            "admin_url": "/api/unicorn/payment/paymentlist/b546a8d8-a5c1-4161-b3fb-6186f0ca192f/change/",
             "abort_comment": "",
             "closure_comment": null,
             "closed_by": null,

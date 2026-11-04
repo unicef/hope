@@ -8,7 +8,7 @@ import type { TargetPopulationCopy } from '@restgenerated/models/TargetPopulatio
 import type { TargetPopulationDetail } from '@restgenerated/models/TargetPopulationDetail';
 import { RestService } from '@restgenerated/services/RestService';
 import { restQueryKey } from '@utils/queryKeys';
-import { PaymentPlanGroupAutocompleteRest } from '@shared/autocompletes/rest/PaymentPlanGroupAutocompleteRest';
+import { PaymentPlanAutocompleteRest } from '@shared/autocompletes/rest/PaymentPlanAutocompleteRest';
 import { ProgramCycleAutocompleteRest } from '@shared/autocompletes/rest/ProgramCycleAutocompleteRest';
 import { FormikChipAutocomplete } from '@shared/Formik/FormikChipAutocomplete/FormikChipAutocomplete';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
@@ -30,7 +30,7 @@ const validationSchema = Yup.object().shape({
   programCycleId: Yup.object().shape({
     value: Yup.string().required('Programme Cycle is required'),
   }),
-  paymentPlanGroupId: Yup.object().shape({
+  paymentPlanId: Yup.object().shape({
     value: Yup.string().required('Payment Plan is required'),
   }),
 });
@@ -102,7 +102,7 @@ export const DuplicateTargetPopulation = ({
       value: '',
       name: '',
     },
-    paymentPlanGroupId: {
+    paymentPlanId: {
       value: '',
       name: '',
     },
@@ -130,7 +130,7 @@ export const DuplicateTargetPopulation = ({
                 name: values.name,
                 targetPopulationId,
                 programCycleId,
-                paymentPlanGroupId: values.paymentPlanGroupId.value,
+                paymentPlanId: values.paymentPlanId.value,
                 paymentPlanPurposes: values.paymentPlanPurposes,
               },
               // The mutation's generated return type differs from the actual
@@ -183,7 +183,7 @@ export const DuplicateTargetPopulation = ({
                         'programCycleId',
                         e ?? { value: '', name: '' },
                       );
-                      await setFieldValue('paymentPlanGroupId', {
+                      await setFieldValue('paymentPlanId', {
                         value: '',
                         name: '',
                       });
@@ -193,15 +193,15 @@ export const DuplicateTargetPopulation = ({
                   />
                 </Grid>
                 <Grid size={{ xs: 12 }}>
-                  <PaymentPlanGroupAutocompleteRest
-                    value={values.paymentPlanGroupId}
+                  <PaymentPlanAutocompleteRest
+                    value={values.paymentPlanId}
                     onChange={async (e) => {
-                      await setFieldValue('paymentPlanGroupId', e);
+                      await setFieldValue('paymentPlanId', e);
                     }}
                     cycleId={values.programCycleId?.value ?? ''}
                     disabled={!values.programCycleId?.value}
                     required
-                    error={errors.paymentPlanGroupId?.value}
+                    error={errors.paymentPlanId?.value}
                   />
                 </Grid>
                 {programPurposes.length > 0 && (

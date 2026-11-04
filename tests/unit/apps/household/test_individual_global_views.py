@@ -16,7 +16,7 @@ from extras.test_utils.factories import (
     IndividualFactory,
     PartnerFactory,
     PaymentFactory,
-    PaymentPlanFactory,
+    PaymentListFactory,
     PaymentVerificationFactory,
     PaymentVerificationPlanFactory,
     PaymentVerificationSummaryFactory,
@@ -330,16 +330,16 @@ def office_search_context(client: Any, user: Any, afghanistan: BusinessArea) -> 
     hh4, individuals4 = _create_household_with_individuals(program, afghanistan, count=1)
 
     program_cycle = program.cycles.first()
-    payment_plan = PaymentPlanFactory(business_area=afghanistan, program_cycle=program_cycle)
+    payment_list = PaymentListFactory(business_area=afghanistan, program_cycle=program_cycle)
     payment1 = PaymentFactory(
-        parent=payment_plan,
+        parent=payment_list,
         household=hh1,
         head_of_household=individuals1[0],
         collector=individuals1[0],
         program=program,
     )
     payment2 = PaymentFactory(
-        parent=payment_plan,
+        parent=payment_list,
         household=hh2,
         head_of_household=individuals2[0],
         collector=individuals2[0],
@@ -394,14 +394,14 @@ def office_search_context(client: Any, user: Any, afghanistan: BusinessArea) -> 
 
     hh5, individuals5 = _create_household_with_individuals(program, afghanistan, count=1)
     payment3 = PaymentFactory(
-        parent=payment_plan,
+        parent=payment_list,
         household=hh5,
         head_of_household=individuals5[0],
         collector=individuals5[0],
         program=program,
     )
-    PaymentVerificationSummaryFactory(payment_plan=payment_plan)
-    payment_verification_plan = PaymentVerificationPlanFactory(payment_plan=payment_plan)
+    PaymentVerificationSummaryFactory(payment_list=payment_list)
+    payment_verification_plan = PaymentVerificationPlanFactory(payment_list=payment_list)
     payment_verification = PaymentVerificationFactory(
         payment=payment3, payment_verification_plan=payment_verification_plan
     )
@@ -428,7 +428,7 @@ def office_search_context(client: Any, user: Any, afghanistan: BusinessArea) -> 
         "individuals3": individuals3,
         "individuals4": individuals4,
         "individuals5": individuals5,
-        "payment_plan": payment_plan,
+        "payment_list": payment_list,
         "payment1": payment1,
         "payment2": payment2,
         "payment3": payment3,
@@ -514,7 +514,7 @@ def test_search_by_payment_unicef_id(office_search_context: dict, create_user_ro
     assert response.data["results"][0]["id"] == str(ctx["individuals1"][0].id)
 
 
-def test_search_by_payment_plan_unicef_id(
+def test_search_by_payment_list_unicef_id(
     office_search_context: dict, create_user_role_with_permissions: Callable
 ) -> None:
     ctx = office_search_context
@@ -524,8 +524,8 @@ def test_search_by_payment_plan_unicef_id(
         business_area=ctx["afghanistan"],
         program=ctx["program"],
     )
-    ctx["payment_plan"].refresh_from_db()
-    response = ctx["client"].get(_global_url(ctx["afghanistan"]), {"office_search": ctx["payment_plan"].unicef_id})
+    ctx["payment_list"].refresh_from_db()
+    response = ctx["client"].get(_global_url(ctx["afghanistan"]), {"office_search": ctx["payment_list"].unicef_id})
     assert response.status_code == status.HTTP_200_OK
     assert len(response.data["results"]) == 3
     result_ids = [r["id"] for r in response.data["results"]]

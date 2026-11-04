@@ -8,7 +8,7 @@ from extras.test_utils.selenium import HopeTestBrowser
 from hope.apps.payment.xlsx.xlsx_follow_up_instruction_delivery_export_service import (
     XlsxFollowUpInstructionDeliveryExportService,
 )
-from hope.models import BusinessArea, FollowUpInstruction, PaymentPlanGroup, Program
+from hope.models import BusinessArea, FollowUpInstruction, PaymentPlan, Program
 
 pytestmark = pytest.mark.django_db()
 
@@ -64,7 +64,7 @@ def test_follow_up_instruction_full_flow(
     login: HopeTestBrowser,
     business_area: BusinessArea,
     fi_program: Program,
-    fi_source_plans: tuple[PaymentPlanGroup, PaymentPlanGroup],
+    fi_source_plans: tuple[PaymentPlan, PaymentPlan],
 ) -> None:
     group_one, group_two = fi_source_plans
     base_url = f"/{business_area.slug}/programs/{fi_program.code}"

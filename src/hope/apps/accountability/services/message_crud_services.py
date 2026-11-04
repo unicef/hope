@@ -9,7 +9,7 @@ from rest_framework.generics import get_object_or_404
 from hope.apps.accountability.services.sampling import Sampling
 from hope.apps.accountability.services.verifiers import MessageArgumentVerifier
 from hope.apps.core.services.rapid_pro.api import RapidProAPI
-from hope.models import BusinessArea, Household, Message, PaymentPlan, Program, RegistrationDataImport
+from hope.models import BusinessArea, Household, Message, PaymentList, Program, RegistrationDataImport
 
 logger = logging.getLogger(__name__)
 
@@ -42,8 +42,8 @@ class MessageCrudServices:
         message.number_of_recipients = result.number_of_recipients
         message.households.set(result.households)
 
-        if payment_plan := input_data.get("payment_plan"):
-            message.payment_plan = payment_plan
+        if payment_list := input_data.get("payment_list"):
+            message.payment_list = payment_list
 
         if registration_data_import := input_data.get("registration_data_import"):
             message.registration_data_import = registration_data_import
@@ -70,10 +70,10 @@ class MessageCrudServices:
                 head_of_household__phone_no_valid=False,
                 head_of_household__phone_no_alternative_valid=False,
             )
-        if payment_plan := input_data.get("payment_plan"):
-            if payment_plan.status == PaymentPlan.Status.TP_OPEN:
+        if payment_list := input_data.get("payment_list"):
+            if payment_list.status == PaymentList.Status.TP_OPEN:
                 return Household.objects.none()
-            return Household.objects.filter(payment__parent=payment_plan).exclude(
+            return Household.objects.filter(payment__parent=payment_list).exclude(
                 head_of_household__phone_no_valid=False,
                 head_of_household__phone_no_alternative_valid=False,
             )

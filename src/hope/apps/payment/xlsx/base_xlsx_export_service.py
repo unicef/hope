@@ -66,11 +66,11 @@ class XlsxExportBaseService:
                 cell.border = Border(left=bd, top=bd, right=bd, bottom=bd)
 
     def get_email_context(self, user: "User") -> dict:
-        payment_plan_id = str(self.payment_plan.id)
-        path_name = "download-payment-plan-payment-list"
-        link = get_link(reverse(path_name, args=[payment_plan_id]))
+        payment_list_id = str(self.payment_list.id)
+        path_name = "download-payment-list"
+        link = get_link(reverse(path_name, args=[payment_list_id]))
 
-        msg = "Payment Plan Payment List xlsx file(s) were generated and below You have the link to download this file."
+        msg = "Payment List xlsx file(s) were generated and below You have the link to download this file."
 
         return {
             "first_name": getattr(user, "first_name", "") or getattr(user, "username", ""),
@@ -78,7 +78,7 @@ class XlsxExportBaseService:
             "email": getattr(user, "email", ""),
             "message": msg,
             "link": link,
-            "title": "Payment Plan Payment List files generated",
+            "title": "Payment List files generated",
         }
 
     def right_format_for_xlsx(self, value: Any) -> Any:

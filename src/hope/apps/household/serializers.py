@@ -3,7 +3,7 @@ from typing import TYPE_CHECKING, Any, Optional
 
 from rest_framework import serializers
 
-from hope.models import Household, Payment, PaymentPlan
+from hope.models import Household, Payment, PaymentList
 from hope.models.utils import MergeStatusModel
 
 if TYPE_CHECKING:
@@ -37,7 +37,7 @@ def get_household_status(
             return "paid", payments.first().delivery_date
 
     if selections := Payment.objects.filter(
-        household=household, parent__status__in=PaymentPlan.PRE_PAYMENT_PLAN_STATUSES
+        household=household, parent__status__in=PaymentList.PRE_PAYMENT_LIST_STATUSES
     ).exists():
         selection = selections.order_by("updated_at").first()
         return "targeted", selection.updated_at

@@ -45,7 +45,7 @@ This command initializes demo data for the application by performing the followi
 
 - `INITDEMO_EMAIL_LIST`: Comma-separated list of emails to be added as staff and superusers.
 - `INITDEMO_TESTER_LIST`: Comma-separated list of emails to be added as testers.
-- `INITDEMO_LARGE_PAYMENT_PLAN`: When set (truthy), also generates a heavy payment plan with many payees.
+- `INITDEMO_LARGE_PAYMENT_LIST`: When set (truthy), also generates a heavy payment plan with many payees.
 """
 
 from argparse import ArgumentParser
@@ -84,9 +84,9 @@ from hope.apps.core.management.commands.demo_data.household import (
 from hope.apps.core.management.commands.demo_data.my_tasks import generate_my_tasks_demo
 from hope.apps.core.management.commands.demo_data.payment import (
     generate_delivery_mechanisms,
-    generate_payment_plan,
-    generate_payment_plan_large,
-    generate_reconciled_payment_plan,
+    generate_payment_list,
+    generate_payment_list_large,
+    generate_reconciled_payment_list,
     update_fsps,
 )
 from hope.apps.core.management.commands.demo_data.pdu import generate_pdu_data
@@ -166,14 +166,14 @@ class Command(BaseCommand):
             logger.warning(f"Elasticsearch RequestError: {e}")
         self.stdout.write("Generating delivery mechanisms...")
         generate_delivery_mechanisms()
-        self.stdout.write("Generating payment plan...")
-        generate_payment_plan()
+        self.stdout.write("Generating payment list...")
+        generate_payment_list()
         self.stdout.write("Generating real cash plans...")
-        self.stdout.write("Generating reconciled payment plan...")
-        generate_reconciled_payment_plan()
-        if os.getenv("INITDEMO_LARGE_PAYMENT_PLAN"):
-            self.stdout.write("Generating large payment plan...")
-            generate_payment_plan_large()
+        self.stdout.write("Generating reconciled payment list...")
+        generate_reconciled_payment_list()
+        if os.getenv("INITDEMO_LARGE_PAYMENT_LIST"):
+            self.stdout.write("Generating large payment list...")
+            generate_payment_list_large()
         self.stdout.write("Updating FSPs...")
         update_fsps()
         self.stdout.write("Loading additional fixtures...")

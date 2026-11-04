@@ -1,601 +1,318 @@
 from __future__ import annotations
 
-import datetime
-from decimal import Decimal, InvalidOperation
+from io import BytesIO
 import logging
 from typing import IO, TYPE_CHECKING, Any, cast
 
-from dateutil.parser import parse
-from django.contrib.contenttypes.models import ContentType
 from django.db import transaction
-from django.db.models import Q
-from django.utils import timezone
 import openpyxl
-import pytz
 
 from hope.apps.activity_log.utils import copy_model_object
-from hope.apps.core.timezones import to_utc_midnight
-from hope.apps.grievance.models import GrievanceTicket, TicketPaymentVerificationDetails
-from hope.apps.payment.services.handle_total_cash_in_households import (
-    handle_total_cash_in_specific_households,
-)
-from hope.apps.payment.utils import (
-    bulk_log_payment_changes,
-    calculate_counts,
-    get_payment_delivered_quantity_status_and_value,
-    get_quantity_in_usd,
-)
-from hope.apps.payment.xlsx.base_xlsx_import_service import XlsxImportBaseService
+from hope.apps.payment.flows import PaymentListFlow
+from hope.apps.payment.services.payment_list_services import PaymentListService
+from hope.apps.payment.services.payment_plan_services import PaymentPlanService
+from hope.apps.payment.utils import log_payment_list_change
 from hope.apps.payment.xlsx.xlsx_error import XlsxError
-from hope.models import (
-    FileTemp,
-    FinancialServiceProviderXlsxTemplate,
-    Payment,
-    PaymentVerification,
-    PaymentVerificationPlan,
-    User,
+from hope.apps.payment.xlsx.xlsx_payment_list_delivery_import_service import (
+    NULL_DELIVERY_POLICIES,
+    NULL_DELIVERY_POLICY_RESET,
+    XlsxPaymentListDeliveryImportService,
 )
+from hope.models import Payment, PaymentList
 
 if TYPE_CHECKING:
-    import io
-
-    from django.db.models import QuerySet
-    from openpyxl.cell.cell import Cell
+    from openpyxl.worksheet.worksheet import Worksheet
 
     from hope.models import PaymentPlan
 
-
-OVERRIDE_OPTION = "override"
-NULL_DELIVERY_POLICY_OPTION = "null_delivery_policy"
-DELIVERY_ATTEMPTED_BUT_FAILED_VALUE = Decimal(-1)
-
-NULL_DELIVERY_POLICY_RESET = "reset"
-NULL_DELIVERY_POLICY_IGNORE = "ignore"
-NULL_DELIVERY_POLICIES = (NULL_DELIVERY_POLICY_RESET, NULL_DELIVERY_POLICY_IGNORE)
+logger = logging.getLogger(__name__)
 
 
-class XlsxPaymentPlanDeliveryImportService(XlsxImportBaseService):
-    logger = logging.getLogger(__name__)
-    KNOWN_COLUMNS: frozenset[str] = frozenset(FinancialServiceProviderXlsxTemplate.DEFAULT_COLUMNS)
+class XlsxPaymentPlanDeliveryImportError(Exception):
+    def __init__(self, errors: list[XlsxError]) -> None:
+        self.errors = errors
+        super().__init__("Payment Plan reconciliation XLSX validation failed")
 
-    ACTION_APPLY = "apply"
-    ACTION_CONFLICT = "conflict"
-    ACTION_IGNORE = NULL_DELIVERY_POLICY_IGNORE
-    ACTION_RESET = NULL_DELIVERY_POLICY_RESET
-    ACTION_SKIP = "skip"
 
-    OVERRIDE_ELIGIBLE_STATUSES = frozenset(
-        {
-            Payment.STATUS_SENT_TO_FSP,
-            Payment.STATUS_DISTRIBUTION_SUCCESS,
-            Payment.STATUS_DISTRIBUTION_PARTIAL,
-            Payment.STATUS_NOT_DISTRIBUTED,
-            Payment.STATUS_ERROR,
-        }
-    )
-    PAYMENT_UPDATE_FIELDS = (
-        "delivered_quantity",
-        "delivered_quantity_usd",
-        "status",
-        "status_date",
-        "delivery_date",
-        "transaction_reference_id",
-        "reason_for_unsuccessful_payment",
-        "additional_collector_name",
-        "additional_document_type",
-        "additional_document_number",
-        "transaction_status_blockchain_link",
-        "extras",
-    )
-    OPTIONAL_RECONCILIATION_FIELDS = {
-        "reference_id": "transaction_reference_id",
-        "reason_for_unsuccessful_payment": "reason_for_unsuccessful_payment",
-        "additional_collector_name": "additional_collector_name",
-        "additional_document_type": "additional_document_type",
-        "additional_document_number": "additional_document_number",
-        "transaction_status_blockchain_link": "transaction_status_blockchain_link",
-    }
+class XlsxPaymentPlanDeliveryImportService:
+    """Import and validate a single-sheet reconciliation XLSX for a single-FSP Payment Plan.
 
-    class XlsxPaymentPlanDeliveryImportServiceError(Exception):
-        pass
+    The file can contain rows from multiple Payment Lists in the payment plan. Rows are matched to their
+    owning plan by Payment.unicef_id and processed atomically through per-plan import services.
+    """
+
+    REQUIRED_COLUMNS = ("payment_id", "delivered_quantity")
+    PLAN_STATUSES = (PaymentList.Status.ACCEPTED, PaymentList.Status.FINISHED)
 
     def __init__(
         self,
         payment_plan: "PaymentPlan",
-        file: io.BytesIO | IO[bytes],
-        fsp_owned_headers: set[str] | None = None,
+        file: IO[bytes],
         override: bool = False,
         null_delivery_policy: str = NULL_DELIVERY_POLICY_RESET,
     ) -> None:
         if null_delivery_policy not in NULL_DELIVERY_POLICIES:
             raise ValueError(f"Unsupported null delivery policy: {null_delivery_policy}")
-
         self.payment_plan = payment_plan
-        self.pp_currency_exchange_date = self.payment_plan.currency_exchange_date
-        self.payment_list: QuerySet[Payment] = payment_plan.eligible_payments.select_related("household")
         self.file = file
-        self.errors: list[XlsxError] = []
-        self.conflict_errors: list[XlsxError] = []
-        self.payments_dict: dict[str, Payment] = {str(payment.unicef_id): payment for payment in self.payment_list}
-        self.fsp_owned_headers = (
-            fsp_owned_headers
-            if fsp_owned_headers is not None
-            else {header for payment in self.payments_dict.values() for header in payment.fsp_extra_fields}
-        )
         self.override = override
         self.null_delivery_policy = null_delivery_policy
-        self.payment_ids: list[str] = list(self.payments_dict)
-        self.payment_ids_from_xlsx: list[str] = []
-        self.payments_to_save: list[Payment] = []
-        self.old_payments: dict[Any, Payment] = {}
-        self.payment_ids_for_verification_cleanup: set[Any] = set()
+        self.errors: list[XlsxError] = []
+        self.conflict_errors: list[XlsxError] = []
         self.skipped_rows: list[dict[str, Any]] = []
-        self.action_counts: dict[str, int] = {
-            self.ACTION_APPLY: 0,
-            self.ACTION_CONFLICT: 0,
-            self.ACTION_IGNORE: 0,
-            self.ACTION_RESET: 0,
-            self.ACTION_SKIP: 0,
-        }
-        self.actual_updated_rows_count = 0
-        self.required_columns: list[str] = ["payment_id", "delivered_quantity"]
-        self.xlsx_headers: list[str] = []
-        self.is_updated = False
+        self.payment_lists: list[PaymentList] = []
+        self.eligible_plans: list[PaymentList] = []
+        self.payment_to_plan: dict[str, PaymentList] = {}
+        self.ineligible_payment_reasons: dict[str, str] = {}
+        self.payment_gateway_payment_ids: set[str] = set()
+        self.fsp_owned_headers: set[str] = set()
+        self.source_row_numbers: dict[str, int] = {}
+        self.headers: list[str] = []
+        self.sheetname = ""
+        self.ws: Worksheet | None = None
+        self.wb: openpyxl.Workbook | None = None
+        self.per_plan_services: dict[str, XlsxPaymentListDeliveryImportService] = {}
+
+    def _load_payment_lists(self, lock: bool = False) -> None:
+        queryset = self.payment_plan.payment_lists.filter(status__in=self.PLAN_STATUSES).order_by("unicef_id")
+        if lock:
+            queryset = queryset.select_for_update()
+        self.payment_lists = list(queryset)
+
+    def _prepare_eligible_plans(self) -> None:
+        self.eligible_plans = []
+        for payment_list in self.payment_lists:
+            if payment_list.is_payment_gateway:
+                logger.warning(
+                    f"Skipping Payment List {payment_list.unicef_id}: uses payment gateway, "
+                    f"manual reconciliation is not allowed."
+                )
+                continue
+            if payment_list.status == PaymentList.Status.FINISHED and not self.override:
+                continue
+            self.eligible_plans.append(payment_list)
+
+    def _build_payment_index(self, lock: bool = False) -> None:
+        self.payment_to_plan = {}
+        self.ineligible_payment_reasons = {}
+        self.payment_gateway_payment_ids = set()
+        self.fsp_owned_headers = set()
+
+        payment_list_by_id = {payment_list.id: payment_list for payment_list in self.payment_lists}
+        queryset = Payment.objects.filter(parent__in=self.payment_lists).eligible()
+        if lock:
+            queryset = queryset.select_for_update()
+        payments = queryset.values_list("unicef_id", "parent_id", "extras")
+        eligible_plan_ids = {payment_list.id for payment_list in self.eligible_plans}
+        for unicef_id, parent_id, extras in payments:
+            payment_id = str(unicef_id)
+            payment_list = payment_list_by_id[parent_id]
+            self.fsp_owned_headers.update(extras.get(Payment.FSP_EXTRA_FIELDS_KEY, {}))
+            if payment_list.is_payment_gateway:
+                self.payment_gateway_payment_ids.add(payment_id)
+            elif payment_list.id not in eligible_plan_ids:
+                self.ineligible_payment_reasons[payment_id] = (
+                    f"Payment List status {payment_list.status} is not eligible for this import mode."
+                )
+            else:
+                self.payment_to_plan[payment_id] = payment_list
+
+    def _prepare_payment_data(self, lock: bool = False) -> None:
+        self._load_payment_lists(lock=lock)
+        self._prepare_eligible_plans()
+        self._build_payment_index(lock=lock)
 
     def open_workbook(self) -> openpyxl.Workbook:
-        self.logger.info(f"Opening workbook for payment plan: {self.payment_plan.id}")
         wb = openpyxl.load_workbook(self.file, data_only=True)
         self.wb = wb
-        self.ws_payments = wb[wb.sheetnames[0]]
+        self.ws = wb[wb.sheetnames[0]]
         self.sheetname = wb.sheetnames[0]
-        self.logger.info("Generating headers")
-        self.xlsx_headers = [header.value for header in self.ws_payments[1]]
+        self.headers = [cell.value for cell in self.ws[1]]
+        self._prepare_payment_data()
         return wb
 
-    def _validate_headers(self) -> None:
-        for required_column in self.required_columns:
-            if required_column not in self.xlsx_headers:
-                self.errors.append(
-                    XlsxError(
-                        self.sheetname,
-                        None,
-                        f"Provided headers {self.xlsx_headers} do not match expected headers. "
-                        f"{self.required_columns} are required headers.",
-                    )
-                )
-                return
-
-    def _validate_payment_id(self, row: tuple[Cell, ...]) -> None:
-        cell = row[self.xlsx_headers.index("payment_id")]
-        payment_id = str(cell.value) if cell.value is not None else None
-        if payment_id not in self.payment_ids:
-            self.errors.append(
-                XlsxError(
-                    self.sheetname,
-                    cell.coordinate,
-                    f"This payment id {cell.value} is not in Payment Plan Payment List",
-                )
-            )
-        if payment_id in self.payment_ids_from_xlsx:
-            self.errors.append(
-                XlsxError(
-                    self.sheetname,
-                    cell.coordinate,
-                    f"Payment id {cell.value} appears multiple times in the import file",
-                )
-            )
-        if payment_id is not None:
-            self.payment_ids_from_xlsx.append(payment_id)
-
-    def _payment_plan_is_eligible(self) -> bool:
-        if self.payment_plan.status == self.payment_plan.Status.CLOSED:
-            return False
-        if self.override:
-            return self.payment_plan.status in {
-                self.payment_plan.Status.ACCEPTED,
-                self.payment_plan.Status.FINISHED,
-            }
-        return self.payment_plan.status == self.payment_plan.Status.ACCEPTED
-
-    def _should_skip_row(self, payment_id: str | None) -> bool:
-        if payment_id is None or not self._payment_plan_is_eligible():
-            return True
-        payment = self.payments_dict.get(str(payment_id))
-        if payment is None:
-            return True
-        if self.override:
-            return payment.status not in self.OVERRIDE_ELIGIBLE_STATUSES
-        return payment.delivered_quantity is None and payment.status != Payment.STATUS_SENT_TO_FSP
-
-    @staticmethod
-    def _is_empty_quantity(value: Any) -> bool:
-        return value is None or isinstance(value, str) and not value.strip()
-
-    @classmethod
-    def _parse_delivered_quantity(cls, value: Any) -> Decimal | None:
-        if cls._is_empty_quantity(value):
-            return None
-        if isinstance(value, bool | datetime.date):
-            raise ValueError
-        try:
-            quantity = Decimal(str(value).strip())
-        except (InvalidOperation, TypeError, ValueError):
-            raise ValueError from None
-        if not quantity.is_finite() or quantity < 0 and quantity != DELIVERY_ATTEMPTED_BUT_FAILED_VALUE:
-            raise ValueError
-        try:
-            return quantity.quantize(Decimal("0.01"))
-        except InvalidOperation:
-            raise ValueError from None
-
-    def _get_row_action(self, payment: Payment, delivered_quantity: Decimal | None) -> str:
-        action = self.ACTION_SKIP
-        if not self._payment_plan_is_eligible():
-            pass
-        elif self.override:
-            if payment.status not in self.OVERRIDE_ELIGIBLE_STATUSES:
-                pass
-            elif delivered_quantity is None:
-                action = (
-                    self.ACTION_RESET if self.null_delivery_policy == NULL_DELIVERY_POLICY_RESET else self.ACTION_IGNORE
-                )
-            else:
-                action = self.ACTION_APPLY
-        elif delivered_quantity is None:
-            action = self.ACTION_IGNORE
-        elif payment.delivered_quantity is not None:
-            if delivered_quantity == payment.delivered_quantity:
-                action = self.ACTION_IGNORE
-            else:
-                action = self.ACTION_CONFLICT
-        elif payment.status == Payment.STATUS_SENT_TO_FSP:
-            action = self.ACTION_APPLY
-        return action
-
-    def _validate_delivered_quantity(self, row: tuple[Cell, ...]) -> tuple[str, Decimal | None]:
-        payment_id = str(row[self.xlsx_headers.index("payment_id")].value)
-        payment = self.payments_dict.get(payment_id)
-        if payment is None or not self._payment_plan_is_eligible():
-            return self.ACTION_SKIP, None
-        if self.override and payment.status not in self.OVERRIDE_ELIGIBLE_STATUSES:
-            return self.ACTION_SKIP, None
-        if not self.override and payment.delivered_quantity is None and payment.status != Payment.STATUS_SENT_TO_FSP:
-            return self.ACTION_SKIP, None
-
-        cell = row[self.xlsx_headers.index("delivered_quantity")]
-        try:
-            delivered_quantity = self._parse_delivered_quantity(cell.value)
-        except ValueError:
-            self.errors.append(
-                XlsxError(
-                    self.sheetname,
-                    cell.coordinate,
-                    f"Payment {payment_id}: Delivered quantity {cell.value} must be a number greater than or equal "
-                    "to zero, exactly -1, or empty.",
-                )
-            )
-            return self.ACTION_SKIP, None
-
-        action = self._get_row_action(payment, delivered_quantity)
-        if action == self.ACTION_CONFLICT:
-            conflict_error = XlsxError(
-                self.sheetname,
-                cell.coordinate,
-                f"Payment {payment_id}: Delivered quantity {delivered_quantity} conflicts with the existing "
-                f"delivered quantity {payment.delivered_quantity}.",
-            )
-            self.errors.append(conflict_error)
-            self.conflict_errors.append(conflict_error)
-            return action, delivered_quantity
-
-        if delivered_quantity is not None and delivered_quantity != Decimal("-1.00"):
-            entitlement_quantity = payment.entitlement_quantity or Decimal(0)
-            if delivered_quantity > entitlement_quantity:
-                self.errors.append(
-                    XlsxError(
-                        self.sheetname,
-                        cell.coordinate,
-                        f"Payment {payment_id}: Delivered quantity {delivered_quantity} is bigger than "
-                        f"Entitlement quantity {entitlement_quantity}",
-                    )
-                )
-        return action, delivered_quantity
-
-    def _validate_delivery_date(self, row: tuple[Cell, ...]) -> None:
-        if "delivery_date" not in self.xlsx_headers:
-            return
-        payment_id = str(row[self.xlsx_headers.index("payment_id")].value)
-        if payment_id not in self.payments_dict:
-            return
-        cell = row[self.xlsx_headers.index("delivery_date")]
-        if cell.value in (None, ""):
-            return
-        try:
-            delivery_date = self._parse_delivery_date(cell.value)
-            date_value = delivery_date.date()
-            if date_value > datetime.date.today() or date_value < self.payment_plan.program.start_date:
-                self.errors.append(
-                    XlsxError(
-                        self.sheetname,
-                        cell.coordinate,
-                        f"Payment {payment_id}: Delivery date ({date_value}) cannot be greater than today's date,"
-                        " and cannot be before Programme's start date",
-                    )
-                )
-        except (ValueError, TypeError, OverflowError) as error:
-            self.errors.append(
-                XlsxError(
-                    self.sheetname,
-                    cell.coordinate,
-                    f"Payment {payment_id}: Delivered date {cell.value} is not a datetime. {error}",
-                )
-            )
-
-    def _validate_rows(self) -> None:
-        self.is_updated = False
-        self.payment_ids_from_xlsx = []
-        self.skipped_rows = []
-        self.conflict_errors = []
-        self.action_counts = dict.fromkeys(self.action_counts, 0)
-        for row in self.ws_payments.iter_rows(min_row=2):
-            if not any(cell.value for cell in row):
-                continue
-
-            error_count = len(self.errors)
-            self._validate_payment_id(row)
-            if len(self.errors) != error_count:
-                continue
-            action, _ = self._validate_delivered_quantity(row)
-            self.action_counts[action] += 1
-            if action == self.ACTION_APPLY:
-                self._validate_delivery_date(row)
-            if action in {self.ACTION_APPLY, self.ACTION_RESET}:
-                self.is_updated = True
-            elif action == self.ACTION_SKIP:
-                payment_id = str(row[self.xlsx_headers.index("payment_id")].value)
-                payment = self.payments_dict[payment_id]
-                self.skipped_rows.append(
-                    {
-                        "row": getattr(row[0], "row", None),
-                        "payment_id": payment_id,
-                        "reason": self._get_skip_reason(payment),
-                    }
-                )
-
-    def _get_skip_reason(self, payment: Payment) -> str:
-        if not self._payment_plan_is_eligible():
-            return f"Payment Plan status {self.payment_plan.status} is not eligible for this import mode."
-        return f"Payment status {payment.status} is not eligible for this import mode."
-
-    def _validate_imported_file(self) -> None:
-        if not self.is_updated:
+    def _validate_required_headers(self) -> bool:
+        missing = [column for column in self.REQUIRED_COLUMNS if column not in self.headers]
+        if missing:
             self.errors.append(
                 XlsxError(
                     self.sheetname,
                     None,
-                    "There aren't any updates in imported file, please add changes and try again",
+                    f"Provided headers {self.headers} do not match expected headers. "
+                    f"{list(self.REQUIRED_COLUMNS)} are required headers.",
                 )
             )
+            return False
+        return True
 
-    def validate(self) -> None:
-        self.logger.info("Starting validation")
-        self._validate_headers()
-        if not self.errors:
-            self._validate_rows()
-            self._validate_imported_file()
-        self.logger.info("Finished validation")
-
-    def import_payment_list(self, user_id: str | None = None) -> None:
-        self.logger.info("Starting importing payment list")
-        exchange_rate = self.payment_plan.exchange_rate
-        self.payments_to_save = []
-        self.old_payments = {}
-        self.payment_ids_for_verification_cleanup = set()
-
-        for row in self.ws_payments.iter_rows(min_row=2):
-            if any(cell.value for cell in row):
-                self._import_row(row, exchange_rate)
-
-        Payment.objects.bulk_update(self.payments_to_save, self.PAYMENT_UPDATE_FIELDS, batch_size=500)
-        user = User.objects.filter(pk=user_id).first() if user_id else None
-        bulk_log_payment_changes(
-            [(self.old_payments[payment.pk], payment) for payment in self.payments_to_save],
-            user,
-        )
-        handle_total_cash_in_specific_households([payment.household_id for payment in self.payments_to_save])
-
-        self._cleanup_payment_verifications()
-        self.logger.info("Finished import payment list")
-
-    def _get_delivered_quantity_status_and_value(
-        self,
-        delivered_quantity: int | float | str | Decimal,
-        entitlement_quantity: Decimal,
-        payment_id: str,
-    ) -> tuple[str, Decimal | None]:
-        try:
-            parsed_quantity = self._parse_delivered_quantity(delivered_quantity)
-            if parsed_quantity is None:
-                raise ValueError
-            return get_payment_delivered_quantity_status_and_value(str(parsed_quantity), entitlement_quantity)
-        except ValueError:
-            raise self.XlsxPaymentPlanDeliveryImportServiceError(
-                f"Invalid delivered_quantity {delivered_quantity} provided for payment_id {payment_id}"
-            ) from None
-
-    def _get_optional_cell_value(self, row: tuple[Cell, ...], header_name: str) -> Any:
-        if header_name not in self.xlsx_headers:
-            return None
-        value = row[self.xlsx_headers.index(header_name)].value
-        return None if value == "" else value
-
-    def _get_optional_reconciliation_updates(self, row: tuple[Cell, ...]) -> dict[str, Any]:
-        return {
-            field_name: self._get_optional_cell_value(row, header)
-            for header, field_name in self.OPTIONAL_RECONCILIATION_FIELDS.items()
-            if header in self.xlsx_headers
-        }
-
-    def _cleanup_payment_verifications(self) -> None:
-        if not self.payment_ids_for_verification_cleanup:
+    def _validate_row_payment_ids(self) -> None:
+        if self.ws is None:
             return
-        verifications = PaymentVerification.objects.filter(payment_id__in=self.payment_ids_for_verification_cleanup)
-        plans = list(
-            PaymentVerificationPlan.objects.select_for_update()
-            .filter(pk__in=verifications.values("payment_verification_plan_id"))
-            .order_by("pk")
-        )
-        ticket_ids = TicketPaymentVerificationDetails.objects.filter(
-            Q(payment_verification__in=verifications) | Q(payment_verifications__in=verifications)
-        ).values("ticket_id")
-        # Delete tickets first: deleting a verification alone would only null its ticket's FK.
-        GrievanceTicket.objects.filter(pk__in=ticket_ids).delete()
-        verifications.delete()
-        for plan in plans:
-            remaining_count = plan.payment_record_verifications.count()
-            if remaining_count:
-                calculate_counts(plan)
-                plan.sample_size = remaining_count
-                plan.save(
-                    update_fields=[
-                        "sample_size",
-                        "responded_count",
-                        "received_count",
-                        "not_received_count",
-                        "received_with_problems_count",
-                    ]
+        seen_ids: set[str] = set()
+        payment_id_idx = self.headers.index("payment_id")
+        for row in self.ws.iter_rows(min_row=2):
+            if not any(cell.value for cell in row):
+                continue
+            id_cell = row[payment_id_idx]
+            if id_cell.value is None:
+                continue
+            payment_id = str(id_cell.value)
+            if payment_id in seen_ids:
+                self.errors.append(
+                    XlsxError(
+                        self.sheetname,
+                        id_cell.coordinate,
+                        f"Payment id {payment_id} appears multiple times in the import file",
+                    )
                 )
             else:
-                files = FileTemp.objects.filter(
-                    content_type=ContentType.objects.get_for_model(PaymentVerificationPlan), object_id=str(plan.pk)
+                seen_ids.add(payment_id)
+
+            if payment_id in self.payment_gateway_payment_ids:
+                self.errors.append(
+                    XlsxError(
+                        self.sheetname,
+                        id_cell.coordinate,
+                        f"Payment id {payment_id} belongs to a payment list that uses payment gateway "
+                        f"and cannot be manually reconciled.",
+                    )
                 )
-                for file_temp in files:
-                    if file_temp.file:
-                        transaction.on_commit(lambda file=file_temp.file: file.delete(save=False), robust=True)
-                files.delete()
-                plan.delete()
+            elif reason := self.ineligible_payment_reasons.get(payment_id):
+                self.skipped_rows.append({"row": id_cell.row, "payment_id": payment_id, "reason": reason})
+            elif payment_id not in self.payment_to_plan:
+                self.errors.append(
+                    XlsxError(
+                        self.sheetname,
+                        id_cell.coordinate,
+                        f"Payment id {payment_id} does not belong to any payment list in this payment plan.",
+                    )
+                )
 
-    def _parse_delivery_date(self, value: Any) -> datetime.datetime:
-        if isinstance(value, str):
-            value = parse(value)
-        elif isinstance(value, datetime.date) and not isinstance(value, datetime.datetime):
-            value = datetime.datetime.combine(value, datetime.time.min)
-        if not isinstance(value, datetime.datetime):
-            raise TypeError("value is not a date")
-        if value.tzinfo is None:
-            value = pytz.utc.localize(value)
-        return value
+    def _row_groups_by_plan(self) -> dict[str, list[tuple[Any, ...]]]:
+        if self.ws is None:
+            return {}
+        rows_by_plan: dict[str, list[tuple[Any, ...]]] = {}
+        self.source_row_numbers = {}
+        seen_ids: set[str] = set()
+        payment_id_idx = self.headers.index("payment_id")
+        for row in self.ws.iter_rows(min_row=2):
+            if not any(cell.value for cell in row):
+                continue
+            payment_id_value = row[payment_id_idx].value
+            if payment_id_value is None:
+                continue
+            payment_id = str(payment_id_value)
+            payment_list = self.payment_to_plan.get(payment_id)
+            if payment_list is None or payment_id in seen_ids:
+                continue
+            seen_ids.add(payment_id)
+            self.source_row_numbers[payment_id] = row[payment_id_idx].row
+            rows_by_plan.setdefault(str(payment_list.id), []).append(tuple(cell.value for cell in row))
+        return rows_by_plan
 
-    def _payment_changed(self, old_payment: Payment, payment: Payment) -> bool:
-        return any(getattr(old_payment, field) != getattr(payment, field) for field in self.PAYMENT_UPDATE_FIELDS)
+    def _build_per_plan_workbook(self, rows: list[tuple[Any, ...]]) -> BytesIO:
+        wb = openpyxl.Workbook()
+        ws = wb.active
+        ws.title = self.sheetname or "Sheet"
+        ws.append(self.headers)
+        current_row = 1
+        payment_id_idx = self.headers.index("payment_id")
+        for row_values in rows:
+            payment_id = str(row_values[payment_id_idx])
+            source_row = self.source_row_numbers[payment_id]
+            while current_row < source_row - 1:
+                ws.append([None])
+                current_row += 1
+            ws.append(list(row_values))
+            current_row += 1
+        buffer = BytesIO()
+        wb.save(buffer)
+        buffer.seek(0)
+        return buffer
 
-    def _get_row_delivered_quantity(self, row: tuple[Cell, ...], payment_id: str) -> Decimal | None:
-        try:
-            return self._parse_delivered_quantity(row[self.xlsx_headers.index("delivered_quantity")].value)
-        except ValueError as error:
-            raise self.XlsxPaymentPlanDeliveryImportServiceError(
-                f"Invalid delivered_quantity provided for payment_id {payment_id}"
-            ) from error
-
-    def _queue_payment_change(self, payment: Payment, old_payment: Payment, action: str) -> None:
-        if not self._payment_changed(old_payment, payment):
-            return
-        if action == self.ACTION_APPLY:
-            self.actual_updated_rows_count += 1
-        self.old_payments[payment.pk] = old_payment
-        self.payments_to_save.append(payment)
-
-    def _import_row(self, row: tuple[Cell, ...], exchange_rate: Decimal | float | None) -> None:
-        payment_id = str(row[self.xlsx_headers.index("payment_id")].value)
-        if self._should_skip_row(payment_id):
-            return
-
-        payment = self.payments_dict[payment_id]
-        delivered_quantity = self._get_row_delivered_quantity(row, payment_id)
-        action = self._get_row_action(payment, delivered_quantity)
-
-        if action == self.ACTION_CONFLICT:
-            raise self.XlsxPaymentPlanDeliveryImportServiceError(
-                f"Delivered quantity conflict for payment_id {payment_id}"
+    def _build_per_plan_services(self) -> None:
+        self.per_plan_services = {}
+        rows_by_plan = self._row_groups_by_plan()
+        for payment_list in self.eligible_plans:
+            rows = rows_by_plan.get(str(payment_list.id), [])
+            if not rows:
+                continue
+            service = XlsxPaymentListDeliveryImportService(
+                payment_list,
+                self._build_per_plan_workbook(rows),
+                fsp_owned_headers=self.fsp_owned_headers,
+                override=self.override,
+                null_delivery_policy=self.null_delivery_policy,
             )
-        if action not in {self.ACTION_APPLY, self.ACTION_RESET}:
+            service.open_workbook()
+            self.per_plan_services[str(payment_list.id)] = service
+
+    def validate(self) -> None:
+        self.errors = []
+        self.conflict_errors = []
+        self.skipped_rows = []
+        if not self._validate_required_headers():
             return
-
-        old_payment = cast("Payment", copy_model_object(payment))
-        if action == self.ACTION_RESET:
-            self._reset_payment(payment)
-            self.payment_ids_for_verification_cleanup.add(payment.pk)
-        else:
-            self._apply_reconciliation_values(payment, row, cast("Decimal", delivered_quantity), exchange_rate)
-            if self.override and old_payment.delivered_quantity != payment.delivered_quantity:
-                self.payment_ids_for_verification_cleanup.add(payment.pk)
-
-        self._queue_payment_change(payment, old_payment, action)
-
-    def _reset_payment(self, payment: Payment) -> None:
-        old_status = payment.status
-        payment.delivered_quantity = None
-        payment.delivered_quantity_usd = None
-        payment.delivery_date = None
-        payment.status = Payment.STATUS_SENT_TO_FSP
-        if old_status != payment.status:
-            payment.status_date = timezone.now()
-        payment.transaction_reference_id = None
-        payment.reason_for_unsuccessful_payment = None
-        payment.additional_collector_name = None
-        payment.additional_document_type = None
-        payment.additional_document_number = None
-        payment.transaction_status_blockchain_link = None
-        payment.set_extra_fields({})
-
-    def _apply_reconciliation_values(
-        self,
-        payment: Payment,
-        row: tuple[Cell, ...],
-        delivered_quantity: Decimal,
-        exchange_rate: Decimal | float | None,
-    ) -> None:
-        status, stored_quantity = self._get_delivered_quantity_status_and_value(
-            delivered_quantity,
-            payment.entitlement_quantity or Decimal(0),
-            str(payment.unicef_id),
-        )
-        old_status = payment.status
-        payment.delivered_quantity = stored_quantity
-        payment.delivered_quantity_usd = get_quantity_in_usd(
-            amount=stored_quantity,
-            currency=self.payment_plan.currency,
-            exchange_rate=Decimal(exchange_rate or 0),
-            currency_exchange_date=self.pp_currency_exchange_date,
-        )
-        payment.status = status
-        if old_status != status:
-            payment.status_date = timezone.now()
-
-        if "delivery_date" in self.xlsx_headers:
-            delivery_date = self._get_optional_cell_value(row, "delivery_date")
-            payment.delivery_date = (
-                to_utc_midnight(self._parse_delivery_date(delivery_date)) if delivery_date is not None else None
+        self._validate_row_payment_ids()
+        self._build_per_plan_services()
+        for service in self.per_plan_services.values():
+            service._validate_headers()
+            if not service.errors:
+                service._validate_rows()
+            self.errors.extend(service.errors)
+            self.conflict_errors.extend(service.conflict_errors)
+            self.skipped_rows.extend(
+                {
+                    **skipped_row,
+                    "row": self.source_row_numbers.get(skipped_row["payment_id"]),
+                }
+                for skipped_row in service.skipped_rows
             )
 
-        for field_name, value in self._get_optional_reconciliation_updates(row).items():
-            setattr(payment, field_name, value)
-        payment.set_extra_fields(self._get_extras_for_row(row, payment.extra_fields))
+    def import_payment_list(self, user_id: str | None = None) -> None:
+        if self.ws is None:
+            raise RuntimeError("open_workbook() must be called before import_payment_list()")
 
-    def _get_extras_for_row(self, row: tuple[Cell, ...], current_extras: dict[str, object] | None = None) -> dict:
-        extras = dict(current_extras or {})
-        for idx, header in enumerate(self.xlsx_headers):
-            if not header or header in self.KNOWN_COLUMNS or header in self.fsp_owned_headers:
-                continue
-            value = row[idx].value
-            if value is None or value == "":
-                extras.pop(header, None)
-                continue
-            if isinstance(value, Decimal):
-                value = float(value)
-            elif isinstance(value, datetime.datetime):
-                value = value.isoformat()
-            elif not isinstance(value, int | float | bool):
-                value = str(value)
-            extras[header] = value
-        return extras
+        with transaction.atomic():
+            self._prepare_payment_data(lock=True)
+            self.validate()
+            if self.errors:
+                raise XlsxPaymentPlanDeliveryImportError(self.errors)
+
+            affected_plan_ids: list[str] = []
+            for payment_list_id, service in self.per_plan_services.items():
+                payment_list = service.payment_list
+                old_payment_list = cast("PaymentList", copy_model_object(payment_list))
+                service.import_payment_list(user_id)
+                if not service.payments_to_save:
+                    continue
+
+                affected_plan_ids.append(payment_list_id)
+                payment_list.remove_export_files()
+                flow = PaymentListFlow(payment_list)
+                flow.background_action_status_none()
+                payment_list.update_money_fields()
+                payment_list.save()
+                log_payment_list_change(payment_list, old_payment_list, user_id)
+                PaymentListService(payment_list).recalculate_signatures_in_batch()
+            PaymentPlanService(self.payment_plan).sync_finished(user_id)
+
+            if affected_plan_ids:
+                logger.info(f"Imported reconciliation for Payment Lists: {affected_plan_ids}")
+                self.payment_plan.remove_export_file_delivery()
+                self.payment_plan.save(update_fields=["export_file_delivery", "updated_at"])
+                # All payment lists in the payment plan share one cycle: invalidate the cycle-list cache once.
+                self.payment_plan.cycle.save()
+
+    def get_result_counts(self) -> dict[str, int]:
+        if self.ws is None:
+            raise RuntimeError("open_workbook() must be called before reading import results")
+        updated_rows = sum(service.actual_updated_rows_count for service in self.per_plan_services.values())
+        reset_rows = sum(service.action_counts[service.ACTION_RESET] for service in self.per_plan_services.values())
+        total_rows = sum(1 for row in self.ws.iter_rows(min_row=2) if any(cell.value for cell in row))
+        return {
+            "total_rows": total_rows,
+            "updated_rows": updated_rows,
+            "reset_rows": reset_rows,
+            "ignored_rows": total_rows - updated_rows - reset_rows,
+        }

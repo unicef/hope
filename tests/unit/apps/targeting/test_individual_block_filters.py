@@ -6,7 +6,7 @@ from extras.test_utils.factories import (
     FlexibleAttributeForPDUFactory,
     HouseholdFactory,
     IndividualFactory,
-    PaymentPlanFactory,
+    PaymentListFactory,
     PeriodicFieldDataFactory,
     ProgramFactory,
     TargetingCriteriaRuleFactory,
@@ -67,8 +67,8 @@ def households_individuals(business_area, program):
 
 def test_all_individuals_male_filter(user, program_cycle, households_individuals):
     queryset = Household.objects.all()
-    payment_plan = PaymentPlanFactory(program_cycle=program_cycle, created_by=user)
-    tcr = TargetingCriteriaRuleFactory(payment_plan=payment_plan)
+    payment_list = PaymentListFactory(program_cycle=program_cycle, created_by=user)
+    tcr = TargetingCriteriaRuleFactory(payment_list=payment_list)
     block = TargetingIndividualRuleFilterBlockFactory(targeting_criteria_rule=tcr, target_only_hoh=False)
     TargetingIndividualBlockRuleFilterFactory(
         individuals_filters_block=block,
@@ -82,15 +82,15 @@ def test_all_individuals_male_filter(user, program_cycle, households_individuals
         field_name="sex",
         arguments=[MALE],
     )
-    queryset = queryset.filter(payment_plan.get_query())
+    queryset = queryset.filter(payment_list.get_query())
     assert queryset.count() == 1
     assert queryset.first().id == households_individuals["hh1"].id
 
 
 def test_all_individuals_filter_on_mixins(user, program_cycle, households_individuals):
     queryset = Household.objects.all()
-    pp = PaymentPlanFactory()
-    tcr = TargetingCriteriaRuleFactory(payment_plan=pp)
+    pp = PaymentListFactory()
+    tcr = TargetingCriteriaRuleFactory(payment_list=pp)
     pp.rules.set([tcr])
     block = TargetingIndividualRuleFilterBlockFactory(targeting_criteria_rule=tcr, target_only_hoh=False)
     TargetingIndividualBlockRuleFilterFactory(
@@ -115,8 +115,8 @@ def test_all_individuals_filter_on_mixins(user, program_cycle, households_indivi
 
 def test_two_separate_blocks_on_mixins(user, program_cycle, households_individuals):
     queryset = Household.objects.all()
-    pp = PaymentPlanFactory()
-    tcr = TargetingCriteriaRuleFactory(payment_plan=pp)
+    pp = PaymentListFactory()
+    tcr = TargetingCriteriaRuleFactory(payment_list=pp)
     pp.rules.set([tcr])
 
     block1 = TargetingIndividualRuleFilterBlockFactory(targeting_criteria_rule=tcr, target_only_hoh=False)
@@ -154,8 +154,8 @@ def test_two_separate_blocks_on_mixins(user, program_cycle, households_individua
 
 
 def test_filter_on_flex_field_not_exist(user, program_cycle):
-    payment_plan = PaymentPlanFactory(program_cycle=program_cycle, created_by=user)
-    tcr = TargetingCriteriaRuleFactory(payment_plan=payment_plan)
+    payment_list = PaymentListFactory(program_cycle=program_cycle, created_by=user)
+    tcr = TargetingCriteriaRuleFactory(payment_list=payment_list)
     block = TargetingIndividualRuleFilterBlockFactory(targeting_criteria_rule=tcr, target_only_hoh=False)
     queryset = Household.objects.all()
     TargetingIndividualBlockRuleFilterFactory(
@@ -170,11 +170,11 @@ def test_filter_on_flex_field_not_exist(user, program_cycle):
         Exception,
         match="There is no Flex Field Attributes associated with this fieldName flex_field_2",
     ):
-        queryset.filter(payment_plan.get_query())
+        queryset.filter(payment_list.get_query())
 
 
 def test_filter_on_flex_field(user, program_cycle, households_individuals):
-    payment_plan = PaymentPlanFactory(program_cycle=program_cycle, created_by=user)
+    payment_list = PaymentListFactory(program_cycle=program_cycle, created_by=user)
     FlexibleAttributeFactory(
         name="flex_field_1",
         type=FlexibleAttribute.STRING,
@@ -182,7 +182,7 @@ def test_filter_on_flex_field(user, program_cycle, households_individuals):
         label={"English(EN)": "value"},
         program=None,
     )
-    tcr = TargetingCriteriaRuleFactory(payment_plan=payment_plan)
+    tcr = TargetingCriteriaRuleFactory(payment_list=payment_list)
     block = TargetingIndividualRuleFilterBlockFactory(targeting_criteria_rule=tcr, target_only_hoh=False)
     TargetingIndividualBlockRuleFilterFactory(
         individuals_filters_block=block,
@@ -194,20 +194,20 @@ def test_filter_on_flex_field(user, program_cycle, households_individuals):
     queryset = Household.objects.all()
 
     # Before value
-    queryset_before = queryset.filter(payment_plan.get_query())
+    queryset_before = queryset.filter(payment_list.get_query())
     assert queryset_before.count() == 0
     # After setting flex field
     households_individuals["ind1"].flex_fields["flex_field_1"] = "Average value"
     households_individuals["ind1"].save()
 
-    queryset_after = queryset.filter(payment_plan.get_query())
+    queryset_after = queryset.filter(payment_list.get_query())
     assert queryset_after.count() == 1
     assert queryset_after.first().id == households_individuals["hh1"].id
 
 
 def test_filter_on_pdu_flex_field_not_exist(user, program_cycle):
-    payment_plan = PaymentPlanFactory(program_cycle=program_cycle, created_by=user)
-    tcr = TargetingCriteriaRuleFactory(payment_plan=payment_plan)
+    payment_list = PaymentListFactory(program_cycle=program_cycle, created_by=user)
+    tcr = TargetingCriteriaRuleFactory(payment_list=payment_list)
     block = TargetingIndividualRuleFilterBlockFactory(targeting_criteria_rule=tcr, target_only_hoh=False)
     queryset = Household.objects.all()
 
@@ -223,12 +223,12 @@ def test_filter_on_pdu_flex_field_not_exist(user, program_cycle):
         Exception,
         match="There is no PDU Flex Field Attribute associated with this fieldName pdu_field_1 in program Test Program",
     ):
-        queryset.filter(payment_plan.get_query())
+        queryset.filter(payment_list.get_query())
 
 
 def test_filter_on_pdu_flex_field_no_round_number(user, program_cycle, program):
-    payment_plan = PaymentPlanFactory(program_cycle=program_cycle, created_by=user)
-    tcr = TargetingCriteriaRuleFactory(payment_plan=payment_plan)
+    payment_list = PaymentListFactory(program_cycle=program_cycle, created_by=user)
+    tcr = TargetingCriteriaRuleFactory(payment_list=payment_list)
     block = TargetingIndividualRuleFilterBlockFactory(targeting_criteria_rule=tcr, target_only_hoh=False)
     pdu_data = PeriodicFieldDataFactory(
         subtype=PeriodicFieldData.DECIMAL, number_of_rounds=2, rounds_names=["Round 1", "Round 2"]
@@ -243,12 +243,12 @@ def test_filter_on_pdu_flex_field_no_round_number(user, program_cycle, program):
         flex_field_classification=FlexFieldClassification.FLEX_FIELD_PDU,
     )
     with pytest.raises(Exception, match="Round number is missing for PDU Flex Field Attribute pdu_field_1"):
-        queryset.filter(payment_plan.get_query())
+        queryset.filter(payment_list.get_query())
 
 
 def test_filter_on_pdu_flex_field_incorrect_round_number(user, program_cycle, program):
-    payment_plan = PaymentPlanFactory(program_cycle=program_cycle, created_by=user)
-    tcr = TargetingCriteriaRuleFactory(payment_plan=payment_plan)
+    payment_list = PaymentListFactory(program_cycle=program_cycle, created_by=user)
+    tcr = TargetingCriteriaRuleFactory(payment_list=payment_list)
     block = TargetingIndividualRuleFilterBlockFactory(targeting_criteria_rule=tcr, target_only_hoh=False)
     pdu_data = PeriodicFieldDataFactory(
         subtype=PeriodicFieldData.DECIMAL, number_of_rounds=2, rounds_names=["Round 1", "Round 2"]
@@ -269,12 +269,12 @@ def test_filter_on_pdu_flex_field_incorrect_round_number(user, program_cycle, pr
         Exception,
         match="Round number 3 is greater than the number of rounds for PDU Flex Field Attribute pdu_field_1",
     ):
-        queryset.filter(payment_plan.get_query())
+        queryset.filter(payment_list.get_query())
 
 
 def test_filter_on_pdu_flex_field(user, program_cycle, households_individuals, program):
-    payment_plan = PaymentPlanFactory(program_cycle=program_cycle, created_by=user)
-    tcr = TargetingCriteriaRuleFactory(payment_plan=payment_plan)
+    payment_list = PaymentListFactory(program_cycle=program_cycle, created_by=user)
+    tcr = TargetingCriteriaRuleFactory(payment_list=payment_list)
     block = TargetingIndividualRuleFilterBlockFactory(targeting_criteria_rule=tcr, target_only_hoh=False)
     pdu_data = PeriodicFieldDataFactory(
         subtype=PeriodicFieldData.DECIMAL, number_of_rounds=2, rounds_names=["Round 1", "Round 2"]
@@ -298,28 +298,28 @@ def test_filter_on_pdu_flex_field(user, program_cycle, households_individuals, p
     households_individuals["ind2"].save()
 
     # Before value
-    queryset_before = queryset.filter(payment_plan.get_query())
+    queryset_before = queryset.filter(payment_list.get_query())
     assert queryset_before.count() == 0
 
     households_individuals["ind1"].flex_fields["pdu_field_1"]["1"] = {"value": 2.5, "collection_date": "2021-01-01"}
     households_individuals["ind1"].save()
 
-    queryset_after = queryset.filter(payment_plan.get_query())
+    queryset_after = queryset.filter(payment_list.get_query())
     assert queryset_after.count() == 1
     assert queryset_after.first().id == households_individuals["hh1"].id
 
 
 def test_exclude_by_ids(user, program_cycle, program, households_individuals):
-    payment_plan = PaymentPlanFactory(program_cycle=program_cycle, created_by=user)
+    payment_list = PaymentListFactory(program_cycle=program_cycle, created_by=user)
 
-    empty_basic_query = payment_plan.get_basic_query()
+    empty_basic_query = payment_list.get_basic_query()
     assert str(empty_basic_query) == "(AND: ('withdrawn', False), (NOT (AND: ('unicef_id__in', []))))"
-    payment_plan.excluded_ids = f"{households_individuals['hh1'].unicef_id}, {households_individuals['hh2'].unicef_id}"
-    payment_plan.save()
-    payment_plan.refresh_from_db()
+    payment_list.excluded_ids = f"{households_individuals['hh1'].unicef_id}, {households_individuals['hh2'].unicef_id}"
+    payment_list.save()
+    payment_list.refresh_from_db()
 
-    basic_query_1 = payment_plan.get_basic_query()
-    assert not payment_plan.is_social_worker_program
+    basic_query_1 = payment_list.get_basic_query()
+    assert not payment_list.is_social_worker_program
     assert str(basic_query_1) == (
         f"(AND: ('withdrawn', False), (NOT (AND: ('unicef_id__in', "
         f"['{households_individuals['hh1'].unicef_id}', "
@@ -328,12 +328,12 @@ def test_exclude_by_ids(user, program_cycle, program, households_individuals):
     # Test social worker program
     program.data_collecting_type.type = DataCollectingType.Type.SOCIAL
     program.data_collecting_type.save()
-    payment_plan.excluded_ids = f"{households_individuals['hh1'].unicef_id}, {households_individuals['hh2'].unicef_id}"
-    payment_plan.save()
-    payment_plan.refresh_from_db()
+    payment_list.excluded_ids = f"{households_individuals['hh1'].unicef_id}, {households_individuals['hh2'].unicef_id}"
+    payment_list.save()
+    payment_list.refresh_from_db()
 
-    assert payment_plan.is_social_worker_program
-    basic_query_2 = payment_plan.get_basic_query()
+    assert payment_list.is_social_worker_program
+    basic_query_2 = payment_list.get_basic_query()
     assert (
         str(basic_query_2) == f"(AND: ('withdrawn', False), (NOT (AND: ('unicef_id__in', "
         f"['{households_individuals['hh1'].unicef_id}', '{households_individuals['hh2'].unicef_id}']))))"
@@ -350,28 +350,28 @@ def test_exclude_by_individual_ids_social_worker_program(user, program_cycle, pr
     hh1 = households_individuals["hh1"]
     hh2 = households_individuals["hh2"]
 
-    payment_plan = PaymentPlanFactory(
+    payment_list = PaymentListFactory(
         program_cycle=program_cycle,
         created_by=user,
         business_area=program.business_area,
     )
 
     # Verify baseline: both households appear in household_list before exclusion
-    assert hh1 in payment_plan.household_list
-    assert hh2 in payment_plan.household_list
+    assert hh1 in payment_list.household_list
+    assert hh2 in payment_list.household_list
 
     # Exclude single individual by unicef_id
-    payment_plan.excluded_ids = ind1.unicef_id
-    payment_plan.save()
-    payment_plan.refresh_from_db()
+    payment_list.excluded_ids = ind1.unicef_id
+    payment_list.save()
+    payment_list.refresh_from_db()
 
-    assert hh1 not in payment_plan.household_list
-    assert hh2 in payment_plan.household_list
+    assert hh1 not in payment_list.household_list
+    assert hh2 in payment_list.household_list
 
     # Exclude multiple individuals by unicef_id
-    payment_plan.excluded_ids = f"{ind1.unicef_id},{ind2.unicef_id}"
-    payment_plan.save()
-    payment_plan.refresh_from_db()
+    payment_list.excluded_ids = f"{ind1.unicef_id},{ind2.unicef_id}"
+    payment_list.save()
+    payment_list.refresh_from_db()
 
-    assert hh1 not in payment_plan.household_list
-    assert hh2 not in payment_plan.household_list
+    assert hh1 not in payment_list.household_list
+    assert hh2 not in payment_list.household_list

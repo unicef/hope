@@ -2,23 +2,23 @@ import pytest
 
 from extras.test_utils.factories import (
     HouseholdFactory,
-    PaymentPlanGroupFactory,
+    PaymentPlanFactory,
     PaymentPlanPurposeFactory,
 )
 from extras.test_utils.factories.payment import (
     DeliveryMechanismFactory,
     FinancialServiceProviderFactory,
-    PaymentPlanFactory,
+    PaymentListFactory,
 )
 from extras.test_utils.factories.program import ProgramCycleFactory, ProgramFactory
 from extras.test_utils.factories.steficon import RuleCommitFactory
 from extras.test_utils.factories.targeting import TargetingCriteriaRuleFactory, TargetingCriteriaRuleFilterFactory
-from hope.apps.payment.services.payment_plan_services import PaymentPlanService
+from hope.apps.payment.services.payment_list_services import PaymentListService
 from hope.models import (
     BusinessArea,
     Household,
+    PaymentList,
     PaymentPlan,
-    PaymentPlanGroup,
     PaymentPlanPurpose,
     Program,
     ProgramCycle,
@@ -38,7 +38,7 @@ STATUS = 'div[data-cy="target-population-status"]'
 HOUSEHOLDS_COUNT = '[data-cy="total-number-of-households-count"]'
 
 
-def tp_url(tp: PaymentPlan) -> str:
+def tp_url(tp: PaymentList) -> str:
     return f"/{tp.business_area.slug}/programs/{tp.program_cycle.program.code}/target-population/{tp.id}"
 
 
@@ -72,8 +72,8 @@ def targeting_cycle(targeting_program: Program) -> ProgramCycle:
 
 
 @pytest.fixture
-def targeting_group(targeting_cycle: ProgramCycle) -> PaymentPlanGroup:
-    return PaymentPlanGroupFactory(cycle=targeting_cycle, name=GROUP_NAME)
+def targeting_group(targeting_cycle: ProgramCycle) -> PaymentPlan:
+    return PaymentPlanFactory(cycle=targeting_cycle, name=GROUP_NAME)
 
 
 @pytest.fixture
@@ -82,24 +82,24 @@ def second_targeting_cycle(targeting_program: Program) -> ProgramCycle:
 
 
 @pytest.fixture
-def second_targeting_group(second_targeting_cycle: ProgramCycle) -> PaymentPlanGroup:
-    return PaymentPlanGroupFactory(cycle=second_targeting_cycle, name=SECOND_GROUP_NAME)
+def second_targeting_group(second_targeting_cycle: ProgramCycle) -> PaymentPlan:
+    return PaymentPlanFactory(cycle=second_targeting_cycle, name=SECOND_GROUP_NAME)
 
 
 @pytest.fixture
-def targeting_tp(targeting_group: PaymentPlanGroup, tp_purpose: PaymentPlanPurpose) -> PaymentPlan:
-    tp = PaymentPlanFactory(
+def targeting_tp(targeting_group: PaymentPlan, tp_purpose: PaymentPlanPurpose) -> PaymentList:
+    tp = PaymentListFactory(
         name="Test TP",
         program_cycle=targeting_group.cycle,
-        payment_plan_group=targeting_group,
-        status=PaymentPlan.Status.TP_OPEN,
+        payment_plan=targeting_group,
+        status=PaymentList.Status.TP_OPEN,
         business_area=targeting_group.cycle.program.business_area,
     )
     tp.payment_plan_purposes.add(tp_purpose)
-    rule = TargetingCriteriaRuleFactory(payment_plan=tp)
+    rule = TargetingCriteriaRuleFactory(payment_list=tp)
     TargetingCriteriaRuleFilterFactory(targeting_criteria_rule=rule, comparison_method="RANGE", arguments=[1, 10])
     # Remove any stale PPs in this cycle that could make targeting_tp appear non-latest
-    PaymentPlan.objects.filter(program_cycle=targeting_group.cycle).exclude(id=tp.id).delete()
+    PaymentList.objects.filter(program_cycle=targeting_group.cycle).exclude(id=tp.id).delete()
     return tp
 
 
@@ -109,11 +109,11 @@ def other_purpose() -> PaymentPlanPurpose:
 
 
 @pytest.fixture
-def later_tp(targeting_tp: PaymentPlan, targeting_group: PaymentPlanGroup) -> PaymentPlan:
-    return PaymentPlanFactory(
+def later_tp(targeting_tp: PaymentList, targeting_group: PaymentPlan) -> PaymentList:
+    return PaymentListFactory(
         program_cycle=targeting_tp.program_cycle,
-        payment_plan_group=targeting_group,
-        status=PaymentPlan.Status.TP_OPEN,
+        payment_plan=targeting_group,
+        status=PaymentList.Status.TP_OPEN,
         business_area=targeting_tp.business_area,
     )
 
@@ -133,34 +133,34 @@ def sized_households(targeting_program: Program) -> list[Household]:
 
 @pytest.fixture
 def built_tp(
-    targeting_group: PaymentPlanGroup,
+    targeting_group: PaymentPlan,
     tp_purpose: PaymentPlanPurpose,
     sized_households: list[Household],
-) -> PaymentPlan:
-    tp = PaymentPlanFactory(
+) -> PaymentList:
+    tp = PaymentListFactory(
         name=BUILT_TP_NAME,
         program_cycle=targeting_group.cycle,
-        payment_plan_group=targeting_group,
-        status=PaymentPlan.Status.TP_OPEN,
+        payment_plan=targeting_group,
+        status=PaymentList.Status.TP_OPEN,
         business_area=targeting_group.cycle.program.business_area,
     )
     tp.payment_plan_purposes.add(tp_purpose)
-    rule = TargetingCriteriaRuleFactory(payment_plan=tp)
+    rule = TargetingCriteriaRuleFactory(payment_list=tp)
     TargetingCriteriaRuleFilterFactory(targeting_criteria_rule=rule, comparison_method="RANGE", arguments=[1, 10])
-    PaymentPlanService(tp).full_rebuild()
-    tp.build_status = PaymentPlan.BuildStatus.BUILD_STATUS_OK
+    PaymentListService(tp).full_rebuild()
+    tp.build_status = PaymentList.BuildStatus.BUILD_STATUS_OK
     tp.save(update_fields=["build_status"])
     tp.refresh_from_db()
     return tp
 
 
 @pytest.fixture
-def locked_tp(built_tp: PaymentPlan) -> PaymentPlan:
+def locked_tp(built_tp: PaymentList) -> PaymentList:
     # Mark Ready needs an FSP on the group and a delivery mechanism on the target population.
-    group = built_tp.payment_plan_group
+    group = built_tp.payment_plan
     group.financial_service_provider = FinancialServiceProviderFactory()
     group.save(update_fields=["financial_service_provider"])
-    built_tp.status = PaymentPlan.Status.TP_LOCKED
+    built_tp.status = PaymentList.Status.TP_LOCKED
     built_tp.delivery_mechanism = DeliveryMechanismFactory()
     built_tp.save(update_fields=["status", "delivery_mechanism"])
     return built_tp

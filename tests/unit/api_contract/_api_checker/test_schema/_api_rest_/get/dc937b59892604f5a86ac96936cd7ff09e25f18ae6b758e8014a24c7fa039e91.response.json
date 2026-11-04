@@ -8929,9 +8929,9 @@
                     }
                 }
             },
-            "/api/rest/business-areas/{business_area_slug}/payment-plans/": {
+            "/api/rest/business-areas/{business_area_slug}/payment-lists/": {
                 "get": {
-                    "operationId": "rest_business_areas_payment_plans_list",
+                    "operationId": "rest_business_areas_payment_lists_list",
                     "description": "Applies BusinessAreaMixin and also filters the qs based on the user's partner's permissions across programs.",
                     "parameters": [
                         {
@@ -9186,9 +9186,9 @@
                     }
                 }
             },
-            "/api/rest/business-areas/{business_area_slug}/payment-plans/count/": {
+            "/api/rest/business-areas/{business_area_slug}/payment-lists/count/": {
                 "get": {
-                    "operationId": "rest_business_areas_payment_plans_count_retrieve",
+                    "operationId": "rest_business_areas_payment_lists_count_retrieve",
                     "description": "Applies BusinessAreaMixin and also filters the qs based on the user's partner's permissions across programs.",
                     "parameters": [
                         {
@@ -9582,7 +9582,7 @@
                     }
                 }
             },
-            "/api/rest/business-areas/{business_area_slug}/payments/payment-plans-managerial/": {
+            "/api/rest/business-areas/{business_area_slug}/payments/payment-lists-managerial/": {
                 "get": {
                     "operationId": "rest_business_areas_payments_payment_plans_managerial_list",
                     "description": "Applies BusinessAreaMixin and also filters the qs based on the user's partner's permissions across programs.",
@@ -9825,7 +9825,7 @@
                     }
                 }
             },
-            "/api/rest/business-areas/{business_area_slug}/payments/payment-plans-managerial/bulk-action/": {
+            "/api/rest/business-areas/{business_area_slug}/payments/payment-lists-managerial/bulk-action/": {
                 "post": {
                     "operationId": "rest_business_areas_payments_payment_plans_managerial_bulk_action_create",
                     "description": "Applies BusinessAreaMixin and also filters the qs based on the user's partner's permissions across programs.",
@@ -17205,7 +17205,7 @@
                         },
                         {
                             "in": "query",
-                            "name": "payment_plan",
+                            "name": "payment_list",
                             "schema": {
                                 "type": "string",
                                 "format": "uuid"
@@ -17478,7 +17478,7 @@
                         },
                         {
                             "in": "query",
-                            "name": "payment_plan",
+                            "name": "payment_list",
                             "schema": {
                                 "type": "string",
                                 "format": "uuid"
@@ -17603,9 +17603,9 @@
                     }
                 }
             },
-            "/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-plan-groups/": {
+            "/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-plans/": {
                 "get": {
-                    "operationId": "rest_business_areas_programs_payment_plan_groups_list",
+                    "operationId": "rest_business_areas_programs_payment_plans_list",
                     "parameters": [
                         {
                             "in": "path",
@@ -17676,7 +17676,7 @@
                     }
                 },
                 "post": {
-                    "operationId": "rest_business_areas_programs_payment_plan_groups_create",
+                    "operationId": "rest_business_areas_programs_payment_plans_create",
                     "parameters": [
                         {
                             "in": "path",
@@ -17732,9 +17732,9 @@
                     }
                 }
             },
-            "/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-plan-groups/{id}/": {
+            "/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-plans/{id}/": {
                 "get": {
-                    "operationId": "rest_business_areas_programs_payment_plan_groups_retrieve",
+                    "operationId": "rest_business_areas_programs_payment_plans_retrieve",
                     "parameters": [
                         {
                             "in": "path",
@@ -17780,7 +17780,7 @@
                     }
                 },
                 "put": {
-                    "operationId": "rest_business_areas_programs_payment_plan_groups_update",
+                    "operationId": "rest_business_areas_programs_payment_plans_update",
                     "parameters": [
                         {
                             "in": "path",
@@ -17845,7 +17845,7 @@
                     }
                 },
                 "patch": {
-                    "operationId": "rest_business_areas_programs_payment_plan_groups_partial_update",
+                    "operationId": "rest_business_areas_programs_payment_plans_partial_update",
                     "parameters": [
                         {
                             "in": "path",
@@ -17884,7 +17884,7 @@
                     }
                 },
                 "delete": {
-                    "operationId": "rest_business_areas_programs_payment_plan_groups_destroy",
+                    "operationId": "rest_business_areas_programs_payment_plans_destroy",
                     "parameters": [
                         {
                             "in": "path",
@@ -17923,9 +17923,9 @@
                     }
                 }
             },
-            "/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-plans/": {
+            "/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-lists/": {
                 "get": {
-                    "operationId": "rest_business_areas_programs_payment_plans_list",
+                    "operationId": "rest_business_areas_programs_payment_lists_list",
                     "parameters": [
                         {
                             "in": "path",
@@ -18173,7 +18173,7 @@
                     }
                 },
                 "post": {
-                    "operationId": "rest_business_areas_programs_payment_plans_create",
+                    "operationId": "rest_business_areas_programs_payment_lists_create",
                     "parameters": [
                         {
                             "in": "path",
@@ -18229,9 +18229,9 @@
                     }
                 }
             },
-            "/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-plans/{payment_plan_pk}/payments/": {
+            "/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-lists/{payment_list_pk}/payments/": {
                 "get": {
-                    "operationId": "rest_business_areas_programs_payment_plans_payments_list",
+                    "operationId": "rest_business_areas_programs_payment_lists_payments_list",
                     "parameters": [
                         {
                             "in": "path",
@@ -18312,7 +18312,7 @@
                         },
                         {
                             "in": "path",
-                            "name": "payment_plan_pk",
+                            "name": "payment_list_pk",
                             "schema": {
                                 "type": "string"
                             },
@@ -18351,9 +18351,9 @@
                     }
                 }
             },
-            "/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-plans/{payment_plan_pk}/payments/{payment_id}/": {
+            "/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-lists/{payment_list_pk}/payments/{payment_id}/": {
                 "get": {
-                    "operationId": "rest_business_areas_programs_payment_plans_payments_retrieve",
+                    "operationId": "rest_business_areas_programs_payment_lists_payments_retrieve",
                     "parameters": [
                         {
                             "in": "path",
@@ -18373,7 +18373,7 @@
                         },
                         {
                             "in": "path",
-                            "name": "payment_plan_pk",
+                            "name": "payment_list_pk",
                             "schema": {
                                 "type": "string"
                             },
@@ -18405,9 +18405,9 @@
                     }
                 }
             },
-            "/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-plans/{payment_plan_pk}/payments/{payment_id}/mark-as-failed/": {
+            "/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-lists/{payment_list_pk}/payments/{payment_id}/mark-as-failed/": {
                 "get": {
-                    "operationId": "rest_business_areas_programs_payment_plans_payments_mark_as_failed_retrieve",
+                    "operationId": "rest_business_areas_programs_payment_lists_payments_mark_as_failed_retrieve",
                     "parameters": [
                         {
                             "in": "path",
@@ -18427,7 +18427,7 @@
                         },
                         {
                             "in": "path",
-                            "name": "payment_plan_pk",
+                            "name": "payment_list_pk",
                             "schema": {
                                 "type": "string"
                             },
@@ -18452,9 +18452,9 @@
                     }
                 }
             },
-            "/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-plans/{payment_plan_pk}/payments/{payment_id}/revert-mark-as-failed/": {
+            "/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-lists/{payment_list_pk}/payments/{payment_id}/revert-mark-as-failed/": {
                 "post": {
-                    "operationId": "rest_business_areas_programs_payment_plans_payments_revert_mark_as_failed_create",
+                    "operationId": "rest_business_areas_programs_payment_lists_payments_revert_mark_as_failed_create",
                     "parameters": [
                         {
                             "in": "path",
@@ -18474,7 +18474,7 @@
                         },
                         {
                             "in": "path",
-                            "name": "payment_plan_pk",
+                            "name": "payment_list_pk",
                             "schema": {
                                 "type": "string"
                             },
@@ -18526,9 +18526,9 @@
                     }
                 }
             },
-            "/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-plans/{payment_plan_pk}/payments/count/": {
+            "/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-lists/{payment_list_pk}/payments/count/": {
                 "get": {
-                    "operationId": "rest_business_areas_programs_payment_plans_payments_count_retrieve",
+                    "operationId": "rest_business_areas_programs_payment_lists_payments_count_retrieve",
                     "parameters": [
                         {
                             "in": "path",
@@ -18591,7 +18591,7 @@
                         },
                         {
                             "in": "path",
-                            "name": "payment_plan_pk",
+                            "name": "payment_list_pk",
                             "schema": {
                                 "type": "string"
                             },
@@ -18630,9 +18630,9 @@
                     }
                 }
             },
-            "/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-plans/{payment_plan_pk}/supporting-documents/": {
+            "/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-lists/{payment_list_pk}/supporting-documents/": {
                 "post": {
-                    "operationId": "rest_business_areas_programs_payment_plans_supporting_documents_create",
+                    "operationId": "rest_business_areas_programs_payment_lists_supporting_documents_create",
                     "parameters": [
                         {
                             "in": "path",
@@ -18644,7 +18644,7 @@
                         },
                         {
                             "in": "path",
-                            "name": "payment_plan_pk",
+                            "name": "payment_list_pk",
                             "schema": {
                                 "type": "string",
                                 "format": "uuid"
@@ -18697,9 +18697,9 @@
                     }
                 }
             },
-            "/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-plans/{payment_plan_pk}/supporting-documents/{file_id}/": {
+            "/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-lists/{payment_list_pk}/supporting-documents/{file_id}/": {
                 "delete": {
-                    "operationId": "rest_business_areas_programs_payment_plans_supporting_documents_destroy",
+                    "operationId": "rest_business_areas_programs_payment_lists_supporting_documents_destroy",
                     "parameters": [
                         {
                             "in": "path",
@@ -18719,7 +18719,7 @@
                         },
                         {
                             "in": "path",
-                            "name": "payment_plan_pk",
+                            "name": "payment_list_pk",
                             "schema": {
                                 "type": "string",
                                 "format": "uuid"
@@ -18745,9 +18745,9 @@
                     }
                 }
             },
-            "/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-plans/{payment_plan_pk}/supporting-documents/{file_id}/download/": {
+            "/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-lists/{payment_list_pk}/supporting-documents/{file_id}/download/": {
                 "get": {
-                    "operationId": "rest_business_areas_programs_payment_plans_supporting_documents_download_retrieve",
+                    "operationId": "rest_business_areas_programs_payment_lists_supporting_documents_download_retrieve",
                     "parameters": [
                         {
                             "in": "path",
@@ -18767,7 +18767,7 @@
                         },
                         {
                             "in": "path",
-                            "name": "payment_plan_pk",
+                            "name": "payment_list_pk",
                             "schema": {
                                 "type": "string",
                                 "format": "uuid"
@@ -18800,9 +18800,9 @@
                     }
                 }
             },
-            "/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-plans/{id}/": {
+            "/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-lists/{id}/": {
                 "get": {
-                    "operationId": "rest_business_areas_programs_payment_plans_retrieve",
+                    "operationId": "rest_business_areas_programs_payment_lists_retrieve",
                     "parameters": [
                         {
                             "in": "path",
@@ -18848,7 +18848,7 @@
                     }
                 },
                 "patch": {
-                    "operationId": "rest_business_areas_programs_payment_plans_partial_update",
+                    "operationId": "rest_business_areas_programs_payment_lists_partial_update",
                     "parameters": [
                         {
                             "in": "path",
@@ -18913,7 +18913,7 @@
                     }
                 },
                 "delete": {
-                    "operationId": "rest_business_areas_programs_payment_plans_destroy",
+                    "operationId": "rest_business_areas_programs_payment_lists_destroy",
                     "parameters": [
                         {
                             "in": "path",
@@ -18952,9 +18952,9 @@
                     }
                 }
             },
-            "/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-plans/{id}/abort/": {
+            "/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-lists/{id}/abort/": {
                 "post": {
-                    "operationId": "rest_business_areas_programs_payment_plans_abort_create",
+                    "operationId": "rest_business_areas_programs_payment_lists_abort_create",
                     "parameters": [
                         {
                             "in": "path",
@@ -19019,9 +19019,9 @@
                     }
                 }
             },
-            "/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-plans/{id}/apply-engine-formula/": {
+            "/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-lists/{id}/apply-engine-formula/": {
                 "post": {
-                    "operationId": "rest_business_areas_programs_payment_plans_apply_engine_formula_create",
+                    "operationId": "rest_business_areas_programs_payment_lists_apply_engine_formula_create",
                     "parameters": [
                         {
                             "in": "path",
@@ -19087,9 +19087,9 @@
                     }
                 }
             },
-            "/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-plans/{id}/approve/": {
+            "/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-lists/{id}/approve/": {
                 "post": {
-                    "operationId": "rest_business_areas_programs_payment_plans_approve_create",
+                    "operationId": "rest_business_areas_programs_payment_lists_approve_create",
                     "parameters": [
                         {
                             "in": "path",
@@ -19154,9 +19154,9 @@
                     }
                 }
             },
-            "/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-plans/{id}/assign-funds-commitments/": {
+            "/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-lists/{id}/assign-funds-commitments/": {
                 "post": {
-                    "operationId": "rest_business_areas_programs_payment_plans_assign_funds_commitments_create",
+                    "operationId": "rest_business_areas_programs_payment_lists_assign_funds_commitments_create",
                     "parameters": [
                         {
                             "in": "path",
@@ -19221,9 +19221,9 @@
                     }
                 }
             },
-            "/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-plans/{id}/authorize/": {
+            "/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-lists/{id}/authorize/": {
                 "post": {
-                    "operationId": "rest_business_areas_programs_payment_plans_authorize_create",
+                    "operationId": "rest_business_areas_programs_payment_lists_authorize_create",
                     "parameters": [
                         {
                             "in": "path",
@@ -19288,9 +19288,9 @@
                     }
                 }
             },
-            "/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-plans/{id}/close/": {
+            "/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-lists/{id}/close/": {
                 "get": {
-                    "operationId": "rest_business_areas_programs_payment_plans_close_retrieve",
+                    "operationId": "rest_business_areas_programs_payment_lists_close_retrieve",
                     "parameters": [
                         {
                             "in": "path",
@@ -19336,9 +19336,9 @@
                     }
                 }
             },
-            "/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-plans/{id}/create-follow-up/": {
+            "/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-lists/{id}/create-follow-up/": {
                 "post": {
-                    "operationId": "rest_business_areas_programs_payment_plans_create_follow_up_create",
+                    "operationId": "rest_business_areas_programs_payment_lists_create_follow_up_create",
                     "parameters": [
                         {
                             "in": "path",
@@ -19404,9 +19404,9 @@
                     }
                 }
             },
-            "/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-plans/{id}/custom-exchange-rate/": {
+            "/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-lists/{id}/custom-exchange-rate/": {
                 "post": {
-                    "operationId": "rest_business_areas_programs_payment_plans_custom_exchange_rate_create",
+                    "operationId": "rest_business_areas_programs_payment_lists_custom_exchange_rate_create",
                     "parameters": [
                         {
                             "in": "path",
@@ -19471,9 +19471,9 @@
                     }
                 }
             },
-            "/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-plans/{id}/entitlement-export-xlsx/": {
+            "/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-lists/{id}/entitlement-export-xlsx/": {
                 "get": {
-                    "operationId": "rest_business_areas_programs_payment_plans_entitlement_export_xlsx_retrieve",
+                    "operationId": "rest_business_areas_programs_payment_lists_entitlement_export_xlsx_retrieve",
                     "parameters": [
                         {
                             "in": "path",
@@ -19519,9 +19519,9 @@
                     }
                 }
             },
-            "/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-plans/{id}/entitlement-flat-amount/": {
+            "/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-lists/{id}/entitlement-flat-amount/": {
                 "post": {
-                    "operationId": "rest_business_areas_programs_payment_plans_entitlement_flat_amount_create",
+                    "operationId": "rest_business_areas_programs_payment_lists_entitlement_flat_amount_create",
                     "parameters": [
                         {
                             "in": "path",
@@ -19587,9 +19587,9 @@
                     }
                 }
             },
-            "/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-plans/{id}/entitlement-import-xlsx/": {
+            "/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-lists/{id}/entitlement-import-xlsx/": {
                 "post": {
-                    "operationId": "rest_business_areas_programs_payment_plans_entitlement_import_xlsx_create",
+                    "operationId": "rest_business_areas_programs_payment_lists_entitlement_import_xlsx_create",
                     "parameters": [
                         {
                             "in": "path",
@@ -19655,9 +19655,9 @@
                     }
                 }
             },
-            "/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-plans/{id}/exclude-beneficiaries/": {
+            "/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-lists/{id}/exclude-beneficiaries/": {
                 "post": {
-                    "operationId": "rest_business_areas_programs_payment_plans_exclude_beneficiaries_create",
+                    "operationId": "rest_business_areas_programs_payment_lists_exclude_beneficiaries_create",
                     "parameters": [
                         {
                             "in": "path",
@@ -19723,9 +19723,9 @@
                     }
                 }
             },
-            "/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-plans/{id}/export-pdf-payment-plan-summary/": {
+            "/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-lists/{id}/export-pdf-payment-list-summary/": {
                 "get": {
-                    "operationId": "rest_business_areas_programs_payment_plans_export_pdf_payment_plan_summary_retrieve",
+                    "operationId": "rest_business_areas_programs_payment_lists_export_pdf_payment_list_summary_retrieve",
                     "parameters": [
                         {
                             "in": "path",
@@ -19771,9 +19771,9 @@
                     }
                 }
             },
-            "/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-plans/{id}/delivery-export-xlsx-with-auth-code/": {
+            "/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-lists/{id}/delivery-export-xlsx-with-auth-code/": {
                 "post": {
-                    "operationId": "rest_business_areas_programs_payment_plans_delivery_export_xlsx_with_auth_code_create",
+                    "operationId": "rest_business_areas_programs_payment_lists_delivery_export_xlsx_with_auth_code_create",
                     "parameters": [
                         {
                             "in": "path",
@@ -19839,9 +19839,9 @@
                     }
                 }
             },
-            "/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-plans/{id}/lock/": {
+            "/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-lists/{id}/lock/": {
                 "get": {
-                    "operationId": "rest_business_areas_programs_payment_plans_lock_retrieve",
+                    "operationId": "rest_business_areas_programs_payment_lists_lock_retrieve",
                     "parameters": [
                         {
                             "in": "path",
@@ -19887,9 +19887,9 @@
                     }
                 }
             },
-            "/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-plans/{id}/lock-fsp/": {
+            "/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-lists/{id}/lock-fsp/": {
                 "get": {
-                    "operationId": "rest_business_areas_programs_payment_plans_lock_fsp_retrieve",
+                    "operationId": "rest_business_areas_programs_payment_lists_lock_fsp_retrieve",
                     "parameters": [
                         {
                             "in": "path",
@@ -19935,9 +19935,9 @@
                     }
                 }
             },
-            "/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-plans/{id}/mark-as-released/": {
+            "/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-lists/{id}/mark-as-released/": {
                 "post": {
-                    "operationId": "rest_business_areas_programs_payment_plans_mark_as_released_create",
+                    "operationId": "rest_business_areas_programs_payment_lists_mark_as_released_create",
                     "parameters": [
                         {
                             "in": "path",
@@ -20002,9 +20002,9 @@
                     }
                 }
             },
-            "/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-plans/{id}/reactivate-abort/": {
+            "/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-lists/{id}/reactivate-abort/": {
                 "get": {
-                    "operationId": "rest_business_areas_programs_payment_plans_reactivate_abort_retrieve",
+                    "operationId": "rest_business_areas_programs_payment_lists_reactivate_abort_retrieve",
                     "parameters": [
                         {
                             "in": "path",
@@ -20050,9 +20050,9 @@
                     }
                 }
             },
-            "/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-plans/{id}/delivery-export-xlsx/": {
+            "/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-lists/{id}/delivery-export-xlsx/": {
                 "get": {
-                    "operationId": "rest_business_areas_programs_payment_plans_delivery_export_xlsx_retrieve",
+                    "operationId": "rest_business_areas_programs_payment_lists_delivery_export_xlsx_retrieve",
                     "parameters": [
                         {
                             "in": "path",
@@ -20098,9 +20098,9 @@
                     }
                 }
             },
-            "/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-plans/{id}/delivery-import-xlsx/": {
+            "/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-lists/{id}/delivery-import-xlsx/": {
                 "post": {
-                    "operationId": "rest_business_areas_programs_payment_plans_delivery_import_xlsx_create",
+                    "operationId": "rest_business_areas_programs_payment_lists_delivery_import_xlsx_create",
                     "parameters": [
                         {
                             "in": "path",
@@ -20166,9 +20166,9 @@
                     }
                 }
             },
-            "/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-plans/{id}/reject/": {
+            "/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-lists/{id}/reject/": {
                 "post": {
-                    "operationId": "rest_business_areas_programs_payment_plans_reject_create",
+                    "operationId": "rest_business_areas_programs_payment_lists_reject_create",
                     "parameters": [
                         {
                             "in": "path",
@@ -20233,9 +20233,9 @@
                     }
                 }
             },
-            "/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-plans/{id}/send-for-approval/": {
+            "/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-lists/{id}/send-for-approval/": {
                 "get": {
-                    "operationId": "rest_business_areas_programs_payment_plans_send_for_approval_retrieve",
+                    "operationId": "rest_business_areas_programs_payment_lists_send_for_approval_retrieve",
                     "parameters": [
                         {
                             "in": "path",
@@ -20281,9 +20281,9 @@
                     }
                 }
             },
-            "/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-plans/{id}/send-to-payment-gateway/": {
+            "/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-lists/{id}/send-to-payment-gateway/": {
                 "get": {
-                    "operationId": "rest_business_areas_programs_payment_plans_send_to_payment_gateway_retrieve",
+                    "operationId": "rest_business_areas_programs_payment_lists_send_to_payment_gateway_retrieve",
                     "parameters": [
                         {
                             "in": "path",
@@ -20329,9 +20329,9 @@
                     }
                 }
             },
-            "/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-plans/{id}/send-xlsx-password/": {
+            "/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-lists/{id}/send-xlsx-password/": {
                 "get": {
-                    "operationId": "rest_business_areas_programs_payment_plans_send_xlsx_password_retrieve",
+                    "operationId": "rest_business_areas_programs_payment_lists_send_xlsx_password_retrieve",
                     "parameters": [
                         {
                             "in": "path",
@@ -20377,9 +20377,9 @@
                     }
                 }
             },
-            "/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-plans/{id}/split/": {
+            "/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-lists/{id}/split/": {
                 "post": {
-                    "operationId": "rest_business_areas_programs_payment_plans_split_create",
+                    "operationId": "rest_business_areas_programs_payment_lists_split_create",
                     "parameters": [
                         {
                             "in": "path",
@@ -20445,9 +20445,9 @@
                     }
                 }
             },
-            "/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-plans/{id}/unlock/": {
+            "/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-lists/{id}/unlock/": {
                 "get": {
-                    "operationId": "rest_business_areas_programs_payment_plans_unlock_retrieve",
+                    "operationId": "rest_business_areas_programs_payment_lists_unlock_retrieve",
                     "parameters": [
                         {
                             "in": "path",
@@ -20493,9 +20493,9 @@
                     }
                 }
             },
-            "/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-plans/{id}/unlock-fsp/": {
+            "/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-lists/{id}/unlock-fsp/": {
                 "get": {
-                    "operationId": "rest_business_areas_programs_payment_plans_unlock_fsp_retrieve",
+                    "operationId": "rest_business_areas_programs_payment_lists_unlock_fsp_retrieve",
                     "parameters": [
                         {
                             "in": "path",
@@ -20541,9 +20541,9 @@
                     }
                 }
             },
-            "/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-plans/count/": {
+            "/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-lists/count/": {
                 "get": {
-                    "operationId": "rest_business_areas_programs_payment_plans_count_retrieve",
+                    "operationId": "rest_business_areas_programs_payment_lists_count_retrieve",
                     "parameters": [
                         {
                             "in": "path",
@@ -20773,9 +20773,9 @@
                     }
                 }
             },
-            "/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-plans/fsp-xlsx-template-list/": {
+            "/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-lists/fsp-xlsx-template-list/": {
                 "get": {
-                    "operationId": "rest_business_areas_programs_payment_plans_fsp_xlsx_template_list_list",
+                    "operationId": "rest_business_areas_programs_payment_lists_fsp_xlsx_template_list_list",
                     "parameters": [
                         {
                             "in": "path",
@@ -25237,7 +25237,7 @@
                         },
                         {
                             "in": "query",
-                            "name": "payment_plan",
+                            "name": "payment_list",
                             "schema": {
                                 "type": "string",
                                 "format": "uuid"
@@ -25511,7 +25511,7 @@
                         },
                         {
                             "in": "query",
-                            "name": "payment_plan",
+                            "name": "payment_list",
                             "schema": {
                                 "type": "string",
                                 "format": "uuid"
@@ -25654,7 +25654,7 @@
                         },
                         {
                             "in": "query",
-                            "name": "payment_plan",
+                            "name": "payment_list",
                             "schema": {
                                 "type": "string",
                                 "format": "uuid"
@@ -25776,7 +25776,7 @@
                         },
                         {
                             "in": "query",
-                            "name": "payment_plan",
+                            "name": "payment_list",
                             "schema": {
                                 "type": "string",
                                 "format": "uuid"
@@ -28433,9 +28433,9 @@
                     }
                 }
             },
-            "/api/rest/choices/payment-plan-background-action-status/": {
+            "/api/rest/choices/payment-list-background-action-status/": {
                 "get": {
-                    "operationId": "rest_choices_payment_plan_background_action_status_list",
+                    "operationId": "rest_choices_payment_list_background_action_status_list",
                     "description": "Return choices used in the system like statuses, currencies.\n\nResponse([{\"value\": k, \"name\": v} for k, v in PaymentPlan.Status.choices])",
                     "tags": [
                         "rest"
@@ -28460,9 +28460,9 @@
                     }
                 }
             },
-            "/api/rest/choices/payment-plan-status/": {
+            "/api/rest/choices/payment-list-status/": {
                 "get": {
-                    "operationId": "rest_choices_payment_plan_status_list",
+                    "operationId": "rest_choices_payment_list_status_list",
                     "description": "Return choices used in the system like statuses, currencies.\n\nResponse([{\"value\": k, \"name\": v} for k, v in PaymentPlan.Status.choices])",
                     "tags": [
                         "rest"
@@ -28750,7 +28750,7 @@
                                     "TARGETING"
                                 ]
                             },
-                            "description": "Use Rule for Targeting or Payment Plan\n\n* `PAYMENT_PLAN` - Payment Plan\n* `TARGETING` - Targeting",
+                            "description": "Use Rule for Targeting or Payment Plan\n\n* `PAYMENT_LIST` - Payment Plan\n* `TARGETING` - Targeting",
                             "required": true
                         }
                     ],
@@ -37193,7 +37193,7 @@
                             ],
                             "nullable": true
                         },
-                        "payment_plan": {
+                        "payment_list": {
                             "type": "string",
                             "format": "uuid",
                             "nullable": true
@@ -37259,7 +37259,7 @@
                             },
                             "readOnly": true
                         },
-                        "payment_plan": {
+                        "payment_list": {
                             "allOf": [
                                 {
                                     "$ref": "#/components/schemas/FollowUpPaymentPlan"
@@ -37302,7 +37302,7 @@
                         "created_by",
                         "households",
                         "id",
-                        "payment_plan",
+                        "payment_list",
                         "registration_data_import",
                         "title"
                     ]
@@ -37364,7 +37364,7 @@
                                 "format": "uuid"
                             }
                         },
-                        "payment_plan": {
+                        "payment_list": {
                             "type": "string",
                             "format": "uuid",
                             "nullable": true
@@ -39680,20 +39680,20 @@
                             ],
                             "readOnly": true
                         },
-                        "payment_plan_hard_conflicted": {
+                        "payment_list_hard_conflicted": {
                             "type": "boolean",
                             "readOnly": true
                         },
-                        "payment_plan_hard_conflicted_data": {
+                        "payment_list_hard_conflicted_data": {
                             "type": "array",
                             "items": {},
                             "readOnly": true
                         },
-                        "payment_plan_soft_conflicted": {
+                        "payment_list_soft_conflicted": {
                             "type": "boolean",
                             "readOnly": true
                         },
-                        "payment_plan_soft_conflicted_data": {
+                        "payment_list_soft_conflicted_data": {
                             "type": "array",
                             "items": {},
                             "readOnly": true
@@ -39804,10 +39804,10 @@
                         "parent",
                         "parent_id",
                         "parent_unicef_id",
-                        "payment_plan_hard_conflicted",
-                        "payment_plan_hard_conflicted_data",
-                        "payment_plan_soft_conflicted",
-                        "payment_plan_soft_conflicted_data",
+                        "payment_list_hard_conflicted",
+                        "payment_list_hard_conflicted_data",
+                        "payment_list_soft_conflicted",
+                        "payment_list_soft_conflicted_data",
                         "people_individual",
                         "program_code",
                         "program_name",
@@ -39964,20 +39964,20 @@
                             ],
                             "readOnly": true
                         },
-                        "payment_plan_hard_conflicted": {
+                        "payment_list_hard_conflicted": {
                             "type": "boolean",
                             "readOnly": true
                         },
-                        "payment_plan_hard_conflicted_data": {
+                        "payment_list_hard_conflicted_data": {
                             "type": "array",
                             "items": {},
                             "readOnly": true
                         },
-                        "payment_plan_soft_conflicted": {
+                        "payment_list_soft_conflicted": {
                             "type": "boolean",
                             "readOnly": true
                         },
-                        "payment_plan_soft_conflicted_data": {
+                        "payment_list_soft_conflicted_data": {
                             "type": "array",
                             "items": {},
                             "readOnly": true
@@ -40022,10 +40022,10 @@
                         "id",
                         "parent_id",
                         "parent_unicef_id",
-                        "payment_plan_hard_conflicted",
-                        "payment_plan_hard_conflicted_data",
-                        "payment_plan_soft_conflicted",
-                        "payment_plan_soft_conflicted_data",
+                        "payment_list_hard_conflicted",
+                        "payment_list_hard_conflicted_data",
+                        "payment_list_soft_conflicted",
+                        "payment_list_soft_conflicted_data",
                         "people_individual",
                         "program_code",
                         "program_name",
@@ -40647,7 +40647,7 @@
                             ],
                             "readOnly": true
                         },
-                        "source_payment_plan": {
+                        "source_payment_list": {
                             "allOf": [
                                 {
                                     "$ref": "#/components/schemas/FollowUpPaymentPlan"
@@ -40754,7 +40754,7 @@
                         "program",
                         "program_cycle",
                         "reconciliation_summary",
-                        "source_payment_plan",
+                        "source_payment_list",
                         "split_choices",
                         "steficon_rule",
                         "supporting_documents",
@@ -40866,7 +40866,7 @@
                             "format": "double",
                             "readOnly": true
                         },
-                        "payment_plans_count": {
+                        "payment_lists_count": {
                             "type": "integer",
                             "readOnly": true
                         }
@@ -40875,7 +40875,7 @@
                         "created_at",
                         "cycle",
                         "id",
-                        "payment_plans_count",
+                        "payment_lists_count",
                         "total_delivered_quantity_usd",
                         "total_entitled_quantity_usd",
                         "total_undelivered_quantity_usd"
@@ -44282,7 +44282,7 @@
                                     "$ref": "#/components/schemas/RuleTypeEnum"
                                 }
                             ],
-                            "description": "Use Rule for Targeting or Payment Plan\n\n* `PAYMENT_PLAN` - Payment Plan\n* `TARGETING` - Targeting"
+                            "description": "Use Rule for Targeting or Payment Plan\n\n* `PAYMENT_LIST` - Payment Plan\n* `TARGETING` - Targeting"
                         }
                     },
                     "required": [
@@ -44323,7 +44323,7 @@
                         "TARGETING"
                     ],
                     "type": "string",
-                    "description": "* `PAYMENT_PLAN` - Payment Plan\n* `TARGETING` - Targeting"
+                    "description": "* `PAYMENT_LIST` - Payment Plan\n* `TARGETING` - Targeting"
                 },
                 "SampleSize": {
                     "type": "object",
@@ -44605,12 +44605,12 @@
                             "nullable": true,
                             "maxLength": 255
                         },
-                        "payment_plan": {
+                        "payment_list": {
                             "type": "string",
                             "format": "uuid",
                             "nullable": true
                         },
-                        "payment_plan_name": {
+                        "payment_list_name": {
                             "type": "string",
                             "readOnly": true
                         },
@@ -44667,7 +44667,7 @@
                         "created_by",
                         "has_valid_sample_file",
                         "id",
-                        "payment_plan_name",
+                        "payment_list_name",
                         "rapid_pro_url",
                         "sample_file_path",
                         "sampling_type",
@@ -44716,7 +44716,7 @@
                 "SurveySampleSize": {
                     "type": "object",
                     "properties": {
-                        "payment_plan": {
+                        "payment_list": {
                             "type": "string",
                             "format": "uuid",
                             "nullable": true

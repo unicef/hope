@@ -8,32 +8,32 @@ from openpyxl.utils.exceptions import InvalidFileException
 from openpyxl.worksheet.worksheet import Worksheet
 
 from hope.apps.payment.utils import to_decimal
-from hope.apps.payment.xlsx.xlsx_payment_plan_base_service import XlsxPaymentPlanBaseService
-from hope.apps.payment.xlsx.xlsx_payment_plan_export_service import XlsxPaymentPlanExportService
+from hope.apps.payment.xlsx.xlsx_payment_list_base_service import XlsxPaymentListBaseService
+from hope.apps.payment.xlsx.xlsx_payment_list_export_service import XlsxPaymentListExportService
 
 if TYPE_CHECKING:
-    from hope.models import Payment, PaymentPlan
+    from hope.models import Payment, PaymentList
 
 
-class TopUpAmountTemplateService(XlsxPaymentPlanExportService):
-    """Blank amount template listing the payments eligible for a group's Top-Up or Amendment.
+class TopUpAmountTemplateService(XlsxPaymentListExportService):
+    """Blank amount template listing the payments eligible for a payment plan's Top-Up or Amendment.
 
-    One sheet for every source plan of the group. Same sheet shape as the entitlement export
+    One sheet for every source payment list of the payment plan. Same sheet shape as the entitlement export
     operators already know, with two differences: the rows are each plan's
     ``eligible_payments_for_child_plan()`` rather than every eligible payment, and the entitlement
     columns ship empty. Empty is deliberate — prefilling the source amount invites the operator to
     submit it unchanged, which would silently repeat the original payment instead of topping it up.
-    The plans of one group share a programme, so the first one sets the columns.
+    The payment lists of one payment plan share a programme, so the first one sets the columns.
     """
 
-    def __init__(self, source_payment_plans: list["PaymentPlan"]) -> None:
-        super().__init__(source_payment_plans[0])
-        self.source_payment_plans = source_payment_plans
+    def __init__(self, source_payment_lists: list["PaymentList"]) -> None:
+        super().__init__(source_payment_lists[0])
+        self.source_payment_lists = source_payment_lists
 
     def _add_payment_list(self) -> None:
-        for source_payment_plan in self.source_payment_plans:
+        for source_payment_list in self.source_payment_lists:
             qs = (
-                source_payment_plan.eligible_payments_for_child_plan()
+                source_payment_list.eligible_payments_for_child_plan()
                 .select_related("household_snapshot", "currency", "delivery_type", "financial_service_provider")
                 .order_by("unicef_id")
             )
@@ -54,9 +54,10 @@ def _open_amount_sheet(file: IO[bytes]) -> Worksheet:
         workbook = openpyxl.load_workbook(file, data_only=True)
     except (InvalidFileException, BadZipFile, OSError):
         raise ValidationError("The uploaded file could not be read as an XLSX workbook.")
-    if XlsxPaymentPlanBaseService.TITLE not in workbook.sheetnames:
-        raise ValidationError(f"Sheet '{XlsxPaymentPlanBaseService.TITLE}' not found in the uploaded file.")
-    return workbook[XlsxPaymentPlanBaseService.TITLE]
+    sheet_name = XlsxPaymentListBaseService.payment_sheet_name(workbook.sheetnames)
+    if sheet_name is None:
+        raise ValidationError(f"Sheet '{XlsxPaymentListBaseService.TITLE}' not found in the uploaded file.")
+    return workbook[sheet_name]
 
 
 def _row_amount(raw_amount: object, payment_id: str) -> Decimal | None:
@@ -71,7 +72,7 @@ def _row_amount(raw_amount: object, payment_id: str) -> Decimal | None:
     return amount or None
 
 
-def parse_top_up_amount_file(source_payment_plans: list["PaymentPlan"], file: IO[bytes]) -> dict[str, Decimal]:
+def parse_top_up_amount_file(source_payment_lists: list["PaymentList"], file: IO[bytes]) -> dict[str, Decimal]:
     """Read a filled-in Top-Up amount template into ``{payment unicef_id: amount}``.
 
     Only funded rows are returned: a row left empty or set to zero means the beneficiary is not
@@ -82,19 +83,19 @@ def parse_top_up_amount_file(source_payment_plans: list["PaymentPlan"], file: IO
     worksheet = _open_amount_sheet(file)
     headers = [cell.value for cell in worksheet[1]]
     required_columns = (
-        XlsxPaymentPlanBaseService.COLUMN_PAYMENT_ID,
-        XlsxPaymentPlanBaseService.COLUMN_ENTITLEMENT_QUANTITY,
+        XlsxPaymentListBaseService.COLUMN_PAYMENT_ID,
+        XlsxPaymentListBaseService.COLUMN_ENTITLEMENT_QUANTITY,
     )
     missing = [column for column in required_columns if column not in headers]
     if missing:
         raise ValidationError(f"Column '{missing[0]}' is required in the amount file.")
 
-    payment_id_index = headers.index(XlsxPaymentPlanBaseService.COLUMN_PAYMENT_ID)
-    amount_index = headers.index(XlsxPaymentPlanBaseService.COLUMN_ENTITLEMENT_QUANTITY)
+    payment_id_index = headers.index(XlsxPaymentListBaseService.COLUMN_PAYMENT_ID)
+    amount_index = headers.index(XlsxPaymentListBaseService.COLUMN_ENTITLEMENT_QUANTITY)
     eligible_ids = {
         unicef_id
-        for source_payment_plan in source_payment_plans
-        for unicef_id in source_payment_plan.eligible_payments_for_child_plan().values_list("unicef_id", flat=True)
+        for source_payment_list in source_payment_lists
+        for unicef_id in source_payment_list.eligible_payments_for_child_plan().values_list("unicef_id", flat=True)
     }
 
     amounts: dict[str, Decimal] = {}
@@ -107,7 +108,7 @@ def parse_top_up_amount_file(source_payment_plans: list["PaymentPlan"], file: IO
             continue
         payment_id = str(raw_payment_id).strip()
         if payment_id not in eligible_ids:
-            raise ValidationError(f"Payment {payment_id} is not eligible for a Top-Up of this Payment Plan Group.")
+            raise ValidationError(f"Payment {payment_id} is not eligible for a Top-Up of this Payment Plan.")
         if payment_id in seen_payment_ids:
             raise ValidationError(f"Payment {payment_id} appears more than once in the amount file.")
         seen_payment_ids.add(payment_id)

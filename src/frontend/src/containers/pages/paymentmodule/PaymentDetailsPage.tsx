@@ -7,7 +7,7 @@ import { ForceFailedButton } from '@components/paymentmodule/ForceFailedButton';
 import { RevertForceFailedButton } from '@components/paymentmodule/RevertForceFailedButton';
 import { SomethingWentWrong } from '@containers/pages/somethingWentWrong/SomethingWentWrong';
 import { AdminButton } from '@core/AdminButton';
-import { PaymentPlanStatusEnum } from '@restgenerated/models/PaymentPlanStatusEnum';
+import { PaymentListStatusEnum } from '@restgenerated/models/PaymentListStatusEnum';
 import { PaymentStatusEnum } from '@restgenerated/models/PaymentStatusEnum';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
@@ -27,7 +27,7 @@ function PaymentDetailsPage(): ReactElement {
   const { t } = useTranslation();
   const { paymentId } = useParams();
   const location = useLocation();
-  const paymentPlanId = location.state?.parentId;
+  const paymentListId = location.state?.parentId;
 
   const { baseUrl, businessArea, programId } = useBaseUrl();
 
@@ -37,25 +37,25 @@ function PaymentDetailsPage(): ReactElement {
     error,
   } = useQuery<PaymentDetail>({
     queryKey: restQueryKey(
-      RestService.restBusinessAreasProgramsPaymentPlansPaymentsRetrieve,
+      RestService.restBusinessAreasProgramsPaymentListsPaymentsRetrieve,
       {
         businessAreaSlug: businessArea,
         paymentId: paymentId,
         programCode: programId,
-        paymentPlanPk: paymentPlanId,
+        paymentListPk: paymentListId,
       },
     ),
     queryFn: () =>
-      RestService.restBusinessAreasProgramsPaymentPlansPaymentsRetrieve({
+      RestService.restBusinessAreasProgramsPaymentListsPaymentsRetrieve({
         businessAreaSlug: businessArea,
         paymentId: paymentId,
         programCode: programId,
-        paymentPlanPk: paymentPlanId,
+        paymentListPk: paymentListId,
       }),
   });
 
-  const paymentPlanStatus = payment?.parent?.status;
-  const paymentPlanIsFollowUp = payment?.parent?.planType === 'FOLLOW_UP';
+  const paymentListStatus = payment?.parent?.status;
+  const paymentListIsFollowUp = payment?.parent?.planType === 'FOLLOW_UP';
   const permissions = usePermissions();
   if (loading) return <LoadingComponent />;
   if (permissions === null) return null;
@@ -75,21 +75,21 @@ function PaymentDetailsPage(): ReactElement {
             : undefined
         }
         errorMessage={error?.message}
-        goBackAddress={`/${baseUrl}/payment-module/payment-plans`}
+        goBackAddress={`/${baseUrl}/payment-module/payment-lists`}
       />
     );
 
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
       title: t('Payment Module'),
-      to: '../payment-plans',
+      to: '../payment-lists',
     },
     {
-      title: ` ${paymentPlanIsFollowUp ? 'Follow-up ' : ''} Payment Plan ${
+      title: ` ${paymentListIsFollowUp ? 'Follow-up ' : ''} Payment List ${
         payment?.parent?.unicefId
       }`,
       to: `/${baseUrl}/payment-module/${
-        paymentPlanIsFollowUp ? 'followup-payment-plans' : 'payment-plans'
+        paymentListIsFollowUp ? 'followup-payment-lists' : 'payment-lists'
       }/${payment?.parent?.id}/`,
     },
   ];
@@ -97,8 +97,8 @@ function PaymentDetailsPage(): ReactElement {
   const renderButton = (): ReactElement | null => {
     if (
       hasPermissions(PERMISSIONS.PM_MARK_PAYMENT_AS_FAILED, permissions) &&
-      (paymentPlanStatus === PaymentPlanStatusEnum.ACCEPTED ||
-        paymentPlanStatus === PaymentPlanStatusEnum.FINISHED) &&
+      (paymentListStatus === PaymentListStatusEnum.ACCEPTED ||
+        paymentListStatus === PaymentListStatusEnum.FINISHED) &&
       !payment.parent?.isPaymentGateway
     ) {
       const ButtonComponent =

@@ -22,8 +22,8 @@ export const headCells: HeadCell<FollowUpInstructionList>[] = [
   },
   {
     disablePadding: false,
-    label: 'Payment Plans',
-    id: 'childPaymentPlansCount',
+    label: 'Payment Lists',
+    id: 'childPaymentListsCount',
     numeric: true,
   },
   {

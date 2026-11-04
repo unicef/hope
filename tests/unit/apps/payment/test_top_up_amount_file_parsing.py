@@ -11,34 +11,34 @@ from extras.test_utils.factories import (
     CurrencyFactory,
     PaymentFactory,
     PaymentHouseholdSnapshotFactory,
-    PaymentPlanFactory,
+    PaymentListFactory,
     PaymentPlanPurposeFactory,
     ProgramCycleFactory,
     ProgramFactory,
 )
 from hope.apps.payment.services.top_up_amount_service import TopUpAmountTemplateService, parse_top_up_amount_file
-from hope.apps.payment.xlsx.xlsx_payment_plan_base_service import XlsxPaymentPlanBaseService
-from hope.models import Payment, PaymentPlan, Program
+from hope.apps.payment.xlsx.xlsx_payment_list_base_service import XlsxPaymentListBaseService
+from hope.models import Payment, PaymentList, Program
 
 pytestmark = pytest.mark.django_db
 
-PAYMENT_ID_COLUMN = XlsxPaymentPlanBaseService.COLUMN_PAYMENT_ID
-AMOUNT_COLUMN = XlsxPaymentPlanBaseService.COLUMN_ENTITLEMENT_QUANTITY
+PAYMENT_ID_COLUMN = XlsxPaymentListBaseService.COLUMN_PAYMENT_ID
+AMOUNT_COLUMN = XlsxPaymentListBaseService.COLUMN_ENTITLEMENT_QUANTITY
 
 
 @pytest.fixture
-def source_pp(db: Any) -> PaymentPlan:
+def source_pp(db: Any) -> PaymentList:
     business_area = BusinessAreaFactory(slug="afghanistan")
     program = ProgramFactory(business_area=business_area, status=Program.ACTIVE)
     cycle = ProgramCycleFactory(program=program)
     purpose = PaymentPlanPurposeFactory()
     program.payment_plan_purposes.add(purpose)
-    plan = PaymentPlanFactory(
+    plan = PaymentListFactory(
         name="Standard PP",
         business_area=business_area,
         program_cycle=cycle,
-        plan_type=PaymentPlan.PlanType.REGULAR,
-        status=PaymentPlan.Status.ACCEPTED,
+        plan_type=PaymentList.PlanType.REGULAR,
+        status=PaymentList.Status.ACCEPTED,
         currency=CurrencyFactory(code="USD"),
         payment_plan_purposes=[purpose],
     )
@@ -51,7 +51,7 @@ def source_pp(db: Any) -> PaymentPlan:
     return plan
 
 
-def _template(source_pp: PaymentPlan) -> Any:
+def _template(source_pp: PaymentList) -> Any:
     return TopUpAmountTemplateService([source_pp]).generate_workbook()
 
 
@@ -68,7 +68,7 @@ def _set_cell(worksheet: Any, row: int, column_name: str, value: Any) -> None:
 
 
 def test_parse_top_up_amount_file_arrange_funded_row_act_parse_assert_amount_returned(
-    source_pp: PaymentPlan,
+    source_pp: PaymentList,
 ) -> None:
     workbook = _template(source_pp)
     _set_cell(workbook.active, 2, AMOUNT_COLUMN, 12.5)
@@ -80,14 +80,14 @@ def test_parse_top_up_amount_file_arrange_funded_row_act_parse_assert_amount_ret
 
 
 def test_parse_top_up_amount_file_arrange_not_a_workbook_act_parse_assert_raises(
-    source_pp: PaymentPlan,
+    source_pp: PaymentList,
 ) -> None:
     with pytest.raises(ValidationError, match="could not be read"):
         parse_top_up_amount_file([source_pp], BytesIO(b"definitely not an xlsx"))
 
 
 def test_parse_top_up_amount_file_arrange_wrong_sheet_name_act_parse_assert_raises(
-    source_pp: PaymentPlan,
+    source_pp: PaymentList,
 ) -> None:
     workbook = openpyxl.Workbook()
     workbook.active.title = "Some Other Sheet"
@@ -97,7 +97,7 @@ def test_parse_top_up_amount_file_arrange_wrong_sheet_name_act_parse_assert_rais
 
 
 def test_parse_top_up_amount_file_arrange_missing_amount_column_act_parse_assert_raises(
-    source_pp: PaymentPlan,
+    source_pp: PaymentList,
 ) -> None:
     workbook = _template(source_pp)
     worksheet = workbook.active
@@ -109,7 +109,7 @@ def test_parse_top_up_amount_file_arrange_missing_amount_column_act_parse_assert
 
 
 def test_parse_top_up_amount_file_arrange_non_numeric_amount_act_parse_assert_raises(
-    source_pp: PaymentPlan,
+    source_pp: PaymentList,
 ) -> None:
     workbook = _template(source_pp)
     _set_cell(workbook.active, 2, AMOUNT_COLUMN, "not a number")
@@ -119,7 +119,7 @@ def test_parse_top_up_amount_file_arrange_non_numeric_amount_act_parse_assert_ra
 
 
 def test_parse_top_up_amount_file_arrange_duplicate_payment_row_act_parse_assert_raises(
-    source_pp: PaymentPlan,
+    source_pp: PaymentList,
 ) -> None:
     workbook = _template(source_pp)
     worksheet = workbook.active
@@ -133,7 +133,7 @@ def test_parse_top_up_amount_file_arrange_duplicate_payment_row_act_parse_assert
 
 
 def test_parse_top_up_amount_file_arrange_duplicate_with_blank_row_first_act_parse_assert_raises(
-    source_pp: PaymentPlan,
+    source_pp: PaymentList,
 ) -> None:
     """The blank row must count as an occurrence, or the same file passes or fails by row order."""
     workbook = _template(source_pp)
@@ -148,7 +148,7 @@ def test_parse_top_up_amount_file_arrange_duplicate_with_blank_row_first_act_par
 
 
 def test_parse_top_up_amount_file_arrange_blank_payment_id_row_act_parse_assert_row_skipped(
-    source_pp: PaymentPlan,
+    source_pp: PaymentList,
 ) -> None:
     """A row with no payment id is padding, not an error — operators leave trailing blanks."""
     workbook = _template(source_pp)

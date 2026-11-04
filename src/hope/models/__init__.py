@@ -51,11 +51,11 @@ from hope.models.partner import *  # noqa: F403
 from hope.models.payment import *  # noqa: F403
 from hope.models.payment_data_collector import *  # noqa: F403
 from hope.models.payment_household_snapshot import *  # noqa: F403
+from hope.models.payment_list import *  # noqa: F403
+from hope.models.payment_list_split import *  # noqa: F403
+from hope.models.payment_list_split_payments import *  # noqa: F403
 from hope.models.payment_plan import *  # noqa: F403
-from hope.models.payment_plan_group import *  # noqa: F403
 from hope.models.payment_plan_purpose import *  # noqa: F403
-from hope.models.payment_plan_split import *  # noqa: F403
-from hope.models.payment_plan_split_payments import *  # noqa: F403
 from hope.models.payment_plan_supporting_document import *  # noqa: F403
 from hope.models.payment_verification import *  # noqa: F403
 from hope.models.payment_verification_plan import *  # noqa: F403
@@ -91,6 +91,6 @@ from hope.models.utils import *  # noqa: F403
 from hope.models.western_union_data import *  # noqa: F403
 from hope.models.western_union_invoice import *  # noqa: F403
 from hope.models.western_union_invoice_payment import *  # noqa: F403
-from hope.models.western_union_payment_plan_report import *  # noqa: F403
+from hope.models.western_union_payment_list_report import *  # noqa: F403
 from hope.models.xlsx_kobo_template import *  # noqa: F403
 from hope.models.xlsx_update_file import *  # noqa: F403

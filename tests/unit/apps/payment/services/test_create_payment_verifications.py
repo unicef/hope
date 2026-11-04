@@ -19,16 +19,16 @@ def verification_plan() -> PaymentVerificationPlan:
 def payments(verification_plan: PaymentVerificationPlan) -> list[Payment]:
     return PaymentFactory.create_batch(
         5,
-        parent=verification_plan.payment_plan,
-        business_area=verification_plan.payment_plan.business_area,
+        parent=verification_plan.payment_list,
+        business_area=verification_plan.payment_list.business_area,
     )
 
 
 def test_creates_payment_verifications_in_batches(
     verification_plan: PaymentVerificationPlan, payments: list[Payment]
 ) -> None:
-    payment_plan = verification_plan.payment_plan
-    service = CreatePaymentVerifications(verification_plan, payment_plan.payment_items.all())
+    payment_list = verification_plan.payment_list
+    service = CreatePaymentVerifications(verification_plan, payment_list.payment_items.all())
     service.BATCH_SIZE = 2
     service.create()
 
@@ -38,8 +38,8 @@ def test_creates_payment_verifications_in_batches(
 
 
 def test_create_skips_when_no_payments(verification_plan: PaymentVerificationPlan) -> None:
-    payment_plan = verification_plan.payment_plan
-    service = CreatePaymentVerifications(verification_plan, payment_plan.payment_items.none())
+    payment_list = verification_plan.payment_list
+    service = CreatePaymentVerifications(verification_plan, payment_list.payment_items.none())
     service.create()
 
     assert PaymentVerification.objects.filter(payment_verification_plan=verification_plan).count() == 0

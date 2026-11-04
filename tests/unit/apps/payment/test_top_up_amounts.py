@@ -10,16 +10,16 @@ from extras.test_utils.factories import (
     BusinessAreaFactory,
     CurrencyFactory,
     PaymentFactory,
+    PaymentListFactory,
     PaymentPlanFactory,
-    PaymentPlanGroupFactory,
     PaymentPlanPurposeFactory,
     ProgramCycleFactory,
     ProgramFactory,
     UserFactory,
 )
-from hope.apps.payment.celery_tasks import prepare_child_payment_plan_async_task
-from hope.apps.payment.services.payment_plan_services import PaymentPlanService
-from hope.models import Payment, PaymentPlan, PaymentPlanGroup, ProgramCycle, User
+from hope.apps.payment.celery_tasks import prepare_child_payment_list_async_task
+from hope.apps.payment.services.payment_list_services import PaymentListService
+from hope.models import Payment, PaymentList, PaymentPlan, ProgramCycle, User
 
 pytestmark = pytest.mark.django_db
 
@@ -47,46 +47,46 @@ def purpose(cycle: ProgramCycle) -> Any:
 
 
 @pytest.fixture
-def source_pp(business_area: Any, cycle: ProgramCycle, purpose: Any) -> PaymentPlan:
-    return PaymentPlanFactory(
+def source_pp(business_area: Any, cycle: ProgramCycle, purpose: Any) -> PaymentList:
+    return PaymentListFactory(
         name="Standard PP",
         business_area=business_area,
         program_cycle=cycle,
-        plan_type=PaymentPlan.PlanType.REGULAR,
-        status=PaymentPlan.Status.ACCEPTED,
+        plan_type=PaymentList.PlanType.REGULAR,
+        status=PaymentList.Status.ACCEPTED,
         currency=CurrencyFactory(code="USD"),
         payment_plan_purposes=[purpose],
     )
 
 
 @pytest.fixture
-def top_up_group(cycle: ProgramCycle, source_pp: PaymentPlan) -> PaymentPlanGroup:
-    return PaymentPlanGroupFactory(
-        cycle=cycle, plan_type=PaymentPlan.PlanType.TOP_UP, source_group=source_pp.payment_plan_group
+def top_up_group(cycle: ProgramCycle, source_pp: PaymentList) -> PaymentPlan:
+    return PaymentPlanFactory(
+        cycle=cycle, plan_type=PaymentList.PlanType.TOP_UP, source_payment_plan=source_pp.payment_plan
     )
 
 
 @pytest.fixture
-def three_payments(source_pp: PaymentPlan) -> list[Payment]:
+def three_payments(source_pp: PaymentList) -> list[Payment]:
     return [PaymentFactory(parent=source_pp, status=Payment.STATUS_PENDING) for _ in range(3)]
 
 
 def _create_and_run(
-    source_pp: PaymentPlan,
-    top_up_group: PaymentPlanGroup,
+    source_pp: PaymentList,
+    top_up_group: PaymentPlan,
     user: User,
     on_commit: Any,
     *,
     fixed_amount: Decimal | None = None,
     amounts: dict[str, Decimal] | None = None,
-) -> PaymentPlan:
+) -> PaymentList:
     """Create the Top-Up and run the copy job the way the API does.
 
     The job is kicked off explicitly rather than through the on_commit hook so the amounts the
     endpoint resolved travel with it, mirroring what `create_top_up` queues in production.
     """
-    top_up = PaymentPlanService(source_pp).create_top_up(
-        user, payment_plan_group=top_up_group, fixed_amount=fixed_amount, amounts=amounts
+    top_up = PaymentListService(source_pp).create_top_up(
+        user, payment_plan=top_up_group, fixed_amount=fixed_amount, amounts=amounts
     )
     extra_config = (
         {"fixed_amount": str(fixed_amount)}
@@ -94,16 +94,16 @@ def _create_and_run(
         else {"amounts": {unicef_id: str(amount) for unicef_id, amount in amounts.items()}}
     )
     with on_commit(execute=True):
-        prepare_child_payment_plan_async_task(top_up, extra_config=extra_config)
+        prepare_child_payment_list_async_task(top_up, extra_config=extra_config)
     top_up.refresh_from_db()
     return top_up
 
 
-@mock.patch("hope.models.payment_plan.PaymentPlan.get_exchange_rate", return_value=1.0)
+@mock.patch("hope.models.payment_list.PaymentList.get_exchange_rate", return_value=1.0)
 def test_create_top_up_arrange_fixed_amount_act_run_task_assert_every_beneficiary_funded(
     get_exchange_rate_mock: Any,
     user: User,
-    source_pp: PaymentPlan,
+    source_pp: PaymentList,
     three_payments: list[Payment],
     django_capture_on_commit_callbacks: Any,
     top_up_group: Any,
@@ -116,11 +116,11 @@ def test_create_top_up_arrange_fixed_amount_act_run_task_assert_every_beneficiar
     assert set(top_up.payment_items.values_list("entitlement_quantity", flat=True)) == {Decimal("25.00")}
 
 
-@mock.patch("hope.models.payment_plan.PaymentPlan.get_exchange_rate", return_value=1.0)
+@mock.patch("hope.models.payment_list.PaymentList.get_exchange_rate", return_value=1.0)
 def test_create_top_up_arrange_per_beneficiary_amounts_act_run_task_assert_only_funded_copied(
     get_exchange_rate_mock: Any,
     user: User,
-    source_pp: PaymentPlan,
+    source_pp: PaymentList,
     three_payments: list[Payment],
     django_capture_on_commit_callbacks: Any,
     top_up_group: Any,
@@ -134,11 +134,11 @@ def test_create_top_up_arrange_per_beneficiary_amounts_act_run_task_assert_only_
     assert dict(top_up.payment_items.values_list("source_payment__unicef_id", "entitlement_quantity")) == amounts
 
 
-@mock.patch("hope.models.payment_plan.PaymentPlan.get_exchange_rate", return_value=1.0)
+@mock.patch("hope.models.payment_list.PaymentList.get_exchange_rate", return_value=1.0)
 def test_create_top_up_arrange_beneficiary_left_out_act_check_eligibility_assert_still_available(
     get_exchange_rate_mock: Any,
     user: User,
-    source_pp: PaymentPlan,
+    source_pp: PaymentList,
     three_payments: list[Payment],
     django_capture_on_commit_callbacks: Any,
     top_up_group: Any,
@@ -158,11 +158,11 @@ def test_create_top_up_arrange_beneficiary_left_out_act_check_eligibility_assert
     assert funded not in still_eligible
 
 
-@mock.patch("hope.models.payment_plan.PaymentPlan.get_exchange_rate", return_value=1.0)
+@mock.patch("hope.models.payment_list.PaymentList.get_exchange_rate", return_value=1.0)
 def test_create_top_up_arrange_beneficiary_already_topped_up_act_exclude_them_assert_still_blocked(
     get_exchange_rate_mock: Any,
     user: User,
-    source_pp: PaymentPlan,
+    source_pp: PaymentList,
     three_payments: list[Payment],
     django_capture_on_commit_callbacks: Any,
     top_up_group: Any,
@@ -186,7 +186,7 @@ def test_create_top_up_arrange_beneficiary_already_topped_up_act_exclude_them_as
 
 
 def test_eligible_payments_for_top_up_arrange_withdrawn_household_act_query_assert_not_eligible(
-    source_pp: PaymentPlan,
+    source_pp: PaymentList,
 ) -> None:
     payment = PaymentFactory(parent=source_pp, status=Payment.STATUS_DISTRIBUTION_SUCCESS)
     payment.household.withdrawn = True
@@ -197,11 +197,16 @@ def test_eligible_payments_for_top_up_arrange_withdrawn_household_act_query_asse
 
 @pytest.mark.parametrize(
     "status",
-    [PaymentPlan.Status.OPEN, PaymentPlan.Status.LOCKED, PaymentPlan.Status.IN_REVIEW, PaymentPlan.Status.CLOSED],
+    [
+        PaymentList.Status.OPEN,
+        PaymentList.Status.LOCKED,
+        PaymentList.Status.IN_REVIEW,
+        PaymentList.Status.CLOSED,
+    ],
 )
 def test_create_top_up_arrange_source_outside_accepted_or_finished_act_create_assert_raises(
     user: User,
-    source_pp: PaymentPlan,
+    source_pp: PaymentList,
     three_payments: list[Payment],
     status: str,
     top_up_group: Any,
@@ -210,34 +215,34 @@ def test_create_top_up_arrange_source_outside_accepted_or_finished_act_create_as
     source_pp.save(update_fields=["status"])
 
     with pytest.raises(Exception, match="Accepted or Finished"):
-        PaymentPlanService(source_pp).create_top_up(user, payment_plan_group=top_up_group, fixed_amount=Decimal("5.00"))
+        PaymentListService(source_pp).create_top_up(user, payment_plan=top_up_group, fixed_amount=Decimal("5.00"))
 
 
-@mock.patch("hope.models.payment_plan.PaymentPlan.get_exchange_rate", return_value=1.0)
+@mock.patch("hope.models.payment_list.PaymentList.get_exchange_rate", return_value=1.0)
 def test_create_top_up_arrange_finished_source_act_create_assert_top_up_created(
     get_exchange_rate_mock: Any,
     user: User,
-    source_pp: PaymentPlan,
+    source_pp: PaymentList,
     three_payments: list[Payment],
     django_capture_on_commit_callbacks: Any,
     top_up_group: Any,
 ) -> None:
-    source_pp.status = PaymentPlan.Status.FINISHED
+    source_pp.status = PaymentList.Status.FINISHED
     source_pp.save(update_fields=["status"])
 
     top_up = _create_and_run(
         source_pp, top_up_group, user, django_capture_on_commit_callbacks, fixed_amount=Decimal("25.00")
     )
 
-    assert top_up.plan_type == PaymentPlan.PlanType.TOP_UP
+    assert top_up.plan_type == PaymentList.PlanType.TOP_UP
     assert top_up.payment_items.count() == 3
 
 
-@mock.patch("hope.models.payment_plan.PaymentPlan.get_exchange_rate", return_value=1.0)
+@mock.patch("hope.models.payment_list.PaymentList.get_exchange_rate", return_value=1.0)
 def test_create_top_up_arrange_second_top_up_for_remaining_act_run_task_assert_disjoint_beneficiaries(
     get_exchange_rate_mock: Any,
     user: User,
-    source_pp: PaymentPlan,
+    source_pp: PaymentList,
     three_payments: list[Payment],
     django_capture_on_commit_callbacks: Any,
     top_up_group: Any,
@@ -263,11 +268,11 @@ def test_create_top_up_arrange_second_top_up_for_remaining_act_run_task_assert_d
     assert third_payment in source_pp.eligible_payments_for_top_up()
 
 
-@mock.patch("hope.models.payment_plan.PaymentPlan.get_exchange_rate", return_value=1.0)
+@mock.patch("hope.models.payment_list.PaymentList.get_exchange_rate", return_value=1.0)
 def test_create_top_up_arrange_fixed_amount_act_run_task_assert_query_count(
     get_exchange_rate_mock: Any,
     user: User,
-    source_pp: PaymentPlan,
+    source_pp: PaymentList,
     three_payments: list[Payment],
     django_capture_on_commit_callbacks: Any,
     django_assert_num_queries: Any,
@@ -277,18 +282,16 @@ def test_create_top_up_arrange_fixed_amount_act_run_task_assert_query_count(
     ContentType.objects.clear_cache()
 
     with django_assert_num_queries(76), django_capture_on_commit_callbacks(execute=True):
-        PaymentPlanService(source_pp).create_top_up(
-            user, payment_plan_group=top_up_group, fixed_amount=Decimal("25.00")
-        )
+        PaymentListService(source_pp).create_top_up(user, payment_plan=top_up_group, fixed_amount=Decimal("25.00"))
 
 
-@mock.patch("hope.models.payment_plan.PaymentPlan.get_exchange_rate", return_value=1.0)
+@mock.patch("hope.models.payment_list.PaymentList.get_exchange_rate", return_value=1.0)
 def test_create_top_up_arrange_beneficiary_claimed_between_validation_and_copy_act_run_task_assert_shrink_logged(
     get_exchange_rate_mock: Any,
     user: User,
     business_area: Any,
     cycle: ProgramCycle,
-    source_pp: PaymentPlan,
+    source_pp: PaymentList,
     three_payments: list[Payment],
     django_capture_on_commit_callbacks: Any,
     caplog: Any,
@@ -297,12 +300,12 @@ def test_create_top_up_arrange_beneficiary_claimed_between_validation_and_copy_a
     """A beneficiary claimed by a sibling Top-Up after validation is skipped, but never silently."""
     claimed, funded, _other = three_payments
     amounts = {claimed.unicef_id: Decimal("10.00"), funded.unicef_id: Decimal("30.00")}
-    top_up = PaymentPlanService(source_pp).create_top_up(user, payment_plan_group=top_up_group, amounts=amounts)
-    competing_pp = PaymentPlanFactory(
+    top_up = PaymentListService(source_pp).create_top_up(user, payment_plan=top_up_group, amounts=amounts)
+    competing_pp = PaymentListFactory(
         business_area=business_area,
         program_cycle=cycle,
-        plan_type=PaymentPlan.PlanType.TOP_UP,
-        source_payment_plan=source_pp,
+        plan_type=PaymentList.PlanType.TOP_UP,
+        source_payment_list=source_pp,
     )
     PaymentFactory(parent=competing_pp, household=claimed.household, status=Payment.STATUS_PENDING)
 
@@ -310,7 +313,7 @@ def test_create_top_up_arrange_beneficiary_claimed_between_validation_and_copy_a
         caplog.at_level(logging.WARNING),
         django_capture_on_commit_callbacks(execute=True),
     ):
-        prepare_child_payment_plan_async_task(
+        prepare_child_payment_list_async_task(
             top_up, extra_config={"amounts": {unicef_id: str(amount) for unicef_id, amount in amounts.items()}}
         )
 

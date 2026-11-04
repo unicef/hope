@@ -17,13 +17,13 @@ from extras.test_utils.factories import (
     IndividualFactory,
     PartnerFactory,
     PaymentFactory,
-    PaymentPlanFactory,
+    PaymentListFactory,
     ProgramFactory,
     RegistrationDataImportFactory,
     UserFactory,
 )
 from hope.apps.account.permissions import Permissions
-from hope.models import PaymentPlan, Program, Survey
+from hope.models import PaymentList, Program, Survey
 
 pytestmark = pytest.mark.django_db
 
@@ -79,9 +79,9 @@ def program_finished(business_area):
 
 
 @pytest.fixture
-def payment_plan(user, business_area, program_active):
-    return PaymentPlanFactory(
-        status=PaymentPlan.Status.TP_LOCKED,
+def payment_list(user, business_area, program_active):
+    return PaymentListFactory(
+        status=PaymentList.Status.TP_LOCKED,
         created_by=user,
         business_area=business_area,
         program_cycle=program_active.cycles.first(),
@@ -169,9 +169,9 @@ def household_3(program_active, business_area, rdi, individual_hoh_3):
 
 
 @pytest.fixture
-def payment_for_hh_1(payment_plan, program_active, business_area, household_1, individual_hoh_1):
+def payment_for_hh_1(payment_list, program_active, business_area, household_1, individual_hoh_1):
     return PaymentFactory(
-        parent=payment_plan,
+        parent=payment_list,
         program=program_active,
         household=household_1,
         business_area=business_area,
@@ -180,9 +180,9 @@ def payment_for_hh_1(payment_plan, program_active, business_area, household_1, i
 
 
 @pytest.fixture
-def payment_for_hh_2(payment_plan, program_active, business_area, household_2, individual_hoh_2):
+def payment_for_hh_2(payment_list, program_active, business_area, household_2, individual_hoh_2):
     return PaymentFactory(
-        parent=payment_plan,
+        parent=payment_list,
         program=program_active,
         household=household_2,
         business_area=business_area,
@@ -191,9 +191,9 @@ def payment_for_hh_2(payment_plan, program_active, business_area, household_2, i
 
 
 @pytest.fixture
-def payment_for_hh_3(payment_plan, program_active, business_area, household_3, individual_hoh_3):
+def payment_for_hh_3(payment_list, program_active, business_area, household_3, individual_hoh_3):
     return PaymentFactory(
-        parent=payment_plan,
+        parent=payment_list,
         program=program_active,
         household=household_3,
         business_area=business_area,
@@ -215,8 +215,8 @@ def msg_1(program_active, business_area, user):
         body="MSG body",
         created_by=user,
         sampling_type=Survey.SAMPLING_FULL_LIST,
-        payment_plan=PaymentPlanFactory(
-            status=PaymentPlan.Status.TP_LOCKED,
+        payment_list=PaymentListFactory(
+            status=PaymentList.Status.TP_LOCKED,
             created_by=user,
             business_area=business_area,
             program_cycle=program_active.cycles.first(),
@@ -233,8 +233,8 @@ def msg_2(program_active, business_area, user):
         body="MSG body 2",
         created_by=user,
         sampling_type=Survey.SAMPLING_RANDOM,
-        payment_plan=PaymentPlanFactory(
-            status=PaymentPlan.Status.TP_LOCKED,
+        payment_list=PaymentListFactory(
+            status=PaymentList.Status.TP_LOCKED,
             created_by=user,
             business_area=business_area,
             program_cycle=program_active.cycles.first(),
@@ -285,9 +285,9 @@ def msg_created_2020(program_active, business_area, user):
 
 
 @pytest.fixture
-def payment_plan_empty(user, business_area, program_active):
-    return PaymentPlanFactory(
-        status=PaymentPlan.Status.TP_LOCKED,
+def payment_list_empty(user, business_area, program_active):
+    return PaymentListFactory(
+        status=PaymentList.Status.TP_LOCKED,
         created_by=user,
         business_area=business_area,
         program_cycle=program_active.cycles.first(),
@@ -451,7 +451,7 @@ def test_msg_details_returns_data_with_permission(
     assert "id" in resp_data
     assert resp_data["body"] == "MSG body"
     assert resp_data["households"] is not None
-    assert resp_data["payment_plan"] is not None
+    assert resp_data["payment_list"] is not None
     assert resp_data["registration_data_import"] is None
     assert resp_data["sampling_type"] == Survey.SAMPLING_FULL_LIST
     assert resp_data["full_list_arguments"]["excluded_admin_areas"] == []
@@ -648,7 +648,7 @@ def test_create_new_message_by_target_population_full_list(
     user,
     business_area,
     program_active,
-    payment_plan,
+    payment_list,
     households,
     url_list,
 ) -> None:
@@ -676,7 +676,7 @@ def test_create_new_message_by_target_population_full_list(
                 "body": "Thank you for tests! Looks Good To Me!",
                 "sampling_type": Survey.SAMPLING_FULL_LIST,
                 "full_list_arguments": {"excluded_admin_areas": []},
-                "payment_plan": str(payment_plan.id),
+                "payment_list": str(payment_list.id),
             },
             format="json",
         )
@@ -691,7 +691,7 @@ def test_create_new_message_target_population_random(
     user,
     business_area,
     program_active,
-    payment_plan,
+    payment_list,
     households,
     url_list,
 ) -> None:
@@ -725,7 +725,7 @@ def test_create_new_message_target_population_random(
                     "confidence_interval": 0.9,
                     "excluded_admin_areas": [],
                 },
-                "payment_plan": str(payment_plan.id),
+                "payment_list": str(payment_list.id),
             },
             format="json",
         )
@@ -734,13 +734,13 @@ def test_create_new_message_target_population_random(
     assert resp_data["sample_size"] == 1
 
 
-def test_create_message_validation_error_payment_plan_no_recipients(
+def test_create_message_validation_error_payment_list_no_recipients(
     create_user_role_with_permissions: Any,
     authenticated_client,
     user,
     business_area,
     program_active,
-    payment_plan_empty,
+    payment_list_empty,
     url_list,
 ) -> None:
     create_user_role_with_permissions(
@@ -756,7 +756,7 @@ def test_create_message_validation_error_payment_plan_no_recipients(
             "body": "Thank you for tests!",
             "sampling_type": Survey.SAMPLING_FULL_LIST,
             "full_list_arguments": {"excluded_admin_areas": []},
-            "payment_plan": str(payment_plan_empty.pk),
+            "payment_list": str(payment_list_empty.pk),
         },
         format="json",
     )
@@ -839,7 +839,7 @@ def test_sample_size(
     user,
     business_area,
     program_active,
-    payment_plan,
+    payment_list,
     households,
 ) -> None:
     create_user_role_with_permissions(
@@ -856,7 +856,7 @@ def test_sample_size(
         },
     )
     data = {
-        "payment_plan": str(payment_plan.pk),
+        "payment_list": str(payment_list.pk),
         "sampling_type": Survey.SAMPLING_RANDOM,
         "random_sampling_arguments": {
             "age": {"max": 80, "min": 15},

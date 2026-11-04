@@ -21,7 +21,7 @@ from hope.models import (
     FlexibleAttribute,
     Household,
     Partner,
-    PaymentPlan,
+    PaymentList,
     PaymentPlanPurpose,
     PeriodicFieldData,
     Program,
@@ -423,7 +423,7 @@ class ProgramDetailSerializer(AdminUrlSerializerMixin, ProgramListSerializer):
         return obj.registration_imports.count() if hasattr(obj, "registration_imports") else 0
 
     def get_target_populations_count(self, obj: Program) -> int:
-        return PaymentPlan.objects.filter(program_cycle__program=obj).count()
+        return PaymentList.objects.filter(program_cycle__program=obj).count()
 
     @extend_schema_field(serializers.ListSerializer(child=PartnerForProgramSerializer()))
     def get_partners(self, obj: Program) -> ReturnDict:
@@ -678,12 +678,12 @@ class ProgramUpdateSerializer(serializers.ModelSerializer):
     def validate_payment_plan_purposes(self, value: list) -> list:
         incoming_ids = {p.pk for p in value}
         blocked_for_removal = self.instance.payment_plan_purposes.exclude(id__in=incoming_ids).filter(
-            payment_plans__program_cycle__program=self.instance
+            payment_lists__program_cycle__program=self.instance
         )
         if blocked_for_removal.exists():
             names = ", ".join(blocked_for_removal.values_list("name", flat=True))
             raise serializers.ValidationError(
-                f"Cannot remove Payment Plan Purposes that are in use by a Payment Plan: {names}."
+                f"Cannot remove Payment Plan Purposes that are in use by a Payment List: {names}."
             )
         if len(incoming_ids) > 10:
             raise serializers.ValidationError("A program can have at most 10 Payment Plan Purposes.")

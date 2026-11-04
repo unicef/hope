@@ -66,7 +66,7 @@
 <table>
   <tbody>
     <tr>
-      <td colspan="6" class="header">COMPONENTS</td>
+      <td colspan="6" class="header">PAYMENT LISTS</td>
     </tr>
     <tr>
       <td>ID</td>
@@ -76,14 +76,14 @@
       <td>{% if is_social_worker_program %}People{% else %}Households{% endif %}</td>
       <td>Entitlement ({{ currency }})</td>
     </tr>
-    {% for payment_plan in payment_plans %}
+    {% for payment_list in payment_lists %}
     <tr>
-      <td>{{ payment_plan.unicef_id }}</td>
-      <td>{{ payment_plan.name }}</td>
-      <td>{{ payment_plan.delivery_mechanism|default_if_none:"-" }}</td>
+      <td>{{ payment_list.unicef_id }}</td>
+      <td>{{ payment_list.name }}</td>
+      <td>{{ payment_list.delivery_mechanism|default_if_none:"-" }}</td>
       <td>{{ dispersion_start_date|date:"j N Y" }} - {{ dispersion_end_date|date:"j N Y" }}</td>
-      <td>{% if is_social_worker_program %}{{ payment_plan.total_individuals_count }}{% else %}{{ payment_plan.total_households_count }}{% endif %}</td>
-      <td>{{ payment_plan.total_entitled_quantity|default_if_none:"0" }}</td>
+      <td>{% if is_social_worker_program %}{{ payment_list.total_individuals_count }}{% else %}{{ payment_list.total_households_count }}{% endif %}</td>
+      <td>{{ payment_list.total_entitled_quantity|default_if_none:"0" }}</td>
     </tr>
     {% endfor %}
   </tbody>

@@ -1,7 +1,7 @@
+import { PaymentListStatusEnum } from '@restgenerated/models/PaymentListStatusEnum';
 import { PaymentPlanStatusEnum } from '@restgenerated/models/PaymentPlanStatusEnum';
-import { PaymentPlanGroupStatusEnum } from '@restgenerated/models/PaymentPlanGroupStatusEnum';
-import { PaymentPlanDetailBackgroundActionStatusEnum } from '@restgenerated/models/PaymentPlanDetailBackgroundActionStatusEnum';
-import { PaymentPlanBackgroundActionStatusEnum } from '@restgenerated/models/PaymentPlanBackgroundActionStatusEnum';
+import { PaymentListDetailBackgroundActionStatusEnum } from '@restgenerated/models/PaymentListDetailBackgroundActionStatusEnum';
+import { PaymentListBackgroundActionStatusEnum } from '@restgenerated/models/PaymentListBackgroundActionStatusEnum';
 import type { BeneficiaryGroup } from '@restgenerated/models/BeneficiaryGroup';
 
 export const PROGRAM_STATE_FILTER = {
@@ -25,51 +25,48 @@ export const AUTHORIZED_USER_ROLE_CHOICES = [
   { value: 'canMerge', label: 'Authorized for Merge' },
 ] as const;
 
-export const PAYMENT_PLAN_STATES = {
+export const PAYMENT_LIST_STATES = {
+  [PaymentListStatusEnum.OPEN]: 'Open',
+  [PaymentListStatusEnum.LOCKED]: 'Locked',
+  [PaymentListStatusEnum.LOCKED_FSP]: 'FSP Locked',
+  [PaymentListStatusEnum.IN_APPROVAL]: 'In Approval',
+  [PaymentListStatusEnum.IN_AUTHORIZATION]: 'In Authorization',
+  [PaymentListStatusEnum.IN_REVIEW]: 'In Review',
+  [PaymentListStatusEnum.ACCEPTED]: 'Accepted',
+  [PaymentListStatusEnum.FINISHED]: 'Finished',
+  [PaymentListStatusEnum.READY_FOR_CLOSURE]: 'Ready for Closure',
+  [PaymentListStatusEnum.CLOSED]: 'Closed',
+  ['ASSIGNED']: 'Assigned',
+};
+
+export const PAYMENT_PLAN_STATES: Record<PaymentPlanStatusEnum, string> = {
   [PaymentPlanStatusEnum.OPEN]: 'Open',
   [PaymentPlanStatusEnum.LOCKED]: 'Locked',
-  [PaymentPlanStatusEnum.LOCKED_FSP]: 'FSP Locked',
   [PaymentPlanStatusEnum.IN_APPROVAL]: 'In Approval',
   [PaymentPlanStatusEnum.IN_AUTHORIZATION]: 'In Authorization',
   [PaymentPlanStatusEnum.IN_REVIEW]: 'In Review',
   [PaymentPlanStatusEnum.ACCEPTED]: 'Accepted',
+  [PaymentPlanStatusEnum.ABORTED]: 'Aborted',
   [PaymentPlanStatusEnum.FINISHED]: 'Finished',
   [PaymentPlanStatusEnum.READY_FOR_CLOSURE]: 'Ready for Closure',
   [PaymentPlanStatusEnum.CLOSED]: 'Closed',
-  ['ASSIGNED']: 'Assigned',
 };
 
-export const PAYMENT_PLAN_GROUP_STATES: Record<
-  PaymentPlanGroupStatusEnum,
-  string
-> = {
-  [PaymentPlanGroupStatusEnum.OPEN]: 'Open',
-  [PaymentPlanGroupStatusEnum.LOCKED]: 'Locked',
-  [PaymentPlanGroupStatusEnum.IN_APPROVAL]: 'In Approval',
-  [PaymentPlanGroupStatusEnum.IN_AUTHORIZATION]: 'In Authorization',
-  [PaymentPlanGroupStatusEnum.IN_REVIEW]: 'In Review',
-  [PaymentPlanGroupStatusEnum.ACCEPTED]: 'Accepted',
-  [PaymentPlanGroupStatusEnum.ABORTED]: 'Aborted',
-  [PaymentPlanGroupStatusEnum.FINISHED]: 'Finished',
-  [PaymentPlanGroupStatusEnum.READY_FOR_CLOSURE]: 'Ready for Closure',
-  [PaymentPlanGroupStatusEnum.CLOSED]: 'Closed',
-};
-
-export const PAYMENT_PLAN_BACKGROUND_ACTION_STATES = {
-  [PaymentPlanBackgroundActionStatusEnum.RULE_ENGINE_RUN]:
+export const PAYMENT_LIST_BACKGROUND_ACTION_STATES = {
+  [PaymentListBackgroundActionStatusEnum.RULE_ENGINE_RUN]:
     'Entitlement Formula Run',
-  [PaymentPlanBackgroundActionStatusEnum.RULE_ENGINE_ERROR]:
+  [PaymentListBackgroundActionStatusEnum.RULE_ENGINE_ERROR]:
     'Entitlement Formula Error',
-  [PaymentPlanBackgroundActionStatusEnum.XLSX_EXPORTING]: 'XLSX Exporting',
-  [PaymentPlanBackgroundActionStatusEnum.XLSX_EXPORT_ERROR]:
+  [PaymentListBackgroundActionStatusEnum.XLSX_EXPORTING]: 'XLSX Exporting',
+  [PaymentListBackgroundActionStatusEnum.XLSX_EXPORT_ERROR]:
     'XLSX Export Error',
-  [PaymentPlanBackgroundActionStatusEnum.XLSX_IMPORTING_ENTITLEMENTS]:
+  [PaymentListBackgroundActionStatusEnum.XLSX_IMPORTING_ENTITLEMENTS]:
     'XLSX Importing Entitlements',
-  [PaymentPlanBackgroundActionStatusEnum.XLSX_IMPORTING_RECONCILIATION]:
+  [PaymentListBackgroundActionStatusEnum.XLSX_IMPORTING_RECONCILIATION]:
     'XLSX Importing Reconciliation',
-  [PaymentPlanBackgroundActionStatusEnum.XLSX_IMPORT_ERROR]:
+  [PaymentListBackgroundActionStatusEnum.XLSX_IMPORT_ERROR]:
     'XLSX Import Error',
-  [PaymentPlanBackgroundActionStatusEnum.XLSX_IMPORTING_FSP_EXTRA_FIELDS]:
+  [PaymentListBackgroundActionStatusEnum.XLSX_IMPORTING_FSP_EXTRA_FIELDS]:
     'XLSX Importing FSP Extra Fields',
 };
 
@@ -330,12 +327,12 @@ export const generateTableOrderOptionsMember = (
   ];
 };
 
-export const PAYMENT_PLAN_BACKGROUND_ACTION_ERROR_STATUSES: PaymentPlanDetailBackgroundActionStatusEnum[] =
+export const PAYMENT_LIST_BACKGROUND_ACTION_ERROR_STATUSES: PaymentListDetailBackgroundActionStatusEnum[] =
   [
-    PaymentPlanDetailBackgroundActionStatusEnum.EXCLUDE_BENEFICIARIES_ERROR,
-    PaymentPlanDetailBackgroundActionStatusEnum.XLSX_EXPORT_ERROR,
-    PaymentPlanDetailBackgroundActionStatusEnum.XLSX_IMPORT_ERROR,
-    PaymentPlanDetailBackgroundActionStatusEnum.RULE_ENGINE_ERROR,
-    PaymentPlanDetailBackgroundActionStatusEnum.SEND_TO_PAYMENT_GATEWAY_ERROR,
-    PaymentPlanDetailBackgroundActionStatusEnum.REBUILD_ERROR,
+    PaymentListDetailBackgroundActionStatusEnum.EXCLUDE_BENEFICIARIES_ERROR,
+    PaymentListDetailBackgroundActionStatusEnum.XLSX_EXPORT_ERROR,
+    PaymentListDetailBackgroundActionStatusEnum.XLSX_IMPORT_ERROR,
+    PaymentListDetailBackgroundActionStatusEnum.RULE_ENGINE_ERROR,
+    PaymentListDetailBackgroundActionStatusEnum.SEND_TO_PAYMENT_GATEWAY_ERROR,
+    PaymentListDetailBackgroundActionStatusEnum.REBUILD_ERROR,
   ];

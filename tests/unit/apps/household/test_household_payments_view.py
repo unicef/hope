@@ -13,14 +13,14 @@ from extras.test_utils.factories import (
     IndividualFactory,
     PartnerFactory,
     PaymentFactory,
+    PaymentListFactory,
     PaymentPlanFactory,
-    PaymentPlanGroupFactory,
     ProgramCycleFactory,
     ProgramFactory,
     UserFactory,
 )
 from hope.apps.account.permissions import Permissions
-from hope.models import PaymentPlan, Program
+from hope.models import PaymentList, Program
 
 pytestmark = pytest.mark.django_db
 
@@ -39,11 +39,11 @@ def payments_context(api_client: Any) -> dict[str, Any]:
 
     first_cycle = ProgramCycleFactory(program=program, title="Beta cycle")
     first = PaymentFactory(
-        parent=PaymentPlanFactory(
-            status=PaymentPlan.Status.ACCEPTED,
+        parent=PaymentListFactory(
+            status=PaymentList.Status.ACCEPTED,
             business_area=afghanistan,
             program_cycle=first_cycle,
-            payment_plan_group=PaymentPlanGroupFactory(cycle=first_cycle, name="Beta group"),
+            payment_plan=PaymentPlanFactory(cycle=first_cycle, name="Beta group"),
         ),
         household=household,
         business_area=afghanistan,
@@ -55,11 +55,11 @@ def payments_context(api_client: Any) -> dict[str, Any]:
     )
     second_cycle = ProgramCycleFactory(program=program, title="Alpha cycle")
     second = PaymentFactory(
-        parent=PaymentPlanFactory(
-            status=PaymentPlan.Status.ACCEPTED,
+        parent=PaymentListFactory(
+            status=PaymentList.Status.ACCEPTED,
             business_area=afghanistan,
             program_cycle=second_cycle,
-            payment_plan_group=PaymentPlanGroupFactory(cycle=second_cycle, name="Alpha group"),
+            payment_plan=PaymentPlanFactory(cycle=second_cycle, name="Alpha group"),
         ),
         household=household,
         business_area=afghanistan,
@@ -71,11 +71,11 @@ def payments_context(api_client: Any) -> dict[str, Any]:
     )
     third_cycle = ProgramCycleFactory(program=program, title="Gamma cycle")
     third = PaymentFactory(
-        parent=PaymentPlanFactory(
-            status=PaymentPlan.Status.ACCEPTED,
+        parent=PaymentListFactory(
+            status=PaymentList.Status.ACCEPTED,
             business_area=afghanistan,
             program_cycle=third_cycle,
-            payment_plan_group=PaymentPlanGroupFactory(cycle=third_cycle, name="Gamma group"),
+            payment_plan=PaymentPlanFactory(cycle=third_cycle, name="Gamma group"),
         ),
         household=household,
         business_area=afghanistan,
@@ -173,7 +173,7 @@ def test_household_payments_ordering_by_entitlement_quantity_descending(
     assert results[2]["entitlement_quantity"] == "10.00"
 
 
-def test_household_payments_ordering_by_payment_plan_cycle_ascending(
+def test_household_payments_ordering_by_payment_list_cycle_ascending(
     create_user_role_with_permissions: Any,
     payments_context: dict[str, Any],
     payments_url: str,
@@ -185,16 +185,16 @@ def test_household_payments_ordering_by_payment_plan_cycle_ascending(
         program=payments_context["program"],
     )
 
-    response = payments_context["api_client"].get(payments_url, {"ordering": "payment_plan_cycle"})
+    response = payments_context["api_client"].get(payments_url, {"ordering": "payment_list_cycle"})
 
     assert response.status_code == status.HTTP_200_OK
     results = response.json()["results"]
-    assert results[0]["payment_plan_cycle"] == "Alpha cycle"
-    assert results[1]["payment_plan_cycle"] == "Beta cycle"
-    assert results[2]["payment_plan_cycle"] == "Gamma cycle"
+    assert results[0]["payment_list_cycle"] == "Alpha cycle"
+    assert results[1]["payment_list_cycle"] == "Beta cycle"
+    assert results[2]["payment_list_cycle"] == "Gamma cycle"
 
 
-def test_household_payments_ordering_by_payment_plan_cycle_descending(
+def test_household_payments_ordering_by_payment_list_cycle_descending(
     create_user_role_with_permissions: Any,
     payments_context: dict[str, Any],
     payments_url: str,
@@ -206,16 +206,16 @@ def test_household_payments_ordering_by_payment_plan_cycle_descending(
         program=payments_context["program"],
     )
 
-    response = payments_context["api_client"].get(payments_url, {"ordering": "-payment_plan_cycle"})
+    response = payments_context["api_client"].get(payments_url, {"ordering": "-payment_list_cycle"})
 
     assert response.status_code == status.HTTP_200_OK
     results = response.json()["results"]
-    assert results[0]["payment_plan_cycle"] == "Gamma cycle"
-    assert results[1]["payment_plan_cycle"] == "Beta cycle"
-    assert results[2]["payment_plan_cycle"] == "Alpha cycle"
+    assert results[0]["payment_list_cycle"] == "Gamma cycle"
+    assert results[1]["payment_list_cycle"] == "Beta cycle"
+    assert results[2]["payment_list_cycle"] == "Alpha cycle"
 
 
-def test_household_payments_ordering_by_payment_plan_group(
+def test_household_payments_ordering_by_payment_plan(
     create_user_role_with_permissions: Any,
     payments_context: dict[str, Any],
     payments_url: str,
@@ -227,13 +227,13 @@ def test_household_payments_ordering_by_payment_plan_group(
         program=payments_context["program"],
     )
 
-    response = payments_context["api_client"].get(payments_url, {"ordering": "payment_plan_group"})
+    response = payments_context["api_client"].get(payments_url, {"ordering": "payment_plan"})
 
     assert response.status_code == status.HTTP_200_OK
     results = response.json()["results"]
-    assert results[0]["payment_plan_group"] == "Alpha group"
-    assert results[1]["payment_plan_group"] == "Beta group"
-    assert results[2]["payment_plan_group"] == "Gamma group"
+    assert results[0]["payment_plan"] == "Alpha group"
+    assert results[1]["payment_plan"] == "Beta group"
+    assert results[2]["payment_plan"] == "Gamma group"
 
 
 def test_household_payments_ordering_by_hoh_full_name(

@@ -377,7 +377,7 @@ FLAGS_STATE_LOGGING = DEBUG
 FLAGS = {
     "SILK_MIDDLEWARE": [],
     "ALLOW_ACCOUNTABILITY_MODULE": [{"condition": "boolean", "value": False}],
-    "WU_PAYMENT_PLAN_INVOICES_NOTIFICATIONS_ENABLED": [{"condition": "boolean", "value": False}],
+    "WU_PAYMENT_LIST_INVOICES_NOTIFICATIONS_ENABLED": [{"condition": "boolean", "value": False}],
     "VISION_INTEGRATION_ACTIVE": [{"condition": "boolean", "value": False}],
     "IS_ROOT": [{"condition": "boolean", "value": False}],
 }

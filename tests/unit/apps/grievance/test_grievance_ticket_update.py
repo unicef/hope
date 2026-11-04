@@ -32,7 +32,7 @@ from extras.test_utils.factories.account import AdminAreaLimitedToFactory
 from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory, CountryFactory
 from extras.test_utils.factories.payment import (
     PaymentFactory,
-    PaymentPlanFactory,
+    PaymentListFactory,
     PaymentVerificationFactory,
     PaymentVerificationPlanFactory,
     PaymentVerificationSummaryFactory,
@@ -870,18 +870,18 @@ def test_update_payment_verification_ticket_with_new_received_amount_extras(
 
     household = HouseholdFactory(business_area=afghanistan, program=program)
 
-    payment_plan = PaymentPlanFactory(
+    payment_list = PaymentListFactory(
         name="TEST",
         program_cycle=program.cycles.first(),
         business_area=afghanistan,
     )
-    PaymentVerificationSummaryFactory(payment_plan=payment_plan)
+    PaymentVerificationSummaryFactory(payment_list=payment_list)
     payment_verification_plan = PaymentVerificationPlanFactory(
-        payment_plan=payment_plan,
+        payment_list=payment_list,
         status=PaymentVerificationPlan.STATUS_ACTIVE,
     )
     payment = PaymentFactory(
-        parent=payment_plan,
+        parent=payment_list,
         household=household,
         currency=CurrencyFactory(code="PLN", name="Polish Zloty"),
         program=program,

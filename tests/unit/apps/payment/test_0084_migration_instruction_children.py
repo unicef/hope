@@ -1,25 +1,29 @@
 import importlib
 from types import SimpleNamespace
+from typing import Any
 
 from django.db import connection
+from django.db.migrations.loader import MigrationLoader
 import pytest
 
-from extras.test_utils.factories import PaymentPlanFactory, PaymentPlanGroupFactory, ProgramCycleFactory
+from extras.test_utils.factories import PaymentListFactory, PaymentPlanFactory, ProgramCycleFactory
 from extras.test_utils.factories.core import CurrencyFactory
 from extras.test_utils.factories.payment import FinancialServiceProviderFactory, FollowUpInstructionFactory
-from hope.models import FollowUpInstruction, PaymentPlan, PaymentPlanGroup
+from hope.models import FollowUpInstruction, PaymentList, PaymentPlan
 
 pytestmark = pytest.mark.django_db
 
 migration_module = importlib.import_module("hope.apps.payment.migrations.0084_migration")
 
 
-def build_apps() -> SimpleNamespace:
+@pytest.fixture
+def historical_apps(settings: Any) -> SimpleNamespace:
+    """The models just before the payment list rename, under the names 0084 uses for them."""
+    settings.MIGRATION_MODULES = {}
+    apps = MigrationLoader(connection).project_state(("payment", "0086_migration")).apps
+    names_in_0084 = {"PaymentPlan": "PaymentList", "PaymentPlanGroup": "PaymentPlan"}
     return SimpleNamespace(
-        get_model=lambda app_label, model_name: {
-            ("payment", "FollowUpInstruction"): FollowUpInstruction,
-            ("payment", "PaymentPlan"): PaymentPlan,
-        }[(app_label, model_name)]
+        get_model=lambda app_label, model_name: apps.get_model(app_label, names_in_0084.get(model_name, model_name))
     )
 
 
@@ -33,8 +37,8 @@ def without_plan_owner_constraint() -> None:
 
 
 @pytest.fixture
-def source_group(without_plan_owner_constraint: None) -> PaymentPlanGroup:
-    return PaymentPlanGroupFactory(
+def source_payment_plan(without_plan_owner_constraint: None) -> PaymentPlan:
+    return PaymentPlanFactory(
         cycle=ProgramCycleFactory(),
         currency=CurrencyFactory(code="EUR", name="Euro"),
         financial_service_provider=FinancialServiceProviderFactory(),
@@ -42,72 +46,81 @@ def source_group(without_plan_owner_constraint: None) -> PaymentPlanGroup:
 
 
 @pytest.fixture
-def source_payment_plan(source_group: PaymentPlanGroup) -> PaymentPlan:
-    return PaymentPlanFactory(program_cycle=source_group.cycle, payment_plan_group=source_group)
+def source_payment_list(source_payment_plan: PaymentPlan) -> PaymentList:
+    return PaymentListFactory(program_cycle=source_payment_plan.cycle, payment_plan=source_payment_plan)
 
 
 @pytest.fixture
-def instruction(source_group: PaymentPlanGroup) -> FollowUpInstruction:
-    return FollowUpInstructionFactory(program=source_group.cycle.program)
+def instruction(source_payment_plan: PaymentPlan) -> FollowUpInstruction:
+    return FollowUpInstructionFactory(program=source_payment_plan.cycle.program)
 
 
 @pytest.fixture
 def instruction_child_in_source_group(
-    source_group: PaymentPlanGroup, source_payment_plan: PaymentPlan, instruction: FollowUpInstruction
-) -> PaymentPlan:
-    child_plan = PaymentPlanFactory(
-        program_cycle=source_group.cycle,
+    source_payment_plan: PaymentPlan, source_payment_list: PaymentList, instruction: FollowUpInstruction
+) -> PaymentList:
+    child_plan = PaymentListFactory(
+        program_cycle=source_payment_plan.cycle,
         follow_up_instruction=instruction,
-        source_payment_plan=source_payment_plan,
-        plan_type=PaymentPlan.PlanType.FOLLOW_UP,
+        source_payment_list=source_payment_list,
+        plan_type=PaymentList.PlanType.FOLLOW_UP,
     )
-    PaymentPlan.objects.filter(pk=child_plan.pk).update(payment_plan_group=source_group)
+    PaymentList.objects.filter(pk=child_plan.pk).update(payment_plan=source_payment_plan)
     return child_plan
 
 
 @pytest.fixture
 def instruction_child_outside_group(
-    source_group: PaymentPlanGroup, source_payment_plan: PaymentPlan, instruction: FollowUpInstruction
-) -> PaymentPlan:
-    return PaymentPlanFactory(
-        program_cycle=source_group.cycle,
+    source_payment_plan: PaymentPlan, source_payment_list: PaymentList, instruction: FollowUpInstruction
+) -> PaymentList:
+    return PaymentListFactory(
+        program_cycle=source_payment_plan.cycle,
         follow_up_instruction=instruction,
-        source_payment_plan=source_payment_plan,
-        plan_type=PaymentPlan.PlanType.FOLLOW_UP,
+        source_payment_list=source_payment_list,
+        plan_type=PaymentList.PlanType.FOLLOW_UP,
     )
 
 
 def test_migration_gives_instruction_the_fsp_and_currency_of_its_childs_group(
-    instruction_child_in_source_group: PaymentPlan, instruction: FollowUpInstruction, source_group: PaymentPlanGroup
+    historical_apps: SimpleNamespace,
+    instruction_child_in_source_group: PaymentList,
+    instruction: FollowUpInstruction,
+    source_payment_plan: PaymentPlan,
 ) -> None:
-    migration_module.move_instruction_children_out_of_groups(build_apps(), schema_editor=None)
+    migration_module.move_instruction_children_out_of_groups(historical_apps, schema_editor=None)
 
     instruction.refresh_from_db()
-    assert instruction.financial_service_provider == source_group.financial_service_provider
-    assert instruction.currency == source_group.currency
+    assert instruction.financial_service_provider == source_payment_plan.financial_service_provider
+    assert instruction.currency == source_payment_plan.currency
 
 
-def test_migration_takes_instruction_child_out_of_its_group(instruction_child_in_source_group: PaymentPlan) -> None:
-    migration_module.move_instruction_children_out_of_groups(build_apps(), schema_editor=None)
+def test_migration_takes_instruction_child_out_of_its_group(
+    historical_apps: SimpleNamespace,
+    instruction_child_in_source_group: PaymentList,
+) -> None:
+    migration_module.move_instruction_children_out_of_groups(historical_apps, schema_editor=None)
 
     instruction_child_in_source_group.refresh_from_db()
-    assert instruction_child_in_source_group.payment_plan_group_id is None
+    assert instruction_child_in_source_group.payment_plan_id is None
 
 
 def test_migration_leaves_plan_of_the_group_in_it(
-    instruction_child_in_source_group: PaymentPlan, source_payment_plan: PaymentPlan, source_group: PaymentPlanGroup
+    historical_apps: SimpleNamespace,
+    instruction_child_in_source_group: PaymentList,
+    source_payment_list: PaymentList,
+    source_payment_plan: PaymentPlan,
 ) -> None:
-    migration_module.move_instruction_children_out_of_groups(build_apps(), schema_editor=None)
+    migration_module.move_instruction_children_out_of_groups(historical_apps, schema_editor=None)
 
-    source_payment_plan.refresh_from_db()
-    assert source_payment_plan.payment_plan_group == source_group
+    source_payment_list.refresh_from_db()
+    assert source_payment_list.payment_plan == source_payment_plan
 
 
 def test_reverse_migration_returns_instruction_child_to_its_source_plans_group(
-    instruction_child_outside_group: PaymentPlan, source_group: PaymentPlanGroup
+    historical_apps: SimpleNamespace, instruction_child_outside_group: PaymentList, source_payment_plan: PaymentPlan
 ) -> None:
     with connection.cursor() as cursor:
-        migration_module.put_instruction_children_back_into_groups(build_apps(), schema_editor=cursor)
+        migration_module.put_instruction_children_back_into_groups(historical_apps, schema_editor=cursor)
 
     instruction_child_outside_group.refresh_from_db()
-    assert instruction_child_outside_group.payment_plan_group == source_group
+    assert instruction_child_outside_group.payment_plan == source_payment_plan

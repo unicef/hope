@@ -3,10 +3,10 @@
 {% block content %}
   <p class="messagelist warning">
     {% if vision_receipt_unconfirmed %}
-      HOPE could not confirm that this Payment Plan Group was successfully sent to Vision. The request may have
+      HOPE could not confirm that this Payment Plan was successfully sent to Vision. The request may have
       failed, or processing may have stopped before confirmation was recorded.
     {% endif %}
-    Assigning these FC headers will release this Payment Plan Group and its Payment Plans, then send eligible plans to
+    Assigning these FC headers will release this Payment Plan and its Payment Lists, then send eligible payment lists to
     Payment Gateway.
   </p>
   <form method="post">
@@ -18,6 +18,6 @@
       {{ form.funds_commitment_headers }}
     </div>
     <input type="submit" value="Assign FC Headers and Continue" class="default">
-    <a href="{% url 'admin:payment_paymentplangroup_change' payment_plan_group.id %}">Cancel</a>
+    <a href="{% url 'admin:payment_paymentplan_change' payment_plan.id %}">Cancel</a>
   </form>
 {% endblock content %}

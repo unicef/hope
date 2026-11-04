@@ -48,11 +48,11 @@ function SurveyDetails({ survey }: SurveyDetailsProps): ReactElement {
           </ResponsiveGrid>
           <ResponsiveGrid size="quarter" mobileSize="half">
             <LabelizedField label={t('Target Population')}>
-              {survey?.paymentPlan ? (
+              {survey?.paymentList ? (
                 <BlackLink
-                  to={`/${baseUrl}/target-population/${survey?.paymentPlan}`}
+                  to={`/${baseUrl}/target-population/${survey?.paymentList}`}
                 >
-                  {survey?.paymentPlanName}
+                  {survey?.paymentListName}
                 </BlackLink>
               ) : (
                 '-'

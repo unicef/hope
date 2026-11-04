@@ -15,7 +15,7 @@ class PaymentModuleDetails(BaseComponents):
     label_end_date = 'div[data-cy="label-End Date"]'
     label_dispersion_start_date = 'div[data-cy="label-Dispersion Start Date"]'
     label_dispersion_end_date = 'div[data-cy="label-Dispersion End Date"]'
-    label_related_follow_up_payment_plans = 'div[data-cy="label-Related Follow-Up Payment Plans"]'
+    label_related_follow_up_payment_lists = 'div[data-cy="label-Related Follow-Up Payment Lists"]'
     button_set_up_fsp = 'a[data-cy="button-set-up-fsp"]'
     button_create_exclusions = 'button[data-cy="button-create-exclusions"]'
     button_save_exclusions = 'button[data-cy="button-save-exclusions"]'
@@ -118,8 +118,8 @@ class PaymentModuleDetails(BaseComponents):
     def get_label_dispersion_end_date(self) -> WebElement:
         return self.wait_for(self.label_dispersion_end_date)
 
-    def get_label_related_follow_up_payment_plans(self) -> WebElement:
-        return self.wait_for(self.label_related_follow_up_payment_plans)
+    def get_label_related_follow_up_payment_lists(self) -> WebElement:
+        return self.wait_for(self.label_related_follow_up_payment_lists)
 
     def get_button_create_exclusions(self) -> WebElement:
         return self.wait_for(self.button_create_exclusions)

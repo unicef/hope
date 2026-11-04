@@ -4,17 +4,17 @@ import pytest
 
 from extras.test_utils.factories.payment import (
     FollowUpInstructionFactory,
+    PaymentListFactory,
     PaymentPlanFactory,
-    PaymentPlanGroupFactory,
 )
 from extras.test_utils.factories.program import ProgramCycleFactory
 
 
 @pytest.fixture
 def grouped_plans(db):
-    group = PaymentPlanGroupFactory(exchange_rate=Decimal("1.25000000"), custom_exchange_rate=True)
-    first = PaymentPlanFactory(program_cycle=group.cycle, payment_plan_group=group)
-    second = PaymentPlanFactory(program_cycle=group.cycle, payment_plan_group=group)
+    group = PaymentPlanFactory(exchange_rate=Decimal("1.25000000"), custom_exchange_rate=True)
+    first = PaymentListFactory(program_cycle=group.cycle, payment_plan=group)
+    second = PaymentListFactory(program_cycle=group.cycle, payment_plan=group)
     return group, first, second
 
 
@@ -22,7 +22,7 @@ def grouped_plans(db):
 def instruction_plan(db):
     instruction = FollowUpInstructionFactory(exchange_rate=Decimal("2.50000000"), custom_exchange_rate=True)
     cycle = ProgramCycleFactory(program=instruction.program)
-    plan = PaymentPlanFactory(program_cycle=cycle, payment_plan_group=None, follow_up_instruction=instruction)
+    plan = PaymentListFactory(program_cycle=cycle, payment_plan=None, follow_up_instruction=instruction)
     return instruction, plan
 
 
@@ -40,7 +40,7 @@ def test_instruction_child_reads_instruction_rate(instruction_plan, django_asser
     instruction, plan = instruction_plan
 
     with django_assert_num_queries(0):
-        assert plan.payment_plan_group_id is None
+        assert plan.payment_plan_id is None
         assert plan.exchange_rate_owner is instruction
         assert plan.exchange_rate == Decimal("2.50000000")
         assert plan.get_exchange_rate() == 2.5

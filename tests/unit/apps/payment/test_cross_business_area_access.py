@@ -13,8 +13,8 @@ from extras.test_utils.factories import (
     FinancialServiceProviderFactory,
     HouseholdFactory,
     PaymentFactory,
+    PaymentListFactory,
     PaymentPlanFactory,
-    PaymentPlanGroupFactory,
     PaymentPlanPurposeFactory,
     PaymentPlanSupportingDocumentFactory,
     PaymentVerificationPlanFactory,
@@ -27,8 +27,8 @@ from hope.apps.account.permissions import Permissions
 from hope.models import (
     BusinessArea,
     Payment,
+    PaymentList,
     PaymentPlan,
-    PaymentPlanGroup,
     PaymentPlanPurpose,
     PaymentPlanSupportingDocument,
     PaymentVerificationPlan,
@@ -50,57 +50,57 @@ def victim_business_area() -> BusinessArea:
 
 
 @pytest.fixture
-def attacker_payment_plan(attacker_business_area: BusinessArea) -> PaymentPlan:
-    return PaymentPlanFactory(
-        status=PaymentPlan.Status.OPEN,
+def attacker_payment_list(attacker_business_area: BusinessArea) -> PaymentList:
+    return PaymentListFactory(
+        status=PaymentList.Status.OPEN,
         program_cycle__program=ProgramFactory(business_area=attacker_business_area),
     )
 
 
 @pytest.fixture
-def victim_payment_plan(victim_business_area: BusinessArea) -> PaymentPlan:
-    return PaymentPlanFactory(
-        status=PaymentPlan.Status.ACCEPTED,
+def victim_payment_list(victim_business_area: BusinessArea) -> PaymentList:
+    return PaymentListFactory(
+        status=PaymentList.Status.ACCEPTED,
         program_cycle__program=ProgramFactory(business_area=victim_business_area),
     )
 
 
 @pytest.fixture
-def victim_target_population(victim_business_area: BusinessArea) -> PaymentPlan:
-    return PaymentPlanFactory(
-        status=PaymentPlan.Status.DRAFT,
+def victim_target_population(victim_business_area: BusinessArea) -> PaymentList:
+    return PaymentListFactory(
+        status=PaymentList.Status.DRAFT,
         program_cycle__program=ProgramFactory(business_area=victim_business_area),
         currency=CurrencyFactory(),
     )
 
 
 @pytest.fixture
-def attacker_purpose(attacker_payment_plan: PaymentPlan) -> PaymentPlanPurpose:
+def attacker_purpose(attacker_payment_list: PaymentList) -> PaymentPlanPurpose:
     purpose = PaymentPlanPurposeFactory()
-    attacker_payment_plan.program.payment_plan_purposes.add(purpose)
+    attacker_payment_list.program.payment_plan_purposes.add(purpose)
     return purpose
 
 
 @pytest.fixture
-def victim_document(victim_payment_plan: PaymentPlan) -> PaymentPlanSupportingDocument:
-    return PaymentPlanSupportingDocumentFactory(payment_plan_group=victim_payment_plan.payment_plan_group)
+def victim_document(victim_payment_list: PaymentList) -> PaymentPlanSupportingDocument:
+    return PaymentPlanSupportingDocumentFactory(payment_plan=victim_payment_list.payment_plan)
 
 
 @pytest.fixture
-def victim_payment(victim_payment_plan: PaymentPlan) -> Payment:
-    return PaymentFactory(parent=victim_payment_plan)
+def victim_payment(victim_payment_list: PaymentList) -> Payment:
+    return PaymentFactory(parent=victim_payment_list)
 
 
 @pytest.fixture
-def victim_verification_plan(victim_payment_plan: PaymentPlan) -> PaymentVerificationPlan:
-    PaymentVerificationSummaryFactory(payment_plan=victim_payment_plan)
-    return PaymentVerificationPlanFactory(payment_plan=victim_payment_plan)
+def victim_verification_plan(victim_payment_list: PaymentList) -> PaymentVerificationPlan:
+    PaymentVerificationSummaryFactory(payment_list=victim_payment_list)
+    return PaymentVerificationPlanFactory(payment_list=victim_payment_list)
 
 
 @pytest.fixture
 def attacker(
     attacker_business_area: BusinessArea,
-    attacker_payment_plan: PaymentPlan,
+    attacker_payment_list: PaymentList,
     create_user_role_with_permissions: Any,
 ) -> User:
     user = UserFactory()
@@ -121,13 +121,13 @@ def attacker(
             Permissions.PAYMENT_VERIFICATION_VIEW_DETAILS,
             Permissions.PAYMENT_VERIFICATION_DELETE,
             Permissions.PAYMENT_VERIFICATION_ACTIVATE,
-            Permissions.PM_PAYMENT_PLAN_GROUP_CREATE,
+            Permissions.PM_PAYMENT_PLAN_CREATE,
             Permissions.TARGETING_CREATE,
             Permissions.TARGETING_UPDATE,
             Permissions.PM_APPLY_RULE_ENGINE_FORMULA_WITH_ENTITLEMENTS,
         ],
         attacker_business_area,
-        program=attacker_payment_plan.program,
+        program=attacker_payment_list.program,
     )
     return user
 
@@ -152,11 +152,11 @@ def api_client_without_role() -> APIClient:
 
 
 @pytest.fixture
-def cross_ba_kwargs(attacker_business_area: BusinessArea, attacker_payment_plan: PaymentPlan) -> dict[str, str]:
+def cross_ba_kwargs(attacker_business_area: BusinessArea, attacker_payment_list: PaymentList) -> dict[str, str]:
     """Path segments the attacker is authorized for - the object ids appended to them are not."""
     return {
         "business_area_slug": attacker_business_area.slug,
-        "program_code": attacker_payment_plan.program.code,
+        "program_code": attacker_payment_list.program.code,
     }
 
 
@@ -166,10 +166,10 @@ def test_download_supporting_document_without_permission_is_denied(
     victim_document: PaymentPlanSupportingDocument,
 ) -> None:
     url = reverse(
-        "api:payments:payment-plan-group-supporting-documents-download",
+        "api:payments:payment-plan-supporting-documents-download",
         kwargs={
             **cross_ba_kwargs,
-            "payment_plan_group_pk": str(victim_document.payment_plan_group.id),
+            "payment_plan_pk": str(victim_document.payment_plan.id),
             "file_id": str(victim_document.id),
         },
     )
@@ -185,10 +185,10 @@ def test_download_supporting_document_from_other_business_area_is_denied(
     victim_document: PaymentPlanSupportingDocument,
 ) -> None:
     url = reverse(
-        "api:payments:payment-plan-group-supporting-documents-download",
+        "api:payments:payment-plan-supporting-documents-download",
         kwargs={
             **cross_ba_kwargs,
-            "payment_plan_group_pk": str(victim_document.payment_plan_group.id),
+            "payment_plan_pk": str(victim_document.payment_plan.id),
             "file_id": str(victim_document.id),
         },
     )
@@ -204,10 +204,10 @@ def test_delete_supporting_document_from_other_business_area_is_denied(
     victim_document: PaymentPlanSupportingDocument,
 ) -> None:
     url = reverse(
-        "api:payments:payment-plan-group-supporting-documents-detail",
+        "api:payments:payment-plan-supporting-documents-detail",
         kwargs={
             **cross_ba_kwargs,
-            "payment_plan_group_pk": str(victim_document.payment_plan_group.id),
+            "payment_plan_pk": str(victim_document.payment_plan.id),
             "file_id": str(victim_document.id),
         },
     )
@@ -221,24 +221,24 @@ def test_delete_supporting_document_from_other_business_area_is_denied(
 def test_upload_supporting_document_to_other_business_area_is_denied(
     api_client: APIClient,
     cross_ba_kwargs: dict[str, str],
-    victim_payment_plan: PaymentPlan,
+    victim_payment_list: PaymentList,
     upload_file: SimpleUploadedFile,
 ) -> None:
     url = reverse(
-        "api:payments:payment-plan-group-supporting-documents-list",
-        kwargs={**cross_ba_kwargs, "payment_plan_group_pk": str(victim_payment_plan.payment_plan_group.id)},
+        "api:payments:payment-plan-supporting-documents-list",
+        kwargs={**cross_ba_kwargs, "payment_plan_pk": str(victim_payment_list.payment_plan.id)},
     )
 
     response = api_client.post(url, {"title": "cross ba", "file": upload_file}, format="multipart")
 
     assert response.status_code == status.HTTP_404_NOT_FOUND, response.status_code
-    assert not victim_payment_plan.payment_plan_group.documents.exists()
+    assert not victim_payment_list.payment_plan.documents.exists()
 
 
-def test_retrieve_payment_plan_from_other_business_area_is_denied(
-    api_client: APIClient, cross_ba_kwargs: dict[str, str], victim_payment_plan: PaymentPlan
+def test_retrieve_payment_list_from_other_business_area_is_denied(
+    api_client: APIClient, cross_ba_kwargs: dict[str, str], victim_payment_list: PaymentList
 ) -> None:
-    url = reverse("api:payments:payment-plans-detail", kwargs={**cross_ba_kwargs, "pk": str(victim_payment_plan.id)})
+    url = reverse("api:payments:payment-lists-detail", kwargs={**cross_ba_kwargs, "pk": str(victim_payment_list.id)})
 
     response = api_client.get(url)
 
@@ -246,10 +246,10 @@ def test_retrieve_payment_plan_from_other_business_area_is_denied(
 
 
 def test_retrieve_target_population_from_other_business_area_is_denied(
-    api_client: APIClient, cross_ba_kwargs: dict[str, str], victim_payment_plan: PaymentPlan
+    api_client: APIClient, cross_ba_kwargs: dict[str, str], victim_payment_list: PaymentList
 ) -> None:
     url = reverse(
-        "api:payments:target-populations-detail", kwargs={**cross_ba_kwargs, "pk": str(victim_payment_plan.id)}
+        "api:payments:target-populations-detail", kwargs={**cross_ba_kwargs, "pk": str(victim_payment_list.id)}
     )
 
     response = api_client.get(url)
@@ -258,10 +258,10 @@ def test_retrieve_target_population_from_other_business_area_is_denied(
 
 
 def test_retrieve_payment_verification_from_other_business_area_is_denied(
-    api_client: APIClient, cross_ba_kwargs: dict[str, str], victim_payment_plan: PaymentPlan
+    api_client: APIClient, cross_ba_kwargs: dict[str, str], victim_payment_list: PaymentList
 ) -> None:
     url = reverse(
-        "api:payments:payment-verifications-detail", kwargs={**cross_ba_kwargs, "pk": str(victim_payment_plan.id)}
+        "api:payments:payment-verifications-detail", kwargs={**cross_ba_kwargs, "pk": str(victim_payment_list.id)}
     )
 
     response = api_client.get(url)
@@ -278,7 +278,7 @@ def test_delete_payment_verification_plan_from_other_business_area_is_denied(
         "api:payments:payment-verifications-delete-payment-verification-plan",
         kwargs={
             **cross_ba_kwargs,
-            "pk": str(victim_verification_plan.payment_plan.id),
+            "pk": str(victim_verification_plan.payment_list.id),
             "verification_plan_id": str(victim_verification_plan.id),
         },
     )
@@ -292,14 +292,14 @@ def test_delete_payment_verification_plan_from_other_business_area_is_denied(
 def test_activate_verification_plan_from_other_business_area_under_own_plan_is_denied(
     api_client: APIClient,
     cross_ba_kwargs: dict[str, str],
-    attacker_payment_plan: PaymentPlan,
+    attacker_payment_list: PaymentList,
     victim_verification_plan: PaymentVerificationPlan,
 ) -> None:
     url = reverse(
         "api:payments:payment-verifications-activate-payment-verification-plan",
         kwargs={
             **cross_ba_kwargs,
-            "pk": str(attacker_payment_plan.id),
+            "pk": str(attacker_payment_list.id),
             "verification_plan_id": str(victim_verification_plan.id),
         },
     )
@@ -312,11 +312,11 @@ def test_activate_verification_plan_from_other_business_area_under_own_plan_is_d
 
 
 def test_list_verification_records_from_other_business_area_is_denied(
-    api_client: APIClient, cross_ba_kwargs: dict[str, str], victim_payment_plan: PaymentPlan
+    api_client: APIClient, cross_ba_kwargs: dict[str, str], victim_payment_list: PaymentList
 ) -> None:
     url = reverse(
         "api:payments:verification-records-list",
-        kwargs={**cross_ba_kwargs, "payment_verification_pk": str(victim_payment_plan.id)},
+        kwargs={**cross_ba_kwargs, "payment_verification_pk": str(victim_payment_list.id)},
     )
 
     response = api_client.get(url)
@@ -324,10 +324,10 @@ def test_list_verification_records_from_other_business_area_is_denied(
     assert response.status_code == status.HTTP_404_NOT_FOUND, response.status_code
 
 
-def test_create_payment_plan_from_other_business_area_target_population_is_denied(
-    api_client: APIClient, cross_ba_kwargs: dict[str, str], victim_target_population: PaymentPlan
+def test_create_payment_list_from_other_business_area_target_population_is_denied(
+    api_client: APIClient, cross_ba_kwargs: dict[str, str], victim_target_population: PaymentList
 ) -> None:
-    url = reverse("api:payments:payment-plans-list", kwargs=cross_ba_kwargs)
+    url = reverse("api:payments:payment-lists-list", kwargs=cross_ba_kwargs)
 
     response = api_client.post(
         url,
@@ -345,27 +345,27 @@ def test_create_payment_plan_from_other_business_area_target_population_is_denie
 def test_copy_target_population_into_other_business_area_cycle_is_denied(
     api_client: APIClient,
     cross_ba_kwargs: dict[str, str],
-    attacker_payment_plan: PaymentPlan,
-    victim_payment_plan: PaymentPlan,
+    attacker_payment_list: PaymentList,
+    victim_payment_list: PaymentList,
     attacker_purpose: PaymentPlanPurpose,
 ) -> None:
     url = reverse(
-        "api:payments:target-populations-copy", kwargs={**cross_ba_kwargs, "pk": str(attacker_payment_plan.id)}
+        "api:payments:target-populations-copy", kwargs={**cross_ba_kwargs, "pk": str(attacker_payment_list.id)}
     )
 
     response = api_client.post(
         url,
         {
             "name": "copied across business areas",
-            "program_cycle_id": str(victim_payment_plan.program_cycle_id),
-            "payment_plan_group_id": str(victim_payment_plan.payment_plan_group_id),
+            "program_cycle_id": str(victim_payment_list.program_cycle_id),
+            "payment_plan_id": str(victim_payment_list.payment_plan_id),
             "payment_plan_purposes": [str(attacker_purpose.id)],
         },
         format="json",
     )
 
     assert response.status_code == status.HTTP_404_NOT_FOUND, response.status_code
-    assert not PaymentPlan.objects.filter(name="copied across business areas").exists()
+    assert not PaymentList.objects.filter(name="copied across business areas").exists()
 
 
 def test_retrieve_payment_from_other_business_area_is_denied(
@@ -375,7 +375,7 @@ def test_retrieve_payment_from_other_business_area_is_denied(
         "api:payments:payments-detail",
         kwargs={
             **cross_ba_kwargs,
-            "payment_plan_pk": str(victim_payment.parent_id),
+            "payment_list_pk": str(victim_payment.parent_id),
             "payment_id": str(victim_payment.id),
         },
     )
@@ -386,35 +386,37 @@ def test_retrieve_payment_from_other_business_area_is_denied(
 
 
 @pytest.fixture
-def attacker_second_payment_plan(attacker_payment_plan: PaymentPlan) -> PaymentPlan:
-    return PaymentPlanFactory(
-        status=PaymentPlan.Status.ACCEPTED,
-        program_cycle__program=attacker_payment_plan.program,
+def attacker_second_payment_list(attacker_payment_list: PaymentList) -> PaymentList:
+    return PaymentListFactory(
+        status=PaymentList.Status.ACCEPTED,
+        program_cycle__program=attacker_payment_list.program,
     )
 
 
 @pytest.fixture
-def attacker_second_plan_payment(attacker_second_payment_plan: PaymentPlan) -> Payment:
-    return PaymentFactory(parent=attacker_second_payment_plan)
+def attacker_second_plan_payment(attacker_second_payment_list: PaymentList) -> Payment:
+    return PaymentFactory(parent=attacker_second_payment_list)
 
 
 @pytest.fixture
-def attacker_second_plan_verification_plan(attacker_second_payment_plan: PaymentPlan) -> PaymentVerificationPlan:
-    PaymentVerificationSummaryFactory(payment_plan=attacker_second_payment_plan)
-    return PaymentVerificationPlanFactory(payment_plan=attacker_second_payment_plan)
+def attacker_second_plan_verification_plan(
+    attacker_second_payment_list: PaymentList,
+) -> PaymentVerificationPlan:
+    PaymentVerificationSummaryFactory(payment_list=attacker_second_payment_list)
+    return PaymentVerificationPlanFactory(payment_list=attacker_second_payment_list)
 
 
-def test_retrieve_payment_of_other_business_area_under_own_payment_plan_is_denied(
+def test_retrieve_payment_of_other_business_area_under_own_payment_list_is_denied(
     api_client: APIClient,
     cross_ba_kwargs: dict[str, str],
-    attacker_payment_plan: PaymentPlan,
+    attacker_payment_list: PaymentList,
     victim_payment: Payment,
 ) -> None:
     url = reverse(
         "api:payments:payments-detail",
         kwargs={
             **cross_ba_kwargs,
-            "payment_plan_pk": str(attacker_payment_plan.id),
+            "payment_list_pk": str(attacker_payment_list.id),
             "payment_id": str(victim_payment.id),
         },
     )
@@ -424,7 +426,7 @@ def test_retrieve_payment_of_other_business_area_under_own_payment_plan_is_denie
     assert response.status_code == status.HTTP_404_NOT_FOUND, response.status_code
 
 
-def test_retrieve_payment_of_own_program_works_without_a_usable_payment_plan_in_the_path(
+def test_retrieve_payment_of_own_program_works_without_a_usable_payment_list_in_the_path(
     api_client: APIClient,
     cross_ba_kwargs: dict[str, str],
     attacker_second_plan_payment: Payment,
@@ -433,7 +435,7 @@ def test_retrieve_payment_of_own_program_works_without_a_usable_payment_plan_in_
         "api:payments:payments-detail",
         kwargs={
             **cross_ba_kwargs,
-            "payment_plan_pk": "undefined",
+            "payment_list_pk": "undefined",
             "payment_id": str(attacker_second_plan_payment.id),
         },
     )
@@ -443,17 +445,17 @@ def test_retrieve_payment_of_own_program_works_without_a_usable_payment_plan_in_
     assert response.status_code == status.HTTP_200_OK, response.status_code
 
 
-def test_retrieve_verification_record_under_mismatched_payment_plan_path_is_denied(
+def test_retrieve_verification_record_under_mismatched_payment_list_path_is_denied(
     api_client: APIClient,
     cross_ba_kwargs: dict[str, str],
-    attacker_payment_plan: PaymentPlan,
+    attacker_payment_list: PaymentList,
     attacker_second_plan_payment: Payment,
 ) -> None:
     url = reverse(
         "api:payments:verification-records-detail",
         kwargs={
             **cross_ba_kwargs,
-            "payment_verification_pk": str(attacker_payment_plan.id),
+            "payment_verification_pk": str(attacker_payment_list.id),
             "pk": str(attacker_second_plan_payment.id),
         },
     )
@@ -463,17 +465,17 @@ def test_retrieve_verification_record_under_mismatched_payment_plan_path_is_deni
     assert response.status_code == status.HTTP_404_NOT_FOUND, response.status_code
 
 
-def test_delete_verification_plan_of_another_payment_plan_is_denied(
+def test_delete_verification_plan_of_another_payment_list_is_denied(
     api_client: APIClient,
     cross_ba_kwargs: dict[str, str],
-    attacker_payment_plan: PaymentPlan,
+    attacker_payment_list: PaymentList,
     attacker_second_plan_verification_plan: PaymentVerificationPlan,
 ) -> None:
     url = reverse(
         "api:payments:payment-verifications-delete-payment-verification-plan",
         kwargs={
             **cross_ba_kwargs,
-            "pk": str(attacker_payment_plan.id),
+            "pk": str(attacker_payment_list.id),
             "verification_plan_id": str(attacker_second_plan_verification_plan.id),
         },
     )
@@ -484,17 +486,17 @@ def test_delete_verification_plan_of_another_payment_plan_is_denied(
     assert PaymentVerificationPlan.objects.filter(id=attacker_second_plan_verification_plan.id).exists()
 
 
-def test_activate_verification_plan_of_another_payment_plan_is_denied(
+def test_activate_verification_plan_of_another_payment_list_is_denied(
     api_client: APIClient,
     cross_ba_kwargs: dict[str, str],
-    attacker_payment_plan: PaymentPlan,
+    attacker_payment_list: PaymentList,
     attacker_second_plan_verification_plan: PaymentVerificationPlan,
 ) -> None:
     url = reverse(
         "api:payments:payment-verifications-activate-payment-verification-plan",
         kwargs={
             **cross_ba_kwargs,
-            "pk": str(attacker_payment_plan.id),
+            "pk": str(attacker_payment_list.id),
             "verification_plan_id": str(attacker_second_plan_verification_plan.id),
         },
     )
@@ -506,30 +508,30 @@ def test_activate_verification_plan_of_another_payment_plan_is_denied(
     assert attacker_second_plan_verification_plan.status == PaymentVerificationPlan.STATUS_PENDING
 
 
-def test_create_payment_plan_group_in_cycle_of_other_business_area_is_denied(
+def test_create_payment_plan_in_cycle_of_other_business_area_is_denied(
     api_client: APIClient,
     cross_ba_kwargs: dict[str, str],
-    victim_payment_plan: PaymentPlan,
+    victim_payment_list: PaymentList,
 ) -> None:
-    victim_cycle = victim_payment_plan.program_cycle
-    url = reverse("api:payments:payment-plan-groups-list", kwargs=cross_ba_kwargs)
+    victim_cycle = victim_payment_list.program_cycle
+    url = reverse("api:payments:payment-plans-list", kwargs=cross_ba_kwargs)
 
     response = api_client.post(url, {"name": "cross ba group", "cycle": str(victim_cycle.id)}, format="json")
 
     assert response.status_code == status.HTTP_400_BAD_REQUEST, response.status_code
-    assert not PaymentPlanGroup.objects.filter(cycle=victim_cycle, name="cross ba group").exists()
+    assert not PaymentPlan.objects.filter(cycle=victim_cycle, name="cross ba group").exists()
 
 
 def test_create_target_population_in_cycle_of_other_business_area_is_denied(
     api_client: APIClient,
     cross_ba_kwargs: dict[str, str],
     attacker_purpose: PaymentPlanPurpose,
-    victim_payment_plan: PaymentPlan,
+    victim_payment_list: PaymentList,
 ) -> None:
-    victim_cycle = victim_payment_plan.program_cycle
+    victim_cycle = victim_payment_list.program_cycle
     victim_household = HouseholdFactory(
-        business_area=victim_payment_plan.business_area,
-        program=victim_payment_plan.program,
+        business_area=victim_payment_list.business_area,
+        program=victim_payment_list.program,
         create_role=False,
     )
     url = reverse("api:payments:target-populations-list", kwargs=cross_ba_kwargs)
@@ -539,7 +541,7 @@ def test_create_target_population_in_cycle_of_other_business_area_is_denied(
         {
             "name": "cross ba target population",
             "program_cycle_id": str(victim_cycle.id),
-            "payment_plan_group_id": str(PaymentPlanGroupFactory(cycle=victim_cycle).id),
+            "payment_plan_id": str(PaymentPlanFactory(cycle=victim_cycle).id),
             "payment_plan_purposes": [str(attacker_purpose.id)],
             "rules": [
                 {
@@ -556,7 +558,7 @@ def test_create_target_population_in_cycle_of_other_business_area_is_denied(
     )
 
     assert response.status_code == status.HTTP_404_NOT_FOUND, response.json()
-    assert not PaymentPlan.objects.filter(name="cross ba target population").exists()
+    assert not PaymentList.objects.filter(name="cross ba target population").exists()
 
 
 def test_create_target_population_in_cycle_of_other_program_is_denied(
@@ -566,7 +568,7 @@ def test_create_target_population_in_cycle_of_other_program_is_denied(
     attacker_purpose: PaymentPlanPurpose,
 ) -> None:
     other_program = ProgramFactory(business_area=attacker_business_area)
-    other_plan = PaymentPlanFactory(status=PaymentPlan.Status.OPEN, program_cycle__program=other_program)
+    other_plan = PaymentListFactory(status=PaymentList.Status.OPEN, program_cycle__program=other_program)
     household = HouseholdFactory(business_area=attacker_business_area, program=other_program, create_role=False)
     url = reverse("api:payments:target-populations-list", kwargs=cross_ba_kwargs)
 
@@ -575,7 +577,7 @@ def test_create_target_population_in_cycle_of_other_program_is_denied(
         {
             "name": "cross program target population",
             "program_cycle_id": str(other_plan.program_cycle.id),
-            "payment_plan_group_id": str(PaymentPlanGroupFactory(cycle=other_plan.program_cycle).id),
+            "payment_plan_id": str(PaymentPlanFactory(cycle=other_plan.program_cycle).id),
             "payment_plan_purposes": [str(attacker_purpose.id)],
             "rules": [
                 {
@@ -592,7 +594,7 @@ def test_create_target_population_in_cycle_of_other_program_is_denied(
     )
 
     assert response.status_code == status.HTTP_404_NOT_FOUND, response.json()
-    assert not PaymentPlan.objects.filter(name="cross program target population").exists()
+    assert not PaymentList.objects.filter(name="cross program target population").exists()
 
 
 @pytest.fixture
@@ -603,43 +605,43 @@ def victim_fsp(victim_business_area: BusinessArea) -> Any:
     return fsp
 
 
-def test_create_payment_plan_group_with_fsp_of_other_business_area_is_denied(
+def test_create_payment_plan_with_fsp_of_other_business_area_is_denied(
     api_client: APIClient,
     cross_ba_kwargs: dict[str, str],
-    attacker_payment_plan: PaymentPlan,
+    attacker_payment_list: PaymentList,
     victim_fsp: Any,
 ) -> None:
-    url = reverse("api:payments:payment-plan-groups-list", kwargs=cross_ba_kwargs)
+    url = reverse("api:payments:payment-plans-list", kwargs=cross_ba_kwargs)
 
     response = api_client.post(
         url,
         {
             "name": "group with a foreign fsp",
-            "cycle": str(attacker_payment_plan.program_cycle.id),
+            "cycle": str(attacker_payment_list.program_cycle.id),
             "financial_service_provider": str(victim_fsp.id),
         },
         format="json",
     )
 
     assert response.status_code == status.HTTP_400_BAD_REQUEST, response.json()
-    assert not PaymentPlanGroup.objects.filter(name="group with a foreign fsp").exists()
+    assert not PaymentPlan.objects.filter(name="group with a foreign fsp").exists()
 
 
 @pytest.fixture
-def attacker_target_population(attacker_payment_plan: PaymentPlan) -> PaymentPlan:
-    return PaymentPlanFactory(
-        status=PaymentPlan.Status.TP_OPEN,
-        program_cycle__program=attacker_payment_plan.program,
+def attacker_target_population(attacker_payment_list: PaymentList) -> PaymentList:
+    return PaymentListFactory(
+        status=PaymentList.Status.TP_OPEN,
+        program_cycle__program=attacker_payment_list.program,
     )
 
 
 def test_move_target_population_into_cycle_of_other_business_area_is_denied(
     api_client: APIClient,
     cross_ba_kwargs: dict[str, str],
-    attacker_target_population: PaymentPlan,
-    victim_payment_plan: PaymentPlan,
+    attacker_target_population: PaymentList,
+    victim_payment_list: PaymentList,
 ) -> None:
-    victim_cycle = victim_payment_plan.program_cycle
+    victim_cycle = victim_payment_list.program_cycle
     own_cycle_id = attacker_target_population.program_cycle_id
     url = reverse(
         "api:payments:target-populations-detail",
@@ -650,7 +652,7 @@ def test_move_target_population_into_cycle_of_other_business_area_is_denied(
         url,
         {
             "program_cycle_id": str(victim_cycle.id),
-            "payment_plan_group_id": str(PaymentPlanGroupFactory(cycle=victim_cycle).id),
+            "payment_plan_id": str(PaymentPlanFactory(cycle=victim_cycle).id),
         },
         format="json",
     )
@@ -662,7 +664,7 @@ def test_move_target_population_into_cycle_of_other_business_area_is_denied(
 
 @pytest.fixture
 def victim_engine_rule(victim_business_area: BusinessArea) -> Any:
-    rule = RuleCommitFactory(rule__type=Rule.TYPE_PAYMENT_PLAN, rule__enabled=True).rule
+    rule = RuleCommitFactory(rule__type=Rule.TYPE_PAYMENT_LIST, rule__enabled=True).rule
     rule.allowed_business_areas.set([victim_business_area])
     return rule
 
@@ -670,32 +672,32 @@ def victim_engine_rule(victim_business_area: BusinessArea) -> Any:
 def test_apply_engine_formula_with_rule_of_other_business_area_is_denied(
     api_client: APIClient,
     cross_ba_kwargs: dict[str, str],
-    attacker_payment_plan: PaymentPlan,
+    attacker_payment_list: PaymentList,
     victim_engine_rule: Any,
 ) -> None:
-    attacker_payment_plan.status = PaymentPlan.Status.LOCKED
-    attacker_payment_plan.save(update_fields=["status"])
+    attacker_payment_list.status = PaymentList.Status.LOCKED
+    attacker_payment_list.save(update_fields=["status"])
     url = reverse(
-        "api:payments:payment-plans-apply-engine-formula",
-        kwargs={**cross_ba_kwargs, "pk": str(attacker_payment_plan.id)},
+        "api:payments:payment-lists-apply-engine-formula",
+        kwargs={**cross_ba_kwargs, "pk": str(attacker_payment_list.id)},
     )
 
     response = api_client.post(url, {"engine_formula_rule_id": str(victim_engine_rule.id)}, format="json")
 
     assert response.status_code == status.HTTP_404_NOT_FOUND, response.status_code
-    attacker_payment_plan.refresh_from_db()
-    assert attacker_payment_plan.background_action_status is None
+    attacker_payment_list.refresh_from_db()
+    assert attacker_payment_list.background_action_status is None
 
 
 def test_apply_engine_formula_on_target_population_with_rule_of_other_business_area_is_denied(
     api_client: APIClient,
     cross_ba_kwargs: dict[str, str],
-    attacker_target_population: PaymentPlan,
+    attacker_target_population: PaymentList,
     victim_business_area: BusinessArea,
 ) -> None:
     rule = RuleCommitFactory(rule__type=Rule.TYPE_TARGETING, rule__enabled=True, is_release=True).rule
     rule.allowed_business_areas.set([victim_business_area])
-    attacker_target_population.status = PaymentPlan.Status.TP_LOCKED
+    attacker_target_population.status = PaymentList.Status.TP_LOCKED
     attacker_target_population.save(update_fields=["status"])
     url = reverse(
         "api:payments:target-populations-apply-engine-formula",

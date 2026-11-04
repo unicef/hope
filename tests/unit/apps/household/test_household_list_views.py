@@ -24,7 +24,7 @@ from extras.test_utils.factories import (
     IndividualRoleInHouseholdFactory,
     PartnerFactory,
     PaymentFactory,
-    PaymentPlanFactory,
+    PaymentListFactory,
     ProgramFactory,
     RegistrationDataImportFactory,
     SurveyFactory,
@@ -600,7 +600,7 @@ def household_detail_context(api_client: Any) -> dict[str, Any]:
 
     program_cycle = program.cycles.first()
     PaymentFactory(
-        parent=PaymentPlanFactory(program_cycle=program_cycle, business_area=afghanistan),
+        parent=PaymentListFactory(program_cycle=program_cycle, business_area=afghanistan),
         currency=CurrencyFactory(code="AFN", name="Afghani"),
         delivered_quantity_usd=50,
         delivered_quantity=100,
@@ -609,7 +609,7 @@ def household_detail_context(api_client: Any) -> dict[str, Any]:
         status=Payment.STATUS_SUCCESS,
     )
     PaymentFactory(
-        parent=PaymentPlanFactory(program_cycle=program_cycle, business_area=afghanistan),
+        parent=PaymentListFactory(program_cycle=program_cycle, business_area=afghanistan),
         currency=CurrencyFactory(code="AFN", name="Afghani"),
         delivered_quantity_usd=33,
         delivered_quantity=133,

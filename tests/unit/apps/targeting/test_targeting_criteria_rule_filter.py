@@ -12,7 +12,7 @@ from extras.test_utils.factories import (
     FlexibleAttributeForPDUFactory,
     HouseholdFactory,
     IndividualFactory,
-    PaymentPlanFactory,
+    PaymentListFactory,
     PeriodicFieldDataFactory,
     ProgramFactory,
     UserFactory,
@@ -547,8 +547,8 @@ def test_rule_filter_string_contains(households_flex):
 
 
 def test_rule_filter_pdu_string_contains(households_pdu):
-    payment_plan = PaymentPlanFactory(program_cycle=households_pdu["program_cycle"], created_by=households_pdu["user"])
-    tcr = TargetingCriteriaRule.objects.create(payment_plan=payment_plan)
+    payment_list = PaymentListFactory(program_cycle=households_pdu["program_cycle"], created_by=households_pdu["user"])
+    tcr = TargetingCriteriaRule.objects.create(payment_list=payment_list)
     block = TargetingIndividualRuleFilterBlock.objects.create(targeting_criteria_rule=tcr, target_only_hoh=False)
 
     rule_filter = TargetingIndividualBlockRuleFilter(
@@ -566,8 +566,8 @@ def test_rule_filter_pdu_string_contains(households_pdu):
 
 
 def test_rule_filter_pdu_string_is_null(households_pdu):
-    payment_plan = PaymentPlanFactory(program_cycle=households_pdu["program_cycle"], created_by=households_pdu["user"])
-    tcr = TargetingCriteriaRule.objects.create(payment_plan=payment_plan)
+    payment_list = PaymentListFactory(program_cycle=households_pdu["program_cycle"], created_by=households_pdu["user"])
+    tcr = TargetingCriteriaRule.objects.create(payment_list=payment_list)
     block = TargetingIndividualRuleFilterBlock.objects.create(targeting_criteria_rule=tcr, target_only_hoh=False)
 
     rule_filter = TargetingIndividualBlockRuleFilter(
@@ -585,8 +585,8 @@ def test_rule_filter_pdu_string_is_null(households_pdu):
 
 
 def test_rule_filter_pdu_decimal_range(households_pdu):
-    payment_plan = PaymentPlanFactory(program_cycle=households_pdu["program_cycle"], created_by=households_pdu["user"])
-    tcr = TargetingCriteriaRule.objects.create(payment_plan=payment_plan)
+    payment_list = PaymentListFactory(program_cycle=households_pdu["program_cycle"], created_by=households_pdu["user"])
+    tcr = TargetingCriteriaRule.objects.create(payment_list=payment_list)
     block = TargetingIndividualRuleFilterBlock.objects.create(targeting_criteria_rule=tcr, target_only_hoh=False)
 
     rule_filter = TargetingIndividualBlockRuleFilter(
@@ -605,8 +605,8 @@ def test_rule_filter_pdu_decimal_range(households_pdu):
 
 
 def test_rule_filter_pdu_decimal_greater_than(households_pdu):
-    payment_plan = PaymentPlanFactory(program_cycle=households_pdu["program_cycle"], created_by=households_pdu["user"])
-    tcr = TargetingCriteriaRule.objects.create(payment_plan=payment_plan)
+    payment_list = PaymentListFactory(program_cycle=households_pdu["program_cycle"], created_by=households_pdu["user"])
+    tcr = TargetingCriteriaRule.objects.create(payment_list=payment_list)
     block = TargetingIndividualRuleFilterBlock.objects.create(targeting_criteria_rule=tcr, target_only_hoh=False)
 
     rule_filter = TargetingIndividualBlockRuleFilter(
@@ -626,8 +626,8 @@ def test_rule_filter_pdu_decimal_greater_than(households_pdu):
 
 
 def test_rule_filter_pdu_decimal_less_than(households_pdu):
-    payment_plan = PaymentPlanFactory(program_cycle=households_pdu["program_cycle"], created_by=households_pdu["user"])
-    tcr = TargetingCriteriaRule.objects.create(payment_plan=payment_plan)
+    payment_list = PaymentListFactory(program_cycle=households_pdu["program_cycle"], created_by=households_pdu["user"])
+    tcr = TargetingCriteriaRule.objects.create(payment_list=payment_list)
     block = TargetingIndividualRuleFilterBlock.objects.create(targeting_criteria_rule=tcr, target_only_hoh=False)
 
     rule_filter = TargetingIndividualBlockRuleFilter(
@@ -645,8 +645,8 @@ def test_rule_filter_pdu_decimal_less_than(households_pdu):
 
 
 def test_rule_filter_pdu_decimal_is_null(households_pdu):
-    payment_plan = PaymentPlanFactory(program_cycle=households_pdu["program_cycle"], created_by=households_pdu["user"])
-    tcr = TargetingCriteriaRule.objects.create(payment_plan=payment_plan)
+    payment_list = PaymentListFactory(program_cycle=households_pdu["program_cycle"], created_by=households_pdu["user"])
+    tcr = TargetingCriteriaRule.objects.create(payment_list=payment_list)
     block = TargetingIndividualRuleFilterBlock.objects.create(targeting_criteria_rule=tcr, target_only_hoh=False)
 
     rule_filter = TargetingIndividualBlockRuleFilter(
@@ -664,8 +664,8 @@ def test_rule_filter_pdu_decimal_is_null(households_pdu):
 
 
 def test_rule_filter_pdu_date_range(households_pdu):
-    payment_plan = PaymentPlanFactory(program_cycle=households_pdu["program_cycle"], created_by=households_pdu["user"])
-    tcr = TargetingCriteriaRule.objects.create(payment_plan=payment_plan)
+    payment_list = PaymentListFactory(program_cycle=households_pdu["program_cycle"], created_by=households_pdu["user"])
+    tcr = TargetingCriteriaRule.objects.create(payment_list=payment_list)
     block = TargetingIndividualRuleFilterBlock.objects.create(targeting_criteria_rule=tcr, target_only_hoh=False)
 
     rule_filter = TargetingIndividualBlockRuleFilter(
@@ -684,8 +684,8 @@ def test_rule_filter_pdu_date_range(households_pdu):
 
 
 def test_rule_filter_pdu_date_greater_than(households_pdu):
-    payment_plan = PaymentPlanFactory(program_cycle=households_pdu["program_cycle"], created_by=households_pdu["user"])
-    tcr = TargetingCriteriaRule.objects.create(payment_plan=payment_plan)
+    payment_list = PaymentListFactory(program_cycle=households_pdu["program_cycle"], created_by=households_pdu["user"])
+    tcr = TargetingCriteriaRule.objects.create(payment_list=payment_list)
     block = TargetingIndividualRuleFilterBlock.objects.create(targeting_criteria_rule=tcr, target_only_hoh=False)
 
     rule_filter = TargetingIndividualBlockRuleFilter(
@@ -703,8 +703,8 @@ def test_rule_filter_pdu_date_greater_than(households_pdu):
 
 
 def test_rule_filter_pdu_date_less_than(households_pdu):
-    payment_plan = PaymentPlanFactory(program_cycle=households_pdu["program_cycle"], created_by=households_pdu["user"])
-    tcr = TargetingCriteriaRule.objects.create(payment_plan=payment_plan)
+    payment_list = PaymentListFactory(program_cycle=households_pdu["program_cycle"], created_by=households_pdu["user"])
+    tcr = TargetingCriteriaRule.objects.create(payment_list=payment_list)
     block = TargetingIndividualRuleFilterBlock.objects.create(targeting_criteria_rule=tcr, target_only_hoh=False)
 
     rule_filter = TargetingIndividualBlockRuleFilter(
@@ -723,8 +723,8 @@ def test_rule_filter_pdu_date_less_than(households_pdu):
 
 
 def test_rule_filter_pdu_date_is_null(households_pdu):
-    payment_plan = PaymentPlanFactory(program_cycle=households_pdu["program_cycle"], created_by=households_pdu["user"])
-    tcr = TargetingCriteriaRule.objects.create(payment_plan=payment_plan)
+    payment_list = PaymentListFactory(program_cycle=households_pdu["program_cycle"], created_by=households_pdu["user"])
+    tcr = TargetingCriteriaRule.objects.create(payment_list=payment_list)
     block = TargetingIndividualRuleFilterBlock.objects.create(targeting_criteria_rule=tcr, target_only_hoh=False)
 
     rule_filter = TargetingIndividualBlockRuleFilter(
@@ -742,8 +742,8 @@ def test_rule_filter_pdu_date_is_null(households_pdu):
 
 
 def test_rule_filter_pdu_boolean_true(households_pdu):
-    payment_plan = PaymentPlanFactory(program_cycle=households_pdu["program_cycle"], created_by=households_pdu["user"])
-    tcr = TargetingCriteriaRule.objects.create(payment_plan=payment_plan)
+    payment_list = PaymentListFactory(program_cycle=households_pdu["program_cycle"], created_by=households_pdu["user"])
+    tcr = TargetingCriteriaRule.objects.create(payment_list=payment_list)
     block = TargetingIndividualRuleFilterBlock.objects.create(targeting_criteria_rule=tcr, target_only_hoh=False)
 
     rule_filter = TargetingIndividualBlockRuleFilter(
@@ -762,8 +762,8 @@ def test_rule_filter_pdu_boolean_true(households_pdu):
 
 
 def test_rule_filter_pdu_boolean_false(households_pdu):
-    payment_plan = PaymentPlanFactory(program_cycle=households_pdu["program_cycle"], created_by=households_pdu["user"])
-    tcr = TargetingCriteriaRule.objects.create(payment_plan=payment_plan)
+    payment_list = PaymentListFactory(program_cycle=households_pdu["program_cycle"], created_by=households_pdu["user"])
+    tcr = TargetingCriteriaRule.objects.create(payment_list=payment_list)
     block = TargetingIndividualRuleFilterBlock.objects.create(targeting_criteria_rule=tcr, target_only_hoh=False)
 
     rule_filter = TargetingIndividualBlockRuleFilter(
@@ -781,8 +781,8 @@ def test_rule_filter_pdu_boolean_false(households_pdu):
 
 
 def test_rule_filter_pdu_boolean_is_null(households_pdu):
-    payment_plan = PaymentPlanFactory(program_cycle=households_pdu["program_cycle"], created_by=households_pdu["user"])
-    tcr = TargetingCriteriaRule.objects.create(payment_plan=payment_plan)
+    payment_list = PaymentListFactory(program_cycle=households_pdu["program_cycle"], created_by=households_pdu["user"])
+    tcr = TargetingCriteriaRule.objects.create(payment_list=payment_list)
     block = TargetingIndividualRuleFilterBlock.objects.create(targeting_criteria_rule=tcr, target_only_hoh=False)
 
     rule_filter = TargetingIndividualBlockRuleFilter(

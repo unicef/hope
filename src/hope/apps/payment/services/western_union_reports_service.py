@@ -33,11 +33,11 @@ from hope.apps.payment.utils import get_link
 from hope.models import (
     FileTemp,
     Payment,
-    PaymentPlan,
+    PaymentList,
     WesternUnionData,
     WesternUnionInvoice,
     WesternUnionInvoicePayment,
-    WesternUnionPaymentPlanReport,
+    WesternUnionPaymentListReport,
 )
 
 logger = logging.getLogger(__name__)
@@ -73,7 +73,7 @@ class QCFReportPaymentRowData:
     mtcn: str
     mtcns_match: bool
     hope_mtcn: str | None
-    payment_plan_unicef_id: str | None
+    payment_list_unicef_id: str | None
     programme: str
     fc: str
     principal_amount: float
@@ -84,7 +84,7 @@ class QCFReportPaymentRowData:
 
 @dataclasses.dataclass
 class QCFReportPaymentPlanData:
-    payment_plan_unicef_id: str | None
+    payment_list_unicef_id: str | None
     principal_total: float = dataclasses.field(init=False)
     charges_total: float = dataclasses.field(init=False)
     refunds_total: float = dataclasses.field(init=False)
@@ -270,8 +270,8 @@ class WesternUnionReportsService:
         try:
             with transaction.atomic():
                 try:
-                    payment_plan_id_payments_map = self.extract_data_payment_rows(matched_data)
-                    self.link_payments_from_data_rows(invoice, payment_plan_id_payments_map)
+                    payment_list_id_payments_map = self.extract_data_payment_rows(matched_data)
+                    self.link_payments_from_data_rows(invoice, payment_list_id_payments_map)
                 except (
                     WesternUnionReportsService.QCFReportsServiceError,
                     DatabaseError,
@@ -285,7 +285,7 @@ class WesternUnionReportsService:
 
                 self.generate_reports_for_invoice(
                     invoice,
-                    payment_plan_id_payments_map,
+                    payment_list_id_payments_map,
                     send_notifications=send_notifications,
                 )
                 invoice.matched_data = matched_data
@@ -347,7 +347,7 @@ class WesternUnionReportsService:
     def link_payments_from_data_rows(
         self,
         invoice: WesternUnionInvoice,
-        payment_plan_id_payments_map: dict[str, list[MatchedDataPaymentRow]],
+        payment_list_id_payments_map: dict[str, list[MatchedDataPaymentRow]],
     ) -> None:
         WesternUnionInvoicePayment.objects.filter(western_union_invoice=invoice).delete()
 
@@ -357,7 +357,7 @@ class WesternUnionReportsService:
                 payment=row.payment,
                 transaction_status=row.transaction_status,
             )
-            for payment_rows in payment_plan_id_payments_map.values()
+            for payment_rows in payment_list_id_payments_map.values()
             for row in payment_rows
         ]
         if not payments_to_link:
@@ -368,17 +368,17 @@ class WesternUnionReportsService:
     def generate_reports_for_invoice(
         self,
         invoice: WesternUnionInvoice,
-        payment_plan_id_payments_map: dict[str, list[MatchedDataPaymentRow]],
+        payment_list_id_payments_map: dict[str, list[MatchedDataPaymentRow]],
         send_notifications: bool = True,
     ) -> None:
         ad_name_value = invoice.advice_name or ""
-        for payment_plan_id, payment_rows in payment_plan_id_payments_map.items():
-            payment_plan = PaymentPlan.objects.get(id=payment_plan_id)
-            report_name, report = self.generate_report(payment_plan, payment_rows, ad_name_value)
+        for payment_list_id, payment_rows in payment_list_id_payments_map.items():
+            payment_list = PaymentList.objects.get(id=payment_list_id)
+            report_name, report = self.generate_report(payment_list, payment_rows, ad_name_value)
 
-            wu_report = WesternUnionPaymentPlanReport.objects.create(
+            wu_report = WesternUnionPaymentListReport.objects.create(
                 invoice=invoice,
-                payment_plan=payment_plan,
+                payment_list=payment_list,
             )
 
             with NamedTemporaryFile() as tmp:
@@ -403,7 +403,7 @@ class WesternUnionReportsService:
         if data_file.file is None:
             raise self.QCFReportsServiceError("Matching data file has no file")
 
-        payment_plan_id_payments_map: dict[str, list[MatchedDataPaymentRow]] = defaultdict(list)
+        payment_list_id_payments_map: dict[str, list[MatchedDataPaymentRow]] = defaultdict(list)
 
         data_file.file.file.open("rb")
         try:
@@ -424,9 +424,9 @@ class WesternUnionReportsService:
                 continue
 
             matched_row = self.aggregate_data_payment_row(payment_unicef_id, payment, payment_rows)
-            payment_plan_id_payments_map[str(payment.parent_id)].append(matched_row)
+            payment_list_id_payments_map[str(payment.parent_id)].append(matched_row)
 
-        return payment_plan_id_payments_map
+        return payment_list_id_payments_map
 
     def aggregate_data_payment_row(
         self,
@@ -650,25 +650,25 @@ class WesternUnionReportsService:
 
     def generate_report(
         self,
-        payment_plan: PaymentPlan,
+        payment_list: PaymentList,
         payment_rows: list[MatchedDataPaymentRow],
         ad_name_value: str | None = None,
     ) -> tuple[str, openpyxl.Workbook]:
-        report_count_for_payment_plan = WesternUnionPaymentPlanReport.objects.filter(payment_plan=payment_plan).count()
+        report_count_for_payment_list = WesternUnionPaymentListReport.objects.filter(payment_list=payment_list).count()
         report_filename = (
-            f"WU_REPORT_{payment_plan.business_area.slug}_{payment_plan.unicef_id}_"
-            f"{report_count_for_payment_plan + 1}.xlsx"
+            f"WU_REPORT_{payment_list.business_area.slug}_{payment_list.unicef_id}_"
+            f"{report_count_for_payment_list + 1}.xlsx"
         )
 
         funds_commitments_str = ""
-        funds_commitment_group = payment_plan.payment_plan_group
-        if payment_plan.plan_type == PaymentPlan.PlanType.FOLLOW_UP and payment_plan.source_payment_plan_id:
-            funds_commitment_group = payment_plan.source_payment_plan.payment_plan_group
-        if funds_commitment_group:
-            funds_commitment_group = funds_commitment_group.funds_commitment_source_group
+        funds_commitment_payment_plan = payment_list.payment_plan
+        if payment_list.plan_type == PaymentList.PlanType.FOLLOW_UP and payment_list.source_payment_list_id:
+            funds_commitment_payment_plan = payment_list.source_payment_list.payment_plan
+        if funds_commitment_payment_plan:
+            funds_commitment_payment_plan = funds_commitment_payment_plan.funds_commitment_source_payment_plan
             funds_commitments_str = ", ".join(
                 f"{number}/{item}"
-                for number, item in funds_commitment_group.funds_commitment_headers.values_list(
+                for number, item in funds_commitment_payment_plan.funds_commitment_headers.values_list(
                     "funds_commitment_number",
                     "funds_commitment_items__funds_commitment_item",
                 )
@@ -683,8 +683,8 @@ class WesternUnionReportsService:
                     mtcn=row.mtcn,
                     mtcns_match=mtcn_match,
                     hope_mtcn=row.payment.fsp_auth_code,
-                    payment_plan_unicef_id=payment_plan.unicef_id,
-                    programme=payment_plan.program_cycle.program.name,
+                    payment_list_unicef_id=payment_list.unicef_id,
+                    programme=payment_list.program_cycle.program.name,
                     fc=funds_commitments_str,
                     principal_amount=float(row.principal_amount),
                     charges_amount=float(row.charges_amount),
@@ -694,7 +694,7 @@ class WesternUnionReportsService:
             )
 
         report_data = QCFReportPaymentPlanData(
-            payment_plan_unicef_id=payment_plan.unicef_id,
+            payment_list_unicef_id=payment_list.unicef_id,
             payments_data=payments_data,
         )
 
@@ -703,14 +703,14 @@ class WesternUnionReportsService:
     def generate_report_xlsx(self, report_data: QCFReportPaymentPlanData) -> openpyxl.Workbook:
         wb = openpyxl.Workbook()
         ws = wb.active
-        ws.title = f"WU Report - {report_data.payment_plan_unicef_id}"[:31]
+        ws.title = f"WU Report - {report_data.payment_list_unicef_id}"[:31]
 
         headers = [
             "Payment ID",
             "MTCN",
             "MTCNs match",
             "HOPE MTCN",
-            "Payment Plan ID",
+            "Payment List ID",
             "Programme",
             "FC",
             "Principal Amount",
@@ -729,7 +729,7 @@ class WesternUnionReportsService:
                     payment_data.mtcn,
                     payment_data.mtcns_match,
                     payment_data.hope_mtcn,
-                    payment_data.payment_plan_unicef_id,
+                    payment_data.payment_list_unicef_id,
                     payment_data.programme,
                     payment_data.fc,
                     payment_data.principal_amount,
@@ -751,8 +751,8 @@ class WesternUnionReportsService:
 
         return wb
 
-    def send_notification_emails(self, report: WesternUnionPaymentPlanReport) -> None:
-        business_area = report.payment_plan.business_area
+    def send_notification_emails(self, report: WesternUnionPaymentListReport) -> None:
+        business_area = report.payment_list.business_area
         users = [
             user for user in User.objects.all() if user.has_perm(Permissions.RECEIVE_PARSED_WU_QCF.name, business_area)
         ]
@@ -760,15 +760,15 @@ class WesternUnionReportsService:
             text_template = "payment/western_union_report_email.txt"
             html_template = "payment/western_union_report_email.html"
 
-            path_name = "download-payment-plan-invoice-report-pdf"
-            payment_plan = report.payment_plan
+            path_name = "download-payment-list-invoice-report-pdf"
+            payment_list = report.payment_list
 
             report_id = str(report.id)
-            payment_plan_id = str(payment_plan.id)
-            program_code = report.payment_plan.program.code
+            payment_list_id = str(payment_list.id)
+            program_code = report.payment_list.program.code
 
-            payment_plan_link = get_link(
-                f"/{payment_plan.business_area.slug}/programs/{program_code}/payment-module/payment-plans/{payment_plan_id}"
+            payment_list_link = get_link(
+                f"/{payment_list.business_area.slug}/programs/{program_code}/payment-module/payment-lists/{payment_list_id}"
             )
             download_link = get_link(reverse(path_name, args=[report_id]))
 
@@ -777,8 +777,8 @@ class WesternUnionReportsService:
                 "first_name": getattr(user, "first_name", "") or getattr(user, "username", ""),
                 "last_name": getattr(user, "last_name", ""),
                 "email": getattr(user, "email", ""),
-                "message": f"Payment Plan: {payment_plan_link}",
-                "title": f"Payment Plan {report.report_file.file.name} Western Union report",
+                "message": f"Payment List: {payment_list_link}",
+                "title": f"Payment List {report.report_file.file.name} Western Union report",
                 "link": download_link,
             }
             user.email_user(

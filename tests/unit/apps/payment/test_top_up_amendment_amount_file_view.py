@@ -17,8 +17,8 @@ from extras.test_utils.factories import (
     CurrencyFactory,
     PaymentFactory,
     PaymentHouseholdSnapshotFactory,
+    PaymentListFactory,
     PaymentPlanFactory,
-    PaymentPlanGroupFactory,
     PaymentPlanPurposeFactory,
     ProgramCycleFactory,
     ProgramFactory,
@@ -26,8 +26,8 @@ from extras.test_utils.factories import (
 )
 from hope.apps.account.permissions import Permissions
 from hope.apps.payment.services.top_up_amount_service import TopUpAmountTemplateService
-from hope.apps.payment.xlsx.xlsx_payment_plan_base_service import XlsxPaymentPlanBaseService
-from hope.models import Payment, PaymentPlan, PaymentPlanGroup, Program
+from hope.apps.payment.xlsx.xlsx_payment_list_base_service import XlsxPaymentListBaseService
+from hope.models import Payment, PaymentList, PaymentPlan, Program
 
 pytestmark = pytest.mark.django_db
 
@@ -42,30 +42,30 @@ def amendment_context(api_client: Callable, create_user_role_with_permissions: A
     cycle = ProgramCycleFactory(program=program)
     purpose = PaymentPlanPurposeFactory()
     program.payment_plan_purposes.add(purpose)
-    regular_pp = PaymentPlanFactory(
+    regular_pp = PaymentListFactory(
         name="Standard PP",
         business_area=business_area,
         program_cycle=cycle,
-        plan_type=PaymentPlan.PlanType.REGULAR,
-        status=PaymentPlan.Status.ACCEPTED,
+        plan_type=PaymentList.PlanType.REGULAR,
+        status=PaymentList.Status.ACCEPTED,
         currency=CurrencyFactory(code="USD"),
         payment_plan_purposes=[purpose],
     )
-    top_up_group = PaymentPlanGroupFactory(
+    top_up_group = PaymentPlanFactory(
         cycle=cycle,
-        plan_type=PaymentPlan.PlanType.TOP_UP,
-        source_group=regular_pp.payment_plan_group,
-        status=PaymentPlanGroup.Status.ACCEPTED,
+        plan_type=PaymentList.PlanType.TOP_UP,
+        source_payment_plan=regular_pp.payment_plan,
+        status=PaymentPlan.Status.ACCEPTED,
         currency=regular_pp.currency,
     )
-    top_up_pp = PaymentPlanFactory(
+    top_up_pp = PaymentListFactory(
         name="Standard PP Top Up",
         business_area=business_area,
         program_cycle=cycle,
-        plan_type=PaymentPlan.PlanType.TOP_UP,
-        status=PaymentPlan.Status.ACCEPTED,
-        source_payment_plan=regular_pp,
-        payment_plan_group=top_up_group,
+        plan_type=PaymentList.PlanType.TOP_UP,
+        status=PaymentList.Status.ACCEPTED,
+        source_payment_list=regular_pp,
+        payment_plan=top_up_group,
         payment_plan_purposes=[purpose],
     )
     payments = [PaymentFactory(parent=top_up_pp, status=Payment.STATUS_PENDING) for _ in range(3)]
@@ -85,18 +85,18 @@ def amendment_context(api_client: Callable, create_user_role_with_permissions: A
         "top_up_pp": top_up_pp,
         "payments": payments,
         "client": api_client(user),
-        "template_url": reverse("api:payments:payment-plan-groups-top-up-amount-template", kwargs=url_kwargs),
-        "create_url": reverse("api:payments:payment-plan-groups-create-top-up-amendment", kwargs=url_kwargs),
+        "template_url": reverse("api:payments:payment-plans-top-up-amount-template", kwargs=url_kwargs),
+        "create_url": reverse("api:payments:payment-plans-create-top-up-amendment", kwargs=url_kwargs),
     }
 
 
-def _amount_file(source_pp: PaymentPlan, amounts_by_payment_id: dict[str, str | None]) -> SimpleUploadedFile:
+def _amount_file(source_pp: PaymentList, amounts_by_payment_id: dict[str, str | None]) -> SimpleUploadedFile:
     """Build a filled-in amount template. Payment ids missing from the mapping are left blank."""
     workbook = TopUpAmountTemplateService([source_pp]).generate_workbook()
     worksheet = workbook.active
     headers = [cell.value for cell in worksheet[1]]
-    payment_id_column = headers.index(XlsxPaymentPlanBaseService.COLUMN_PAYMENT_ID) + 1
-    amount_column = headers.index(XlsxPaymentPlanBaseService.COLUMN_ENTITLEMENT_QUANTITY) + 1
+    payment_id_column = headers.index(XlsxPaymentListBaseService.COLUMN_PAYMENT_ID) + 1
+    amount_column = headers.index(XlsxPaymentListBaseService.COLUMN_ENTITLEMENT_QUANTITY) + 1
     for row_index in range(2, worksheet.max_row + 1):
         payment_id = worksheet.cell(row=row_index, column=payment_id_column).value
         worksheet.cell(row=row_index, column=amount_column).value = amounts_by_payment_id.get(str(payment_id))
@@ -154,6 +154,6 @@ def test_create_amendment_arrange_zero_amount_in_file_act_post_assert_row_left_o
         )
 
     assert response.status_code == status.HTTP_201_CREATED
-    amendment = PaymentPlan.objects.get(payment_plan_group_id=response.json()["id"])
+    amendment = PaymentList.objects.get(payment_plan_id=response.json()["id"])
     assert list(amendment.payment_items.values_list("source_payment_id", flat=True)) == [funded.id]
     assert set(amendment_context["top_up_pp"].eligible_payments_for_top_up_amendment()) == {zeroed, skipped}

@@ -18,8 +18,8 @@ from extras.test_utils.factories import (
     ApprovalProcessFactory,
     BusinessAreaFactory,
     PartnerFactory,
+    PaymentListFactory,
     PaymentPlanFactory,
-    PaymentPlanGroupFactory,
     ProgramCycleFactory,
     ProgramFactory,
     UserFactory,
@@ -27,7 +27,7 @@ from extras.test_utils.factories import (
 from extras.test_utils.factories.core import CurrencyFactory
 from extras.test_utils.factories.payment import FinancialServiceProviderFactory
 from hope.apps.account.permissions import Permissions
-from hope.models import Approval, PaymentPlan, PaymentPlanGroup
+from hope.models import Approval, PaymentList, PaymentPlan
 
 pytestmark = pytest.mark.django_db
 
@@ -45,45 +45,48 @@ def managerial_context(api_client: Callable, business_area: Any) -> dict[str, An
     program2 = ProgramFactory(business_area=business_area, cycle=False)
     cycle1 = ProgramCycleFactory(program=program1, title="Cycle 1")
     cycle2 = ProgramCycleFactory(program=program2, title="Cycle 2")
-    group1 = PaymentPlanGroupFactory(
+    group1 = PaymentPlanFactory(
         cycle=cycle1,
         name="Group One",
-        status=PaymentPlanGroup.Status.IN_APPROVAL,
+        status=PaymentPlan.Status.IN_APPROVAL,
         financial_service_provider=FinancialServiceProviderFactory(name="FSP One"),
         currency=CurrencyFactory(code="PLN", name="Polish Zloty"),
     )
-    group2 = PaymentPlanGroupFactory(cycle=cycle2, name="Group Two", status=PaymentPlanGroup.Status.IN_APPROVAL)
-    group3 = PaymentPlanGroupFactory(cycle=cycle2, name="Group Three", status=PaymentPlanGroup.Status.OPEN)
+    group2 = PaymentPlanFactory(cycle=cycle2, name="Group Two", status=PaymentPlan.Status.IN_APPROVAL)
+    group3 = PaymentPlanFactory(cycle=cycle2, name="Group Three", status=PaymentPlan.Status.OPEN)
     group1.unicef_id = "PPG-MAN-001"
     group1.save(update_fields=["unicef_id"])
     group2.unicef_id = "PPG-MAN-002"
     group2.save(update_fields=["unicef_id"])
     group3.unicef_id = "PPG-MAN-003"
     group3.save(update_fields=["unicef_id"])
-    PaymentPlanFactory(
+    PaymentListFactory(
         program_cycle=cycle1,
-        payment_plan_group=group1,
+        payment_plan=group1,
         business_area=business_area,
-        status=PaymentPlan.Status.IN_APPROVAL,
+        status=PaymentList.Status.IN_APPROVAL,
         total_households_count=3,
         total_entitled_quantity_usd=Decimal("100.00"),
     )
-    PaymentPlanFactory(
+    PaymentListFactory(
         program_cycle=cycle1,
-        payment_plan_group=group1,
+        payment_plan=group1,
         business_area=business_area,
-        status=PaymentPlan.Status.IN_APPROVAL,
+        status=PaymentList.Status.IN_APPROVAL,
         total_households_count=2,
         total_entitled_quantity_usd=Decimal("50.00"),
     )
-    PaymentPlanFactory(
+    PaymentListFactory(
         program_cycle=cycle2,
-        payment_plan_group=group2,
+        payment_plan=group2,
         business_area=business_area,
-        status=PaymentPlan.Status.IN_APPROVAL,
+        status=PaymentList.Status.IN_APPROVAL,
     )
-    PaymentPlanFactory(
-        program_cycle=cycle2, payment_plan_group=group3, business_area=business_area, status=PaymentPlan.Status.OPEN
+    PaymentListFactory(
+        program_cycle=cycle2,
+        payment_plan=group3,
+        business_area=business_area,
+        status=PaymentList.Status.OPEN,
     )
     return {
         "partner": partner,
@@ -105,9 +108,9 @@ def managerial_context(api_client: Callable, business_area: Any) -> dict[str, An
 @pytest.fixture
 def vision_managerial_context(managerial_context: dict[str, Any]) -> dict[str, Any]:
     group = managerial_context["group1"]
-    group.status = PaymentPlanGroup.Status.IN_REVIEW
+    group.status = PaymentPlan.Status.IN_REVIEW
     group.save(update_fields=["status"])
-    group.payment_plans.update(status=PaymentPlan.Status.IN_REVIEW)
+    group.payment_lists.update(status=PaymentList.Status.IN_REVIEW)
     managerial_context["business_area"].vision_integration_active = True
     managerial_context["business_area"].save(update_fields=["vision_integration_active"])
     FlagState.objects.get_or_create(name="VISION_INTEGRATION_ACTIVE", condition="boolean", value="True")
@@ -183,14 +186,14 @@ def test_list_groups_row_carries_programme_totals_and_configuration(
     assert response.status_code == status.HTTP_200_OK
     row = response.json()["results"][0]
     assert row["name"] == "Group One"
-    assert row["status"] == PaymentPlanGroup.Status.IN_APPROVAL
+    assert row["status"] == PaymentPlan.Status.IN_APPROVAL
     assert row["status_display"] == "In Approval"
     assert row["program"] == managerial_context["program1"].name
     assert row["program_code"] == managerial_context["program1"].code
     assert row["cycle_title"] == "Cycle 1"
     assert row["financial_service_provider"] == "FSP One"
     assert row["currency"] == "PLN"
-    assert row["payment_plans_count"] == 2
+    assert row["payment_lists_count"] == 2
     assert row["total_households_count"] == 5
     assert row["total_entitled_quantity_usd"] == "150.00"
 
@@ -232,7 +235,7 @@ def test_list_groups_drops_group_once_it_leaves_the_approval_stages(
     managerial_context["client"].get(managerial_context["url"])
 
     with TestCase.captureOnCommitCallbacks(execute=True):
-        managerial_context["group1"].status = PaymentPlanGroup.Status.FINISHED
+        managerial_context["group1"].status = PaymentPlan.Status.FINISHED
         managerial_context["group1"].save(update_fields=["status"])
     response = managerial_context["client"].get(managerial_context["url"])
 
@@ -245,7 +248,7 @@ def test_list_groups_approval_process_data(
     create_user_role_with_permissions: Any,
 ) -> None:
     approval_process = ApprovalProcessFactory(
-        payment_plan_group=managerial_context["group1"],
+        payment_plan=managerial_context["group1"],
         sent_for_approval_date=timezone.datetime(2021, 1, 1, 0, 0, 0, tzinfo=dt_timezone.utc),
         sent_for_approval_by=managerial_context["user"],
     )
@@ -268,21 +271,21 @@ def test_list_groups_approval_process_data(
     assert row["last_approval_process_by"] == str(approval_process.sent_for_approval_by)
 
     with TestCase.captureOnCommitCallbacks(execute=True):
-        group.status = PaymentPlanGroup.Status.IN_AUTHORIZATION
+        group.status = PaymentPlan.Status.IN_AUTHORIZATION
         group.save(update_fields=["status"])
     row = managerial_context["client"].get(managerial_context["url"]).json()["results"][0]
     assert row["last_approval_process_date"] == approval_approval.created_at.strftime("%Y-%m-%dT%H:%M:%SZ")
     assert row["last_approval_process_by"] == str(approval_approval.created_by)
 
     with TestCase.captureOnCommitCallbacks(execute=True):
-        group.status = PaymentPlanGroup.Status.IN_REVIEW
+        group.status = PaymentPlan.Status.IN_REVIEW
         group.save(update_fields=["status"])
     row = managerial_context["client"].get(managerial_context["url"]).json()["results"][0]
     assert row["last_approval_process_date"] == approval_authorization.created_at.strftime("%Y-%m-%dT%H:%M:%SZ")
     assert row["last_approval_process_by"] == str(approval_authorization.created_by)
 
     with TestCase.captureOnCommitCallbacks(execute=True):
-        group.status = PaymentPlanGroup.Status.ACCEPTED
+        group.status = PaymentPlan.Status.ACCEPTED
         group.save(update_fields=["status"])
     row = managerial_context["client"].get(managerial_context["url"]).json()["results"][0]
     assert row["last_approval_process_date"] == approval_release.created_at.strftime("%Y-%m-%dT%H:%M:%SZ")
@@ -306,21 +309,25 @@ def test_bulk_approve_moves_groups_and_their_plans(
         managerial_context["business_area"],
         managerial_context["program2"],
     )
-    ApprovalProcessFactory(payment_plan_group=managerial_context["group1"])
-    ApprovalProcessFactory(payment_plan_group=managerial_context["group2"])
+    ApprovalProcessFactory(payment_plan=managerial_context["group1"])
+    ApprovalProcessFactory(payment_plan=managerial_context["group2"])
     group1, group2 = managerial_context["group1"], managerial_context["group2"]
 
     response = managerial_context["client"].post(
         managerial_context["bulk_url"],
-        data={"ids": [group1.id, group2.id], "action": PaymentPlan.Action.APPROVE.value, "comment": "Test comment"},
+        data={
+            "ids": [group1.id, group2.id],
+            "action": PaymentList.Action.APPROVE.value,
+            "comment": "Test comment",
+        },
     )
 
     assert response.status_code == status.HTTP_204_NO_CONTENT
     group1.refresh_from_db()
     group2.refresh_from_db()
-    assert group1.status == PaymentPlanGroup.Status.IN_AUTHORIZATION
-    assert group2.status == PaymentPlanGroup.Status.IN_AUTHORIZATION
-    assert set(group1.payment_plans.values_list("status", flat=True)) == {PaymentPlan.Status.IN_AUTHORIZATION}
+    assert group1.status == PaymentPlan.Status.IN_AUTHORIZATION
+    assert group2.status == PaymentPlan.Status.IN_AUTHORIZATION
+    assert set(group1.payment_lists.values_list("status", flat=True)) == {PaymentList.Status.IN_AUTHORIZATION}
     assert group1.approval_process.first().approvals.get().comment == "Test comment"
 
 
@@ -338,12 +345,13 @@ def test_bulk_release_skips_vision_managed_group(
     )
 
     response = vision_managerial_context["client"].post(
-        vision_managerial_context["bulk_url"], data={"ids": [group.id], "action": PaymentPlan.Action.REVIEW.value}
+        vision_managerial_context["bulk_url"],
+        data={"ids": [group.id], "action": PaymentList.Action.REVIEW.value},
     )
 
     assert response.status_code == status.HTTP_204_NO_CONTENT
     group.refresh_from_db()
-    assert group.status == PaymentPlanGroup.Status.IN_REVIEW
+    assert group.status == PaymentPlan.Status.IN_REVIEW
 
 
 def test_bulk_action_rejects_unsupported_action(
@@ -359,13 +367,16 @@ def test_bulk_action_rejects_unsupported_action(
 
     response = managerial_context["client"].post(
         managerial_context["bulk_url"],
-        data={"ids": [managerial_context["group1"].id], "action": PaymentPlan.Action.MARK_READY_FOR_CLOSURE.value},
+        data={
+            "ids": [managerial_context["group1"].id],
+            "action": PaymentList.Action.MARK_READY_FOR_CLOSURE.value,
+        },
     )
 
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert "action" in response.json()
     managerial_context["group1"].refresh_from_db()
-    assert managerial_context["group1"].status == PaymentPlanGroup.Status.IN_APPROVAL
+    assert managerial_context["group1"].status == PaymentPlan.Status.IN_APPROVAL
 
 
 def test_bulk_action_rejects_too_long_comment(
@@ -383,7 +394,7 @@ def test_bulk_action_rejects_too_long_comment(
         managerial_context["bulk_url"],
         data={
             "ids": [managerial_context["group1"].id],
-            "action": PaymentPlan.Action.APPROVE.value,
+            "action": PaymentList.Action.APPROVE.value,
             "comment": "a" * 2001,
         },
     )
@@ -391,7 +402,7 @@ def test_bulk_action_rejects_too_long_comment(
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert "comment" in response.json()
     managerial_context["group1"].refresh_from_db()
-    assert managerial_context["group1"].status == PaymentPlanGroup.Status.IN_APPROVAL
+    assert managerial_context["group1"].status == PaymentPlan.Status.IN_APPROVAL
 
 
 def test_bulk_action_without_stage_permission_returns_403_and_changes_nothing(
@@ -411,21 +422,25 @@ def test_bulk_action_without_stage_permission_returns_403_and_changes_nothing(
         managerial_context["business_area"],
         managerial_context["program2"],
     )
-    ApprovalProcessFactory(payment_plan_group=managerial_context["group1"])
-    ApprovalProcessFactory(payment_plan_group=managerial_context["group2"])
+    ApprovalProcessFactory(payment_plan=managerial_context["group1"])
+    ApprovalProcessFactory(payment_plan=managerial_context["group2"])
     group1, group2 = managerial_context["group1"], managerial_context["group2"]
 
     response = managerial_context["client"].post(
         managerial_context["bulk_url"],
-        data={"ids": [group1.id, group2.id], "action": PaymentPlan.Action.APPROVE.value, "comment": "Test comment"},
+        data={
+            "ids": [group1.id, group2.id],
+            "action": PaymentList.Action.APPROVE.value,
+            "comment": "Test comment",
+        },
     )
 
     assert response.status_code == status.HTTP_403_FORBIDDEN
     assert response.json()["required_permissions"] == [Permissions.PM_ACCEPTANCE_PROCESS_APPROVE.value]
     group1.refresh_from_db()
     group2.refresh_from_db()
-    assert group1.status == PaymentPlanGroup.Status.IN_APPROVAL
-    assert group2.status == PaymentPlanGroup.Status.IN_APPROVAL
+    assert group1.status == PaymentPlan.Status.IN_APPROVAL
+    assert group2.status == PaymentPlan.Status.IN_APPROVAL
 
 
 def test_bulk_action_ignores_groups_of_another_business_area(
@@ -438,13 +453,14 @@ def test_bulk_action_ignores_groups_of_another_business_area(
         managerial_context["business_area"],
         managerial_context["program1"],
     )
-    other_group = PaymentPlanGroupFactory(status=PaymentPlanGroup.Status.IN_APPROVAL)
-    ApprovalProcessFactory(payment_plan_group=other_group)
+    other_group = PaymentPlanFactory(status=PaymentPlan.Status.IN_APPROVAL)
+    ApprovalProcessFactory(payment_plan=other_group)
 
     response = managerial_context["client"].post(
-        managerial_context["bulk_url"], data={"ids": [other_group.id], "action": PaymentPlan.Action.APPROVE.value}
+        managerial_context["bulk_url"],
+        data={"ids": [other_group.id], "action": PaymentList.Action.APPROVE.value},
     )
 
     assert response.status_code == status.HTTP_204_NO_CONTENT
     other_group.refresh_from_db()
-    assert other_group.status == PaymentPlanGroup.Status.IN_APPROVAL
+    assert other_group.status == PaymentPlan.Status.IN_APPROVAL

@@ -1,9 +1,9 @@
 import withErrorBoundary from '@components/core/withErrorBoundary';
-import AcceptanceProcess from '@components/paymentmodule/PaymentPlanDetails/AcceptanceProcess/AcceptanceProcess';
-import { ConversionToUsd } from '@components/paymentmodule/PaymentPlanDetails/ConversionToUsd';
-import { SupportingDocumentsSection } from '@components/paymentmodule/PaymentPlanDetails/SupportingDocumentsSection/SupportingDocumentsSection';
+import AcceptanceProcess from '@components/paymentmodule/PaymentListDetails/AcceptanceProcess/AcceptanceProcess';
+import { ConversionToUsd } from '@components/paymentmodule/PaymentListDetails/ConversionToUsd';
+import { SupportingDocumentsSection } from '@components/paymentmodule/PaymentListDetails/SupportingDocumentsSection/SupportingDocumentsSection';
 import { ExportInstructionSummaryPdfButton } from '@containers/pages/paymentmodule/FollowUpInstructions/actions/ExportInstructionSummaryPdfButton';
-import { ChildPaymentPlansTable } from '@containers/pages/paymentmodule/FollowUpInstructions/ChildPaymentPlansTable';
+import { ChildPaymentListsTable } from '@containers/pages/paymentmodule/FollowUpInstructions/ChildPaymentListsTable';
 import { FollowUpInstructionDetailsHeader } from '@containers/pages/paymentmodule/FollowUpInstructions/FollowUpInstructionDetailsHeader';
 import { FollowUpInstructionSummary } from '@containers/pages/paymentmodule/FollowUpInstructions/FollowUpInstructionSummary';
 import { SomethingWentWrong } from '@containers/pages/somethingWentWrong/SomethingWentWrong';
@@ -75,7 +75,7 @@ const FollowUpInstructionDetailsPage = (): ReactElement => {
     if (wasRateRecalculating.current && !rateRecalculating) {
       queryClient.invalidateQueries({
         queryKey: restQueryKey(
-          RestService.restBusinessAreasProgramsPaymentPlansList,
+          RestService.restBusinessAreasProgramsPaymentListsList,
         ),
       });
     }
@@ -141,7 +141,7 @@ const FollowUpInstructionDetailsPage = (): ReactElement => {
         ownerPath={`follow-up-instructions/${instruction.id}`}
         supportingDocuments={instruction.supportingDocuments}
       />
-      <ChildPaymentPlansTable paymentPlans={instruction.paymentPlans} />
+      <ChildPaymentListsTable paymentLists={instruction.paymentLists} />
     </Box>
   );
 };

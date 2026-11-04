@@ -1,4 +1,0 @@
-{% extends "core/base_greeting_email.txt" %}
-
-{% block content %}{{ message }}{% if link %}
-Payment Plan: {{ link }}{% endif %}{% endblock content %}

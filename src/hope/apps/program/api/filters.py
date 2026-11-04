@@ -53,7 +53,7 @@ class ProgramCycleFilter(UpdatedAtFilter):
             queryset = queryset.annotate(
                 total_delivered_q_usd=Coalesce(
                     Sum(
-                        "payment_plans__total_delivered_quantity_usd",
+                        "payment_lists__total_delivered_quantity_usd",
                         output_field=DecimalField(),
                     ),
                     Decimal(0.0),
@@ -72,7 +72,7 @@ class ProgramCycleFilter(UpdatedAtFilter):
             queryset = queryset.annotate(
                 total_entitled_q_usd=Coalesce(
                     Sum(
-                        "payment_plans__total_entitled_quantity_usd",
+                        "payment_lists__total_entitled_quantity_usd",
                         output_field=DecimalField(),
                     ),
                     Decimal(0.0),
