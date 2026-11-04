@@ -1,7 +1,6 @@
 import logging
 from typing import Any, cast
 
-from admin_cursor_paginator import CursorPaginatorAdmin
 from adminfilters.autocomplete import AutoCompleteFilter
 from adminfilters.combo import RelatedFieldComboFilter
 from django.contrib import admin
@@ -12,6 +11,7 @@ from django.http import HttpRequest
 from django.utils import timezone
 
 from hope.admin.utils import (
+    FieldPkCursorPaginatorAdmin,
     HOPEModelAdminBase,
     RdiMergeStatusAdminMixin,
     SoftDeletableAdminMixin,
@@ -28,7 +28,7 @@ logger = logging.getLogger(__name__)
 class DocumentAdmin(
     UnicefIdSearchMixin,
     SoftDeletableAdminMixin,
-    CursorPaginatorAdmin,
+    FieldPkCursorPaginatorAdmin,
     HOPEModelAdminBase,
     RdiMergeStatusAdminMixin,
 ):

@@ -1,7 +1,8 @@
 from __future__ import annotations
 
+import json
 import re
-from typing import TYPE_CHECKING, Any, TypeVar
+from typing import TYPE_CHECKING, Any, TypeVar, override
 
 if TYPE_CHECKING:
     from uuid import UUID
@@ -13,7 +14,9 @@ if TYPE_CHECKING:
     from django.forms.fields import Field as FormField
     from django.http import HttpRequest, HttpResponse
 
-from admin_cursor_paginator.paginator import AdminCursorPaginator
+from admin_cursor_paginator import CursorPaginatorAdmin
+from admin_cursor_paginator.cursor import Cursor, decode_cursor, encode_value
+from admin_cursor_paginator.paginator import AdminCursorPage, AdminCursorPaginator
 from admin_extra_buttons.decorators import button, link
 from admin_extra_buttons.mixins import ExtraButtonsMixin, confirm_action
 from adminactions.helpers import AdminActionPermMixin
@@ -21,13 +24,15 @@ from adminfilters.mixin import AdminFiltersMixin
 from django.conf import settings
 from django.contrib import admin, messages
 from django.contrib.admin.options import get_content_type_for_model
+from django.contrib.admin.views.main import PAGE_VAR
 from django.core.cache import cache
 from django.core.exceptions import ObjectDoesNotExist
-from django.db.models import Model, OneToOneRel, QuerySet
+from django.db.models import Model, OneToOneRel, Q, QuerySet
 from django.db.models.functions import Collate
 from django.shortcuts import redirect
 from django.template.response import TemplateResponse
 from django.urls import reverse
+from django.utils.functional import cached_property
 from jsoneditor.forms import JSONEditor
 from smart_admin.mixins import DisplayAllMixin as SmartDisplayAllMixin
 
@@ -494,6 +499,103 @@ class LinkedObjectsManagerMixin:
         return "%s_%s_%s" % (value.app_label, value.model_name, arg)
 
 
+class FieldPkCursorPaginator(AdminCursorPaginator):
+    """Order and page by `(ordering_field, pk)`, so rows sharing the field value at a page boundary are not skipped.
+
+    The cursor value is the JSON pair `[field value, pk]`.
+    """
+
+    @staticmethod
+    def cursor_value(field_value: Any, pk: Any) -> str:
+        return json.dumps([encode_value(field_value), str(pk)])
+
+    @cached_property
+    @override
+    def current_page(self) -> AdminCursorPage:
+        encoded_cursor = self.request.GET.get(PAGE_VAR, "")
+        cursor = self._decode_cursor(encoded_cursor)
+        cur_number = cursor.number if cursor else 1
+        is_reverse = bool(cursor and cursor.is_reverse)
+
+        ordering_field = self.ordering_field
+        if is_reverse:
+            ordering_field = self._reverse_ordering(ordering_field)
+
+        pk_ordering = "-pk" if ordering_field.startswith("-") else "pk"
+        qs = self.queryset.order_by(ordering_field, pk_ordering)
+        if cursor:
+            qs = self._apply_filter(qs, cursor)
+
+        object_list = list(qs[: self.per_page + 1])
+        has_more = len(object_list) > self.per_page
+        if has_more:
+            object_list = object_list[:-1]
+        if is_reverse:
+            object_list.reverse()
+
+        prev_cursor = None
+        if object_list and cur_number > 2:
+            prev_cursor = Cursor(
+                value=self._get_value_from_instance(object_list[0]),
+                is_reverse=1,
+                number=cur_number - 1,
+            )
+
+        next_cursor = None
+        if object_list and (is_reverse or has_more):
+            next_cursor = Cursor(
+                value=self._get_value_from_instance(object_list[-1]),
+                is_reverse=0,
+                number=cur_number + 1,
+            )
+
+        return AdminCursorPage(object_list, self, cur_number, prev_cursor, next_cursor)
+
+    @override
+    def _apply_filter(self, qs: QuerySet, cursor: Cursor) -> QuerySet:
+        field_value, pk = cursor.value
+        direction = "gt" if cursor.is_reverse == self.ordering_field.startswith("-") else "lt"
+        inclusive = {"gt": "gte", "lt": "lte"}[direction]
+        field = self.ordering_field_name
+        return qs.filter(
+            # An OR can't drive an index scan; the line below is redundant, but it lets the scan walk the field's
+            # index in order and filter the OR row by row.
+            Q(**{f"{field}__{inclusive}": field_value}),
+            Q(**{f"{field}__{direction}": field_value}) | Q(**{field: field_value, f"pk__{direction}": pk}),
+        )
+
+    @override
+    def _get_value_from_instance(self, instance: Model) -> str:
+        return self.cursor_value(super()._get_value_from_instance(instance), instance.pk)
+
+    @staticmethod
+    def _decode_cursor(encoded_cursor: str) -> Cursor | None:
+        cursor = decode_cursor(encoded_cursor)
+        if cursor is None:
+            return None
+        try:
+            field_value, pk = json.loads(cursor.value)
+        except (TypeError, ValueError):
+            return None
+        return cursor._replace(value=(field_value, pk))
+
+
+class FieldPkCursorPaginatorAdmin(CursorPaginatorAdmin):
+    @override
+    def get_paginator(
+        self,
+        request: HttpRequest,
+        queryset: QuerySet,
+        per_page: int,
+        orphans: int = 0,
+        allow_empty_first_page: bool = True,
+    ) -> AdminCursorPaginator | Paginator:
+        paginator = super().get_paginator(request, queryset, per_page, orphans, allow_empty_first_page)
+        if isinstance(paginator, AdminCursorPaginator):
+            return FieldPkCursorPaginator(request, queryset, per_page, self.cursor_ordering_field)
+        return paginator
+
+
 class UnicefIdSearchMixin(admin.ModelAdmin):
     """Prefix-match a pasted unicef_id instead of OR-ing `icontains` over every search field.
 
@@ -533,5 +635,5 @@ class UnicefIdSearchMixin(admin.ModelAdmin):
         allow_empty_first_page: bool = True,
     ) -> AdminCursorPaginator | Paginator:
         if "unicef_id_c" in queryset.query.annotations:
-            return AdminCursorPaginator(request, queryset, per_page, "unicef_id_c")
+            return FieldPkCursorPaginator(request, queryset, per_page, "unicef_id_c")
         return super().get_paginator(request, queryset, per_page, orphans, allow_empty_first_page)

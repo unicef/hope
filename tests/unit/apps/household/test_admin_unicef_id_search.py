@@ -24,6 +24,7 @@ from hope.admin.account import AccountAdmin
 from hope.admin.document import DocumentAdmin
 from hope.admin.household import HouseholdAdmin
 from hope.admin.individual import IndividualAdmin, IndividualIdentityAdmin, IndividualRoleInHouseholdAdmin
+from hope.admin.utils import FieldPkCursorPaginator
 from hope.apps.household.const import ROLE_PRIMARY
 from hope.models import Account, Document, Household, Individual, IndividualIdentity, IndividualRoleInHousehold
 
@@ -164,35 +165,41 @@ def paged_population():
     ba = BusinessAreaFactory(slug="unicef-id-paging-ba")
     program = ProgramFactory(business_area=ba, status="ACTIVE")
     other_program = ProgramFactory(business_area=ba, status="ACTIVE")
-    HouseholdFactory(
-        business_area=ba,
-        program=program,
-        create_role=False,
-        unicef_id="HH-24-0000.0001",
-        head_of_household__unicef_id="IND-24-0000.0001",
-    )
-    HouseholdFactory(
-        business_area=ba,
-        program=program,
-        create_role=False,
-        unicef_id="HH-24-0000.0002",
-        head_of_household__unicef_id="IND-24-0000.0002",
-    )
-    HouseholdFactory(
-        business_area=ba,
-        program=program,
-        create_role=False,
-        unicef_id="HH-24-0000.0003",
-        head_of_household__unicef_id="IND-24-0000.0003",
-    )
-    HouseholdFactory(
-        business_area=ba,
-        program=other_program,
-        create_role=False,
-        unicef_id="HH-24-0000.0004",
-        head_of_household__unicef_id="IND-24-0000.0004",
-    )
-    return {"business_area__exact": str(ba.id), "program__exact": str(program.id)}
+    households = [
+        HouseholdFactory(
+            business_area=ba,
+            program=program,
+            create_role=False,
+            unicef_id="HH-24-0000.0001",
+            head_of_household__unicef_id="IND-24-0000.0001",
+        ),
+        HouseholdFactory(
+            business_area=ba,
+            program=program,
+            create_role=False,
+            unicef_id="HH-24-0000.0002",
+            head_of_household__unicef_id="IND-24-0000.0002",
+        ),
+        HouseholdFactory(
+            business_area=ba,
+            program=program,
+            create_role=False,
+            unicef_id="HH-24-0000.0003",
+            head_of_household__unicef_id="IND-24-0000.0003",
+        ),
+        HouseholdFactory(
+            business_area=ba,
+            program=other_program,
+            create_role=False,
+            unicef_id="HH-24-0000.0004",
+            head_of_household__unicef_id="IND-24-0000.0004",
+        ),
+    ]
+    rows = [*households, *(household.head_of_household for household in households)]
+    return {
+        "filters": {"business_area__exact": str(ba.id), "program__exact": str(program.id)},
+        "pk": {row.unicef_id: row.pk for row in rows},
+    }
 
 
 @pytest.fixture
@@ -236,52 +243,57 @@ def test_paginator_orders_by_c_collation_only_for_own_unicef_id_search(
 
 
 @pytest.mark.parametrize(
-    ("url_name", "params", "expected"),
+    ("url_name", "term", "expected"),
     [
         (
             "admin:household_individual_changelist",
-            {"q": "IND-24"},
+            "IND-24",
             ["IND-24-0000.0001", "IND-24-0000.0002", "IND-24-0000.0003"],
         ),
+        ("admin:household_household_changelist", "HH-24", ["HH-24-0000.0001", "HH-24-0000.0002", "HH-24-0000.0003"]),
+    ],
+    ids=["individual", "household"],
+)
+def test_changelist_search_by_own_unicef_id_lists_first_page(paged_population, staff_client, url_name, term, expected):
+    response = staff_client.get(reverse(url_name), {"q": term, **paged_population["filters"]})
+
+    assert [obj.unicef_id for obj in response.context["cl"].result_list] == expected
+
+
+@pytest.mark.parametrize(
+    ("url_name", "term", "cursor_id", "is_reverse", "expected"),
+    [
         (
             "admin:household_individual_changelist",
-            {"q": "IND-24", "p": encode_cursor(Cursor(value="IND-24-0000.0001", is_reverse=0, number=2))},
+            "IND-24",
+            "IND-24-0000.0001",
+            0,
             ["IND-24-0000.0002", "IND-24-0000.0003"],
         ),
         (
             "admin:household_individual_changelist",
-            {"q": "IND-24", "p": encode_cursor(Cursor(value="IND-24-0000.0003", is_reverse=1, number=2))},
+            "IND-24",
+            "IND-24-0000.0003",
+            1,
             ["IND-24-0000.0001", "IND-24-0000.0002"],
         ),
-        (
-            "admin:household_household_changelist",
-            {"q": "HH-24"},
-            ["HH-24-0000.0001", "HH-24-0000.0002", "HH-24-0000.0003"],
-        ),
-        (
-            "admin:household_household_changelist",
-            {"q": "HH-24", "p": encode_cursor(Cursor(value="HH-24-0000.0001", is_reverse=0, number=2))},
-            ["HH-24-0000.0002", "HH-24-0000.0003"],
-        ),
-        (
-            "admin:household_household_changelist",
-            {"q": "HH-24", "p": encode_cursor(Cursor(value="HH-24-0000.0003", is_reverse=1, number=2))},
-            ["HH-24-0000.0001", "HH-24-0000.0002"],
-        ),
+        ("admin:household_household_changelist", "HH-24", "HH-24-0000.0001", 0, ["HH-24-0000.0002", "HH-24-0000.0003"]),
+        ("admin:household_household_changelist", "HH-24", "HH-24-0000.0003", 1, ["HH-24-0000.0001", "HH-24-0000.0002"]),
     ],
-    ids=[
-        "individual-first",
-        "individual-next",
-        "individual-previous",
-        "household-first",
-        "household-next",
-        "household-previous",
-    ],
+    ids=["individual-next", "individual-previous", "household-next", "household-previous"],
 )
-def test_changelist_search_by_own_unicef_id_pages_through_results(
-    paged_population, staff_client, url_name, params, expected
+def test_changelist_search_by_own_unicef_id_pages_from_cursor(
+    paged_population, staff_client, url_name, term, cursor_id, is_reverse, expected
 ):
-    response = staff_client.get(reverse(url_name), {**params, **paged_population})
+    cursor = Cursor(
+        value=FieldPkCursorPaginator.cursor_value(cursor_id, paged_population["pk"][cursor_id]),
+        is_reverse=is_reverse,
+        number=2,
+    )
+
+    response = staff_client.get(
+        reverse(url_name), {"q": term, "p": encode_cursor(cursor), **paged_population["filters"]}
+    )
 
     assert [obj.unicef_id for obj in response.context["cl"].result_list] == expected
 

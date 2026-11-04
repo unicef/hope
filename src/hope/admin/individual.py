@@ -24,6 +24,7 @@ from smart_admin.mixins import FieldsetMixin as SmartFieldsetMixin
 from hope.admin.utils import (
     AutocompleteForeignKeyMixin,
     BusinessAreaForIndividualCollectionListFilter,
+    FieldPkCursorPaginatorAdmin,
     HOPEModelAdminBase,
     LastSyncDateResetMixin,
     LinkedObjectsManagerMixin,
@@ -80,7 +81,7 @@ class IndividualAdmin(
     LinkedObjectsManagerMixin,
     SmartFieldsetMixin,
     RdiMergeStatusAdminMixin,
-    CursorPaginatorAdmin,
+    FieldPkCursorPaginatorAdmin,
     HOPEModelAdminBase,
 ):
     # Custom template to merge AdminAdvancedFiltersMixin and ExtraButtonsMixin

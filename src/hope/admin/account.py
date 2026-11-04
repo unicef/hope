@@ -1,6 +1,5 @@
 from typing import Any
 
-from admin_cursor_paginator import CursorPaginatorAdmin
 from adminfilters.autocomplete import AutoCompleteFilter
 from django.contrib import admin
 from django.db.models import QuerySet
@@ -8,7 +7,12 @@ from django.http import HttpRequest
 from django.urls import reverse
 from django.utils.html import format_html
 
-from hope.admin.utils import AutocompleteForeignKeyMixin, HOPEModelAdminBase, UnicefIdSearchMixin
+from hope.admin.utils import (
+    AutocompleteForeignKeyMixin,
+    FieldPkCursorPaginatorAdmin,
+    HOPEModelAdminBase,
+    UnicefIdSearchMixin,
+)
 from hope.models import (
     Account,
     AccountAttachment,
@@ -40,7 +44,7 @@ class AccountAttachmentInline(AutocompleteForeignKeyMixin, admin.TabularInline):
 
 
 @admin.register(Account)
-class AccountAdmin(UnicefIdSearchMixin, CursorPaginatorAdmin, HOPEModelAdminBase):
+class AccountAdmin(UnicefIdSearchMixin, FieldPkCursorPaginatorAdmin, HOPEModelAdminBase):
     cursor_ordering_field = "-created_at"
     list_display = (
         "individual",

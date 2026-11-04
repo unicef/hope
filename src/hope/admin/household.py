@@ -4,7 +4,6 @@ import re
 from typing import Any, cast
 from uuid import UUID
 
-from admin_cursor_paginator import CursorPaginatorAdmin
 from admin_extra_buttons.decorators import button
 from admin_extra_buttons.mixins import confirm_action
 from adminfilters.autocomplete import LinkedAutoCompleteFilter
@@ -29,6 +28,7 @@ from smart_admin.mixins import FieldsetMixin as SmartFieldsetMixin
 from hope.admin.utils import (
     AutocompleteForeignKeyMixin,
     BusinessAreaForHouseholdCollectionListFilter,
+    FieldPkCursorPaginatorAdmin,
     HOPEModelAdminBase,
     LastSyncDateResetMixin,
     LinkedObjectsManagerMixin,
@@ -318,7 +318,7 @@ class HouseholdAdmin(
     LastSyncDateResetMixin,
     LinkedObjectsManagerMixin,
     SmartFieldsetMixin,
-    CursorPaginatorAdmin,
+    FieldPkCursorPaginatorAdmin,
     HouseholdWithdrawnMixin,
     HOPEModelAdminBase,
     RdiMergeStatusAdminMixin,
