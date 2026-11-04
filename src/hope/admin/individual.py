@@ -2,7 +2,6 @@ import logging
 from typing import Any, Iterable
 from uuid import UUID
 
-from admin_cursor_paginator import CursorPaginatorAdmin
 from admin_extra_buttons.decorators import button
 from adminfilters.autocomplete import AutoCompleteFilter, LinkedAutoCompleteFilter
 from adminfilters.combo import ChoicesFieldComboFilter
@@ -293,7 +292,7 @@ class IndividualRoleInHouseholdAdmin(
     UnicefIdSearchMixin,
     SoftDeletableAdminMixin,
     LastSyncDateResetMixin,
-    CursorPaginatorAdmin,
+    FieldPkCursorPaginatorAdmin,
     HOPEModelAdminBase,
     RdiMergeStatusAdminMixin,
 ):
@@ -335,7 +334,9 @@ class IndividualRoleInHouseholdAdmin(
 
 
 @admin.register(IndividualIdentity)
-class IndividualIdentityAdmin(UnicefIdSearchMixin, CursorPaginatorAdmin, HOPEModelAdminBase, RdiMergeStatusAdminMixin):
+class IndividualIdentityAdmin(
+    UnicefIdSearchMixin, FieldPkCursorPaginatorAdmin, HOPEModelAdminBase, RdiMergeStatusAdminMixin
+):
     list_display = (
         "number",
         "partner",
