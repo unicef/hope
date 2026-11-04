@@ -104,12 +104,25 @@ def detail_user(business_area: Any, program: Program, create_user_role_with_perm
 
 @pytest.fixture
 def group_document(group: PaymentPlan) -> PaymentPlanSupportingDocument:
-    return PaymentPlanSupportingDocumentFactory(payment_plan=group, title="Group contract")
+    return PaymentPlanSupportingDocumentFactory(
+        payment_plan=group,
+        title="Group contract",
+        file=SimpleUploadedFile("group-contract.pdf", b"abc", content_type="application/pdf"),
+    )
+
+
+@pytest.fixture
+def group_document_without_a_file(group: PaymentPlan) -> PaymentPlanSupportingDocument:
+    return PaymentPlanSupportingDocumentFactory(payment_plan=group, file=None)
 
 
 @pytest.fixture
 def instruction_document(instruction: FollowUpInstruction) -> PaymentPlanSupportingDocument:
-    return PaymentPlanSupportingDocumentFactory(follow_up_instruction=instruction, title="Instruction contract")
+    return PaymentPlanSupportingDocumentFactory(
+        follow_up_instruction=instruction,
+        title="Instruction contract",
+        file=SimpleUploadedFile("instruction-contract.pdf", b"abc", content_type="application/pdf"),
+    )
 
 
 @pytest.fixture
@@ -291,6 +304,14 @@ def test_validate_file_limit_failure(full_group: PaymentPlan, serializer_context
     )
 
 
+def test_to_representation_leaves_a_missing_file_as_none(
+    group_document_without_a_file: PaymentPlanSupportingDocument,
+) -> None:
+    data = PaymentPlanSupportingDocumentSerializer(group_document_without_a_file).data
+
+    assert data["file"] is None
+
+
 @pytest.mark.enable_activity_log
 def test_upload_to_group_attaches_document_to_group_and_logs_it(
     api_client: APIClient, group_documents_url: str, upload_user: User, group: PaymentPlan
@@ -309,7 +330,8 @@ def test_upload_to_group_attaches_document_to_group_and_logs_it(
     assert document.follow_up_instruction is None
     assert document.created_by == upload_user
     assert response.data["title"] == "Test"
-    assert "test_file" in response.data["file"]
+    assert response.data["file"].startswith("test_file")
+    assert "/" not in response.data["file"]
     log = LogEntry.objects.get(object_id=group.id)
     assert log.changes["supporting_document"] == {"from": None, "to": "Test"}
 
@@ -355,7 +377,8 @@ def test_download_group_document(
 
     assert response.status_code == status.HTTP_200_OK
     assert isinstance(response, FileResponse)
-    assert response["Content-Disposition"] == f'attachment; filename="{group_document.file.name}"'
+    assert response["Content-Disposition"].startswith('attachment; filename="group-contract')
+    assert response["Content-Disposition"].endswith('.pdf"')
 
 
 def test_upload_to_instruction_attaches_document_to_instruction(
@@ -400,7 +423,8 @@ def test_download_instruction_document(
     response = api_client.get(instruction_document_download_url)
 
     assert response.status_code == status.HTTP_200_OK
-    assert response["Content-Disposition"] == f'attachment; filename="{instruction_document.file.name}"'
+    assert response["Content-Disposition"].startswith('attachment; filename="instruction-contract')
+    assert response["Content-Disposition"].endswith('.pdf"')
 
 
 def test_group_detail_returns_its_supporting_documents(

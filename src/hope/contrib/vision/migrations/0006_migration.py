@@ -26,7 +26,7 @@ def migrate_group_assignments(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("payment", "0085_migration"),
+        ("payment", "0086_migration"),
         ("vision", "0005_migration"),
     ]
 

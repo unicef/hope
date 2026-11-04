@@ -277,6 +277,7 @@ def test_wallet_stored_on_account(
 def test_wallet_images_stored_as_saved_files(
     registration: Any,
     user: Any,
+    program: Program,
     ukraine_country: Any,
     tax_id_document_type: Any,
     digital_wallet_delivery_mechanism: DeliveryMechanism,
@@ -296,6 +297,8 @@ def test_wallet_images_stored_as_saved_files(
     assert attachment.file.name.endswith(".jpg")
     assert default_storage.exists(attachment.file.name)
     assert default_storage.exists(id_image_path)
+    directory = f"{program.start_date.year}/{program.business_area.slug}/{program.code}/"
+    assert id_image_path.startswith(directory)
 
 
 def test_individual_detail_flex_image_resolves_to_url(

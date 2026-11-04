@@ -13,7 +13,7 @@ from hope.models import FollowUpInstruction, PaymentList, PaymentPlan, PaymentPl
 
 pytestmark = pytest.mark.django_db
 
-migration_module = importlib.import_module("hope.apps.payment.migrations.0084_migration")
+migration_module = importlib.import_module("hope.apps.payment.migrations.0085_migration")
 
 
 @pytest.fixture
@@ -25,7 +25,7 @@ def schema_editor() -> BaseDatabaseSchemaEditor:
 def historical_apps(settings: Any) -> Apps:
     """The models the data step runs with: a document still points at its plan, and may have no owner yet."""
     settings.MIGRATION_MODULES = {}
-    state = MigrationLoader(connection).project_state(("payment", "0083_migration"))
+    state = MigrationLoader(connection).project_state(("payment", "0084_migration"))
     with connection.cursor() as cursor:
         cursor.execute(
             'ALTER TABLE "payment_paymentplansupportingdocument" ADD COLUMN "payment_plan_id" uuid NULL, '

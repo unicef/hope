@@ -13,23 +13,23 @@ from hope.models import FollowUpInstruction, PaymentList, PaymentPlan
 
 pytestmark = pytest.mark.django_db
 
-migration_module = importlib.import_module("hope.apps.payment.migrations.0084_migration")
+migration_module = importlib.import_module("hope.apps.payment.migrations.0085_migration")
 
 
 @pytest.fixture
 def historical_apps(settings: Any) -> SimpleNamespace:
-    """The models just before the payment list rename, under the names 0084 uses for them."""
+    """The models just before the payment list rename, under the names 0085 uses for them."""
     settings.MIGRATION_MODULES = {}
-    apps = MigrationLoader(connection).project_state(("payment", "0086_migration")).apps
-    names_in_0084 = {"PaymentPlan": "PaymentList", "PaymentPlanGroup": "PaymentPlan"}
+    apps = MigrationLoader(connection).project_state(("payment", "0087_migration")).apps
+    names_in_0085 = {"PaymentPlan": "PaymentList", "PaymentPlanGroup": "PaymentPlan"}
     return SimpleNamespace(
-        get_model=lambda app_label, model_name: apps.get_model(app_label, names_in_0084.get(model_name, model_name))
+        get_model=lambda app_label, model_name: apps.get_model(app_label, names_in_0085.get(model_name, model_name))
     )
 
 
 @pytest.fixture
 def without_plan_owner_constraint() -> None:
-    """The state the data step runs in: 0083 drops the old constraint and 0085 adds the new one."""
+    """The state the data step runs in: 0084 drops the old constraint and 0086 adds the new one."""
     with connection.cursor() as cursor:
         cursor.execute(
             'ALTER TABLE "payment_paymentplan" DROP CONSTRAINT "payment_plan_in_group_or_instruction_unless_removed"'

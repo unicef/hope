@@ -8,6 +8,7 @@ from decimal import Decimal, InvalidOperation
 from enum import IntEnum
 import io
 import logging
+import os
 import re
 from tempfile import NamedTemporaryFile
 from typing import IO
@@ -771,6 +772,7 @@ class WesternUnionReportsService:
                 f"/{payment_list.business_area.slug}/programs/{program_code}/payment-module/payment-lists/{payment_list_id}"
             )
             download_link = get_link(reverse(path_name, args=[report_id]))
+            report_name = os.path.basename(report.report_file.file.name or "")
 
         for user in users:
             context = {
@@ -778,7 +780,7 @@ class WesternUnionReportsService:
                 "last_name": getattr(user, "last_name", ""),
                 "email": getattr(user, "email", ""),
                 "message": f"Payment List: {payment_list_link}",
-                "title": f"Payment List {report.report_file.file.name} Western Union report",
+                "title": f"Payment List {report_name} Western Union report",
                 "link": download_link,
             }
             user.email_user(

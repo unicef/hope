@@ -431,7 +431,7 @@ def test_sensitive_filter_lists_only_sensitive_tickets(
     _wait_for_rows(login, my_sensitive)
 
 
-def test_other_filter_excludes_sensitive_tickets(
+def test_non_sensitive_filter_excludes_sensitive_tickets(
     login: HopeTestBrowser,
     business_area: BusinessArea,
     my_complaint: GrievanceTicket,
@@ -440,7 +440,7 @@ def test_other_filter_excludes_sensitive_tickets(
     _open(login, business_area, "?tab=mine")
     _wait_for_rows(login, my_complaint, my_sensitive)
 
-    _pick_filter(login, FILTER_SENSITIVE, "Other")
+    _pick_filter(login, FILTER_SENSITIVE, "Non-Sensitive")
     _apply(login)
 
     _wait_for_rows(login, my_complaint)
@@ -533,7 +533,7 @@ def test_email_link_selects_the_needs_assignment_tab(
     _open_url(login, f"{my_tasks_url(business_area, PRESET_NEEDS_ASSIGNMENT)}&sensitive=false")
 
     login.assert_element(f'{TAB_NEEDS_ASSIGNMENT}[aria-selected="true"]')
-    login.assert_text("Other", FILTER_SENSITIVE)
+    login.assert_text("Non-Sensitive", FILTER_SENSITIVE)
     _wait_for_rows(login, unassigned_complaint)
 
 

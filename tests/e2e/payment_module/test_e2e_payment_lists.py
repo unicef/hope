@@ -591,7 +591,7 @@ class TestPaymentPlans:
         assert "2" in page_payment_module_details.get_label_female_adults().text
         assert "3" in page_payment_module_details.get_label_male_children().text
         assert "1" in page_payment_module_details.get_label_male_adults().text
-        assert "11" in page_payment_module_details.get_label_total_number_of_people().text
+        assert "2" in page_payment_module_details.get_label_total_number_of_people().text
         page_payment_module_details.get_button_create_exclusions().click()
         page_payment_module_details.get_input_exclusion_reason().send_keys("Reason e2e Test")
         page_payment_module_details.get_input_beneficiaries_ids()
@@ -610,7 +610,7 @@ class TestPaymentPlans:
         assert "4" in page_payment_module_details.get_label_female_children().text
         assert "1" in page_payment_module_details.get_label_female_adults().text
         assert "1" in page_payment_module_details.get_label_male_children().text
-        assert "6" in page_payment_module_details.get_label_total_number_of_people().text
+        assert "1" in page_payment_module_details.get_label_total_number_of_people().text
 
     def test_payment_list_save_exclude(
         self,
