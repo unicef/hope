@@ -155,6 +155,7 @@ class AbstractCollisionDetector:
             "sanction_list_confirmed_match",
         }
         data = self._get_update_data(individual_source, exclude)
+        self._record_replaced_ids(individual_destination, data, ("country_workspace_id", "originating_id"))
         self._update_biometric_pairs(individual_destination, individual_source)
         # the source still holds the country_workspace_id and originating_id the destination takes over,
         # both unique among live rows, so it has to be gone before the copy
@@ -238,6 +239,7 @@ class AbstractCollisionDetector:
             "flex_registrations_record_id",
         }
         data = self._get_update_data(household_source, exclude)
+        self._record_replaced_ids(household_destination, data, ("originating_id",))
         # need to set None because of protected FK
         household_source.head_of_household = None
         household_source.save()
@@ -245,6 +247,15 @@ class AbstractCollisionDetector:
         # unique among live rows, so it has to be gone before the copy
         household_source.delete(soft=False)
         Household.objects.filter(id=household_destination.id).update(**data, head_of_household=head_of_household)
+
+    def _record_replaced_ids(self, destination: models.Model, data: dict[str, Any], fields: tuple[str, ...]) -> None:
+        """Append the ids the destination held before this collision to internal_data, one entry per collision."""
+        previous = {name: getattr(destination, name) for name in fields if getattr(destination, name) != data.get(name)}
+        if not previous:
+            return
+        internal_data = dict(destination.internal_data or {})
+        internal_data["collision_replaced_ids"] = [*internal_data.get("collision_replaced_ids", []), previous]
+        data["internal_data"] = internal_data
 
     def _get_update_data(self, source: models.Model, exclude: set[str]) -> dict[str, Any]:
         """Prepare the data to copy from a source model to a destination model.

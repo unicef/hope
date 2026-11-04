@@ -854,6 +854,9 @@ def test_update_individual_takes_over_source_unique_ids(
     merge_destination_individual.refresh_from_db()
     assert merge_destination_individual.originating_id == "API#IND-B"
     assert merge_destination_individual.country_workspace_id == "CW-16"
+    assert merge_destination_individual.internal_data["collision_replaced_ids"] == [
+        {"country_workspace_id": "CW-7", "originating_id": "API#IND-A"}
+    ]
     assert not Individual.all_objects.filter(id=source_household_with_unique_ids[1].id).exists()
 
 
@@ -869,7 +872,51 @@ def test_update_household_takes_over_source_originating_id(
 
     destination_household_obj.refresh_from_db()
     assert destination_household_obj.originating_id == "API#HH-B"
+    assert destination_household_obj.internal_data["collision_replaced_ids"] == [{"originating_id": "API#HH-A"}]
     assert not Household.all_objects.filter(id=source_household_with_unique_ids[0].id).exists()
+
+
+@pytest.fixture
+def merge_destination_individual_after_earlier_collision(
+    destination_household_with_unique_ids: tuple[Household, Individual],
+    merge_destination_individual: Individual,
+) -> Individual:
+    merge_destination_individual.internal_data = {
+        "collision_replaced_ids": [{"country_workspace_id": "CW-1", "originating_id": "API#IND-0"}]
+    }
+    merge_destination_individual.save(update_fields=["internal_data"])
+    return merge_destination_individual
+
+
+def test_update_individual_appends_replaced_ids_on_every_collision(
+    source_household_with_unique_ids: tuple[Household, Individual],
+    merge_destination_individual_after_earlier_collision: Individual,
+    program: Program,
+) -> None:
+    detector = IdentificationKeyCollisionDetector(program)
+
+    detector._update_individual(
+        merge_destination_individual_after_earlier_collision, source_household_with_unique_ids[1]
+    )
+
+    merge_destination_individual_after_earlier_collision.refresh_from_db()
+    assert merge_destination_individual_after_earlier_collision.internal_data["collision_replaced_ids"] == [
+        {"country_workspace_id": "CW-1", "originating_id": "API#IND-0"},
+        {"country_workspace_id": "CW-7", "originating_id": "API#IND-A"},
+    ]
+
+
+def test_update_individual_does_not_record_unchanged_ids(
+    source_household: tuple[Household, Individual],
+    merge_destination_individual: Individual,
+    program: Program,
+) -> None:
+    detector = IdentificationKeyCollisionDetector(program)
+
+    detector._update_individual(merge_destination_individual, source_household[1])
+
+    merge_destination_individual.refresh_from_db()
+    assert "collision_replaced_ids" not in (merge_destination_individual.internal_data or {})
 
 
 DESTINATION_INDIVIDUAL_SYSTEM_VALUES = {
