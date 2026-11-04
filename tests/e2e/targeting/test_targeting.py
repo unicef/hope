@@ -854,7 +854,7 @@ class TestCreateTargeting:
         page_targeting_create.select_listbox_element("Residence status")
         page_targeting_create.get_targeting_criteria_value().click()
         page_targeting_create.wait_for_page_ready()
-        page_targeting_create.get_select_refugee().click()
+        page_targeting_create.select_option_by_name("REFUGEE")
         page_targeting_create.get_targeting_criteria_add_dialog_save_button().click()
         page_targeting_create.get_no_validation_fsp_accept().click()
         disability_expected_criteria_text = "Residence status: Displaced | Refugee / Asylum Seeker"
