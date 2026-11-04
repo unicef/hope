@@ -220,6 +220,7 @@ class BiographicDeduplicationEngineService:
         # counting other statistics.
         #
         # in legacy flow it's being done here: deduplicate.py:143-145
+        # deduplicate_individuals_against_population
         self.mark_population_individuals_as_duplicates(
             self._get_population_matches_outside_rdi_ids(population_pairs, rdi_individuals_ids)
         )
