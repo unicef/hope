@@ -58,6 +58,18 @@ const renderHeader = (
             backgroundActionStatus,
             status,
             approvalProcess,
+            closureSummary: {
+              totalHouseholdsCount: 3,
+              totalIndividualsCount: 7,
+              numberOfPayments: 3,
+              deliveredFully: 1,
+              deliveredPartially: 1,
+              notDelivered: 1,
+              verified: 0,
+              received: 0,
+              notReceived: 0,
+              receivedWithProblems: 0,
+            },
             ...extra,
           } as PaymentPlanDetail
         }
@@ -454,6 +466,7 @@ describe('PaymentPlanDetailsHeader', () => {
 
     fireEvent.click(screen.getByTestId('button-close'));
     expect(screen.getByText('Summary of Payment Plan')).not.toBeNull();
+    expect(screen.getByText('Payments Delivered partially')).not.toBeNull();
     const submit = screen.getByTestId('button-close-payment-plan');
     expect(submit.hasAttribute('disabled')).toBe(true);
 

@@ -2170,6 +2170,7 @@ class PaymentPlanDetailSerializer(OwnerExchangeRateSerializerMixin, AdminUrlSeri
     custom_exchange_rate = serializers.BooleanField(read_only=True)
     vision_managed = serializers.BooleanField(read_only=True)
     has_verification = serializers.BooleanField(read_only=True)
+    closure_summary = serializers.SerializerMethodField()
     vision = serializers.SerializerMethodField()
     funds_commitments = serializers.SerializerMethodField()
     available_funds_commitments = serializers.SerializerMethodField()
@@ -2199,6 +2200,7 @@ class PaymentPlanDetailSerializer(OwnerExchangeRateSerializerMixin, AdminUrlSeri
         fields = PaymentPlanListSerializer.Meta.fields + [
             "vision_managed",
             "has_verification",
+            "closure_summary",
             "exchange_rate",
             "custom_exchange_rate",
             "unore_exchange_rate",
@@ -2305,6 +2307,47 @@ class PaymentPlanDetailSerializer(OwnerExchangeRateSerializerMixin, AdminUrlSeri
     @staticmethod
     def get_can_regenerate_export(obj: PaymentPlan) -> bool:
         return obj.can_regenerate_export
+
+    @extend_schema_field(
+        inline_serializer(
+            name="PaymentPlanClosureSummary",
+            fields={
+                "total_households_count": serializers.IntegerField(),
+                "total_individuals_count": serializers.IntegerField(),
+                "number_of_payments": serializers.IntegerField(),
+                "delivered_fully": serializers.IntegerField(),
+                "delivered_partially": serializers.IntegerField(),
+                "not_delivered": serializers.IntegerField(),
+                "verified": serializers.IntegerField(),
+                "received": serializers.IntegerField(),
+                "not_received": serializers.IntegerField(),
+                "received_with_problems": serializers.IntegerField(),
+            },
+        )
+    )
+    def get_closure_summary(self, obj: PaymentPlan) -> dict[str, int]:
+        """Coverage, delivery and verification figures across every payment list, shown before closing."""
+        coverage = obj.payment_lists.aggregate(
+            total_households_count=Coalesce(Sum("total_households_count"), 0),
+            total_individuals_count=Coalesce(Sum("total_individuals_count"), 0),
+        )
+        delivery = (
+            Payment.objects.filter(parent__payment_plan=obj)
+            .eligible()
+            .aggregate(
+                number_of_payments=Count("id"),
+                delivered_fully=Count("id", filter=Q(status=Payment.STATUS_DISTRIBUTION_SUCCESS)),
+                delivered_partially=Count("id", filter=Q(status=Payment.STATUS_DISTRIBUTION_PARTIAL)),
+                not_delivered=Count("id", filter=Q(status=Payment.STATUS_NOT_DISTRIBUTED)),
+            )
+        )
+        verification = PaymentVerificationPlan.objects.filter(payment_list__payment_plan=obj).aggregate(
+            verified=Coalesce(Sum("responded_count"), 0),
+            received=Coalesce(Sum("received_count"), 0),
+            not_received=Coalesce(Sum("not_received_count"), 0),
+            received_with_problems=Coalesce(Sum("received_with_problems_count"), 0),
+        )
+        return {**coverage, **delivery, **verification}
 
     def get_total_entitled_quantity_usd(self, obj: PaymentPlan) -> Decimal:
         result = obj.payment_lists.aggregate(total=Sum("total_entitled_quantity_usd"))

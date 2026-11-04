@@ -82,12 +82,19 @@ export function ClosePaymentPlanButton({
         ),
   });
 
-  // TODO: add the reconciliation and verification rows (payments delivered
-  // fully / partially / not delivered, verified as received ...) once the payment plan exposes them.
+  const summary = paymentPlan.closureSummary;
   const summaryRows = [
     {
       label: t('Number of Payment Lists'),
       value: paymentPlan.paymentListsCount,
+    },
+    {
+      label: t('Total number of Households covered'),
+      value: summary.totalHouseholdsCount,
+    },
+    {
+      label: t('Total number of individuals covered'),
+      value: summary.totalIndividualsCount,
     },
     {
       label: t('Total Entitlement'),
@@ -100,6 +107,23 @@ export function ClosePaymentPlanButton({
     {
       label: t('Total amount undelivered'),
       value: `${paymentPlan.totalUndeliveredQuantityUsd ?? 0} USD`,
+    },
+    { label: t('Number of payments'), value: summary.numberOfPayments },
+    { label: t('Payments Delivered fully'), value: summary.deliveredFully },
+    {
+      label: t('Payments Delivered partially'),
+      value: summary.deliveredPartially,
+    },
+    { label: t('Payments Not delivered'), value: summary.notDelivered },
+    { label: t('Number of verified payments'), value: summary.verified },
+    { label: t('Payments verified as received'), value: summary.received },
+    {
+      label: t('Payments verified as not received'),
+      value: summary.notReceived,
+    },
+    {
+      label: t('Payments verified as received with issues'),
+      value: summary.receivedWithProblems,
     },
   ];
 

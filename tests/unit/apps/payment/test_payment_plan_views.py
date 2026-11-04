@@ -897,6 +897,57 @@ def group_with_verified_plan(group_with_plan: Any) -> Any:
     return group_with_plan
 
 
+@pytest.fixture
+def group_with_delivered_and_verified_payments(business_area: Any, cycle: Any) -> Any:
+    group = cycle.payment_plans.first()
+    payment_list = PaymentListFactory(
+        business_area=business_area,
+        program_cycle=cycle,
+        payment_plan=group,
+        total_households_count=3,
+        total_individuals_count=7,
+    )
+    PaymentFactory(parent=payment_list, status=Payment.STATUS_DISTRIBUTION_SUCCESS)
+    PaymentFactory(parent=payment_list, status=Payment.STATUS_DISTRIBUTION_PARTIAL)
+    PaymentFactory(parent=payment_list, status=Payment.STATUS_NOT_DISTRIBUTED)
+    PaymentVerificationSummaryFactory(payment_list=payment_list)
+    PaymentVerificationPlanFactory(
+        payment_list=payment_list,
+        responded_count=2,
+        received_count=1,
+        not_received_count=1,
+        received_with_problems_count=0,
+    )
+    return group
+
+
+def test_retrieve_detail_closure_summary_counts_payments_and_verifications_of_every_list(
+    client: Any,
+    user: Any,
+    business_area: Any,
+    program: Any,
+    group_with_delivered_and_verified_payments: Any,
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(user, [Permissions.PM_PAYMENT_PLAN_VIEW_DETAIL], business_area, program=program)
+
+    response = client.get(_detail_url(business_area.slug, program.code, group_with_delivered_and_verified_payments.id))
+
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json()["closure_summary"] == {
+        "total_households_count": 3,
+        "total_individuals_count": 7,
+        "number_of_payments": 3,
+        "delivered_fully": 1,
+        "delivered_partially": 1,
+        "not_delivered": 1,
+        "verified": 2,
+        "received": 1,
+        "not_received": 1,
+        "received_with_problems": 0,
+    }
+
+
 def test_retrieve_detail_has_verification_false_without_responded_verification(
     client: Any,
     user: Any,
