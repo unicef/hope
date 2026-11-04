@@ -1,12 +1,13 @@
 from typing import TYPE_CHECKING, Any
 
 from django.db import models
+from django.db.models import Q
 from django.db.transaction import atomic
 from django.forms.models import model_to_dict
 from strategy_field.registry import Registry
 
 from hope.apps.household.const import REMOVED_BY_COLLISION
-from hope.models import Household, Individual, IndividualRoleInHousehold
+from hope.models import BiometricDedupeSimilarityPair, Household, Individual, IndividualRoleInHousehold
 
 if TYPE_CHECKING:
     from hope.models import Program
@@ -124,12 +125,74 @@ class AbstractCollisionDetector:
             "registration_data_import_id",
             "household",
             "household_id",
+            "is_removed",
+            "removed_date",
+            "updated_at",
+            "last_sync_at",
+            "version",
+            "internal_data",
+            "copied_from",
+            "copied_from_id",
+            "origin_unicef_id",
+            "is_migration_handled",
+            "migrated_at",
+            "imported_individual_id",
+            "withdrawn",
+            "withdrawn_date",
+            "first_registration_date",
+            "age_at_registration",
+            "duplicate",
+            "duplicate_date",
+            "deduplication_golden_record_status",
+            "deduplication_batch_status",
+            "deduplication_golden_record_results",
+            "deduplication_batch_results",
+            "biometric_deduplication_golden_record_status",
+            "biometric_deduplication_batch_status",
+            "biometric_deduplication_golden_record_results",
+            "biometric_deduplication_batch_results",
+            "sanction_list_possible_match",
+            "sanction_list_confirmed_match",
         }
-        # the pending source row is cascade-deleted with its household at the end of update_household;
-        # free its unique ids first so copying them onto the destination does not trip
-        # country_workspace_id_ind_unique_constraint / originating_id_ind_unique_constraint
-        Individual.all_objects.filter(pk=individual_source.pk).update(country_workspace_id=None, originating_id=None)
-        self._update_db_instance(individual_source, individual_destination, exclude)
+        data = self._get_update_data(individual_source, exclude)
+        self._update_biometric_pairs(individual_destination, individual_source)
+        # the source still holds the country_workspace_id and originating_id the destination takes over,
+        # both unique among live rows, so it has to be gone before the copy
+        Household.all_objects.filter(head_of_household=individual_source).update(head_of_household=None)
+        individual_source.delete(soft=False)
+        Individual.objects.filter(pk=individual_destination.pk).update(**data)
+
+    def _update_biometric_pairs(self, individual_destination: Individual, individual_source: Individual) -> None:
+        """Reassign biometric deduplication pairs.
+
+        Pairs are stored against the pending source before the merge and would be cascade-deleted with it.
+        1. Recreates each source pair with the destination in place of the source
+        2. Skips pairs that would point the destination at itself
+        """
+        pairs_source = BiometricDedupeSimilarityPair.objects.filter(
+            Q(individual1=individual_source) | Q(individual2=individual_source)
+        )
+        pairs_destination = []
+        for pair in pairs_source:
+            ids = [
+                individual_destination.pk if individual_id == individual_source.pk else individual_id
+                for individual_id in (pair.individual1_id, pair.individual2_id)
+            ]
+            if ids[0] == ids[1]:
+                continue
+            if None not in ids:
+                # same ordering as BiometricDedupeSimilarityPair.bulk_add_pairs (individual1_lt_individual2)
+                ids.sort(key=str)
+            pairs_destination.append(
+                BiometricDedupeSimilarityPair(
+                    program_id=pair.program_id,
+                    individual1_id=ids[0],
+                    individual2_id=ids[1],
+                    similarity_score=pair.similarity_score,
+                    status_code=pair.status_code,
+                )
+            )
+        BiometricDedupeSimilarityPair.objects.bulk_create(pairs_destination, ignore_conflicts=True)
 
     def _update_household(
         self,
@@ -153,43 +216,53 @@ class AbstractCollisionDetector:
             "registration_data_import_id",
             "head_of_household",
             "head_of_household_id",
+            "is_removed",
+            "removed_date",
+            "last_sync_at",
+            "version",
+            "internal_data",
+            "copied_from",
+            "copied_from_id",
+            "origin_unicef_id",
+            "is_migration_handled",
+            "migrated_at",
+            "withdrawn",
+            "withdrawn_date",
+            "first_registration_date",
+            "total_cash_received",
+            "total_cash_received_usd",
+            "storage_obj",
+            "storage_obj_id",
+            "kobo_submission_uuid",
+            "kobo_submission_time",
+            "flex_registrations_record_id",
         }
-        self._update_db_instance(household_source, household_destination, exclude, extra_fields={})
+        data = self._get_update_data(household_source, exclude)
         # need to set None because of protected FK
         household_source.head_of_household = None
         household_source.save()
+        # the source still holds the originating_id the destination takes over,
+        # unique among live rows, so it has to be gone before the copy
         household_source.delete(soft=False)
-        Household.objects.filter(id=household_destination.id).update(head_of_household=head_of_household)
+        Household.objects.filter(id=household_destination.id).update(**data, head_of_household=head_of_household)
 
-    def _update_db_instance(
-        self,
-        source: models.Model,
-        destination: models.Model,
-        exclude: set[str],
-        extra_fields: dict[str, Any] | None = None,
-    ) -> None:
-        """Update a database instance by copying data from a source model to a destination model.
+    def _get_update_data(self, source: models.Model, exclude: set[str]) -> dict[str, Any]:
+        """Prepare the data to copy from a source model to a destination model.
 
         This function performs the following steps:
         1. Converts the source model to a dictionary, excluding specified fields
         2. Removes many-to-many fields from the data dictionary
-        3. Adds any extra fields provided to the data dictionary
-        4. Updates the destination instance in the database with the prepared data
 
         Args:
             source: The source Django model instance to copy data from
-            destination: The destination Django model instance to update
             exclude: A set/list of field names to exclude from the update
-            extra_fields: Optional dictionary of additional fields to set on the destination
 
         """
         data = model_to_dict(source, exclude=list(exclude))
         for name, field in source._meta.fields_map.items():
             if field.many_to_many:
                 data.pop(name, None)
-        for key, value in (extra_fields or {}).items():
-            data[key] = value
-        destination.__class__.objects.filter(pk=destination.id).update(**data)
+        return data
 
     def _process_removed_individual(
         self,

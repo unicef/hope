@@ -1128,3 +1128,25 @@ def test_lax_push_null_country_workspace_id_reports_error(lax_api_client, lax_pu
     assert response.data["errors"] == 1
     assert response.data["results"][0] == {"country_workspace_id": ["This field may not be null."]}
     assert PendingIndividual.objects.count() == 0
+
+
+@pytest.mark.parametrize("identification_key", ["", "   "])
+def test_create_individual_with_blank_identification_key_is_rejected(lax_api_client, lax_push_url, identification_key):
+    individual_data = {
+        "country_workspace_id": "IND001",
+        "full_name": "John Doe",
+        "given_name": "John",
+        "family_name": "Doe",
+        "birth_date": "1990-01-01",
+        "sex": "MALE",
+        "observed_disability": ["NONE"],
+        "marital_status": "SINGLE",
+        "identification_key": identification_key,
+    }
+
+    response = lax_api_client.post(lax_push_url, [individual_data], format="json")
+
+    assert response.status_code == status.HTTP_201_CREATED, str(response.json())
+    assert response.data["accepted"] == 0
+    assert response.data["errors"] == 1
+    assert len(response.data["individual_id_mapping"]) == 0

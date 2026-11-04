@@ -164,6 +164,7 @@ class IndividualSerializer(serializers.ModelSerializer):
     disability = DisabilityChoiceField(choices=DISABILITY_CHOICES, required=False, allow_blank=True)
     sex = serializers.ChoiceField(SEX_CHOICE, allow_blank=False, default=NOT_COLLECTED)
     country_workspace_id = serializers.CharField(required=True, max_length=150)
+    identification_key = serializers.CharField(required=False, allow_null=True, max_length=255)
 
     class Meta:
         model = PendingIndividual
@@ -575,6 +576,7 @@ class HouseholdSerializer(serializers.ModelSerializer):
     consent_sharing = serializers.MultipleChoiceField(choices=DATA_SHARING_CHOICES, required=False)
     village = serializers.CharField(allow_blank=True, allow_null=True, required=False)
     consent_sign = serializers.CharField(allow_blank=True, required=False)
+    identification_key = serializers.CharField(required=False, allow_null=True, max_length=255)
     currency = CurrencySlugRelatedField(
         on_unchanged_code=OnUnchangedCode.ALWAYS_ACTIVE,
         required=False,

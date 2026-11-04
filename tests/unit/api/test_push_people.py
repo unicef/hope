@@ -574,3 +574,29 @@ def test_push_people_creates_account_attachments(
     attachment = account.attachments.get()
     assert attachment.title == "Wallet number image"
     assert attachment.file.name
+
+
+@pytest.mark.parametrize("identification_key", ["", "   "])
+def test_push_person_with_blank_identification_key_is_rejected(
+    token_api_client, push_people_url, program, afghanistan_country, identification_key
+) -> None:
+    data = [
+        {
+            "residence_status": "IDP",
+            "village": "village1",
+            "country": "AF",
+            "full_name": "John Doe",
+            "birth_date": "1990-01-01",
+            "sex": "MALE",
+            "type": "",
+            "program": str(program.id),
+            "country_workspace_id": "cw-blank-key",
+            "identification_key": identification_key,
+        },
+    ]
+
+    response = token_api_client.post(push_people_url, data, format="json")
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST, str(response.json())
+    assert response.json() == {"0": {"identification_key": ["This field may not be blank."]}}
+    assert not PendingIndividual.objects.exists()

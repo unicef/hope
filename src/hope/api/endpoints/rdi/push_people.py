@@ -124,6 +124,7 @@ class PushPeopleSerializer(serializers.ModelSerializer):
     disability = DisabilityChoiceField(choices=DISABILITY_CHOICES, required=False, allow_blank=True)
     consent_sharing = serializers.MultipleChoiceField(choices=DATA_SHARING_CHOICES, required=False)
     country_workspace_id = serializers.CharField(required=True, max_length=150)
+    identification_key = serializers.CharField(required=False, allow_null=True, max_length=255)
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)

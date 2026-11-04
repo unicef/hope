@@ -785,3 +785,33 @@ def test_create_household_with_collector_of_other_business_area_is_denied(
     assert response.data["accepted"] == 0
     assert response.data["errors"] == 1
     assert not PendingHousehold.objects.filter(village="Test Village").exists()
+
+
+@pytest.mark.parametrize("identification_key", ["", "   "])
+def test_create_household_with_blank_identification_key_is_rejected(
+    api_client: APIClient,
+    lax_households_url: str,
+    afghanistan_country: Country,
+    head_of_household: PendingIndividual,
+    primary_collector: PendingIndividual,
+    rdi: RegistrationDataImport,
+    identification_key: str,
+) -> None:
+    household_data = {
+        "country": "AF",
+        "country_origin": "AF",
+        "size": 1,
+        "consent_sharing": ["UNICEF"],
+        "village": "Test Village",
+        "head_of_household_id": head_of_household.unicef_id,
+        "primary_collector_id": primary_collector.unicef_id,
+        "members": [head_of_household.unicef_id],
+        "identification_key": identification_key,
+    }
+
+    response = api_client.post(lax_households_url, [household_data], format="json")
+
+    assert response.status_code == status.HTTP_201_CREATED, str(response.json())
+    assert response.data["accepted"] == 0
+    assert response.data["errors"] == 1
+    assert not PendingHousehold.objects.filter(registration_data_import=rdi).exists()

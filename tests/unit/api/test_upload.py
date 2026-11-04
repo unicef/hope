@@ -880,3 +880,126 @@ def test_upload_household_with_a_retired_currency_is_rejected(
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response.json() == {"households": {"Household #1": [{"currency": ["Object with code=VEF does not exist."]}]}}
     assert RegistrationDataImport.objects.count() == 0
+
+
+@pytest.mark.parametrize("identification_key", ["", "   "])
+def test_upload_household_with_blank_identification_key_is_rejected(
+    token_api_client: APIClient,
+    upload_url: str,
+    program: Program,
+    afghanistan_country: None,
+    mock_elasticsearch: None,
+    identification_key: str,
+) -> None:
+    payload = {
+        "name": "aaaa",
+        "program": str(program.id),
+        "households": [
+            {
+                "residence_status": "IDP",
+                "village": "village1",
+                "country": "AF",
+                "identification_key": identification_key,
+                "members": [
+                    {
+                        "relationship": HEAD,
+                        "role": ROLE_PRIMARY,
+                        "full_name": "John Doe",
+                        "birth_date": "2000-01-01",
+                        "sex": "MALE",
+                    }
+                ],
+                "size": 1,
+            }
+        ],
+    }
+
+    response = token_api_client.post(upload_url, payload, format="json")
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST, response.json()
+    assert response.json() == {
+        "households": {"Household #1": [{"identification_key": ["This field may not be blank."]}]}
+    }
+    assert RegistrationDataImport.objects.count() == 0
+
+
+@pytest.mark.parametrize("identification_key", ["", "   "])
+def test_upload_member_with_blank_identification_key_is_rejected(
+    token_api_client: APIClient,
+    upload_url: str,
+    program: Program,
+    afghanistan_country: None,
+    mock_elasticsearch: None,
+    identification_key: str,
+) -> None:
+    payload = {
+        "name": "aaaa",
+        "program": str(program.id),
+        "households": [
+            {
+                "residence_status": "IDP",
+                "village": "village1",
+                "country": "AF",
+                "members": [
+                    {
+                        "relationship": HEAD,
+                        "role": ROLE_PRIMARY,
+                        "full_name": "John Doe",
+                        "birth_date": "2000-01-01",
+                        "sex": "MALE",
+                        "identification_key": identification_key,
+                    }
+                ],
+                "size": 1,
+            }
+        ],
+    }
+
+    response = token_api_client.post(upload_url, payload, format="json")
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST, response.json()
+    assert response.json() == {
+        "households": {
+            "Household #1": [{"members": {"Member #1": [{"identification_key": ["This field may not be blank."]}]}}]
+        }
+    }
+    assert RegistrationDataImport.objects.count() == 0
+
+
+def test_upload_household_with_null_identification_key_is_accepted(
+    token_api_client: APIClient,
+    upload_url: str,
+    program: Program,
+    afghanistan_country: None,
+    mock_elasticsearch: None,
+) -> None:
+    payload = {
+        "name": "aaaa",
+        "program": str(program.id),
+        "households": [
+            {
+                "residence_status": "IDP",
+                "village": "village1",
+                "country": "AF",
+                "identification_key": None,
+                "members": [
+                    {
+                        "relationship": HEAD,
+                        "role": ROLE_PRIMARY,
+                        "full_name": "John Doe",
+                        "birth_date": "2000-01-01",
+                        "sex": "MALE",
+                        "identification_key": None,
+                    }
+                ],
+                "size": 1,
+            }
+        ],
+    }
+
+    response = token_api_client.post(upload_url, payload, format="json")
+
+    assert response.status_code == status.HTTP_201_CREATED, response.json()
+    household = PendingHousehold.objects.get(registration_data_import_id=response.json()["id"])
+    assert household.identification_key is None
+    assert household.head_of_household.identification_key is None
