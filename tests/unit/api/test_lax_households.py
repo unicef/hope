@@ -1,3 +1,5 @@
+from collections.abc import Callable
+
 import pytest
 from rest_framework import status
 from rest_framework.reverse import reverse
@@ -17,6 +19,7 @@ from extras.test_utils.factories import (
     RoleFactory,
     UserFactory,
 )
+from hope.api.endpoints.rdi.stored_images import get_stored_image_prefix
 from hope.apps.program.collision_detectors import IdentificationKeyCollisionDetector
 from hope.models import (
     Area,
@@ -80,6 +83,21 @@ def api_client(business_area: BusinessArea) -> APIClient:
 @pytest.fixture
 def lax_households_url(business_area: BusinessArea, rdi: RegistrationDataImport) -> str:
     return reverse("api:rdi-push-lax-households", args=[business_area.slug, str(rdi.id)])
+
+
+@pytest.fixture
+def file_prefix(rdi: RegistrationDataImport) -> str:
+    return get_stored_image_prefix(rdi.business_area.code, rdi.program.code)
+
+
+@pytest.fixture
+def stored_image(store_image: Callable[[str], str], file_prefix: str) -> str:
+    return store_image(f"{file_prefix}CW_image.png")
+
+
+@pytest.fixture
+def missing_image(file_prefix: str) -> str:
+    return f"{file_prefix}does_not_exist.png"
 
 
 # ── Individual fixtures ────────────────────────────────────────────────
@@ -497,12 +515,14 @@ def test_create_household_with_consent_sign_references_stored_file(
     assert household.consent_sign.name == stored_image
 
 
-def test_create_household_with_missing_consent_sign_file_returns_error(
+def test_create_household_with_file_of_another_program_returns_error(
     api_client: APIClient,
     lax_households_url: str,
     afghanistan_country: Country,
     head_of_household: PendingIndividual,
     primary_collector: PendingIndividual,
+    store_image: Callable[[str], str],
+    file_prefix: str,
 ) -> None:
     household_data = {
         "country": "AF",
@@ -513,7 +533,34 @@ def test_create_household_with_missing_consent_sign_file_returns_error(
         "head_of_household_id": head_of_household.unicef_id,
         "primary_collector_id": primary_collector.unicef_id,
         "members": [head_of_household.unicef_id],
-        "consent_sign": "cw_files/does_not_exist.png",
+        "consent_sign": store_image("OTH/zz99/CW_hh_1_consent_sign.png"),
+    }
+
+    response = api_client.post(lax_households_url, [household_data], format="json")
+
+    assert response.status_code == status.HTTP_201_CREATED, str(response.json())
+    assert response.data["accepted"] == 0
+    assert response.data["results"][0]["consent_sign"] == [f"File name must start with '{file_prefix}'."]
+
+
+def test_create_household_with_missing_consent_sign_file_returns_error(
+    api_client: APIClient,
+    lax_households_url: str,
+    afghanistan_country: Country,
+    head_of_household: PendingIndividual,
+    primary_collector: PendingIndividual,
+    missing_image: str,
+) -> None:
+    household_data = {
+        "country": "AF",
+        "country_origin": "AF",
+        "size": 1,
+        "consent_sharing": ["UNICEF"],
+        "village": "Test Village",
+        "head_of_household_id": head_of_household.unicef_id,
+        "primary_collector_id": primary_collector.unicef_id,
+        "members": [head_of_household.unicef_id],
+        "consent_sign": missing_image,
     }
 
     response = api_client.post(lax_households_url, [household_data], format="json")
@@ -521,9 +568,7 @@ def test_create_household_with_missing_consent_sign_file_returns_error(
     assert response.status_code == status.HTTP_201_CREATED, str(response.json())
     assert response.data["accepted"] == 0
     assert response.data["errors"] == 1
-    assert response.data["results"][0]["consent_sign"] == [
-        "File 'cw_files/does_not_exist.png' does not exist in storage."
-    ]
+    assert response.data["results"][0]["consent_sign"] == [f"File '{missing_image}' does not exist in storage."]
 
 
 def test_create_household_with_empty_consent_sign(
@@ -590,6 +635,7 @@ def test_household_with_missing_image_flex_field_file_returns_error(
     head_of_household: PendingIndividual,
     primary_collector: PendingIndividual,
     household_image_flex_attribute: FlexibleAttribute,
+    missing_image: str,
 ) -> None:
     household_data = {
         "country": "AF",
@@ -600,7 +646,7 @@ def test_household_with_missing_image_flex_field_file_returns_error(
         "head_of_household_id": head_of_household.unicef_id,
         "primary_collector_id": primary_collector.unicef_id,
         "members": [head_of_household.unicef_id],
-        "household_photo": "cw_files/does_not_exist.png",
+        "household_photo": missing_image,
     }
 
     response = api_client.post(lax_households_url, [household_data], format="json")
@@ -609,7 +655,7 @@ def test_household_with_missing_image_flex_field_file_returns_error(
     assert response.data["accepted"] == 0
     assert response.data["errors"] == 1
     assert response.data["results"][0] == {
-        "flex_fields": {"household_photo": ["File 'cw_files/does_not_exist.png' does not exist in storage."]}
+        "flex_fields": {"household_photo": [f"File '{missing_image}' does not exist in storage."]}
     }
 
 

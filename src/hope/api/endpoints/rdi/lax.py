@@ -1,15 +1,10 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from functools import cache, cached_property, partial
+from functools import cached_property, partial
 import logging
-from pathlib import PurePosixPath
-import posixpath
 from typing import TYPE_CHECKING, Any, cast
 
-from django.core.exceptions import SuspiciousOperation
-from django.core.files.storage import default_storage
-from django.core.validators import get_available_image_extensions
 from django.db.models import Field, Model
 from django.db.transaction import atomic
 from django.http import Http404
@@ -33,6 +28,13 @@ from hope.api.endpoints.rdi.cw_ids import (
     existing_cw_ids,
 )
 from hope.api.endpoints.rdi.mixin import HouseholdUploadMixin
+from hope.api.endpoints.rdi.stored_images import (
+    STORED_IMAGE_PREFIX_CONTEXT_KEY,
+    StoredImageField,
+    get_stored_image_error,
+    get_stored_image_prefix,
+    normalize_stored_image_name,
+)
 from hope.api.endpoints.rdi.upload import BirthDateValidator
 from hope.api.utils import CurrencySlugRelatedField, OnUnchangedCode
 from hope.apps.core.api.fields import ScopedSlugRelatedField, UTCDateField
@@ -75,7 +77,7 @@ if TYPE_CHECKING:
     from hope.models import BusinessArea, Program
 
 BATCH_SIZE = 100
-STORAGE_FILE_NAME_MAX_LENGTH = 1024  # Azure blob name limit
+FLEX_FIELD_FILE_NAME_MAX_LENGTH = 1024  # Azure blob name limit, flex fields are stored in a JSON column
 logger = logging.getLogger(__name__)
 
 
@@ -89,59 +91,9 @@ class IndividualsBulkStaging:
     doc_type_keys: set[str] = field(default_factory=set)
 
 
-@cache
-def get_image_extensions() -> frozenset[str]:
-    return frozenset(get_available_image_extensions())
-
-
-def normalize_storage_file_name(file_name: str) -> str:
-    return file_name.strip().lstrip("/")
-
-
-def get_storage_file_error(file_name: str, max_length: int = STORAGE_FILE_NAME_MAX_LENGTH) -> str | None:
-    """Return why ``file_name`` is not a safe name of an existing image in the media storage, None if it is.
-
-    Names are validated strictly before reaching the storage backend because Azure silently rewrites ``a/../b``
-    to ``b``, which would make the checked name differ from the stored one.
-    """
-    if len(file_name) > max_length:
-        return f"File name must have no more than {max_length} characters."
-    if (
-        not file_name
-        or "\\" in file_name
-        or "\x00" in file_name
-        or ".." in file_name.split("/")
-        or posixpath.normpath(file_name) != file_name
-    ):
-        return f"Invalid file name '{file_name}'."
-    if PurePosixPath(file_name).suffix[1:].lower() not in get_image_extensions():
-        return f"File '{file_name}' is not a supported image type."
-    try:
-        exists = default_storage.exists(file_name)
-    except (SuspiciousOperation, ValueError):
-        return f"Invalid file name '{file_name}'."
-    if not exists:
-        return f"File '{file_name}' does not exist in storage."
-    return None
-
-
-class StorageFileField(serializers.CharField):
-    """Name of an image already written to the media storage by CW, kept as the name string."""
-
-    def __init__(self, *, model_field: tuple[type[Model], str], **kwargs: Any) -> None:
-        model, field_name = model_field
-        self.file_name_max_length = model._meta.get_field(field_name).max_length or STORAGE_FILE_NAME_MAX_LENGTH
-        kwargs.setdefault("help_text", "File name (full path inside the media storage container) of an image.")
-        super().__init__(**kwargs)
-
-    def to_internal_value(self, data: Any) -> str:
-        file_name = normalize_storage_file_name(super().to_internal_value(data))
-        if error := get_storage_file_error(file_name, self.file_name_max_length):
-            raise ValidationError(error)
-        return file_name
-
-
-def clean_image_flex_fields(flex_fields: dict | None, image_field_names: Iterable[str]) -> dict[str, list[str]]:
+def clean_image_flex_fields(
+    flex_fields: dict | None, image_field_names: Iterable[str], prefix: str
+) -> dict[str, list[str]]:
     """Normalize IMAGE type flex fields in place and return errors keyed by flex field name."""
     if not flex_fields:
         return {}
@@ -154,8 +106,8 @@ def clean_image_flex_fields(flex_fields: dict | None, image_field_names: Iterabl
         if not isinstance(value, str):
             errors[field_name] = ["Expected a file name."]
             continue
-        file_name = normalize_storage_file_name(value)
-        if error := get_storage_file_error(file_name):
+        file_name = normalize_stored_image_name(value)
+        if error := get_stored_image_error(file_name, prefix, FLEX_FIELD_FILE_NAME_MAX_LENGTH):
             errors[field_name] = [error]
         else:
             flex_fields[field_name] = file_name
@@ -166,10 +118,10 @@ class ImageFlexFieldsValidationMixin:
     context: dict[str, Any]
 
     def validate_flex_fields(self, value: dict | None) -> dict | None:
-        get_image_flex_fields = self.context.get("get_image_flex_fields")
-        if not value or get_image_flex_fields is None:
+        if not value:
             return value
-        if errors := clean_image_flex_fields(value, get_image_flex_fields() or ()):
+        image_field_names = self.context["get_image_flex_fields"]() or ()
+        if errors := clean_image_flex_fields(value, image_field_names, self.context[STORED_IMAGE_PREFIX_CONTEXT_KEY]):
             raise ValidationError(errors)
         return value
 
@@ -195,7 +147,7 @@ class DocumentTypeKeyField(serializers.CharField):
 class DocumentSerializerLax(serializers.ModelSerializer):
     type = DocumentTypeKeyField(required=True)
     country = serializers.ChoiceField(choices=Countries())
-    image = StorageFileField(
+    image = StoredImageField(
         model_field=(PendingDocument, "photo"),
         allow_blank=True,
         required=False,
@@ -250,12 +202,12 @@ class IndividualSerializer(ImageFlexFieldsValidationMixin, serializers.ModelSeri
     documents = DocumentSerializerLax(many=True, required=False)
     birth_date = serializers.DateField(validators=[BirthDateValidator()])
     accounts = AccountLaxSerializer(many=True, required=False)
-    photo = StorageFileField(
+    photo = StoredImageField(
         model_field=(PendingIndividual, "photo"),
         allow_blank=True,
         required=False,
     )
-    disability_certificate_picture = StorageFileField(
+    disability_certificate_picture = StoredImageField(
         model_field=(PendingIndividual, "disability_certificate_picture"),
         allow_null=True,
         allow_blank=True,
@@ -382,6 +334,10 @@ class CreateLaxBaseView(HOPEAPIBusinessAreaView, HandleFlexFieldsMixin):
     @cached_property
     def _rdi_program(self) -> "Program":
         return self.selected_rdi.program
+
+    @cached_property
+    def _stored_image_prefix(self) -> str:
+        return get_stored_image_prefix(self.selected_business_area.code, self._rdi_program.code)
 
 
 class CreateLaxIndividuals(CreateLaxBaseView):
@@ -544,6 +500,7 @@ class CreateLaxIndividuals(CreateLaxBaseView):
                         "get_image_flex_fields": partial(
                             self.get_image_flex_fields, FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL
                         ),
+                        STORED_IMAGE_PREFIX_CONTEXT_KEY: self._stored_image_prefix,
                     },
                 )
 
@@ -610,7 +567,7 @@ class HouseholdSerializer(ImageFlexFieldsValidationMixin, serializers.ModelSeria
     country_origin = NullableChoiceField(choices=Countries(), required=False, allow_blank=True, allow_null=True)
     consent_sharing = serializers.MultipleChoiceField(choices=DATA_SHARING_CHOICES, required=False)
     village = serializers.CharField(allow_blank=True, allow_null=True, required=False)
-    consent_sign = StorageFileField(
+    consent_sign = StoredImageField(
         model_field=(PendingHousehold, "consent_sign"),
         allow_blank=True,
         required=False,
@@ -742,6 +699,7 @@ class CreateLaxHouseholds(CreateLaxBaseView, HouseholdUploadMixin):
                     "get_image_flex_fields": partial(
                         self.get_image_flex_fields, FlexibleAttribute.ASSOCIATED_WITH_HOUSEHOLD
                     ),
+                    STORED_IMAGE_PREFIX_CONTEXT_KEY: self._stored_image_prefix,
                 },
             )
             if serializer.is_valid():
