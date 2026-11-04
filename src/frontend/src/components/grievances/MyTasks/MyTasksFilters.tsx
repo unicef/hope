@@ -171,7 +171,7 @@ export const MyTasksFilters = ({
             >
               <MenuItem value="">{t('All Categories')}</MenuItem>
               <MenuItem value="true">{t('Sensitive')}</MenuItem>
-              <MenuItem value="false">{t('Other')}</MenuItem>
+              <MenuItem value="false">{t('Non-Sensitive')}</MenuItem>
             </SelectFilter>
           </ResponsiveGrid>
         )}

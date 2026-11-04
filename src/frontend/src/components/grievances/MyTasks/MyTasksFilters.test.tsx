@@ -109,7 +109,7 @@ describe('MyTasksFilters', () => {
 
     // ?sensitive=false arrives as a boolean and must not collapse into the unset '' value.
     expect(screen.getByTestId('filters-sensitive').textContent).toContain(
-      'Other',
+      'Non-Sensitive',
     );
   });
 
@@ -119,7 +119,7 @@ describe('MyTasksFilters', () => {
     });
 
     fireEvent.click(
-      openOptions('filters-sensitive').find((o) => o.textContent === 'Other'),
+      openOptions('filters-sensitive').find((o) => o.textContent === 'Non-Sensitive'),
     );
 
     expect(setFilter).toHaveBeenCalledWith(
