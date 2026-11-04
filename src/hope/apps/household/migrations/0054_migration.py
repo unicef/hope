@@ -14,10 +14,10 @@ class Migration(migrations.Migration):
 
     operations = [
         AddIndexConcurrently(
-            model_name="individual",
+            model_name="household",
             index=models.Index(
                 django.db.models.functions.comparison.Collate("unicef_id", "C"),
-                name="hi_unicef_id_c_idx",
+                name="hh_unicef_id_c_idx",
             ),
         ),
     ]
