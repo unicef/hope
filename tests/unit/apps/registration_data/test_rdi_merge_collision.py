@@ -434,6 +434,31 @@ def test_merge_rdi_with_collision(
     assert in_review_rdi in merged_household_obj.extra_rdis.all()
 
 
+def test_merge_rdi_with_collision_does_not_send_individual_deleted_signal(
+    program: Program,
+    pending_household: tuple[Household, Individual],
+    merged_household: tuple[Household, tuple[Individual, Individual]],
+    in_review_rdi: RegistrationDataImport,
+) -> None:
+    """Dropping the pending source rows must not send individual_deleted per member (adjust_program_size job each)."""
+    from hope.apps.household.signals import individual_deleted
+    from hope.apps.program.collision_detectors import IdentificationKeyCollisionDetector
+    from hope.apps.registration_data.tasks.rdi_merge import RdiMergeTask
+
+    program.collision_detector = IdentificationKeyCollisionDetector
+    program.save(update_fields=["collision_detector"])
+
+    signal_calls = []
+    individual_deleted.connect(lambda sender, instance, **kwargs: signal_calls.append(instance))
+
+    try:
+        RdiMergeTask().execute(str(in_review_rdi.id))
+    finally:
+        individual_deleted.disconnect()
+
+    assert signal_calls == []
+
+
 def test_merge_rdi_with_collision_does_not_send_individual_withdrawn_signal(
     program: Program,
     pending_household: tuple[Household, Individual],

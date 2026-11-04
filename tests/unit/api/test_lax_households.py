@@ -403,6 +403,7 @@ def test_colliding_household_is_saved_as_pending_for_merge(
     pending_hh = PendingHousehold.objects.get(registration_data_import=rdi, identification_key="COLLISION-KEY-001")
     head_of_household.refresh_from_db()
     assert head_of_household.household == pending_hh
+    existing_collision_household.refresh_from_db()
     assert existing_collision_household.village != "Test Village"
     assert not rdi.extra_hh_rdis.exists()
 

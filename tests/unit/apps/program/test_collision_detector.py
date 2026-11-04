@@ -778,7 +778,7 @@ def test_update_individual_moves_biometric_pair_onto_destination(
 ) -> None:
     detector = IdentificationKeyCollisionDetector(program)
 
-    with django_assert_num_queries(35):
+    with django_assert_num_queries(36):
         detector._update_individual(merge_destination_individual, source_household[1])
 
     pair = BiometricDedupeSimilarityPair.objects.get()
@@ -904,6 +904,82 @@ def test_update_individual_appends_replaced_ids_on_every_collision(
         {"country_workspace_id": "CW-1", "originating_id": "API#IND-0"},
         {"country_workspace_id": "CW-7", "originating_id": "API#IND-A"},
     ]
+
+
+@pytest.fixture
+def merge_destination_individual_without_ids(merge_destination_individual: Individual) -> Individual:
+    merge_destination_individual.country_workspace_id = None
+    merge_destination_individual.originating_id = None
+    merge_destination_individual.save(update_fields=["country_workspace_id", "originating_id"])
+    return merge_destination_individual
+
+
+def test_update_individual_does_not_record_missing_ids(
+    source_household_with_unique_ids: tuple[Household, Individual],
+    merge_destination_individual_without_ids: Individual,
+    program: Program,
+) -> None:
+    detector = IdentificationKeyCollisionDetector(program)
+
+    detector._update_individual(merge_destination_individual_without_ids, source_household_with_unique_ids[1])
+
+    merge_destination_individual_without_ids.refresh_from_db()
+    assert merge_destination_individual_without_ids.country_workspace_id == "CW-16"
+    assert "collision_replaced_ids" not in (merge_destination_individual_without_ids.internal_data or {})
+
+
+@pytest.fixture
+def merge_destination_individual_removed_by_collision(merge_destination_individual: Individual) -> Individual:
+    merge_destination_individual.internal_data = {
+        "removed_by_collision_detector": {"previous_relationship": "SON_DAUGHTER", "withdrawn_by_collision": True}
+    }
+    merge_destination_individual.relationship = REMOVED_BY_COLLISION
+    merge_destination_individual.withdrawn = True
+    merge_destination_individual.withdrawn_date = datetime(2025, 1, 1, tzinfo=UTC)
+    merge_destination_individual.save(update_fields=["internal_data", "relationship", "withdrawn", "withdrawn_date"])
+    return merge_destination_individual
+
+
+def test_update_individual_restores_member_removed_by_earlier_collision(
+    source_household: tuple[Household, Individual],
+    merge_destination_individual_removed_by_collision: Individual,
+    program: Program,
+) -> None:
+    detector = IdentificationKeyCollisionDetector(program)
+
+    detector._update_individual(merge_destination_individual_removed_by_collision, source_household[1])
+
+    merge_destination_individual_removed_by_collision.refresh_from_db()
+    assert merge_destination_individual_removed_by_collision.withdrawn is False
+    assert merge_destination_individual_removed_by_collision.withdrawn_date is None
+    assert merge_destination_individual_removed_by_collision.relationship == source_household[1].relationship
+    assert "removed_by_collision_detector" not in merge_destination_individual_removed_by_collision.internal_data
+
+
+@pytest.fixture
+def merge_destination_individual_withdrawn_before_collision(merge_destination_individual: Individual) -> Individual:
+    merge_destination_individual.internal_data = {
+        "removed_by_collision_detector": {"previous_relationship": "SON_DAUGHTER", "withdrawn_by_collision": False}
+    }
+    merge_destination_individual.withdrawn = True
+    merge_destination_individual.withdrawn_date = datetime(2025, 1, 1, tzinfo=UTC)
+    merge_destination_individual.save(update_fields=["internal_data", "withdrawn", "withdrawn_date"])
+    return merge_destination_individual
+
+
+def test_update_individual_keeps_withdrawal_made_before_collision(
+    source_household: tuple[Household, Individual],
+    merge_destination_individual_withdrawn_before_collision: Individual,
+    program: Program,
+) -> None:
+    detector = IdentificationKeyCollisionDetector(program)
+
+    detector._update_individual(merge_destination_individual_withdrawn_before_collision, source_household[1])
+
+    merge_destination_individual_withdrawn_before_collision.refresh_from_db()
+    assert merge_destination_individual_withdrawn_before_collision.withdrawn is True
+    assert merge_destination_individual_withdrawn_before_collision.withdrawn_date == datetime(2025, 1, 1, tzinfo=UTC)
+    assert "removed_by_collision_detector" not in merge_destination_individual_withdrawn_before_collision.internal_data
 
 
 def test_update_individual_does_not_record_unchanged_ids(

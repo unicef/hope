@@ -156,11 +156,13 @@ class AbstractCollisionDetector:
         }
         data = self._get_update_data(individual_source, exclude)
         self._record_replaced_ids(individual_destination, data, ("country_workspace_id", "originating_id"))
+        self._restore_removed_by_collision(individual_destination, data)
         self._update_biometric_pairs(individual_destination, individual_source)
         # the source still holds the country_workspace_id and originating_id the destination takes over,
         # both unique among live rows, so it has to be gone before the copy
         Household.all_objects.filter(head_of_household=individual_source).update(head_of_household=None)
-        individual_source.delete(soft=False)
+        # queryset delete: Individual.delete() would send individual_deleted (an adjust_program_size job) per member
+        Individual.all_objects.filter(pk=individual_source.pk).delete()
         Individual.objects.filter(pk=individual_destination.pk).update(**data)
 
     def _update_biometric_pairs(self, individual_destination: Individual, individual_source: Individual) -> None:
@@ -250,12 +252,27 @@ class AbstractCollisionDetector:
 
     def _record_replaced_ids(self, destination: models.Model, data: dict[str, Any], fields: tuple[str, ...]) -> None:
         """Append the ids the destination held before this collision to internal_data, one entry per collision."""
-        previous = {name: getattr(destination, name) for name in fields if getattr(destination, name) != data.get(name)}
+        previous = {
+            name: getattr(destination, name)
+            for name in fields
+            if getattr(destination, name) is not None and getattr(destination, name) != data.get(name)
+        }
         if not previous:
             return
-        internal_data = dict(destination.internal_data or {})
+        internal_data = data.get("internal_data", dict(destination.internal_data or {}))
         internal_data["collision_replaced_ids"] = [*internal_data.get("collision_replaced_ids", []), previous]
         data["internal_data"] = internal_data
+
+    def _restore_removed_by_collision(self, destination: Individual, data: dict[str, Any]) -> None:
+        """Undo _process_removed_individual when a member dropped by an earlier collision is back in the household."""
+        internal_data = data.get("internal_data", dict(destination.internal_data or {}))
+        removed = internal_data.pop("removed_by_collision_detector", None)
+        if removed is None:
+            return
+        data["internal_data"] = internal_data
+        if removed.get("withdrawn_by_collision"):
+            data["withdrawn"] = False
+            data["withdrawn_date"] = None
 
     def _get_update_data(self, source: models.Model, exclude: set[str]) -> dict[str, Any]:
         """Prepare the data to copy from a source model to a destination model.
@@ -306,6 +323,7 @@ class AbstractCollisionDetector:
             "previous_relationship": individual.relationship,
             "previous_roles": previous_roles,
             "was_head_of_household": was_head,
+            "withdrawn_by_collision": not individual.withdrawn,
         }
 
         # 4. Update relationship to REMOVED_BY_COLLISION
