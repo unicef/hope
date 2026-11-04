@@ -307,3 +307,39 @@ class BiographicDedupeSimilarityPair(DedupEngineSimilarityPair):
             similarity_score=finding.score,
             proximity_to_score=finding.proximity_to_score,
         )
+
+    @classmethod
+    def serialize_for_individual(
+        cls,
+        individual: Individual,
+        similarity_pairs: Sequence["BiographicDedupeSimilarityPair"],
+    ) -> dict[str, list[dict[str, Any]]]:
+        # Same shape as the legacy HOPE biographic `deduplication_*_results`.
+        #
+        # Legacy biographic flow: _get_deduplicate_result:
+        # 1. Executes ES query
+        # 2. Gathers hit IDs
+        # 3. For each hit, serialises hit_id, full_name, score (ES meta score), location (admin2),
+        #    dob (birth_date as YYYY-MM-DD) and proximity_to_score.
+        # 4. Results are assigned to deduplication_golden_record_results in deduplicate.py:133.
+        #
+        # DIFFERENCE COMPARING TO LEGACY FLOW: We drop possible duplicates.
+        # We're only interested in DUPLICATES.
+        duplicates = []
+        for pair in similarity_pairs:
+            duplicate = pair.individual2 if pair.individual1 == individual else pair.individual1
+            if not duplicate:
+                continue
+            household = duplicate.household
+            duplicates.append(
+                {
+                    "hit_id": str(duplicate.id),
+                    "full_name": duplicate.full_name,
+                    "score": float(pair.similarity_score),
+                    "location": household.admin2.name if household and household.admin2 else None,
+                    "dob": duplicate.birth_date.strftime("%Y-%m-%d"),
+                    "proximity_to_score": float(pair.proximity_to_score),
+                }
+            )
+        # HDE biographic has no "possible duplicate" bucket.
+        return {"duplicates": duplicates, "possible_duplicates": []}

@@ -13,12 +13,12 @@ from hope.models import Household, Individual, IndividualRoleInHousehold, Progra
 
 
 def post_process_dedupe_results(record: Any) -> None:
-    max_score = 0
-    min_score = sys.maxsize
     for field in [
         record.deduplication_batch_results,
         record.deduplication_golden_record_results,
     ]:
+        max_score = 0
+        min_score = sys.maxsize
         if "duplicates" in field:
             duplicates = field["duplicates"]
             for entry in field["duplicates"]:
