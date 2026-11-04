@@ -48,8 +48,7 @@ export function ClosePaymentPlanButton({
   const queryClient = useQueryClient();
   const [dialogOpen, setDialogOpen] = useState(false);
 
-  // TODO: read from the payment plan once it exposes its verification plans.
-  const hasVerification = false;
+  const hasVerification = paymentPlan.hasVerification;
 
   const { mutate: closePaymentPlan, isPending } = useMutation({
     mutationFn: (closureComment: string | null) =>

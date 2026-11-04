@@ -287,6 +287,14 @@ class PaymentPlan(TimeStampedUUIDModel, UnicefIdentifiedModel, InternalDataField
         return self.cycle.program.business_area
 
     @property
+    def has_verification(self) -> bool:
+        """Whether every payment list has a verification plan with at least one response."""
+        from hope.models import PaymentVerificationPlan
+
+        responded = PaymentVerificationPlan.objects.filter(payment_list=OuterRef("pk"), responded_count__gt=0)
+        return not self.payment_lists.filter(~Exists(responded)).exists()
+
+    @property
     def vision_managed(self) -> bool:
         if (
             self.plan_type == PaymentList.PlanType.FOLLOW_UP
