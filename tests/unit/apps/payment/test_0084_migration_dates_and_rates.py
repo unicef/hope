@@ -1,4 +1,5 @@
 import datetime as dt
+from decimal import Decimal
 import importlib
 from typing import Any
 
@@ -8,9 +9,9 @@ from django.db.backends.base.schema import BaseDatabaseSchemaEditor
 from django.db.migrations.loader import MigrationLoader
 import pytest
 
-from extras.test_utils.factories import PaymentListFactory, PaymentPlanFactory, ProgramCycleFactory
+from extras.test_utils.factories import PaymentListFactory, PaymentPlanFactory, ProgramCycleFactory, UserFactory
 from extras.test_utils.factories.payment import FollowUpInstructionFactory
-from hope.models import FollowUpInstruction, PaymentList, PaymentPlan
+from hope.models import FollowUpInstruction, PaymentList, PaymentPlan, User
 
 pytestmark = pytest.mark.django_db
 
@@ -30,9 +31,20 @@ def historical_apps(settings: Any) -> Apps:
     with connection.cursor() as cursor:
         cursor.execute(
             'ALTER TABLE "payment_paymentplan" ADD COLUMN "dispersion_start_date" date NULL, '
-            'ADD COLUMN "dispersion_end_date" date NULL'
+            'ADD COLUMN "dispersion_end_date" date NULL, ADD COLUMN "exchange_rate" numeric(15, 8) NULL, '
+            'ADD COLUMN "custom_exchange_rate" boolean NOT NULL DEFAULT false, '
+            'ADD COLUMN "custom_exchange_rate_set_by_id" uuid NULL'
         )
     return state.apps
+
+
+def set_rate(payment_list: PaymentList, status: str, exchange_rate: Decimal | None, set_by: User | None = None) -> None:
+    with connection.cursor() as cursor:
+        cursor.execute(
+            'UPDATE "payment_paymentplan" SET "status" = %s, "exchange_rate" = %s, "custom_exchange_rate" = %s, '
+            '"custom_exchange_rate_set_by_id" = %s WHERE "id" = %s',
+            [status, exchange_rate, set_by is not None, set_by.pk if set_by else None, payment_list.pk],
+        )
 
 
 @pytest.fixture
@@ -136,3 +148,115 @@ def test_group_without_plans_keeps_no_dispersion_dates(
     group.refresh_from_db()
     assert group.dispersion_start_date is None
     assert group.dispersion_end_date is None
+
+
+@pytest.fixture
+def accepted_plan(historical_apps: Apps, cycle: Any, group: PaymentPlan) -> PaymentList:
+    payment_list = PaymentListFactory(program_cycle=cycle, payment_plan=group)
+    set_rate(payment_list, PaymentList.Status.ACCEPTED, Decimal("1.5"))
+    return payment_list
+
+
+@pytest.fixture
+def tp_locked_plan_without_rate(historical_apps: Apps, cycle: Any, group: PaymentPlan) -> PaymentList:
+    payment_list = PaymentListFactory(program_cycle=cycle, payment_plan=group)
+    set_rate(payment_list, PaymentList.Status.TP_LOCKED, None)
+    return payment_list
+
+
+@pytest.fixture
+def tp_open_plan_with_stale_rate(historical_apps: Apps, cycle: Any, group: PaymentPlan) -> PaymentList:
+    payment_list = PaymentListFactory(program_cycle=cycle, payment_plan=group)
+    set_rate(payment_list, PaymentList.Status.TP_OPEN, Decimal(9))
+    return payment_list
+
+
+@pytest.fixture
+def open_plan_without_rate(historical_apps: Apps, cycle: Any, group: PaymentPlan) -> PaymentList:
+    payment_list = PaymentListFactory(program_cycle=cycle, payment_plan=group)
+    set_rate(payment_list, PaymentList.Status.OPEN, None)
+    return payment_list
+
+
+@pytest.fixture
+def accepted_plan_with_other_rate(historical_apps: Apps, cycle: Any, group: PaymentPlan) -> PaymentList:
+    payment_list = PaymentListFactory(program_cycle=cycle, payment_plan=group)
+    set_rate(payment_list, PaymentList.Status.ACCEPTED, Decimal("1.6"))
+    return payment_list
+
+
+@pytest.fixture
+def rate_setter() -> User:
+    return UserFactory()
+
+
+@pytest.fixture
+def plan_with_custom_rate(historical_apps: Apps, cycle: Any, group: PaymentPlan, rate_setter: User) -> PaymentList:
+    payment_list = PaymentListFactory(program_cycle=cycle, payment_plan=group)
+    set_rate(payment_list, PaymentList.Status.IN_REVIEW, Decimal(2), rate_setter)
+    return payment_list
+
+
+def test_group_takes_the_rate_of_its_opened_plan_when_another_plan_is_not_opened_yet(
+    historical_apps: Apps,
+    schema_editor: BaseDatabaseSchemaEditor,
+    group: PaymentPlan,
+    accepted_plan: PaymentList,
+    tp_locked_plan_without_rate: PaymentList,
+) -> None:
+    migration_module.copy_exchange_rates_from_payment_plans(historical_apps, schema_editor)
+
+    group.refresh_from_db()
+    assert group.exchange_rate == Decimal("1.5")
+
+
+def test_stale_rate_of_a_plan_before_open_is_ignored(
+    historical_apps: Apps,
+    schema_editor: BaseDatabaseSchemaEditor,
+    group: PaymentPlan,
+    accepted_plan: PaymentList,
+    tp_open_plan_with_stale_rate: PaymentList,
+) -> None:
+    migration_module.copy_exchange_rates_from_payment_plans(historical_apps, schema_editor)
+
+    group.refresh_from_db()
+    assert group.exchange_rate == Decimal("1.5")
+
+
+def test_opened_plan_without_rate_does_not_stop_the_rate_copy(
+    historical_apps: Apps,
+    schema_editor: BaseDatabaseSchemaEditor,
+    group: PaymentPlan,
+    accepted_plan: PaymentList,
+    open_plan_without_rate: PaymentList,
+) -> None:
+    migration_module.copy_exchange_rates_from_payment_plans(historical_apps, schema_editor)
+
+    group.refresh_from_db()
+    assert group.exchange_rate == Decimal("1.5")
+
+
+def test_opened_plans_with_different_rates_stop_the_migration_naming_the_group(
+    historical_apps: Apps,
+    schema_editor: BaseDatabaseSchemaEditor,
+    group: PaymentPlan,
+    accepted_plan: PaymentList,
+    accepted_plan_with_other_rate: PaymentList,
+) -> None:
+    with pytest.raises(RuntimeError, match=f"different exchange rates: \\['{group.unicef_id}'\\]"):
+        migration_module.copy_exchange_rates_from_payment_plans(historical_apps, schema_editor)
+
+
+def test_group_takes_the_custom_rate_flag_and_user_of_its_rated_plan(
+    historical_apps: Apps,
+    schema_editor: BaseDatabaseSchemaEditor,
+    group: PaymentPlan,
+    plan_with_custom_rate: PaymentList,
+    rate_setter: User,
+) -> None:
+    migration_module.copy_exchange_rates_from_payment_plans(historical_apps, schema_editor)
+
+    group.refresh_from_db()
+    assert group.exchange_rate == Decimal(2)
+    assert group.custom_exchange_rate is True
+    assert group.custom_exchange_rate_set_by == rate_setter

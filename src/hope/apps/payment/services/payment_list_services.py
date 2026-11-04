@@ -707,13 +707,16 @@ class PaymentListService:
         if PaymentList.objects.filter(name=pp_name, program_cycle__program=program, is_removed=False).exists():
             raise ValidationError(f"Target Population with name: {pp_name} and program: {program.name} already exists.")
 
-        if not (
-            payment_plan := PaymentPlan.objects.filter(pk=input_data["payment_plan_id"], cycle=program_cycle).first()
-        ):
-            raise ValidationError("Payment Plan does not exist in the given Programme Cycle.")
-        PaymentListService._validate_payment_plan_accepts_new_payment_lists(payment_plan)
-
         with transaction.atomic():
+            # Locked so the plan cannot be locked while this list joins it.
+            payment_plan = (
+                PaymentPlan.objects.select_for_update()
+                .filter(pk=input_data["payment_plan_id"], cycle=program_cycle)
+                .first()
+            )
+            if payment_plan is None:
+                raise ValidationError("Payment Plan does not exist in the given Programme Cycle.")
+            PaymentListService._validate_payment_plan_accepts_new_payment_lists(payment_plan)
             payment_list = PaymentList.objects.create(
                 business_area=business_area,
                 created_by=user,
@@ -803,6 +806,7 @@ class PaymentListService:
             self.payment_list.vulnerability_score_max = vulnerability_score_max
         return vulnerability_filter
 
+    @transaction.atomic
     def update(self, input_data: dict) -> PaymentList:
         program = self.payment_list.program_cycle.program
         should_rebuild_list = False
@@ -875,7 +879,10 @@ class PaymentListService:
             self.payment_list.program_cycle = program_cycle
             if not (payment_plan_id := input_data.get("payment_plan_id")):
                 raise ValidationError("Payment Plan is required when changing Programme Cycle.")
-            if not (payment_plan := PaymentPlan.objects.filter(pk=payment_plan_id, cycle=program_cycle).first()):
+            payment_plan = (
+                PaymentPlan.objects.select_for_update().filter(pk=payment_plan_id, cycle=program_cycle).first()
+            )
+            if payment_plan is None:
                 raise ValidationError("Payment Plan does not exist in the given Programme Cycle.")
             self._move_to_payment_plan(payment_plan)
 
@@ -890,11 +897,12 @@ class PaymentListService:
         new_cycle_id = input_data.get("program_cycle_id")
         if new_cycle_id and new_cycle_id != self.payment_list.program_cycle_id:
             return
-        if not (
-            payment_plan := PaymentPlan.objects.filter(
-                pk=payment_plan_id, cycle=self.payment_list.program_cycle
-            ).first()
-        ):
+        payment_plan = (
+            PaymentPlan.objects.select_for_update()
+            .filter(pk=payment_plan_id, cycle=self.payment_list.program_cycle)
+            .first()
+        )
+        if payment_plan is None:
             raise ValidationError("Payment Plan does not exist in the given Programme Cycle.")
         self._move_to_payment_plan(payment_plan)
 

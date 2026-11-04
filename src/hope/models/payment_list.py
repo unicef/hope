@@ -78,9 +78,10 @@ def last_approval_step(approval_process: "ApprovalProcess | None", status: str, 
             PaymentList.Status.ACCEPTED: Approval.FINANCE_RELEASE,
         }
         approval_type = approval_type_by_status.get(status)
-        if approval_type and (
-            approval := approval_process.approvals.filter(type=approval_type).order_by("created_at").last()
-        ):
+        # Read from the prefetched approvals when the caller loaded them.
+        approvals = [approval for approval in approval_process.approvals.all() if approval.type == approval_type]
+        if approvals:
+            approval = max(approvals, key=lambda approval: approval.created_at)
             return ModifiedData(approval.created_at, approval.created_by)
     return ModifiedData(fallback)
 

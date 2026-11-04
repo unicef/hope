@@ -186,6 +186,8 @@ from hope.contrib.vision.services import FundsCommitmentAssignmentError, VisionS
 from hope.models import (
     Account,
     AccountAttachment,
+    Approval,
+    ApprovalProcess,
     DeliveryMechanism,
     FileTemp,
     FinancialInstitution,
@@ -212,9 +214,9 @@ logger = logging.getLogger(__name__)
 XLSX_CONTENT_TYPE = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 
 REJECT_PERMISSION_BY_STATUS: dict[str | None, Permissions] = {
-    PaymentList.Status.IN_APPROVAL: Permissions.PM_ACCEPTANCE_PROCESS_APPROVE,
-    PaymentList.Status.IN_AUTHORIZATION: Permissions.PM_ACCEPTANCE_PROCESS_AUTHORIZE,
-    PaymentList.Status.IN_REVIEW: Permissions.PM_ACCEPTANCE_PROCESS_FINANCIAL_REVIEW,
+    PaymentPlan.Status.IN_APPROVAL: Permissions.PM_ACCEPTANCE_PROCESS_APPROVE,
+    PaymentPlan.Status.IN_AUTHORIZATION: Permissions.PM_ACCEPTANCE_PROCESS_AUTHORIZE,
+    PaymentPlan.Status.IN_REVIEW: Permissions.PM_ACCEPTANCE_PROCESS_FINANCIAL_REVIEW,
 }
 
 
@@ -1354,7 +1356,8 @@ class FollowUpInstructionViewSet(
     @action(detail=True, methods=["post"])
     @transaction.atomic
     def reject(self, request: Request, *args: Any, **kwargs: Any) -> Response:
-        instruction = self.get_object()
+        # The stage permission must match the status the reject is recorded on, so read it from the locked row.
+        instruction = FollowUpInstruction.objects.select_for_update().get(pk=self.get_object().pk)
         reject_permission = REJECT_PERMISSION_BY_STATUS.get(instruction.status)
         if reject_permission and not request.user.has_perm(reject_permission.value, instruction.program):
             raise PermissionDenied(detail={"required_permissions": [reject_permission.value]})
@@ -1856,6 +1859,14 @@ class PaymentPlanManagerialViewSet(
             .get_queryset()
             .filter(status__in=self.MANAGERIAL_STATUSES)
             .select_related("cycle__program", "financial_service_provider", "currency")
+            .prefetch_related(
+                Prefetch(
+                    "approval_process",
+                    queryset=ApprovalProcess.objects.select_related("sent_for_approval_by").prefetch_related(
+                        Prefetch("approvals", queryset=Approval.objects.select_related("created_by"))
+                    ),
+                )
+            )
             .annotate(
                 payment_lists_count=Count("payment_lists"),
                 households_total=Coalesce(Sum("payment_lists__total_households_count"), 0),
@@ -2561,7 +2572,7 @@ class PaymentPlanViewSet(
     @action(detail=True, methods=["post"], url_path="delivery-export-xlsx")
     @transaction.atomic
     def delivery_export_xlsx(self, request: Request, *args: Any, **kwargs: Any) -> Response:
-        payment_plan = self.get_object()
+        payment_plan = PaymentPlan.objects.select_for_update().get(pk=self.get_object().pk)
         self._validate_delivery_status(payment_plan, "Export")
         if not payment_plan.can_start_background_action:
             raise ValidationError("Another background action is already in progress.")
@@ -2639,7 +2650,7 @@ class PaymentPlanViewSet(
     )
     @transaction.atomic
     def delivery_import_xlsx(self, request: Request, *args: Any, **kwargs: Any) -> Response:
-        payment_plan = self.get_object()
+        payment_plan = PaymentPlan.objects.select_for_update().get(pk=self.get_object().pk)
         self._validate_delivery_status(payment_plan, "Import")
         if not payment_plan.can_start_background_action:
             raise ValidationError("Another background action is already in progress.")
@@ -2827,8 +2838,10 @@ class PaymentPlanViewSet(
 
     @extend_schema(request=AcceptanceProcessSerializer, responses={200: PaymentPlanDetailSerializer})
     @action(detail=True, methods=["post"])
+    @transaction.atomic
     def reject(self, request: Request, *args: Any, **kwargs: Any) -> Response:
-        payment_plan = self.get_object()
+        # The stage permission must match the status the reject is recorded on, so read it from the locked row.
+        payment_plan = PaymentPlan.objects.select_for_update().get(pk=self.get_object().pk)
         reject_permission = REJECT_PERMISSION_BY_STATUS.get(payment_plan.status)
         if reject_permission and not request.user.has_perm(reject_permission.value, payment_plan.cycle.program):
             raise PermissionDenied(detail={"required_permissions": [reject_permission.value]})
@@ -2878,6 +2891,7 @@ class PaymentPlanViewSet(
             request, lambda service: service.acceptance_process(plan_action.value, request.user, comment)
         )
 
+    @transaction.atomic
     def _run_status_action(self, request: Request, action_method: Callable) -> Response:
         payment_plan = self.get_object()
         old_payment_plan = copy_model_object(payment_plan)

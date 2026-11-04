@@ -354,7 +354,7 @@ class FollowUpInstructionService:
             self._log_payment_list_change(updated_payment_list, user, old_payment_list)
         instruction.closure_comment = closure_comment
         instruction.closed_by = user
-        instruction.save(update_fields=["closure_comment", "closed_by", "updated_at"])
+        instruction.save(update_fields=["closure_comment", "closed_by", "updated_at", "version"])
         return instruction
 
     @transaction.atomic
@@ -365,7 +365,7 @@ class FollowUpInstructionService:
             updated_payment_list = PaymentListService(payment_list).abort(abort_comment, user_id=str(user.pk))
             self._log_payment_list_change(updated_payment_list, user, old_payment_list)
         instruction.abort_comment = abort_comment or ""
-        instruction.save(update_fields=["abort_comment", "updated_at"])
+        instruction.save(update_fields=["abort_comment", "updated_at", "version"])
         return instruction
 
     @transaction.atomic
@@ -393,7 +393,7 @@ class FollowUpInstructionService:
         self._validate_currency_is_active()
         flow = FollowUpInstructionFlow(instruction)
         flow.background_action_status_xlsx_exporting()
-        instruction.save(update_fields=["background_action_status", "updated_at"])
+        instruction.save(update_fields=["background_action_status", "updated_at", "version"])
         create_follow_up_instruction_delivery_xlsx_async_task(instruction, str(user.id))
         instruction.refresh_from_db(fields=["background_action_status", "export_file"])
         return instruction
@@ -427,7 +427,9 @@ class FollowUpInstructionService:
         flow = FollowUpInstructionFlow(instruction)
         flow.background_action_status_xlsx_importing_reconciliation()
         instruction.reconciliation_import_file = file_temp
-        instruction.save(update_fields=["background_action_status", "reconciliation_import_file", "updated_at"])
+        instruction.save(
+            update_fields=["background_action_status", "reconciliation_import_file", "updated_at", "version"]
+        )
         import_follow_up_instruction_reconciliation_from_xlsx_async_task(instruction, str(user.id))
         instruction.refresh_from_db(fields=["background_action_status", "reconciliation_import_file"])
         return instruction

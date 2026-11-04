@@ -2025,6 +2025,7 @@ class PaymentPlanManagerialSerializer(AdminUrlSerializerMixin, serializers.Model
     )
     last_approval_process_date = serializers.DateTimeField(read_only=True)
     last_approval_process_by = serializers.SerializerMethodField()
+    vision_managed = serializers.BooleanField(read_only=True)
 
     class Meta:
         model = PaymentPlan
@@ -2046,6 +2047,7 @@ class PaymentPlanManagerialSerializer(AdminUrlSerializerMixin, serializers.Model
             "total_entitled_quantity_usd",
             "last_approval_process_date",
             "last_approval_process_by",
+            "vision_managed",
             "admin_url",
         )
 
@@ -2160,6 +2162,7 @@ class PaymentPlanDetailSerializer(OwnerExchangeRateSerializerMixin, AdminUrlSeri
     exchange_rate = serializers.DecimalField(max_digits=15, decimal_places=8, allow_null=True, read_only=True)
     custom_exchange_rate = serializers.BooleanField(read_only=True)
     vision_managed = serializers.BooleanField(read_only=True)
+    has_verification = serializers.BooleanField(read_only=True)
     vision = serializers.SerializerMethodField()
     funds_commitments = serializers.SerializerMethodField()
     available_funds_commitments = serializers.SerializerMethodField()
@@ -2188,6 +2191,7 @@ class PaymentPlanDetailSerializer(OwnerExchangeRateSerializerMixin, AdminUrlSeri
     class Meta(PaymentPlanListSerializer.Meta):
         fields = PaymentPlanListSerializer.Meta.fields + [
             "vision_managed",
+            "has_verification",
             "exchange_rate",
             "custom_exchange_rate",
             "unore_exchange_rate",

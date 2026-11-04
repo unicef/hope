@@ -24,6 +24,8 @@ from extras.test_utils.factories import (
     PaymentListFactory,
     PaymentListSplitFactory,
     PaymentPlanFactory,
+    PaymentVerificationPlanFactory,
+    PaymentVerificationSummaryFactory,
     ProgramCycleFactory,
     ProgramFactory,
     UserFactory,
@@ -885,6 +887,46 @@ def test_retrieve_detail_aggregated_totals(
     assert Decimal(data["total_delivered_quantity_usd"]) == Decimal("210.00")
     assert Decimal(data["total_undelivered_quantity_usd"]) == Decimal("90.00")
     assert data["payment_lists_count"] == 2
+
+
+@pytest.fixture
+def group_with_verified_plan(group_with_plan: Any) -> Any:
+    payment_list = group_with_plan.payment_lists.first()
+    PaymentVerificationSummaryFactory(payment_list=payment_list)
+    PaymentVerificationPlanFactory(payment_list=payment_list, responded_count=1)
+    return group_with_plan
+
+
+def test_retrieve_detail_has_verification_false_without_responded_verification(
+    client: Any,
+    user: Any,
+    business_area: Any,
+    program: Any,
+    group_with_plan: Any,
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(user, [Permissions.PM_PAYMENT_PLAN_VIEW_DETAIL], business_area, program=program)
+
+    response = client.get(_detail_url(business_area.slug, program.code, group_with_plan.id))
+
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json()["has_verification"] is False
+
+
+def test_retrieve_detail_has_verification_true_when_every_list_was_verified(
+    client: Any,
+    user: Any,
+    business_area: Any,
+    program: Any,
+    group_with_verified_plan: Any,
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(user, [Permissions.PM_PAYMENT_PLAN_VIEW_DETAIL], business_area, program=program)
+
+    response = client.get(_detail_url(business_area.slug, program.code, group_with_verified_plan.id))
+
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json()["has_verification"] is True
 
 
 def test_retrieve_detail_can_export_true_for_unexported_accepted_plan(

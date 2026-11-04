@@ -65,8 +65,13 @@ export const PendingForReleaseSection: FC<PendingForReleaseSectionProps> = ({
     filterRows,
   } = useSortAndFilter({ initialSortField: null, initialSortDirection: 'asc' });
 
+  // Vision releases its payment plans itself once the funds commitment arrives.
+  const releasablePlans = inReviewData?.results?.filter(
+    (plan) => !plan.visionManaged,
+  );
+
   const handleSelectAllReviewed = () => {
-    const ids = inReviewData?.results?.map((plan) => plan.id);
+    const ids = releasablePlans?.map((plan) => plan.id);
     handleSelectAll(ids, selectedInReview, setSelectedInReview);
   };
 
@@ -77,7 +82,7 @@ export const PendingForReleaseSection: FC<PendingForReleaseSectionProps> = ({
     return acc;
   }, []);
 
-  const allSelected = inReviewData?.results?.every((plan) =>
+  const allSelected = releasablePlans?.every((plan) =>
     selectedInReview.includes(plan.id),
   );
 
@@ -207,6 +212,7 @@ export const PendingForReleaseSection: FC<PendingForReleaseSectionProps> = ({
                 <TableCell padding="checkbox">
                   <Checkbox
                     checked={selectedInReview.includes(row.id)}
+                    disabled={row.visionManaged}
                     onChange={() =>
                       handleSelect(
                         selectedInReview,

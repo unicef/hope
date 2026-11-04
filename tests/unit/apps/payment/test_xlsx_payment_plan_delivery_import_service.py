@@ -1420,7 +1420,7 @@ def test_override_equal_quantity_and_fields_counts_row_as_ignored(
     service.open_workbook()
 
     ContentType.objects.clear_cache()
-    with django_assert_num_queries(12):
+    with django_assert_num_queries(13):
         service.import_payment_list()
 
     assert service.get_result_counts() == {

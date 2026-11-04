@@ -461,15 +461,70 @@ def test_unlock_keeps_failed_recalculation(locked_group_after_failed_recalculati
 
 
 @patch("hope.apps.payment.services.payment_plan_services.send_payment_plan_notification_emails_async_task")
-def test_send_for_approval_keeps_failed_recalculation(mock_notify, locked_group_after_failed_recalculation, user):
-    PaymentPlanService(locked_group_after_failed_recalculation).send_for_approval(user)
+def test_send_for_approval_refuses_failed_recalculation(mock_notify, locked_group_after_failed_recalculation, user):
+    with pytest.raises(ValidationError) as error:
+        PaymentPlanService(locked_group_after_failed_recalculation).send_for_approval(user)
 
-    locked_group_after_failed_recalculation.refresh_from_db()
-    assert locked_group_after_failed_recalculation.status == PaymentPlan.Status.IN_APPROVAL
-    assert (
-        locked_group_after_failed_recalculation.background_action_status
-        == PaymentPlan.BackgroundActionStatus.RECALCULATING_ERROR
+    assert error.value.detail[0] == (
+        "USD recalculation failed for this payment plan. Retry it before sending for approval."
     )
+    locked_group_after_failed_recalculation.refresh_from_db()
+    assert locked_group_after_failed_recalculation.status == PaymentPlan.Status.LOCKED
+
+
+@pytest.fixture
+def open_group_recalculating(open_group):
+    open_group.background_action_status = PaymentPlan.BackgroundActionStatus.RECALCULATING
+    open_group.save(update_fields=["background_action_status"])
+    return open_group
+
+
+@pytest.fixture
+def locked_group_recalculating(locked_payment_plan):
+    locked_payment_plan.background_action_status = PaymentPlan.BackgroundActionStatus.RECALCULATING
+    locked_payment_plan.save(update_fields=["background_action_status"])
+    return locked_payment_plan
+
+
+@pytest.fixture
+def group_in_review_recalculating(group_in_review):
+    group_in_review.background_action_status = PaymentPlan.BackgroundActionStatus.RECALCULATING
+    group_in_review.save(update_fields=["background_action_status"])
+    return group_in_review
+
+
+def test_lock_refuses_group_with_running_background_action(open_group_recalculating, locked_payment_list):
+    with pytest.raises(ValidationError) as error:
+        PaymentPlanService(open_group_recalculating).lock()
+
+    assert error.value.detail[0] == "Another background action is already in progress."
+
+
+def test_lock_bumps_the_version(open_group, locked_payment_list):
+    version_before = open_group.version
+
+    PaymentPlanService(open_group).lock()
+
+    open_group.refresh_from_db()
+    assert open_group.version > version_before
+
+
+def test_abort_refuses_group_with_running_background_action(locked_group_recalculating, user):
+    with pytest.raises(ValidationError) as error:
+        PaymentPlanService(locked_group_recalculating).abort("stop", user)
+
+    assert error.value.detail[0] == "Another background action is already in progress."
+
+
+def test_mark_as_released_refuses_group_with_running_background_action(
+    group_in_review_recalculating, locked_payment_list, user
+):
+    with pytest.raises(ValidationError) as error:
+        PaymentPlanService(group_in_review_recalculating).acceptance_process(PaymentList.Action.REVIEW.value, user)
+
+    assert error.value.detail[0] == "Another background action is already in progress."
+    group_in_review_recalculating.refresh_from_db()
+    assert group_in_review_recalculating.status == PaymentPlan.Status.IN_REVIEW
 
 
 @patch("hope.apps.payment.services.payment_plan_services.send_payment_plan_notification_emails_async_task")

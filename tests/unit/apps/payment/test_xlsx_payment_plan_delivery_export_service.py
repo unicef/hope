@@ -1174,6 +1174,52 @@ def test_save_xlsx_file_with_auth_code_produces_encrypted_zip(
     assert file_temp.xlsx_password is not None
 
 
+@pytest.fixture
+def group_with_auth_code_only_in_its_second_list(
+    program_cycle, business_area, payment_gateway_fsp, delivery_mechanism, auth_code_template
+):
+    """Two lists of one gateway FSP: the voucher template has no auth code column, the cash one requires it."""
+    voucher = DeliveryMechanismFactory(code="voucher", name="Voucher", payment_gateway_id="dm-voucher")
+    FspXlsxTemplatePerDeliveryMechanismFactory(
+        financial_service_provider=payment_gateway_fsp,
+        delivery_mechanism=voucher,
+        xlsx_template=FinancialServiceProviderXlsxTemplateFactory(columns=["payment_id"]),
+    )
+    group = PaymentPlanFactory(cycle=program_cycle)
+    plain_plan = PaymentListFactory(
+        program_cycle=program_cycle,
+        payment_plan=group,
+        business_area=business_area,
+        financial_service_provider=payment_gateway_fsp,
+        delivery_mechanism=voucher,
+        status=PaymentList.Status.ACCEPTED,
+    )
+    PaymentFactory(parent=plain_plan, financial_service_provider=payment_gateway_fsp)
+    gateway_plan = PaymentListFactory(
+        program_cycle=program_cycle,
+        payment_plan=group,
+        business_area=business_area,
+        financial_service_provider=payment_gateway_fsp,
+        delivery_mechanism=delivery_mechanism,
+        status=PaymentList.Status.ACCEPTED,
+    )
+    PaymentFactory(
+        parent=gateway_plan, financial_service_provider=payment_gateway_fsp, status=Payment.STATUS_DISTRIBUTION_SUCCESS
+    )
+    return group
+
+
+def test_save_xlsx_file_protects_the_file_when_a_later_list_writes_auth_codes(
+    group_with_auth_code_only_in_its_second_list, user
+):
+    XlsxPaymentPlanDeliveryExportService(group_with_auth_code_only_in_its_second_list).save_xlsx_file(user)
+
+    group_with_auth_code_only_in_its_second_list.refresh_from_db()
+    file_temp = group_with_auth_code_only_in_its_second_list.export_file_delivery
+    assert file_temp.file.name.endswith(".zip")
+    assert file_temp.xlsx_password is not None
+
+
 def test_save_xlsx_file_with_auth_code_follow_up_produces_zip_with_suffix(make_auth_code_group_with_typed_plan, user):
     group, _plan = make_auth_code_group_with_typed_plan(PaymentList.PlanType.FOLLOW_UP)
 

@@ -10,7 +10,7 @@
         "X-Content-Type-Options": "nosniff",
         "Referrer-Policy": "same-origin",
         "Cross-Origin-Opener-Policy": "same-origin",
-        "Content-Length": "768"
+        "Content-Length": "791"
     },
     "data": {
         "next": "http://testserver/api/rest/business-areas/business-area-0/payments/payment-plans-managerial/?limit=50&offset=50",
@@ -34,6 +34,7 @@
                 "total_entitled_quantity_usd": "0.00",
                 "last_approval_process_date": "2025-01-01T00:00:00Z",
                 "last_approval_process_by": null,
+                "vision_managed": false,
                 "admin_url": "/api/unicorn/payment/paymentplan/ce59a2a7-9c8e-43ca-b8c6-ea124bbe9066/change/"
             }
         ]

@@ -18,7 +18,7 @@ from hope.apps.payment.xlsx.xlsx_payment_list_delivery_import_service import (
     NULL_DELIVERY_POLICY_RESET,
     XlsxPaymentListDeliveryImportService,
 )
-from hope.models import Payment, PaymentList
+from hope.models import Payment, PaymentList, PaymentPlan
 
 if TYPE_CHECKING:
     from openpyxl.worksheet.worksheet import Worksheet
@@ -274,6 +274,8 @@ class XlsxPaymentPlanDeliveryImportService:
             raise RuntimeError("open_workbook() must be called before import_payment_list()")
 
         with transaction.atomic():
+            # Every payment plan action locks the plan before its lists; keep that order to avoid deadlocks.
+            PaymentPlan.objects.select_for_update().get(pk=self.payment_plan.pk)
             self._prepare_payment_data(lock=True)
             self.validate()
             if self.errors:

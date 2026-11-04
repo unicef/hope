@@ -26,6 +26,7 @@ import { FormikTextField } from '@shared/Formik/FormikTextField';
 import { showApiErrorMessages } from '@utils/utils';
 import type { PaymentPlanSettings } from '@components/paymentmodule/PaymentPlanSettingsFields';
 import { PaymentPlanSettingsFields } from '@components/paymentmodule/PaymentPlanSettingsFields';
+import { PaymentPlanStatusEnum } from '@restgenerated/models/PaymentPlanStatusEnum';
 import type { PaymentPlanDetail } from '../types';
 
 interface EditPaymentPlanProps {
@@ -75,6 +76,12 @@ export function EditPaymentPlan({
       await queryClient.invalidateQueries({
         queryKey: restQueryKey(
           RestService.restBusinessAreasProgramsPaymentPlansList,
+        ),
+      });
+      // An FSP change rebuilds every payment list in the plan.
+      await queryClient.invalidateQueries({
+        queryKey: restQueryKey(
+          RestService.restBusinessAreasProgramsPaymentListsList,
         ),
       });
       setOpen(false);
@@ -145,6 +152,7 @@ export function EditPaymentPlan({
                     onChange={(settings) =>
                       setValues({ ...values, ...settings })
                     }
+                    disabled={paymentPlan.status !== PaymentPlanStatusEnum.OPEN}
                   />
                 </Box>
               </DialogContent>

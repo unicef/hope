@@ -6,16 +6,8 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { useSnackbar } from '@hooks/useSnackBar';
 import AddIcon from '@mui/icons-material/Add';
-import {
-  Box,
-  Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  TextField,
-} from '@mui/material';
-import type { PaymentPlanCreate } from '@restgenerated/models/PaymentPlanCreate';
+import { Box, Button } from '@mui/material';
+import { CreatePaymentPlanModal } from '@components/paymentmodule/CreatePaymentPlanModal';
 import type { ProgramCycleList } from '@restgenerated/models/ProgramCycleList';
 import { RestService } from '@restgenerated/index';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
@@ -40,7 +32,6 @@ export const ProgramCycleDetailsHeader = ({
   const queryClient = useQueryClient();
   const { businessArea, programId } = useBaseUrl();
   const [createPaymentPlanOpen, setCreatePaymentPlanOpen] = useState(false);
-  const [newPaymentPlanName, setNewPaymentPlanName] = useState('');
 
   const { mutateAsync: finishMutation, isPending: isPendingFinishing } =
     useMutation({
@@ -96,30 +87,6 @@ export const ProgramCycleDetailsHeader = ({
       },
     });
 
-  const { mutateAsync: createPaymentPlan, isPending: creatingPaymentPlan } =
-    useMutation({
-      mutationFn: (name: string) =>
-        RestService.restBusinessAreasProgramsPaymentPlansCreate({
-          businessAreaSlug: businessArea,
-          programCode: programId,
-          // Generated PaymentPlanCreate marks readonly id/unicefId as
-          // required; only name + cycle are accepted on create.
-          // The generated PaymentPlanCreate model doesn't match the actual
-          // create payload ({ name, cycle }); cast until codegen is corrected.
-          requestBody: {
-            name,
-            cycle: programCycle.id,
-          } as unknown as PaymentPlanCreate,
-        }),
-      onSuccess: () => {
-        queryClient.invalidateQueries({
-          queryKey: restQueryKey(
-            RestService.restBusinessAreasProgramsPaymentPlansList,
-          ),
-        });
-      },
-    });
-
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
       title: t('Payment Module'),
@@ -152,17 +119,6 @@ export const ProgramCycleDetailsHeader = ({
         programCode: programId,
       });
       showMessage(t('Programme Cycle Reactivated'));
-    } catch (e) {
-      showApiErrorMessages(e, showMessage);
-    }
-  };
-
-  const handleCreatePaymentPlan = async (): Promise<void> => {
-    try {
-      await createPaymentPlan(newPaymentPlanName.trim());
-      showMessage(t('Payment Plan created'));
-      setCreatePaymentPlanOpen(false);
-      setNewPaymentPlanName('');
     } catch (e) {
       showApiErrorMessages(e, showMessage);
     }
@@ -241,38 +197,13 @@ export const ProgramCycleDetailsHeader = ({
           )}
       </HeaderActions>
 
-      <Dialog
+      <CreatePaymentPlanModal
         open={createPaymentPlanOpen}
         onClose={() => setCreatePaymentPlanOpen(false)}
-        maxWidth="xs"
-        fullWidth
-      >
-        <DialogTitle>{t('Create Payment Plan')}</DialogTitle>
-        <DialogContent>
-          <TextField
-            autoFocus
-            margin="dense"
-            label={t('Payment Plan Name')}
-            name="groupName"
-            fullWidth
-            value={newPaymentPlanName}
-            onChange={(e) => setNewPaymentPlanName(e.target.value)}
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setCreatePaymentPlanOpen(false)}>
-            {t('Cancel')}
-          </Button>
-          <Button
-            onClick={handleCreatePaymentPlan}
-            variant="contained"
-            disabled={!newPaymentPlanName.trim() || creatingPaymentPlan}
-            data-cy="button-create-group-submit"
-          >
-            {t('Create')}
-          </Button>
-        </DialogActions>
-      </Dialog>
+        cycleId={programCycle.id}
+        cycleTitle={programCycle.title}
+        onSuccess={() => setCreatePaymentPlanOpen(false)}
+      />
     </>
   );
 

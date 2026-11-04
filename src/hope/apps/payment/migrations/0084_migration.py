@@ -340,6 +340,12 @@ def copy_dates_from_payment_plans(apps, schema_editor):
 
 
 def copy_exchange_rates_from_payment_plans(apps, schema_editor):
+    """Give every group and instruction the exchange rate of its opened plans.
+
+    Like the split, a missing rate is not a difference: plans before OPEN have no rate yet (or a stale one), and a
+    plan opened while the rate feed was down has none. Only two different rates among opened plans stop the
+    migration.
+    """
     PaymentPlan = apps.get_model("payment", "PaymentPlan")
     plans = PaymentPlan.objects.using(schema_editor.connection.alias).filter(is_removed=False)
     unowned = plans.filter(payment_plan_group__isnull=True, follow_up_instruction__isnull=True).filter(
@@ -348,40 +354,29 @@ def copy_exchange_rates_from_payment_plans(apps, schema_editor):
     if unowned.exists():
         raise RuntimeError("Payment plans without a group or Follow-Up Instruction have exchange-rate data.")
 
+    rated = plans.exclude(status__in=PLAN_STATUSES_WITHOUT_RATE)
     for owner_field, model_name in (
         ("payment_plan_group", "PaymentPlanGroup"),
         ("follow_up_instruction", "FollowUpInstruction"),
     ):
-        owner_model = apps.get_model("payment", model_name)
-        grouped = (
-            plans.filter(**{f"{owner_field}__isnull": False})
+        owner_model = apps.get_model("payment", model_name).objects.using(schema_editor.connection.alias)
+        conflicts = (
+            rated.filter(**{f"{owner_field}__isnull": False})
             .values(owner_field)
-            .annotate(
-                rate_count=Count("exchange_rate", distinct=True),
-                null_rate_count=Count("pk", filter=Q(exchange_rate__isnull=True)),
-                custom_count=Count("custom_exchange_rate", distinct=True),
-                user_count=Count("custom_exchange_rate_set_by_id", distinct=True),
-                null_user_count=Count("pk", filter=Q(custom_exchange_rate_set_by_id__isnull=True)),
-            )
+            .annotate(rate_count=Count("exchange_rate", distinct=True))
+            .filter(rate_count__gt=1)
+            .values_list(owner_field, flat=True)
         )
-        conflicts = list(
-            grouped.filter(
-                Q(rate_count__gt=1)
-                | Q(rate_count__gt=0, null_rate_count__gt=0)
-                | Q(custom_count__gt=1)
-                | Q(user_count__gt=1)
-                | Q(user_count__gt=0, null_user_count__gt=0)
-            ).values_list(owner_field, flat=True)
-        )
-        if conflicts:
-            raise RuntimeError(f"Payment plans of one {model_name} have different exchange-rate data: {conflicts}.")
+        mixed = list(owner_model.filter(pk__in=conflicts).values_list("unicef_id", flat=True))
+        if mixed:
+            raise RuntimeError(f"Payment plans of one {model_name} have different exchange rates: {mixed}.")
 
-        source = plans.filter(**{owner_field: OuterRef("pk")}).order_by(
+        source = rated.filter(**{owner_field: OuterRef("pk")}).order_by(
             F("exchange_rate").desc(nulls_last=True),
             F("custom_exchange_rate_set_by_id").desc(nulls_last=True),
             "created_at",
         )
-        owner_model.objects.using(schema_editor.connection.alias).filter(Exists(source)).update(
+        owner_model.filter(Exists(source)).update(
             exchange_rate=Subquery(source.values("exchange_rate")[:1]),
             custom_exchange_rate=Subquery(source.values("custom_exchange_rate")[:1]),
             custom_exchange_rate_set_by_id=Subquery(source.values("custom_exchange_rate_set_by_id")[:1]),
@@ -517,9 +512,15 @@ def clear_legacy_payment_plan_custom_rate_statuses(apps, schema_editor):
 
 
 def move_documents_to_groups_and_instructions(apps, schema_editor):
-    """Attach every supporting document to its plan's Follow-Up Instruction, or else to its plan's group."""
+    """Attach every supporting document to its plan's Follow-Up Instruction, or else to its plan's group.
+
+    A plan removed before groups existed (0069 grouped live plans only) has neither, so its documents go with it.
+    """
     PaymentPlan = apps.get_model("payment", "PaymentPlan")
     PaymentPlanSupportingDocument = apps.get_model("payment", "PaymentPlanSupportingDocument")
+    PaymentPlanSupportingDocument.objects.filter(
+        payment_plan__payment_plan_group__isnull=True, payment_plan__follow_up_instruction__isnull=True
+    ).delete()
     plan = PaymentPlan.objects.filter(pk=OuterRef("payment_plan_id"))
     PaymentPlanSupportingDocument.objects.filter(payment_plan__follow_up_instruction__isnull=False).update(
         follow_up_instruction_id=Subquery(plan.values("follow_up_instruction_id")[:1])

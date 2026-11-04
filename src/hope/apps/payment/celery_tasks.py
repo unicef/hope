@@ -854,7 +854,7 @@ def _run_owner_exchange_rate_recalculation(
         if owner.exchange_rate != rate:
             old_owner = copy_model_object(owner)
             owner.exchange_rate = rate
-            owner.save(update_fields=["exchange_rate", "updated_at"])
+            owner.save(update_fields=["exchange_rate", "updated_at", "version"])
             owner.refresh_from_db(fields=["exchange_rate"])
             if isinstance(owner, PaymentPlan):
                 log_payment_plan_change(owner, cast("PaymentPlan", old_owner), job.config.get("user_id"))
@@ -910,7 +910,7 @@ def recalculate_owner_exchange_rate_async_task_action(job: AsyncRetryJob) -> Non
             owner = owner_model.objects.select_for_update().get(pk=job.object_id)
             if owner.background_action_status == owner.BackgroundActionStatus.RECALCULATING:
                 owner.background_action_status = owner.BackgroundActionStatus.RECALCULATING_ERROR
-                owner.save(update_fields=["background_action_status", "updated_at"])
+                owner.save(update_fields=["background_action_status", "updated_at", "version"])
         raise NonRetriableTaskError(str(error)) from error
 
 

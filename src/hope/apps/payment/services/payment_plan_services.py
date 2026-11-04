@@ -257,6 +257,7 @@ class PaymentPlanService:
         payment_plan = PaymentPlan.objects.select_for_update().get(pk=self.payment_plan.pk)
         if payment_plan.status != PaymentPlan.Status.OPEN:
             raise ValidationError(f"Lock Payment Plan is possible only within Status {PaymentPlan.Status.OPEN}")
+        self._clear_background_action(payment_plan)
 
         payment_lists = self._payment_lists(payment_plan)
         self._validate_payment_lists_locked(payment_lists)
@@ -268,7 +269,7 @@ class PaymentPlanService:
 
         flow = PaymentPlanFlow(payment_plan)
         flow.status_lock()
-        payment_plan.save(update_fields=("status", "status_date", "updated_at"))
+        payment_plan.save(update_fields=("status", "status_date", "background_action_status", "updated_at", "version"))
 
         self.payment_plan = payment_plan
         return payment_plan
@@ -279,13 +280,18 @@ class PaymentPlanService:
         payment_plan = self._locked_for_update()
         if payment_plan.status != PaymentPlan.Status.LOCKED:
             raise ValidationError(f"Send for Approval is possible only within Status {PaymentPlan.Status.LOCKED}")
+        # The approval numbers come from the USD totals, so a failed recalculation must be retried first.
+        if payment_plan.background_action_status == PaymentPlan.BackgroundActionStatus.RECALCULATING_ERROR:
+            raise ValidationError(
+                "USD recalculation failed for this payment plan. Retry it before sending for approval."
+            )
         self._clear_background_action(payment_plan)
         for payment_list in self._payment_lists(payment_plan):
             PaymentListService(payment_list).transition_send_for_approval()
 
         flow = PaymentPlanFlow(payment_plan)
         flow.status_send_for_approval()
-        payment_plan.save(update_fields=("status", "status_date", "background_action_status", "updated_at"))
+        payment_plan.save(update_fields=("status", "status_date", "background_action_status", "updated_at", "version"))
         ApprovalProcess.objects.create(
             payment_plan=payment_plan,
             sent_for_approval_by=user,
@@ -323,6 +329,9 @@ class PaymentPlanService:
         payment_lists = self._payment_lists(payment_plan)
         if action == PaymentList.Action.REVIEW.value and payment_plan.vision_managed:
             raise ValidationError("Vision-managed Payment Plans are released automatically after FC assignment")
+        # The release queues a rate recalculation, which refuses to start while another background action runs.
+        if approval_type == Approval.FINANCE_RELEASE and not payment_plan.can_start_background_action:
+            raise ValidationError("Another background action is already in progress.")
         required_number = required_number_for(approval_process, approval_type)
         validate_approval_count(approval_process, approval_type, required_number, payment_plan.status, user)
 
@@ -370,6 +379,8 @@ class PaymentPlanService:
         payment_lists = self._payment_lists(payment_plan)
         if not payment_lists or any(plan.status != PaymentList.Status.IN_REVIEW for plan in payment_lists):
             raise ValidationError("Every Payment List must be in review for Vision release")
+        if not payment_plan.can_start_background_action:
+            raise ValidationError("Another background action is already in progress.")
         approval_process = payment_plan.approval_process.first()
         if approval_process is None:
             raise ValidationError("Approval Process object not found for Payment Plan")
@@ -420,7 +431,7 @@ class PaymentPlanService:
             return payment_plan
         old_payment_plan = cast("PaymentPlan", copy_model_object(payment_plan))
         getattr(PaymentPlanFlow(payment_plan), transition)()
-        payment_plan.save(update_fields=("status", "status_date", "updated_at"))
+        payment_plan.save(update_fields=("status", "status_date", "updated_at", "version"))
         for payment_list in self._payment_lists(payment_plan):
             getattr(PaymentListFlow(payment_list), transition)()
             payment_list.save(update_fields=("status", "status_date", "updated_at"))
@@ -439,7 +450,7 @@ class PaymentPlanService:
             PaymentListService(payment_list).ready_for_closure()
         flow = PaymentPlanFlow(payment_plan)
         flow.status_ready_for_closure()
-        payment_plan.save(update_fields=("status", "status_date", "updated_at"))
+        payment_plan.save(update_fields=("status", "status_date", "updated_at", "version"))
         send_payment_plan_notification_emails_async_task(
             payment_plan,
             PaymentList.Action.MARK_READY_FOR_CLOSURE.value,
@@ -458,7 +469,7 @@ class PaymentPlanService:
             PaymentListService(payment_list).send_back_to_finished()
         flow = PaymentPlanFlow(payment_plan)
         flow.status_finished()
-        payment_plan.save(update_fields=("status", "status_date", "updated_at"))
+        payment_plan.save(update_fields=("status", "status_date", "updated_at", "version"))
         send_payment_plan_notification_emails_async_task(
             payment_plan,
             PaymentList.Action.SEND_BACK_TO_FINISHED.value,
@@ -476,11 +487,7 @@ class PaymentPlanService:
                 f"Close Payment Plan is possible only within Status {PaymentPlan.Status.READY_FOR_CLOSURE}"
             )
         payment_lists = self._payment_lists(payment_plan)
-        every_plan_verified = all(
-            payment_list.payment_verification_plans.filter(responded_count__gt=0).exists()
-            for payment_list in payment_lists
-        )
-        if not every_plan_verified and not closure_comment:
+        if not payment_plan.has_verification and not closure_comment:
             raise ValidationError("Closure comment is required when no payment verification was carried out.")
         for payment_list in payment_lists:
             PaymentListService(payment_list).close(closure_comment=closure_comment, user_id=str(user.pk))
@@ -488,7 +495,9 @@ class PaymentPlanService:
         flow.status_close()
         payment_plan.closure_comment = closure_comment
         payment_plan.closed_by = user
-        payment_plan.save(update_fields=("status", "status_date", "closure_comment", "closed_by", "updated_at"))
+        payment_plan.save(
+            update_fields=("status", "status_date", "closure_comment", "closed_by", "updated_at", "version")
+        )
         self.payment_plan = payment_plan
         return payment_plan
 
@@ -502,6 +511,7 @@ class PaymentPlanService:
             PaymentPlan.Status.IN_REVIEW,
         ):
             raise ValidationError(f"Abort Payment Plan is not possible within Status {payment_plan.status}")
+        self._clear_background_action(payment_plan)
         notify_vision = payment_plan.sent_to_vision
         if notify_vision or payment_plan.vision_status != VisionStatus.NOT_SENT.value:
             from hope.contrib.vision.services import VisionService
@@ -512,7 +522,16 @@ class PaymentPlanService:
         flow = PaymentPlanFlow(payment_plan)
         flow.status_abort()
         payment_plan.abort_comment = abort_comment or ""
-        payment_plan.save(update_fields=("status", "status_date", "abort_comment", "updated_at", "internal_data"))
+        payment_plan.save(
+            update_fields=(
+                "status",
+                "status_date",
+                "abort_comment",
+                "background_action_status",
+                "updated_at",
+                "internal_data",
+            )
+        )
         if notify_vision:
             from hope.contrib.vision.tasks import notify_payment_plan_status_to_vision_async_task
 
@@ -547,7 +566,7 @@ class PaymentPlanService:
                 PaymentListService(payment_list).reactivate_abort(user_id)
         if any(payment_list.status == PaymentList.Status.ABORTED for payment_list in payment_lists):
             payment_plan.background_action_status = PaymentPlan.BackgroundActionStatus.REBUILDING
-            payment_plan.save(update_fields=("background_action_status", "updated_at"))
+            payment_plan.save(update_fields=("background_action_status", "updated_at", "version"))
         else:
             self._open_reactivated(payment_plan)
         self.payment_plan = payment_plan
@@ -574,7 +593,7 @@ class PaymentPlanService:
             return
         old_payment_plan = cast("PaymentPlan", copy_model_object(payment_plan))
         payment_plan.background_action_status = PaymentPlan.BackgroundActionStatus.REBUILD_ERROR
-        payment_plan.save(update_fields=("background_action_status", "updated_at"))
+        payment_plan.save(update_fields=("background_action_status", "updated_at", "version"))
         log_payment_plan_change(payment_plan, old_payment_plan, user_id)
 
     @staticmethod
@@ -582,7 +601,7 @@ class PaymentPlanService:
         flow = PaymentPlanFlow(payment_plan)
         flow.status_reactivate_abort()
         payment_plan.background_action_status = None
-        payment_plan.save(update_fields=("status", "status_date", "background_action_status", "updated_at"))
+        payment_plan.save(update_fields=("status", "status_date", "background_action_status", "updated_at", "version"))
 
     @staticmethod
     def _transition_stage(payment_plan: PaymentPlan, approval_type: str) -> None:
@@ -593,7 +612,7 @@ class PaymentPlanService:
             Approval.FINANCE_RELEASE: flow.status_mark_as_reviewed,
             Approval.REJECT: flow.status_reject,
         }[approval_type]()
-        payment_plan.save(update_fields=("status", "status_date", "updated_at"))
+        payment_plan.save(update_fields=("status", "status_date", "updated_at", "version"))
 
     def _locked_for_update(self) -> PaymentPlan:
         return PaymentPlan.objects.select_for_update().get(pk=self.payment_plan.pk)
@@ -611,7 +630,7 @@ class PaymentPlanService:
 
         flow = PaymentPlanFlow(payment_plan)
         flow.status_unlock()
-        payment_plan.save(update_fields=("status", "status_date", "background_action_status", "updated_at"))
+        payment_plan.save(update_fields=("status", "status_date", "background_action_status", "updated_at", "version"))
 
         self.payment_plan = payment_plan
         return payment_plan

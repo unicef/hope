@@ -54,9 +54,7 @@ describe('ApprovalSection', () => {
 
     expect(
       screen.getByText('PPG-0002').closest('a')?.getAttribute('href'),
-    ).toBe(
-      '/afghanistan/programs/prog1/payment-module/payment-plans/group-2',
-    );
+    ).toBe('/afghanistan/programs/prog1/payment-module/payment-plans/group-2');
     expect(screen.getByText('South')).not.toBeNull();
 
     const checkbox = within(

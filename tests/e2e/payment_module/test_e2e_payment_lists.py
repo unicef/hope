@@ -437,7 +437,7 @@ class TestSmokePaymentModule:
         ).find_element(By.TAG_NAME, "a").click()
         page_program_cycle_details.get_button_create_payment_list().click()
         page_new_payment_list.wait_for_page_ready()
-        page_new_payment_list.assert_page_header_title("New Payment Plan")
+        page_new_payment_list.assert_page_header_title("New Payment List")
         assert "SAVE" in page_new_payment_list.get_button_save_payment_list().text
         assert "Target Population" in page_new_payment_list.get_input_target_population().text
         assert "CURRENCY" in page_new_payment_list.get_label_group_currency().text.upper()

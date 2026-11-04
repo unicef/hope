@@ -13,11 +13,19 @@ PERMISSION_RENAMES = (
     ("PM_PAYMENT_PLAN_GROUP_IMPORT_XLSX", "PM_PAYMENT_PLAN_IMPORT_XLSX"),
 )
 RENAME_SQL = "UPDATE account_role SET permissions = array_replace(permissions, %s, %s) WHERE %s = ANY(permissions)"
+# Sending to the payment gateway moved from the payment list to the payment plan; roles keep the ability.
+PERMISSION_GRANTS = (("PM_SEND_TO_PAYMENT_GATEWAY", "PM_PAYMENT_PLAN_SEND_TO_PAYMENT_GATEWAY"),)
+GRANT_SQL = (
+    "UPDATE account_role SET permissions = array_append(permissions, %s) "
+    "WHERE %s = ANY(permissions) AND NOT (%s = ANY(permissions))"
+)
 
 
 def forwards(apps, schema_editor) -> None:
     for old, new in PERMISSION_RENAMES:
         schema_editor.execute(RENAME_SQL, [old, new, old])
+    for held, granted in PERMISSION_GRANTS:
+        schema_editor.execute(GRANT_SQL, [granted, held, granted])
 
 
 def backwards(apps, schema_editor) -> None:

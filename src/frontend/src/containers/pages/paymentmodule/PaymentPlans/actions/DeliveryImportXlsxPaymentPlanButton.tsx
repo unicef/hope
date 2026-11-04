@@ -11,6 +11,7 @@ import {
   Select,
 } from '@mui/material';
 import type { PaymentPlanImportFile } from '@restgenerated/models/PaymentPlanImportFile';
+import { PaymentPlanStatusEnum } from '@restgenerated/models/PaymentPlanStatusEnum';
 import { RestService } from '@restgenerated/services/RestService';
 import { restQueryKey } from '@utils/queryKeys';
 import type { ReactElement } from 'react';
@@ -50,6 +51,11 @@ export function DeliveryImportXlsxPaymentPlanButton({
   };
 
   if (!hasPermissions(PERMISSIONS.PM_PAYMENT_PLAN_IMPORT_XLSX, permissions))
+    return null;
+  if (
+    paymentPlan?.status !== PaymentPlanStatusEnum.ACCEPTED &&
+    paymentPlan?.status !== PaymentPlanStatusEnum.FINISHED
+  )
     return null;
 
   return (

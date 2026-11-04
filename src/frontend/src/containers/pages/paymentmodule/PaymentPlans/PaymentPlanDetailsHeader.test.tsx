@@ -109,12 +109,21 @@ describe('PaymentPlanDetailsHeader', () => {
     expect(screen.queryByTestId('group-background-action-status')).toBeNull();
   });
 
+  it('hides Upload Reconciliation while the payment plan is not accepted', () => {
+    mockUsePermissions.mockReturnValue([
+      PERMISSIONS.PM_PAYMENT_PLAN_IMPORT_XLSX,
+    ]);
+    renderHeader(null, PaymentPlanStatusEnum.OPEN);
+
+    expect(screen.queryByText('Upload Reconciliation')).toBeNull();
+  });
+
   it('shows override controls only to users with the override permission', () => {
     mockUsePermissions.mockReturnValue([
       PERMISSIONS.PM_PAYMENT_PLAN_IMPORT_XLSX,
       PERMISSIONS.PM_IMPORT_XLSX_WITH_RECONCILIATION_OVERRIDE,
     ]);
-    renderHeader(null);
+    renderHeader(null, PaymentPlanStatusEnum.ACCEPTED);
 
     fireEvent.click(screen.getByText('Upload Reconciliation'));
     fireEvent.click(
@@ -140,7 +149,7 @@ describe('PaymentPlanDetailsHeader', () => {
     mockUsePermissions.mockReturnValue([
       PERMISSIONS.PM_PAYMENT_PLAN_IMPORT_XLSX,
     ]);
-    renderHeader(null);
+    renderHeader(null, PaymentPlanStatusEnum.ACCEPTED);
 
     fireEvent.click(screen.getByText('Upload Reconciliation'));
 

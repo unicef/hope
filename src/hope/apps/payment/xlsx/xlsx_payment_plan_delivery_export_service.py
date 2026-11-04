@@ -201,11 +201,11 @@ class XlsxPaymentPlanDeliveryExportService(XlsxExportBaseService):
                 fsp_extra_fields_headers=payment_plan_fsp_extra_fields_headers,
             )
             per_fsp_service.prepare_headers(cast("FinancialServiceProviderXlsxTemplate", template))
-            if not prepared_services:
-                self.allow_export_fsp_auth_code = per_fsp_service.allow_export_fsp_auth_code
             header.extend(column for column in per_fsp_service.header_list if column not in header)
             prepared_services.append(per_fsp_service)
             self.exported_plan_ids.append(payment_list.id)
+        # Every list writes its own auth codes into the shared header, so one such list protects the file.
+        self.allow_export_fsp_auth_code = any(service.allow_export_fsp_auth_code for service in prepared_services)
 
         self.ws_export_list.append(header)
 
