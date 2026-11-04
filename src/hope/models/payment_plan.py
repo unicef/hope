@@ -15,7 +15,7 @@ from django.core.validators import (
 )
 from django.db import models, transaction
 from django.db.backends.postgresql.psycopg_any import NumericRange
-from django.db.models import Count, Exists, OuterRef, Q, QuerySet, Sum, Value
+from django.db.models import Count, Exists, F, OuterRef, Q, QuerySet, Sum, Value
 from django.db.models.functions import Coalesce
 from django.utils import timezone
 from django.utils.text import Truncator
@@ -26,6 +26,7 @@ from model_utils.models import SoftDeletableModel
 
 from hope.apps.activity_log.utils import create_mapping_dict
 from hope.apps.core.exchange_rates import ExchangeRates
+from hope.apps.core.fields import HopeCurrencyField, currency_precision_check
 from hope.apps.core.utils import map_unicef_ids_to_households_unicef_ids
 from hope.apps.household.const import FEMALE, MALE, NON_BENEFICIARY
 from hope.apps.targeting.services.targeting_service import TargetingCriteriaQueryingBase
@@ -543,13 +544,12 @@ class PaymentPlan(
         blank=True,
         help_text="Total Entitled Quantity [sys]",
     )
-    total_entitled_quantity_usd = models.DecimalField(
-        decimal_places=2,
-        max_digits=15,
+    total_entitled_quantity_usd = HopeCurrencyField(
+        verbose_name="Total entitled quantity in USD",
         validators=[MinValueValidator(Decimal(0))],
         null=True,
         blank=True,
-        help_text="Total Entitled Quantity USD [sys]",
+        help_text="Sum of payment entitlements converted to USD, with up to 10 decimal places [sys].",
     )
     total_entitled_quantity_revised = models.DecimalField(
         decimal_places=2,
@@ -559,13 +559,12 @@ class PaymentPlan(
         blank=True,
         help_text="Total Entitled Quantity Revised [sys]",
     )
-    total_entitled_quantity_revised_usd = models.DecimalField(
-        decimal_places=2,
-        max_digits=15,
+    total_entitled_quantity_revised_usd = HopeCurrencyField(
+        verbose_name="Revised total entitled quantity in USD",
         validators=[MinValueValidator(Decimal(0))],
         null=True,
         blank=True,
-        help_text="Total Entitled Quantity Revised USD [sys]",
+        help_text="Revised entitlement total in USD, with up to 10 decimal places [sys].",
     )
     total_delivered_quantity = models.DecimalField(
         decimal_places=2,
@@ -575,13 +574,12 @@ class PaymentPlan(
         blank=True,
         help_text="Total Delivered Quantity [sys]",
     )
-    total_delivered_quantity_usd = models.DecimalField(
-        decimal_places=2,
-        max_digits=15,
+    total_delivered_quantity_usd = HopeCurrencyField(
+        verbose_name="Total delivered quantity in USD",
         validators=[MinValueValidator(Decimal(0))],
         null=True,
         blank=True,
-        help_text="Total Delivered Quantity USD [sys]",
+        help_text="Sum of delivered payments in USD, with up to 10 decimal places [sys].",
     )
     total_undelivered_quantity = models.DecimalField(
         decimal_places=2,
@@ -591,13 +589,12 @@ class PaymentPlan(
         blank=True,
         help_text="Total Undelivered Quantity [sys]",
     )
-    total_undelivered_quantity_usd = models.DecimalField(
-        decimal_places=2,
-        max_digits=15,
+    total_undelivered_quantity_usd = HopeCurrencyField(
+        verbose_name="Total undelivered quantity in USD",
         validators=[MinValueValidator(Decimal(0))],
         null=True,
         blank=True,
-        help_text="Total Undelivered Quantity USD [sys]",
+        help_text="Entitled amount remaining in USD, with up to 10 decimal places [sys].",
     )
     steficon_targeting_applied_date = models.DateTimeField(
         blank=True,
@@ -656,6 +653,13 @@ class PaymentPlan(
             models.CheckConstraint(
                 condition=Q(is_removed=True) | Q(payment_plan_group__isnull=False),
                 name="payment_plan_group_required_unless_removed",
+            ),
+            currency_precision_check(
+                "total_entitled_quantity_usd",
+                "total_entitled_quantity_revised_usd",
+                "total_delivered_quantity_usd",
+                "total_undelivered_quantity_usd",
+                name="payment_plan_currency_precision",
             ),
         ]
         indexes = [
@@ -782,6 +786,19 @@ class PaymentPlan(
                 total_entitled_quantity_usd=Coalesce(Sum("entitlement_quantity_usd"), Decimal(0.0)),
                 total_delivered_quantity=Coalesce(Sum("delivered_quantity"), Decimal(0.0)),
                 total_delivered_quantity_usd=Coalesce(Sum("delivered_quantity_usd"), Decimal(0.0)),
+                total_undelivered_quantity=Coalesce(
+                    Sum(
+                        Coalesce(F("entitlement_quantity"), Decimal(0)) - Coalesce(F("delivered_quantity"), Decimal(0))
+                    ),
+                    Decimal(0.0),
+                ),
+                total_undelivered_quantity_usd=Coalesce(
+                    Sum(
+                        Coalesce(F("entitlement_quantity_usd"), Decimal(0))
+                        - Coalesce(F("delivered_quantity_usd"), Decimal(0))
+                    ),
+                    Decimal(0.0),
+                ),
             )
 
             self.total_entitled_quantity = payments.get("total_entitled_quantity", 0.00)
@@ -789,8 +806,8 @@ class PaymentPlan(
             self.total_delivered_quantity = payments.get("total_delivered_quantity", 0.00)
             self.total_delivered_quantity_usd = payments.get("total_delivered_quantity_usd", 0.00)
 
-            self.total_undelivered_quantity = self.total_entitled_quantity - self.total_delivered_quantity
-            self.total_undelivered_quantity_usd = self.total_entitled_quantity_usd - self.total_delivered_quantity_usd
+            self.total_undelivered_quantity = payments["total_undelivered_quantity"]
+            self.total_undelivered_quantity_usd = payments["total_undelivered_quantity_usd"]
 
             self.save(
                 update_fields=[

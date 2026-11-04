@@ -341,7 +341,10 @@ class XlsxPaymentPlanDeliveryExportService(XlsxExportBaseService):
 
         payment_row.extend(payment.fsp_extra_fields.get(header, "") for header in self.fsp_extra_fields_headers)
 
-        return list(map(self.right_format_for_xlsx, payment_row))
+        return [
+            self.right_format_for_xlsx(value, column_name)
+            for column_name, value in zip(self.header_list, payment_row, strict=True)
+        ]
 
     def _get_flex_field_by_name(self, name: str, payment: Payment) -> str:
         attribute: FlexibleAttribute = self.flexible_attributes[name]

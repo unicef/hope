@@ -94,6 +94,44 @@ def verification_setup(verification_plan, program, business_area, admin_areas):
     }
 
 
+@pytest.fixture
+def two_decimal_verification_setup(verification_setup):
+    verification_plan = verification_setup["verification_plan"]
+    verification = verification_plan.payment_record_verifications.order_by("id").first()
+    payment = verification.payment
+    payment.delivered_quantity = Decimal("123.12")
+    payment.save(update_fields=["delivered_quantity"])
+    verification.received_amount = Decimal("123.12")
+    verification.status = PaymentVerification.STATUS_RECEIVED
+    verification.save(update_fields=["received_amount", "status"])
+    verification_setup["two_decimal_payment"] = payment
+    return verification_setup
+
+
+def test_verification_xlsx_round_trip_preserves_two_decimal_amount(two_decimal_verification_setup):
+    verification_plan = two_decimal_verification_setup["verification_plan"]
+    payment = two_decimal_verification_setup["two_decimal_payment"]
+    workbook = XlsxVerificationExportService(verification_plan).generate_workbook()
+    amount_cell = workbook.active[f"{XlsxVerificationExportService.RECEIVED_AMOUNT_COLUMN_LETTER}2"]
+    received_cell = workbook.active[f"{XlsxVerificationExportService.RECEIVED_COLUMN_LETTER}2"]
+    assert amount_cell.value == Decimal("123.12")
+    assert amount_cell.data_type == "n"
+    assert received_cell.value == "YES"
+    file = io.BytesIO()
+    workbook.save(file)
+    file.seek(0)
+
+    service = XlsxVerificationImportService(verification_plan, file)
+    service.open_workbook()
+    service.validate()
+    assert service.errors == []
+    service.import_verifications()
+
+    verification = PaymentVerification.objects.get(payment=payment)
+    assert verification.status == PaymentVerification.STATUS_RECEIVED
+    assert verification.received_amount == Decimal("123.12")
+
+
 @pytest.mark.parametrize(
     ("initial_status", "result"),
     [

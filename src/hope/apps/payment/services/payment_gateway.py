@@ -1,5 +1,6 @@
 from _decimal import Decimal
 import dataclasses
+from datetime import date
 from enum import Enum
 import logging
 from typing import Any, Self, cast
@@ -243,7 +244,7 @@ class PaymentRecordData(FlexibleArgumentsDataclassMixin):
     status: str
     auth_code: str
     fsp_code: str
-    payout_amount: float | None = None
+    payout_amount: Decimal | float | str | None = None
     payout_date: str | None = None
     message: str | None = None
 
@@ -700,6 +701,7 @@ class PaymentGatewayService:
         payment_plan: PaymentPlan,
         exchange_rate: Decimal | float | None,
         log_pairs: "list[tuple[Payment, Payment]]",
+        currency_exchange_date: date | None = None,
     ) -> tuple[str, ...] | None:
         matching_pg_payment = payment_records_by_remote_id.get(str(payment.id))
         if matching_pg_payment is None:
@@ -707,7 +709,7 @@ class PaymentGatewayService:
             return None
 
         old_payment = cast("Payment", copy_model_object(payment))
-        payment.status = matching_pg_payment.get_hope_status(payment.entitlement_quantity)  # type: ignore[arg-type]
+        payment.status = matching_pg_payment.get_hope_status(cast("Decimal", payment.entitlement_quantity))
         payment.status_date = now()
         payment.fsp_auth_code = matching_pg_payment.auth_code
         payment.reason_for_unsuccessful_payment = matching_pg_payment.message
@@ -725,7 +727,7 @@ class PaymentGatewayService:
             Payment.STATUS_DISTRIBUTION_PARTIAL,
             Payment.STATUS_NOT_DISTRIBUTED,
         ]:
-            if payment.status == Payment.STATUS_NOT_DISTRIBUTED and delivered_quantity is None:  # pragma no cover
+            if payment.status == Payment.STATUS_NOT_DISTRIBUTED and delivered_quantity is None:
                 delivered_quantity = 0
                 delivery_date = None
 
@@ -733,10 +735,10 @@ class PaymentGatewayService:
             payment.delivery_date = to_utc_midnight(delivery_date) if delivery_date else None
             payment.delivered_quantity = to_decimal(delivered_quantity)
             payment.delivered_quantity_usd = get_quantity_in_usd(
-                amount=Decimal(delivered_quantity),  # type: ignore[arg-type]
+                amount=payment.delivered_quantity,
                 currency=payment_plan.currency,
-                exchange_rate=Decimal(exchange_rate),  # type: ignore[arg-type]
-                currency_exchange_date=payment_plan.currency_exchange_date,
+                exchange_rate=exchange_rate,
+                currency_exchange_date=currency_exchange_date or payment_plan.currency_exchange_date,
             )
 
         log_pairs.append((old_payment, payment))
@@ -787,6 +789,7 @@ class PaymentGatewayService:
             payment_log_pairs: list = []
 
             if (not has_eligible_payments or pending_payments) and payment_plan.is_payment_gateway:
+                currency_exchange_date = payment_plan.currency_exchange_date
                 payment_instructions = [split for split in payment_plan.splits.all() if split.sent_to_payment_gateway]
                 pending_payments_by_split: dict[Any, list[Payment]] = {}
                 payments_by_update_fields: dict[tuple[str, ...], list[Payment]] = {}
@@ -804,6 +807,7 @@ class PaymentGatewayService:
                                 payment_records_by_remote_id=payment_records_by_remote_id,
                                 container=instruction,
                                 payment_plan=payment_plan,
+                                currency_exchange_date=currency_exchange_date,
                                 exchange_rate=exchange_rate,
                                 log_pairs=payment_log_pairs,
                             )
@@ -837,6 +841,7 @@ class PaymentGatewayService:
                 payment_records_by_remote_id={pg_payment_record.remote_id: pg_payment_record},
                 container=payment.parent_split,  # type: ignore[arg-type]
                 payment_plan=payment_plan,
+                currency_exchange_date=payment_plan.currency_exchange_date,
                 exchange_rate=payment_plan.exchange_rate,
                 log_pairs=payment_log_pairs,
             )

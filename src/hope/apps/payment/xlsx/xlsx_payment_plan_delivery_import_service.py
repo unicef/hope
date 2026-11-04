@@ -277,26 +277,27 @@ class XlsxPaymentPlanDeliveryImportService(XlsxImportBaseService):
             return self.ACTION_SKIP, None
 
         action = self._get_row_action(payment, delivered_quantity)
-        if action == self.ACTION_CONFLICT:
+        if action == self.ACTION_CONFLICT and delivered_quantity is not None:
             conflict_error = XlsxError(
                 self.sheetname,
                 cell.coordinate,
-                f"Payment {payment_id}: Delivered quantity {delivered_quantity} conflicts with the existing "
-                f"delivered quantity {payment.delivered_quantity}.",
+                f"Payment {payment_id}: Delivered quantity {delivered_quantity} "
+                f"conflicts with the existing delivered quantity "
+                f"{payment.delivered_quantity or Decimal('0.00')}.",
             )
             self.errors.append(conflict_error)
             self.conflict_errors.append(conflict_error)
             return action, delivered_quantity
 
         if delivered_quantity is not None and delivered_quantity != Decimal("-1.00"):
-            entitlement_quantity = payment.entitlement_quantity or Decimal(0)
+            entitlement_quantity = payment.entitlement_quantity or Decimal("0.00")
             if delivered_quantity > entitlement_quantity:
                 self.errors.append(
                     XlsxError(
                         self.sheetname,
                         cell.coordinate,
-                        f"Payment {payment_id}: Delivered quantity {delivered_quantity} is bigger than "
-                        f"Entitlement quantity {entitlement_quantity}",
+                        f"Payment {payment_id}: Delivered quantity "
+                        f"{delivered_quantity} is bigger than Entitlement quantity {entitlement_quantity}",
                     )
                 )
         return action, delivered_quantity

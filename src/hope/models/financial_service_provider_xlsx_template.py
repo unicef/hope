@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from decimal import Decimal
 from typing import Any
 
 from django import forms
@@ -255,7 +256,7 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
         column_name: str,
         areas_dict: dict,
         document_types: list[str],
-    ) -> str | float | list | None:
+    ) -> str | float | Decimal | list | None:
         # we can get if needed payment.parent.program.is_social_worker_program
         snapshot = getattr(payment, "household_snapshot", None)
         if not snapshot:
@@ -317,14 +318,14 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
         if column_name in document_types or column_name in cls.DOCUMENT_NUMBER_COLUMNS:
             return cls.get_document_number_by_doc_type_key(snapshot_data, column_name)
 
-        result: str | float | list | None
+        result: str | float | Decimal | list | None
         if column_name in additional_columns:
             method, args = additional_columns[column_name]
             result = method(*args)  # type: ignore
         elif column_name in map_obj_name_column:
             obj, nested_field = map_obj_name_column[column_name]
             if column_name == "delivered_quantity" and payment.status == Payment.STATUS_ERROR:
-                result = float(-1)
+                result = -1
             elif column_name == "delivery_date" and payment.delivery_date is not None:
                 result = utc_date(payment.delivery_date).isoformat()
             elif isinstance(obj, dict):

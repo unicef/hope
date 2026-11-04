@@ -107,25 +107,19 @@ const ProgramCyclesTableProgramDetails = ({
           align="right"
           data-cy="program-cycle-total-entitled-quantity-usd"
         >
-          {row.totalEntitledQuantityUsd
-            ? formatFigure(row.totalEntitledQuantityUsd)
-            : '-'}
+          {formatFigure(row.totalEntitledQuantityUsd)}
         </TableCell>
         <TableCell
           align="right"
           data-cy="program-cycle-total-undelivered-quantity-usd"
         >
-          {row.totalUndeliveredQuantityUsd
-            ? formatFigure(row.totalUndeliveredQuantityUsd)
-            : '-'}
+          {formatFigure(row.totalUndeliveredQuantityUsd)}
         </TableCell>
         <TableCell
           align="right"
           data-cy="program-cycle-total-delivered-quantity-usd"
         >
-          {row.totalDeliveredQuantityUsd
-            ? formatFigure(row.totalDeliveredQuantityUsd)
-            : '-'}
+          {formatFigure(row.totalDeliveredQuantityUsd)}
         </TableCell>
         <TableCell data-cy="program-cycle-start-date">
           <UniversalMoment>{row.startDate}</UniversalMoment>

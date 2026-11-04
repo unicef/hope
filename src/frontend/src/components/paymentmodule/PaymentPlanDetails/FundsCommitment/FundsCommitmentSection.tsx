@@ -239,7 +239,7 @@ const FundsCommitmentSection: React.FC<FundsCommitmentSectionProps> = ({
                 <ResponsiveGrid size="quarter" mobileSize="half">
                   <LabelizedField
                     label={t('Total Amount USD')}
-                    value={formatFigure(header.totalAmountUsd)}
+                    value={header.totalAmountUsd ?? '-'}
                   />
                 </ResponsiveGrid>
                 <ResponsiveGrid size="quarter" mobileSize="half">
@@ -297,7 +297,7 @@ const FundsCommitmentSection: React.FC<FundsCommitmentSectionProps> = ({
                     <ResponsiveGrid size="quarter" mobileSize="half">
                       <LabelizedField
                         label={t('Commitment Amount USD')}
-                        value={formatFigure(item.commitmentAmountUsd)}
+                        value={item.commitmentAmountUsd ?? '-'}
                       />
                     </ResponsiveGrid>
                     <ResponsiveGrid size="quarter" mobileSize="half">
@@ -309,7 +309,7 @@ const FundsCommitmentSection: React.FC<FundsCommitmentSectionProps> = ({
                     <ResponsiveGrid size="quarter" mobileSize="half">
                       <LabelizedField
                         label={t('Total Open Amount USD')}
-                        value={formatFigure(item.totalOpenAmountUsd)}
+                        value={item.totalOpenAmountUsd ?? '-'}
                       />
                     </ResponsiveGrid>
                     <ResponsiveGrid size="quarter" mobileSize="half">

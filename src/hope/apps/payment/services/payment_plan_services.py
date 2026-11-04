@@ -1220,6 +1220,7 @@ class PaymentPlanService:
             split = PaymentPlanSplit.objects.create(payment_plan=self.payment_plan)
 
         exchange_rate = Decimal(self.payment_plan.exchange_rate or 0)
+        currency_exchange_date = self.payment_plan.currency_exchange_date if amounts is not None else None
         # Without a rate on the plan, get_quantity_in_usd builds its own ExchangeRates — a full
         # rates fetch and parse — on every single call, so hand it one built up front.
         exchange_rates_client = ExchangeRates() if amounts and not exchange_rate else None
@@ -1231,7 +1232,7 @@ class PaymentPlanService:
                     amount=quantity,
                     currency=self.payment_plan.currency,
                     exchange_rate=exchange_rate,
-                    currency_exchange_date=self.payment_plan.currency_exchange_date,
+                    currency_exchange_date=cast("datetime.date", currency_exchange_date),
                     exchange_rates_client=exchange_rates_client,
                 )
             if copy_entitlement:

@@ -49,7 +49,7 @@ class PaymentVerification(TimeStampedUUIDModel, ConcurrencyModel, AdminUrlMixin)
     received_amount = models.DecimalField(
         decimal_places=2,
         max_digits=15,
-        validators=[MinValueValidator(Decimal("0.01"))],
+        validators=[MinValueValidator(Decimal("0.00"))],
         null=True,
         blank=True,
     )

@@ -1,9 +1,17 @@
 from datetime import date, datetime
+from decimal import ROUND_HALF_UP, Decimal
 from typing import Any
 
+from django.core.exceptions import ValidationError as DjangoValidationError
 from django.db.models import QuerySet
 from rest_framework import serializers
 
+from hope.apps.core.fields import (
+    CURRENCY_DECIMAL_PLACES,
+    CURRENCY_MAX_DIGITS,
+    HopeCurrencyField,
+    normalize_currency_decimal,
+)
 from hope.apps.core.timezones import utc_date
 
 
@@ -12,6 +20,32 @@ class UTCDateField(serializers.DateField):
 
     def to_representation(self, value: date | datetime) -> str:
         return super().to_representation(utc_date(value))
+
+
+class HopeCurrencyDecimalField(serializers.DecimalField):
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
+        kwargs.setdefault("max_digits", CURRENCY_MAX_DIGITS)
+        kwargs.setdefault("decimal_places", CURRENCY_DECIMAL_PLACES)
+        kwargs["coerce_to_string"] = True
+        super().__init__(*args, **kwargs)
+
+    def to_internal_value(self, data: Any) -> Any:
+        try:
+            value = normalize_currency_decimal(data)
+        except DjangoValidationError:
+            self.fail("invalid")
+        return super().to_internal_value(value)
+
+    def to_representation(self, value: Any) -> str:
+        amount = normalize_currency_decimal(value).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+        return format(amount, ".2f")
+
+
+class HopeCurrencyModelSerializer(serializers.ModelSerializer):
+    serializer_field_mapping = {
+        **serializers.ModelSerializer.serializer_field_mapping,
+        HopeCurrencyField: HopeCurrencyDecimalField,
+    }
 
 
 class ScopedRelatedFieldMixin:

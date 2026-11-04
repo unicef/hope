@@ -3,7 +3,8 @@ from typing import Any
 
 from django.conf import settings
 from django.db import models
-from django.db.models import Count, Sum
+from django.db.models import Count, F, Sum
+from django.db.models.functions import Coalesce
 
 from hope.models.file_temp import FileTemp
 from hope.models.payment import Payment
@@ -132,6 +133,12 @@ class FollowUpInstruction(TimeStampedUUIDModel, UnicefIdentifiedModel, AdminUrlM
             total_entitled_quantity_usd=Sum("entitlement_quantity_usd"),
             total_delivered_quantity=Sum("delivered_quantity"),
             total_delivered_quantity_usd=Sum("delivered_quantity_usd"),
+            total_undelivered_quantity=Sum(
+                Coalesce(F("entitlement_quantity"), Decimal(0)) - Coalesce(F("delivered_quantity"), Decimal(0))
+            ),
+            total_undelivered_quantity_usd=Sum(
+                Coalesce(F("entitlement_quantity_usd"), Decimal(0)) - Coalesce(F("delivered_quantity_usd"), Decimal(0))
+            ),
         )
         total_entitled_quantity = summary["total_entitled_quantity"] or Decimal(0)
         total_entitled_quantity_usd = summary["total_entitled_quantity_usd"] or Decimal(0)
@@ -144,6 +151,6 @@ class FollowUpInstruction(TimeStampedUUIDModel, UnicefIdentifiedModel, AdminUrlM
             "total_entitled_quantity_usd": total_entitled_quantity_usd,
             "total_delivered_quantity": total_delivered_quantity,
             "total_delivered_quantity_usd": total_delivered_quantity_usd,
-            "total_undelivered_quantity": total_entitled_quantity - total_delivered_quantity,
-            "total_undelivered_quantity_usd": total_entitled_quantity_usd - total_delivered_quantity_usd,
+            "total_undelivered_quantity": summary["total_undelivered_quantity"] or Decimal(0),
+            "total_undelivered_quantity_usd": summary["total_undelivered_quantity_usd"] or Decimal(0),
         }
