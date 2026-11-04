@@ -17,6 +17,11 @@ INCENTIVE_PAYEE_NEW_PAYEE_LABELS = (
 ORGANIZATION_NEW_PAYEE_LABELS = (
     ("Schools", "School"),
     ("Healthcare Facilities", "Healthcare Facility"),
+    ("Child Protection Facilities", "Child Protection Facility"),
+    ("Social Protection Facilities", "Social Protection Facility"),
+    ("WASH Facilities", "WASH Facility"),
+    ("Mosques", "Mosque"),
+    ("Other Service Delivery Organizations", "Other Service Delivery Organization"),
 )
 ORGANIZATION_MEMBER_LABEL = ("Representative", "Representatives")
 ORGANIZATION_DCT_CODE = "head_of_facility"
