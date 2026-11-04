@@ -127,7 +127,7 @@ def restore_master_detail(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("core", "0042_migration"),
+        ("core", "0043_migration"),
         ("program", "0024_migration"),
     ]
 
