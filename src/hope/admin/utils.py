@@ -509,6 +509,7 @@ class FieldPkCursorPaginator(AdminCursorPaginator):
     def cursor_value(field_value: Any, pk: Any) -> str:
         return json.dumps([encode_value(field_value), str(pk)])
 
+    # A copy of the library's 0.1.7 `current_page` with `pk` added to the ORDER BY; pyproject pins `<0.2` for it.
     @cached_property
     @override
     def current_page(self) -> AdminCursorPage:

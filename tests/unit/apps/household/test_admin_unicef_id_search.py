@@ -198,7 +198,7 @@ def paged_population():
     rows = [*households, *(household.head_of_household for household in households)]
     return {
         "filters": {"business_area__exact": str(ba.id), "program__exact": str(program.id)},
-        "pk": {row.unicef_id: row.pk for row in rows},
+        "pk_by_unicef_id": {row.unicef_id: row.pk for row in rows},
     }
 
 
@@ -286,7 +286,7 @@ def test_changelist_search_by_own_unicef_id_pages_from_cursor(
     paged_population, staff_client, url_name, term, cursor_id, is_reverse, expected
 ):
     cursor = Cursor(
-        value=FieldPkCursorPaginator.cursor_value(cursor_id, paged_population["pk"][cursor_id]),
+        value=FieldPkCursorPaginator.cursor_value(cursor_id, paged_population["pk_by_unicef_id"][cursor_id]),
         is_reverse=is_reverse,
         number=2,
     )

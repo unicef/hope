@@ -6,9 +6,9 @@ from admin_cursor_paginator.cursor import Cursor, encode_cursor
 from django.contrib.admin.models import LogEntry
 from django.contrib.admin.sites import AdminSite
 from django.core.paginator import Paginator
-from django.test import RequestFactory
 import pytest
 
+from extras.test_utils.admin import admin_request
 from extras.test_utils.factories import (
     AccountFactory,
     BusinessAreaFactory,
@@ -78,12 +78,6 @@ def staff_user():
     return UserFactory(is_staff=True, is_active=True, status="ACTIVE")
 
 
-def admin_request(user, params=None):
-    request = RequestFactory().get("/admin/", params or {})
-    request.user = user
-    return request
-
-
 @pytest.mark.parametrize(
     ("model", "model_admin_class", "term"),
     [(Individual, IndividualAdmin, "IND-24"), (Household, HouseholdAdmin, "HH-24"), (Household, HouseholdAdmin, "")],
@@ -136,7 +130,7 @@ def test_previous_page_cursor_on_a_shared_unicef_id_returns_the_row_before_it(sa
     assert page.next_cursor.value == FieldPkCursorPaginator.cursor_value("IND-24-0000.0001", first_pk)
 
 
-# A cursor from a bookmarked link made before the pk was added carries the field value alone.
+# A cursor whose value is not a JSON `[field value, pk]` pair is ignored.
 def test_cursor_without_pk_opens_the_first_page(same_unicef_id_population, staff_user):
     model_admin = IndividualAdmin(Individual, AdminSite())
     queryset, _ = model_admin.get_search_results(
