@@ -1,7 +1,7 @@
 import base64
+from collections.abc import Callable, Iterator
 import contextlib
 from pathlib import Path
-from typing import Iterator
 
 from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
@@ -86,11 +86,19 @@ def base64_image() -> str:
 
 
 @pytest.fixture
-def stored_image() -> Iterator[str]:
+def store_image() -> Iterator[Callable[[str], str]]:
     image = Path(__file__).parent / "logo.png"
-    file_name = default_storage.save("cw_files/logo.png", ContentFile(image.read_bytes()))
-    yield file_name
-    default_storage.delete(file_name)
+    stored_names: list[str] = []
+
+    def store(file_name: str) -> str:
+        stored_name = default_storage.save(file_name, ContentFile(image.read_bytes()))
+        stored_names.append(stored_name)
+        return stored_name
+
+    yield store
+
+    for stored_name in stored_names:
+        default_storage.delete(stored_name)
 
 
 @pytest.fixture
