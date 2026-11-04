@@ -13,7 +13,7 @@ import { MainActivityLogTableRow } from './MainActivityLogTableRow';
 import { headCells } from './MainActivityLogTableHeadCells';
 import { KeyboardArrowLeft, KeyboardArrowRight } from '@mui/icons-material';
 import withErrorBoundary from '@components/core/withErrorBoundary';
-import { responsiveValue } from 'src/responsive';
+import { PAGINATION_SX, responsiveValue } from 'src/responsive';
 
 interface HeadingCellProps {
   weight?: number;
@@ -125,6 +125,7 @@ export function MainActivityLogTable({
         <TablePagination
           rowsPerPageOptions={[5, 10, 15, 20]}
           component="div"
+          sx={PAGINATION_SX}
           count={totalCount}
           rowsPerPage={rowsPerPage}
           page={page}

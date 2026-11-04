@@ -1,7 +1,7 @@
 import { useConfirmation } from '@core/ConfirmationDialog';
 import { LoadingComponent } from '@core/LoadingComponent';
 import { Box, Paper, TablePagination, Typography } from '@mui/material';
-import { responsiveValue } from 'src/responsive';
+import { PAGINATION_SX, responsiveValue } from 'src/responsive';
 import type { GrievanceChoices } from '@restgenerated/models/GrievanceChoices';
 import type { GrievanceTicketList } from '@restgenerated/models/GrievanceTicketList';
 import type { ReactElement } from 'react';
@@ -108,6 +108,7 @@ export const NaTicketsList = ({
       </Box>
       <TablePagination
         component="div"
+        sx={PAGINATION_SX}
         count={count}
         page={page}
         rowsPerPage={rowsPerPage}

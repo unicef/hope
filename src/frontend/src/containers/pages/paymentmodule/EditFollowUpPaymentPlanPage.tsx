@@ -8,7 +8,6 @@ import { EditPaymentPlanHeader } from '@components/paymentmodule/EditPaymentPlan
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { useSnackbar } from '@hooks/useSnackBar';
-import type { PaginatedTargetPopulationListList } from '@restgenerated/models/PaginatedTargetPopulationListList';
 import type { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 import { RestService } from '@restgenerated/services/RestService';
 import { useMutation, useQuery } from '@tanstack/react-query';
@@ -68,29 +67,8 @@ const EditFollowUpPaymentPlanPage = (): ReactElement => {
         }),
     });
 
-  const {
-    data: allTargetPopulationsData,
-    isLoading: loadingTargetPopulations,
-  } = useQuery<PaginatedTargetPopulationListList>({
-    queryKey: restQueryKey(
-      RestService.restBusinessAreasProgramsTargetPopulationsList,
-      {
-        businessAreaSlug: businessArea,
-        programCode: programId,
-        status: 'DRAFT',
-      },
-    ),
-    queryFn: () => {
-      return RestService.restBusinessAreasProgramsTargetPopulationsList({
-        businessAreaSlug: businessArea,
-        programCode: programId,
-        status: 'DRAFT',
-      });
-    },
-  });
-  if (loadingTargetPopulations || loadingPaymentPlan)
-    return <LoadingComponent />;
-  if (!allTargetPopulationsData || !paymentPlan) return null;
+  if (loadingPaymentPlan) return <LoadingComponent />;
+  if (!paymentPlan) return null;
   if (permissions === null) return null;
   if (!hasPermissions(PERMISSIONS.PM_CREATE, permissions))
     return <PermissionDenied permission={PERMISSIONS.PM_CREATE} />;
@@ -167,8 +145,7 @@ const EditFollowUpPaymentPlanPage = (): ReactElement => {
             loadingUpdate={loadingUpdate}
           />
           <PaymentPlanTargeting
-            allTargetPopulations={allTargetPopulationsData}
-            loading={loadingTargetPopulations}
+            targetPopulations={[{ id: paymentPlan.id, name: paymentPlan.name }]}
             disabled
           />
           <PaymentPlanParameters paymentPlan={paymentPlan} values={values} />

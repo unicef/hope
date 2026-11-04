@@ -3,11 +3,11 @@ from datetime import date
 import pytest
 
 from e2e.new_selenium.conftest import grant_permission
-from extras.test_utils.selenium import HopeTestBrowser
+from extras.test_utils.selenium import HopeTestBrowser, ui_date
 from hope.apps.account.permissions import Permissions
 from hope.models import BusinessArea, Program, User
 
-from .conftest import days_from_today
+from .conftest import days_from_today, details_url
 
 pytestmark = pytest.mark.django_db()
 
@@ -31,16 +31,8 @@ CYCLE_PERMISSIONS = (
 )
 
 
-def details_url(program: Program) -> str:
-    return f"/{program.business_area.slug}/programs/{program.code}/details/{program.code}"
-
-
 def row_cell(index: int, cell: str) -> str:
     return f'{ROW}:nth-of-type({index}) td[data-cy="program-cycle-{cell}"]'
-
-
-def shown(day: date) -> str:
-    return day.strftime("%-d %b %Y")
 
 
 def open_programme(browser: HopeTestBrowser, program: Program, rows: int) -> None:
@@ -74,8 +66,8 @@ def test_add_programme_cycle(
         browser.wait_for_element_visible(f"{ROW}:nth-of-type(2)")
         browser.assert_text("123", row_cell(2, "title"))
         browser.assert_text("Draft", row_cell(2, "status"))
-        browser.assert_text(shown(start), row_cell(2, "start-date"))
-        browser.assert_text(shown(end), row_cell(2, "end-date"))
+        browser.assert_text(ui_date(start), row_cell(2, "start-date"))
+        browser.assert_text(ui_date(end), row_cell(2, "end-date"))
         cycle = active_programme_with_finished_cycle.cycles.get(title="123")
         assert (cycle.start_date, cycle.end_date) == (start, end)
 
@@ -97,7 +89,7 @@ def test_add_programme_cycle_without_end_date(
         browser.wait_for_element_visible(f"{ROW}:nth-of-type(2)")
         browser.assert_text("Test %$ What?", row_cell(2, "title"))
         browser.assert_text("Draft", row_cell(2, "status"))
-        browser.assert_text(shown(start), row_cell(2, "start-date"))
+        browser.assert_text(ui_date(start), row_cell(2, "start-date"))
         browser.assert_exact_text("-", row_cell(2, "end-date"))
         cycle = active_programme_with_finished_cycle.cycles.get(title="Test %$ What?")
         assert (cycle.start_date, cycle.end_date) == (start, None)
@@ -123,10 +115,10 @@ def test_add_programme_cycle_sets_end_date_of_open_ended_cycle_first(
         browser.click(CREATE_CYCLE)
 
         browser.wait_for_element_visible(f"{ROW}:nth-of-type(2)")
-        browser.assert_text(shown(today), row_cell(1, "end-date"))
+        browser.assert_text(ui_date(today), row_cell(1, "end-date"))
         browser.assert_text("Test Title", row_cell(2, "title"))
-        browser.assert_text(shown(tomorrow), row_cell(2, "start-date"))
-        browser.assert_text(shown(tomorrow), row_cell(2, "end-date"))
+        browser.assert_text(ui_date(tomorrow), row_cell(2, "start-date"))
+        browser.assert_text(ui_date(tomorrow), row_cell(2, "end-date"))
         assert programme_with_open_ended_cycle.cycles.get(title="Default Programme Cycle").end_date == today
 
 
@@ -147,7 +139,7 @@ def test_cancel_after_setting_end_date_keeps_the_end_date(
         browser.click(f'{DIALOG} button[data-cy="button-cancel"]')
 
         browser.wait_for_element_absent(DIALOG)
-        browser.wait_for_text(shown(today), row_cell(1, "end-date"))
+        browser.wait_for_text(ui_date(today), row_cell(1, "end-date"))
         browser.assert_element_absent(f"{ROW}:nth-of-type(2)")
         assert programme_with_open_ended_cycle.cycles.get().end_date == today
 
@@ -220,8 +212,8 @@ def test_edit_programme_cycle(
         browser.click(SAVE_CYCLE)
 
         browser.wait_for_text("Edited title check", row_cell(1, "title"))
-        browser.assert_text(shown(start), row_cell(1, "start-date"))
-        browser.assert_text(shown(end), row_cell(1, "end-date"))
+        browser.assert_text(ui_date(start), row_cell(1, "start-date"))
+        browser.assert_text(ui_date(end), row_cell(1, "end-date"))
         cycle = programme_with_draft_cycle.cycles.get()
         assert (cycle.title, cycle.start_date, cycle.end_date) == ("Edited title check", start, end)
 

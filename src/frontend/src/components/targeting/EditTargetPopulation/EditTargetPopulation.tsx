@@ -61,6 +61,11 @@ const EditTargetPopulation = ({
     useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
   const permissions = usePermissions();
+  // Without the list permission the cycle stays fixed to the target population's own.
+  const canListCycles = hasPermissions(
+    PERMISSIONS.PM_PROGRAMME_CYCLE_VIEW_LIST,
+    permissions,
+  );
   const [createGroupModalOpen, setCreateGroupModalOpen] = useState(false);
   const [modalCycle, setModalCycle] = useState<{ value: string; name: string }>(
     {
@@ -308,6 +313,8 @@ const EditTargetPopulation = ({
                   // @ts-ignore
                   error={errors.programCycleId?.value}
                   data-cy="program-cycle-autocomplete"
+                  enabled={canListCycles}
+                  disabled={!canListCycles}
                 />
               </Grid>
               <Grid size={responsiveGridSize('half')}>

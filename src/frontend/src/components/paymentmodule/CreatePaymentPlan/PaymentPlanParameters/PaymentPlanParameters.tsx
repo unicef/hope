@@ -15,12 +15,14 @@ interface PaymentPlanParametersProps {
   values;
   paymentPlan?;
   cycles?: Array<{ id: string; title: string | null }>;
+  cycleDisabled?: boolean;
 }
 
 export const PaymentPlanParameters = ({
   values,
   paymentPlan,
   cycles,
+  cycleDisabled = false,
 }: PaymentPlanParametersProps): ReactElement => {
   const { t } = useTranslation();
   return (
@@ -43,6 +45,7 @@ export const PaymentPlanParameters = ({
               }))}
               component={FormikSelectField}
               disableClearable
+              disabled={cycleDisabled}
               data-cy="input-program-cycle"
             />
           </ResponsiveGrid>

@@ -4,3 +4,4 @@ export const DATE_FORMAT = 'd MMM yyyy';
 export const DATE_FORMAT_LONG = 'd MMM yyyy h:mm a';
 export const AUTO_LOGOUT_MINUTES = 15;
 export const AUTO_LOGOUT_MILLIS = 1000 * 60 * AUTO_LOGOUT_MINUTES;
+export const COMMENT_MAX_LENGTH = 2000;

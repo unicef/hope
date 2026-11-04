@@ -40,7 +40,7 @@ export const FiltersSection: FC<FiltersSectionProps> = ({
 
   const filtersComponent = (
     <>
-      <Collapse in={expanded}>
+      <Collapse in={expanded || !hasHideShowButton}>
         <Box
           sx={{
             display: 'flex',
