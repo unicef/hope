@@ -22,6 +22,7 @@ import { PaymentPlansTable } from '@containers/pages/paymentmodule/ProgramCycle/
 import { PaymentPlanGroupDetailsHeader } from '@containers/pages/paymentmodule/Groups/PaymentPlanGroupDetailsHeader';
 import { UniversalActivityLogTable } from '@containers/tables/UniversalActivityLogTable';
 import { batchPlanTypeLabel, isGroupBackgroundActionBusy } from './utils';
+import { ResponsiveGrid, ResponsiveGridContainer, responsiveValue } from 'src/responsive';
 
 const initialFilter = {
   search: '',
@@ -95,13 +96,13 @@ const PaymentPlanGroupDetailsPage = (): ReactElement => {
             <Typography variant="h6">{t('Details')}</Typography>
           </Title>
           <OverviewContainer>
-            <Grid container spacing={6}>
-              <Grid size={{ xs: 3 }}>
+            <ResponsiveGridContainer spacing={6}>
+              <ResponsiveGrid size="quarter" mobileSize="half">
                 <LabelizedField label={t('Name')}>
                   {group?.name ?? '-'}
                 </LabelizedField>
-              </Grid>
-              <Grid size={{ xs: 3 }}>
+              </ResponsiveGrid>
+              <ResponsiveGrid size="quarter" mobileSize="half">
                 <LabelizedField label={t('Cycle')}>
                   {group?.cycle ? (
                     <BlackLink
@@ -113,23 +114,23 @@ const PaymentPlanGroupDetailsPage = (): ReactElement => {
                     '-'
                   )}
                 </LabelizedField>
-              </Grid>
-              <Grid size={{ xs: 3 }}>
+              </ResponsiveGrid>
+              <ResponsiveGrid size="quarter" mobileSize="half">
                 <LabelizedField label={t('Total Entitled (USD)')}>
                   {group?.totalEntitledQuantityUsd ?? '-'}
                 </LabelizedField>
-              </Grid>
-              <Grid size={{ xs: 3 }}>
+              </ResponsiveGrid>
+              <ResponsiveGrid size="quarter" mobileSize="half">
                 <LabelizedField label={t('Total Delivered (USD)')}>
                   {group?.totalDeliveredQuantityUsd ?? '-'}
                 </LabelizedField>
-              </Grid>
-              <Grid size={{ xs: 3 }}>
+              </ResponsiveGrid>
+              <ResponsiveGrid size="quarter" mobileSize="half">
                 <LabelizedField label={t('Total Undelivered (USD)')}>
                   {group?.totalUndeliveredQuantityUsd ?? '-'}
                 </LabelizedField>
-              </Grid>
-            </Grid>
+              </ResponsiveGrid>
+            </ResponsiveGridContainer>
           </OverviewContainer>
         </ContainerColumnWithBorder>
       </Grid>
@@ -144,6 +145,7 @@ const PaymentPlanGroupDetailsPage = (): ReactElement => {
                 key={batch.exportTag}
                 sx={{
                   display: 'flex',
+                  flexWrap: responsiveValue('wrap', 'nowrap'),
                   alignItems: 'center',
                   gap: 2,
                   py: 1,

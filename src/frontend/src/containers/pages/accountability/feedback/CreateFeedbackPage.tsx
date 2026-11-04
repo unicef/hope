@@ -14,15 +14,8 @@ import { LookUpHouseholdIndividualSelection } from '@components/grievances/LookU
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { useSnackbar } from '@hooks/useSnackBar';
-import {
-  Button,
-  FormHelperText,
-  Step,
-  StepLabel,
-  Stepper,
-  Typography,
-} from '@mui/material';
-import { Box, Grid } from '@mui/system';
+import { Button, FormHelperText, Typography } from '@mui/material';
+import { Box } from '@mui/system';
 import { RestService } from '@restgenerated/index';
 import type { PaginatedProgramListList } from '@restgenerated/models/PaginatedProgramListList';
 import { FormikAdminAreaAutocomplete } from '@shared/Formik/FormikAdminAreaAutocomplete';
@@ -45,6 +38,12 @@ import styled from 'styled-components';
 import * as Yup from 'yup';
 import { Admin2SyncEffect } from './Admin2SyncEffect';
 import { ProgramIdSyncEffect } from './ProgramIdSyncEffect';
+import { CreateGrievanceStepper } from '@components/grievances/CreateGrievance/CreateGrievanceStepper/CreateGrievanceStepper';
+import {
+  ResponsiveGrid,
+  ResponsiveGridContainer,
+  responsiveValue,
+} from 'src/responsive';
 
 const FEEDBACK_ISSUE_TYPE = {
   POSITIVE_FEEDBACK: 'POSITIVE_FEEDBACK',
@@ -54,19 +53,20 @@ const FEEDBACK_ISSUE_TYPE = {
 const BoxPadding = styled.div`
   padding: 15px 0;
 `;
-const NoRootPadding = styled.div`
-  .MuiStepper-root {
-    padding: 0 !important;
-  }
-`;
-const InnerBoxPadding = styled.div`
-  .MuiPaper-root {
-    padding: 32px 20px;
-  }
-`;
-const NewTicket = styled.div`
-  padding: 20px;
-`;
+function InnerBoxPadding({ children }: { children: ReactNode }): ReactElement {
+  return (
+    <Box
+      sx={{
+        '& .MuiPaper-root': { padding: responsiveValue('16px', '32px 20px') },
+      }}
+    >
+      {children}
+    </Box>
+  );
+}
+function NewTicket({ children }: { children: ReactNode }): ReactElement {
+  return <Box sx={{ padding: responsiveValue('8px', '20px') }}>{children}</Box>;
+}
 const BoxWithBorderBottom = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
   padding: 15px 0;
@@ -275,34 +275,23 @@ function CreateFeedbackPage(): ReactElement {
                   : null
               }
             />
-            <Grid container spacing={3}>
-              <Grid size={{ xs: 12 }}>
+            <ResponsiveGridContainer spacing={3}>
+              <ResponsiveGrid size="full">
                 <NewTicket>
                   <InnerBoxPadding>
                     <ContainerColumnWithBorder>
-                      <NoRootPadding>
-                        <Stepper activeStep={activeStep}>
-                          {steps.map((label) => {
-                            const stepProps: { completed?: boolean } = {};
-                            const labelProps: {
-                              optional?: ReactNode;
-                            } = {};
-                            return (
-                              <Step key={label} {...stepProps}>
-                                <StepLabel {...labelProps}>{label}</StepLabel>
-                              </Step>
-                            );
-                          })}
-                        </Stepper>
-                      </NoRootPadding>
+                      <CreateGrievanceStepper
+                        activeStep={activeStep}
+                        steps={steps}
+                      />
                       {activeStep === FeedbackSteps.Selection && (
-                        <Grid container spacing={3}>
-                          <Grid size={{ xs: 6 }}>
+                        <ResponsiveGridContainer spacing={3}>
+                          <ResponsiveGrid size="half">
                             <LabelizedField label={t('Category')}>
                               {t('Feedback')}
                             </LabelizedField>
-                          </Grid>
-                          <Grid size={{ xs: 6 }}>
+                          </ResponsiveGrid>
+                          <ResponsiveGrid size="half">
                             <Field
                               name="issueType"
                               label="Issue Type"
@@ -312,8 +301,8 @@ function CreateFeedbackPage(): ReactElement {
                               component={FormikSelectField}
                               data-cy="input-issue-type"
                             />
-                          </Grid>
-                        </Grid>
+                          </ResponsiveGrid>
+                        </ResponsiveGridContainer>
                       )}
                       {activeStep === FeedbackSteps.Lookup && (
                         <BoxWithBorders>
@@ -402,22 +391,22 @@ function CreateFeedbackPage(): ReactElement {
                                 p: 6,
                               }}
                             >
-                              <Grid container spacing={6}>
-                                <Grid size={{ xs: 6 }}>
+                              <ResponsiveGridContainer spacing={6}>
+                                <ResponsiveGrid size="half">
                                   <LabelizedField label={t('Category')}>
                                     {t('Feedback')}
                                   </LabelizedField>
-                                </Grid>
-                                <Grid size={{ xs: 6 }}>
+                                </ResponsiveGrid>
+                                <ResponsiveGrid size="half">
                                   <LabelizedField label={t('Issue Type')}>
                                     {values.issueType ===
                                     FEEDBACK_ISSUE_TYPE.POSITIVE_FEEDBACK
                                       ? 'Positive Feedback'
                                       : 'Negative Feedback'}
                                   </LabelizedField>
-                                </Grid>
+                                </ResponsiveGrid>
                                 {!isSocialDctType && (
-                                  <Grid size={{ xs: 6 }}>
+                                  <ResponsiveGrid size="half">
                                     <LabelizedField
                                       label={t(
                                         `${beneficiaryGroup?.groupLabel}`,
@@ -425,9 +414,9 @@ function CreateFeedbackPage(): ReactElement {
                                     >
                                       {values.selectedHousehold?.unicefId}
                                     </LabelizedField>
-                                  </Grid>
+                                  </ResponsiveGrid>
                                 )}
-                                <Grid size={{ xs: 6 }}>
+                                <ResponsiveGrid size="half">
                                   <LabelizedField
                                     label={t(
                                       `${beneficiaryGroup?.memberLabel}`,
@@ -435,14 +424,14 @@ function CreateFeedbackPage(): ReactElement {
                                   >
                                     {values.selectedIndividual?.unicefId}
                                   </LabelizedField>
-                                </Grid>
-                              </Grid>
+                                </ResponsiveGrid>
+                              </ResponsiveGridContainer>
                             </Box>
                           </OverviewContainer>
                           <BoxWithBorderBottom />
                           <BoxPadding />
-                          <Grid container spacing={3}>
-                            <Grid size={{ xs: 12 }}>
+                          <ResponsiveGridContainer spacing={3}>
+                            <ResponsiveGrid size="full">
                               <Field
                                 name="description"
                                 multiline
@@ -453,8 +442,8 @@ function CreateFeedbackPage(): ReactElement {
                                 component={FormikTextField}
                                 data-cy="input-description"
                               />
-                            </Grid>
-                            <Grid size={{ xs: 12 }}>
+                            </ResponsiveGrid>
+                            <ResponsiveGrid size="full">
                               <Field
                                 name="comments"
                                 multiline
@@ -464,8 +453,8 @@ function CreateFeedbackPage(): ReactElement {
                                 component={FormikTextField}
                                 data-cy="input-comments"
                               />
-                            </Grid>
-                            <Grid size={{ xs: 6 }}>
+                            </ResponsiveGrid>
+                            <ResponsiveGrid size="half">
                               <Field
                                 name="admin2"
                                 variant="outlined"
@@ -478,8 +467,8 @@ function CreateFeedbackPage(): ReactElement {
                                     {errors.admin2}
                                   </FormHelperText>
                                 )}
-                            </Grid>
-                            <Grid size={{ xs: 6 }}>
+                            </ResponsiveGrid>
+                            <ResponsiveGrid size="half">
                               <Field
                                 name="area"
                                 fullWidth
@@ -494,8 +483,8 @@ function CreateFeedbackPage(): ReactElement {
                                     {errors.area}
                                   </FormHelperText>
                                 )}
-                            </Grid>
-                            <Grid size={{ xs: 6 }}>
+                            </ResponsiveGrid>
+                            <ResponsiveGrid size="half">
                               <Field
                                 name="language"
                                 multiline
@@ -511,8 +500,8 @@ function CreateFeedbackPage(): ReactElement {
                                     {errors.language}
                                   </FormHelperText>
                                 )}
-                            </Grid>
-                            <Grid size={{ xs: 3 }}>
+                            </ResponsiveGrid>
+                            <ResponsiveGrid size="quarter">
                               <Field
                                 name="programId"
                                 label={t('Programme Name')}
@@ -528,8 +517,8 @@ function CreateFeedbackPage(): ReactElement {
                                     {errors.programId}
                                   </FormHelperText>
                                 )}
-                            </Grid>
-                          </Grid>
+                            </ResponsiveGrid>
+                          </ResponsiveGridContainer>
                         </BoxPadding>
                       )}
                       {errors.verificationRequired ? (
@@ -586,8 +575,8 @@ function CreateFeedbackPage(): ReactElement {
                     </ContainerColumnWithBorder>
                   </InnerBoxPadding>
                 </NewTicket>
-              </Grid>
-            </Grid>
+              </ResponsiveGrid>
+            </ResponsiveGridContainer>
           </>
         );
       }}

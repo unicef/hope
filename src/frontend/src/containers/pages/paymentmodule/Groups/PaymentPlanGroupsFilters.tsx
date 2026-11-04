@@ -5,11 +5,12 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { RestService } from '@restgenerated/services/RestService';
 import { restQueryKey } from '@utils/queryKeys';
 import { createHandleApplyFilterChange } from '@utils/utils';
-import { Grid, MenuItem } from '@mui/material';
+import { MenuItem } from '@mui/material';
 import { useQuery } from '@tanstack/react-query';
 import type { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { ResponsiveGrid, ResponsiveGridContainer } from 'src/responsive';
 
 interface PaymentPlanGroupsFiltersProps {
   filter;
@@ -64,14 +65,13 @@ export const PaymentPlanGroupsFilters = ({
       clearHandler={clearFilter}
       applyHandler={applyFilterChanges}
     >
-      <Grid
-        container
+      <ResponsiveGridContainer
         spacing={3}
         sx={{
           alignItems: 'flex-end',
         }}
       >
-        <Grid size={4}>
+        <ResponsiveGrid size="third">
           <SearchTextField
             label={t('Search')}
             value={filter.search}
@@ -79,8 +79,8 @@ export const PaymentPlanGroupsFilters = ({
             onChange={(e) => handleFilterChange('search', e.target.value)}
             data-cy="filters-search"
           />
-        </Grid>
-        <Grid size={4}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="third">
           <SelectFilter
             onChange={(e) => handleFilterChange('cycle', e.target.value)}
             variant="outlined"
@@ -95,8 +95,8 @@ export const PaymentPlanGroupsFilters = ({
               </MenuItem>
             ))}
           </SelectFilter>
-        </Grid>
-      </Grid>
+        </ResponsiveGrid>
+      </ResponsiveGridContainer>
     </FiltersSection>
   );
 };

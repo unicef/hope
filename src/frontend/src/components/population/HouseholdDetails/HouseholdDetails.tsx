@@ -2,13 +2,17 @@ import { Overview } from '@components/payments/Overview';
 import { ContentLink } from '@core/ContentLink';
 import { LabelizedField } from '@core/LabelizedField';
 import { Title } from '@core/Title';
-import type { Theme } from '@mui/material';
 import { Box, Grid, Typography } from '@mui/material';
 import type { GrievanceChoices } from '@restgenerated/models/GrievanceChoices';
 import type { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
 import { displayNameWithLatin, formatCurrencyWithSymbol } from '@utils/utils';
 import type { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
+import {
+  ResponsiveGrid,
+  ResponsiveGridContainer,
+  SECTION_PADDING,
+} from 'src/responsive';
 import styled from 'styled-components';
 import { useProgramContext } from '../../../programContext';
 import {
@@ -17,13 +21,11 @@ import {
 } from '../../rdi/details/RegistrationDetails/RegistrationDetails';
 import { LinkedGrievancesModal } from '../LinkedGrievancesModal/LinkedGrievancesModal';
 
-const Container = styled.div<{ theme?: Theme }>`
+const Container = styled(Box)`
   display: flex;
   flex: 1;
   width: 100%;
   background-color: #fff;
-  padding: ${({ theme }) => theme.spacing(8)}
-    ${({ theme }) => theme.spacing(11)};
   flex-direction: column;
   align-items: center;
   border-color: #b1b1b5;
@@ -53,22 +55,22 @@ export function HouseholdDetails({
 
   return (
     <>
-      <Container>
+      <Container sx={{ padding: SECTION_PADDING }}>
         <Title>
           <Typography variant="h6">{t('Details')}</Typography>
         </Title>
-        <Grid container spacing={3}>
-          <Grid size={3}>
+        <ResponsiveGridContainer spacing={3}>
+          <ResponsiveGrid size="quarter" mobileSize="half">
             <LabelizedField label={`${beneficiaryGroup?.groupLabel} Size`}>
               {household?.kabSize ?? '-'}
             </LabelizedField>
-          </Grid>
-          <Grid size={3}>
+          </ResponsiveGrid>
+          <ResponsiveGrid size="quarter" mobileSize="half">
             <LabelizedField label={t('Residence Status')}>
               {household?.residenceStatus}
             </LabelizedField>
-          </Grid>
-          <Grid size={6}>
+          </ResponsiveGrid>
+          <ResponsiveGrid size="half">
             <LabelizedField label={`Head of ${beneficiaryGroup?.groupLabel}`}>
               <ContentLink
                 href={`/${baseUrl}/population/individuals/${household?.headOfHousehold?.id}`}
@@ -76,94 +78,94 @@ export function HouseholdDetails({
                 {displayNameWithLatin(household?.headOfHousehold, 'fullName')}
               </ContentLink>
             </LabelizedField>
-          </Grid>
-          <Grid size={3}>
+          </ResponsiveGrid>
+          <ResponsiveGrid size="quarter" mobileSize="half">
             <LabelizedField
               label={t('FEMALE CHILD HEADED ' + beneficiaryGroup?.groupLabel)}
             >
               {household?.fchildHoh ? t('Yes') : t('No')}
             </LabelizedField>
-          </Grid>
-          <Grid size={3}>
+          </ResponsiveGrid>
+          <ResponsiveGrid size="quarter" mobileSize="half">
             <LabelizedField
               label={t('CHILD HEADED ' + beneficiaryGroup?.groupLabel)}
             >
               {household?.childHoh ? t('Yes') : t('No')}
             </LabelizedField>
-          </Grid>
-          <Grid size={3}>
+          </ResponsiveGrid>
+          <ResponsiveGrid size="quarter" mobileSize="half">
             <LabelizedField label={t('Country')}>
               {household?.country}
             </LabelizedField>
-          </Grid>
-          <Grid size={3}>
+          </ResponsiveGrid>
+          <ResponsiveGrid size="quarter" mobileSize="half">
             <LabelizedField label={t('Country of Origin')}>
               {household?.countryOrigin}
             </LabelizedField>
-          </Grid>
-          <Grid size={3}>
+          </ResponsiveGrid>
+          <ResponsiveGrid size="quarter" mobileSize="half">
             <LabelizedField label={t('Address')}>
               {household?.address}
             </LabelizedField>
-          </Grid>
-          <Grid size={3}>
+          </ResponsiveGrid>
+          <ResponsiveGrid size="quarter" mobileSize="half">
             <LabelizedField label={t('Village')}>
               {household?.village}
             </LabelizedField>
-          </Grid>
-          <Grid size={3}>
+          </ResponsiveGrid>
+          <ResponsiveGrid size="quarter" mobileSize="half">
             <LabelizedField label={t('Zip code')}>
               {household?.zipCode}
             </LabelizedField>
-          </Grid>
-          <Grid size={3}>
+          </ResponsiveGrid>
+          <ResponsiveGrid size="quarter" mobileSize="half">
             <LabelizedField label={t('Administrative Level 1')}>
               {household?.admin1?.name}
             </LabelizedField>
-          </Grid>
-          <Grid size={3}>
+          </ResponsiveGrid>
+          <ResponsiveGrid size="quarter" mobileSize="half">
             <LabelizedField label={t('Administrative Level 2')}>
               {household?.admin2?.name}
             </LabelizedField>
-          </Grid>
-          <Grid size={3}>
+          </ResponsiveGrid>
+          <ResponsiveGrid size="quarter" mobileSize="half">
             <LabelizedField label={t('Administrative Level 3')}>
               {household?.admin3?.name}
             </LabelizedField>
-          </Grid>
-          <Grid size={3}>
+          </ResponsiveGrid>
+          <ResponsiveGrid size="quarter" mobileSize="half">
             <LabelizedField label={t('Administrative Level 4')}>
               {household?.admin4?.name}
             </LabelizedField>
-          </Grid>
-          <Grid size={6}>
+          </ResponsiveGrid>
+          <ResponsiveGrid size="half">
             <LabelizedField label={t('Geolocation')}>
               {household?.geopoint
                 ? `${household?.geopoint?.[0]}, ${household?.geopoint?.[1]}`
                 : '-'}
             </LabelizedField>
-          </Grid>
-          <Grid size={3}>
+          </ResponsiveGrid>
+          <ResponsiveGrid size="quarter" mobileSize="half">
             <LabelizedField label={t('UNHCR CASE ID')}>
               {household?.unhcrId}
             </LabelizedField>
-          </Grid>
-          <Grid size={3}>
+          </ResponsiveGrid>
+          <ResponsiveGrid size="quarter" mobileSize="half">
             <LabelizedField label={t('Facility Name')}>
               {household?.facilityName}
             </LabelizedField>
-          </Grid>
-          <Grid size={3}>
+          </ResponsiveGrid>
+          <ResponsiveGrid size="quarter" mobileSize="half">
             <LabelizedField label={t('LENGTH OF TIME SINCE ARRIVAL')}>
               {household?.flexFields?.months_displaced_h_f}
             </LabelizedField>
-          </Grid>
-          <Grid size={3}>
+          </ResponsiveGrid>
+          <ResponsiveGrid size="quarter" mobileSize="half">
             <LabelizedField label={t('NUMBER OF TIMES DISPLACED')}>
               {household?.flexFields?.number_times_displaced_h_f}
             </LabelizedField>
-          </Grid>
-          <Grid size={3}>
+          </ResponsiveGrid>
+          <ResponsiveGrid size="quarter" mobileSize="half">
             <LabelizedField
               label={t(
                 'IS THIS A RETURNEE ' + beneficiaryGroup?.groupLabel + '?',
@@ -171,8 +173,8 @@ export function HouseholdDetails({
             >
               {household?.returnee ? t('Yes') : t('No')}
             </LabelizedField>
-          </Grid>
-          <Grid size={3}>
+          </ResponsiveGrid>
+          <ResponsiveGrid size="quarter" mobileSize="half">
             {household?.unicefId && (
               <LinkedGrievancesModal
                 household={household}
@@ -181,20 +183,20 @@ export function HouseholdDetails({
                 grievancesChoices={grievancesChoices}
               />
             )}
-          </Grid>
-          <Grid size={3}>
+          </ResponsiveGrid>
+          <ResponsiveGrid size="quarter" mobileSize="half">
             <LabelizedField label={t('Data Collecting Type')}>
               {selectedProgram?.dataCollectingType?.label}
             </LabelizedField>
-          </Grid>
-        </Grid>
+          </ResponsiveGrid>
+        </ResponsiveGridContainer>
       </Container>
       <Overview>
         <Title>
           <Typography variant="h6">{t('Benefits')}</Typography>
         </Title>
         <Grid container>
-          <Grid size={3}>
+          <ResponsiveGrid size="quarter" mobileSize="half">
             <LabelizedField label={t('Cash received')}>
               {household?.deliveredQuantities?.length ? (
                 <Box
@@ -232,8 +234,8 @@ export function HouseholdDetails({
                 <>-</>
               )}
             </LabelizedField>
-          </Grid>
-          <Grid size={3}>
+          </ResponsiveGrid>
+          <ResponsiveGrid size="quarter" mobileSize="half">
             <BigValueContainer>
               <LabelizedField label={t('Total Cash Received')}>
                 <BigValue>
@@ -244,7 +246,7 @@ export function HouseholdDetails({
                 </BigValue>
               </LabelizedField>
             </BigValueContainer>
-          </Grid>
+          </ResponsiveGrid>
         </Grid>
       </Overview>
     </>

@@ -4,12 +4,13 @@ import { ButtonTooltip } from '@core/ButtonTooltip';
 import { DividerLine } from '@core/DividerLine';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import AddIcon from '@mui/icons-material/Add';
-import { Box, Button, Grid } from '@mui/material';
+import { Box, Button } from '@mui/material';
 import { FormikSelectField } from '@shared/Formik/FormikSelectField';
 import { Field, FieldArray } from 'formik';
 import type { FC } from 'react';
 import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
+import { ResponsiveGrid } from 'src/responsive';
 import { Link } from 'react-router-dom';
 import { ProgramPartnerCard } from '../CreateProgram/ProgramPartnerCard';
 
@@ -78,7 +79,7 @@ export const PartnersStep: FC<PartnersStepProps> = ({
           mt: 2,
         }}
       >
-        <Grid size={{ xs: 6 }}>
+        <ResponsiveGrid size="half">
           <Field
             name="partnerAccess"
             label={t('Who should have access to the program?')}
@@ -88,7 +89,7 @@ export const PartnersStep: FC<PartnersStepProps> = ({
             required
             disableClearable
           />
-        </Grid>
+        </ResponsiveGrid>
       </Box>
       <>
         <DividerLine />

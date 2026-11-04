@@ -1,7 +1,7 @@
 import { LabelizedField } from '@core/LabelizedField';
 import { Title } from '@core/Title';
 import { UniversalMoment } from '@core/UniversalMoment';
-import { Box, Grid, Typography } from '@mui/material';
+import { Box, Typography } from '@mui/material';
 import { DisabilityEnum } from '@restgenerated/models/DisabilityEnum';
 import type { IndividualDetail } from '@restgenerated/models/IndividualDetail';
 import {
@@ -14,6 +14,7 @@ import {
 } from '@utils/utils';
 import type { ReactElement, ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
+import { ResponsiveGrid, ResponsiveGridContainer } from 'src/responsive';
 import styled from 'styled-components';
 import { useProgramContext } from '../../../programContext';
 import { DocumentPopulationPhotoModal } from '../../population/DocumentPopulationPhotoModal';
@@ -63,7 +64,7 @@ export const PeopleBioData = ({
   );
 
   const mappedIndividualDocuments = individual?.documents?.map((doc) => (
-    <Grid size={{ xs: 3 }} key={doc.id}>
+    <ResponsiveGrid size="quarter" key={doc.id}>
       <Box
         sx={{
           flexDirection: 'column',
@@ -88,11 +89,11 @@ export const PeopleBioData = ({
         </Box>
         <LabelizedField label="issued">{doc.country?.name}</LabelizedField>
       </Box>
-    </Grid>
+    </ResponsiveGrid>
   ));
 
   const mappedIdentities = individual?.identities?.map((item) => (
-    <Grid size={{ xs: 3 }} key={item.id}>
+    <ResponsiveGrid size="quarter" key={item.id}>
       <Box
         sx={{
           flexDirection: 'column',
@@ -109,7 +110,7 @@ export const PeopleBioData = ({
         </Box>
         <LabelizedField label="issued">{item.country.name}</LabelizedField>
       </Box>
-    </Grid>
+    </ResponsiveGrid>
   ));
 
   const renderDelegate = (): ReactNode | null => {
@@ -120,10 +121,10 @@ export const PeopleBioData = ({
 
     return (
       <>
-        <Grid size={{ xs: 12 }}>
+        <ResponsiveGrid size="full">
           <BorderBox />
-        </Grid>
-        <Grid size={{ xs: 3 }}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="quarter" mobileSize="half">
           <LabelizedField label={t('Delegate')}>
             {delegate?.unicefId ? (
               <BlackLink to={`/${baseUrl}/population/people/${delegate.id}`}>
@@ -133,7 +134,7 @@ export const PeopleBioData = ({
               '-'
             )}
           </LabelizedField>
-        </Grid>
+        </ResponsiveGrid>
       </>
     );
   };
@@ -153,25 +154,25 @@ export const PeopleBioData = ({
 
     return (
       <>
-        <Grid size={{ xs: 12 }}>
+        <ResponsiveGrid size="full">
           <BorderBox />
-        </Grid>
-        <Grid size={{ xs: 12 }}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="full">
           <Typography variant="h6">{t('Biometric Data')}</Typography>
-        </Grid>
-        <Grid size={{ xs: 3 }}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="quarter" mobileSize="half">
           <LabelizedField label={t('Biometric Trait')}>
             {individual.photo ? (
               <IndividualPhotoModal individual={individual} />
             ) : null}
           </LabelizedField>
-        </Grid>
-        <Grid size={{ xs: 3 }}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="quarter" mobileSize="half">
           <LabelizedField label={t('Biometric Check')}>
             {biometricCheckRun ? t('Was run') : t('Was not run')}
           </LabelizedField>
-        </Grid>
-        <Grid size={{ xs: 3 }}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="quarter" mobileSize="half">
           <LabelizedField label={t('Tickets related')}>
             {biometricTickets.length > 0
               ? biometricTickets.map((ticket) => {
@@ -188,7 +189,7 @@ export const PeopleBioData = ({
                 })
               : null}
           </LabelizedField>
-        </Grid>
+        </ResponsiveGrid>
       </>
     );
   };
@@ -198,73 +199,73 @@ export const PeopleBioData = ({
     const household = individual.household;
     peopleFromHouseholdData = (
       <>
-        <Grid size={{ xs: 3 }}>
+        <ResponsiveGrid size="quarter" mobileSize="half">
           <LabelizedField label={t('Residence Status')}>
             {household?.residenceStatus}
           </LabelizedField>
-        </Grid>
-        <Grid size={{ xs: 3 }}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="quarter" mobileSize="half">
           <LabelizedField label={t('Type')}>
             {individual.relationship === RelationshipEnum.HEAD
               ? t('Beneficiary')
               : t('Non-beneficiary')}{' '}
           </LabelizedField>
-        </Grid>
-        <Grid size={{ xs: 3 }}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="quarter" mobileSize="half">
           <LabelizedField label={t('Country')}>
             {household?.country}
           </LabelizedField>
-        </Grid>
-        <Grid size={{ xs: 3 }}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="quarter" mobileSize="half">
           <LabelizedField label={t('Country of Origin')}>
             {household.countryOrigin}
           </LabelizedField>
-        </Grid>
-        <Grid size={{ xs: 3 }}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="quarter" mobileSize="half">
           <LabelizedField label={t('Address')}>
             {household.address}
           </LabelizedField>
-        </Grid>
-        <Grid size={{ xs: 3 }}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="quarter" mobileSize="half">
           <LabelizedField label={t('Vilage')}>
             {household.village}
           </LabelizedField>
-        </Grid>
-        <Grid size={{ xs: 3 }}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="quarter" mobileSize="half">
           <LabelizedField label={t('Zip Code')}>
             {household.zipCode}
           </LabelizedField>
-        </Grid>
-        <Grid size={{ xs: 3 }}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="quarter" mobileSize="half">
           <LabelizedField label={t('Administrative Level 1')}>
             {household?.admin1?.name}
           </LabelizedField>
-        </Grid>
-        <Grid size={{ xs: 3 }}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="quarter" mobileSize="half">
           <LabelizedField label={t('Administrative Level 2')}>
             {household?.admin2?.name}
           </LabelizedField>
-        </Grid>
-        <Grid size={{ xs: 3 }}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="quarter" mobileSize="half">
           <LabelizedField label={t('Administrative Level 3')}>
             {household?.admin3?.name}
           </LabelizedField>
-        </Grid>
-        <Grid size={{ xs: 3 }}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="quarter" mobileSize="half">
           <LabelizedField label={t('Administrative Level 4')}>
             {household?.admin4?.name}
           </LabelizedField>
-        </Grid>
-        <Grid size={{ xs: 6 }}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="half">
           <LabelizedField label={t('Geolocation')}>
             {household?.geopoint}
           </LabelizedField>
-        </Grid>
-        <Grid size={{ xs: 3 }}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="quarter" mobileSize="half">
           <LabelizedField label={t('Data Collecting Type')}>
             {selectedProgram?.dataCollectingType?.label}
           </LabelizedField>
-        </Grid>
+        </ResponsiveGrid>
       </>
     );
   }
@@ -274,153 +275,177 @@ export const PeopleBioData = ({
       <Title>
         <Typography variant="h6">{t('Bio Data')}</Typography>
       </Title>
-      <Grid container spacing={6}>
-        <Grid size={{ xs: 3 }}>
+      <ResponsiveGridContainer spacing={6}>
+        <ResponsiveGrid size="quarter" mobileSize="half">
           <LabelizedField label={t('Full Name')}>
             {displayNameWithLatin(individual, 'fullName')}
           </LabelizedField>
-        </Grid>
-        <Grid size={{ xs: 3 }}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="quarter" mobileSize="half">
           <LabelizedField label={t('Given Name')}>
             {displayNameWithLatin(individual, 'givenName')}
           </LabelizedField>
-        </Grid>
-        <Grid size={{ xs: 3 }}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="quarter" mobileSize="half">
           <LabelizedField label={t('Middle Name')}>
             {displayNameWithLatin(individual, 'middleName')}
           </LabelizedField>
-        </Grid>
-        <Grid size={{ xs: 3 }}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="quarter" mobileSize="half">
           <LabelizedField label={t('Family Name')}>
             {displayNameWithLatin(individual, 'familyName')}
           </LabelizedField>
-        </Grid>
-        <Grid size={{ xs: 3 }}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="quarter" mobileSize="half">
           <LabelizedField label={t('Gender')}>
             {sexToCapitalize(individual?.sex)}
           </LabelizedField>
-        </Grid>
-        <Grid size={{ xs: 3 }}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="quarter" mobileSize="half">
           <LabelizedField label={t('Age')}>
             {formatAge(individual?.age)}
           </LabelizedField>
-        </Grid>
-        <Grid size={{ xs: 3 }}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="quarter" mobileSize="half">
           <LabelizedField label={t('Date of Birth')}>
             <UniversalMoment>{individual?.birthDate}</UniversalMoment>
           </LabelizedField>
-        </Grid>
-        <Grid size={{ xs: 3 }}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="quarter" mobileSize="half">
           <LabelizedField label={t('Estimated Date of Birth')}>
             {renderBoolean(individual?.estimatedBirthDate)}
           </LabelizedField>
-        </Grid>
-        <Grid size={{ xs: 3 }}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="quarter" mobileSize="half">
           <LabelizedField label={t('Marital Status')}>
             {maritalStatusChoicesDict[individual?.maritalStatus ?? '']}
           </LabelizedField>
-        </Grid>
-        <Grid size={{ xs: 3 }}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="quarter" mobileSize="half">
           <LabelizedField label={t('Work Status')}>
             {workStatusChoicesDict[individual?.workStatus ?? '']}
           </LabelizedField>
-        </Grid>
-        <Grid size={{ xs: 3 }}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="quarter" mobileSize="half">
           <LabelizedField label={t('Pregnant')}>
             {renderBoolean(individual?.pregnant)}
           </LabelizedField>
-        </Grid>
-        <Grid size={{ xs: 3 }}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="quarter" mobileSize="half">
           <LabelizedField label={t('Role')}>
             {roleChoicesDict[individual?.role ?? '']}
           </LabelizedField>
-        </Grid>
-        <Grid size={{ xs: 3 }}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="quarter" mobileSize="half">
           <LabelizedField label={t('Preferred language')}>
             {individual?.preferredLanguage}
           </LabelizedField>
-        </Grid>
+        </ResponsiveGrid>
         {peopleFromHouseholdData}
-        <Grid size={{ xs: 12 }}>
+        <ResponsiveGrid size="full">
           <BorderBox />
-        </Grid>
-        <Grid size={{ xs: 3 }}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="quarter" mobileSize="half">
           <LabelizedField label={t('Observed disabilities')}>
-            {observedDisabilityChoicesDict[individual?.observedDisability ?? '']}
+            {
+              observedDisabilityChoicesDict[
+                individual?.observedDisability ?? ''
+              ]
+            }
           </LabelizedField>
-        </Grid>
-        <Grid size={{ xs: 3 }}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="quarter" mobileSize="half">
           <LabelizedField label={t('Seeing disability severity')}>
-            {severityOfDisabilityChoicesDict[individual?.seeingDisability ?? '']}
+            {
+              severityOfDisabilityChoicesDict[
+                individual?.seeingDisability ?? ''
+              ]
+            }
           </LabelizedField>
-        </Grid>
-        <Grid size={{ xs: 3 }}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="quarter" mobileSize="half">
           <LabelizedField label={t('Hearing disability severity')}>
-            {severityOfDisabilityChoicesDict[individual?.hearingDisability ?? '']}
+            {
+              severityOfDisabilityChoicesDict[
+                individual?.hearingDisability ?? ''
+              ]
+            }
           </LabelizedField>
-        </Grid>
-        <Grid size={{ xs: 3 }}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="quarter" mobileSize="half">
           <LabelizedField label={t('Physical disability severity')}>
-            {severityOfDisabilityChoicesDict[individual?.physicalDisability ?? '']}
+            {
+              severityOfDisabilityChoicesDict[
+                individual?.physicalDisability ?? ''
+              ]
+            }
           </LabelizedField>
-        </Grid>
-        <Grid size={{ xs: 3 }}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="quarter" mobileSize="half">
           <LabelizedField
             label={t('Remembering or concentrating disability severity')}
           >
-            {severityOfDisabilityChoicesDict[individual?.memoryDisability ?? '']}
+            {
+              severityOfDisabilityChoicesDict[
+                individual?.memoryDisability ?? ''
+              ]
+            }
           </LabelizedField>
-        </Grid>
-        <Grid size={{ xs: 3 }}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="quarter" mobileSize="half">
           <LabelizedField label={t('Self-care disability severity')}>
-            {severityOfDisabilityChoicesDict[individual?.selfcareDisability ?? '']}
+            {
+              severityOfDisabilityChoicesDict[
+                individual?.selfcareDisability ?? ''
+              ]
+            }
           </LabelizedField>
-        </Grid>
-        <Grid size={{ xs: 3 }}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="quarter" mobileSize="half">
           <LabelizedField label={t('Communicating disability severity')}>
             {severityOfDisabilityChoicesDict[individual?.commsDisability ?? '']}
           </LabelizedField>
-        </Grid>
-        <Grid size={{ xs: 3 }}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="quarter" mobileSize="half">
           <LabelizedField label={t('Disability')}>
             {individual?.disability === DisabilityEnum.DISABLED
               ? 'Disabled'
               : 'Not Disabled'}
           </LabelizedField>
-        </Grid>
+        </ResponsiveGrid>
         {!mappedIndividualDocuments?.length &&
         !mappedIdentities?.length ? null : (
-          <Grid size={{ xs: 12 }}>
+          <ResponsiveGrid size="full">
             <BorderBox />
-          </Grid>
+          </ResponsiveGrid>
         )}
         {mappedIndividualDocuments}
         {mappedIdentities}
-        <Grid size={{ xs: 12 }}>
+        <ResponsiveGrid size="full">
           <BorderBox />
-        </Grid>
-        <Grid size={{ xs: 3 }}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="quarter" mobileSize="half">
           <LabelizedField label={t('Email')}>
             {individual?.email}
           </LabelizedField>
-        </Grid>
-        <Grid size={{ xs: 3 }}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="quarter" mobileSize="half">
           <LabelizedField label={t('Phone Number')}>
             {getPhoneNoLabel(individual?.phoneNo, individual?.phoneNoValid)}
           </LabelizedField>
-        </Grid>
-        <Grid size={{ xs: 3 }}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="quarter" mobileSize="half">
           <LabelizedField label={t('Alternative Phone Number')}>
             {getPhoneNoLabel(
               individual?.phoneNoAlternative,
               individual?.phoneNoAlternativeValid,
             )}
           </LabelizedField>
-        </Grid>
-        <Grid size={{ xs: 12 }}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="full">
           <BorderBox />
-        </Grid>
-        <Grid size={{ xs: 3 }}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="quarter" mobileSize="half">
           <LabelizedField
             label={t('Date of last screening against sanctions list')}
           >
@@ -428,8 +453,8 @@ export const PeopleBioData = ({
               {individual?.sanctionListLastCheck}
             </UniversalMoment>
           </LabelizedField>
-        </Grid>
-        <Grid size={{ xs: 6 }}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="half">
           {individual?.household?.unicefId && (
             <LinkedGrievancesModal
               household={individual?.household}
@@ -438,10 +463,10 @@ export const PeopleBioData = ({
               grievancesChoices={grievancesChoices}
             />
           )}
-        </Grid>
+        </ResponsiveGrid>
         {renderBiometricDataSection()}
         {renderDelegate()}
-      </Grid>
+      </ResponsiveGridContainer>
     </Overview>
   );
 };

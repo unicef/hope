@@ -1,4 +1,4 @@
-import { Box, Button, Grid, Typography } from '@mui/material';
+import { Box, Button, Typography } from '@mui/material';
 import capitalize from 'lodash/capitalize';
 import { useTranslation } from 'react-i18next';
 import { useSnackbar } from '@hooks/useSnackBar';
@@ -25,6 +25,7 @@ import { restQueryKey } from '@utils/queryKeys';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import camelCase from 'lodash/camelCase';
 import { PERMISSIONS } from 'src/config/permissions';
+import { ResponsiveGrid, ResponsiveGridContainer } from 'src/responsive';
 
 function AddIndividualGrievanceDetails({
   ticket,
@@ -120,16 +121,16 @@ function AddIndividualGrievanceDetails({
       }
       if (fieldAttribute?.type === 'IMAGE' || key === 'photo') {
         return (
-          <Grid key={key} size={{ xs: 6 }}>
+          <ResponsiveGrid key={key} size="half">
             <LabelizedField
               label={camelToUnderscore(key).replace(/_/g, ' ')}
               value={value ? <PhotoModal src={value as string} /> : '-'}
             />
-          </Grid>
+          </ResponsiveGrid>
         );
       }
       return (
-        <Grid key={key} size={{ xs: 6 }}>
+        <ResponsiveGrid key={key} size="half">
           <LabelizedField
             label={
               key === 'sex'
@@ -138,37 +139,37 @@ function AddIndividualGrievanceDetails({
             }
             value={<span>{textValue as ReactNode}</span>}
           />
-        </Grid>
+        </ResponsiveGrid>
       );
     }) || [];
 
   const flexFieldLabels =
     Object.entries((flexFields || {}) as Record<string, string | string[]>).map(
       ([key, value]) => (
-        <Grid key={key} size={{ xs: 6 }}>
+        <ResponsiveGrid key={key} size="half">
           <LabelizedField
             label={key.replaceAll('_i_f', '').replace(/_/g, ' ')}
             value={getFlexFieldTextValue(key, value, fieldsDict[key])}
           />
-        </Grid>
+        </ResponsiveGrid>
       ),
     ) || [];
   const documentLabels =
     documents?.map((item) => (
-      <Grid key={item?.country + item?.key} size={{ xs: 6 }}>
+      <ResponsiveGrid key={item?.country + item?.key} size="half">
         <LabelizedField
           label={item?.key?.replace(/_/g, ' ')}
           value={item.number}
         />
-      </Grid>
+      </ResponsiveGrid>
     )) || [];
   const identityLabels =
     identities?.map((item) => {
       const partner = item.partner || item.agency; // For backward compatibility
       return (
-        <Grid key={item.country + partner} size={{ xs: 6 }}>
+        <ResponsiveGrid key={item.country + partner} size="half">
           <LabelizedField label={partner} value={item.number} />
-        </Grid>
+        </ResponsiveGrid>
       );
     }) || [];
   const allLabels = [
@@ -231,9 +232,7 @@ function AddIndividualGrievanceDetails({
           )}
         </Box>
       </Title>
-      <Grid container spacing={6}>
-        {allLabels}
-      </Grid>
+      <ResponsiveGridContainer spacing={6}>{allLabels}</ResponsiveGridContainer>
     </ApproveBox>
   );
 }

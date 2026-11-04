@@ -3,6 +3,7 @@ import { Delete } from '@mui/icons-material';
 import styled from 'styled-components';
 import { useTranslation } from 'react-i18next';
 import type { ReactElement } from 'react';
+import { responsiveValue } from 'src/responsive';
 
 const StyledBox = styled(Box)`
   width: 100%;
@@ -41,10 +42,8 @@ export function ExcludedItem({
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
-        pl: 8,
-        pr: 8,
-        pt: 4,
-        pb: 4,
+        px: responsiveValue(4, 8),
+        py: responsiveValue(2, 4),
         mt: 2,
       }}
     >

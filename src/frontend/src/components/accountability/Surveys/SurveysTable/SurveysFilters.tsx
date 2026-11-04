@@ -8,6 +8,7 @@ import { FiltersSection } from '@core/FiltersSection';
 import { SearchTextField } from '@core/SearchTextField';
 import type { ReactElement } from 'react';
 import { CreatedByAutocompleteRestFilter } from '@shared/autocompletes/CreatedByAutocompleteRestFilter';
+import { ResponsiveGrid, ResponsiveGridContainer } from 'src/responsive';
 
 interface SurveysFiltersProps {
   filter: Record<string, any>;
@@ -48,8 +49,8 @@ export function SurveysFilters({
       applyHandler={handleApplyFilter}
       clearHandler={handleClearFilter}
     >
-      <Grid container spacing={3} sx={{ alignItems: 'center' }}>
-        <Grid size={{ xs: 4 }}>
+      <ResponsiveGridContainer spacing={3} sx={{ alignItems: 'center' }}>
+        <ResponsiveGrid size="third">
           <SearchTextField
             value={filter.search}
             label="Search"
@@ -57,8 +58,8 @@ export function SurveysFilters({
             data-cy="filters-search"
             fullWidth
           />
-        </Grid>
-        <Grid size={{ xs: 4 }}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="third">
           <TargetPopulationAutocompleteRestFilter
             name="targetPopulation"
             value={filter.targetPopulation}
@@ -68,8 +69,8 @@ export function SurveysFilters({
             appliedFilter={appliedFilter}
             setAppliedFilter={setAppliedFilter}
           />
-        </Grid>
-        <Grid size={{ xs: 4 }}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="third">
           <CreatedByAutocompleteRestFilter
             name="createdBy"
             label={t('Created by')}
@@ -81,14 +82,14 @@ export function SurveysFilters({
             setAppliedFilter={setAppliedFilter}
             additionalVariables={{ isSurveyCreator: true }}
           />
-        </Grid>
+        </ResponsiveGrid>
         <Grid
           container
           size={{ xs: 12 }}
           spacing={3}
           sx={{ alignItems: 'flex-end' }}
         >
-          <Grid size={{ xs: 3 }}>
+          <ResponsiveGrid size="quarter" mobileSize="half">
             <DatePickerFilter
               topLabel={t('Creation Date')}
               label="From"
@@ -96,17 +97,17 @@ export function SurveysFilters({
               value={filter.createdAtRangeMin}
               dataCy="filters-creation-date-from"
             />
-          </Grid>
-          <Grid size={{ xs: 3 }}>
+          </ResponsiveGrid>
+          <ResponsiveGrid size="quarter" mobileSize="half">
             <DatePickerFilter
               label={t('To')}
               onChange={(date) => handleFilterChange('createdAtRangeMax', date)}
               value={filter.createdAtRangeMax}
               dataCy="filters-creation-date-to"
             />
-          </Grid>
+          </ResponsiveGrid>
         </Grid>
-      </Grid>
+      </ResponsiveGridContainer>
     </FiltersSection>
   );
 }

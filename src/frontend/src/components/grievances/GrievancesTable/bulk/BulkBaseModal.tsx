@@ -16,6 +16,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { useProgramContext } from '../../../../programContext';
+import { responsiveValue } from 'src/responsive';
 
 export const StyledLink = styled.div`
   color: #000;
@@ -24,10 +25,10 @@ export const StyledLink = styled.div`
   display: flex;
   align-content: center;
 `;
-const StyledContainer = styled.div`
-  min-width: 400px;
-  max-width: 800px;
-`;
+const containerSx = {
+  minWidth: responsiveValue(0, 400),
+  maxWidth: '800px',
+};
 const StyledDialog = styled(Dialog)`
   max-height: 800px;
 `;
@@ -97,16 +98,18 @@ export function BulkBaseModal({
               mb: 6,
             }}
           >
-            <StyledContainer>
+            <Box sx={containerSx}>
               <Typography>
                 {t('Tickets ID')}:{' '}
                 <Bold data-cy="selected-tickets">
                   {selectedTickets.map((ticket) => ticket.unicefId).join(', ')}
                 </Bold>
               </Typography>
-            </StyledContainer>
+            </Box>
           </Box>
-          <StyledContainer data-cy="dropdown">{children}</StyledContainer>
+          <Box sx={containerSx} data-cy="dropdown">
+            {children}
+          </Box>
         </DialogContent>
         <DialogFooter>
           <DialogActions>

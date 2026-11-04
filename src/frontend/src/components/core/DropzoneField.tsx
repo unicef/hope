@@ -5,6 +5,7 @@ import { useCallback } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
+import { responsiveValue } from 'src/responsive';
 import { LoadingComponent } from './LoadingComponent';
 
 interface DropzoneContainerProps {
@@ -20,6 +21,8 @@ interface DropzoneFieldProps {
 
 const DropzoneContainer = styled.div<DropzoneContainerProps>`
   width: 500px;
+  max-width: 100%;
+  box-sizing: border-box;
   height: 100px;
   background-color: rgba(2, 62, 144, 0.1);
   color: #023e90;
@@ -65,7 +68,7 @@ export const DropzoneField = ({
       sx={{
         display: 'flex',
         justifyContent: 'center',
-        p: 5,
+        p: responsiveValue(0, 5),
       }}
     >
       <DropzoneContainer {...getRootProps()} disabled={loading}>

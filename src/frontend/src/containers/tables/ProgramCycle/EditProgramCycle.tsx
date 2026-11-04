@@ -32,6 +32,7 @@ import { useSnackbar } from '@hooks/useSnackBar';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import type { ProgramDetail } from '@restgenerated/models/ProgramDetail';
 import type { ProgramCycleList } from '@restgenerated/models/ProgramCycleList';
+import { ResponsiveGrid } from 'src/responsive';
 
 interface EditProgramCycleProps {
   programCycle: ProgramCycleList;
@@ -164,7 +165,7 @@ const EditProgramCycle = ({
                   </GreyText>
                 </DialogDescription>
                 <Grid container spacing={3}>
-                  <Grid size={{ xs: 12 }}>
+                  <ResponsiveGrid size="full">
                     <Field
                       name="title"
                       fullWidth
@@ -173,8 +174,8 @@ const EditProgramCycle = ({
                       component={FormikTextField}
                       required
                     />
-                  </Grid>
-                  <Grid size={{ xs: 6 }} data-cy="start-date-cycle">
+                  </ResponsiveGrid>
+                  <ResponsiveGrid size="half" data-cy="start-date-cycle">
                     <Field
                       name="startDate"
                       label={t('Start Date')}
@@ -185,8 +186,8 @@ const EditProgramCycle = ({
                         <CalendarTodayRoundedIcon color="disabled" />
                       }
                     />
-                  </Grid>
-                  <Grid size={{ xs: 6 }} data-cy="end-date-cycle">
+                  </ResponsiveGrid>
+                  <ResponsiveGrid size="half" data-cy="end-date-cycle">
                     <Field
                       name="endDate"
                       label={t('End Date')}
@@ -197,7 +198,7 @@ const EditProgramCycle = ({
                         <CalendarTodayRoundedIcon color="disabled" />
                       }
                     />
-                  </Grid>
+                  </ResponsiveGrid>
                 </Grid>
               </DialogContent>
               <DialogFooter>

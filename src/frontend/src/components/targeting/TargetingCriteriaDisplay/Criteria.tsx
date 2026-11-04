@@ -16,6 +16,7 @@ import {
 } from '@mui/material';
 import { Delete, Edit } from '@mui/icons-material';
 import styled from 'styled-components';
+import { PAGINATION_SX } from 'src/responsive';
 import GreaterThanEqual from '../../../assets/GreaterThanEqual.svg';
 import LessThanEqual from '../../../assets/LessThanEqual.svg';
 import { Box } from '@mui/system';
@@ -535,6 +536,7 @@ export function Criteria({
           <TablePagination
             rowsPerPageOptions={[5, 10, 25]}
             component="div"
+            sx={PAGINATION_SX}
             count={currentHouseholdIds.length}
             rowsPerPage={rowsPerPageHH}
             page={pageHH}
@@ -574,6 +576,7 @@ export function Criteria({
           <TablePagination
             rowsPerPageOptions={[5, 10, 25]}
             component="div"
+            sx={PAGINATION_SX}
             count={currentIndividualIds.length}
             rowsPerPage={rowsPerPageIND}
             page={pageIND}
@@ -613,6 +616,7 @@ export function Criteria({
           <TablePagination
             rowsPerPageOptions={[5, 10, 25]}
             component="div"
+            sx={PAGINATION_SX}
             count={currentAlternativeCollectorIds.length}
             rowsPerPage={rowsPerPageALT}
             page={pageALT}

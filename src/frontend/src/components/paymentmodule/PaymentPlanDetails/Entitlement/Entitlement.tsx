@@ -3,6 +3,7 @@ import { ContainerColumnWithBorder } from '@core/ContainerColumnWithBorder';
 import { LabelizedField } from '@core/LabelizedField';
 import { LoadingButton } from '@core/LoadingButton';
 import { LoadingComponent } from '@core/LoadingComponent';
+import { RuleNameWithDescription } from '@core/RuleNameWithDescription';
 import { Title } from '@core/Title';
 import { UniversalMoment } from '@core/UniversalMoment';
 import { useBaseUrl } from '@hooks/useBaseUrl';
@@ -18,7 +19,6 @@ import {
   MenuItem,
   Select,
   TextField,
-  Tooltip,
   Typography,
 } from '@mui/material';
 import type { ApplyEngineFormula } from '@restgenerated/models/ApplyEngineFormula';
@@ -42,6 +42,7 @@ import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
 import { useProgramContext } from '../../../../programContext';
 import { BigValue } from '../../../rdi/details/RegistrationDetails/RegistrationDetails';
 import { ImportXlsxPaymentPlanPaymentList } from '../ImportXlsxPaymentPlanPaymentList/ImportXlsxPaymentPlanPaymentList';
+import { responsiveValue, Row } from 'src/responsive';
 
 const GreyText = styled.p`
   color: #9e9e9e;
@@ -91,10 +92,6 @@ const SpinaczIconContainer = styled(Box)`
   top: 4px;
   font-size: 16px;
   color: #666666;
-`;
-
-const BoxWithBorderRight = styled(Box)`
-  border-right: 1px solid #b1b1b5;
 `;
 
 interface EntitlementProps {
@@ -268,7 +265,7 @@ function Entitlement({
   return (
     <Box
       sx={{
-        m: 5,
+        m: responsiveValue(2, 5),
       }}
     >
       <ContainerColumnWithBorder>
@@ -288,7 +285,7 @@ function Entitlement({
               alignItems: 'center',
             }}
           >
-            <Grid size={{ xs: 10 }}>
+            <Grid size={responsiveValue(12, 10)}>
               <FormControl size="small" variant="outlined" fullWidth>
                 <Box>
                   <InputLabel size="small" htmlFor="entitlement-formula">
@@ -313,42 +310,45 @@ function Entitlement({
                   value={steficonRuleValue}
                   data-cy="input-entitlement-formula"
                   onChange={(event) => setSteficonRuleValue(event.target.value)}
-                >
-                  {steficonData?.results?.map((each, index) => {
-                    const hasDescription = Boolean(each?.description);
-                    return (
-                      <MenuItem
-                        data-cy={`select-option-${index}`}
-                        key={each.id}
-                        value={each.id}
-                      >
-                        {hasDescription ? (
-                          <Tooltip
-                            title={each.description}
-                            placement="right"
-                            arrow
-                          >
-                            <Box
-                              component="span"
-                              sx={{ display: 'block', width: '100%' }}
-                            >
-                              {each.name}
-                            </Box>
-                          </Tooltip>
-                        ) : (
-                          each.name
-                        )}
-                      </MenuItem>
+                  renderValue={(value) => {
+                    const appliedRule = paymentPlan.steficonRule?.rule;
+                    const rule =
+                      steficonData?.results?.find(
+                        (each) => String(each.id) === String(value),
+                      ) ??
+                      (String(appliedRule?.id) === String(value)
+                        ? appliedRule
+                        : undefined);
+                    return rule ? (
+                      <RuleNameWithDescription
+                        name={rule.name}
+                        description={rule.description}
+                      />
+                    ) : (
+                      ''
                     );
-                  })}
+                  }}
+                >
+                  {steficonData?.results?.map((each, index) => (
+                    <MenuItem
+                      data-cy={`select-option-${index}`}
+                      key={each.id}
+                      value={each.id}
+                    >
+                      <RuleNameWithDescription
+                        name={each.name}
+                        description={each.description}
+                      />
+                    </MenuItem>
+                  ))}
                 </Select>
               </FormControl>
             </Grid>
-            <Grid size={{ xs: 2 }}>
+            <Grid size={responsiveValue(12, 2)}>
               <Button
                 variant="contained"
                 color="primary"
-                sx={{ ml: 1 }}
+                sx={{ ml: responsiveValue(0, 1) }}
                 disabled={
                   loadingSetSteficonRule ||
                   !steficonRuleValue ||
@@ -411,7 +411,7 @@ function Entitlement({
                 alignItems: 'center',
               }}
             >
-              <Grid size={{ xs: 10 }}>
+              <Grid size={responsiveValue(12, 10)}>
                 <TextField
                   size="small"
                   variant="outlined"
@@ -425,12 +425,12 @@ function Entitlement({
                   data-cy="input-flat-amount"
                 />
               </Grid>
-              <Grid size={{ xs: 2 }}>
+              <Grid size={responsiveValue(12, 2)}>
                 <LoadingButton
                   variant="contained"
                   color="primary"
                   loading={loadingSetFlatAmount}
-                  sx={{ ml: 1 }}
+                  sx={{ ml: responsiveValue(0, 1) }}
                   disabled={
                     loadingSetFlatAmount ||
                     !flatAmount ||
@@ -475,18 +475,17 @@ function Entitlement({
             <OrDivider />
           </Box>
         </Box>
-        <Box
-          sx={{
-            display: 'flex',
-          }}
-        >
+        <Row sx={{ gap: responsiveValue(4, 0) }}>
           <Box
             sx={{
-              width: '50%',
+              width: responsiveValue('100%', '50%'),
             }}
           >
-            <BoxWithBorderRight
+            <Box
               sx={{
+                borderRight: responsiveValue('none', '1px solid #b1b1b5'),
+                borderBottom: responsiveValue('1px solid #b1b1b5', 'none'),
+                pb: responsiveValue(4, 0),
                 display: 'flex',
                 justifyContent: 'center',
                 alignItems: 'center',
@@ -529,11 +528,11 @@ function Entitlement({
                   'Template contains payment list with all targeted households',
                 )}
               </GreyTextSmall>
-            </BoxWithBorderRight>
+            </Box>
           </Box>
           <Box
             sx={{
-              width: '50%',
+              width: responsiveValue('100%', '50%'),
             }}
           >
             <Box
@@ -586,7 +585,7 @@ function Entitlement({
               )}
             </Box>
           </Box>
-        </Box>
+        </Row>
         {paymentPlan.totalEntitledQuantityUsd ? (
           <>
             <Divider />

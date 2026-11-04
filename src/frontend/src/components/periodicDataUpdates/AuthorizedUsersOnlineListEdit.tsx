@@ -28,6 +28,7 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { renderUserName } from '@utils/utils';
 import { AUTHORIZED_USER_ROLE_CHOICES } from '@utils/constants';
 import { restQueryKey } from '@utils/queryKeys';
+import { responsiveValue } from 'src/responsive';
 import { useParams } from 'react-router-dom';
 
 interface AuthorizedUsersOnlineListEditProps {
@@ -190,7 +191,7 @@ export const AuthorizedUsersOnlineListEdit: React.FC<
       >
         <Box sx={{ mb: 2 }}>
           <Grid container spacing={2}>
-            <Grid size={{ xs: 8 }}>
+            <Grid size={responsiveValue(12, 8)}>
               <TextField
                 label={t('Search')}
                 variant="outlined"
@@ -200,8 +201,12 @@ export const AuthorizedUsersOnlineListEdit: React.FC<
                 fullWidth
               />
             </Grid>
-            <Grid size={{ xs: 4 }}>
-              <FormControl size="small" sx={{ minWidth: 300 }} fullWidth>
+            <Grid size={responsiveValue(12, 4)}>
+              <FormControl
+                size="small"
+                sx={{ minWidth: responsiveValue(0, 300) }}
+                fullWidth
+              >
                 <InputLabel>{t('Permission Type')}</InputLabel>
                 <Select
                   label={t('Permission Type')}

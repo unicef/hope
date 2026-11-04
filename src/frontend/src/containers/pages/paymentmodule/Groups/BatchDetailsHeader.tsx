@@ -9,6 +9,8 @@ import { DownloadBatchButton } from './actions/DownloadBatchButton';
 import { ExportBatchButton } from './actions/ExportBatchButton';
 import { SendXlsxPasswordBatchButton } from './actions/SendXlsxPasswordBatchButton';
 import { batchPlanTypeLabel } from './utils';
+import { responsiveValue } from 'src/responsive';
+import { HeaderActions } from '@core/HeaderActions';
 
 interface BatchDetailsHeaderProps {
   groupId: string;
@@ -51,6 +53,7 @@ export function BatchDetailsHeader({
         <Box
           sx={{
             display: 'flex',
+            flexWrap: responsiveValue('wrap', 'nowrap'),
             alignItems: 'baseline',
             gap: 1,
           }}
@@ -72,12 +75,7 @@ export function BatchDetailsHeader({
       }
       breadCrumbs={breadCrumbsItems}
     >
-      <Box
-        sx={{
-          display: 'flex',
-          alignItems: 'center',
-        }}
-      >
+      <HeaderActions spacing="none">
         {hasExportFile ? (
           <DownloadBatchButton groupId={groupId} tag={tag} />
         ) : (
@@ -91,7 +89,7 @@ export function BatchDetailsHeader({
         {hasPassword && (
           <SendXlsxPasswordBatchButton groupId={groupId} tag={tag} />
         )}
-      </Box>
+      </HeaderActions>
     </PageHeader>
   );
 }

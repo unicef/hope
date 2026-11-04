@@ -13,6 +13,7 @@ import {
 import type { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import { FollowUpInstructionActions } from './actions/FollowUpInstructionActions';
+import { responsiveValue } from 'src/responsive';
 
 interface FollowUpInstructionDetailsHeaderProps {
   instruction: FollowUpInstructionDetail;
@@ -43,6 +44,7 @@ export function FollowUpInstructionDetailsHeader({
         <Box
           sx={{
             display: 'flex',
+            flexWrap: responsiveValue('wrap', 'nowrap'),
             alignItems: 'baseline',
             gap: 1,
           }}
@@ -74,6 +76,7 @@ export function FollowUpInstructionDetailsHeader({
       <Box
         sx={{
           display: 'flex',
+          flexWrap: responsiveValue('wrap', 'nowrap'),
           alignItems: 'center',
           gap: 1,
         }}

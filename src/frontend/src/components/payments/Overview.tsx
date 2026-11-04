@@ -1,9 +1,11 @@
-import styled from 'styled-components';
-import type { Theme } from '@mui/material';
 import { Paper } from '@mui/material';
+import type { ReactElement, ReactNode } from 'react';
+import { SECTION_PADDING, responsiveValue } from 'src/responsive';
 
-export const Overview = styled(Paper)<{ theme?: Theme }>`
-  margin: 20px;
-  padding: ${({ theme }) => theme.spacing(8)}
-    ${({ theme }) => theme.spacing(11)};
-`;
+export function Overview({ children }: { children: ReactNode }): ReactElement {
+  return (
+    <Paper sx={{ m: responsiveValue(2, 5), padding: SECTION_PADDING }}>
+      {children}
+    </Paper>
+  );
+}

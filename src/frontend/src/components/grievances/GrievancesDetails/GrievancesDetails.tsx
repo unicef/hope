@@ -8,8 +8,9 @@ import { StatusBox } from '@core/StatusBox';
 import { Title } from '@core/Title';
 import { UniversalMoment } from '@core/UniversalMoment';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import type { GridSize } from '@mui/material';
 import { Box, Grid, Typography } from '@mui/material';
+import { ResponsiveGrid, ResponsiveGridContainer } from 'src/responsive';
+import type { ResponsiveGridSize } from 'src/responsive';
 import { GRIEVANCE_ISSUE_TYPES } from '@utils/constants';
 import {
   choicesToDict,
@@ -170,7 +171,7 @@ function GrievancesDetails({
           <Typography variant="h6">{t('Details')}</Typography>
         </Title>
         <OverviewContainer>
-          <Grid container spacing={6}>
+          <ResponsiveGridContainer spacing={6}>
             {[
               {
                 label: t('Status'),
@@ -180,7 +181,7 @@ function GrievancesDetails({
                     statusToColor={grievanceTicketStatusToColor}
                   />
                 ),
-                size: 3,
+                size: 'quarter',
               },
               {
                 label: t('Priority'),
@@ -196,7 +197,7 @@ function GrievancesDetails({
                     statusToColor={grievanceTicketBadgeColors}
                   />
                 ),
-                size: 3,
+                size: 'quarter',
               },
               {
                 label: t('Urgency'),
@@ -212,12 +213,12 @@ function GrievancesDetails({
                     statusToColor={grievanceTicketBadgeColors}
                   />
                 ),
-                size: 3,
+                size: 'quarter',
               },
               {
                 label: t('Assigned to'),
                 value: renderUserName(ticket.assignedTo),
-                size: 3,
+                size: 'quarter',
               },
               {
                 label: t('Submission Channel'),
@@ -227,12 +228,12 @@ function GrievancesDetails({
                       '-'}
                   </span>
                 ),
-                size: 3,
+                size: 'quarter',
               },
               {
                 label: t('Category'),
                 value: <span>{categoryChoices[ticket.category]}</span>,
-                size: 3,
+                size: 'quarter',
               },
               showIssueType && {
                 label: t('Issue Type'),
@@ -241,7 +242,7 @@ function GrievancesDetails({
                     {replaceLabels(issueTypeToDisplay, beneficiaryGroup)}
                   </span>
                 ),
-                size: 3,
+                size: 'quarter',
               },
               !isSocialDctType && {
                 label: `${beneficiaryGroup?.groupLabel} ID`,
@@ -262,7 +263,7 @@ function GrievancesDetails({
                     )}
                   </span>
                 ),
-                size: 3,
+                size: 'quarter',
               },
               {
                 label:
@@ -290,77 +291,77 @@ function GrievancesDetails({
                       )}
                     </span>
                   ),
-                size: 3,
+                size: 'quarter',
               },
               {
                 label: t('Payment ID'),
                 value: <span>{renderPaymentUrl()}</span>,
-                size: 3,
+                size: 'quarter',
               },
               {
                 label: t('Payment Plan'),
                 value: <span>{renderPaymentPlanUrl()}</span>,
-                size: 3,
+                size: 'quarter',
               },
               {
                 label: t('Payment Plan Verification'),
                 value: <span>{renderPaymentPlanVerificationUrl()}</span>,
-                size: 3,
+                size: 'quarter',
               },
               {
                 label: t('Programme'),
                 value: mappedPrograms(),
-                size: 3,
+                size: 'quarter',
               },
               showPartner && {
                 label: t('Partner'),
                 value: ticket.partner?.name,
-                size: 3,
+                size: 'quarter',
               },
               {
                 label: t('Created By'),
                 value: renderUserName(ticket.createdBy),
-                size: 3,
+                size: 'quarter',
               },
               {
                 label: t('Date Created'),
                 value: <UniversalMoment>{ticket.createdAt}</UniversalMoment>,
-                size: 3,
+                size: 'quarter',
               },
               {
                 label: t('Last Modified Date'),
                 value: <UniversalMoment>{ticket.updatedAt}</UniversalMoment>,
-                size: 3,
+                size: 'quarter',
               },
               {
                 label: t('Administrative Level 2'),
                 value: ticket.admin,
-                size: 3,
+                size: 'quarter',
               },
               {
                 label: t('Area / Village / Pay point'),
                 value: ticket.area,
-                size: 3,
+                size: 'quarter',
               },
               {
                 label: t('Languages Spoken'),
                 value: ticket.language,
-                size: 3,
+                size: 'quarter',
               },
               {
                 label: t('Grievance Supporting Documents'),
                 value: mappedDocumentation(),
-                size: 3,
+                size: 'quarter',
               },
               {
                 label: t('Description'),
                 value: ticket.description,
-                size: 12,
+                size: 'full',
               },
               {
                 label: t('Comments'),
                 value: ticket.comments,
-                size: 12,
+                size: 'full',
               },
             ]
               .filter((el) =>
@@ -373,14 +374,18 @@ function GrievancesDetails({
                   el.label &&
                   el.value &&
                   el.size && (
-                    <Grid key={el.label} size={{ xs: el.size as GridSize }}>
+                    <ResponsiveGrid
+                      key={el.label}
+                      size={el.size as ResponsiveGridSize}
+                      mobileSize={el.size === 'quarter' ? 'half' : 'full'}
+                    >
                       <LabelizedField label={el.label}>
                         {el.value}
                       </LabelizedField>
-                    </Grid>
+                    </ResponsiveGrid>
                   ),
               )}
-          </Grid>
+          </ResponsiveGridContainer>
         </OverviewContainer>
       </ContainerColumnWithBorder>
     </Grid>

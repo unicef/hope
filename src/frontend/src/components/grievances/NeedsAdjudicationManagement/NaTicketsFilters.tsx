@@ -6,7 +6,6 @@ import { SearchTextField } from '@core/SearchTextField';
 import { SelectFilter } from '@core/SelectFilter';
 import { useArrayToDict } from '@hooks/useArrayToDict';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import Grid from '@mui/material/Grid';
 import { MenuItem } from '@mui/material';
 import type { GrievanceChoices } from '@restgenerated/models/GrievanceChoices';
 import { ProgramStatusEnum } from '@restgenerated/models/ProgramStatusEnum';
@@ -20,6 +19,7 @@ import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useDocumentTypeChoices } from '@hooks/useDocumentTypeChoices';
+import { ResponsiveGrid, ResponsiveGridContainer } from 'src/responsive';
 
 interface NaTicketsFiltersProps {
   filter;
@@ -108,8 +108,8 @@ export const NaTicketsFilters = ({
       withHideShowButton
       initialExpanded={false}
     >
-      <Grid container spacing={3} sx={{ alignItems: 'flex-end' }}>
-        <Grid size={{ xs: 3 }}>
+      <ResponsiveGridContainer spacing={3} sx={{ alignItems: 'flex-end' }}>
+        <ResponsiveGrid size="quarter">
           <SearchTextField
             value={filter.search}
             label="Search"
@@ -117,7 +117,7 @@ export const NaTicketsFilters = ({
             data-cy="filters-search"
             borderRadius="4px 0px 0px 4px"
           />
-        </Grid>
+        </ResponsiveGrid>
         <DocumentSearchField
           onChange={handleFilterChange}
           type={filter.documentType}
@@ -125,7 +125,7 @@ export const NaTicketsFilters = ({
           choices={documentTypeChoices}
         />
         {isAllPrograms && (
-          <Grid size={{ xs: 3 }}>
+          <ResponsiveGrid size="quarter">
             <ProgramAutocompleteRestFilter
               filter={filter}
               name="program"
@@ -136,9 +136,9 @@ export const NaTicketsFilters = ({
               appliedFilter={appliedFilter}
               setAppliedFilter={setAppliedFilter}
             />
-          </Grid>
+          </ResponsiveGrid>
         )}
-        <Grid size={{ xs: 2 }}>
+        <ResponsiveGrid size="sixth" mobileSize="half">
           <DatePickerFilter
             topLabel={t('Creation Date')}
             placeholder="From"
@@ -147,8 +147,8 @@ export const NaTicketsFilters = ({
             fullWidth
             dataCy="filters-creation-date-from"
           />
-        </Grid>
-        <Grid size={{ xs: 2 }}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="sixth" mobileSize="half">
           <DatePickerFilter
             placeholder="To"
             onChange={(date) => handleFilterChange('createdAtAfter', date)}
@@ -156,8 +156,8 @@ export const NaTicketsFilters = ({
             fullWidth
             dataCy="filters-creation-date-to"
           />
-        </Grid>
-        <Grid size={{ xs: 3 }}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="quarter">
           <NumberTextField
             topLabel={t('Similarity Score')}
             value={filter.scoreMin}
@@ -166,8 +166,8 @@ export const NaTicketsFilters = ({
             data-cy="filters-similarity-score-from"
             fullWidth
           />
-        </Grid>
-        <Grid size={{ xs: 3 }}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="quarter">
           <NumberTextField
             value={filter.scoreMax}
             placeholder="To"
@@ -175,8 +175,8 @@ export const NaTicketsFilters = ({
             data-cy="filters-similarity-score-to"
             fullWidth
           />
-        </Grid>
-        <Grid size={{ xs: 3 }}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="quarter">
           <LanguageAutocompleteRestFilter
             filter={filter}
             name="preferredLanguage"
@@ -187,8 +187,8 @@ export const NaTicketsFilters = ({
             setFilter={setFilter}
             dataCy="filters-preferred-language"
           />
-        </Grid>
-        <Grid size={{ xs: 3 }}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="quarter">
           <SelectFilter
             onChange={(e) => handleFilterChange('priority', e.target.value)}
             label={t('Priority')}
@@ -202,8 +202,8 @@ export const NaTicketsFilters = ({
               </MenuItem>
             ))}
           </SelectFilter>
-        </Grid>
-        <Grid size={{ xs: 2 }}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="sixth">
           <SelectFilter
             onChange={(e) => handleFilterChange('urgency', e.target.value)}
             label={t('Urgency')}
@@ -217,8 +217,8 @@ export const NaTicketsFilters = ({
               </MenuItem>
             ))}
           </SelectFilter>
-        </Grid>
-        <Grid size={{ xs: 3 }}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="quarter">
           <SelectFilter
             onChange={(e) => handleFilterChange('issueType', e.target.value)}
             label={t('Ticket Type')}
@@ -232,8 +232,8 @@ export const NaTicketsFilters = ({
               </MenuItem>
             ))}
           </SelectFilter>
-        </Grid>
-        <Grid size={{ xs: 2 }}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="sixth">
           <SelectFilter
             onChange={(e) => handleFilterChange('areaScope', e.target.value)}
             label={t('Area Scope')}
@@ -245,8 +245,8 @@ export const NaTicketsFilters = ({
             <MenuItem value="cross-area">{t('Cross-Area Tickets')}</MenuItem>
             <MenuItem value="all">{t('All Tickets')}</MenuItem>
           </SelectFilter>
-        </Grid>
-        <Grid size={{ xs: 3 }}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="quarter">
           <AdminAreaAutocomplete
             level={1}
             filter={filter}
@@ -259,8 +259,8 @@ export const NaTicketsFilters = ({
             setAppliedFilter={setAppliedFilter}
             dataCy="filters-admin-level-1"
           />
-        </Grid>
-        <Grid size={{ xs: 3 }}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="quarter">
           <AdminAreaAutocomplete
             level={2}
             filter={filter}
@@ -273,8 +273,8 @@ export const NaTicketsFilters = ({
             setAppliedFilter={setAppliedFilter}
             dataCy="filters-admin-level-2"
           />
-        </Grid>
-      </Grid>
+        </ResponsiveGrid>
+      </ResponsiveGridContainer>
     </FiltersSection>
   );
 };

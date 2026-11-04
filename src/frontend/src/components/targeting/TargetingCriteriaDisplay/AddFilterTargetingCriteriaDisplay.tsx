@@ -12,6 +12,7 @@ import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 import { useProgramContext } from 'src/programContext';
 import styled from 'styled-components';
+import { responsiveValue } from 'src/responsive';
 import { Criteria } from './Criteria';
 import ExcludeCheckboxes from './ExcludeCheckboxes';
 import TargetingCriteriaDisplayDisabled, {
@@ -27,9 +28,7 @@ const Title = styled.div`
   align-items: center;
 `;
 
-const Divider = styled.div`
-  border-left: 1px solid #b1b1b5;
-  margin: 0 ${({ theme }) => theme.spacing(10)};
+const Divider = styled(Box)`
   position: relative;
   transform: scale(0.9);
 `;
@@ -54,7 +53,7 @@ const DividerLabel = styled.div`
   background-color: #fff;
 `;
 
-const AddCriteria = styled.div`
+const AddCriteria = styled(Box)`
   display: flex;
   align-items: center;
   justify-content: center;
@@ -62,8 +61,6 @@ const AddCriteria = styled.div`
   border: 2px solid #033f91;
   border-radius: 3px;
   font-size: 16px;
-  padding: ${({ theme }) => theme.spacing(6)}
-    ${({ theme }) => theme.spacing(28)};
   cursor: pointer;
   p {
     font-weight: 500;
@@ -277,7 +274,22 @@ const AddFilterTargetingCriteriaDisplay = ({
 
                       {index === rules.length - 1 ||
                       (rules.length === 1 && index === 0) ? null : (
-                        <Divider>
+                        <Divider
+                          sx={{
+                            // Criteria stack on mobile, so the divider between them turns horizontal.
+                            flexBasis: responsiveValue('100%', 'auto'),
+                            borderLeft: responsiveValue(
+                              'none',
+                              '1px solid #b1b1b5',
+                            ),
+                            borderTop: responsiveValue(
+                              '1px solid #b1b1b5',
+                              'none',
+                            ),
+                            mx: responsiveValue(0, 10),
+                            my: responsiveValue(6, 0),
+                          }}
+                        >
                           <DividerLabel>Or</DividerLabel>
                         </Divider>
                       )}
@@ -289,6 +301,7 @@ const AddFilterTargetingCriteriaDisplay = ({
                 <>
                   {isEdit && helpers ? (
                     <AddCriteria
+                      sx={{ py: 6, px: responsiveValue(4, 28) }}
                       onClick={handleAddFilter}
                       data-cy="button-target-population-add-criteria"
                     >
