@@ -282,7 +282,7 @@ class PushPeopleToRDIView(HOPEAPIBusinessAreaView, PeopleUploadMixin, HOPEAPIVie
             context={
                 "business_area": self.selected_business_area,
                 STORED_IMAGE_PREFIX_CONTEXT_KEY: get_stored_image_prefix(
-                    self.selected_business_area.code, self.selected_rdi.program.code
+                    self.selected_business_area.slug, self.selected_rdi.program
                 ),
             },
         )

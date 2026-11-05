@@ -1,4 +1,5 @@
 from collections.abc import Callable
+from datetime import date
 from unittest.mock import MagicMock, patch
 
 from django.core.exceptions import ImproperlyConfigured, SuspiciousOperation
@@ -12,9 +13,9 @@ from hope.api.endpoints.rdi.stored_images import (
     get_stored_image_prefix,
     normalize_stored_image_name,
 )
-from hope.models import PendingIndividual
+from hope.models import PendingIndividual, Program
 
-PREFIX = "AFG/ab12/"
+PREFIX = "2025/afghanistan/ab12/"
 MAX_LENGTH = 100
 PHOTO_MAX_LENGTH = PendingIndividual._meta.get_field("photo").max_length
 
@@ -23,25 +24,29 @@ class PhotoSerializer(serializers.Serializer):
     photo = StoredImageField(model_field=(PendingIndividual, "photo"), allow_blank=True, allow_null=True)
 
 
-def test_get_stored_image_prefix_joins_business_area_and_program_codes() -> None:
-    assert get_stored_image_prefix("AFG", "ab12") == "AFG/ab12/"
+def test_get_stored_image_prefix_is_year_business_area_slug_and_program_code() -> None:
+    program = Program(code="ab12", start_date=date(2025, 3, 1))
+
+    assert get_stored_image_prefix("afghanistan", program) == "2025/afghanistan/ab12/"
 
 
 @pytest.mark.parametrize(
-    ("business_area_code", "program_code", "expected"),
+    ("business_area_slug", "program_code", "expected"),
     [
-        ("A/F G", "a..b", "A_F_G/a..b/"),
-        (" AFG ", " ab12 ", "AFG/ab12/"),
+        ("south-sudan", "a-1_b", "2025/south-sudan/a-1_b/"),
+        ("a b/c", "x.y", "2025/a_b_c/x_y/"),
     ],
 )
-def test_get_stored_image_prefix_sanitizes_the_codes_like_cw(
-    business_area_code: str, program_code: str, expected: str
+def test_get_stored_image_prefix_sanitizes_the_segments_like_hope_uploads(
+    business_area_slug: str, program_code: str, expected: str
 ) -> None:
-    assert get_stored_image_prefix(business_area_code, program_code) == expected
+    program = Program(code=program_code, start_date=date(2025, 3, 1))
+
+    assert get_stored_image_prefix(business_area_slug, program) == expected
 
 
 def test_normalize_stored_image_name_strips_whitespace_and_leading_slash() -> None:
-    assert normalize_stored_image_name(" /AFG/ab12/x.png ") == "AFG/ab12/x.png"
+    assert normalize_stored_image_name(" /2025/afghanistan/ab12/x.png ") == "2025/afghanistan/ab12/x.png"
 
 
 def test_get_stored_image_error_existing_file(store_image: Callable[[str], str]) -> None:
@@ -59,7 +64,7 @@ def test_get_stored_image_error_missing_file() -> None:
 def test_get_stored_image_error_file_outside_prefix_is_rejected_without_asking_the_storage(
     store_image: Callable[[str], str],
 ) -> None:
-    file_name = store_image("OTH/zz99/CW_ind_1_photo.png")
+    file_name = store_image("2025/other-area/zz99/CW_ind_1_photo.png")
 
     with patch("hope.api.endpoints.rdi.stored_images.default_storage") as storage:
         error = get_stored_image_error(file_name, PREFIX, MAX_LENGTH)
@@ -72,13 +77,13 @@ def test_get_stored_image_error_file_outside_prefix_is_rejected_without_asking_t
     "file_name",
     [
         "",
-        "../AFG/ab12/x.png",
-        "AFG/ab12/../ab12/x.png",
-        "AFG/ab12/./x.png",
-        "AFG/ab12//x.png",
-        "AFG/ab12/x.png/",
-        "AFG\\ab12\\x.png",
-        "AFG/ab12/x\x00.png",
+        "../2025/afghanistan/ab12/x.png",
+        "2025/afghanistan/ab12/../ab12/x.png",
+        "2025/afghanistan/ab12/./x.png",
+        "2025/afghanistan/ab12//x.png",
+        "2025/afghanistan/ab12/x.png/",
+        "2025\\afghanistan\\ab12\\x.png",
+        "2025/afghanistan/ab12/x\x00.png",
     ],
 )
 def test_get_stored_image_error_invalid_file_name(file_name: str) -> None:

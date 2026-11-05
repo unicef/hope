@@ -337,7 +337,7 @@ class CreateLaxBaseView(HOPEAPIBusinessAreaView, HandleFlexFieldsMixin):
 
     @cached_property
     def _stored_image_prefix(self) -> str:
-        return get_stored_image_prefix(self.selected_business_area.code, self._rdi_program.code)
+        return get_stored_image_prefix(self.selected_business_area.slug, self._rdi_program)
 
 
 class CreateLaxIndividuals(CreateLaxBaseView):
