@@ -65,6 +65,15 @@ def household_program(
 
 
 @pytest.fixture
+def unsaved_program_with_wash_workers_label(
+    afghanistan: BusinessArea, household_dct: DataCollectingType, wash_workers_label: BeneficiaryGroup
+) -> Program:
+    return ProgramFactory.build(
+        business_area=afghanistan, data_collecting_type=household_dct, beneficiary_group=wash_workers_label
+    )
+
+
+@pytest.fixture
 def program_with_inactive_household_label(household_program: Program, household_label: BeneficiaryGroup) -> Program:
     household_label.active = False
     household_label.save()
@@ -98,12 +107,10 @@ def test_generate_code_retries_on_collision(afghanistan: BusinessArea) -> None:
 
 
 def test_program_save_rejects_payee_label_of_other_payee_type(
-    afghanistan: BusinessArea, household_dct: DataCollectingType, wash_workers_label: BeneficiaryGroup
+    unsaved_program_with_wash_workers_label: Program,
 ) -> None:
     with pytest.raises(ValidationError) as error:
-        ProgramFactory(
-            business_area=afghanistan, data_collecting_type=household_dct, beneficiary_group=wash_workers_label
-        )
+        unsaved_program_with_wash_workers_label.save()
 
     assert error.value.message_dict == {
         "beneficiary_group": ["Payee Label does not belong to the selected Payee Type."]
