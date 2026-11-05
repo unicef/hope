@@ -23,7 +23,8 @@ the detector separately for each programme; see
   with the incoming record.
 - The match uses the household **identification key**. HOPE compares the key on the incoming
   household with the keys of households already in the programme population.
-- A household without an identification key never collides. The same applies to a blank key.
+- A household without an identification key never collides. The ingestion API rejects an
+  empty key; leave the field out or send `null` when there is no key.
 - Individual members also carry an identification key. HOPE uses it to decide which members
   the incoming household keeps, adds, or removes during a merge.
 - Within a programme, an identification key must be unique among merged, non-removed
@@ -39,19 +40,16 @@ The label shown for the individual identification key is configurable per progra
 
 ## When HOPE resolves a collision
 
-Collision detection runs during registration data processing. The exact moment depends on
-how the data enters HOPE:
+Collision detection runs when a registration data import (RDI) is merged into the
+population, whatever the source of the import. The upload itself never changes an existing
+household: the incoming household and its members are stored as pending records, and the
+full merge described below runs when the import is merged.
 
-| Entry path | When the collision is resolved | Effect |
-|---|---|---|
-| Registration data import (RDI) merge | While pending households are merged into the population | Full household and member merge, described below |
-| Ingestion API upload, including Country Workspace and LAX pushes | While the household is uploaded | The existing household's own fields are updated; no second household is created |
-
-When the collision is resolved at upload time, the member-level merge described below does
-not run. Only an XLSX or Kobo RDI merge performs the full merge. In the LAX push flow, the
-pushed individuals remain in the population without a household; in a nested upload, the
-members are not created. The existing household keeps its current members until an XLSX or
-Kobo RDI merge changes them.
+| Entry path | When the import is merged |
+|---|---|
+| XLSX or Kobo import | When a user merges the import |
+| Ingestion API nested upload | When a user merges the import; it waits in review until then |
+| Country Workspace push, including LAX pushes | Automatically after the push is completed; the imports of a programme are merged one at a time, oldest first |
 
 ## What happens during a full merge
 
@@ -68,12 +66,18 @@ destination and the incoming household as the source:
    documents are invalidated, and their accounts are deactivated.
 5. The head of household and the primary and alternate collector roles are rebuilt from the
    incoming household.
-6. The incoming household's data replaces the existing household's data, except for system
-   fields such as identifiers, programme, registration import, and merge status.
-7. The incoming household record is deleted. The existing household remains.
-8. The registration data import that contained the incoming household is linked to the
+6. The incoming household's data replaces the existing household's data, except for the
+   fields HOPE manages itself: identifiers, programme, registration import, merge status,
+   withdrawal, first registration date, cash received totals, and Kobo submission data.
+   Members keep their withdrawal, registration dates, duplicate and deduplication results,
+   and sanction list flags in the same way.
+7. When the incoming household or member carries a different country workspace id or
+   originating id, the existing record takes the new values and keeps the previous ones in
+   its internal data under `collision_replaced_ids`, one entry per collision.
+8. The incoming household record is deleted. The existing household remains.
+9. The registration data import that contained the incoming household is linked to the
    existing household as an **extra RDI**.
-9. HOPE recalculates the household's population counters after the merge.
+10. HOPE recalculates the household's population counters after the merge.
 
 If any member of either household has no identification key, HOPE cannot complete the merge
 and stops with an error. See [Troubleshooting](#troubleshooting).
@@ -90,6 +94,12 @@ A member removed by a collision is not deleted:
   `removed_by_collision_detector`.
 
 This preserves the audit trail of what the member was before the merge.
+
+If a later collision brings the member back, because the incoming household contains the
+same individual identification key again, HOPE restores the member: the audit entry is
+removed, the relationship, roles, documents, identities, and accounts come from the incoming
+data, and the withdrawal is lifted when it was the collision that withdrew the member. A
+withdrawal made before the collision stays in place.
 
 ## What collision detection does not do
 
@@ -108,7 +118,7 @@ This preserves the audit trail of what the member was before the merge.
 | No collision is detected for an incoming household | The incoming household has no identification key, or its key differs from the existing household | Check the key in the import file or API payload |
 | No collision is detected | The household belongs to a different programme | Confirm the programme on both records |
 | The merge stops with `Cannot merge households with individuals with no identification key` | At least one member in either household has no individual identification key | Populate the missing individual keys, then run the merge again |
-| Members are not in the existing household after an upload resolved the collision | API uploads (Country Workspace, LAX) resolve the collision at upload time and never run the member-level merge | Only an XLSX or Kobo RDI merge runs the full merge. LAX individuals stay in the population without a household; nested-upload members are not created. Re-import the household through an XLSX or Kobo RDI, or add the members manually |
+| Members pushed through the API are not in the existing household | The import has not been merged yet: a nested upload waits in review until a user merges it, and a Country Workspace import is merged automatically but the programme's merge queue stops while an earlier import is in error | Merge the import, or ask an administrator to retry or reset the import that is in error |
 
 ## Next steps
 

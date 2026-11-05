@@ -68,14 +68,22 @@ During a registration data import merge, a detected collision:
 
 - updates the existing household instead of creating a new one;
 - keeps the existing household's identifiers, including its `unicef_id`;
+- keeps the fields HOPE manages itself on the existing household and its members:
+  withdrawal, registration dates, cash received totals, duplicate and deduplication results,
+  and sanction list flags;
+- takes over the incoming country workspace id and originating id and keeps the previous
+  values in the record's internal data under `collision_replaced_ids`, one entry per
+  collision;
 - withdraws members that are no longer present, sets their relationship to **Removed by
   collision**, and keeps the previous relationship and roles in their internal data;
+- restores a member that an earlier collision removed when the incoming household contains
+  that member again;
 - links the incoming registration data import to the existing household as an extra RDI;
 - recalculates the household's population counters.
 
-When an ingestion API upload resolves the collision earlier, only the existing household's
-own fields are updated. The incoming household is not created, and no member-level merge
-runs.
+Ingestion API uploads (nested, Country Workspace, LAX, and people pushes) store pending
+records only. The collision is resolved when their import is merged; Country Workspace
+imports are merged automatically once the push is completed.
 
 ## Verify and monitor
 
@@ -104,7 +112,9 @@ Cannot merge households with individuals with no identification key
 
 at least one member of the existing household or of the incoming household has no
 identification key. The merge transaction rolls back and the registration data import is not
-marked as merged. Populate the missing keys, then run the merge again.
+marked as merged. Populate the missing keys, then run the merge again. For a Country
+Workspace import this happens during the automatic merge: the import ends in **Merge error**
+and the programme's merge queue stops until that import is retried or reset.
 
 If a household has no identification key at all, it is accepted without collision
 processing. Correct the key in the source data and import the household again if matching is
