@@ -126,13 +126,25 @@ export const ProgramDetails = ({
           </ResponsiveGrid>
           <ResponsiveGrid size="third">
             <LabelizedField
+              label={t('Payee Type')}
+              value={program?.payeeType?.name}
+            />
+          </ResponsiveGrid>
+          <ResponsiveGrid size="third">
+            <LabelizedField
+              label={t('GL Code')}
+              value={program?.payeeType?.glCode}
+            />
+          </ResponsiveGrid>
+          <ResponsiveGrid size="third">
+            <LabelizedField
               label={t('Data Collecting Type')}
               value={program?.dataCollectingType?.label}
             />
           </ResponsiveGrid>
           <ResponsiveGrid size="third">
             <LabelizedField
-              label={t('Beneficiary Group')}
+              label={t('Payee Label')}
               value={program?.beneficiaryGroup?.name}
             />
           </ResponsiveGrid>

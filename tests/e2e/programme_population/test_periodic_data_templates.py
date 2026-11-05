@@ -50,7 +50,6 @@ def program(business_area) -> Program:
         group_label_plural="Items Groups",
         member_label="Item",
         member_label_plural="Items",
-        master_detail=True,
     )
     return ProgramFactory(
         name="Test Program",

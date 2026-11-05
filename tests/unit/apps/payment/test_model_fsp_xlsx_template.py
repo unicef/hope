@@ -74,7 +74,7 @@ def pdu_flex_attribute():
 
 def test_fsp_template_get_column_from_core_field():
     data_collecting_type = DataCollectingTypeFactory(type=DataCollectingType.Type.SOCIAL)
-    beneficiary_group = BeneficiaryGroupFactory(name="People", master_detail=False)
+    beneficiary_group = BeneficiaryGroupFactory(name="People")
     program = ProgramFactory(data_collecting_type=data_collecting_type, beneficiary_group=beneficiary_group)
     program_cycle = program.cycles.first()
     payment_plan = PaymentPlanFactory(program_cycle=program_cycle)

@@ -128,6 +128,7 @@ const DuplicateProgramPage = (): ReactElement => {
       'editMode',
       'beneficiaryGroup',
       'isActive',
+      'payeeType',
     ]);
     const initialPduFieldState = {
       label: '',
@@ -281,6 +282,7 @@ const DuplicateProgramPage = (): ReactElement => {
     startDate,
     endDate,
     sector,
+    payeeType: program.payeeType?.id,
     dataCollectingTypeCode: dataCollectingType?.code,
     beneficiaryGroup: beneficiaryGroup?.id,
     description,
@@ -309,6 +311,7 @@ const DuplicateProgramPage = (): ReactElement => {
       'startDate',
       'endDate',
       'sector',
+      'payeeType',
       'dataCollectingTypeCode',
       'beneficiaryGroup',
       'description',
@@ -429,6 +432,7 @@ const DuplicateProgramPage = (): ReactElement => {
                         handleNext={handleNextStep}
                         programId={id}
                         errors={errors}
+                        program={program}
                       />
                     )}
                   </div>

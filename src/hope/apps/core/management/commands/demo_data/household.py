@@ -4,6 +4,7 @@ from extras.test_utils.factories import (
     DocumentTypeFactory,
     HouseholdFactory,
     IndividualFactory,
+    PayeeTypeFactory,
     ProgramCycleFactory,
     ProgramFactory,
     RegistrationDataImportFactory,
@@ -30,7 +31,7 @@ def generate_beneficiary_groups() -> None:
         group_label_plural="Households",
         member_label="Individual",
         member_label_plural="Individuals",
-        master_detail=True,
+        payee_type=PayeeTypeFactory(name="Household", gl_code="7700410"),
     )
     BeneficiaryGroupFactory(
         name="Social Workers",
@@ -38,7 +39,7 @@ def generate_beneficiary_groups() -> None:
         group_label_plural="Households",
         member_label="Individual",
         member_label_plural="Individuals",
-        master_detail=False,
+        payee_type=PayeeTypeFactory(name="Incentive Payee", gl_code="7700430"),
     )
 
 

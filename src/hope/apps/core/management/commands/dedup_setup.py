@@ -122,8 +122,8 @@ class Command(BaseCommand):
             }
 
             # CW-only BA also gets a master-detail (household+individual) program so
-            # the CW household test has a STANDARD DCT + master_detail beneficiary
-            # group to import households into. No golden population — that test is a
+            # the CW household test has a STANDARD DCT + a beneficiary group of the
+            # same payee type to import households into. No golden population — that test is a
             # clean single all-unique batch. Same BA, biometric kept ON. Its ES index
             # is rebuilt outside the transaction, mirroring the primary program.
             if ingest_source == BusinessArea.IngestSource.COUNTRY_WORKSPACE_ONLY:
@@ -168,24 +168,23 @@ class Command(BaseCommand):
         if not dct:
             raise CommandError("Missing reference data on env: no DataCollectingType found")
 
-        needs_master_detail = dct.type == DataCollectingType.Type.STANDARD
-        bg = BeneficiaryGroup.objects.filter(master_detail=needs_master_detail).first()
+        bg = BeneficiaryGroup.objects.filter(payee_type_id=dct.payee_type_id).first()
         if not bg:
             raise CommandError(
                 f"Missing reference data on env: no BeneficiaryGroup with "
-                f"master_detail={needs_master_detail} (required for dct {dct.code!r} type {dct.type})"
+                f"payee_type={dct.payee_type} (required for dct {dct.code!r})"
             )
         return dct, bg, Country.objects.first()
 
     def _household_reference_data(self) -> tuple[DataCollectingType, BeneficiaryGroup]:
-        """Return the STANDARD DCT + master_detail BeneficiaryGroup for the CW household program.
+        """Return the STANDARD DCT + BeneficiaryGroup of its payee type for the CW household program.
 
-        The primary ``_reference_data`` pair is SOCIAL / non-master_detail on demo
-        data (0 households). The CW household+individual test needs the opposite:
-        a STANDARD data-collecting type paired with a master_detail beneficiary
-        group (Program.clean() enforces the pairing). Prefer the canonical
-        ``full_collection`` / ``Household`` rows, fall back to any STANDARD /
-        master_detail row so this holds on envs where the names differ.
+        The primary ``_reference_data`` pair is SOCIAL on demo data (0 households).
+        The CW household+individual test needs the opposite: a STANDARD
+        data-collecting type paired with a beneficiary group of the same payee
+        type. Prefer the canonical ``full_collection`` / ``Household`` rows, fall
+        back to any STANDARD DCT / same-payee-type group so this holds on envs
+        where the names differ.
         """
         dct = (
             DataCollectingType.objects.filter(code="full_collection").first()
@@ -197,13 +196,13 @@ class Command(BaseCommand):
                 "(need 'full_collection' or similar for the household program)"
             )
         bg = (
-            BeneficiaryGroup.objects.filter(name="Household").first()
-            or BeneficiaryGroup.objects.filter(master_detail=True).first()
+            BeneficiaryGroup.objects.filter(name="Household", payee_type_id=dct.payee_type_id).first()
+            or BeneficiaryGroup.objects.filter(payee_type_id=dct.payee_type_id).first()
         )
         if not bg:
             raise CommandError(
-                "Missing reference data on env: no BeneficiaryGroup with "
-                "master_detail=True (need 'Household' or similar for the household program)"
+                f"Missing reference data on env: no BeneficiaryGroup with "
+                f"payee_type={dct.payee_type} (need 'Household' or similar for the household program)"
             )
         return dct, bg
 
@@ -269,7 +268,7 @@ class Command(BaseCommand):
         code: str | None = None,
     ) -> Program:
         # Defaults build the golden-record program; the household program passes a
-        # STANDARD/master_detail dct+bg and its own name/code.
+        # STANDARD dct+bg and its own name/code.
         program = Program.objects.create(
             name=name or f"dedup-regression-{ba.slug}",
             code=code or f"{tag[:3]}1",  # max_length=4, unique per BA (fresh BA -> safe)

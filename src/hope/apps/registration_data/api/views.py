@@ -243,7 +243,7 @@ class RegistrationDataImportViewSet(
             raise ValidationError("In order to perform this action, program status must not be finished.")
 
         if self.program.beneficiary_group != import_from_program.beneficiary_group:
-            raise ValidationError("Cannot import data from a program with a different Beneficiary Group.")
+            raise ValidationError("Cannot import data from a program with a different Payee Label.")
 
         if (
             self.program.data_collecting_type.code != import_from_program.data_collecting_type.code

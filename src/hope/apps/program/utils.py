@@ -37,6 +37,7 @@ from hope.models.utils import MergeStatusModel
 def copy_program_object(copy_from_program_id: str, program_data: dict, user: User) -> Program:
     program = Program.objects.get(id=copy_from_program_id)
     admin_areas = program.admin_areas.all()
+    program.copied_from = Program.objects.select_related("data_collecting_type").get(id=copy_from_program_id)
     program.pk = None
     program.status = Program.DRAFT
     # The copied population has no country_workspace_id, so the Deduplication Engine can never
