@@ -26,6 +26,12 @@ MANAGERIAL_PAYMENT_PLAN_STATUSES = (
     PaymentPlan.Status.IN_REVIEW,
     PaymentPlan.Status.ACCEPTED,
 )
+# statuses a plan moves to when it leaves the managerial list (see PaymentPlanFlow)
+MANAGERIAL_EXIT_PAYMENT_PLAN_STATUSES = (
+    PaymentPlan.Status.LOCKED_FSP,
+    PaymentPlan.Status.FINISHED,
+    PaymentPlan.Status.ABORTED,
+)
 
 
 def _program_scope_by_cycle(program_cycle_id: Any) -> tuple[str, str] | None:
@@ -93,7 +99,7 @@ def increment_payment_plan_list_cache(sender: Any, instance: PaymentPlan, **kwar
     # invalidate payment plan lists
     _invalidate_lists(_program_scope_by_cycle(instance.program_cycle_id), PAYMENT_PLAN_LIST_CACHE_KEYS)
 
-    if instance.status not in MANAGERIAL_PAYMENT_PLAN_STATUSES:
+    if instance.status not in (*MANAGERIAL_PAYMENT_PLAN_STATUSES, *MANAGERIAL_EXIT_PAYMENT_PLAN_STATUSES):
         return
     invalidate_managerial_payment_plan_list_cache(instance.business_area.slug)
 

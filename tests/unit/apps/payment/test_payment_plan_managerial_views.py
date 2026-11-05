@@ -235,20 +235,46 @@ def _list_by_id(managerial_context: dict[str, Any]) -> dict[str, dict]:
     return {row["id"]: row for row in response.json()["results"]}
 
 
-def test_list_payment_plans_reconciliation_overdue_flag(reconciliation_context: dict[str, Any]) -> None:
-    overdue = _make_released_plan(reconciliation_context, days_since_dispersion=20)
-    within_window = _make_released_plan(reconciliation_context, days_since_dispersion=5)
-    reconciled = _make_released_plan(reconciliation_context, days_since_dispersion=20, delivered_quantity=100)
-    failed = _make_released_plan(reconciliation_context, days_since_dispersion=20)
-    failed.payment_items.update(status=Payment.STATUS_ERROR)
+def test_list_payment_plans_reconciliation_overdue_flag_on_when_overdue(
+    reconciliation_context: dict[str, Any],
+) -> None:
+    payment_plan = _make_released_plan(reconciliation_context, days_since_dispersion=20)
 
     rows = _list_by_id(reconciliation_context)
 
-    assert rows[str(overdue.id)]["has_payments_reconciliation_overdue"] is True
-    assert rows[str(overdue.id)]["reconciliation_window_in_days"] == 10
-    assert rows[str(within_window.id)]["has_payments_reconciliation_overdue"] is False
-    assert rows[str(reconciled.id)]["has_payments_reconciliation_overdue"] is False
-    assert rows[str(failed.id)]["has_payments_reconciliation_overdue"] is False
+    assert rows[str(payment_plan.id)]["has_payments_reconciliation_overdue"] is True
+    assert rows[str(payment_plan.id)]["reconciliation_window_in_days"] == 10
+
+
+def test_list_payment_plans_reconciliation_overdue_flag_off_within_window(
+    reconciliation_context: dict[str, Any],
+) -> None:
+    payment_plan = _make_released_plan(reconciliation_context, days_since_dispersion=5)
+
+    rows = _list_by_id(reconciliation_context)
+
+    assert rows[str(payment_plan.id)]["has_payments_reconciliation_overdue"] is False
+
+
+def test_list_payment_plans_reconciliation_overdue_flag_off_when_reconciled(
+    reconciliation_context: dict[str, Any],
+) -> None:
+    payment_plan = _make_released_plan(reconciliation_context, days_since_dispersion=20, delivered_quantity=100)
+
+    rows = _list_by_id(reconciliation_context)
+
+    assert rows[str(payment_plan.id)]["has_payments_reconciliation_overdue"] is False
+
+
+def test_list_payment_plans_reconciliation_overdue_flag_off_for_failed_payments(
+    reconciliation_context: dict[str, Any],
+) -> None:
+    payment_plan = _make_released_plan(reconciliation_context, days_since_dispersion=20)
+    payment_plan.payment_items.update(status=Payment.STATUS_ERROR)
+
+    rows = _list_by_id(reconciliation_context)
+
+    assert rows[str(payment_plan.id)]["has_payments_reconciliation_overdue"] is False
 
 
 def test_list_payment_plans_reconciliation_overdue_flag_off_without_window(

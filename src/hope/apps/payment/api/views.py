@@ -2394,9 +2394,7 @@ class PaymentPlanManagerialViewSet(
             .select_related("program_cycle__program")
             .annotate(
                 has_unreconciled_payments=Exists(
-                    Payment.objects.eligible()
-                    .filter(parent=OuterRef("pk"), delivered_quantity__isnull=True)
-                    .exclude(status__in=Payment.FAILED_STATUSES)
+                    Payment.objects.eligible().unreconciled().filter(parent=OuterRef("pk"))
                 )
             )
         )

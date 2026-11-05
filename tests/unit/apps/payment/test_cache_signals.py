@@ -212,6 +212,28 @@ def test_payment_plan_managerial_status_increments_managerial_list_cache(
     assert get_or_create_cache_key(version_key, 0) > initial_version
 
 
+@pytest.mark.parametrize(
+    "payment_plan_status",
+    [
+        PaymentPlan.Status.LOCKED_FSP,
+        PaymentPlan.Status.FINISHED,
+        PaymentPlan.Status.ABORTED,
+    ],
+)
+def test_payment_plan_leaving_managerial_status_increments_managerial_list_cache(
+    payment_plan: PaymentPlan, business_area: BusinessArea, payment_plan_status: PaymentPlan.Status
+) -> None:
+    cache.clear()
+    version_key = _business_area_version_key(business_area.slug, "management_payment_plans_list")
+    initial_version = get_or_create_cache_key(version_key, 0)
+
+    with TestCase.captureOnCommitCallbacks(execute=True):
+        payment_plan.status = payment_plan_status
+        payment_plan.save()
+
+    assert get_or_create_cache_key(version_key, 0) > initial_version
+
+
 def test_payment_plan_open_does_not_increment_managerial_list_cache(
     payment_plan: PaymentPlan, business_area: BusinessArea
 ) -> None:
@@ -236,6 +258,33 @@ def test_program_save_increments_managerial_list_cache(program: Program, busines
         program.save()
 
     assert get_or_create_cache_key(version_key, 0) > initial_version
+
+
+def test_program_save_of_managerial_field_increments_managerial_list_cache(
+    program: Program, business_area: BusinessArea
+) -> None:
+    cache.clear()
+    version_key = _business_area_version_key(business_area.slug, "management_payment_plans_list")
+    initial_version = get_or_create_cache_key(version_key, 0)
+
+    with TestCase.captureOnCommitCallbacks(execute=True):
+        program.reconciliation_window_in_days = 30
+        program.save(update_fields=["reconciliation_window_in_days"])
+
+    assert get_or_create_cache_key(version_key, 0) > initial_version
+
+
+def test_program_save_of_unrelated_fields_does_not_increment_managerial_list_cache(
+    program: Program, business_area: BusinessArea
+) -> None:
+    cache.clear()
+    version_key = _business_area_version_key(business_area.slug, "management_payment_plans_list")
+    initial_version = get_or_create_cache_key(version_key, 0)
+
+    with TestCase.captureOnCommitCallbacks(execute=True):
+        program.save(update_fields=["household_count", "individual_count"])
+
+    assert get_or_create_cache_key(version_key, 0) == initial_version
 
 
 def test_today_key_bit_changes_daily() -> None:

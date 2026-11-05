@@ -21,6 +21,9 @@ program_copied = Signal()
 # the payment verification list renders the cycle's data, so a cycle change is visible there too
 PROGRAM_CYCLE_LIST_CACHE_KEYS = ("program_cycle_list", "payment_verifications_list")
 
+# programme fields rendered in the managerial list
+MANAGERIAL_LIST_PROGRAM_FIELDS = {"name", "code", "screen_beneficiary", "reconciliation_window_in_days"}
+
 
 def adjust_program_size(program: Program) -> None:
     from hope.apps.program.celery_tasks import adjust_program_size_async_task
@@ -63,8 +66,9 @@ def increase_program_version_cache(sender: Any, instance: Program, **kwargs: dic
         increment_cache_key(version_key)
 
     transaction.on_commit(_increment)
-    # programme settings (e.g. reconciliation window) are rendered in the managerial list
-    invalidate_managerial_payment_plan_list_cache(business_area_slug)
+    update_fields = kwargs.get("update_fields")
+    if update_fields is None or MANAGERIAL_LIST_PROGRAM_FIELDS & set(update_fields):
+        invalidate_managerial_payment_plan_list_cache(business_area_slug)
 
 
 @receiver([post_save, post_delete], sender=ProgramCycle)

@@ -1314,8 +1314,4 @@ class PaymentPlan(
         has_unreconciled_payments = getattr(self, "has_unreconciled_payments", None)
         if has_unreconciled_payments is not None:
             return bool(has_unreconciled_payments)
-        return (
-            self.eligible_payments.exclude(status__in=Payment.FAILED_STATUSES)
-            .filter(delivered_quantity__isnull=True)
-            .exists()
-        )
+        return self.eligible_payments.unreconciled().exists()
