@@ -793,8 +793,8 @@ def test_group_details_action_buttons_follow_group_state(
 
     Neither group has a plan the payment gateway can take, so Send to Payment Gateway stays hidden.
 
-    The two states are mutually exclusive: export needs an exportable plan, delete
-    needs a group with none, so no single group can ever show all six buttons.
+    The two states are mutually exclusive: export and import need an accepted group with an exportable
+    plan, delete needs an open group with none, so no single group can ever show all six buttons.
     """
     group, _ = exportable_group
     program = group.cycle.program
@@ -825,7 +825,7 @@ def test_group_details_action_buttons_follow_group_state(
         browser.open(f"/{business_area.slug}/programs/{program.code}/payment-module/payment-plans/{payment_plan.id}")
         browser.wait_for_element_visible('[data-cy="button-delete-group"]')
         browser.wait_for_element_visible('[data-cy="button-edit-group-name"]')
-        browser.wait_for_element_visible('[data-cy="button-delivery-import-xlsx-group"]')
+        browser.assert_element_absent('[data-cy="button-delivery-import-xlsx-group"]')
         browser.assert_element_absent('[data-cy="button-send-to-payment-gateway-group"]')
         browser.assert_element_absent('[data-cy="button-delivery-export-xlsx-group"]')
         browser.assert_element_absent('[data-cy="button-delivery-export-xlsx-with-auth-code-group"]')

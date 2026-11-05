@@ -29,7 +29,7 @@ class GrievanceDetailsPage(BaseComponents):
     ticket_target_id = 'div[data-cy="label-Target ID"]'
     ticket_individual_id = 'div[data-cy="label-{} ID"]'
     ticket_payment_label = 'div[data-cy="label-Payment ID"]'
-    label_payment_list = 'div[data-cy="label-Payment Plan"]'
+    label_payment_list = 'div[data-cy="label-Payment List"]'
     label_payment_list_verification = 'div[data-cy="label-Payment List Verification"]'
     label_programme = 'div[data-cy="label-Programme"]'
     ticket_category_by = 'div[data-cy="label-Created By"]'

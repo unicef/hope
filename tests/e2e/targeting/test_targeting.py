@@ -518,6 +518,7 @@ class TestSmokeTargeting:
             "Created by",
         ]
         assert expected_column_names == [name.text for name in page_targeting.get_tab_column_label()]
+        page_targeting.disappear_loading_rows()
         assert len(page_targeting.get_target_populations_rows()) == 2
         page_targeting.get_button_create_new().click()
 

@@ -1068,7 +1068,7 @@ class PaymentList(
         return owner.custom_exchange_rate_set_by if owner else None
 
     @property
-    def is_payment_gateway(self) -> bool:  # pragma: no cover
+    def is_payment_gateway(self) -> bool:
         if not getattr(self, "financial_service_provider", None):
             return False
         return self.use_payment_gateway or (

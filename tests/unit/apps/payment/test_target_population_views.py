@@ -2061,3 +2061,36 @@ def test_list_ordered_by_payment_plan_keeps_same_named_plans_apart(
     assert [r["id"] for r in response.json()["results"]][:4] == [
         str(tp.id) for tp in target_populations_in_same_named_plans
     ]
+
+
+@pytest.fixture
+def two_target_populations_in_one_plan(target_population_filter_context: dict[str, Any]) -> list[PaymentList]:
+    cycle = target_population_filter_context["cycle"]
+    plan = PaymentPlanFactory(cycle=cycle, name="Cash")
+    first = PaymentListFactory(
+        program_cycle=cycle,
+        payment_plan=plan,
+        name="Test Target Population",
+        status=PaymentList.Status.TP_OPEN,
+        created_by=target_population_filter_context["user"],
+    )
+    copy = PaymentListFactory(
+        program_cycle=cycle,
+        payment_plan=plan,
+        name="A Copy TP",
+        status=PaymentList.Status.TP_LOCKED,
+        created_by=target_population_filter_context["user"],
+    )
+    return [first, copy]
+
+
+def test_list_sorted_by_name_descending_inside_the_plan(
+    target_population_filter_context: dict[str, Any], two_target_populations_in_one_plan: list[PaymentList]
+) -> None:
+    response = target_population_filter_context["client"].get(
+        target_population_filter_context["list_url"],
+        {"ordering": "payment_plan_name,payment_plan,-name"},
+    )
+
+    assert response.status_code == status.HTTP_200_OK
+    assert [r["name"] for r in response.json()["results"]][:2] == ["Test Target Population", "A Copy TP"]

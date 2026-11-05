@@ -89,7 +89,7 @@ describe('PaymentListsTable', () => {
         RestService.restBusinessAreasProgramsPaymentListsList,
       ).toHaveBeenCalledWith(
         expect.objectContaining({
-          ordering: 'payment_plan_name,payment_plan,-created_at',
+          ordering: 'payment_plan_name,-created_at',
         }),
       );
     });

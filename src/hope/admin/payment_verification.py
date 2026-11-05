@@ -52,7 +52,7 @@ class PaymentVerificationAdmin(ViewOnUiMixin, CursorPaginatorAdmin, HOPEModelAdm
             f"/verification/payment/{obj.payment.id}"
         )
 
-    def payment_list_name(self, obj: PaymentVerification) -> str:  # pragma: no cover
+    def payment_list_name(self, obj: PaymentVerification) -> str:
         payment_list = obj.payment_verification_plan.payment_list
         return getattr(payment_list, "name", "~no name~")
 

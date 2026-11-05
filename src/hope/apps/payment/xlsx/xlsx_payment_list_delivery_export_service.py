@@ -1,4 +1,4 @@
-from collections.abc import Iterable
+from collections.abc import Callable, Iterable
 from io import BytesIO
 import logging
 from tempfile import NamedTemporaryFile
@@ -36,6 +36,14 @@ if TYPE_CHECKING:
     from hope.models import FinancialServiceProvider, User
 
 logger = logging.getLogger(__name__)
+
+
+def unused_number(length: int, taken: set[int], generate: Callable[[int], int] = generate_numeric_token) -> int:
+    """Draw a numeric token of `length` digits that is not in `taken`."""
+    number = generate(length)
+    while number in taken:
+        number = generate(length)
+    return number
 
 
 class XlsxPaymentListDeliveryExportService(XlsxExportBaseService):
@@ -124,43 +132,17 @@ class XlsxPaymentListDeliveryExportService(XlsxExportBaseService):
             ),
         )
 
-        missing_qs = qs.filter(Q(order_number__isnull=True) | Q(token_number__isnull=True))
-        payments_ids = list(missing_qs.order_by("id").values_list("id", flat=True))
-
-        if not payments_ids:
-            return
-
-        payments: list[Payment] = list(qs.only("id", "order_number", "token_number"))
-        if not payments:  # pragma: no cover
-            return
-
+        missing_qs = qs.filter(Q(order_number__isnull=True) | Q(token_number__isnull=True)).order_by("id")
         to_update: list[Payment] = []
-
-        for payment in payments:
-            need_order = payment.order_number is None
-            need_token = payment.token_number is None
-
-            if not (need_order or need_token):  # pragma: no cover
-                continue
-
-            if need_order:
-                n9 = generate_numeric_token(9)
-                while n9 in existing_orders:  # pragma: no cover
-                    n9 = generate_numeric_token(9)
-                payment.order_number = n9
-                existing_orders.add(n9)
-
-            if need_token:
-                n7 = generate_numeric_token(7)
-                while n7 in existing_tokens:  # pragma: no cover
-                    n7 = generate_numeric_token(7)
-                payment.token_number = n7
-                existing_tokens.add(n7)
-
+        for payment in missing_qs.only("id", "order_number", "token_number"):
+            if payment.order_number is None:
+                payment.order_number = unused_number(9, existing_orders)
+                existing_orders.add(payment.order_number)
+            if payment.token_number is None:
+                payment.token_number = unused_number(7, existing_tokens)
+                existing_tokens.add(payment.token_number)
             to_update.append(payment)
-
-        if to_update:
-            Payment.objects.bulk_update(to_update, ["order_number", "token_number"])
+        Payment.objects.bulk_update(to_update, ["order_number", "token_number"])
 
     @staticmethod
     def get_account_fields_headers(payment_list: PaymentList) -> list[str]:

@@ -320,8 +320,8 @@ class TestSmokePaymentVerification:
         page_payment_verification.select_global_program_filter("Active Program")
         page_payment_verification.get_nav_payment_verification().click()
         page_payment_verification.assert_page_header_title("Payment Verification")
-        assert "List of Payment Plans" in page_payment_verification.get_table_title().text
-        assert "Payment Plan ID" in page_payment_verification.get_unicef_id().text
+        assert "List of Payment Lists" in page_payment_verification.get_table_title().text
+        assert "Payment List ID" in page_payment_verification.get_unicef_id().text
         assert "Verification Status" in page_payment_verification.get_verification_status().text
         assert "Total Amount" in page_payment_verification.get_total_delivered_quantity().text
         assert "Payment Disbursement Dates" in page_payment_verification.get_start_date().text
@@ -342,9 +342,9 @@ class TestSmokePaymentVerification:
         page_payment_verification.select_global_program_filter("Active Program")
         page_payment_verification.get_nav_payment_verification().click()
         page_payment_verification.get_cash_plan_table_row().click()
-        page_payment_verification_details.assert_page_header_title("Payment Plan PP-0000-00-1122334")
+        page_payment_verification_details.assert_page_header_title("Payment List PP-0000-00-1122334")
         assert "CREATE VERIFICATION PLAN" in page_payment_verification_details.get_button_new_plan().text
-        assert "Payment Plan Details" in page_payment_verification_details.get_div_payment_list_details().text
+        assert "Payment List Details" in page_payment_verification_details.get_div_payment_list_details().text
         assert "Active Program" in page_payment_verification_details.get_label_programme_name().text
         page_payment_verification_details.get_label_payment_records()
         page_payment_verification_details.get_label_start_date()

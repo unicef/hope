@@ -15,7 +15,7 @@ from hope.models import PaymentVerificationPlan
 if TYPE_CHECKING:
     from collections.abc import Iterable
 
-    from hope.models import Payment, PaymentList  # pragma: no cover
+    from hope.models import Payment, PaymentList
 
 
 logger = logging.getLogger(__name__)

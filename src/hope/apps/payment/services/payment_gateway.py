@@ -96,7 +96,7 @@ class PaymentInstructionFromSplitSerializer(ReadOnlyModelSerializer):
         return payload
 
     def get_external_code(self, obj: Any) -> str:
-        return f"{obj.payment_list.unicef_id}-{obj.order}"  # pragma: no cover
+        return f"{obj.payment_list.unicef_id}-{obj.order}"
 
     class Meta:
         model = PaymentListSplit

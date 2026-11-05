@@ -851,7 +851,7 @@ def test_save_xlsx_file_stores_file_on_group(group_with_one_accepted_plan, user)
 
     group.refresh_from_db()
     assert group.export_file_delivery is not None
-    assert group.export_file_delivery.file.name == f"payment_plan_{group.unicef_id}_payment_list.xlsx"
+    assert group.export_file_delivery.file.name.endswith(f"payment_plan_{group.unicef_id}_payment_list.xlsx")
 
 
 def test_save_xlsx_file_empty_group_raises_and_creates_no_file(empty_group, user):

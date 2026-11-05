@@ -16,6 +16,7 @@ from extras.test_utils.factories import (
 from hope.apps.payment.validators import payment_token_and_order_number_validator
 from hope.apps.payment.xlsx.xlsx_payment_list_delivery_export_service import (
     XlsxPaymentListDeliveryExportService,
+    unused_number,
 )
 from hope.models import Payment, PaymentList
 
@@ -97,6 +98,33 @@ def test_generate_token_and_order_numbers_for_payments(
     payment = payment_list.eligible_payments.first()
     assert len(str(payment.order_number)) == 9
     assert len(str(payment.token_number)) == 7
+
+
+@pytest.fixture
+def payment_with_order_number_only(payments: list[Payment]) -> Payment:
+    payment = payments[0]
+    payment.order_number = 123456789
+    payment.save(update_fields=["order_number"])
+    return payment
+
+
+def test_generate_token_and_order_numbers_keeps_the_numbers_a_payment_already_has(
+    payment_list: PaymentList, program: Any, payment_with_order_number_only: Payment
+) -> None:
+    service = XlsxPaymentListDeliveryExportService(payment_list, None)
+    service.generate_token_and_order_numbers(payment_list.eligible_payments.all(), program)
+
+    payment_with_order_number_only.refresh_from_db()
+    assert payment_with_order_number_only.order_number == 123456789
+    assert len(str(payment_with_order_number_only.token_number)) == 7
+
+
+def test_unused_number_draws_again_while_the_number_is_taken() -> None:
+    draws = iter([111, 222, 333])
+
+    number = unused_number(3, {111, 222}, generate=lambda length: next(draws))
+
+    assert number == 333
 
 
 def test_validation_token_must_not_has_the_same_digit_more_than_three_times() -> None:

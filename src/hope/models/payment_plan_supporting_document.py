@@ -1,8 +1,13 @@
+from typing import TYPE_CHECKING
+
 from django.conf import settings
 from django.db import models
 from django.db.models import Q
 
 from hope.apps.core.upload_paths import upload_path
+
+if TYPE_CHECKING:
+    from hope.models import Program
 
 
 class PaymentPlanSupportingDocument(models.Model):
@@ -42,3 +47,7 @@ class PaymentPlanSupportingDocument(models.Model):
 
     def __str__(self) -> str:
         return self.title
+
+    @property
+    def program(self) -> "Program":
+        return (self.payment_plan or self.follow_up_instruction).program

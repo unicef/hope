@@ -70,8 +70,10 @@ export function TargetPopulationTable({
 
   const table = useTableState({
     rowsPerPageOptions: [10, 15, 20],
-    defaultOrderBy: 'created_at',
-    defaultOrderDirection: 'desc',
+    // Rows sit under a header per payment plan, so by default the plan sorts first
+    // (then the plan's creation date: a name is unique per cycle only, and this
+    // table spans every cycle of the programme).
+    defaultOrdering: 'payment_plan_name,payment_plan,-created_at',
     resetPageOn: filterVariables,
   });
   const { page } = table;
@@ -79,16 +81,6 @@ export function TargetPopulationTable({
     () => ({
       ...filterVariables,
       ...table.paginationParams,
-      // Rows sit under a header per payment plan, so the plan sorts first (then the
-      // plan's creation date, which keeps two same-named plans from different
-      // cycles apart) and the chosen column orders the rows inside it.
-      ordering: [
-        'payment_plan_name',
-        'payment_plan',
-        table.paginationParams.ordering,
-      ]
-        .filter(Boolean)
-        .join(','),
     }),
     [filterVariables, table.paginationParams],
   );
