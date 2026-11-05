@@ -86,8 +86,6 @@ from hope.apps.payment.celery_tasks import (
     send_follow_up_instruction_notification_emails_async_task,
     send_follow_up_instruction_notification_emails_async_task_action,
     send_payment_list_reconciliation_overdue_email_async_task,
-    send_payment_notification_emails_async_task,
-    send_payment_notification_emails_async_task_action,
     send_payment_plan_delivery_xlsx_password_async_task_action,
     send_to_payment_gateway_async_task,
     send_to_payment_gateway_async_task_action,
@@ -398,17 +396,6 @@ def payment_plan_with_accepted_plan():
             AsyncRetryJob,
             lambda payment_list, user, rule: (payment_list, [], ""),
             "payment_list_exclude_beneficiaries_async_task",
-        ),
-        (
-            send_payment_notification_emails_async_task,
-            AsyncJob,
-            lambda payment_list, user, rule: (
-                payment_list,
-                PaymentList.Action.SEND_FOR_APPROVAL.value,
-                str(user.pk),
-                "3 April 2026",
-            ),
-            "send_payment_notification_emails_async_task",
         ),
         (
             payment_list_apply_steficon_hh_selection_async_task,
@@ -2524,24 +2511,6 @@ def test_create_payment_list_xlsx_async_task_queues_job(mock_queue_task: Mock) -
         "payment_list_id": str(payment_list.id),
         "user_id": str(user.pk),
     }
-
-
-def test_send_payment_notification_emails_action_sends_email() -> None:
-    payment_list = PaymentListFactory()
-    user = UserFactory()
-    job = Mock(
-        config={
-            "payment_list_id": str(payment_list.id),
-            "action_user_id": str(user.id),
-            "action": "SEND_FOR_APPROVAL",
-            "action_date": "2026-04-03T12:30:00+00:00",
-        }
-    )
-
-    with patch("hope.apps.payment.notifications.PaymentNotification") as mock_notification:
-        send_payment_notification_emails_async_task_action(job)
-
-    mock_notification.return_value.send_email_notification.assert_called_once()
 
 
 def test_wu_ftp_sync_uses_default_31_day_lookback_window() -> None:

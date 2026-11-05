@@ -209,23 +209,22 @@ def group_status_for_plan_statuses(plan_statuses):
 def move_legacy_child_plans_into_linked_groups(apps, schema_editor):
     """Give every follow-up / top-up / amendment still sitting in a Standard group a linked group of its own.
 
-    Children of one source group, one type and one status share a linked group, so each new group has one status.
-    Follow-Up Instruction children are not in any group and are left alone.
+    Children of one source group and one type share a linked group when they also agree on what a group holds once
+    for all its plans (status stage, payment gateway flag, FSP, currency, exchange rate), so each new group has one
+    of each. Follow-Up Instruction children are not in any group and are left alone.
     """
     PaymentPlan = apps.get_model("payment", "PaymentPlan")
     PaymentPlanGroup = apps.get_model("payment", "PaymentPlanGroup")
-    legacy_children = (
+    legacy_children = list(
         PaymentPlan.objects.filter(is_removed=False, payment_plan_group__plan_type="REGULAR")
         .exclude(plan_type="REGULAR")
-        .select_related("payment_plan_group")
         .order_by("created_at")
+        .values(*PLAN_FIELDS, "status_date")
     )
-    buckets = defaultdict(list)
-    for child in legacy_children:
-        buckets[(child.payment_plan_group, child.plan_type, group_status_for_plan_statuses([child.status]))].append(
-            child
-        )
-    for (source_group, plan_type, status), children in buckets.items():
+    source_groups = PaymentPlanGroup.objects.in_bulk({child["payment_plan_group_id"] for child in legacy_children})
+    for children in bucket_legacy_children(legacy_children):
+        source_group = source_groups[children[0]["payment_plan_group_id"]]
+        plan_type = children[0]["plan_type"]
         linked_group = PaymentPlanGroup.objects.create(
             cycle_id=source_group.cycle_id,
             name=_free_linked_group_name(PaymentPlanGroup.objects, source_group, plan_type),
@@ -233,10 +232,31 @@ def move_legacy_child_plans_into_linked_groups(apps, schema_editor):
             source_group=source_group,
             financial_service_provider_id=source_group.financial_service_provider_id,
             currency_id=source_group.currency_id,
-            status=status,
-            status_date=max(child.status_date for child in children if child.status_date),
+            status=group_status_for_plan_statuses([child["status"] for child in children]),
+            status_date=max(child["status_date"] for child in children if child["status_date"]),
         )
-        PaymentPlan.objects.filter(pk__in=[child.pk for child in children]).update(payment_plan_group=linked_group)
+        PaymentPlan.objects.filter(pk__in=[child["id"] for child in children]).update(payment_plan_group=linked_group)
+
+
+def bucket_legacy_children(children):
+    """Return the children in buckets that can each share a linked group, the bucket of the oldest child first.
+
+    Children are told apart the way regular plans are in split_plans_into_parts: a child with its own exchange rate
+    (each one fetched its rate when it was created) does not share a group with a child that has another rate, and
+    a missing FSP, currency or rate does not count as a difference.
+    """
+    position = {child["id"]: index for index, child in enumerate(children)}
+    buckets = {}
+    # Place children that have every value first, so they decide the buckets; one missing a value then just joins one.
+    for child in sorted(children, key=lambda child: _split_key(child).count(None)):
+        owner = (child["payment_plan_group_id"], child["plan_type"])
+        key = _split_key(child)
+        bucket_key = next(
+            (bucket_key for bucket_key in buckets if bucket_key[0] == owner and _same_values(bucket_key[1], key)),
+            (owner, key),
+        )
+        buckets.setdefault(bucket_key, []).append(child)
+    return sorted(buckets.values(), key=lambda bucket: min(position[child["id"]] for child in bucket))
 
 
 def _free_linked_group_name(groups, source_group, plan_type):

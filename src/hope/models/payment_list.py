@@ -1,7 +1,6 @@
 from dataclasses import dataclass
 from datetime import date, datetime, timedelta
 from decimal import Decimal
-from functools import cached_property
 import os
 from typing import TYPE_CHECKING, Any, Callable, Optional
 
@@ -15,7 +14,6 @@ from django.core.validators import (
     ProhibitNullCharactersValidator,
 )
 from django.db import models, transaction
-from django.db.backends.postgresql.psycopg_any import NumericRange
 from django.db.models import Count, Exists, OuterRef, Q, QuerySet, Sum, Value
 from django.db.models.functions import Coalesce
 from django.utils import timezone
@@ -49,7 +47,6 @@ from hope.models.utils import (
 
 if TYPE_CHECKING:
     from hope.apps.core.exchange_rates.api import ExchangeRateClient
-    from hope.models.acceptance_process_threshold import AcceptanceProcessThreshold
     from hope.models.approval_process import ApprovalProcess
     from hope.models.currency import Currency
     from hope.models.follow_up_instruction import FollowUpInstruction
@@ -1141,36 +1138,6 @@ class PaymentList(
             self.eligible_payments.exclude(status__in=Payment.PENDING_STATUSES).count()
             == self.eligible_payments.count()
         )
-
-    @cached_property
-    def acceptance_process_threshold(self) -> Optional["AcceptanceProcessThreshold"]:
-        total_entitled_quantity_usd = int(self.total_entitled_quantity_usd or 0)
-
-        return self.business_area.acceptance_process_thresholds.filter(
-            payments_range_usd__contains=NumericRange(
-                total_entitled_quantity_usd, total_entitled_quantity_usd, bounds="[]"
-            )
-        ).first()
-
-    @property
-    def approval_number_required(self) -> int:
-        if not self.acceptance_process_threshold:
-            return 1
-
-        return self.acceptance_process_threshold.approval_number_required
-
-    @property
-    def authorization_number_required(self) -> int:
-        if not self.acceptance_process_threshold:
-            return 1
-
-        return self.acceptance_process_threshold.authorization_number_required
-
-    @property
-    def finance_release_number_required(self) -> int:
-        if not self.acceptance_process_threshold:
-            return 1
-        return self.acceptance_process_threshold.finance_release_number_required
 
     @property
     def last_approval_process_date(self) -> datetime | None:

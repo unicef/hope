@@ -1158,17 +1158,34 @@ def group_named_like_next_follow_up(cycle, accepted_group):
     return PaymentPlanFactory(cycle=cycle, name=f"{accepted_group.name} Follow Up 1")
 
 
-def test_create_follow_up_rejected_when_its_name_is_taken_in_the_cycle(
+def test_create_follow_up_takes_the_next_number_when_its_name_is_taken_in_the_cycle(
     accepted_group, failed_payment, group_named_like_next_follow_up, user
 ):
-    with pytest.raises(ValidationError) as error:
-        PaymentPlanService(accepted_group).create_linked_payment_plan(
-            PaymentList.PlanType.FOLLOW_UP, user, date(2099, 1, 1), date(2099, 12, 31)
-        )
-    assert (
-        error.value.detail[0]
-        == f"A payment plan named '{accepted_group.name} Follow Up 1' already exists in this cycle."
+    follow_up_group = PaymentPlanService(accepted_group).create_linked_payment_plan(
+        PaymentList.PlanType.FOLLOW_UP, user, date(2099, 1, 1), date(2099, 12, 31)
     )
+
+    assert follow_up_group.name == f"{accepted_group.name} Follow Up 2"
+
+
+@pytest.fixture
+def second_follow_up_left_after_the_first_was_deleted(cycle, accepted_group):
+    return PaymentPlanFactory(
+        cycle=cycle,
+        name=f"{accepted_group.name} Follow Up 2",
+        plan_type=PaymentList.PlanType.FOLLOW_UP,
+        source_payment_plan=accepted_group,
+    )
+
+
+def test_create_follow_up_after_an_earlier_one_was_deleted_takes_the_next_free_number(
+    accepted_group, failed_payment, second_follow_up_left_after_the_first_was_deleted, user
+):
+    follow_up_group = PaymentPlanService(accepted_group).create_linked_payment_plan(
+        PaymentList.PlanType.FOLLOW_UP, user, date(2099, 1, 1), date(2099, 12, 31)
+    )
+
+    assert follow_up_group.name == f"{accepted_group.name} Follow Up 3"
 
 
 def test_create_follow_up_rejected_without_unsuccessful_payments(accepted_group, delivered_payment, user):

@@ -135,11 +135,17 @@ class PaymentPlanService:
 
     @staticmethod
     def _linked_payment_plan_name(source_payment_plan: PaymentPlan, plan_type: "PaymentList.PlanType") -> str:
+        """Return the next free name for a linked payment plan of this type, skipping names used in the cycle."""
+        prefix = f"{source_payment_plan.name} {plan_type.label} "
+        taken_names = set(
+            PaymentPlan.objects.filter(cycle_id=source_payment_plan.cycle_id, name__startswith=prefix).values_list(
+                "name", flat=True
+            )
+        )
         sequence_number = source_payment_plan.linked_payment_plans.filter(plan_type=plan_type).count() + 1
-        name = f"{source_payment_plan.name} {plan_type.label} {sequence_number}"
-        if PaymentPlan.objects.filter(cycle_id=source_payment_plan.cycle_id, name=name).exists():
-            raise ValidationError(f"A payment plan named '{name}' already exists in this cycle.")
-        return name
+        while f"{prefix}{sequence_number}" in taken_names:
+            sequence_number += 1
+        return f"{prefix}{sequence_number}"
 
     @transaction.atomic
     def split(self, split_type: str, payments_no: int | None = None) -> PaymentPlan:

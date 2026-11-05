@@ -366,11 +366,9 @@ def test_manual_fc_header_recovery_rejects_group_with_plan_outside_review(
 
 
 @patch("hope.apps.payment.services.payment_plan_services.send_payment_plan_notification_emails_async_task")
-@patch("hope.apps.payment.services.payment_list_services.send_payment_notification_emails_async_task")
 @patch("hope.apps.payment.services.payment_plan_services.recalculate_owner_exchange_rate_async_task")
 def test_manual_fc_header_recovery_assigns_multiple_headers_and_releases_group(
     mock_exchange_rate_task,
-    mock_notification_task,
     mock_group_notification_task,
     vision_admin_context,
     recoverable_group_with_two_headers,
@@ -404,7 +402,6 @@ def test_manual_fc_header_recovery_assigns_multiple_headers_and_releases_group(
     }
     mock_exchange_rate_task.assert_called_once()
     assert mock_exchange_rate_task.call_args.args[0].pk == payment_list.payment_plan_id
-    mock_notification_task.assert_not_called()
     mock_group_notification_task.assert_called_once()
 
 

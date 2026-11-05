@@ -198,6 +198,40 @@ def test_list_groups_row_carries_programme_totals_and_configuration(
     assert row["total_entitled_quantity_usd"] == "150.00"
 
 
+@pytest.fixture
+def removed_list_in_group_one(managerial_context: dict[str, Any]) -> PaymentList:
+    return PaymentListFactory(
+        program_cycle=managerial_context["group1"].cycle,
+        payment_plan=managerial_context["group1"],
+        business_area=managerial_context["business_area"],
+        status=PaymentList.Status.TP_OPEN,
+        total_households_count=7,
+        total_entitled_quantity_usd=Decimal("70.00"),
+        is_removed=True,
+    )
+
+
+def test_list_groups_totals_leave_out_removed_payment_lists(
+    managerial_context: dict[str, Any],
+    removed_list_in_group_one: PaymentList,
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(
+        managerial_context["user"],
+        [Permissions.PAYMENT_VIEW_LIST_MANAGERIAL],
+        managerial_context["business_area"],
+        managerial_context["program1"],
+    )
+
+    response = managerial_context["client"].get(managerial_context["url"])
+
+    assert response.status_code == status.HTTP_200_OK
+    row = response.json()["results"][0]
+    assert row["payment_lists_count"] == 2
+    assert row["total_households_count"] == 5
+    assert row["total_entitled_quantity_usd"] == "150.00"
+
+
 def test_list_groups_is_cached_by_etag(
     managerial_context: dict[str, Any],
     create_user_role_with_permissions: Any,

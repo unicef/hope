@@ -12,7 +12,6 @@ from constance.test import override_config
 from django.db import IntegrityError, transaction
 from django.utils import timezone
 from django.utils.timezone import now
-from flags.models import FlagState
 from freezegun import freeze_time
 import pytest
 import requests_mock as requests_mock_lib
@@ -22,8 +21,6 @@ from viewflow.fsm import TransitionNotAllowed
 from extras.test_utils.factories import (
     AccountFactory,
     AccountTypeFactory,
-    ApprovalFactory,
-    ApprovalProcessFactory,
     AreaFactory,
     AreaTypeFactory,
     BusinessAreaFactory,
@@ -1278,11 +1275,6 @@ def test_full_rebuild(
         assert payment_unicef_id not in old_payment_unicef_ids
 
 
-def test_get_approval_type_by_action_value_error(payment_list_base: PaymentList) -> None:
-    with pytest.raises(ValueError, match="Action cannot be None"):
-        PaymentListService(payment_list=payment_list_base).get_approval_type_by_action()
-
-
 def test_validate_action_not_implemented(payment_list_base: PaymentList, user: User) -> None:
     with pytest.raises(ValidationError) as error:
         PaymentListService(payment_list_base).execute_update_status_action(
@@ -1297,11 +1289,6 @@ def test_validate_action_not_implemented(payment_list_base: PaymentList, user: U
         "LOCK_FSP",
         "UNLOCK",
         "UNLOCK_FSP",
-        "SEND_FOR_APPROVAL",
-        "APPROVE",
-        "AUTHORIZE",
-        "REVIEW",
-        "REJECT",
         "SEND_TO_PAYMENT_GATEWAY",
     ]
     assert error.value.detail[0] == f"Not Implemented Action: INVALID_ACTION. List of possible actions: {actions}"
@@ -1713,13 +1700,6 @@ def test_unlock_fsp_rejects_active_fsp_extra_fields_import(
         PaymentListService(payment_list_importing_fsp_extra_fields).unlock_fsp()
 
 
-def test_send_for_approval_rejects_active_fsp_extra_fields_import(
-    payment_list_importing_fsp_extra_fields: PaymentList,
-) -> None:
-    with pytest.raises(ValidationError, match="Another background action is already in progress."):
-        PaymentListService(payment_list_importing_fsp_extra_fields).send_for_approval()
-
-
 def test_unlock_fsp_allows_retryable_background_error(
     payment_list_with_fsp_extra_fields_import_error: PaymentList,
 ) -> None:
@@ -1727,25 +1707,6 @@ def test_unlock_fsp_allows_retryable_background_error(
 
     assert payment_list_with_fsp_extra_fields_import_error.status == PaymentList.Status.LOCKED
     assert payment_list_with_fsp_extra_fields_import_error.background_action_status is None
-
-
-def test_send_for_approval_allows_retryable_background_error(
-    payment_list_with_fsp_extra_fields_import_error: PaymentList,
-    user: User,
-    mocker: Any,
-) -> None:
-    notification_task = mocker.patch(
-        "hope.apps.payment.services.payment_list_services.send_payment_notification_emails_async_task"
-    )
-
-    PaymentListService(payment_list_with_fsp_extra_fields_import_error).execute_update_status_action(
-        {"action": PaymentList.Action.SEND_FOR_APPROVAL},
-        user,
-    )
-
-    assert payment_list_with_fsp_extra_fields_import_error.status == PaymentList.Status.IN_APPROVAL
-    assert payment_list_with_fsp_extra_fields_import_error.background_action_status is None
-    notification_task.assert_called_once()
 
 
 def test_update_pp_program_cycle(payment_list_tp_open: PaymentList, program: Program) -> None:
@@ -2168,16 +2129,6 @@ def test_create_payments_sets_plan_currency(invalid_wallet_payment_list: Payment
     assert payment.currency.code == "AFN"
 
 
-def test_acceptance_process_validation_error(payment_list_base: PaymentList) -> None:
-    payment_list_base.status = PaymentList.Status.OPEN
-    payment_list_base.save()
-
-    with pytest.raises(ValidationError) as error:
-        PaymentListService(payment_list=payment_list_base).acceptance_process()
-
-    assert f"Approval Process object not found for PaymentList {payment_list_base.id}" in str(error.value)
-
-
 def test_update_rules_tp_open(payment_list_base: PaymentList) -> None:
     payment_list_base.status = PaymentList.Status.TP_OPEN
     payment_list_base.save()
@@ -2444,144 +2395,6 @@ def locked_payment_list_with_payments(locked_payment_list):
     return locked_payment_list
 
 
-@patch("hope.apps.payment.services.payment_list_services.config")
-def test_validate_acceptance_raises_type_error_when_required_number_is_none(mock_config, locked_payment_list):
-    mock_config.PM_ACCEPTANCE_PROCESS_USER_HAVE_MULTIPLE_APPROVALS = True
-    service = PaymentListService(payment_list=locked_payment_list)
-    service.action = PaymentList.Action.APPROVE.value
-    approval_process = mock.MagicMock()
-
-    with patch.object(service, "get_required_number_by_approval_type", return_value=None):
-        with pytest.raises(TypeError):
-            service.validate_acceptance_process_approval_count(approval_process)
-
-
-def test_check_payment_list_and_update_status_raises_type_error_when_required_number_is_none(locked_payment_list):
-    service = PaymentListService(payment_list=locked_payment_list)
-    service.action = PaymentList.Action.APPROVE.value
-    approval_process = mock.MagicMock()
-
-    with patch.object(service, "get_required_number_by_approval_type", return_value=None):
-        with pytest.raises(TypeError):
-            service.check_payment_list_and_update_status(approval_process)
-
-
-@patch("hope.apps.payment.services.payment_list_services.config")
-def test_validate_acceptance_does_not_raise_when_count_below_required(mock_config, locked_payment_list):
-    mock_config.PM_ACCEPTANCE_PROCESS_USER_HAVE_MULTIPLE_APPROVALS = True
-    service = PaymentListService(payment_list=locked_payment_list)
-    service.action = PaymentList.Action.APPROVE.value
-    approval_process = mock.MagicMock()
-    approval_process.approvals.filter.return_value.count.return_value = 0
-
-    with patch.object(service, "get_required_number_by_approval_type", return_value=5):
-        service.validate_acceptance_process_approval_count(approval_process)
-
-
-@patch("hope.apps.payment.services.payment_list_services.config")
-def test_validate_acceptance_raises_when_count_meets_required(mock_config, locked_payment_list):
-    mock_config.PM_ACCEPTANCE_PROCESS_USER_HAVE_MULTIPLE_APPROVALS = True
-    service = PaymentListService(payment_list=locked_payment_list)
-    service.action = PaymentList.Action.APPROVE.value
-    approval_process = mock.MagicMock()
-    approval_process.approvals.filter.return_value.count.return_value = 5
-
-    with patch.object(service, "get_required_number_by_approval_type", return_value=5):
-        with pytest.raises(ValidationError, match="Can't create new approval"):
-            service.validate_acceptance_process_approval_count(approval_process)
-
-
-def test_check_payment_list_and_update_status_does_not_change_when_count_below_required(locked_payment_list):
-    service = PaymentListService(payment_list=locked_payment_list)
-    service.action = PaymentList.Action.APPROVE.value
-    approval_process = mock.MagicMock()
-    approval_process.approvals.filter.return_value.count.return_value = 0
-
-    with patch.object(service, "get_required_number_by_approval_type", return_value=5):
-        service.check_payment_list_and_update_status(approval_process)
-
-
-@patch("hope.apps.payment.services.payment_list_services.send_payment_notification_emails_async_task")
-@patch("hope.apps.payment.services.payment_list_services.PaymentListFlow")
-def test_check_payment_list_and_update_status_triggers_when_count_meets_required(
-    mock_flow_cls, mock_notify, locked_payment_list
-):
-    service = PaymentListService(payment_list=locked_payment_list)
-    service.action = PaymentList.Action.APPROVE.value
-    service.user = mock.MagicMock()
-    approval_process = mock.MagicMock()
-    approval_process.approvals.filter.return_value.count.return_value = 5
-
-    with patch.object(service, "get_required_number_by_approval_type", return_value=5):
-        service.check_payment_list_and_update_status(approval_process)
-
-    mock_flow_cls.return_value.status_approve.assert_called_once()
-
-
-@patch("hope.apps.payment.services.payment_list_services.send_payment_notification_emails_async_task")
-@patch("hope.apps.payment.services.payment_list_services.PaymentListFlow")
-def test_check_payment_list_and_update_status_rejects_without_notification(
-    mock_flow_cls, mock_notify, locked_payment_list
-):
-    service = PaymentListService(payment_list=locked_payment_list)
-    service.action = PaymentList.Action.REJECT.value
-    service.user = mock.MagicMock()
-    approval_process = mock.MagicMock()
-    approval_process.approvals.filter.return_value.count.return_value = 1
-
-    with patch.object(service, "get_required_number_by_approval_type", return_value=1):
-        service.check_payment_list_and_update_status(approval_process)
-
-    mock_flow_cls.return_value.status_reject.assert_called_once()
-    mock_notify.assert_not_called()
-
-
-@pytest.fixture
-def vision_authorization_context():
-    business_area = BusinessAreaFactory(vision_integration_active=True)
-    payment_list = PaymentListFactory(
-        business_area=business_area,
-        program_cycle__program__business_area=business_area,
-        status=PaymentList.Status.IN_AUTHORIZATION,
-    )
-    approval_process = ApprovalProcessFactory(
-        payment_list=payment_list,
-        authorization_number_required=1,
-    )
-    ApprovalFactory(
-        approval_process=approval_process,
-        type="AUTHORIZATION",
-        created_by=payment_list.created_by,
-    )
-    return payment_list, approval_process
-
-
-@patch("hope.contrib.vision.tasks.send_payment_plan_to_vision_async_task")
-@patch("hope.apps.payment.services.payment_list_services.send_payment_notification_emails_async_task")
-def test_plan_authorization_does_not_queue_group_vision_send(
-    mock_notification,
-    mock_send_to_vision,
-    vision_authorization_context,
-    django_capture_on_commit_callbacks,
-) -> None:
-    FlagState.objects.get_or_create(
-        name="VISION_INTEGRATION_ACTIVE",
-        condition="boolean",
-        value="True",
-    )
-    payment_list, approval_process = vision_authorization_context
-    service = PaymentListService(payment_list)
-    service.action = PaymentList.Action.AUTHORIZE.value
-    service.user = payment_list.created_by
-
-    with django_capture_on_commit_callbacks(execute=True):
-        service.check_payment_list_and_update_status(approval_process)
-
-    payment_list.refresh_from_db()
-    assert payment_list.status == PaymentList.Status.IN_REVIEW
-    mock_send_to_vision.assert_not_called()
-
-
 def test_ready_for_closure_moves_plan_to_ready_for_closure(
     business_area: Any, cycle: ProgramCycle, django_assert_num_queries: Any
 ) -> None:
@@ -2654,23 +2467,6 @@ def test_close_rejects_stale_status(user: User, business_area: Any, cycle: Progr
         PaymentListService(payment_list).close(closure_comment="Comment", user_id=str(user.pk))
 
     assert "Close Payment List is possible only within Status READY_FOR_CLOSURE" in str(error.value)
-
-
-def test_acceptance_process_rejects_stale_status(user: User, business_area: Any, cycle: ProgramCycle) -> None:
-    payment_list = PaymentListFactory(
-        program_cycle=cycle,
-        business_area=business_area,
-        status=PaymentList.Status.IN_APPROVAL,
-    )
-    ApprovalProcessFactory(payment_list=payment_list)
-    PaymentList.objects.filter(pk=payment_list.pk).update(status=PaymentList.Status.IN_AUTHORIZATION)
-
-    with pytest.raises(ValidationError) as error:
-        PaymentListService(payment_list).execute_update_status_action(
-            input_data={"action": PaymentList.Action.APPROVE.value, "comment": ""}, user=user
-        )
-
-    assert "Not possible to create APPROVE for Payment List within status IN_AUTHORIZATION" in str(error.value)
 
 
 def test_build_payments_chunks_with_chunks_no_none_returns_single_chunk(locked_payment_list_with_payments):

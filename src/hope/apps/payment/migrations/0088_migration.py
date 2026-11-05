@@ -126,6 +126,9 @@ def _rename_tasks(apps, schema_editor, renames: dict[str, str], key_renames) -> 
     periodic_task_model = apps.get_model("django_celery_beat", "PeriodicTask")
     periodic_task_model.objects.filter(task__in=renames).update(task=_mapped("task", renames))
     job_names = {old.rsplit(".", 1)[-1]: new.rsplit(".", 1)[-1] for old, new in renames.items()}
+    # Beat finds its row by name, which is the schedule key: a row left under the old key would get a second row
+    # created next to it and the task would run twice.
+    periodic_task_model.objects.filter(name__in=job_names).update(name=_mapped("name", job_names))
     for job_model_name in ("AsyncJob", "PeriodicAsyncJob"):
         job_model = apps.get_model("core", job_model_name)
         job_model.objects.filter(action__in=renames).update(action=_mapped("action", renames))

@@ -40,16 +40,14 @@ from hope.apps.payment.celery_tasks import (
     payment_list_refresh_payees_async_task,
     prepare_child_payment_list_async_task,
     prepare_payment_list_async_task,
-    recalculate_owner_exchange_rate_async_task,
     send_payment_list_reconciliation_overdue_email_async_task,
-    send_payment_notification_emails_async_task,
     send_to_payment_gateway_async_task,
 )
 from hope.apps.payment.flows import PaymentListFlow
 from hope.apps.payment.services.payment_household_snapshot_service import (
     create_payment_list_snapshot_data,
 )
-from hope.apps.payment.utils import get_link, get_quantity_in_usd, log_payment_list_approval
+from hope.apps.payment.utils import get_link, get_quantity_in_usd
 from hope.apps.targeting.services.utils import from_input_to_targeting_criteria
 from hope.apps.targeting.validators import TargetingCriteriaInputValidator
 from hope.apps.utils.recipients import users_with_permissions
@@ -165,22 +163,8 @@ class PaymentListService:
             PaymentList.Action.LOCK_FSP.value: self.lock_fsp,
             PaymentList.Action.UNLOCK.value: self.unlock,
             PaymentList.Action.UNLOCK_FSP.value: self.unlock_fsp,
-            PaymentList.Action.SEND_FOR_APPROVAL.value: self.send_for_approval,
-            # use the same method for Approve, Authorize, Finance Release and Reject
-            PaymentList.Action.APPROVE.value: self.acceptance_process,
-            PaymentList.Action.AUTHORIZE.value: self.acceptance_process,
-            PaymentList.Action.REVIEW.value: self.acceptance_process,
-            PaymentList.Action.REJECT.value: self.acceptance_process,
             PaymentList.Action.SEND_TO_PAYMENT_GATEWAY.value: self.send_to_payment_gateway,
         }
-
-    def get_required_number_by_approval_type(self, approval_process: ApprovalProcess) -> int:
-        return required_number_for(approval_process, self.get_approval_type_by_action())
-
-    def get_approval_type_by_action(self) -> str:
-        if not self.action:
-            raise ValueError("Action cannot be None")
-        return ACTION_TO_APPROVAL_TYPE[self.action]
 
     def execute_update_status_action(
         self,
@@ -236,25 +220,6 @@ class PaymentListService:
             flow.background_action_status_none()
         flow.status_send_to_approval()
         self.payment_list.save()
-
-    def send_for_approval(self) -> PaymentList:
-        self.transition_send_for_approval()
-        # create new ApprovalProcess
-        ApprovalProcess.objects.create(
-            payment_list=self.payment_list,
-            sent_for_approval_by=self.user,
-            sent_for_approval_date=timezone.now(),
-            approval_number_required=self.payment_list.approval_number_required,
-            authorization_number_required=self.payment_list.authorization_number_required,
-            finance_release_number_required=self.payment_list.finance_release_number_required,
-        )
-        send_payment_notification_emails_async_task(
-            self.payment_list,
-            PaymentList.Action.SEND_FOR_APPROVAL.value,
-            str(self.user.pk),
-            timezone.now().isoformat(),
-        )
-        return self.payment_list
 
     def send_to_payment_gateway(self) -> PaymentList:
         with transaction.atomic():
@@ -439,93 +404,6 @@ class PaymentListService:
         self.payment_list.save()
 
         return self.payment_list
-
-    def acceptance_process(self) -> PaymentList | None:
-        if (
-            self.action == PaymentList.Action.REVIEW.value
-            and self.payment_list.payment_plan_id
-            and self.payment_list.payment_plan.vision_managed
-        ):
-            raise ValidationError("This Payment List is released through its Vision-managed payment plan")
-
-        with transaction.atomic():
-            self.payment_list = (
-                PaymentList.objects.select_for_update(of=("self",))
-                .select_related("program_cycle")
-                .get(pk=self.payment_list.pk)
-            )
-            self.validate_payment_list_status_to_acceptance_process_approval_type()
-
-            # every time we will create Approval for first created AcceptanceProcess
-            # init creation AcceptanceProcess added in send_for_approval()
-            approval_process = self.payment_list.approval_process.first()
-            if not approval_process:
-                logging.exception("Approval Process object not found for PaymentList %s", self.payment_list.pk)
-                raise ValidationError(f"Approval Process object not found for PaymentList {self.payment_list.pk}")
-
-            # validate approval required number and user as well
-            self.validate_acceptance_process_approval_count(approval_process)
-
-            approval_type = self.get_approval_type_by_action()
-            approval_comment = self.input_data.get("comment")
-            approval_data = {
-                "approval_process": approval_process,
-                "created_by": self.user,
-                "type": approval_type,
-                "comment": approval_comment,
-            }
-            Approval.objects.create(**approval_data)
-            log_payment_list_approval(self.payment_list, self.user, approval_type, approval_comment)
-
-            # base on approval required number check if we need update PaymentList status after new Approval
-            self.check_payment_list_and_update_status(approval_process)
-
-        return self.payment_list
-
-    def validate_payment_list_status_to_acceptance_process_approval_type(self) -> None:
-        action_to_statuses_map = {
-            PaymentList.Action.APPROVE.value: [PaymentList.Status.IN_APPROVAL],
-            PaymentList.Action.AUTHORIZE.value: [PaymentList.Status.IN_AUTHORIZATION],
-            PaymentList.Action.REVIEW.value: [PaymentList.Status.IN_REVIEW],
-            PaymentList.Action.REJECT.value: [
-                PaymentList.Status.IN_APPROVAL,
-                PaymentList.Status.IN_AUTHORIZATION,
-                PaymentList.Status.IN_REVIEW,
-            ],
-        }
-        if self.action and self.payment_list.status not in action_to_statuses_map[self.action]:
-            raise ValidationError(
-                f"Not possible to create {self.action} for Payment List within status {self.payment_list.status}"
-            )
-
-    def validate_acceptance_process_approval_count(self, approval_process: ApprovalProcess) -> None:
-        validate_approval_count(
-            approval_process,
-            self.get_approval_type_by_action(),
-            self.get_required_number_by_approval_type(approval_process),
-            self.payment_list.status,
-            self.user,
-        )
-
-    def check_payment_list_and_update_status(self, approval_process: ApprovalProcess) -> None:
-        approval_type = self.get_approval_type_by_action()
-        required_number = self.get_required_number_by_approval_type(approval_process)
-        if approval_process.approvals.filter(type=approval_type).count() < required_number:
-            return
-        user = cast("User", self.user)
-        record_stage_reached(approval_process, approval_type, user)
-        self.apply_acceptance_stage(approval_type, user)
-        if approval_type == Approval.FINANCE_RELEASE:
-            owner = self.payment_list.exchange_rate_owner
-            if owner is None:
-                raise ValidationError(
-                    "A payment list needs a payment plan or Follow-Up Instruction for its exchange rate"
-                )
-            transaction.on_commit(lambda: recalculate_owner_exchange_rate_async_task(owner, str(user.pk)))
-        if notification_action := STAGE_REACHED_NOTIFICATION.get(approval_type):
-            send_payment_notification_emails_async_task(
-                self.payment_list, notification_action.value, str(user.id), timezone.now().isoformat()
-            )
 
     def apply_acceptance_stage(self, approval_type: str, user: "User") -> None:
         """Move the plan to the stage whose approval count was just reached, with the per-plan side effects.

@@ -4,6 +4,7 @@ import importlib
 from types import SimpleNamespace
 from typing import Any
 
+from django.apps.registry import Apps
 from django.db import connection
 from django.db.backends.postgresql.psycopg_any import NumericRange
 from django.db.migrations.loader import MigrationLoader
@@ -34,6 +35,26 @@ def historical_apps(settings: Any) -> SimpleNamespace:
     return SimpleNamespace(
         get_model=lambda app_label, model_name: apps.get_model(app_label, names_in_0085.get(model_name, model_name))
     )
+
+
+@pytest.fixture
+def historical_apps_with_plan_columns(settings: Any) -> Apps:
+    """The models as they are when 0085 runs, with the old plan columns it reads put back on the test table.
+
+    The test database has the final schema, where 0086 has already dropped FSP, currency, payment gateway flag and
+    exchange rate from the plan.
+    """
+    settings.MIGRATION_MODULES = {}
+    state = MigrationLoader(connection).project_state(("payment", "0084_migration"))
+    with connection.cursor() as cursor:
+        cursor.execute(
+            'ALTER TABLE "payment_paymentplan" ADD COLUMN "financial_service_provider_id" uuid NULL, '
+            'ADD COLUMN "currency_id" bigint NULL, ADD COLUMN "use_payment_gateway" boolean NOT NULL DEFAULT false, '
+            'ADD COLUMN "exchange_rate" numeric(15, 8) NULL, '
+            'ADD COLUMN "custom_exchange_rate" boolean NOT NULL DEFAULT false, '
+            'ADD COLUMN "custom_exchange_rate_set_by_id" uuid NULL'
+        )
+    return state.apps
 
 
 @pytest.fixture
@@ -224,9 +245,9 @@ def legacy_children(cycle: Any, group: PaymentPlan, source_plan: PaymentList) ->
 
 
 def test_legacy_children_move_to_one_linked_group_per_type_and_status(
-    historical_apps: SimpleNamespace, group: PaymentPlan, legacy_children: dict[str, PaymentList]
+    historical_apps_with_plan_columns: Apps, group: PaymentPlan, legacy_children: dict[str, PaymentList]
 ) -> None:
-    migration_module.move_legacy_child_plans_into_linked_groups(historical_apps, schema_editor=None)
+    migration_module.move_legacy_child_plans_into_linked_groups(historical_apps_with_plan_columns, schema_editor=None)
 
     follow_up_group = group.linked_payment_plans.get(plan_type=PaymentList.PlanType.FOLLOW_UP)
     top_up_group = group.linked_payment_plans.get(plan_type=PaymentList.PlanType.TOP_UP)
@@ -242,9 +263,9 @@ def test_legacy_children_move_to_one_linked_group_per_type_and_status(
 
 
 def test_linked_group_takes_cycle_currency_and_fsp_from_the_source_group(
-    historical_apps: SimpleNamespace, group: PaymentPlan, legacy_children: dict[str, PaymentList]
+    historical_apps_with_plan_columns: Apps, group: PaymentPlan, legacy_children: dict[str, PaymentList]
 ) -> None:
-    migration_module.move_legacy_child_plans_into_linked_groups(historical_apps, schema_editor=None)
+    migration_module.move_legacy_child_plans_into_linked_groups(historical_apps_with_plan_columns, schema_editor=None)
 
     follow_up_group = group.linked_payment_plans.get(plan_type=PaymentList.PlanType.FOLLOW_UP)
     assert follow_up_group.cycle == group.cycle
@@ -254,18 +275,18 @@ def test_linked_group_takes_cycle_currency_and_fsp_from_the_source_group(
 
 
 def test_source_plan_stays_in_its_group(
-    historical_apps: SimpleNamespace,
+    historical_apps_with_plan_columns: Apps,
     group: PaymentPlan,
     source_plan: PaymentList,
     legacy_children: dict[str, PaymentList],
 ) -> None:
-    migration_module.move_legacy_child_plans_into_linked_groups(historical_apps, schema_editor=None)
+    migration_module.move_legacy_child_plans_into_linked_groups(historical_apps_with_plan_columns, schema_editor=None)
 
     assert list(group.payment_lists.all()) == [source_plan]
 
 
 def test_legacy_follow_ups_in_different_statuses_are_split_into_separate_linked_groups(
-    historical_apps: SimpleNamespace,
+    historical_apps_with_plan_columns: Apps,
     cycle: Any,
     group: PaymentPlan,
     source_plan: PaymentList,
@@ -279,7 +300,7 @@ def test_legacy_follow_ups_in_different_statuses_are_split_into_separate_linked_
         status=PaymentList.Status.FINISHED,
     )
 
-    migration_module.move_legacy_child_plans_into_linked_groups(historical_apps, schema_editor=None)
+    migration_module.move_legacy_child_plans_into_linked_groups(historical_apps_with_plan_columns, schema_editor=None)
 
     names = sorted(
         group.linked_payment_plans.filter(plan_type=PaymentList.PlanType.FOLLOW_UP).values_list("name", flat=True)
@@ -287,15 +308,86 @@ def test_legacy_follow_ups_in_different_statuses_are_split_into_separate_linked_
     assert names == ["Main Group Follow Up 1", "Main Group Follow Up 2"]
 
 
-def test_instruction_child_gets_no_linked_group(historical_apps: SimpleNamespace, cycle: Any) -> None:
+def test_instruction_child_gets_no_linked_group(historical_apps_with_plan_columns: Apps, cycle: Any) -> None:
     instruction_child = PaymentListFactory(
         program_cycle=cycle,
         follow_up_instruction=FollowUpInstructionFactory(program=cycle.program),
         plan_type=PaymentList.PlanType.FOLLOW_UP,
     )
 
-    migration_module.move_legacy_child_plans_into_linked_groups(historical_apps, schema_editor=None)
+    migration_module.move_legacy_child_plans_into_linked_groups(historical_apps_with_plan_columns, schema_editor=None)
 
     instruction_child.refresh_from_db()
     assert instruction_child.payment_plan_id is None
     assert PaymentPlan.objects.filter(plan_type=PaymentList.PlanType.FOLLOW_UP).count() == 0
+
+
+@pytest.fixture
+def follow_ups_with_different_rates(
+    historical_apps_with_plan_columns: Apps, legacy_children: dict[str, PaymentList]
+) -> dict[str, PaymentList]:
+    with connection.cursor() as cursor:
+        cursor.execute(
+            'UPDATE "payment_paymentplan" SET "exchange_rate" = %s WHERE "id" = %s',
+            [Decimal("1.5"), legacy_children["follow_up_one"].pk],
+        )
+        cursor.execute(
+            'UPDATE "payment_paymentplan" SET "exchange_rate" = %s WHERE "id" = %s',
+            [Decimal("1.6"), legacy_children["follow_up_two"].pk],
+        )
+    return legacy_children
+
+
+def test_legacy_follow_ups_with_different_exchange_rates_get_separate_linked_groups(
+    historical_apps_with_plan_columns: Apps,
+    group: PaymentPlan,
+    follow_ups_with_different_rates: dict[str, PaymentList],
+) -> None:
+    migration_module.move_legacy_child_plans_into_linked_groups(historical_apps_with_plan_columns, schema_editor=None)
+
+    follow_up_groups = group.linked_payment_plans.filter(plan_type=PaymentList.PlanType.FOLLOW_UP).order_by("name")
+    assert [list(follow_up_group.payment_lists.all()) for follow_up_group in follow_up_groups] == [
+        [follow_ups_with_different_rates["follow_up_one"]],
+        [follow_ups_with_different_rates["follow_up_two"]],
+    ]
+
+
+def test_linked_groups_of_follow_ups_with_different_exchange_rates_each_take_their_rate(
+    historical_apps_with_plan_columns: Apps,
+    group: PaymentPlan,
+    follow_ups_with_different_rates: dict[str, PaymentList],
+) -> None:
+    migration_module.move_legacy_child_plans_into_linked_groups(historical_apps_with_plan_columns, schema_editor=None)
+
+    migration_module.copy_exchange_rates_from_payment_plans(
+        historical_apps_with_plan_columns, schema_editor=connection.schema_editor()
+    )
+
+    rates = group.linked_payment_plans.filter(plan_type=PaymentList.PlanType.FOLLOW_UP).order_by("name")
+    assert list(rates.values_list("exchange_rate", flat=True)) == [Decimal("1.5"), Decimal("1.6")]
+
+
+@pytest.fixture
+def follow_ups_one_without_a_rate(
+    historical_apps_with_plan_columns: Apps, legacy_children: dict[str, PaymentList]
+) -> dict[str, PaymentList]:
+    with connection.cursor() as cursor:
+        cursor.execute(
+            'UPDATE "payment_paymentplan" SET "exchange_rate" = %s WHERE "id" = %s',
+            [Decimal("1.5"), legacy_children["follow_up_one"].pk],
+        )
+    return legacy_children
+
+
+def test_legacy_follow_up_without_an_exchange_rate_joins_the_one_with_a_rate(
+    historical_apps_with_plan_columns: Apps,
+    group: PaymentPlan,
+    follow_ups_one_without_a_rate: dict[str, PaymentList],
+) -> None:
+    migration_module.move_legacy_child_plans_into_linked_groups(historical_apps_with_plan_columns, schema_editor=None)
+
+    follow_up_group = group.linked_payment_plans.get(plan_type=PaymentList.PlanType.FOLLOW_UP)
+    assert set(follow_up_group.payment_lists.all()) == {
+        follow_ups_one_without_a_rate["follow_up_one"],
+        follow_ups_one_without_a_rate["follow_up_two"],
+    }

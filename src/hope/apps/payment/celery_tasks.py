@@ -1442,21 +1442,6 @@ def periodic_sync_payment_gateway_records_async_task() -> None:
     )
 
 
-def send_payment_notification_emails_async_task_action(job: AsyncJob) -> None:
-    from hope.apps.payment.notifications import PaymentNotification
-    from hope.models import PaymentList, User
-
-    payment_list = PaymentList.objects.get(id=job.config["payment_list_id"])
-    action_user = User.objects.get(id=job.config["action_user_id"])
-    set_sentry_business_area_tag(payment_list.business_area.name)
-    PaymentNotification(
-        payment_list,
-        job.config["action"],
-        action_user,
-        dt.datetime.fromisoformat(job.config["action_date"]),
-    ).send_email_notification()
-
-
 def send_payment_plan_notification_emails_async_task_action(job: AsyncJob) -> None:
     from hope.apps.payment.notifications import PaymentNotification
     from hope.models import PaymentPlan, User
@@ -1530,30 +1515,6 @@ def send_follow_up_instruction_notification_emails_async_task(
         },
         group_key="payment",
         description=f"Send payment notification emails for follow-up instruction {instruction_id}",
-    )
-
-
-def send_payment_notification_emails_async_task(
-    payment_list: PaymentList,
-    action: str,
-    action_user_id: str,
-    action_date: str,
-) -> None:
-    payment_list_id = str(payment_list.id)
-    config = {
-        "payment_list_id": payment_list_id,
-        "action": action,
-        "action_user_id": action_user_id,
-        "action_date": action_date,
-    }
-    AsyncJob.queue_task(
-        instance=payment_list,
-        owner_id=action_user_id,
-        job_name=send_payment_notification_emails_async_task.__name__,
-        action="hope.apps.payment.celery_tasks.send_payment_notification_emails_async_task_action",
-        config=config,
-        group_key="payment",
-        description=f"Send payment notification emails for {payment_list_id}",
     )
 
 

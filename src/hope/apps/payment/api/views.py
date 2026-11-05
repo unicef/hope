@@ -1867,10 +1867,16 @@ class PaymentPlanManagerialViewSet(
                     ),
                 )
             )
+            # The join does not go through the payment list manager, so removed lists are left out here.
             .annotate(
-                payment_lists_count=Count("payment_lists"),
-                households_total=Coalesce(Sum("payment_lists__total_households_count"), 0),
-                entitled_usd_total=Coalesce(Sum("payment_lists__total_entitled_quantity_usd"), Decimal(0)),
+                payment_lists_count=Count("payment_lists", filter=Q(payment_lists__is_removed=False)),
+                households_total=Coalesce(
+                    Sum("payment_lists__total_households_count", filter=Q(payment_lists__is_removed=False)), 0
+                ),
+                entitled_usd_total=Coalesce(
+                    Sum("payment_lists__total_entitled_quantity_usd", filter=Q(payment_lists__is_removed=False)),
+                    Decimal(0),
+                ),
             )
             .order_by("-created_at")
         )
@@ -2534,6 +2540,9 @@ class PaymentPlanViewSet(
 
     @transaction.atomic
     def perform_update(self, serializer: Any) -> None:
+        # Lock and re-read the plan. The edit saves all its fields, so without this a status or an export file
+        # that changed after the request loaded the plan would be overwritten with the old value.
+        serializer.instance = PaymentPlan.objects.select_for_update().get(pk=serializer.instance.pk)
         old_payment_plan = copy_model_object(serializer.instance)
         payment_plan = serializer.save()
         if not create_diff(old_payment_plan, payment_plan, PaymentPlan.ACTIVITY_LOG_MAPPING):

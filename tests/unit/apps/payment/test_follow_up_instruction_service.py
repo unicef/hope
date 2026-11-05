@@ -969,9 +969,7 @@ def test_reactivate_abort_keeps_child_payment_list_payments(
     ]
 
 
-@patch("hope.apps.payment.services.payment_list_services.send_payment_notification_emails_async_task")
-def test_close_transitions_child_payment_lists_to_closed_without_notification(
-    mock_notify: Any,
+def test_close_transitions_child_payment_lists_to_closed(
     user: Any,
     program: Any,
     cycle: Any,
@@ -996,7 +994,6 @@ def test_close_transitions_child_payment_lists_to_closed_without_notification(
     child_plan.refresh_from_db()
     assert result == instruction
     assert child_plan.status == PaymentList.Status.CLOSED
-    mock_notify.assert_not_called()
 
 
 def test_status_returns_first_status_when_no_precedence_match(user, program, business_area, cycle) -> None:
