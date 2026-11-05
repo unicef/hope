@@ -1,15 +1,20 @@
 import { Field } from 'formik';
 import { useTranslation } from 'react-i18next';
 import { Box, Checkbox, FormControlLabel, Grid } from '@mui/material';
-import styled from 'styled-components';
+import type { FormControlLabelProps } from '@mui/material';
 import { FormikCheckboxField } from '@shared/Formik/FormikCheckboxField';
-import type { FC } from 'react';
+import type { FC, ReactElement } from 'react';
 import { useProgramContext } from 'src/programContext';
+import { responsiveGridSize, responsiveValue } from 'src/responsive';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 
-const NoWrapCheckbox = styled(FormControlLabel)`
-  white-space: nowrap;
-`;
+// Long labels must wrap on phones, where the checkboxes stack.
+const NoWrapCheckbox = (props: FormControlLabelProps): ReactElement => (
+  <FormControlLabel
+    sx={{ whiteSpace: responsiveValue('normal', 'nowrap') }}
+    {...props}
+  />
+);
 
 interface ExcludeCheckboxesProps {
   isStandardDctType: boolean;
@@ -45,7 +50,7 @@ const ExcludeCheckboxes: FC<ExcludeCheckboxesProps> = ({
           }}
         >
           <Grid container spacing={3}>
-            <Grid size={6}>
+            <Grid size={responsiveGridSize('half')}>
               {isStandardDctType && (
                 <NoWrapCheckbox
                   disabled
@@ -81,7 +86,7 @@ const ExcludeCheckboxes: FC<ExcludeCheckboxesProps> = ({
                 />
               )}
             </Grid>
-            <Grid size={6}>
+            <Grid size={responsiveGridSize('half')}>
               {screenBeneficiary && isSocialDctType && (
                 <NoWrapCheckbox
                   disabled
@@ -130,7 +135,7 @@ const ExcludeCheckboxes: FC<ExcludeCheckboxesProps> = ({
         >
           <Grid container spacing={3}>
             {isStandardDctType && (
-              <Grid size={6}>
+              <Grid size={responsiveGridSize('half')}>
                 <Field
                   name="flagExcludeIfActiveAdjudicationTicket"
                   label={t(
@@ -143,7 +148,7 @@ const ExcludeCheckboxes: FC<ExcludeCheckboxesProps> = ({
               </Grid>
             )}
             {isSocialDctType && (
-              <Grid size={6}>
+              <Grid size={responsiveGridSize('half')}>
                 <Field
                   name="flagExcludeIfActiveAdjudicationTicket"
                   label={t(
@@ -156,7 +161,7 @@ const ExcludeCheckboxes: FC<ExcludeCheckboxesProps> = ({
               </Grid>
             )}
             {screenBeneficiary && isStandardDctType && (
-              <Grid size={6}>
+              <Grid size={responsiveGridSize('half')}>
                 <Field
                   name="flagExcludeIfOnSanctionList"
                   label={t(
@@ -169,7 +174,7 @@ const ExcludeCheckboxes: FC<ExcludeCheckboxesProps> = ({
               </Grid>
             )}
             {screenBeneficiary && isSocialDctType && (
-              <Grid size={6}>
+              <Grid size={responsiveGridSize('half')}>
                 <Field
                   name="flagExcludeIfOnSanctionList"
                   label={t(

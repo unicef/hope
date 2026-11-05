@@ -34,6 +34,12 @@ SECOND_GROUP_NAME = "Second Group"
 BUILT_TP_NAME = "Built TP"
 RULE_NAME = "Household Size Score"
 RULE_DEFINITION = 'result.value = context["household"].size'
+STATUS = 'div[data-cy="target-population-status"]'
+HOUSEHOLDS_COUNT = '[data-cy="total-number-of-households-count"]'
+
+
+def tp_url(tp: PaymentPlan) -> str:
+    return f"/{tp.business_area.slug}/programs/{tp.program_cycle.program.code}/target-population/{tp.id}"
 
 
 @pytest.fixture

@@ -17,6 +17,7 @@ import type { HeadCell } from './EnhancedTableHead';
 import { EnhancedTableHead } from './EnhancedTableHead';
 import { EnhancedTableToolbar } from './EnhancedTableToolbar';
 import styled from 'styled-components';
+import { PAGINATION_SX, responsiveValue } from 'src/responsive';
 import type { ReactElement, ChangeEvent, MouseEvent } from 'react';
 
 export type Order = 'asc' | 'desc';
@@ -62,9 +63,15 @@ const StyledTable = styled(Table)`
   data-cy: 'table-title';
 `;
 
-const EmptyMessage = styled.div`
+// Sticky and as wide as the visible part of the table container (`cqi`), so
+// it stays centered on screen when the table is wider than the viewport.
+const EmptyMessage = styled(MuiBox)`
+  position: sticky;
+  left: 0;
+  box-sizing: border-box;
   display: flex;
-  width: 100%;
+  width: 100cqi;
+  white-space: normal;
   align-items: center;
   justify-content: center;
   flex-direction: column;
@@ -72,7 +79,6 @@ const EmptyMessage = styled.div`
   font-size: 24px;
   line-height: 28px;
   text-align: center;
-  padding: 70px;
 `;
 
 const SmallerText = styled(MuiBox)`
@@ -83,6 +89,9 @@ const SmallerText = styled(MuiBox)`
 const IconContainer = styled(MuiBox)`
   font-size: 50px;
 `;
+
+// The cell must not clip or scroll, otherwise the sticky message sticks to the cell.
+const EMPTY_CELL_STYLE = { padding: 0, overflow: 'visible' };
 
 const Icon = styled(FindInPageIcon)`
   & svg {
@@ -184,8 +193,8 @@ export function TableComponent<T>({
   } else if (!data?.length) {
     body = (
       <StyledTableRow data-cy="table-row" style={{ height: 70 * emptyRows }}>
-        <StyledTableCell colSpan={headCells.length}>
-          <EmptyMessage>
+        <StyledTableCell colSpan={headCells.length} style={EMPTY_CELL_STYLE}>
+          <EmptyMessage sx={{ p: responsiveValue('24px', '70px') }}>
             <IconContainer>
               <Icon fontSize="inherit" />
             </IconContainer>
@@ -221,14 +230,18 @@ export function TableComponent<T>({
       </>
     );
   }
+  const showEmptyMessage = !loading && !data?.length;
+
   const table = (
     <>
-      <StyledTableContainer>
-        <StyledBox>
+      <StyledTableContainer
+        sx={showEmptyMessage ? { containerType: 'inline-size' } : undefined}
+      >
+        <StyledBox sx={{ flexWrap: responsiveValue('wrap', 'nowrap') }}>
           {title ? <EnhancedTableToolbar title={title} /> : null}
           <StyledBox
             sx={{
-              p: 5,
+              p: responsiveValue(2, 5),
             }}
           >
             {actions || null}
@@ -253,6 +266,7 @@ export function TableComponent<T>({
       <TablePagination
         rowsPerPageOptions={rowsPerPageOptions}
         component="div"
+        sx={PAGINATION_SX}
         count={itemsCount}
         rowsPerPage={rowsPerPage}
         page={page}

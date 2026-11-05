@@ -6,9 +6,10 @@ import { OverviewContainer } from '@core/OverviewContainer';
 import { Title } from '@core/Title';
 import { UniversalMoment } from '@core/UniversalMoment';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import { Grid, Typography } from '@mui/material';
+import { Typography } from '@mui/material';
 import type { Survey } from '@restgenerated/models/Survey';
 import type { ReactElement } from 'react';
+import { ResponsiveGrid, ResponsiveGridContainer } from 'src/responsive';
 import { useTranslation } from 'react-i18next';
 import { useProgramContext } from 'src/programContext';
 
@@ -30,22 +31,22 @@ function SurveyDetails({ survey }: SurveyDetailsProps): ReactElement {
         <Typography variant="h6">{t('Details')}</Typography>
       </Title>
       <OverviewContainer>
-        <Grid container spacing={6}>
-          <Grid size={{ xs: 3 }}>
+        <ResponsiveGridContainer spacing={6}>
+          <ResponsiveGrid size="quarter" mobileSize="half">
             <LabelizedField label={t('Category')} value={category} />
-          </Grid>
-          <Grid size={{ xs: 3 }}>
+          </ResponsiveGrid>
+          <ResponsiveGrid size="quarter" mobileSize="half">
             <LabelizedField label={t('Survey Title')} value={title} />
-          </Grid>
-          <Grid size={{ xs: 3 }}>
+          </ResponsiveGrid>
+          <ResponsiveGrid size="quarter" mobileSize="half">
             <LabelizedField label={t('Created By')} value={createdBy} />
-          </Grid>
-          <Grid size={{ xs: 3 }}>
+          </ResponsiveGrid>
+          <ResponsiveGrid size="quarter" mobileSize="half">
             <LabelizedField label={t('Date Created')}>
               <UniversalMoment>{createdAt}</UniversalMoment>
             </LabelizedField>
-          </Grid>
-          <Grid size={{ xs: 3 }}>
+          </ResponsiveGrid>
+          <ResponsiveGrid size="quarter" mobileSize="half">
             <LabelizedField label={t('Target Population')}>
               {survey?.paymentPlan ? (
                 <BlackLink
@@ -57,20 +58,20 @@ function SurveyDetails({ survey }: SurveyDetailsProps): ReactElement {
                 '-'
               )}
             </LabelizedField>
-          </Grid>
-          <Grid size={{ xs: 3 }}>
+          </ResponsiveGrid>
+          <ResponsiveGrid size="quarter" mobileSize="half">
             <LabelizedField label={t('Programme')}>
               <BlackLink to={`/${baseUrl}/programmes/${programId}`}>
                 {programName}
               </BlackLink>
             </LabelizedField>
-          </Grid>
+          </ResponsiveGrid>
           {body && (
-            <Grid size={{ xs: 8 }}>
+            <ResponsiveGrid size="twoThirds">
               <LabelizedField label={t('Message')} value={body} />
-            </Grid>
+            </ResponsiveGrid>
           )}
-        </Grid>
+        </ResponsiveGridContainer>
       </OverviewContainer>
     </ContainerColumnWithBorder>
   );

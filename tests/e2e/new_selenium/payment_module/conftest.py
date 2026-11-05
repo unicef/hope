@@ -20,9 +20,8 @@ from extras.test_utils.factories import (
     RuleCommitFactory,
 )
 from extras.test_utils.factories.program import ProgramCycleFactory, ProgramFactory
-from extras.test_utils.factories.targeting import TargetingCriteriaRuleFactory, TargetingCriteriaRuleFilterFactory
+from hope.apps.account.permissions import Permissions
 from hope.apps.payment.services.follow_up_instruction_service import FollowUpInstructionService
-from hope.apps.payment.services.payment_plan_services import PaymentPlanService
 from hope.models import (
     BusinessArea,
     Currency,
@@ -41,6 +40,18 @@ from hope.models import (
 
 ENTITLEMENT_RULE_NAME = "Household Size Entitlement"
 ENTITLEMENT_RULE_DEFINITION = 'result.value = context["household"].size * 10'
+PM_VIEW_PERMISSIONS = (
+    Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS,
+    Permissions.PM_VIEW_LIST,
+    Permissions.PM_VIEW_DETAILS,
+)
+
+
+def payment_plan_url(payment_plan: PaymentPlan) -> str:
+    return (
+        f"/{payment_plan.business_area.slug}/programs/{payment_plan.program.code}"
+        f"/payment-module/payment-plans/{payment_plan.id}"
+    )
 
 
 @pytest.fixture
@@ -505,19 +516,3 @@ def accepted_shared_collectors_payment_plan(business_area: BusinessArea) -> Paym
 @pytest.fixture
 def open_payment_plan(business_area: BusinessArea) -> PaymentPlan:
     return _lifecycle_payment_plan(business_area, PaymentPlan.Status.OPEN)
-
-
-@pytest.fixture
-def aborted_targeted_payment_plan(business_area: BusinessArea) -> PaymentPlan:
-    """ABORTED plan whose targeting matches the programme's 3 households, so Reactivate can rebuild it."""
-    payment_plan = _lifecycle_payment_plan(business_area, PaymentPlan.Status.TP_OPEN, payments_count=0)
-    rule = TargetingCriteriaRuleFactory(payment_plan=payment_plan)
-    TargetingCriteriaRuleFilterFactory(targeting_criteria_rule=rule, comparison_method="RANGE", arguments=[1, 10])
-    for size in (1, 3, 5):
-        HouseholdFactory(size=size, business_area=business_area, program=payment_plan.program)
-    PaymentPlanService(payment_plan).full_rebuild()
-    payment_plan.status = PaymentPlan.Status.ABORTED
-    payment_plan.build_status = PaymentPlan.BuildStatus.BUILD_STATUS_OK
-    payment_plan.abort_comment = "Aborted before the e2e run"
-    payment_plan.save(update_fields=["status", "build_status", "abort_comment"])
-    return payment_plan

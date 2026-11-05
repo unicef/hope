@@ -1,4 +1,5 @@
 import { Box, Grid } from '@mui/material';
+import { responsiveValue } from 'src/responsive';
 import {
   GRIEVANCE_CATEGORIES,
   GRIEVANCE_ISSUE_TYPES,
@@ -109,7 +110,7 @@ export function GrievancesSidebar({
       return (
         <Box
           sx={{
-            p: 3,
+            p: responsiveValue(2, 3),
           }}
         >
           <Box
@@ -132,7 +133,7 @@ export function GrievancesSidebar({
       return (
         <Box
           sx={{
-            p: 3,
+            p: responsiveValue(2, 3),
           }}
         >
           <Box
@@ -150,7 +151,7 @@ export function GrievancesSidebar({
     return (
       <Box
         sx={{
-          p: 3,
+          p: responsiveValue(2, 3),
         }}
       >
         <Box

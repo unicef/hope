@@ -1,10 +1,10 @@
-import { Grid } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 import { LabelizedField } from '@core/LabelizedField';
 import { GrievanceFlexFieldPhotoModal } from '../GrievancesPhotoModals/GrievanceFlexFieldPhotoModal';
 import { GrievanceFlexFieldPhotoModalNewIndividual } from '../GrievancesPhotoModals/GrievanceFlexFieldPhotoModalNewIndividual';
 import type { ReactElement } from 'react';
+import { ResponsiveGrid } from 'src/responsive';
 
 export interface CurrentValueProps {
   field: {
@@ -52,23 +52,23 @@ export function CurrentValue({
       break;
     case 'IMAGE':
       return isNewTicket ? (
-        <Grid size={3}>
+        <ResponsiveGrid size="quarter">
           <GrievanceFlexFieldPhotoModalNewIndividual
             flexField={field}
             individualId={values?.selectedIndividual?.id || null}
           />
-        </Grid>
+        </ResponsiveGrid>
       ) : (
-        <Grid size={3}>
+        <ResponsiveGrid size="quarter">
           <GrievanceFlexFieldPhotoModal isCurrent isIndividual field={field} />
-        </Grid>
+        </ResponsiveGrid>
       );
     default:
       displayValue = value;
   }
   return (
-    <Grid size={12}>
+    <ResponsiveGrid size="full">
       <LabelizedField label="Current Value" value={displayValue} />
-    </Grid>
+    </ResponsiveGrid>
   );
 }

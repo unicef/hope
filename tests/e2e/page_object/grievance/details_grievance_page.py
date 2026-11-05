@@ -13,7 +13,8 @@ class GrievanceDetailsPage(BaseComponents):
     button_send_back = 'button[data-cy="button-send-back"]'
     button_close_ticket = 'button[data-cy="button-close-ticket"]'
     button_confirm = 'button[data-cy="button-confirm"]'
-    button_assign_to_me = 'button[data-cy="button-assign-to-me"]'
+    button_assign = 'button[data-cy="button-assign"]'
+    button_confirm_assign = 'button[data-cy="button-confirm-assign"]'
     button_send_for_approval = 'button[data-cy="button-send-for-approval"]'
     button_approval = 'button[data-cy="button-approve"]'
     ticket_status = 'div[data-cy="label-Status"]'
@@ -218,8 +219,12 @@ class GrievanceDetailsPage(BaseComponents):
     def get_button_close_ticket(self) -> WebElement:
         return self.scroll_to_and_wait_for(self.button_close_ticket)
 
-    def get_button_assign_to_me(self) -> WebElement:
-        return self.scroll_to_and_wait_for(self.button_assign_to_me)
+    def get_button_assign(self) -> WebElement:
+        return self.scroll_to_and_wait_for(self.button_assign)
+
+    def assign_to_me(self) -> None:
+        self.get_button_assign().click()
+        self.wait_for(self.button_confirm_assign).click()
 
     def get_button_send_for_approval(self) -> WebElement:
         return self.wait_for(self.button_send_for_approval)

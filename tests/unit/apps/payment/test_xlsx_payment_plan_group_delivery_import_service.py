@@ -9,6 +9,7 @@ from django.db import connection, transaction
 from django.test.utils import CaptureQueriesContext
 from django.utils import timezone
 import openpyxl
+from openpyxl.styles import Font
 import pytest
 
 from extras.test_utils.factories.core import BusinessAreaFactory, CurrencyFactory, FileTempFactory
@@ -809,6 +810,49 @@ def test_validate_skips_fully_blank_rows(group_two_plans_one_fsp):
     service.validate()
 
     assert service.errors == []
+
+
+@pytest.fixture
+def file_with_styled_empty_trailing_cell(group_two_plans_one_fsp):
+    # A formatted-but-empty cell far below the data makes openpyxl report max_row == 100000
+    # (bug 349154: prod file had one at F1048576); the file itself stays tiny.
+    ctx = group_two_plans_one_fsp
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.append(["payment_id", "delivered_quantity", "currency"])
+    ws.append([str(ctx["payment_one"].unicef_id), Decimal("50.00"), "USD"])
+    ws.append([str(ctx["payment_two"].unicef_id), Decimal("75.00"), "USD"])
+    ws["F100000"].font = Font(bold=True)
+    buffer = BytesIO()
+    wb.save(buffer)
+    buffer.seek(0)
+    return buffer
+
+
+def test_validate_does_not_iterate_past_last_data_row(group_two_plans_one_fsp, file_with_styled_empty_trailing_cell):
+    service = XlsxPaymentPlanGroupDeliveryImportService(
+        group_two_plans_one_fsp["group"], file_with_styled_empty_trailing_cell
+    )
+    service.open_workbook()
+
+    service.validate()
+
+    assert service.errors == []
+    assert len(service.ws._cells) < 100
+
+
+def test_get_result_counts_does_not_iterate_past_last_data_row(
+    group_two_plans_one_fsp, file_with_styled_empty_trailing_cell
+):
+    service = XlsxPaymentPlanGroupDeliveryImportService(
+        group_two_plans_one_fsp["group"], file_with_styled_empty_trailing_cell
+    )
+    service.open_workbook()
+
+    result = service.get_result_counts()
+
+    assert result["total_rows"] == 2
+    assert len(service.ws._cells) < 100
 
 
 @pytest.fixture

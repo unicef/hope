@@ -6,6 +6,7 @@ import {
 import { LabelizedField } from '@core/LabelizedField';
 import { useProgramContext } from 'src/programContext';
 import type { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
+import { responsiveGridSize } from 'src/responsive';
 
 interface ResultsForHouseholdsProps {
   paymentPlan: PaymentPlanDetail;
@@ -18,7 +19,7 @@ export const ResultsForHouseholds = ({
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
   return (
-    <Grid size={{ xs: 4 }}>
+    <Grid size={responsiveGridSize('third')}>
       <Grid
         container
         spacing={0}

@@ -21,6 +21,7 @@ import { Field, Form, Formik } from 'formik';
 import type { ReactElement } from 'react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { ResponsiveGrid, responsiveValue } from 'src/responsive';
 
 export interface Props {
   paymentVerificationId: string;
@@ -109,7 +110,7 @@ export function VerifyManual({
           {verifyManualDialogOpen && <AutoSubmitFormOnEnter />}
           <Box
             sx={{
-              p: 2,
+              p: responsiveValue(0, 2),
             }}
           >
             <Button
@@ -142,13 +143,13 @@ export function VerifyManual({
                       <Field
                         name="status"
                         label="Status"
-                        style={{ flexDirection: 'row' }}
+                        style={{ flexDirection: 'row', flexWrap: 'wrap' }}
                         choices={statusChoices}
                         component={FormikRadioGroup}
                       />
                     )}
                   </Grid>
-                  <Grid size={{ xs: 6 }}>
+                  <ResponsiveGrid size="half">
                     {values.status === 'RECEIVED' && (
                       <Field
                         name="receivedAmount"
@@ -158,7 +159,7 @@ export function VerifyManual({
                         component={FormikTextField}
                       />
                     )}
-                  </Grid>
+                  </ResponsiveGrid>
                 </Grid>
               </DialogContainer>
             </DialogContent>

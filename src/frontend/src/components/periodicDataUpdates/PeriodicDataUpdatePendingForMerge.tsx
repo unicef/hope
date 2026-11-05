@@ -170,7 +170,7 @@ const PeriodicDataUpdatePendingForMerge = () => {
   const renderRow = (row: any): ReactElement => (
     <ClickableTableRow
       key={row.id}
-      data-cy={`pending-approval-row-${row.id}`}
+      data-cy={`pending-merge-row-${row.id}`}
       onClick={() =>
         navigate(
           `/${baseUrl}/population/individuals/online-templates/${row.id}`,
@@ -187,6 +187,7 @@ const PeriodicDataUpdatePendingForMerge = () => {
               handleSelectOne(row.id);
             }}
             slotProps={{ input: { 'aria-label': `select row ${row.id}` } }}
+            data-cy={`checkbox-row-${row.id}`}
           />
         ) : (
           <Tooltip title="You are not within authorized users for this Edit">
@@ -275,6 +276,7 @@ const PeriodicDataUpdatePendingForMerge = () => {
           ? [
               <Button
                 key="merge-selected"
+                data-cy="button-bulk-merge"
                 variant="outlined"
                 color="primary"
                 onClick={handleMerge}

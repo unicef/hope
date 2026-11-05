@@ -1,12 +1,17 @@
+import { Box } from '@mui/material';
 import type { ReactElement } from 'react';
-import styled from 'styled-components';
-
-const Container = styled.div`
-  display: flex;
-  align-items: center;
-  flex-direction: row;
-`;
+import { responsiveValue } from 'src/responsive';
 
 export function OverviewContainer({ children }): ReactElement {
-  return <Container>{children}</Container>;
+  return (
+    <Box
+      sx={{
+        display: 'flex',
+        flexDirection: responsiveValue('column', 'row'),
+        alignItems: responsiveValue('stretch', 'center'),
+      }}
+    >
+      {children}
+    </Box>
+  );
 }

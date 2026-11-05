@@ -14,6 +14,7 @@ import type { ReactElement } from 'react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useProgramContext } from '../../programContext';
+import { responsiveValue } from 'src/responsive';
 
 export interface ActivateVerificationPlanProps {
   paymentVerificationPlanId: string;
@@ -64,7 +65,7 @@ export function ActivateVerificationPlan({
     <>
       <Box
         sx={{
-          p: 2,
+          p: responsiveValue(0, 2),
         }}
       >
         <Button

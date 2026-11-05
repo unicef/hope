@@ -1,7 +1,6 @@
 import { DialogContainer } from '@containers/dialogs/DialogContainer';
 import { DialogFooter } from '@containers/dialogs/DialogFooter';
 import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
-import { AutoSubmitFormOnEnter } from '@core/AutoSubmitFormOnEnter';
 import { GreyText } from '@core/GreyText';
 import { LoadingButton } from '@core/LoadingButton';
 import { useBaseUrl } from '@hooks/useBaseUrl';
@@ -26,6 +25,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import * as Yup from 'yup';
 import { useProgramContext } from '../../../../programContext';
+import { COMMENT_MAX_LENGTH } from 'src/config';
 
 export interface MarkAsReleasedPaymentPlanProps {
   paymentPlan: PaymentPlanDetail;
@@ -92,28 +92,31 @@ export function MarkAsReleasedPaymentPlan({
   };
 
   const validationSchema = Yup.object().shape({
-    comment: Yup.string().min(4, 'Too short').max(255, 'Too long'),
+    comment: Yup.string()
+      .min(4, 'Too short')
+      .max(COMMENT_MAX_LENGTH, 'Too long'),
   });
 
   return (
     <Formik
       initialValues={initialValues}
       onSubmit={(values, { resetForm }) => {
-        markAsReleased({
-          businessAreaSlug: businessArea,
-          id: paymentPlan.id,
-          programCode: programId,
-          requestBody: {
-            comment: values.comment,
+        markAsReleased(
+          {
+            businessAreaSlug: businessArea,
+            id: paymentPlan.id,
+            programCode: programId,
+            requestBody: {
+              comment: values.comment,
+            },
           },
-        });
-        resetForm({});
+          { onSuccess: () => resetForm() },
+        );
       }}
       validationSchema={validationSchema}
     >
-      {({ submitForm }) => (
+      {({ submitForm, resetForm }) => (
         <>
-          {markAsReleasedDialogOpen && <AutoSubmitFormOnEnter />}
           <Box
             sx={{
               p: 2,
@@ -131,7 +134,10 @@ export function MarkAsReleasedPaymentPlan({
           </Box>
           <Dialog
             open={markAsReleasedDialogOpen}
-            onClose={() => setMarkAsReleasedDialogOpen(false)}
+            onClose={() => {
+              resetForm();
+              setMarkAsReleasedDialogOpen(false);
+            }}
             scroll="paper"
             aria-labelledby="form-dialog-title"
             maxWidth="md"
@@ -167,6 +173,7 @@ export function MarkAsReleasedPaymentPlan({
                   <Field
                     name="comment"
                     multiline
+                    minRows={3}
                     fullWidth
                     variant="filled"
                     label="Comment (optional)"
@@ -177,7 +184,12 @@ export function MarkAsReleasedPaymentPlan({
             </DialogContent>
             <DialogFooter>
               <DialogActions>
-                <Button onClick={() => setMarkAsReleasedDialogOpen(false)}>
+                <Button
+                  onClick={() => {
+                    resetForm();
+                    setMarkAsReleasedDialogOpen(false);
+                  }}
+                >
                   CANCEL
                 </Button>
                 <LoadingButton

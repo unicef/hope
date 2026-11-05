@@ -4,6 +4,7 @@ import { Tooltip, Box } from '@mui/material';
 import { AddCircleOutlined } from '@mui/icons-material';
 import type { ReactElement } from 'react';
 import withErrorBoundary from '@components/core/withErrorBoundary';
+import { responsiveValue } from 'src/responsive';
 
 export const ContentWrapper = styled(Box)`
   display: flex;
@@ -15,7 +16,7 @@ const IconWrapper = styled.div`
   color: #a0b6d6;
 `;
 
-const AddCriteria = styled.div`
+const AddCriteria = styled(Box)`
   display: flex;
   align-items: center;
   justify-content: center;
@@ -23,8 +24,6 @@ const AddCriteria = styled.div`
   border: 2px solid #a0b6d6;
   border-radius: 3px;
   font-size: 16px;
-  padding: ${({ theme }) => theme.spacing(6)}
-    ${({ theme }) => theme.spacing(28)};
   cursor: pointer;
   p {
     font-weight: 500;
@@ -43,6 +42,7 @@ function TargetingCriteriaDisplayDisabled({
           <Tooltip title="Make sure program has checked household filter flag or individual filter flag">
             <div>
               <AddCriteria
+                sx={{ py: 6, px: responsiveValue(4, 28) }}
                 onClick={() => null}
                 data-cy="button-target-population-disabled-add-criteria"
               >
@@ -57,6 +57,7 @@ function TargetingCriteriaDisplayDisabled({
       ) : (
         <ContentWrapper>
           <AddCriteria
+            sx={{ py: 6, px: responsiveValue(4, 28) }}
             onClick={() => null}
             data-cy="button-target-population-disabled-add-criteria"
           >

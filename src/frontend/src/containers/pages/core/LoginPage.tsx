@@ -1,4 +1,4 @@
-import { Button, Typography } from '@mui/material';
+import { Box, Button, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
@@ -6,6 +6,7 @@ import { Logo } from '@components/core/Logo';
 import { API_BASE_URL, LOGIN_URL } from '../../../config';
 import type { FormEvent, ReactElement } from 'react';
 import { useEffect, useRef, useState } from 'react';
+import { responsiveValue } from 'src/responsive';
 
 const Container = styled.div`
   width: 100vw;
@@ -14,16 +15,13 @@ const Container = styled.div`
   justify-content: center;
   display: flex;
 `;
-const LoginBox = styled.div`
+const LoginBox = styled(Box)`
   text-align: center;
-  height: 538px;
-  width: 533px;
   border-radius: 4px;
   background-color: ${({ theme }) => theme.hctPalette.lightBlue};
   box-shadow:
     0 0 2px 0 rgba(0, 0, 0, 0.12),
     0 2px 2px 0 rgba(0, 0, 0, 0.24);
-  padding: 50px;
 `;
 const SubTitle = styled(Typography)`
   && {
@@ -31,12 +29,7 @@ const SubTitle = styled(Typography)`
     font-size: 24px;
     font-weight: 300;
     line-height: 32px;
-    margin-top: ${({ theme }) => theme.spacing(13)};
   }
-`;
-const LoginButtonContainer = styled.div`
-  margin-left: ${({ theme }) => theme.spacing(11)};
-  margin-right: ${({ theme }) => theme.spacing(11)};
 `;
 const LoginError = styled(Typography)`
   && {
@@ -113,15 +106,24 @@ export function LoginPage(): ReactElement {
 
   return (
     <Container>
-      <LoginBox>
+      <LoginBox
+        sx={{
+          boxSizing: responsiveValue('border-box', 'content-box'),
+          width: responsiveValue('calc(100% - 32px)', '533px'),
+          height: responsiveValue('auto', '538px'),
+          padding: responsiveValue('24px', '50px'),
+        }}
+      >
         <div
           onClick={handleLogoClick}
           style={{ cursor: 'pointer', display: 'inline-block' }}
         >
           <Logo transparent={false} displayLogoWithoutSubtitle={false} />
         </div>
-        <SubTitle>{t('Login via Active Directory')}</SubTitle>
-        <LoginButtonContainer>
+        <SubTitle sx={{ mt: responsiveValue(6, 13) }}>
+          {t('Login via Active Directory')}
+        </SubTitle>
+        <Box sx={{ mx: responsiveValue(0, 11) }}>
           <form method="post" action={LOGIN_URL} onSubmit={handleLogin}>
             <input
               ref={csrfInputRef}
@@ -139,7 +141,7 @@ export function LoginPage(): ReactElement {
             </LoginButton>
           </form>
           {loginError && <LoginError role="alert">{loginError}</LoginError>}
-        </LoginButtonContainer>
+        </Box>
       </LoginBox>
     </Container>
   );

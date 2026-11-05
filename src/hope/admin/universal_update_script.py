@@ -56,7 +56,7 @@ class ProgramChoiceField(forms.ModelChoiceField):
 
 
 class ArrayFieldFilteredSelectMultiple(FilteredSelectMultiple):
-    def format_value(self, value: str | tuple | list) -> list[str]:  # type: ignore
+    def format_value(self, value: str | tuple | list) -> list[str]:
         """Return selected values as a list."""
         if value is None and self.allow_multiple_selected:
             return []

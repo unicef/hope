@@ -10,15 +10,10 @@ import { UniversalMoment } from '@core/UniversalMoment';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import type { ReactElement } from 'react';
 import type { PaymentVerificationPlanDetails } from '@restgenerated/models/PaymentVerificationPlanDetails';
+import { ResponsiveGrid, responsiveValue } from 'src/responsive';
 
 const ChartContainer = styled.div`
   width: 100%;
-  height: 100%;
-`;
-
-const BorderLeftBox = styled.div`
-  padding-left: ${({ theme }) => theme.spacing(6)};
-  border-left: 1px solid #e0e0e0;
   height: 100%;
 `;
 
@@ -43,14 +38,14 @@ export function CashPlanDetailsSection({
   );
 
   return (
-    <Grid container>
-      <Grid size={{ xs: 7 }}>
+    <Grid container rowSpacing={responsiveValue(4, 0)}>
+      <Grid size={responsiveValue(12, 7)}>
         <Title data-cy="div-payment-plan-details">
           <Typography variant="h6">{t('Payment Plan Details')}</Typography>
         </Title>
         <Box
           sx={{
-            pr: 2,
+            pr: responsiveValue(0, 2),
           }}
         >
           <Grid data-cy="grid-payment-plan-details" container spacing={3}>
@@ -76,15 +71,23 @@ export function CashPlanDetailsSection({
                 value: <UniversalMoment>{planNode.endDate}</UniversalMoment>,
               },
             ].map((el) => (
-              <Grid size={{ xs: 3 }} key={el.label}>
+              <ResponsiveGrid size="quarter" mobileSize="half" key={el.label}>
                 <LabelizedField label={el.label}>{el.value}</LabelizedField>
-              </Grid>
+              </ResponsiveGrid>
             ))}
           </Grid>
         </Box>
       </Grid>
-      <Grid data-cy="grid-bank-reconciliation" size={{ xs: 5 }}>
-        <BorderLeftBox>
+      <Grid data-cy="grid-bank-reconciliation" size={responsiveValue(12, 5)}>
+        <Box
+          sx={{
+            pl: responsiveValue(0, 6),
+            pt: responsiveValue(4, 0),
+            borderLeft: responsiveValue('none', '1px solid #e0e0e0'),
+            borderTop: responsiveValue('1px solid #e0e0e0', 'none'),
+            height: '100%',
+          }}
+        >
           <Title>
             <Typography variant="h6" data-cy="table-label">
               {t('Reconciliation Summary')}
@@ -130,7 +133,7 @@ export function CashPlanDetailsSection({
               </ChartContainer>
             </Grid>
           </Grid>
-        </BorderLeftBox>
+        </Box>
       </Grid>
     </Grid>
   );

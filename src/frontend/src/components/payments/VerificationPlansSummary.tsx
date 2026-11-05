@@ -7,6 +7,7 @@ import { Title } from '@core/Title';
 import { UniversalMoment } from '@core/UniversalMoment';
 import type { ReactElement } from 'react';
 import type { PaymentVerificationPlanDetails } from '@restgenerated/models/PaymentVerificationPlanDetails';
+import { ResponsiveGrid, responsiveValue } from 'src/responsive';
 
 interface VerificationPlansSummaryProps {
   planNode: PaymentVerificationPlanDetails;
@@ -18,14 +19,17 @@ export function VerificationPlansSummary({
   const { t } = useTranslation();
   return (
     <Grid container>
-      <Grid data-cy="grid-verification-plans-summary" size={{ xs: 9 }}>
+      <Grid
+        data-cy="grid-verification-plans-summary"
+        size={responsiveValue(12, 9)}
+      >
         <Title>
           <Typography variant="h6" data-cy="table-label">
             {t('Verification Plans Summary')}
           </Typography>
         </Title>
-        <Grid container>
-          <Grid size={{ xs: 3 }}>
+        <Grid container rowSpacing={responsiveValue(3, 0)}>
+          <ResponsiveGrid size="quarter" mobileSize="half">
             <Box
               sx={{
                 pt: 2,
@@ -40,8 +44,8 @@ export function VerificationPlansSummary({
                 />
               </LabelizedField>
             </Box>
-          </Grid>
-          <Grid size={{ xs: 3 }}>
+          </ResponsiveGrid>
+          <ResponsiveGrid size="quarter" mobileSize="half">
             <Box
               sx={{
                 pt: 2,
@@ -57,8 +61,8 @@ export function VerificationPlansSummary({
                 </UniversalMoment>
               </LabelizedField>
             </Box>
-          </Grid>
-          <Grid size={{ xs: 3 }}>
+          </ResponsiveGrid>
+          <ResponsiveGrid size="quarter" mobileSize="half">
             <Box
               sx={{
                 pt: 2,
@@ -74,8 +78,8 @@ export function VerificationPlansSummary({
                 </UniversalMoment>
               </LabelizedField>
             </Box>
-          </Grid>
-          <Grid size={{ xs: 3 }}>
+          </ResponsiveGrid>
+          <ResponsiveGrid size="quarter" mobileSize="half">
             <Box
               sx={{
                 pt: 2,
@@ -89,7 +93,7 @@ export function VerificationPlansSummary({
                 {planNode.paymentVerificationPlans.length}
               </LabelizedField>
             </Box>
-          </Grid>
+          </ResponsiveGrid>
         </Grid>
       </Grid>
     </Grid>

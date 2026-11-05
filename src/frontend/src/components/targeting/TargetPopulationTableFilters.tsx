@@ -1,4 +1,5 @@
-import { Grid, MenuItem } from '@mui/material';
+import { MenuItem } from '@mui/material';
+import { ResponsiveGrid, ResponsiveGridContainer } from 'src/responsive';
 import { Group, Person } from '@mui/icons-material';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -85,14 +86,13 @@ export const TargetPopulationTableFilters = ({
       clearHandler={handleClearFilter}
       applyHandler={handleApplyFilter}
     >
-      <Grid
-        container
+      <ResponsiveGridContainer
         spacing={3}
         sx={{
           alignItems: 'flex-end',
         }}
       >
-        <Grid size={3}>
+        <ResponsiveGrid size="quarter">
           <SearchTextField
             label={t('Search')}
             value={filter.name}
@@ -100,8 +100,8 @@ export const TargetPopulationTableFilters = ({
             data-cy="filters-search"
             fullWidth
           />
-        </Grid>
-        <Grid size={3}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="quarter">
           <SelectFilter
             onChange={(e) => handleFilterChange('status', e.target.value)}
             value={filter.status}
@@ -116,8 +116,8 @@ export const TargetPopulationTableFilters = ({
               </MenuItem>
             ))}
           </SelectFilter>
-        </Grid>
-        <Grid size={3}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="quarter" mobileSize="half">
           <NumberTextField
             topLabel={t(`Number of ${beneficiaryGroup?.groupLabelPlural}`)}
             value={filter.totalHouseholdsCountGte}
@@ -128,8 +128,8 @@ export const TargetPopulationTableFilters = ({
             icon={<Group />}
             data-cy="filters-total-households-count-min"
           />
-        </Grid>
-        <Grid size={3}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="quarter" mobileSize="half">
           <NumberTextField
             value={filter.totalHouseholdsCountLte}
             placeholder={t('To')}
@@ -139,23 +139,23 @@ export const TargetPopulationTableFilters = ({
             icon={<Group />}
             data-cy="filters-total-households-count-max"
           />
-        </Grid>
-        <Grid size={3}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="quarter" mobileSize="half">
           <DatePickerFilter
             topLabel={t('Date Created')}
             placeholder={t('From')}
             onChange={(date) => handleFilterChange('createdAtGte', date)}
             value={filter.createdAtGte}
           />
-        </Grid>
-        <Grid size={3}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="quarter" mobileSize="half">
           <DatePickerFilter
             placeholder={t('To')}
             onChange={(date) => handleFilterChange('createdAtLte', date)}
             value={filter.createdAtLte}
           />
-        </Grid>
-      </Grid>
+        </ResponsiveGrid>
+      </ResponsiveGridContainer>
     </FiltersSection>
   );
 };

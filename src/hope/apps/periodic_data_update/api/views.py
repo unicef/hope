@@ -1,4 +1,5 @@
 import logging
+import os
 from typing import Any
 
 from django.core.exceptions import ValidationError as DjangoValidationError
@@ -145,7 +146,7 @@ class PDUXlsxTemplateViewSet(
         return FileResponse(
             pdu_template.file.file.open(),
             as_attachment=True,
-            filename=pdu_template.file.file.name,
+            filename=os.path.basename(pdu_template.file.file.name),
             content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         )
 

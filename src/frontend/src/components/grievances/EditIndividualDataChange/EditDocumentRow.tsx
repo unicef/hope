@@ -11,6 +11,11 @@ import { LabelizedField } from '@core/LabelizedField';
 import PhotoModal from '@core/PhotoModal/PhotoModal';
 import { DocumentField } from '../DocumentField';
 import { removeItemById } from '../utils/helpers';
+import {
+  ResponsiveGrid,
+  ResponsiveGridContainer,
+  responsiveValue,
+} from 'src/responsive';
 
 interface DisabledDivProps {
   disabled: boolean;
@@ -45,8 +50,8 @@ export function EditDocumentRow({
   const removed = documentsToRemove.includes(document.id);
 
   return isEdited ? (
-    <Grid container spacing={3}>
-      <Grid size={11}>
+    <ResponsiveGridContainer spacing={3}>
+      <Grid size={responsiveValue(12, 11)}>
         <DocumentField
           id={id}
           key={`${id}-${document.country}-${document.type.label}`}
@@ -66,10 +71,14 @@ export function EditDocumentRow({
           values={values}
         />
       </Grid>
-      <Grid size={1}>
+      <Grid
+        sx={{ textAlign: responsiveValue('right', 'left') }}
+        size={responsiveValue(12, 1)}
+      >
         <Box
           sx={{
             display: 'flex',
+            justifyContent: responsiveValue('flex-end', 'flex-start'),
             alignItems: 'center',
           }}
         >
@@ -89,39 +98,43 @@ export function EditDocumentRow({
           </IconButton>
         </Box>
       </Grid>
-    </Grid>
+    </ResponsiveGridContainer>
   ) : (
-    <Grid container spacing={3} key={document.id}>
-      <Grid size={3}>
+    <ResponsiveGridContainer spacing={3} key={document.id}>
+      <ResponsiveGrid size="quarter">
         <DisabledDiv disabled={removed}>
           <LabelizedField label={t('ID TYPE')} value={document.type.label} />
         </DisabledDiv>
-      </Grid>
-      <Grid size={3}>
+      </ResponsiveGrid>
+      <ResponsiveGrid size="quarter">
         <DisabledDiv disabled={removed}>
           <LabelizedField
             label={t('Country')}
             value={document.country?.name ?? '-'}
           />
         </DisabledDiv>
-      </Grid>
-      <Grid size={3}>
+      </ResponsiveGrid>
+      <ResponsiveGrid size="quarter">
         <DisabledDiv disabled={removed}>
           <LabelizedField
             label={t('ID Number')}
             value={document.documentNumber}
           />
         </DisabledDiv>
-      </Grid>
-      <Grid size={2}>
+      </ResponsiveGrid>
+      <ResponsiveGrid size="sixth">
         <PhotoModal showRotate={false} src={document.photo} />
-      </Grid>
-      <Grid size={1}>
+      </ResponsiveGrid>
+      <Grid
+        sx={{ textAlign: responsiveValue('right', 'left') }}
+        size={responsiveValue(12, 1)}
+      >
         {!removed ? (
           !isEditTicket && (
             <Box
               sx={{
                 display: 'flex',
+                justifyContent: responsiveValue('flex-end', 'flex-start'),
                 alignItems: 'center',
               }}
             >
@@ -164,6 +177,6 @@ export function EditDocumentRow({
           </Box>
         )}
       </Grid>
-    </Grid>
+    </ResponsiveGridContainer>
   );
 }

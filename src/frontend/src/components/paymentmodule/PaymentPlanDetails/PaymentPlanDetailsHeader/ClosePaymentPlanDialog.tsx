@@ -140,14 +140,19 @@ export function ClosePaymentPlanDialog({
     <Formik
       initialValues={{ comment: '' }}
       validationSchema={validationSchema}
-      onSubmit={(values) =>
-        closePaymentPlan(values.comment ? values.comment : null)
+      onSubmit={(values, { resetForm }) =>
+        closePaymentPlan(values.comment ? values.comment : null, {
+          onSuccess: () => resetForm(),
+        })
       }
     >
-      {({ submitForm, values }) => (
+      {({ submitForm, values, resetForm }) => (
         <Dialog
           open={open}
-          onClose={onClose}
+          onClose={() => {
+            resetForm();
+            onClose();
+          }}
           scroll="paper"
           aria-labelledby="form-dialog-title"
           maxWidth="md"
@@ -208,7 +213,13 @@ export function ClosePaymentPlanDialog({
           </DialogContent>
           <DialogFooter>
             <DialogActions>
-              <Button onClick={onClose} data-cy="button-cancel">
+              <Button
+                onClick={() => {
+                  resetForm();
+                  onClose();
+                }}
+                data-cy="button-cancel"
+              >
                 {t('Cancel')}
               </Button>
               <LoadingButton

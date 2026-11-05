@@ -1,5 +1,5 @@
-import Grid from '@mui/material/Grid';
 import { MenuItem } from '@mui/material';
+import { ResponsiveGrid, ResponsiveGridContainer } from 'src/responsive';
 import GroupIcon from '@mui/icons-material/Group';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -71,16 +71,16 @@ const RegistrationPeopleFilters = ({
       clearHandler={handleClearFilter}
       applyHandler={handleApplyFilter}
     >
-      <Grid container spacing={3} sx={{ alignItems: 'flex-end' }}>
-        <Grid size={{ xs: 4 }}>
+      <ResponsiveGridContainer spacing={3} sx={{ alignItems: 'flex-end' }}>
+        <ResponsiveGrid size="third">
           <SearchTextField
             label={t('Search')}
             value={filter.search}
             onChange={(e) => handleFilterChange('search', e.target.value)}
             data-cy="filter-search"
           />
-        </Grid>
-        <Grid size={{ xs: 4 }}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="third">
           <AssigneeAutocompleteRestFilter
             name="importedBy"
             label={t('Imported By')}
@@ -92,8 +92,8 @@ const RegistrationPeopleFilters = ({
             appliedFilter={appliedFilter}
             setAppliedFilter={setAppliedFilter}
           />
-        </Grid>
-        <Grid size={{ xs: 4 }}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="third">
           <SelectFilter
             value={filter.status}
             label={t('Status')}
@@ -106,8 +106,8 @@ const RegistrationPeopleFilters = ({
               </MenuItem>
             ))}
           </SelectFilter>
-        </Grid>
-        <Grid size={{ xs: 3 }}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="quarter" mobileSize="half">
           <NumberTextField
             id="minFilter"
             topLabel={t('Num. of People')}
@@ -117,8 +117,8 @@ const RegistrationPeopleFilters = ({
             onChange={(e) => handleFilterChange('sizeMin', e.target.value)}
             data-cy="filter-size-min"
           />
-        </Grid>
-        <Grid size={{ xs: 3 }}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="quarter" mobileSize="half">
           <NumberTextField
             id="maxFilter"
             value={filter.sizeMax}
@@ -127,8 +127,8 @@ const RegistrationPeopleFilters = ({
             onChange={(e) => handleFilterChange('sizeMax', e.target.value)}
             data-cy="filter-size-max"
           />
-        </Grid>
-        <Grid size={{ xs: 3 }}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="quarter" mobileSize="half">
           <DatePickerFilter
             topLabel={t('Import Date')}
             placeholder={t('From')}
@@ -136,16 +136,16 @@ const RegistrationPeopleFilters = ({
             value={filter.importDateRangeMin}
             dataCy="filter-import-date-range-min"
           />
-        </Grid>
-        <Grid size={{ xs: 3 }}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="quarter" mobileSize="half">
           <DatePickerFilter
             placeholder={t('To')}
             onChange={(date) => handleFilterChange('importDateRangeMax', date)}
             value={filter.importDateRangeMax}
             dataCy="filter-import-date-range-max"
           />
-        </Grid>
-      </Grid>
+        </ResponsiveGrid>
+      </ResponsiveGridContainer>
     </FiltersSection>
   );
 };

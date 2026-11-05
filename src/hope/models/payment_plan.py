@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from datetime import date, datetime, timedelta
 from decimal import Decimal
 from functools import cached_property
+import os
 from typing import TYPE_CHECKING, Any, Callable, Optional
 
 from dateutil.relativedelta import relativedelta
@@ -32,7 +33,7 @@ from hope.apps.household.const import FEMALE, MALE, NON_BENEFICIARY
 from hope.apps.targeting.services.targeting_service import TargetingCriteriaQueryingBase
 from hope.apps.utils.validators import DoubleSpaceValidator, StartEndSpaceValidator
 from hope.contrib.vision.choices import VisionStatus
-from hope.models.approval import Approval
+from hope.models.approval import COMMENT_MAX_LENGTH, Approval
 from hope.models.file_temp import FileTemp
 from hope.models.financial_service_provider import FinancialServiceProvider
 from hope.models.household import Household
@@ -243,6 +244,8 @@ class PaymentPlan(
             "SEND_TO_PAYMENT_GATEWAY_ERROR",
             "Send to Payment Gateway Error",
         )
+        REBUILDING = "REBUILDING", "Rebuilding"
+        REBUILD_ERROR = "REBUILD_ERROR", "Rebuild Error"
 
         @staticmethod
         def get_choices() -> list[tuple[str, str]]:
@@ -255,6 +258,7 @@ class PaymentPlan(
         BackgroundActionStatus.EXCLUDE_BENEFICIARIES_ERROR,
         BackgroundActionStatus.SEND_TO_PAYMENT_GATEWAY_ERROR,
         BackgroundActionStatus.APPLYING_CUSTOM_EXCHANGE_RATE_ERROR,
+        BackgroundActionStatus.REBUILD_ERROR,
     ]
 
     class Action(models.TextChoices):
@@ -466,7 +470,7 @@ class PaymentPlan(
         blank=True,
     )
     abort_comment = models.CharField(
-        max_length=255,
+        max_length=COMMENT_MAX_LENGTH,
         blank=True,
         help_text="Reason for aborting",
     )
@@ -1189,7 +1193,7 @@ class PaymentPlan(
     def imported_file_name(self) -> str:
         """Get file to import entitlements."""
         try:
-            return (self.imported_file.file.name or "") if self.imported_file else ""
+            return os.path.basename(self.imported_file.file.name or "") if self.imported_file else ""
         except FileTemp.DoesNotExist:
             return ""
 
