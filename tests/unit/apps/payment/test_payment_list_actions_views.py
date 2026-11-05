@@ -790,6 +790,40 @@ def test_entitlement_actions_are_blocked_for_follow_up_payment_lists(
     assert "Entitlement actions are not available for Follow Up Payment Lists." in response.data
 
 
+@pytest.mark.parametrize(
+    ("permission", "url_key"),
+    [
+        (Permissions.PM_EXCLUDE_BENEFICIARIES_FROM_FOLLOW_UP_PP, "url_exclude_hh"),
+        (Permissions.PM_APPLY_RULE_ENGINE_FORMULA_WITH_ENTITLEMENTS, "url_apply_steficon"),
+        (Permissions.PM_IMPORT_XLSX_WITH_ENTITLEMENTS, "url_import_entitlement_xlsx"),
+        (Permissions.PM_APPLY_RULE_ENGINE_FORMULA_WITH_ENTITLEMENTS, "url_import_entitlement_flat_amount"),
+    ],
+)
+def test_list_changes_are_refused_once_payment_plan_is_locked(
+    payment_list_actions_context: dict[str, Any],
+    create_user_role_with_permissions: Any,
+    permission: Permissions,
+    url_key: str,
+) -> None:
+    create_user_role_with_permissions(
+        payment_list_actions_context["user"],
+        [permission],
+        payment_list_actions_context["business_area"],
+        payment_list_actions_context["program_active"],
+    )
+    payment_list = payment_list_actions_context["pp"]
+    payment_list.status = PaymentList.Status.LOCKED
+    payment_list.save(update_fields=["status"])
+    PaymentPlan.objects.filter(pk=payment_list.payment_plan_id).update(status=PaymentPlan.Status.LOCKED)
+
+    response = payment_list_actions_context["client"].post(payment_list_actions_context[url_key], {}, format="json")
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert "This Payment List is managed by its Payment Plan." in response.data
+    payment_list.refresh_from_db()
+    assert payment_list.background_action_status is None
+
+
 @patch("hope.models.payment_list.PaymentList.get_exchange_rate", return_value=2.0)
 def test_pp_entitlement_import_xlsx(
     mock_exchange_rate: Any,

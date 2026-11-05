@@ -897,6 +897,7 @@ class PaymentListViewSet(
     @transaction.atomic
     def exclude_beneficiaries(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         payment_list = self.get_object()
+        PaymentListService(payment_list).validate_payment_plan_open()
 
         if payment_list.status not in (
             PaymentList.Status.OPEN,
@@ -974,6 +975,7 @@ class PaymentListViewSet(
         payment_list = self.get_object()
         if payment_list.plan_type == PaymentList.PlanType.FOLLOW_UP:
             raise ValidationError("Entitlement actions are not available for Follow Up Payment Lists.")
+        PaymentListService(payment_list).validate_payment_plan_open()
         serializer = self.get_serializer(
             data=request.data,
         )
@@ -1056,6 +1058,7 @@ class PaymentListViewSet(
         payment_list = self.get_object()
         if payment_list.plan_type == PaymentList.PlanType.FOLLOW_UP:
             raise ValidationError("Entitlement actions are not available for Follow Up Payment Lists.")
+        PaymentListService(payment_list).validate_payment_plan_open()
         if payment_list.status != PaymentList.Status.LOCKED:
             raise ValidationError("User can only import for LOCKED Payment List")
         if payment_list.background_action_status == PaymentList.BackgroundActionStatus.XLSX_IMPORTING_ENTITLEMENTS:
@@ -1110,6 +1113,7 @@ class PaymentListViewSet(
         payment_list = self.get_object()
         if payment_list.plan_type == PaymentList.PlanType.FOLLOW_UP:
             raise ValidationError("Entitlement actions are not available for Follow Up Payment Lists.")
+        PaymentListService(payment_list).validate_payment_plan_open()
         serializer = self.get_serializer(
             data=request.data,
         )

@@ -181,9 +181,7 @@ class PaymentListService:
         if not as_manager:
             if self.payment_list.is_instruction_managed:
                 raise ValidationError("This Payment List is managed by a Follow Up Instruction.")
-            payment_plan = self.payment_list.payment_plan
-            if payment_plan is not None and payment_plan.status != PaymentPlan.Status.OPEN:
-                raise ValidationError("This Payment List is managed by its Payment Plan.")
+            self.validate_payment_plan_open()
         self.action = input_data.get("action")
         self.input_data = input_data
         self.user = cast("User", user)
@@ -198,6 +196,18 @@ class PaymentListService:
                 f"{action_label} is not allowed when the Payment List status is "
                 f"{self.payment_list.get_status_display()}."
             )
+
+    def validate_payment_plan_open(self) -> None:
+        """Refuse a list change once the list's Payment Plan is no longer OPEN.
+
+        The plan row is read with a row lock, so a change sent while Lock Payment Plan is running waits for it and is
+        refused, instead of saving the list over the LOCKED_FSP status the lock gave it.
+        """
+        if self.payment_list.payment_plan_id is None:
+            return
+        payment_plan = PaymentPlan.objects.select_for_update().get(pk=self.payment_list.payment_plan_id)
+        if payment_plan.status != PaymentPlan.Status.OPEN:
+            raise ValidationError("This Payment List is managed by its Payment Plan.")
 
     def validate_action(self) -> None:
         actions = list(self.actions_map.keys())
