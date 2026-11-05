@@ -4,6 +4,42 @@
  {{ form.media }}
   <style>
     #header .theme-toggle { display: none; }
+
+    /* JSONEditor ships light-theme colours only. */
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) {
+        div.jsoneditor-field, div.jsoneditor-value { color: var(--body-fg); }
+        div.jsoneditor-readonly, div.jsoneditor td.jsoneditor-separator { color: #a0a0a0; }
+        div.jsoneditor-value.jsoneditor-string { color: #7ee787; }
+        div.jsoneditor-value.jsoneditor-number { color: #ffa198; }
+        div.jsoneditor-value.jsoneditor-boolean { color: #ffa657; }
+        div.jsoneditor-value.jsoneditor-null { color: #79c0ff; }
+        tr.jsoneditor-highlight, tr.jsoneditor-selected { background-color: #2d333b; }
+        div.jsoneditor-field[contenteditable=true]:is(:focus, :hover),
+        div.jsoneditor-value[contenteditable=true]:is(:focus, :hover) {
+          background-color: #3d3a1a;
+          border-color: #6b6420;
+        }
+        div.jsoneditor-navigation-bar, div.jsoneditor-treepath span { background-color: var(--darkened-bg); color: var(--body-fg); }
+        textarea.jsoneditor-text { background-color: var(--body-bg); color: var(--body-fg); }
+      }
+    }
+    :root[data-theme="dark"] {
+      div.jsoneditor-field, div.jsoneditor-value { color: var(--body-fg); }
+      div.jsoneditor-readonly, div.jsoneditor td.jsoneditor-separator { color: #a0a0a0; }
+      div.jsoneditor-value.jsoneditor-string { color: #7ee787; }
+      div.jsoneditor-value.jsoneditor-number { color: #ffa198; }
+      div.jsoneditor-value.jsoneditor-boolean { color: #ffa657; }
+      div.jsoneditor-value.jsoneditor-null { color: #79c0ff; }
+      tr.jsoneditor-highlight, tr.jsoneditor-selected { background-color: #2d333b; }
+      div.jsoneditor-field[contenteditable=true]:is(:focus, :hover),
+      div.jsoneditor-value[contenteditable=true]:is(:focus, :hover) {
+        background-color: #3d3a1a;
+        border-color: #6b6420;
+      }
+      div.jsoneditor-navigation-bar, div.jsoneditor-treepath span { background-color: var(--darkened-bg); color: var(--body-fg); }
+      textarea.jsoneditor-text { background-color: var(--body-bg); color: var(--body-fg); }
+    }
   </style>
   <script>
    document.addEventListener('DOMContentLoaded', () => {
