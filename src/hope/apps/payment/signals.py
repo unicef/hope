@@ -60,6 +60,15 @@ def _invalidate_lists(scope: tuple[str, str] | None, specific_view_cache_keys: t
     invalidate_payment_plan_list_cache(business_area_slug, program_code, specific_view_cache_keys)
 
 
+def _affects_managerial_list(instance: PaymentPlan, update_fields: Any) -> bool:
+    if instance.status in MANAGERIAL_PAYMENT_PLAN_STATUSES:
+        return True
+    # a plan already out of the list only matters on the save that moved it out
+    return instance.status in MANAGERIAL_EXIT_PAYMENT_PLAN_STATUSES and (
+        update_fields is None or "status" in update_fields
+    )
+
+
 @receiver(post_save, sender=ProgramCycle)
 def create_default_payment_plan_group(
     sender: Any, instance: ProgramCycle, created: bool, raw: bool = False, **kwargs: dict
@@ -97,11 +106,12 @@ def increment_payment_plan_list_cache(sender: Any, instance: PaymentPlan, **kwar
     if kwargs.get("raw"):
         return
     # invalidate payment plan lists
-    _invalidate_lists(_program_scope_by_cycle(instance.program_cycle_id), PAYMENT_PLAN_LIST_CACHE_KEYS)
+    scope = _program_scope_by_cycle(instance.program_cycle_id)
+    _invalidate_lists(scope, PAYMENT_PLAN_LIST_CACHE_KEYS)
 
-    if instance.status not in (*MANAGERIAL_PAYMENT_PLAN_STATUSES, *MANAGERIAL_EXIT_PAYMENT_PLAN_STATUSES):
+    if scope is None or not _affects_managerial_list(instance, kwargs.get("update_fields")):
         return
-    invalidate_managerial_payment_plan_list_cache(instance.business_area.slug)
+    invalidate_managerial_payment_plan_list_cache(scope[0])
 
 
 @receiver(post_save, sender=PaymentVerificationPlan)
