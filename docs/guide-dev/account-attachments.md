@@ -76,6 +76,7 @@ Run it from the Django shell:
 from hope.one_time_scripts.migrate_wallet_images_to_account_attachments import (
     migrate_wallet_images_to_account_attachments,
 )
+
 migrate_wallet_images_to_account_attachments()
 ```
 
