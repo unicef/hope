@@ -819,7 +819,7 @@ def test_list_changes_are_refused_once_payment_plan_is_locked(
     response = payment_list_actions_context["client"].post(payment_list_actions_context[url_key], {}, format="json")
 
     assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert "This Payment List is managed by its Payment Plan." in response.data
+    assert "This Payment List can be changed only while its Payment Plan is Open." in response.data
     payment_list.refresh_from_db()
     assert payment_list.background_action_status is None
 

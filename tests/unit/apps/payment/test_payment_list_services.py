@@ -2585,4 +2585,4 @@ def test_status_action_rejected_when_group_is_not_open(user: User, business_area
         PaymentListService(payment_list).execute_update_status_action(
             input_data={"action": PaymentList.Action.UNLOCK_FSP}, user=user
         )
-    assert error.value.detail[0] == "This Payment List is managed by its Payment Plan."
+    assert error.value.detail[0] == "This Payment List can be changed only while its Payment Plan is Open."

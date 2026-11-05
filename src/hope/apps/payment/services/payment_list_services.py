@@ -207,7 +207,7 @@ class PaymentListService:
             return
         payment_plan = PaymentPlan.objects.select_for_update().get(pk=self.payment_list.payment_plan_id)
         if payment_plan.status != PaymentPlan.Status.OPEN:
-            raise ValidationError("This Payment List is managed by its Payment Plan.")
+            raise ValidationError("This Payment List can be changed only while its Payment Plan is Open.")
 
     def validate_action(self) -> None:
         actions = list(self.actions_map.keys())
