@@ -1,8 +1,7 @@
 from functools import cache
 from pathlib import PurePosixPath
 import posixpath
-import re
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from django.core.exceptions import ImproperlyConfigured, SuspiciousOperation
 from django.core.files.storage import default_storage
@@ -12,6 +11,11 @@ from django.db.models import Model
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
+from hope.apps.core.upload_paths import build_upload_path
+
+if TYPE_CHECKING:
+    from hope.models import Program
+
 STORED_IMAGE_PREFIX_CONTEXT_KEY = "stored_image_prefix"
 
 
@@ -20,16 +24,16 @@ def _get_image_extensions() -> frozenset[str]:
     return frozenset(get_available_image_extensions())
 
 
-def get_stored_image_prefix(business_area_code: str, program_code: str) -> str:
-    """Return the directory CW writes the images of a program to: ``{business area code}/{program code}/``.
+def get_stored_image_prefix(business_area_slug: str, program: "Program") -> str:
+    """Return the directory the images of a program are stored in.
 
-    The codes are sanitized the same way as in CW, the two have to stay in sync.
+    It is ``<program start year>/<business area slug>/<program code>/``, the layout of the files HOPE stores
+    itself (see ``hope.apps.core.upload_paths``), and CW has to write to the same directory. The business area
+    slug is passed in because callers already have the business area loaded.
     """
-
-    def sanitize(value: str) -> str:
-        return re.sub(r"[^A-Za-z0-9._-]", "_", value.strip())
-
-    return f"{sanitize(business_area_code)}/{sanitize(program_code)}/"
+    return build_upload_path(
+        "", year=program.start_date.year, business_area_slug=business_area_slug, program_code=program.code
+    )
 
 
 def normalize_stored_image_name(file_name: str) -> str:
@@ -91,7 +95,7 @@ class StoredImageField(serializers.CharField):
         kwargs.setdefault(
             "help_text",
             "Name of an image in the media storage, relative to the container root and starting with "
-            "'{business area code}/{program code}/'.",
+            "'<program start year>/<business area slug>/<program code>/'.",
         )
         super().__init__(**kwargs)
 

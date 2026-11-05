@@ -87,7 +87,7 @@ def lax_households_url(business_area: BusinessArea, rdi: RegistrationDataImport)
 
 @pytest.fixture
 def file_prefix(rdi: RegistrationDataImport) -> str:
-    return get_stored_image_prefix(rdi.business_area.code, rdi.program.code)
+    return get_stored_image_prefix(rdi.business_area.slug, rdi.program)
 
 
 @pytest.fixture
@@ -533,7 +533,7 @@ def test_create_household_with_file_of_another_program_returns_error(
         "head_of_household_id": head_of_household.unicef_id,
         "primary_collector_id": primary_collector.unicef_id,
         "members": [head_of_household.unicef_id],
-        "consent_sign": store_image("OTH/zz99/CW_hh_1_consent_sign.png"),
+        "consent_sign": store_image("2025/other-area/zz99/CW_hh_1_consent_sign.png"),
     }
 
     response = api_client.post(lax_households_url, [household_data], format="json")

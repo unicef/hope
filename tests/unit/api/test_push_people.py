@@ -447,7 +447,7 @@ def test_push_single_person_with_a_retired_currency_is_rejected(
 
 @pytest.fixture
 def file_prefix(business_area, program) -> str:
-    return get_stored_image_prefix(business_area.code, program.code)
+    return get_stored_image_prefix(business_area.slug, program)
 
 
 @pytest.fixture
@@ -587,7 +587,7 @@ def test_upload_person_with_file_name_longer_than_the_column_returns_error(
 def test_upload_person_with_file_of_another_program_returns_error(
     token_api_client, push_people_url, person_payload, file_prefix, store_image, field
 ) -> None:
-    other_program_file = store_image("OTH/zz99/CW_ind_1_photo.png")
+    other_program_file = store_image("2025/other-area/zz99/CW_ind_1_photo.png")
     person_payload[field] = other_program_file
 
     response = token_api_client.post(push_people_url, [person_payload], format="json")

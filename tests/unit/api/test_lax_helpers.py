@@ -68,7 +68,7 @@ def test_resolve_countries_with_country_and_origin(
     mock_pending_household_cls.objects.bulk_create.assert_called_once()
 
 
-PREFIX = "AFG/ab12/"
+PREFIX = "2025/afghanistan/ab12/"
 
 
 def test_clean_image_flex_fields_normalizes_valid_value(store_image: Callable[[str], str]) -> None:
@@ -91,7 +91,7 @@ def test_clean_image_flex_fields_missing_file() -> None:
 
 
 def test_clean_image_flex_fields_file_of_another_program(store_image: Callable[[str], str]) -> None:
-    file_name = store_image("OTH/zz99/CW_ind_1_photo.png")
+    file_name = store_image("2025/other-area/zz99/CW_ind_1_photo.png")
 
     errors = clean_image_flex_fields({"photo": file_name}, {"photo"}, PREFIX)
 

@@ -125,7 +125,7 @@ def lax_push_url(lax_business_area, lax_rdi) -> str:
 
 @pytest.fixture
 def file_prefix(lax_rdi: RegistrationDataImport) -> str:
-    return get_stored_image_prefix(lax_rdi.business_area.code, lax_rdi.program.code)
+    return get_stored_image_prefix(lax_rdi.business_area.slug, lax_rdi.program)
 
 
 @pytest.fixture
@@ -964,7 +964,7 @@ def test_create_individual_with_file_of_another_program_returns_error(
         "country_workspace_id": "IND_OTHER_PROGRAM",
         "full_name": "John Doe",
         "birth_date": "1990-01-01",
-        "photo": store_image("OTH/zz99/CW_ind_1_photo.png"),
+        "photo": store_image("2025/other-area/zz99/CW_ind_1_photo.png"),
     }
 
     response = lax_api_client.post(lax_push_url, [individual_data], format="json")
