@@ -46,7 +46,6 @@
     "src",
     "tsconfig.json",
     "eslint.config.cjs",
-    "babel.config.cjs",
     "vite.config.ts",
     "vitest.config.ts",
     "vitest"
