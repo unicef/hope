@@ -58,4 +58,6 @@ The field label can be configured separately for each programme by a HOPE admini
 
 The identification key can be manually compared with an identity reference returned by a Financial Service Provider (FSP). References included as additional columns in a reconciliation file are available in the relevant Payment Record details. See [Payment Reconciliation](payment-reconciliation.md#additional-reconciliation-columns).
 
+When a programme enables collision detection, HOPE uses matching identification keys to merge an incoming household into an existing record instead of creating a duplicate. See [Collision Detection](collision-detection.md).
+
 Programme-specific identification key labels were introduced by [Change Request 299147: Identity Field customisation & PaymentRecord flex fields](https://dev.azure.com/unicef/ICTD-HCT-MIS/_workitems/edit/299147).
