@@ -158,11 +158,11 @@ class AbstractCollisionDetector:
         self._record_replaced_ids(individual_destination, data, ("country_workspace_id", "originating_id"))
         self._restore_removed_by_collision(individual_destination, data)
         self._update_biometric_pairs(individual_destination, individual_source)
-        # the source still holds the country_workspace_id and originating_id the destination takes over,
-        # both unique among live rows, so it has to be gone before the copy
-        Household.all_objects.filter(head_of_household=individual_source).update(head_of_household=None)
-        # queryset delete: Individual.delete() would send individual_deleted (an adjust_program_size job) per member
-        Individual.all_objects.filter(pk=individual_source.pk).delete()
+        # The source still holds the country_workspace_id and originating_id the destination takes over,
+        # both unique among live rows, so they are cleared before the copy. The row itself is left for
+        # _update_household: hard-deleting the source household cascades every remaining pending member in
+        # one Collector pass, whereas deleting here would run the Collector (~30 queries) once per member.
+        Individual.all_objects.filter(pk=individual_source.pk).update(country_workspace_id=None, originating_id=None)
         Individual.objects.filter(pk=individual_destination.pk).update(**data)
 
     def _update_biometric_pairs(self, individual_destination: Individual, individual_source: Individual) -> None:
@@ -270,7 +270,8 @@ class AbstractCollisionDetector:
         if removed is None:
             return
         data["internal_data"] = internal_data
-        if removed.get("withdrawn_by_collision"):
+        # markers written before this key exists come from collisions that always withdrew the member
+        if removed.get("withdrawn_by_collision", True):
             data["withdrawn"] = False
             data["withdrawn_date"] = None
 
@@ -307,7 +308,12 @@ class AbstractCollisionDetector:
         4. Update relationship to REMOVED_BY_COLLISION
         5. Remove roles from IndividualRoleInHousehold
         6. Withdraw the individual
+
+        A member already removed by an earlier collision is left untouched, so the stored marker
+        still describes the state before the first removal.
         """
+        if individual.relationship == REMOVED_BY_COLLISION:
+            return
         # 1. Get previous roles before deleting them
         previous_roles = list(
             IndividualRoleInHousehold.all_objects.filter(individual=individual, household_id=household_id).values_list(

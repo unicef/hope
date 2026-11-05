@@ -427,7 +427,7 @@ def test_update_household_moves_the_merged_household_onto_the_active_currency(
     # merge does not keep the deprecated row when the imported code is the same.
     detector = IdentificationKeyCollisionDetector(program)
 
-    with django_assert_num_queries(92):
+    with django_assert_num_queries(91):
         detector.update_household(source_household_on_active_syp)
 
     destination_household_on_deprecated_syp.refresh_from_db()
@@ -778,10 +778,11 @@ def test_update_individual_moves_biometric_pair_onto_destination(
 ) -> None:
     detector = IdentificationKeyCollisionDetector(program)
 
-    with django_assert_num_queries(36):
+    with django_assert_num_queries(4):
         detector._update_individual(merge_destination_individual, source_household[1])
 
-    pair = BiometricDedupeSimilarityPair.objects.get()
+    # the source pair leaves with the source household cascade in _update_household
+    pair = BiometricDedupeSimilarityPair.objects.exclude(pk=pair_source_other.pk).get()
     assert {pair.individual1_id, pair.individual2_id} == {merge_destination_individual.id, other_individual.id}
     assert str(pair.individual1_id) < str(pair.individual2_id)
     assert pair.similarity_score == 91
@@ -798,7 +799,7 @@ def test_update_individual_drops_biometric_pair_between_source_and_destination(
 
     detector._update_individual(merge_destination_individual, source_household[1])
 
-    assert not BiometricDedupeSimilarityPair.objects.exists()
+    assert not BiometricDedupeSimilarityPair.objects.exclude(pk=pair_source_destination.pk).exists()
 
 
 def test_update_individual_moves_single_sided_biometric_pair_onto_destination(
@@ -811,7 +812,7 @@ def test_update_individual_moves_single_sided_biometric_pair_onto_destination(
 
     detector._update_individual(merge_destination_individual, source_household[1])
 
-    pair = BiometricDedupeSimilarityPair.objects.get()
+    pair = BiometricDedupeSimilarityPair.objects.exclude(pk=pair_source_only.pk).get()
     assert pair.individual1_id == merge_destination_individual.id
     assert pair.individual2_id is None
     assert pair.status_code == BiometricDedupeSimilarityPair.StatusCode.STATUS_412
@@ -857,7 +858,9 @@ def test_update_individual_takes_over_source_unique_ids(
     assert merge_destination_individual.internal_data["collision_replaced_ids"] == [
         {"country_workspace_id": "CW-7", "originating_id": "API#IND-A"}
     ]
-    assert not Individual.all_objects.filter(id=source_household_with_unique_ids[1].id).exists()
+    source_individual = Individual.all_objects.get(id=source_household_with_unique_ids[1].id)
+    assert source_individual.originating_id is None
+    assert source_individual.country_workspace_id is None
 
 
 def test_update_household_takes_over_source_originating_id(
@@ -954,6 +957,56 @@ def test_update_individual_restores_member_removed_by_earlier_collision(
     assert merge_destination_individual_removed_by_collision.withdrawn_date is None
     assert merge_destination_individual_removed_by_collision.relationship == source_household[1].relationship
     assert "removed_by_collision_detector" not in merge_destination_individual_removed_by_collision.internal_data
+
+
+def test_process_removed_individual_skips_member_already_removed_by_collision(
+    merge_destination_individual_removed_by_collision: Individual,
+    program: Program,
+    django_assert_num_queries,
+) -> None:
+    detector = IdentificationKeyCollisionDetector(program)
+    marker_before = dict(
+        merge_destination_individual_removed_by_collision.internal_data["removed_by_collision_detector"]
+    )
+
+    with django_assert_num_queries(0):
+        detector._process_removed_individual(
+            merge_destination_individual_removed_by_collision,
+            str(merge_destination_individual_removed_by_collision.household_id),
+            None,
+        )
+
+    merge_destination_individual_removed_by_collision.refresh_from_db()
+    assert (
+        merge_destination_individual_removed_by_collision.internal_data["removed_by_collision_detector"]
+        == marker_before
+    )
+
+
+@pytest.fixture
+def merge_destination_individual_removed_by_legacy_collision(merge_destination_individual: Individual) -> Individual:
+    merge_destination_individual.internal_data = {
+        "removed_by_collision_detector": {"previous_relationship": "SON_DAUGHTER"}
+    }
+    merge_destination_individual.relationship = REMOVED_BY_COLLISION
+    merge_destination_individual.withdrawn = True
+    merge_destination_individual.withdrawn_date = datetime(2025, 1, 1, tzinfo=UTC)
+    merge_destination_individual.save(update_fields=["internal_data", "relationship", "withdrawn", "withdrawn_date"])
+    return merge_destination_individual
+
+
+def test_update_individual_restores_member_removed_by_collision_without_withdrawn_flag(
+    source_household: tuple[Household, Individual],
+    merge_destination_individual_removed_by_legacy_collision: Individual,
+    program: Program,
+) -> None:
+    detector = IdentificationKeyCollisionDetector(program)
+
+    detector._update_individual(merge_destination_individual_removed_by_legacy_collision, source_household[1])
+
+    merge_destination_individual_removed_by_legacy_collision.refresh_from_db()
+    assert merge_destination_individual_removed_by_legacy_collision.withdrawn is False
+    assert merge_destination_individual_removed_by_legacy_collision.withdrawn_date is None
 
 
 @pytest.fixture
