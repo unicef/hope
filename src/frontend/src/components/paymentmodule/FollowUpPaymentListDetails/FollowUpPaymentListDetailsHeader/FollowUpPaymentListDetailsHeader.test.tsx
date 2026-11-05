@@ -1,6 +1,7 @@
 import { renderWithProviders, screen } from 'src/testUtils/testUtils';
 import { describe, expect, it, vi } from 'vitest';
 import { PaymentListStatusEnum } from '@restgenerated/models/PaymentListStatusEnum';
+import { PlanTypeEnum } from '@restgenerated/models/PlanTypeEnum';
 import { FollowUpPaymentListDetailsHeader } from './FollowUpPaymentListDetailsHeader';
 
 vi.mock('react-i18next', () => ({
@@ -66,4 +67,30 @@ describe('FollowUpPaymentListDetailsHeader', () => {
       expect(screen.getByTestId(testId)).toBeTruthy();
     },
   );
+
+  it.each([
+    [PlanTypeEnum.FOLLOW_UP, 'Follow-up Payment List ID:'],
+    [PlanTypeEnum.TOP_UP, 'Top Up Payment List ID:'],
+    [PlanTypeEnum.TOP_UP_AMENDMENT, 'Top Up Amendment Payment List ID:'],
+  ])('titles a %s list with its type', (planType, title) => {
+    renderWithProviders(
+      <FollowUpPaymentListDetailsHeader
+        baseUrl="afghanistan/test-program"
+        permissions={[]}
+        paymentList={
+          {
+            id: 'payment-list-1',
+            unicefId: 'PP-1',
+            status: PaymentListStatusEnum.OPEN,
+            planType,
+            isInstructionManaged: false,
+            visionManaged: false,
+          } as any
+        }
+      />,
+    );
+    expect(screen.getByTestId('page-header-title').textContent).toContain(
+      title,
+    );
+  });
 });

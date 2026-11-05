@@ -16,6 +16,7 @@ import { useTranslation } from 'react-i18next';
 import { hasPermissions, PERMISSIONS } from '../../../../../config/permissions';
 import { PaymentListStatusEnum } from '@restgenerated/models/PaymentListStatusEnum';
 import { responsiveValue } from 'src/responsive';
+import { paymentListTitleLabel } from '../../PaymentPlans/utils';
 
 interface PaymentListDetailsHeaderProps {
   permissions: string[];
@@ -97,7 +98,7 @@ export const PaymentListDetailsHeader = ({
             alignItems: 'center',
           }}
         >
-          {t('Payment List')} ID:{' '}
+          {t(paymentListTitleLabel(paymentList.planType))} ID:{' '}
           <Box
             sx={{
               ml: 1,

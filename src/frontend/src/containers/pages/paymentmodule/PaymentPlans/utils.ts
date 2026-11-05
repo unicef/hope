@@ -37,3 +37,19 @@ export function planTypeDisplayLabel(
       return '';
   }
 }
+
+// Untranslated page title for a payment list of the given type; pass the result through t() when rendering.
+export function paymentListTitleLabel(
+  planType: PlanTypeEnum | undefined,
+): string {
+  switch (planType) {
+    case PlanTypeEnum.FOLLOW_UP:
+      return 'Follow-up Payment List';
+    case PlanTypeEnum.TOP_UP:
+      return 'Top Up Payment List';
+    case PlanTypeEnum.TOP_UP_AMENDMENT:
+      return 'Top Up Amendment Payment List';
+    default:
+      return 'Payment List';
+  }
+}

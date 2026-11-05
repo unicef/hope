@@ -15,6 +15,7 @@ import type { ReactElement } from 'react';
 import type { PaymentListDetail } from '@restgenerated/models/PaymentListDetail';
 import { AdminButton } from '@components/core/AdminButton';
 import { responsiveValue } from 'src/responsive';
+import { paymentListTitleLabel } from '@containers/pages/paymentmodule/PaymentPlans/utils';
 
 const StatusWrapper = styled.div`
   margin-left: 30px;
@@ -88,7 +89,7 @@ export function FollowUpPaymentListDetailsHeader({
             alignItems: 'center',
           }}
         >
-          {t('Follow-up Payment List')} ID:{' '}
+          {t(paymentListTitleLabel(paymentList.planType))} ID:{' '}
           <Box
             sx={{
               ml: 1,

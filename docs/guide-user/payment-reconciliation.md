@@ -8,17 +8,17 @@ tags:
 # Payment Reconciliation
 
 Payment reconciliation records how much was delivered for each Payment. This guide covers manual XLSX reconciliation
-from a **Payment Plan Group**. It does not cover Payment Gateway automatic API reconciliation.
+from a **Payment Plan**. It does not cover Payment Gateway automatic API reconciliation.
 
 ## Prepare the file
 
-1. Open the Payment Plan Group.
+1. Open the Payment Plan.
 2. Export the delivery XLSX. A Payment included in the export is marked as sent to the Financial Service Provider
    (FSP) and becomes ready for reconciliation.
 3. Enter a value in `delivered_quantity` for each Payment you want to reconcile.
 4. Do not change `payment_id` or add the same Payment more than once.
 
-The file may contain some or all Payments from the group. Payments not included in the file are not changed.
+The file may contain some or all Payments from the plan. Payments not included in the file are not changed.
 
 ### Delivered quantity values
 
@@ -36,7 +36,7 @@ Text, dates, values above the entitlement, and negative numbers other than `-1` 
 
 Use normal mode for the first reconciliation:
 
-1. Open the Payment Plan Group and select **Upload Reconciliation**.
+1. Open the Payment Plan and select **Upload Reconciliation**.
 
    ![Upload Reconciliation button](_screenshots/payment/pay_28.png)
 
@@ -103,14 +103,11 @@ example, an FSP identity reference can be compared with the individual's registr
 
 ## CLOSED Payment Plans
 
-A CLOSED Payment Plan is never changed.
+A CLOSED Payment Plan is never changed. **Upload Reconciliation** is available only while the Payment Plan is
+ACCEPTED or FINISHED.
 
-- An empty row or a row that matches the stored result is ignored.
-- A row that attempts to add or change reconciliation data for a CLOSED plan rejects the entire file.
-
-This is important when reusing an older group XLSX. For example, Plan A may have been reconciled and closed while Plan
-B still needs reconciliation. The old file may still contain rows for both plans. Leave Plan A's rows empty or
-unchanged; any attempted change to Plan A stops the import.
+A file changes only the Payments of the Payment Plan it is uploaded to. A row with a `payment_id` from another Payment
+Plan rejects the entire file.
 
 ## File-level validation
 
@@ -119,7 +116,7 @@ The entire file is rejected without changing Payments when it contains:
 - different non-empty delivered quantities for an already reconciled Payment;
 - duplicate `payment_id` rows;
 - invalid delivered quantities;
-- an attempt to change a CLOSED Payment Plan;
+- a `payment_id` that does not belong to the Payment Plan;
 - another invalid row.
 
 Fix every reported error and upload the file again.
@@ -130,7 +127,7 @@ After the import finishes, review the reconciliation summary.
 
 ![Reconciliation summary](_screenshots/payment/pay_30.png)
 
-You can also select **Export XLSX** to export the updated information.
+You can also select **Re-export** to export the updated information.
 
 ![Export reconciled Payments](_screenshots/payment/pay_29.png)
 
