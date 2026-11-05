@@ -4,11 +4,24 @@ from django.utils import timezone
 import pytest
 from rest_framework.test import APIClient
 
-from hope.models import APIToken, BusinessArea, Program
+from extras.test_utils.factories import BeneficiaryGroupFactory, DataCollectingTypeFactory, PayeeTypeFactory
+from hope.models import APIToken, BeneficiaryGroup, BusinessArea, DataCollectingType, Program
 from hope.models.grant import Grant
 from unit.api.conftest import token_grant_permission
 
 pytestmark = pytest.mark.django_db
+
+
+@pytest.fixture
+def dct_without_payee_type(db) -> DataCollectingType:
+    return DataCollectingTypeFactory(code="delegate", payee_type=None)
+
+
+@pytest.fixture
+def payee_label_of_other_payee_type(db) -> BeneficiaryGroup:
+    return BeneficiaryGroupFactory(
+        name="Education workers", payee_type=PayeeTypeFactory(name="Incentive Payee", gl_code="7700430")
+    )
 
 
 # --- Program create (BA-scoped) ---
@@ -65,6 +78,44 @@ def test_create_program_succeeds_with_create_permission(
         "beneficiary_group": str(program.beneficiary_group_id),
     }
     assert program.business_area == business_area
+
+
+def test_create_program_returns_400_for_dct_without_payee_type(
+    token_api_client: APIClient,
+    api_token: APIToken,
+    program_create_url: str,
+    program_create_payload: dict,
+    dct_without_payee_type: DataCollectingType,
+) -> None:
+    payload = {**program_create_payload, "data_collecting_type": dct_without_payee_type.id}
+
+    with (
+        token_grant_permission(api_token, Grant.API_READ_ONLY),
+        token_grant_permission(api_token, Grant.API_PROGRAM_CREATE),
+    ):
+        response = token_api_client.post(program_create_url, payload, format="json")
+
+    assert response.status_code == 400
+    assert response.json() == {"data_collecting_type": ["Data Collecting Type has no Payee Type."]}
+
+
+def test_create_program_returns_400_for_payee_label_of_other_payee_type(
+    token_api_client: APIClient,
+    api_token: APIToken,
+    program_create_url: str,
+    program_create_payload: dict,
+    payee_label_of_other_payee_type: BeneficiaryGroup,
+) -> None:
+    payload = {**program_create_payload, "beneficiary_group": str(payee_label_of_other_payee_type.id)}
+
+    with (
+        token_grant_permission(api_token, Grant.API_READ_ONLY),
+        token_grant_permission(api_token, Grant.API_PROGRAM_CREATE),
+    ):
+        response = token_api_client.post(program_create_url, payload, format="json")
+
+    assert response.status_code == 400
+    assert response.json() == {"beneficiary_group": ["Payee Label does not belong to the selected Payee Type."]}
 
 
 # --- Program list (BA-scoped) ---

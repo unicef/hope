@@ -1,8 +1,9 @@
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import CalendarTodayRoundedIcon from '@mui/icons-material/CalendarTodayRounded';
-import { Tooltip } from '@mui/material';
-import type { PaginatedBeneficiaryGroupList } from '@restgenerated/models/PaginatedBeneficiaryGroupList';
+import { TextField, Tooltip } from '@mui/material';
+import type { PaginatedPayeeLabelList } from '@restgenerated/models/PaginatedPayeeLabelList';
+import type { ProgramDetail } from '@restgenerated/models/ProgramDetail';
 import type { ProgramChoices } from '@restgenerated/models/ProgramChoices';
 import { RestService } from '@restgenerated/services/RestService';
 import { FormikCheckboxField } from '@shared/Formik/FormikCheckboxField';
@@ -29,12 +30,14 @@ interface ProgramFormPropTypes {
   programHasRdi?: boolean;
   errors;
   lockedPurposeIds?: string[];
+  program?: ProgramDetail;
 }
 
 const ProgramForm = ({
   values,
   programHasRdi,
   lockedPurposeIds,
+  program,
 }: ProgramFormPropTypes): ReactElement => {
   const { t } = useTranslation();
   const location = useLocation();
@@ -61,104 +64,114 @@ const ProgramForm = ({
     gcTime: 1000 * 60 * 30,
   });
 
-  const { data: beneficiaryGroupsData } =
-    useQuery<PaginatedBeneficiaryGroupList>({
-      queryKey: restQueryKey(RestService.restBeneficiaryGroupsList),
-      queryFn: () => RestService.restBeneficiaryGroupsList({}),
-    });
+  const { data: payeeTypeChoices } = useQuery({
+    queryKey: restQueryKey(RestService.restBusinessAreasPayeeTypesChoicesList, {
+      businessAreaSlug: businessArea,
+    }),
+    queryFn: () =>
+      RestService.restBusinessAreasPayeeTypesChoicesList({
+        businessAreaSlug: businessArea,
+      }),
+    staleTime: 1000 * 60 * 10,
+    gcTime: 1000 * 60 * 30,
+  });
 
-  const { setFieldValue } = useFormikContext();
+  const { data: beneficiaryGroupsData } = useQuery<PaginatedPayeeLabelList>({
+    queryKey: restQueryKey(RestService.restBeneficiaryGroupsList, {
+      active: true,
+    }),
+    queryFn: () => RestService.restBeneficiaryGroupsList({ active: true }),
+  });
+
+  const { setFieldValue, setValues } = useFormikContext();
 
   const isCopyProgramPage = location.pathname.includes('duplicate');
 
-  // For copy program pages, filter DCTs based on Beneficiary Group (BG → DCT)
-  // For normal create/edit, filter BGs based on DCT (DCT → BG)
-  const filteredDataCollectionTypeChoicesData = useMemo(() => {
-    const allDCTs = dataCollectingTypeChoices?.filter((el) => el.name !== '');
+  const currentPayeeType = program?.payeeType;
+  const selectedPayeeType =
+    payeeTypeChoices?.find((payeeType) => payeeType.id === values.payeeType) ??
+    (currentPayeeType && values.payeeType === currentPayeeType.id
+      ? currentPayeeType
+      : undefined);
 
+  const payeeTypeOptions = useMemo(() => {
+    const choices = (payeeTypeChoices ?? []).map((choice) => ({
+      name: choice.name,
+      value: choice.id,
+    }));
+    // A program may keep a Payee Type that the choices no longer list.
     if (
-      !isCopyProgramPage ||
-      !values.beneficiaryGroup ||
-      !beneficiaryGroupsData?.results
+      currentPayeeType &&
+      values.payeeType === currentPayeeType.id &&
+      !choices.some((choice) => choice.value === currentPayeeType.id)
     ) {
-      return allDCTs;
+      choices.push({ name: currentPayeeType.name, value: currentPayeeType.id });
     }
+    return choices;
+  }, [payeeTypeChoices, currentPayeeType, values.payeeType]);
 
-    // Find the selected beneficiary group to determine its masterDetail property
-    const selectedBG = beneficiaryGroupsData.results.find(
-      (bg) => String(bg.id) === String(values.beneficiaryGroup),
+  const filteredDataCollectionTypeChoicesData = useMemo(() => {
+    const payeeTypeId = isCopyProgramPage
+      ? program?.payeeType?.id
+      : values.payeeType;
+    const choices = (dataCollectingTypeChoices ?? []).filter(
+      (dct) => dct.name !== '' && dct.payeeType === payeeTypeId,
     );
-
-    if (!selectedBG) return allDCTs;
-
-    // Filter DCTs based on beneficiary group's masterDetail property
-    return allDCTs?.filter((dct) => {
-      if (selectedBG.masterDetail === true) {
-        return dct.type === 'STANDARD';
-      } else if (selectedBG.masterDetail === false) {
-        return dct.type === 'SOCIAL';
-      }
-      return true;
-    });
+    // A program may keep a DCT that no longer matches its payee type.
+    const currentCode = program?.dataCollectingType?.code;
+    if (
+      currentCode &&
+      values.dataCollectingTypeCode === currentCode &&
+      !choices.some((dct) => dct.value === currentCode)
+    ) {
+      choices.push({
+        name: program.dataCollectingType.label,
+        value: currentCode,
+      });
+    }
+    return choices;
   }, [
     dataCollectingTypeChoices,
     isCopyProgramPage,
-    values.beneficiaryGroup,
-    beneficiaryGroupsData,
+    program,
+    values.payeeType,
+    values.dataCollectingTypeCode,
   ]);
 
   const mappedBeneficiaryGroupsData = useMemo(() => {
-    function getTypeByDataCollectingTypeCode(
-      dataCollectingTypeCode: string,
-    ): string | undefined {
-      if (!filteredDataCollectionTypeChoicesData) return undefined;
-      const foundObject = filteredDataCollectionTypeChoicesData.find(
-        (item) => item.value === dataCollectingTypeCode,
-      );
-      return foundObject ? foundObject.type : undefined;
+    const choices = (beneficiaryGroupsData?.results ?? [])
+      .filter(
+        (label) =>
+          label.active &&
+          label.payeeType === values.payeeType &&
+          (label.dataCollectingTypes.length === 0 ||
+            label.dataCollectingTypes.includes(values.dataCollectingTypeCode)),
+      )
+      .map((label) => ({ name: label.name, value: label.id }));
+    // A program may keep a Payee Label that was deactivated since.
+    const currentLabel = program?.beneficiaryGroup;
+    if (
+      currentLabel &&
+      values.beneficiaryGroup === currentLabel.id &&
+      !choices.some((choice) => choice.value === currentLabel.id)
+    ) {
+      choices.push({ name: currentLabel.name, value: currentLabel.id });
     }
-
-    if (!beneficiaryGroupsData?.results) return [];
-
-    // For copy program pages, show all beneficiary groups (no filtering)
-    if (isCopyProgramPage) {
-      return beneficiaryGroupsData.results.map((el) => ({
-        name: el.name,
-        value: el.id,
-      }));
-    }
-
-    // For normal create/edit, filter BGs based on DCT
-    const dctType = getTypeByDataCollectingTypeCode(
-      values.dataCollectingTypeCode,
-    );
-
-    let filteredBeneficiaryGroups;
-
-    if (dctType === 'SOCIAL') {
-      filteredBeneficiaryGroups = beneficiaryGroupsData.results.filter(
-        (el) => el.masterDetail === false,
-      );
-    } else if (dctType === 'STANDARD') {
-      filteredBeneficiaryGroups = beneficiaryGroupsData.results.filter(
-        (el) => el.masterDetail === true,
-      );
-    } else {
-      filteredBeneficiaryGroups = beneficiaryGroupsData.results;
-    }
-
-    return filteredBeneficiaryGroups.map((el) => ({
-      name: el.name,
-      value: el.id,
-    }));
+    return choices;
   }, [
-    values.dataCollectingTypeCode,
     beneficiaryGroupsData,
-    filteredDataCollectionTypeChoicesData,
-    isCopyProgramPage,
+    program,
+    values.payeeType,
+    values.dataCollectingTypeCode,
+    values.beneficiaryGroup,
   ]);
 
-  if (!data || !beneficiaryGroupsData || !dataCollectingTypeChoices)
+  if (
+    !data ||
+    !beneficiaryGroupsData ||
+    !dataCollectingTypeChoices ||
+    !payeeTypeChoices
+  )
     return null;
 
   return (
@@ -229,12 +242,66 @@ const ProgramForm = ({
           <Tooltip
             title={
               values.isActive
+                ? 'Cannot update Payee Type when program is Active'
+                : programHasRdi
+                  ? 'Field disabled because Programme has RDI'
+                  : isCopyProgramPage
+                    ? 'Payee Type is fixed when copying programs'
+                    : ''
+            }
+            placement="top"
+          >
+            <span>
+              <Field
+                name="payeeType"
+                label={t('Payee Type')}
+                fullWidth
+                variant="outlined"
+                required
+                disabled={programHasRdi || isCopyProgramPage || values.isActive}
+                onChange={(e) => {
+                  const payeeType = payeeTypeChoices.find(
+                    (choice) => choice.id === e.target.value,
+                  );
+                  setValues({
+                    ...values,
+                    payeeType: e.target.value,
+                    dataCollectingTypeCode:
+                      payeeType?.defaultDataCollectingType ?? '',
+                    beneficiaryGroup: '',
+                  });
+                }}
+                choices={payeeTypeOptions}
+                component={FormikSelectField}
+                data-cy="input-payee-type"
+              />
+            </span>
+          </Tooltip>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="half">
+          <TextField
+            label={t('GL Code')}
+            value={selectedPayeeType?.glCode ?? ''}
+            fullWidth
+            variant="outlined"
+            size="small"
+            disabled
+            slotProps={{ htmlInput: { readOnly: true } }}
+            data-cy="input-gl-code"
+          />
+        </ResponsiveGrid>
+        <ResponsiveGrid size="half">
+          <Tooltip
+            title={
+              values.isActive
                 ? 'Cannot update Data Collecting Type when program is Active'
                 : programHasRdi
                   ? 'Field disabled because Programme has RDI'
                   : isCopyProgramPage
                     ? 'Field disabled on Copy Programme page'
-                    : ''
+                    : !values.payeeType
+                      ? 'Select Payee Type first'
+                      : ''
             }
             placement="top"
           >
@@ -245,9 +312,14 @@ const ProgramForm = ({
                 fullWidth
                 variant="outlined"
                 required
-                disabled={programHasRdi || isCopyProgramPage || values.isActive}
+                disabled={
+                  programHasRdi ||
+                  isCopyProgramPage ||
+                  values.isActive ||
+                  !values.payeeType
+                }
                 onChange={(e) => {
-                  // Only clear Beneficiary Group if NOT copying a program
+                  // Only clear Payee Label if NOT copying a program
                   if (!isCopyProgramPage) {
                     setFieldValue('beneficiaryGroup', '');
                   }
@@ -264,19 +336,21 @@ const ProgramForm = ({
           <Tooltip
             title={
               isCopyProgramPage
-                ? 'Beneficiary Group is fixed when copying programs'
-                : !values.dataCollectingTypeCode
-                  ? 'Select Data Collecting Type first'
-                  : programHasRdi
-                    ? 'Field disabled because program has RDI'
-                    : ''
+                ? 'Payee Label is fixed when copying programs'
+                : !values.payeeType
+                  ? 'Select Payee Type first'
+                  : !values.dataCollectingTypeCode
+                    ? 'Select Data Collecting Type first'
+                    : programHasRdi
+                      ? 'Field disabled because program has RDI'
+                      : ''
             }
             placement="top"
           >
             <span>
               <Field
                 name="beneficiaryGroup"
-                label={t('Beneficiary Group')}
+                label={t('Payee Label')}
                 fullWidth
                 variant="outlined"
                 required={
@@ -290,6 +364,7 @@ const ProgramForm = ({
                 disabled={
                   (isCopyProgramPage && !!values.beneficiaryGroup) ||
                   (!values.dataCollectingTypeCode && !isCopyProgramPage) ||
+                  (!values.payeeType && !isCopyProgramPage) ||
                   programHasRdi
                 }
               />

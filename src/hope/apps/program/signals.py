@@ -1,7 +1,7 @@
 from typing import Any
 
 from django.db import transaction
-from django.db.models.signals import post_delete, post_save, pre_save
+from django.db.models.signals import m2m_changed, post_delete, post_save, pre_save
 from django.dispatch import Signal, receiver
 
 from hope.api.caches import (
@@ -13,7 +13,7 @@ from hope.apps.program.utils import (
     create_program_partner_access,
     remove_program_partner_access,
 )
-from hope.models import BeneficiaryGroup, Program, ProgramCycle
+from hope.models import BeneficiaryGroup, PayeeType, Program, ProgramCycle
 
 program_copied = Signal()
 
@@ -52,6 +52,12 @@ def increment_beneficiary_group_version_cache(sender: Any, instance: Beneficiary
     transaction.on_commit(lambda: increment_cache_key("beneficiary_group_list"))
 
 
+@receiver(m2m_changed, sender=BeneficiaryGroup.data_collecting_types.through)
+def increment_beneficiary_group_version_cache_on_dct_change(sender: Any, action: str, **kwargs: Any) -> None:
+    if action in ("post_add", "post_remove", "post_clear"):
+        transaction.on_commit(lambda: increment_cache_key("beneficiary_group_list"))
+
+
 @receiver([post_save, post_delete], sender=Program)
 def increase_program_version_cache(sender: Any, instance: Program, **kwargs: dict) -> None:
     business_area_slug = instance.business_area.slug
@@ -60,6 +66,23 @@ def increase_program_version_cache(sender: Any, instance: Program, **kwargs: dic
         business_area_version = get_or_create_cache_key(f"{business_area_slug}:version", 1)
         version_key = f"{business_area_slug}:{business_area_version}:program_list"
         increment_cache_key(version_key)
+
+    transaction.on_commit(_increment)
+
+
+@receiver(post_save, sender=PayeeType)
+def increase_program_version_cache_on_payee_type_change(sender: Any, instance: PayeeType, **kwargs: dict) -> None:
+    business_area_slugs = list(
+        Program.all_objects.filter(data_collecting_type__payee_type=instance)
+        .order_by()
+        .values_list("business_area__slug", flat=True)
+        .distinct()
+    )
+
+    def _increment() -> None:
+        for business_area_slug in business_area_slugs:
+            business_area_version = get_or_create_cache_key(f"{business_area_slug}:version", 1)
+            increment_cache_key(f"{business_area_slug}:{business_area_version}:program_list")
 
     transaction.on_commit(_increment)
 
