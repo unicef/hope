@@ -10,7 +10,7 @@ tags:
 # Programme Overview
 
 The Programme Management module is used for defining objectives and basic programme information to be matched with assistance records for reporting purposes. This module involves defining the framework within which all aspects of a humanitarian cash transfer can be created and managed. Programme creation consists of three steps.
-Step 1, Details: In this page you define the following: programme name, programme code, duration, sector, data collection type, beneficiary group, description, payment plan purpose, budget, geographical area of implementation, population goal, frequency of payment and the reconciliation window. 
+Step 1, Details: In this page you define the following: programme name, programme code, duration, sector, data collection type, beneficiary group, description, payment plan purpose, budget, geographical area of implementation, population goal, frequency of payment and the reconciliation window.
 Step 2, Programme Time Series Fields: In this page you can define targeting rules for individuals based on the Programme Data Update fields (round, specified values and ranges) collected.
 Step 3, Programme Partners: This step is optional and should only be used by country offices willing to “segregate” the view of partners or UNICEF sections to PII of a given programme (commonly referred to as Ringfencing). In this area Partner access can be restricted further by administrative areas. In case no ringfencing is required Partners would be assigned access to the whole business area.
 
