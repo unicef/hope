@@ -8,6 +8,7 @@ import { restBusinessAreasProgramsPeriodicFieldsList } from './responses/restBus
 import { restBusinessAreasProgramsPeriodicDataUpdateTemplatesList } from './responses/restBusinessAreasProgramsPeriodicDataUpdateTemplatesList';
 import { restBusinessAreasProgramsPeriodicDataUpdateUploadsList } from './responses/restBusinessAreasProgramsPeriodicDataUpdateUploadsList';
 import { restBusinessAreasProgramsPeriodicDataUpdateTemplatesRetrieve } from './responses/restBusinessAreasProgramsPeriodicDataUpdateTemplatesRetrieve';
+import { restBusinessAreasPayeeTypesChoicesList } from './responses/restBusinessAreasPayeeTypesChoicesList';
 import { restBusinessAreasProgramsCyclesRetrieve } from './responses/restBusinessAreasProgramsCyclesRetrieve';
 
 const baseUrl = 'http://localhost:3000/api/rest/business-areas/';
@@ -36,6 +37,10 @@ const endpoints = [
   {
     url: `${baseUrl}:business_area_slug/programs/:program_slug/periodic-data-update-templates/:id/`,
     response: restBusinessAreasProgramsPeriodicDataUpdateTemplatesRetrieve,
+  },
+  {
+    url: `${baseUrl}:business_area_slug/payee-types/choices/`,
+    response: restBusinessAreasPayeeTypesChoicesList,
   },
   {
     url: '/api/rest/beneficiary-groups/',

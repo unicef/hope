@@ -2393,6 +2393,11 @@ class PaymentPlanManagerialViewSet(
                 ],
             )
             .select_related("program_cycle__program")
+            .annotate(
+                has_unreconciled_payments=Exists(
+                    Payment.objects.eligible().unreconciled().filter(parent=OuterRef("pk"))
+                )
+            )
         )
 
     @etag_decorator(PaymentPlanKeyConstructor)

@@ -1040,7 +1040,7 @@ def test_create_rdi_social_worker_program_with_household_ids(
         code="social",
         type=DataCollectingType.Type.SOCIAL,
     )
-    beneficiary_group = BeneficiaryGroupFactory(name="Social", master_detail=False)
+    beneficiary_group = BeneficiaryGroupFactory(name="Social")
 
     # Create source and target programs with social worker DCT
     import_from_program = ProgramFactory(
@@ -1126,7 +1126,7 @@ def test_create_rdi_social_worker_program_with_individual_ids(
         code="social",
         type=DataCollectingType.Type.SOCIAL,
     )
-    beneficiary_group = BeneficiaryGroupFactory(name="Social", master_detail=False)
+    beneficiary_group = BeneficiaryGroupFactory(name="Social")
 
     # Create source and target programs with social worker DCT
     import_from_program = ProgramFactory(
@@ -1424,7 +1424,7 @@ def test_create_registration_data_import_invalid_bg(
         response = api_client_no_permissions.post(url, data, format="json")
 
     assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert "Cannot import data from a program with a different Beneficiary Group." in str(response.data)
+    assert "Cannot import data from a program with a different Payee Label." in str(response.data)
 
 
 @patch("hope.apps.registration_data.api.views.registration_program_population_import_async_task")

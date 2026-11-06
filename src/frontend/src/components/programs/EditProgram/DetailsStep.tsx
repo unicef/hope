@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import type { FC } from 'react';
 import ProgramForm from '@containers/forms/ProgramForm';
+import type { ProgramDetail } from '@restgenerated/models/ProgramDetail';
 
 interface DetailsStepProps {
   values;
@@ -12,6 +13,7 @@ interface DetailsStepProps {
   programId?: string;
   programHasRdi: boolean;
   lockedPurposeIds?: string[];
+  program?: ProgramDetail;
 }
 
 export const DetailsStep: FC<DetailsStepProps> = ({
@@ -21,6 +23,7 @@ export const DetailsStep: FC<DetailsStepProps> = ({
   programId: formProgramId,
   programHasRdi,
   lockedPurposeIds,
+  program,
 }) => {
   const { t } = useTranslation();
   const { businessArea, programId, baseUrl } = useBaseUrl();
@@ -37,6 +40,7 @@ export const DetailsStep: FC<DetailsStepProps> = ({
         values={values}
         programHasRdi={programHasRdi}
         lockedPurposeIds={lockedPurposeIds}
+        program={program}
       />
       <Box
         sx={{

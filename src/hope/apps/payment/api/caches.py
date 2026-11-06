@@ -1,6 +1,7 @@
 from typing import Any
 
 from django.db import transaction
+from django.utils import timezone
 from rest_framework.request import Request
 from rest_framework_extensions.key_constructor.bits import KeyBitBase
 
@@ -10,6 +11,7 @@ from hope.api.caches import (
     KeyConstructorMixin,
     get_or_create_cache_key,
     increment_business_area_and_program_version,
+    increment_cache_key,
 )
 from hope.models import BusinessArea
 
@@ -35,8 +37,31 @@ def invalidate_payment_plan_list_cache(
     transaction.on_commit(_increment)
 
 
+def invalidate_managerial_payment_plan_list_cache(business_area_slug: str) -> None:
+    def _increment() -> None:
+        business_area_version = get_or_create_cache_key(f"{business_area_slug}:version", 1)
+        increment_cache_key(f"{business_area_slug}:{business_area_version}:management_payment_plans_list")
+
+    transaction.on_commit(_increment)
+
+
 class ManagerialPaymentPlanListVersionsKeyBit(BusinessAreaKeyBitMixin):
     specific_view_cache_key = "management_payment_plans_list"
+
+
+class TodayKeyBit(KeyBitBase):
+    """Roll the cache over daily: reconciliation overdue flags change with the date, not with a save."""
+
+    def get_data(  # noqa: PLR0913, PLR0917 – override of base method signature
+        self,
+        params: Any,
+        view_instance: Any,
+        view_method: Any,
+        request: Request,
+        args: tuple,
+        kwargs: dict,
+    ) -> str:
+        return timezone.now().date().isoformat()
 
 
 class PaymentPlanListKeyBit(BusinessAreaAndProgramKeyBitMixin):
@@ -91,6 +116,7 @@ class PaymentPlanProgramsPermissionsKeyBit(KeyBitBase):
 class PaymentPlanKeyConstructor(KeyConstructorMixin):
     managerial_payment_plan_list_version = ManagerialPaymentPlanListVersionsKeyBit()
     permissions_to_programs = PaymentPlanProgramsPermissionsKeyBit()
+    today = TodayKeyBit()
 
 
 class PaymentPlanListKeyConstructor(KeyConstructorMixin):
