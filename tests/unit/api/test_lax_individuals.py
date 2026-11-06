@@ -1,10 +1,6 @@
-import os
-import tempfile
+from collections.abc import Callable
 from typing import Any
-from unittest.mock import patch
 
-from django.core.files.storage import default_storage
-from django.test.utils import override_settings
 import pytest
 from rest_framework import status
 from rest_framework.reverse import reverse
@@ -24,6 +20,7 @@ from extras.test_utils.factories import (
     UserFactory,
 )
 from hope.api.endpoints.rdi.lax import IndividualSerializer
+from hope.api.endpoints.rdi.stored_images import get_stored_image_prefix
 from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hope.apps.household.const import (
     BLANK,
@@ -48,6 +45,8 @@ from hope.models import (
 from hope.models.grant import Grant
 
 pytestmark = pytest.mark.django_db
+
+PHOTO_MAX_LENGTH = PendingIndividual._meta.get_field("photo").max_length
 
 
 # ── Shared fixtures ──────────────────────────────────────────────────────
@@ -122,6 +121,21 @@ def lax_api_client(lax_business_area) -> APIClient:
 @pytest.fixture
 def lax_push_url(lax_business_area, lax_rdi) -> str:
     return reverse("api:rdi-push-lax-individuals", args=[lax_business_area.slug, str(lax_rdi.id)])
+
+
+@pytest.fixture
+def file_prefix(lax_rdi: RegistrationDataImport) -> str:
+    return get_stored_image_prefix(lax_rdi.business_area.slug, lax_rdi.program)
+
+
+@pytest.fixture
+def stored_image(store_image: Callable[[str], str], file_prefix: str) -> str:
+    return store_image(f"{file_prefix}CW_image.png")
+
+
+@pytest.fixture
+def missing_image(file_prefix: str) -> str:
+    return f"{file_prefix}does_not_exist.png"
 
 
 # ── CreateLaxIndividuals tests ───────────────────────────────────────────
@@ -432,14 +446,7 @@ def test_rdi_not_in_loading_status(lax_api_client, lax_push_url, lax_rdi):
     assert response.status_code == status.HTTP_404_NOT_FOUND, str(response.json())
 
 
-@pytest.mark.parametrize(
-    "image_field",
-    [
-        pytest.param("photo", id="photo"),
-        pytest.param("disability_certificate_picture", id="disability-certificate-picture"),
-    ],
-)
-def test_create_individual_with_image_field(lax_api_client, lax_push_url, lax_program, base64_image, image_field):
+def test_create_individual_with_photo(lax_api_client, lax_push_url, stored_image):
     individual_data = {
         "country_workspace_id": "IND001",
         "full_name": "John Doe",
@@ -449,7 +456,7 @@ def test_create_individual_with_image_field(lax_api_client, lax_push_url, lax_pr
         "sex": "MALE",
         "observed_disability": ["NONE"],
         "marital_status": "SINGLE",
-        image_field: base64_image,
+        "photo": stored_image,
     }
 
     response = lax_api_client.post(lax_push_url, [individual_data], format="json")
@@ -460,16 +467,35 @@ def test_create_individual_with_image_field(lax_api_client, lax_push_url, lax_pr
     assert response.data["errors"] == 0
 
     individual = PendingIndividual.objects.get(unicef_id=list(response.data["individual_id_mapping"].values())[0])
-    image = getattr(individual, image_field)
-    assert image is not None
-    assert image.name.startswith(
-        f"{lax_program.start_date.year}/{lax_program.business_area.slug}/{lax_program.code}/{lax_program.code}"
-    )
-    assert image.name.endswith(".png")
+    assert individual.photo.name == stored_image
+
+
+def test_create_individual_with_disability_certificate_picture(lax_api_client, lax_push_url, stored_image):
+    individual_data = {
+        "country_workspace_id": "IND001",
+        "full_name": "John Doe",
+        "given_name": "John",
+        "family_name": "Doe",
+        "birth_date": "1990-01-01",
+        "sex": "MALE",
+        "observed_disability": ["NONE"],
+        "marital_status": "SINGLE",
+        "disability_certificate_picture": stored_image,
+    }
+
+    response = lax_api_client.post(lax_push_url, [individual_data], format="json")
+
+    assert response.status_code == status.HTTP_201_CREATED, str(response.json())
+    assert response.data["processed"] == 1
+    assert response.data["accepted"] == 1
+    assert response.data["errors"] == 0
+
+    individual = PendingIndividual.objects.get(unicef_id=list(response.data["individual_id_mapping"].values())[0])
+    assert individual.disability_certificate_picture.name == stored_image
 
 
 def test_create_individual_with_document_image(
-    lax_api_client, lax_push_url, lax_program, base64_image, document_type, afghanistan_country
+    lax_api_client, lax_push_url, stored_image, document_type, afghanistan_country
 ):
     individual_data = {
         "country_workspace_id": "IND001",
@@ -487,7 +513,7 @@ def test_create_individual_with_document_image(
                 "document_number": "DOC123456",
                 "issuance_date": "2020-01-01",
                 "expiry_date": "2030-01-01",
-                "image": base64_image,
+                "image": stored_image,
             }
         ],
     }
@@ -500,11 +526,7 @@ def test_create_individual_with_document_image(
 
     individual = PendingIndividual.objects.get(unicef_id=list(response.data["individual_id_mapping"].values())[0])
     document = PendingDocument.objects.get(individual=individual)
-    assert document.photo is not None
-    assert document.photo.name.startswith(
-        f"{lax_program.start_date.year}/{lax_program.business_area.slug}/{lax_program.code}/{lax_program.code}"
-    )
-    assert document.photo.name.endswith(".png")
+    assert document.photo.name == stored_image
 
 
 def test_create_individual_with_non_default_document_type_is_accepted(
@@ -871,55 +893,153 @@ def test_phone_number_validation_flags(lax_api_client, lax_push_url):
     assert no_phone.phone_no_alternative_valid is False
 
 
-def test_file_cleanup_on_failure(
-    lax_api_client, lax_push_url, lax_rdi, base64_image, document_type, afghanistan_country
+def test_create_individual_with_missing_photo_file_returns_error(lax_api_client, lax_push_url, missing_image):
+    individual_data = {
+        "country_workspace_id": "IND_MISSING_PHOTO",
+        "full_name": "John Doe",
+        "birth_date": "1990-01-01",
+        "photo": missing_image,
+    }
+
+    response = lax_api_client.post(lax_push_url, [individual_data], format="json")
+
+    assert response.status_code == status.HTTP_201_CREATED, str(response.json())
+    assert response.data["accepted"] == 0
+    assert response.data["errors"] == 1
+    assert response.data["results"][0]["photo"] == [f"File '{missing_image}' does not exist in storage."]
+    assert not PendingIndividual.objects.filter(country_workspace_id="IND_MISSING_PHOTO").exists()
+
+
+def test_create_individual_with_missing_document_image_returns_error(
+    lax_api_client, lax_push_url, document_type, afghanistan_country, missing_image
 ):
     individual_data = {
-        "country_workspace_id": "IND_CLEANUP",
-        "full_name": "Jane Doe",
-        "given_name": "Jane",
-        "family_name": "Doe",
-        "birth_date": "1992-02-02",
-        "sex": "FEMALE",
+        "country_workspace_id": "IND_MISSING_DOC_IMG",
+        "full_name": "John Doe",
+        "birth_date": "1990-01-01",
         "documents": [
             {
                 "type": document_type.key,
                 "country": "AF",
-                "document_number": "DOC987654",
-                "issuance_date": "2021-01-01",
-                "expiry_date": "2031-01-01",
-                "image": base64_image,
+                "document_number": "DOC123456",
+                "image": missing_image,
             }
         ],
-        "photo": base64_image,
     }
 
-    with tempfile.TemporaryDirectory() as media_root:
-        with override_settings(MEDIA_ROOT=media_root):
+    response = lax_api_client.post(lax_push_url, [individual_data], format="json")
 
-            def fail_after_files_exist(*args: list[Any]) -> None:
-                pre_cleanup_files = []
-                for root, _, files in os.walk(media_root):
-                    pre_cleanup_files.extend(os.path.join(root, f) for f in files)
-                assert len(pre_cleanup_files) > 0
-                raise RuntimeError("forced failure for cleanup test")
+    assert response.status_code == status.HTTP_201_CREATED, str(response.json())
+    assert response.data["accepted"] == 0
+    assert response.data["errors"] == 1
+    assert response.data["results"][0]["documents"][0]["image"] == [
+        f"File '{missing_image}' does not exist in storage."
+    ]
 
-            with patch(
-                "hope.api.endpoints.rdi.lax.CreateLaxIndividuals._bulk_create_accounts",
-                side_effect=fail_after_files_exist,
-            ):
-                response = lax_api_client.post(lax_push_url, [individual_data], format="json")
 
-            assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
-            assert response.json() == {
-                "detail": "Failed to create lax individuals.",
-                "rdi_id": str(lax_rdi.id),
-            }
+def test_create_individual_with_missing_disability_certificate_picture_returns_error(
+    lax_api_client, lax_push_url, missing_image
+):
+    individual_data = {
+        "country_workspace_id": "IND_MISSING_DCP",
+        "full_name": "John Doe",
+        "birth_date": "1990-01-01",
+        "disability_certificate_picture": missing_image,
+    }
 
-            leftover_files = []
-            for root, _, files in os.walk(media_root):
-                leftover_files.extend(os.path.join(root, f) for f in files)
-            assert leftover_files == []
+    response = lax_api_client.post(lax_push_url, [individual_data], format="json")
+
+    assert response.status_code == status.HTTP_201_CREATED, str(response.json())
+    assert response.data["accepted"] == 0
+    assert response.data["errors"] == 1
+    assert response.data["results"][0]["disability_certificate_picture"] == [
+        f"File '{missing_image}' does not exist in storage."
+    ]
+
+
+def test_create_individual_with_file_of_another_program_returns_error(
+    lax_api_client, lax_push_url, store_image, file_prefix
+):
+    individual_data = {
+        "country_workspace_id": "IND_OTHER_PROGRAM",
+        "full_name": "John Doe",
+        "birth_date": "1990-01-01",
+        "photo": store_image("2025/other-area/zz99/CW_ind_1_photo.png"),
+    }
+
+    response = lax_api_client.post(lax_push_url, [individual_data], format="json")
+
+    assert response.status_code == status.HTTP_201_CREATED, str(response.json())
+    assert response.data["accepted"] == 0
+    assert response.data["results"][0]["photo"] == [f"File name must start with '{file_prefix}'."]
+
+
+def test_create_individual_with_invalid_file_name_returns_error(lax_api_client, lax_push_url):
+    individual_data = {
+        "country_workspace_id": "IND_BAD_PATH",
+        "full_name": "John Doe",
+        "birth_date": "1990-01-01",
+        "photo": "../../etc/passwd",
+    }
+
+    response = lax_api_client.post(lax_push_url, [individual_data], format="json")
+
+    assert response.status_code == status.HTTP_201_CREATED, str(response.json())
+    assert response.data["accepted"] == 0
+    assert response.data["errors"] == 1
+    assert response.data["results"][0]["photo"] == ["Invalid file name '../../etc/passwd'."]
+
+
+def test_create_individual_with_photo_name_longer_than_column_returns_error(lax_api_client, lax_push_url, file_prefix):
+    file_name = f"{file_prefix}{'a' * PHOTO_MAX_LENGTH}.png"
+    individual_data = {
+        "country_workspace_id": "IND_LONG_PATH",
+        "full_name": "John Doe",
+        "birth_date": "1990-01-01",
+        "photo": file_name,
+    }
+
+    response = lax_api_client.post(lax_push_url, [individual_data], format="json")
+
+    assert response.status_code == status.HTTP_201_CREATED, str(response.json())
+    assert response.data["accepted"] == 0
+    assert response.data["results"][0]["photo"] == [f"File name must have no more than {PHOTO_MAX_LENGTH} characters."]
+
+
+def test_create_individual_with_photo_leading_slash_is_normalized(lax_api_client, lax_push_url, stored_image):
+    individual_data = {
+        "country_workspace_id": "IND_SLASH",
+        "full_name": "John Doe",
+        "birth_date": "1990-01-01",
+        "photo": f"/{stored_image}",
+    }
+
+    response = lax_api_client.post(lax_push_url, [individual_data], format="json")
+
+    assert response.status_code == status.HTTP_201_CREATED, str(response.json())
+    assert response.data["accepted"] == 1
+    individual = PendingIndividual.objects.get(unicef_id=list(response.data["individual_id_mapping"].values())[0])
+    assert individual.photo.name == stored_image
+
+
+@pytest.mark.parametrize(
+    ("field_name", "empty_value"),
+    [("photo", ""), ("disability_certificate_picture", ""), ("disability_certificate_picture", None)],
+)
+def test_create_individual_with_empty_file_value(lax_api_client, lax_push_url, field_name, empty_value):
+    individual_data = {
+        "country_workspace_id": "IND_EMPTY_FILE",
+        "full_name": "John Doe",
+        "birth_date": "1990-01-01",
+        field_name: empty_value,
+    }
+
+    response = lax_api_client.post(lax_push_url, [individual_data], format="json")
+
+    assert response.status_code == status.HTTP_201_CREATED, str(response.json())
+    assert response.data["accepted"] == 1
+    individual = PendingIndividual.objects.get(unicef_id=list(response.data["individual_id_mapping"].values())[0])
+    assert not getattr(individual, field_name)
 
 
 def test_create_individual_default_values(lax_api_client, lax_push_url):
@@ -985,9 +1105,7 @@ def individual_image_flex_attribute(db: Any) -> FlexibleAttribute:
     )
 
 
-def test_individual_with_image_flex_field(
-    lax_api_client, lax_push_url, lax_program, base64_image, individual_image_flex_attribute
-):
+def test_individual_with_image_flex_field(lax_api_client, lax_push_url, stored_image, individual_image_flex_attribute):
     individual_data = {
         "country_workspace_id": "IND_FLEX_IMG",
         "full_name": "Flex Image Test",
@@ -995,7 +1113,7 @@ def test_individual_with_image_flex_field(
         "family_name": "Test",
         "birth_date": "1990-01-01",
         "sex": "MALE",
-        "individual_photo": base64_image,
+        "individual_photo": stored_image,
     }
 
     response = lax_api_client.post(lax_push_url, [individual_data], format="json")
@@ -1004,53 +1122,63 @@ def test_individual_with_image_flex_field(
     assert response.data["accepted"] == 1
 
     individual = PendingIndividual.objects.get(unicef_id=list(response.data["individual_id_mapping"].values())[0])
-    assert "individual_photo" in individual.flex_fields
-    assert not individual.flex_fields["individual_photo"].startswith(base64_image[:20])
-    assert default_storage.exists(individual.flex_fields["individual_photo"])
-    assert individual.flex_fields["individual_photo"].startswith(
-        f"{lax_program.start_date.year}/{lax_program.business_area.slug}/{lax_program.code}/"
-    )
+    assert individual.flex_fields["individual_photo"] == stored_image
 
 
-def test_image_flex_field_cleanup_on_failure(
-    lax_api_client, lax_push_url, lax_rdi, base64_image, individual_image_flex_attribute
+def test_individual_with_missing_image_flex_field_file_returns_error(
+    lax_api_client, lax_push_url, individual_image_flex_attribute, missing_image
 ):
     individual_data = {
-        "country_workspace_id": "IND_FLEX_IMG",
+        "country_workspace_id": "IND_FLEX_IMG_MISSING",
         "full_name": "Flex Image Test",
-        "given_name": "Flex",
-        "family_name": "Test",
         "birth_date": "1990-01-01",
-        "sex": "MALE",
-        "individual_photo": base64_image,
+        "individual_photo": missing_image,
     }
 
-    with tempfile.TemporaryDirectory() as media_root:
-        with override_settings(MEDIA_ROOT=media_root):
+    response = lax_api_client.post(lax_push_url, [individual_data], format="json")
 
-            def fail_after_files_exist(*args: Any, **kwargs: Any) -> None:
-                pre_cleanup_files = []
-                for root, _, files in os.walk(media_root):
-                    pre_cleanup_files.extend(os.path.join(root, f) for f in files)
-                assert len(pre_cleanup_files) > 0
-                raise RuntimeError("forced failure for image flex field cleanup test")
+    assert response.status_code == status.HTTP_201_CREATED, str(response.json())
+    assert response.data["accepted"] == 0
+    assert response.data["errors"] == 1
+    assert response.data["results"][0] == {
+        "flex_fields": {"individual_photo": [f"File '{missing_image}' does not exist in storage."]}
+    }
+    assert not PendingIndividual.objects.filter(country_workspace_id="IND_FLEX_IMG_MISSING").exists()
 
-            with patch(
-                "hope.api.endpoints.rdi.lax.CreateLaxIndividuals._bulk_create_accounts",
-                side_effect=fail_after_files_exist,
-            ):
-                response = lax_api_client.post(lax_push_url, [individual_data], format="json")
 
-            assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
-            assert response.json() == {
-                "detail": "Failed to create lax individuals.",
-                "rdi_id": str(lax_rdi.id),
-            }
+def test_individual_reports_flex_field_and_regular_field_errors_together(
+    lax_api_client, lax_push_url, individual_image_flex_attribute, file_prefix
+):
+    individual_data = {
+        "country_workspace_id": "IND_FLEX_AND_PHOTO",
+        "full_name": "Flex Image Test",
+        "birth_date": "1990-01-01",
+        "photo": f"{file_prefix}missing_photo.png",
+        "individual_photo": f"{file_prefix}missing_flex.png",
+    }
 
-            leftover_files = []
-            for root, _, files in os.walk(media_root):
-                leftover_files.extend(os.path.join(root, f) for f in files)
-            assert leftover_files == []
+    response = lax_api_client.post(lax_push_url, [individual_data], format="json")
+
+    assert response.status_code == status.HTTP_201_CREATED, str(response.json())
+    assert response.data["errors"] == 1
+    assert response.data["results"][0] == {
+        "photo": [f"File '{file_prefix}missing_photo.png' does not exist in storage."],
+        "flex_fields": {"individual_photo": [f"File '{file_prefix}missing_flex.png' does not exist in storage."]},
+    }
+
+
+def test_individual_with_empty_image_flex_field(lax_api_client, lax_push_url, individual_image_flex_attribute):
+    individual_data = {
+        "country_workspace_id": "IND_FLEX_IMG_EMPTY",
+        "full_name": "Flex Image Test",
+        "birth_date": "1990-01-01",
+        "individual_photo": "",
+    }
+
+    response = lax_api_client.post(lax_push_url, [individual_data], format="json")
+
+    assert response.status_code == status.HTTP_201_CREATED, str(response.json())
+    assert response.data["accepted"] == 1
 
 
 # ── country_workspace_id required-field tests ───────────────────────────
