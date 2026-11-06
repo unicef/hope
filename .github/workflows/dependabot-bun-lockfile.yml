@@ -26,7 +26,7 @@ jobs:
           bun-version-file: src/frontend/package.json
 
       - name: Regenerate bun.lock
-        run: bun install --ignore-scripts
+        run: bun install --lockfile-only --ignore-scripts
         working-directory: src/frontend
 
       - name: Commit updated lockfile
