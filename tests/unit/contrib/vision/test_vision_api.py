@@ -3,6 +3,7 @@ from datetime import datetime, timedelta
 from decimal import Decimal
 from unittest.mock import MagicMock, patch
 
+from flags.models import FlagState
 import pytest
 
 from extras.test_utils.factories import (
@@ -11,8 +12,9 @@ from extras.test_utils.factories import (
     FinancialServiceProviderFactory,
     PaymentPlanFactory,
 )
+from hope.apps.account.actor_snapshot import ActorSnapshot
 from hope.apps.core.api.mixins import BaseAPI
-from hope.contrib.api.serializers.vision import PaymentPlanPayloadSerializer
+from hope.contrib.api.serializers.vision import PaymentPlanCallbackRequestSerializer, PaymentPlanPayloadSerializer
 from hope.contrib.vision.api import VisionAPI, VisionAPIError, VisionAPIMissingCredentialsError
 from hope.contrib.vision.choices import VisionErrorCode, VisionLogEntryType, VisionStatus
 from hope.contrib.vision.services import VisionService
@@ -66,6 +68,29 @@ def vision_api_payment_plan_factory(db) -> Callable[..., PaymentPlan]:
 @pytest.fixture
 def payment_plan_without_exchange_rate(vision_api_payment_plan_factory) -> PaymentPlan:
     return vision_api_payment_plan_factory(exchange_rate=None)
+
+
+@pytest.fixture
+def callback_payment_plan(vision_api_payment_plan_factory) -> PaymentPlan:
+    FlagState.objects.get_or_create(name="VISION_INTEGRATION_ACTIVE", condition="boolean", value="True")
+    payment_plan = vision_api_payment_plan_factory(unicef_id="PP044")
+    payment_plan.business_area.vision_integration_active = True
+    payment_plan.business_area.save(update_fields=["vision_integration_active"])
+    VisionService.set_status(payment_plan, VisionStatus.WAITING_FOR_CALLBACK)
+    payment_plan.save(update_fields=["internal_data"])
+    creator = payment_plan.created_by
+    creator.first_name = "Anna"
+    creator.last_name = "Nowak"
+    creator.job_title = "Stored Title"
+    creator.save(update_fields=["first_name", "last_name", "job_title"])
+    return payment_plan
+
+
+@pytest.fixture
+def released_callback_payment_plan(callback_payment_plan: PaymentPlan) -> PaymentPlan:
+    VisionService.set_status(callback_payment_plan, VisionStatus.RELEASED)
+    callback_payment_plan.save(update_fields=["internal_data"])
+    return callback_payment_plan
 
 
 def test_missing_vision_url_raises_error(settings) -> None:
@@ -539,14 +564,17 @@ def test_callback_view_empty_status_does_not_confirm_plan_creation(mock_get, moc
 
 
 @patch("hope.models.APILogEntry.objects.create")
+@patch("hope.contrib.vision.views.PaymentPlanCallbackView._release_actor_snapshot")
 @patch("hope.contrib.vision.views.PaymentPlanCallbackView._get_payment_plan")
-def test_callback_view_success_with_fc_numbers(mock_get, mock_log_entry) -> None:
+def test_callback_view_success_with_fc_numbers(mock_get, mock_release_actor_snapshot, mock_log_entry) -> None:
     from rest_framework.test import APIRequestFactory, force_authenticate
 
     from hope.contrib.vision.views import PaymentPlanCallbackView
 
     mock_pp = _make_mock_payment_plan(unicef_id="PP044")
     mock_get.return_value = mock_pp
+    actor_snapshot = ActorSnapshot(name="Anna Nowak", job_title="Finance Officer", job_title_source="AD")
+    mock_release_actor_snapshot.return_value = actor_snapshot
     mock_user = MagicMock()
     mock_token = MagicMock()
     mock_token.grants = ["API_VISION_PP_CREATE"]
@@ -585,6 +613,7 @@ def test_callback_view_success_with_fc_numbers(mock_get, mock_log_entry) -> None
         vision_payment_plan_id="00000063",
         vision_result="SUCCESS",
         fc_numbers=["FC123", "FC456"],
+        actor_snapshot=actor_snapshot,
     )
     mock_pp.save.assert_called_once_with(update_fields=["internal_data"])
 
@@ -863,3 +892,60 @@ def test_callback_view_fc_failure_message(vision_data, expected_message, django_
         message = PaymentPlanCallbackView._fc_failure_message(payment_plan)
 
     assert message == expected_message
+
+
+@patch("hope.apps.account.actor_snapshot.MicrosoftGraphAPI")
+def test_release_actor_snapshot_arrange_success_with_fc_act_build_assert_creator_snapshot_from_ad(
+    mock_graph, callback_payment_plan: PaymentPlan
+) -> None:
+    from hope.contrib.vision.views import PaymentPlanCallbackView
+
+    mock_graph.return_value.get_user_data.return_value = {"jobTitle": "Finance Officer"}
+    serializer = PaymentPlanCallbackRequestSerializer(
+        data={"payplanSno": "PP044", "vision_payplanSno": "00000063", "status": "SUCCESS", "fc_numbers": ["FC123"]}
+    )
+    serializer.is_valid()
+
+    snapshot = PaymentPlanCallbackView._release_actor_snapshot(serializer)
+
+    assert snapshot == ActorSnapshot(name="Anna Nowak", job_title="Finance Officer", job_title_source="AD")
+
+
+@pytest.mark.parametrize(
+    "payload",
+    [
+        pytest.param({"payplanSno": "PP044", "status": "SUCCESS", "fc_numbers": []}, id="creation_acknowledgement"),
+        pytest.param({"payplanSno": "PP044", "status": "FAILED", "fc_numbers": ["FC123"]}, id="failure"),
+        pytest.param({"payplanSno": "PP-MISSING", "status": "SUCCESS", "fc_numbers": ["FC123"]}, id="unknown_plan"),
+    ],
+)
+@patch("hope.apps.account.actor_snapshot.MicrosoftGraphAPI")
+def test_release_actor_snapshot_arrange_non_releasing_callback_act_build_assert_none_without_ad_lookup(
+    mock_graph, payload: dict, callback_payment_plan: PaymentPlan
+) -> None:
+    from hope.contrib.vision.views import PaymentPlanCallbackView
+
+    serializer = PaymentPlanCallbackRequestSerializer(data=payload)
+    serializer.is_valid()
+
+    snapshot = PaymentPlanCallbackView._release_actor_snapshot(serializer)
+
+    assert snapshot is None
+    mock_graph.assert_not_called()
+
+
+@patch("hope.apps.account.actor_snapshot.MicrosoftGraphAPI")
+def test_release_actor_snapshot_arrange_already_released_plan_act_build_assert_none_without_ad_lookup(
+    mock_graph, released_callback_payment_plan: PaymentPlan
+) -> None:
+    from hope.contrib.vision.views import PaymentPlanCallbackView
+
+    serializer = PaymentPlanCallbackRequestSerializer(
+        data={"payplanSno": "PP044", "vision_payplanSno": "00000063", "status": "SUCCESS", "fc_numbers": ["FC123"]}
+    )
+    serializer.is_valid()
+
+    snapshot = PaymentPlanCallbackView._release_actor_snapshot(serializer)
+
+    assert snapshot is None
+    mock_graph.assert_not_called()

@@ -2,6 +2,7 @@ from decimal import Decimal
 from typing import Any
 from unittest.mock import MagicMock
 
+from django.template.loader import get_template
 import pytest
 
 from extras.test_utils.factories.payment import (
@@ -93,6 +94,26 @@ def payment_plan(
     return payment_plan
 
 
+@pytest.fixture
+def approver(payment_plan: PaymentPlan) -> Any:
+    approval = payment_plan.approval_process.first().approvals.get(type=Approval.APPROVAL)
+    user = approval.created_by
+    user.first_name = "Jan"
+    user.last_name = "Kowalski"
+    user.save(update_fields=["first_name", "last_name"])
+    return user
+
+
+@pytest.fixture
+def payment_plan_with_approver_snapshot(payment_plan: PaymentPlan, approver: Any) -> PaymentPlan:
+    approval = payment_plan.approval_process.first().approvals.get(type=Approval.APPROVAL)
+    approval.created_by_name = "Jan Kowalski"
+    approval.created_by_job_title = "Programme Officer"
+    approval.created_by_job_title_source = "AD"
+    approval.save(update_fields=["created_by_name", "created_by_job_title", "created_by_job_title_source"])
+    return payment_plan
+
+
 def test_generate_web_links(payment_plan: PaymentPlan, mocker: Any) -> None:
     expected_download_link = "http://www_link/download-payment-plan-summary-pdf/111"
     mocker.patch(
@@ -129,6 +150,48 @@ def test_generate_pdf_summary(payment_plan: PaymentPlan, mocker: Any) -> None:
     pdf2, filename2 = pdf_export_service.generate_pdf_summary()
     assert isinstance(pdf2, bytes)
     assert filename2 == "PaymentPlanSummary-PP-0060-24-00000007.pdf"
+
+
+def test_generate_pdf_summary_arrange_approver_renamed_after_snapshot_act_render_assert_snapshot_name_printed(
+    payment_plan_with_approver_snapshot: PaymentPlan, approver: Any, mocker: Any
+) -> None:
+    mocker.patch(
+        "hope.apps.payment.pdf.payment_plan_export_pdf_service.get_link",
+        return_value="http://www_link/download-payment-plan-summary-pdf/111",
+    )
+    generate_pdf = mocker.patch(
+        "hope.apps.payment.pdf.payment_plan_export_pdf_service.generate_pdf_from_html", return_value=b"pdf"
+    )
+    approver.first_name = "Renamed"
+    approver.last_name = "Person"
+    approver.save(update_fields=["first_name", "last_name"])
+
+    PaymentPlanPDFExportService(payment_plan_with_approver_snapshot).generate_pdf_summary()
+
+    html = get_template(generate_pdf.call_args.kwargs["template_name"]).render(generate_pdf.call_args.kwargs["data"])
+    assert "Jan Kowalski" in html
+    assert "Renamed Person" not in html
+
+
+def test_generate_pdf_summary_arrange_approval_without_snapshot_act_render_assert_current_name_printed(
+    payment_plan: PaymentPlan, approver: Any, mocker: Any
+) -> None:
+    mocker.patch(
+        "hope.apps.payment.pdf.payment_plan_export_pdf_service.get_link",
+        return_value="http://www_link/download-payment-plan-summary-pdf/111",
+    )
+    generate_pdf = mocker.patch(
+        "hope.apps.payment.pdf.payment_plan_export_pdf_service.generate_pdf_from_html", return_value=b"pdf"
+    )
+    approver.first_name = "Renamed"
+    approver.last_name = "Person"
+    approver.save(update_fields=["first_name", "last_name"])
+
+    PaymentPlanPDFExportService(payment_plan).generate_pdf_summary()
+
+    html = get_template(generate_pdf.call_args.kwargs["template_name"]).render(generate_pdf.call_args.kwargs["data"])
+    assert "Renamed Person" in html
+    assert "Jan Kowalski" not in html
 
 
 def test_generate_pdf_summary_reconciliation(

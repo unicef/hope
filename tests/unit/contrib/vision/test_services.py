@@ -13,6 +13,7 @@ from extras.test_utils.factories import (
     FundsCommitmentItemFactory,
     PaymentPlanFactory,
 )
+from hope.apps.account.actor_snapshot import ActorSnapshot
 from hope.apps.payment.services.payment_plan_services import PaymentPlanService
 from hope.contrib.vision.api import VisionAPI, VisionAPIError, VisionAPIMissingCredentialsError
 from hope.contrib.vision.choices import VisionErrorCode, VisionLogEntryType, VisionStatus
@@ -136,6 +137,16 @@ def vision_disabled_payment_plan_with_fc_failure(
 @pytest.fixture
 def vision_send_failed_payment_plan(vision_payment_plan: PaymentPlan) -> PaymentPlan:
     VisionService.set_status(vision_payment_plan, VisionStatus.SEND_FAILED)
+    return vision_payment_plan
+
+
+@pytest.fixture
+def vision_payment_plan_with_named_creator(vision_payment_plan: PaymentPlan) -> PaymentPlan:
+    creator = vision_payment_plan.created_by
+    creator.first_name = "Anna"
+    creator.last_name = "Nowak"
+    creator.job_title = "Stored Title"
+    creator.save(update_fields=["first_name", "last_name", "job_title"])
     return vision_payment_plan
 
 
@@ -437,7 +448,7 @@ def test_process_callback_recovers_failed_state_with_valid_fc(
     assert vision_payment_plan.vision_status == VisionStatus.RELEASED.value
     assert vision_payment_plan.sent_to_vision is True
     assert list(vision_payment_plan.funds_commitment_headers.all()) == [matching_fc_items[0].funds_commitment_header]
-    mock_release.assert_called_once_with()
+    mock_release.assert_called_once_with(None)
     mock_send_to_pg.assert_not_called()
 
 
@@ -771,6 +782,61 @@ def test_release_from_vision_uses_payment_plan_creator(
     assert datetime.fromisoformat(mock_notification.call_args.args[3]).tzinfo is not None
 
 
+@patch("hope.apps.payment.services.payment_plan_services.send_payment_notification_emails_async_task")
+@patch("hope.apps.payment.services.payment_plan_services.update_exchange_rate_on_release_payments_async_task")
+@patch("hope.apps.payment.services.payment_plan_services.log_create")
+@patch("hope.apps.payment.services.payment_plan_services.log_payment_plan_approval")
+@patch("hope.apps.account.actor_snapshot.MicrosoftGraphAPI")
+def test_release_from_vision_arrange_ad_title_act_release_assert_creator_name_and_ad_title_stored(
+    mock_graph,
+    mock_approval_log,
+    mock_activity_log,
+    mock_exchange_rate,
+    mock_notification,
+    vision_payment_plan_with_named_creator: PaymentPlan,
+) -> None:
+    mock_graph.return_value.get_user_data.return_value = {"jobTitle": "Finance Officer"}
+
+    PaymentPlanService(vision_payment_plan_with_named_creator).release_from_vision()
+
+    release = vision_payment_plan_with_named_creator.approval_process.first().approvals.get(
+        type=Approval.FINANCE_RELEASE
+    )
+    assert release.created_by == vision_payment_plan_with_named_creator.created_by
+    assert release.created_by_name == "Anna Nowak"
+    assert release.created_by_job_title == "Finance Officer"
+    assert release.created_by_job_title_source == "AD"
+    mock_graph.return_value.get_user_data.assert_called_once_with(
+        email=vision_payment_plan_with_named_creator.created_by.email
+    )
+
+
+@patch("hope.apps.payment.services.payment_plan_services.send_payment_notification_emails_async_task")
+@patch("hope.apps.payment.services.payment_plan_services.update_exchange_rate_on_release_payments_async_task")
+@patch("hope.apps.payment.services.payment_plan_services.log_create")
+@patch("hope.apps.payment.services.payment_plan_services.log_payment_plan_approval")
+@patch("hope.apps.account.actor_snapshot.MicrosoftGraphAPI")
+def test_release_from_vision_arrange_prebuilt_snapshot_act_release_assert_snapshot_stored_without_ad_lookup(
+    mock_graph,
+    mock_approval_log,
+    mock_activity_log,
+    mock_exchange_rate,
+    mock_notification,
+    vision_payment_plan_with_named_creator: PaymentPlan,
+) -> None:
+    snapshot = ActorSnapshot(name="Anna Nowak", job_title="Finance Officer", job_title_source="AD")
+
+    PaymentPlanService(vision_payment_plan_with_named_creator).release_from_vision(snapshot)
+
+    release = vision_payment_plan_with_named_creator.approval_process.first().approvals.get(
+        type=Approval.FINANCE_RELEASE
+    )
+    assert release.created_by_name == "Anna Nowak"
+    assert release.created_by_job_title == "Finance Officer"
+    assert release.created_by_job_title_source == "AD"
+    mock_graph.assert_not_called()
+
+
 def test_release_from_vision_rejects_non_review_plan(
     accepted_vision_payment_plan: PaymentPlan,
     django_assert_num_queries,
@@ -820,7 +886,7 @@ def test_process_callback_assigns_fc_releases_and_sends_to_pg(
             fc_numbers=["FC123"],
         )
 
-    mock_release.assert_called_once_with()
+    mock_release.assert_called_once_with(None)
     mock_send_to_pg.assert_called_once_with(
         input_data={"action": PaymentPlan.Action.SEND_TO_PAYMENT_GATEWAY},
         user=vision_payment_plan.created_by,
@@ -840,6 +906,7 @@ def test_process_callback_assigns_fc_releases_without_pg_send(
     django_assert_num_queries,
 ) -> None:
     VisionService.set_status(vision_payment_plan, VisionStatus.WAITING_FOR_CALLBACK)
+    snapshot = ActorSnapshot(name="Anna Nowak", job_title="Finance Officer", job_title_source="AD")
     with (
         patch.object(PaymentPlan, "can_send_to_payment_gateway", new_callable=PropertyMock, return_value=False),
         django_assert_num_queries(6),
@@ -849,9 +916,10 @@ def test_process_callback_assigns_fc_releases_without_pg_send(
             vision_payment_plan_id="VISION-1",
             vision_result="SUCCESS",
             fc_numbers=["FC123"],
+            actor_snapshot=snapshot,
         )
 
-    mock_release.assert_called_once_with()
+    mock_release.assert_called_once_with(snapshot)
     mock_send_to_pg.assert_not_called()
     assert vision_payment_plan.vision_status == VisionStatus.RELEASED.value
 
@@ -873,16 +941,18 @@ def test_manual_fc_header_recovery_assigns_selected_headers_and_continues_automa
         }
     }
 
+    snapshot = ActorSnapshot(name="Anna Nowak", job_title="Finance Officer", job_title_source="AD")
+
     with (
         patch("hope.contrib.vision.services.log_create") as mock_activity_log,
         patch.object(PaymentPlan, "can_send_to_payment_gateway", new_callable=PropertyMock, return_value=True),
         django_assert_num_queries(6),
     ):
-        VisionService.recover_with_funds_commitment_headers(vision_payment_plan, [selected_header])
+        VisionService.recover_with_funds_commitment_headers(vision_payment_plan, [selected_header], snapshot)
 
     assert list(vision_payment_plan.funds_commitment_headers.all()) == [selected_header]
     assert vision_payment_plan.vision_status == VisionStatus.RELEASED.value
-    mock_release.assert_called_once_with()
+    mock_release.assert_called_once_with(snapshot)
     mock_send_to_pg.assert_called_once_with(
         input_data={"action": PaymentPlan.Action.SEND_TO_PAYMENT_GATEWAY},
         user=vision_payment_plan.created_by,
