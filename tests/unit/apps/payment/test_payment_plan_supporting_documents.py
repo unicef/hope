@@ -11,12 +11,21 @@ from extras.test_utils.factories import (
     BusinessAreaFactory,
     PaymentPlanFactory,
     PaymentPlanSupportingDocumentFactory,
+    ProgramCycleFactory,
     ProgramFactory,
     UserFactory,
 )
+from extras.test_utils.factories.payment import FollowUpInstructionFactory
 from hope.apps.account.permissions import Permissions
 from hope.apps.payment.api.serializers import PaymentPlanSupportingDocumentSerializer
-from hope.models import PaymentPlan, PaymentPlanSupportingDocument, User
+from hope.models import (
+    FollowUpInstruction,
+    LogEntry,
+    PaymentPlan,
+    PaymentPlanSupportingDocument,
+    Program,
+    User,
+)
 
 pytestmark = pytest.mark.django_db
 
@@ -27,11 +36,18 @@ def business_area() -> Any:
 
 
 @pytest.fixture
-def payment_plan(business_area: Any) -> PaymentPlan:
-    return PaymentPlanFactory(
-        status=PaymentPlan.Status.OPEN,
-        program_cycle__program=ProgramFactory(business_area=business_area),
-    )
+def program(business_area: Any) -> Program:
+    return ProgramFactory(business_area=business_area)
+
+
+@pytest.fixture
+def group(program: Program) -> PaymentPlan:
+    return PaymentPlanFactory(cycle=ProgramCycleFactory(program=program))
+
+
+@pytest.fixture
+def instruction(program: Program) -> FollowUpInstruction:
+    return FollowUpInstructionFactory(program=program)
 
 
 @pytest.fixture
@@ -50,113 +66,194 @@ def upload_file() -> SimpleUploadedFile:
 
 
 @pytest.fixture
-def serializer_context(payment_plan: PaymentPlan, user: User) -> dict[str, Any]:
-    factory = APIRequestFactory()
-    request = factory.post("")
+def serializer_context(group: PaymentPlan, user: User) -> dict[str, Any]:
+    request = APIRequestFactory().post("")
     request.user = user
-    request.parser_context = {"kwargs": {"payment_plan_pk": str(payment_plan.id)}}
-    return {"payment_plan": payment_plan, "request": request}
+    return {"owner": {"payment_plan": group}, "request": request}
 
 
 @pytest.fixture
-def upload_user(
-    user: User,
-    business_area: Any,
-    payment_plan: PaymentPlan,
-    create_user_role_with_permissions: Any,
-) -> User:
-    create_user_role_with_permissions(
-        user,
-        [Permissions.PM_UPLOAD_SUPPORTING_DOCUMENT],
-        business_area,
-        program=payment_plan.program,
-    )
+def upload_user(user: User, business_area: Any, program: Program, create_user_role_with_permissions: Any) -> User:
+    create_user_role_with_permissions(user, [Permissions.PM_UPLOAD_SUPPORTING_DOCUMENT], business_area, program=program)
     return user
 
 
 @pytest.fixture
-def delete_download_user(
-    business_area: Any,
-    payment_plan: PaymentPlan,
-    create_user_role_with_permissions: Any,
-) -> User:
+def delete_download_user(business_area: Any, program: Program, create_user_role_with_permissions: Any) -> User:
     user = UserFactory()
     create_user_role_with_permissions(
         user,
-        [
-            Permissions.PM_DELETE_SUPPORTING_DOCUMENT,
-            Permissions.PM_DOWNLOAD_SUPPORTING_DOCUMENT,
-        ],
+        [Permissions.PM_DELETE_SUPPORTING_DOCUMENT, Permissions.PM_DOWNLOAD_SUPPORTING_DOCUMENT],
         business_area,
-        program=payment_plan.program,
+        program=program,
     )
     return user
 
 
 @pytest.fixture
-def supporting_documents_list_url(business_area: Any, payment_plan: PaymentPlan) -> str:
-    return reverse(
-        "api:payments:supporting-documents-list",
-        kwargs={
-            "business_area_slug": business_area.slug,
-            "program_code": payment_plan.program.code,
-            "payment_plan_pk": str(payment_plan.id),
-        },
+def detail_user(business_area: Any, program: Program, create_user_role_with_permissions: Any) -> User:
+    user = UserFactory()
+    create_user_role_with_permissions(
+        user,
+        [Permissions.PM_PAYMENT_PLAN_VIEW_DETAIL, Permissions.PM_VIEW_DETAILS],
+        business_area,
+        program=program,
     )
+    return user
 
 
 @pytest.fixture
-def supporting_documents_detail_url(business_area: Any, payment_plan: PaymentPlan, document: Any) -> str:
-    return reverse(
-        "api:payments:supporting-documents-detail",
-        kwargs={
-            "business_area_slug": business_area.slug,
-            "program_code": payment_plan.program.code,
-            "payment_plan_pk": str(payment_plan.id),
-            "file_id": str(document.id),
-        },
-    )
-
-
-@pytest.fixture
-def supporting_documents_download_url(business_area: Any, payment_plan: PaymentPlan, document: Any) -> str:
-    return reverse(
-        "api:payments:supporting-documents-download",
-        kwargs={
-            "business_area_slug": business_area.slug,
-            "program_code": payment_plan.program.code,
-            "payment_plan_pk": payment_plan.pk,
-            "file_id": document.id,
-        },
-    )
-
-
-@pytest.fixture
-def document(payment_plan: PaymentPlan) -> PaymentPlanSupportingDocument:
+def group_document(group: PaymentPlan) -> PaymentPlanSupportingDocument:
     return PaymentPlanSupportingDocumentFactory(
-        payment_plan=payment_plan,
-        file=SimpleUploadedFile("evidence.pdf", b"abc", content_type="application/pdf"),
+        payment_plan=group,
+        title="Group contract",
+        file=SimpleUploadedFile("group-contract.pdf", b"abc", content_type="application/pdf"),
     )
 
 
 @pytest.fixture
-def document_without_a_file(payment_plan: PaymentPlan) -> PaymentPlanSupportingDocument:
-    return PaymentPlanSupportingDocumentFactory(payment_plan=payment_plan, file=None)
+def group_document_without_a_file(group: PaymentPlan) -> PaymentPlanSupportingDocument:
+    return PaymentPlanSupportingDocumentFactory(payment_plan=group, file=None)
+
+
+@pytest.fixture
+def instruction_document(instruction: FollowUpInstruction) -> PaymentPlanSupportingDocument:
+    return PaymentPlanSupportingDocumentFactory(
+        follow_up_instruction=instruction,
+        title="Instruction contract",
+        file=SimpleUploadedFile("instruction-contract.pdf", b"abc", content_type="application/pdf"),
+    )
+
+
+@pytest.fixture
+def group_documents_url(business_area: Any, program: Program, group: PaymentPlan) -> str:
+    return reverse(
+        "api:payments:payment-plan-supporting-documents-list",
+        kwargs={
+            "business_area_slug": business_area.slug,
+            "program_code": program.code,
+            "payment_plan_pk": str(group.id),
+        },
+    )
+
+
+@pytest.fixture
+def group_document_url(
+    business_area: Any, program: Program, group: PaymentPlan, group_document: PaymentPlanSupportingDocument
+) -> str:
+    return reverse(
+        "api:payments:payment-plan-supporting-documents-detail",
+        kwargs={
+            "business_area_slug": business_area.slug,
+            "program_code": program.code,
+            "payment_plan_pk": str(group.id),
+            "file_id": str(group_document.id),
+        },
+    )
+
+
+@pytest.fixture
+def group_document_download_url(
+    business_area: Any, program: Program, group: PaymentPlan, group_document: PaymentPlanSupportingDocument
+) -> str:
+    return reverse(
+        "api:payments:payment-plan-supporting-documents-download",
+        kwargs={
+            "business_area_slug": business_area.slug,
+            "program_code": program.code,
+            "payment_plan_pk": str(group.id),
+            "file_id": str(group_document.id),
+        },
+    )
+
+
+@pytest.fixture
+def instruction_documents_url(business_area: Any, program: Program, instruction: FollowUpInstruction) -> str:
+    return reverse(
+        "api:payments:follow-up-instruction-supporting-documents-list",
+        kwargs={
+            "business_area_slug": business_area.slug,
+            "program_code": program.code,
+            "follow_up_instruction_pk": str(instruction.id),
+        },
+    )
+
+
+@pytest.fixture
+def instruction_document_url(
+    business_area: Any,
+    program: Program,
+    instruction: FollowUpInstruction,
+    instruction_document: PaymentPlanSupportingDocument,
+) -> str:
+    return reverse(
+        "api:payments:follow-up-instruction-supporting-documents-detail",
+        kwargs={
+            "business_area_slug": business_area.slug,
+            "program_code": program.code,
+            "follow_up_instruction_pk": str(instruction.id),
+            "file_id": str(instruction_document.id),
+        },
+    )
+
+
+@pytest.fixture
+def instruction_document_download_url(
+    business_area: Any,
+    program: Program,
+    instruction: FollowUpInstruction,
+    instruction_document: PaymentPlanSupportingDocument,
+) -> str:
+    return reverse(
+        "api:payments:follow-up-instruction-supporting-documents-download",
+        kwargs={
+            "business_area_slug": business_area.slug,
+            "program_code": program.code,
+            "follow_up_instruction_pk": str(instruction.id),
+            "file_id": str(instruction_document.id),
+        },
+    )
+
+
+@pytest.fixture
+def group_detail_url(business_area: Any, program: Program, group: PaymentPlan) -> str:
+    return reverse(
+        "api:payments:payment-plans-detail",
+        kwargs={"business_area_slug": business_area.slug, "program_code": program.code, "pk": str(group.id)},
+    )
+
+
+@pytest.fixture
+def instruction_detail_url(business_area: Any, program: Program, instruction: FollowUpInstruction) -> str:
+    return reverse(
+        "api:payments:follow-up-instructions-detail",
+        kwargs={"business_area_slug": business_area.slug, "program_code": program.code, "pk": str(instruction.id)},
+    )
+
+
+@pytest.fixture
+def full_group(group: PaymentPlan) -> PaymentPlan:
+    PaymentPlanSupportingDocumentFactory.create_batch(PaymentPlanSupportingDocument.FILE_LIMIT, payment_plan=group)
+    return group
 
 
 def test_validate_file_size_success(serializer_context: dict[str, Any], upload_file: SimpleUploadedFile) -> None:
-    document_data = {"file": upload_file, "title": "test"}
-    serializer = PaymentPlanSupportingDocumentSerializer(data=document_data, context=serializer_context)
+    serializer = PaymentPlanSupportingDocumentSerializer(
+        data={"file": upload_file, "title": "test"}, context=serializer_context
+    )
+
     serializer.is_valid()
+
     assert serializer.errors == {}
 
 
 def test_validate_file_size_failure(serializer_context: dict[str, Any], upload_file: SimpleUploadedFile) -> None:
     upload_file.size = PaymentPlanSupportingDocument.FILE_SIZE_LIMIT + 1
-    document_data = {"file": upload_file, "title": "test"}
-    serializer = PaymentPlanSupportingDocumentSerializer(data=document_data, context=serializer_context)
+    serializer = PaymentPlanSupportingDocumentSerializer(
+        data={"file": upload_file, "title": "test"}, context=serializer_context
+    )
+
     assert not serializer.is_valid()
-    assert "file" in serializer.errors
     assert serializer.errors["file"][0] == "File size must be ≤ 10MB."
 
 
@@ -165,104 +262,194 @@ def test_validate_file_missing_size_failure(
 ) -> None:
     upload_file.size = None
     serializer = PaymentPlanSupportingDocumentSerializer(data={}, context=serializer_context)
+
     with pytest.raises(serializers.ValidationError) as exc_info:
         serializer.validate_file(upload_file)
+
     assert exc_info.value.detail[0] == "File size is not available."
 
 
 def test_validate_file_extension_success(serializer_context: dict[str, Any]) -> None:
-    valid_file = SimpleUploadedFile("test.jpg", b"abc", content_type="image/jpeg")
-    document_data = {"file": valid_file, "title": "test"}
-    serializer = PaymentPlanSupportingDocumentSerializer(data=document_data, context=serializer_context)
+    serializer = PaymentPlanSupportingDocumentSerializer(
+        data={"file": SimpleUploadedFile("test.jpg", b"abc", content_type="image/jpeg"), "title": "test"},
+        context=serializer_context,
+    )
+
     assert serializer.is_valid()
 
 
 def test_validate_file_extension_failure(serializer_context: dict[str, Any]) -> None:
-    invalid_file = SimpleUploadedFile("test.exe", b"abc", content_type="application/octet-stream")
-    document_data = {"file": invalid_file, "title": "test"}
-    serializer = PaymentPlanSupportingDocumentSerializer(data=document_data, context=serializer_context)
+    serializer = PaymentPlanSupportingDocumentSerializer(
+        data={
+            "file": SimpleUploadedFile("test.exe", b"abc", content_type="application/octet-stream"),
+            "title": "test",
+        },
+        context=serializer_context,
+    )
+
     assert not serializer.is_valid()
-    assert "file" in serializer.errors
     assert serializer.errors["file"][0] == "Unsupported file type."
 
 
-def test_validate_file_limit_failure(payment_plan: PaymentPlan, serializer_context: dict[str, Any]) -> None:
-    PaymentPlanSupportingDocumentFactory.create_batch(
-        PaymentPlanSupportingDocument.FILE_LIMIT + 1,
-        payment_plan=payment_plan,
-    )
+def test_validate_file_limit_failure(full_group: PaymentPlan, serializer_context: dict[str, Any]) -> None:
     serializer = PaymentPlanSupportingDocumentSerializer(
         data={"file": SimpleUploadedFile("test.pdf", b"123", content_type="application/pdf"), "title": "test"},
         context=serializer_context,
     )
+
     assert not serializer.is_valid()
-    assert "non_field_errors" in serializer.errors
     assert (
         serializer.errors["non_field_errors"][0]
-        == f"Payment plan already has the maximum of {PaymentPlanSupportingDocument.FILE_LIMIT} supporting documents."
+        == f"Payment list already has the maximum of {PaymentPlanSupportingDocument.FILE_LIMIT} supporting documents."
     )
 
 
 def test_to_representation_leaves_a_missing_file_as_none(
-    document_without_a_file: PaymentPlanSupportingDocument,
+    group_document_without_a_file: PaymentPlanSupportingDocument,
 ) -> None:
-    data = PaymentPlanSupportingDocumentSerializer(document_without_a_file).data
+    data = PaymentPlanSupportingDocumentSerializer(group_document_without_a_file).data
 
     assert data["file"] is None
 
 
-def test_post_successful_upload(
-    api_client: APIClient,
-    supporting_documents_list_url: str,
-    upload_user: User,
+@pytest.mark.enable_activity_log
+def test_upload_to_group_attaches_document_to_group_and_logs_it(
+    api_client: APIClient, group_documents_url: str, upload_user: User, group: PaymentPlan
 ) -> None:
     api_client.force_authenticate(user=upload_user)
-    assert PaymentPlanSupportingDocument.objects.count() == 0
-    data = {"file": SimpleUploadedFile("test_file.pdf", b"abc", content_type="application/pdf"), "title": "Test"}
-    response = api_client.post(supporting_documents_list_url, data, format="multipart")
+
+    response = api_client.post(
+        group_documents_url,
+        {"file": SimpleUploadedFile("test_file.pdf", b"abc", content_type="application/pdf"), "title": "Test"},
+        format="multipart",
+    )
 
     assert response.status_code == status.HTTP_201_CREATED
-    assert PaymentPlanSupportingDocument.objects.count() == 1
-    assert "id" in response.data
-    assert "uploaded_at" in response.data
+    document = PaymentPlanSupportingDocument.objects.get()
+    assert document.payment_plan == group
+    assert document.follow_up_instruction is None
+    assert document.created_by == upload_user
+    assert response.data["title"] == "Test"
     assert response.data["file"].startswith("test_file")
     assert "/" not in response.data["file"]
-    assert response.data["title"] == "Test"
-    assert response.data["created_by"] == upload_user.pk
+    log = LogEntry.objects.get(object_id=group.id)
+    assert log.changes["supporting_document"] == {"from": None, "to": "Test"}
 
 
-def test_post_invalid_upload(
-    api_client: APIClient,
-    supporting_documents_list_url: str,
-    upload_user: User,
+def test_upload_invalid_file_to_group_is_rejected(
+    api_client: APIClient, group_documents_url: str, upload_user: User
 ) -> None:
     api_client.force_authenticate(user=upload_user)
-    invalid_file = SimpleUploadedFile("test.exe", b"bbb", content_type="application/octet-stream")
-    data = {"file": invalid_file, "title": "Test Document"}
-    response = api_client.post(supporting_documents_list_url, data, format="multipart")
+
+    response = api_client.post(
+        group_documents_url,
+        {"file": SimpleUploadedFile("test.exe", b"bbb", content_type="application/octet-stream"), "title": "Test"},
+        format="multipart",
+    )
+
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert "file" in response.data
 
 
-def test_delete_document_success(
+def test_delete_group_document(
     api_client: APIClient,
-    supporting_documents_detail_url: str,
+    group_document_url: str,
     delete_download_user: User,
+    group_document: PaymentPlanSupportingDocument,
 ) -> None:
     api_client.force_authenticate(user=delete_download_user)
-    response = api_client.delete(supporting_documents_detail_url)
+
+    response = api_client.delete(group_document_url)
+
     assert response.status_code == status.HTTP_204_NO_CONTENT
+    assert not PaymentPlanSupportingDocument.objects.filter(id=group_document.id).exists()
 
 
-def test_get_document_success(
+def test_download_group_document(
     api_client: APIClient,
-    supporting_documents_download_url: str,
+    group_document_download_url: str,
     delete_download_user: User,
-    document: PaymentPlanSupportingDocument,
+    group_document: PaymentPlanSupportingDocument,
 ) -> None:
     api_client.force_authenticate(user=delete_download_user)
-    response = api_client.get(supporting_documents_download_url)
+
+    response = api_client.get(group_document_download_url)
 
     assert response.status_code == status.HTTP_200_OK
     assert isinstance(response, FileResponse)
-    assert response["Content-Disposition"] == 'attachment; filename="evidence.pdf"'
+    assert response["Content-Disposition"].startswith('attachment; filename="group-contract')
+    assert response["Content-Disposition"].endswith('.pdf"')
+
+
+def test_upload_to_instruction_attaches_document_to_instruction(
+    api_client: APIClient, instruction_documents_url: str, upload_user: User, instruction: FollowUpInstruction
+) -> None:
+    api_client.force_authenticate(user=upload_user)
+
+    response = api_client.post(
+        instruction_documents_url,
+        {"file": SimpleUploadedFile("test_file.pdf", b"abc", content_type="application/pdf"), "title": "Test"},
+        format="multipart",
+    )
+
+    assert response.status_code == status.HTTP_201_CREATED
+    document = PaymentPlanSupportingDocument.objects.get()
+    assert document.follow_up_instruction == instruction
+    assert document.payment_plan is None
+
+
+def test_delete_instruction_document(
+    api_client: APIClient,
+    instruction_document_url: str,
+    delete_download_user: User,
+    instruction_document: PaymentPlanSupportingDocument,
+) -> None:
+    api_client.force_authenticate(user=delete_download_user)
+
+    response = api_client.delete(instruction_document_url)
+
+    assert response.status_code == status.HTTP_204_NO_CONTENT
+    assert not PaymentPlanSupportingDocument.objects.filter(id=instruction_document.id).exists()
+
+
+def test_download_instruction_document(
+    api_client: APIClient,
+    instruction_document_download_url: str,
+    delete_download_user: User,
+    instruction_document: PaymentPlanSupportingDocument,
+) -> None:
+    api_client.force_authenticate(user=delete_download_user)
+
+    response = api_client.get(instruction_document_download_url)
+
+    assert response.status_code == status.HTTP_200_OK
+    assert response["Content-Disposition"].startswith('attachment; filename="instruction-contract')
+    assert response["Content-Disposition"].endswith('.pdf"')
+
+
+def test_group_detail_returns_its_supporting_documents(
+    api_client: APIClient,
+    group_detail_url: str,
+    detail_user: User,
+    group_document: PaymentPlanSupportingDocument,
+) -> None:
+    api_client.force_authenticate(user=detail_user)
+
+    response = api_client.get(group_detail_url)
+
+    assert response.status_code == status.HTTP_200_OK
+    assert [document["title"] for document in response.json()["supporting_documents"]] == ["Group contract"]
+
+
+def test_instruction_detail_returns_its_supporting_documents(
+    api_client: APIClient,
+    instruction_detail_url: str,
+    detail_user: User,
+    instruction_document: PaymentPlanSupportingDocument,
+) -> None:
+    api_client.force_authenticate(user=detail_user)
+
+    response = api_client.get(instruction_detail_url)
+
+    assert response.status_code == status.HTTP_200_OK
+    assert [document["title"] for document in response.json()["supporting_documents"]] == ["Instruction contract"]

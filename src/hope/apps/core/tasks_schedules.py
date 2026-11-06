@@ -78,13 +78,13 @@ TASKS_SCHEDULES = {
         "schedule": crontab(minute=0, hour=0),
         "options": periodic_queue_options(),
     },
-    "periodic_sync_payment_plan_invoices_western_union_ftp_async_task": {
-        "task": "hope.apps.payment.celery_tasks.periodic_sync_payment_plan_invoices_western_union_ftp_async_task",
+    "periodic_sync_payment_list_invoices_western_union_ftp_async_task": {
+        "task": "hope.apps.payment.celery_tasks.periodic_sync_payment_list_invoices_western_union_ftp_async_task",
         "schedule": crontab(minute=0, hour=0),
         "options": periodic_queue_options(),
     },
-    "periodic_send_payment_plan_reconciliation_overdue_emails_async_task": {
-        "task": "hope.apps.payment.celery_tasks.periodic_send_payment_plan_reconciliation_overdue_emails_async_task",
+    "periodic_send_payment_list_reconciliation_overdue_emails_async_task": {
+        "task": "hope.apps.payment.celery_tasks.periodic_send_payment_list_reconciliation_overdue_emails_async_task",
         "schedule": crontab(minute=0, hour=0),
         "options": periodic_queue_options(),
     },

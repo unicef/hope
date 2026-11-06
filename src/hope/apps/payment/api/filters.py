@@ -1,3 +1,4 @@
+from datetime import date
 from typing import Any
 
 from django.db.models import Case, IntegerField, Q, QuerySet, Value, When
@@ -9,8 +10,8 @@ from hope.apps.grievance.models import GrievanceTicket
 from hope.models import (
     DeliveryMechanism,
     Payment,
+    PaymentList,
     PaymentPlan,
-    PaymentPlanGroup,
     PaymentVerification,
     PaymentVerificationPlan,
     PaymentVerificationSummary,
@@ -18,17 +19,16 @@ from hope.models import (
 )
 
 
-class PaymentPlanFilter(FilterSet):
+class PaymentListFilter(FilterSet):
     search = django_filters.CharFilter(method="search_filter")
     status = django_filters.ChoiceFilter(
-        choices=PaymentPlan.Status.choices,
+        choices=PaymentList.Status.choices,
     )
     program = django_filters.CharFilter(method="filter_by_program", help_text="Filter by program code")
     program_cycle = django_filters.CharFilter(method="filter_by_program_cycle")
-    payment_plan_group = django_filters.UUIDFilter(field_name="payment_plan_group__id")
-    export_tag = django_filters.NumberFilter(field_name="export_tag")
+    payment_plan = django_filters.UUIDFilter(field_name="payment_plan__id")
     name = django_filters.CharFilter(field_name="name", lookup_expr="startswith")
-    fsp = django_filters.CharFilter(field_name="financial_service_provider__name")
+    fsp = django_filters.CharFilter(method="filter_by_fsp")
     delivery_mechanism = django_filters.ModelMultipleChoiceFilter(
         field_name="delivery_mechanism__code",
         queryset=DeliveryMechanism.objects.all(),
@@ -46,11 +46,11 @@ class PaymentPlanFilter(FilterSet):
     total_entitled_quantity_usd_to = django_filters.NumberFilter(
         field_name="total_entitled_quantity_usd", lookup_expr="lte"
     )
-    start_date = django_filters.DateFilter(field_name="dispersion_start_date", lookup_expr="gte")
-    end_date = django_filters.DateFilter(field_name="dispersion_end_date", lookup_expr="lte")
+    start_date = django_filters.DateFilter(method="filter_by_dispersion_date", lookup_expr="gte")
+    end_date = django_filters.DateFilter(method="filter_by_dispersion_date", lookup_expr="lte")
 
     class Meta:
-        model = PaymentPlan
+        model = PaymentList
         fields = {
             "total_entitled_quantity": ["gte", "lte"],
             "plan_type": ["exact"],
@@ -63,7 +63,17 @@ class PaymentPlanFilter(FilterSet):
     def filter_by_program_cycle(self, qs: QuerySet, name: str, value: str) -> QuerySet:
         return qs.filter(program_cycle_id=value)
 
-    def search_filter(self, qs: QuerySet, name: str, value: str) -> "QuerySet[PaymentPlan]":
+    def filter_by_fsp(self, qs: QuerySet, name: str, value: str) -> QuerySet:
+        return qs.filter(
+            Q(payment_plan__financial_service_provider__name=value)
+            | Q(follow_up_instruction__financial_service_provider__name=value)
+        )
+
+    def filter_by_dispersion_date(self, qs: QuerySet, name: str, value: date) -> QuerySet:
+        lookup = {"start_date": "dispersion_start_date__gte", "end_date": "dispersion_end_date__lte"}[name]
+        return qs.filter(Q(**{f"payment_plan__{lookup}": value}) | Q(**{f"follow_up_instruction__{lookup}": value}))
+
+    def search_filter(self, qs: QuerySet, name: str, value: str) -> "QuerySet[PaymentList]":
         return qs.filter(
             Q(id__icontains=value)
             | Q(unicef_id__icontains=value)
@@ -72,14 +82,23 @@ class PaymentPlanFilter(FilterSet):
         )
 
 
-class TargetPopulationFilter(PaymentPlanFilter):
+class PaymentListListFilter(PaymentListFilter):
+    def filter_queryset(self, queryset: QuerySet) -> QuerySet:
+        # A payment plan's page lists every payment list in it; elsewhere target populations and drafts
+        # stay in Targeting.
+        if not self.form.cleaned_data.get("payment_plan"):
+            queryset = queryset.exclude(status__in=PaymentList.PRE_PAYMENT_LIST_STATUSES)
+        return super().filter_queryset(queryset)
+
+
+class TargetPopulationFilter(PaymentListFilter):
     status = django_filters.ChoiceFilter(
         method="filter_by_status",
-        choices=PaymentPlan.Status.choices + [("ASSIGNED", "Assigned")],
+        choices=PaymentList.Status.choices + [("ASSIGNED", "Assigned")],
     )
 
     class Meta:
-        model = PaymentPlan
+        model = PaymentList
         fields = {
             "created_at": ["gte", "lte"],
             "total_households_count": ["gte", "lte"],
@@ -91,14 +110,14 @@ class TargetPopulationFilter(PaymentPlanFilter):
     def filter_by_status(queryset: "QuerySet", model_field: str, value: Any) -> "QuerySet":
         # assigned TP statuses
         is_assigned = [
-            PaymentPlan.Status.OPEN.value,
-            PaymentPlan.Status.LOCKED.value,
-            PaymentPlan.Status.LOCKED_FSP.value,
-            PaymentPlan.Status.IN_APPROVAL.value,
-            PaymentPlan.Status.IN_AUTHORIZATION.value,
-            PaymentPlan.Status.IN_REVIEW.value,
-            PaymentPlan.Status.ACCEPTED.value,
-            PaymentPlan.Status.FINISHED.value,
+            PaymentList.Status.OPEN.value,
+            PaymentList.Status.LOCKED.value,
+            PaymentList.Status.LOCKED_FSP.value,
+            PaymentList.Status.IN_APPROVAL.value,
+            PaymentList.Status.IN_AUTHORIZATION.value,
+            PaymentList.Status.IN_REVIEW.value,
+            PaymentList.Status.ACCEPTED.value,
+            PaymentList.Status.FINISHED.value,
         ]
         value_list = is_assigned if value == "ASSIGNED" else [value]
         return queryset.filter(status__in=value_list)
@@ -120,18 +139,18 @@ class PendingPaymentFilter(FilterSet):
         fields = []
 
 
-class PaymentPlanOfficeSearchFilter(OfficeSearchFilterMixin, PaymentPlanFilter):
-    class Meta(PaymentPlanFilter.Meta):
+class PaymentListOfficeSearchFilter(OfficeSearchFilterMixin, PaymentListFilter):
+    class Meta(PaymentListFilter.Meta):
         pass
 
-    def filter_by_payment_plan_for_office_search(self, queryset: QuerySet, unicef_id: str) -> QuerySet:
+    def filter_by_payment_list_for_office_search(self, queryset: QuerySet, unicef_id: str) -> QuerySet:
         return queryset.filter(unicef_id=unicef_id)
 
     def filter_by_household_for_office_search(self, queryset: QuerySet, unicef_id: str) -> QuerySet:
         return queryset.filter(payment_items__household__unicef_id=unicef_id).distinct()
 
     def filter_by_individual_for_office_search(self, queryset: QuerySet, value: str) -> QuerySet:
-        """Filter payment plans by individual UNICEF ID, phone number or name."""
+        """Filter payment lists by individual UNICEF ID, phone number or name."""
         q_filters = (
             Q(payment_items__head_of_household__unicef_id=value)
             | Q(payment_items__head_of_household__phone_no__icontains=value)
@@ -184,7 +203,7 @@ class PaymentOfficeSearchFilter(OfficeSearchFilterMixin, FilterSet):
         )
         return queryset.filter(q_filters).distinct()
 
-    def filter_by_payment_plan_for_office_search(self, queryset: QuerySet, unicef_id: str) -> QuerySet:
+    def filter_by_payment_list_for_office_search(self, queryset: QuerySet, unicef_id: str) -> QuerySet:
         return queryset.filter(parent__unicef_id=unicef_id)
 
     def filter_by_grievance_for_office_search(self, queryset: QuerySet, unicef_id: str) -> QuerySet:
@@ -221,21 +240,24 @@ class PaymentOfficeSearchFilter(OfficeSearchFilterMixin, FilterSet):
         return queryset
 
 
-class PaymentPlanGroupFilter(FilterSet):
+class PaymentPlanFilter(FilterSet):
     cycle = django_filters.UUIDFilter(field_name="cycle__id")
     search = django_filters.CharFilter(method="search_filter")
+    status = django_filters.MultipleChoiceFilter(choices=PaymentPlan.Status.choices)
+    plan_type = django_filters.ChoiceFilter(choices=PaymentList.PlanType.choices)
     ordering = OrderingFilter(
         fields=(
             ("unicef_id", "unicef_id"),
             ("name", "name"),
             ("created_at", "created_at"),
             ("cycle__title", "cycle"),
+            ("status", "status"),
         )
     )
 
     class Meta:
-        model = PaymentPlanGroup
-        fields = ["cycle"]
+        model = PaymentPlan
+        fields = ["cycle", "status", "plan_type"]
 
     def search_filter(self, qs: QuerySet, name: str, value: str) -> QuerySet:
         return qs.filter(Q(unicef_id__icontains=value) | Q(name__istartswith=value))

@@ -139,8 +139,8 @@
                         individuals: item.individuals || 0,
                         households: item.households || 0,
                         reconciled: item.reconciled || 0,
-                        finished_payment_plans: item.finished_payment_plans || 0,
-                        total_payment_plans: item.total_payment_plans || 0,
+                        finished_payment_lists: item.finished_payment_lists || 0,
+                        total_payment_lists: item.total_payment_lists || 0,
                         children_counts: item.children_counts || 0,
                         month: item.month || "Unknown month",
                         year: item.year || "Unknown year",
@@ -407,21 +407,21 @@
                             () => ({ value: 0 })
                         ).value().value;
 
-                        const paymentPlanMetrics = ndx.groupAll().reduce(
+                        const paymentListMetrics = ndx.groupAll().reduce(
                                     (p, v) => {
-                                        p.finished += v.finished_payment_plans || 0;
-                                        p.total += v.total_payment_plans || 0;
+                                        p.finished += v.finished_payment_lists || 0;
+                                        p.total += v.total_payment_lists || 0;
                                         return p;
                                     },
                                     (p, v) => {
-                                        p.finished -= v.finished_payment_plans || 0;
-                                        p.total -= v.total_payment_plans || 0;
+                                        p.finished -= v.finished_payment_lists || 0;
+                                        p.total -= v.total_payment_lists || 0;
                                         return p;
                                     },
                                     () => ({ finished: 0, total: 0 })
                                 ).value();
-                        const finishedPaymentPlans = paymentPlanMetrics.finished;
-                        const totalPaymentPlans = paymentPlanMetrics.total;
+                        const finishedPaymentPlans = paymentListMetrics.finished;
+                        const totalPaymentPlans = paymentListMetrics.total;
                         const verificationPercentage = totalPaymentPlans > 0
                             ? (finishedPaymentPlans / totalPaymentPlans) * 100
                             : 0;

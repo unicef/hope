@@ -7,8 +7,8 @@ import { Box, Button } from '@mui/material';
 import GetAppIcon from '@mui/icons-material/GetApp';
 import type { FollowUpInstructionDetail } from '@restgenerated/models/FollowUpInstructionDetail';
 import {
-  paymentPlanBackgroundActionStatusToColor,
-  paymentPlanStatusToColor,
+  paymentListBackgroundActionStatusToColor,
+  paymentListStatusToColor,
 } from '@utils/utils';
 import type { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -57,14 +57,14 @@ export function FollowUpInstructionDetailsHeader({
           >
             <StatusBox
               status={instruction.status}
-              statusToColor={paymentPlanStatusToColor}
+              statusToColor={paymentListStatusToColor}
             />
           </Box>
           {instruction.backgroundActionStatus && (
             <Box>
               <StatusBox
                 status={instruction.backgroundActionStatus}
-                statusToColor={paymentPlanBackgroundActionStatusToColor}
+                statusToColor={paymentListBackgroundActionStatusToColor}
               />
             </Box>
           )}

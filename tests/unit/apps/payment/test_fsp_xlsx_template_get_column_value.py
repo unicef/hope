@@ -14,34 +14,34 @@ from extras.test_utils.factories.payment import (
     DeliveryMechanismFactory,
     FinancialServiceProviderFactory,
     PaymentFactory,
-    PaymentPlanFactory,
+    PaymentListFactory,
 )
 from hope.apps.core.field_attributes.fields_types import _HOUSEHOLD, _INDIVIDUAL
 from hope.apps.household.const import ROLE_ALTERNATE, ROLE_PRIMARY
-from hope.apps.payment.services.payment_household_snapshot_service import create_payment_plan_snapshot_data
-from hope.apps.payment.xlsx.xlsx_payment_plan_base_service import XlsxPaymentPlanBaseService
+from hope.apps.payment.services.payment_household_snapshot_service import create_payment_list_snapshot_data
+from hope.apps.payment.xlsx.xlsx_payment_list_base_service import XlsxPaymentListBaseService
 from hope.models import (
     FinancialServiceProvider,
     FinancialServiceProviderXlsxTemplate,
     MergeStatusModel,
     Payment,
-    PaymentPlan,
+    PaymentList,
 )
 
 pytestmark = pytest.mark.django_db
 
-# account_data is stripped in XlsxPaymentPlanDeliveryExportService.prepare_headers and read by
+# account_data is stripped in XlsxPaymentListDeliveryExportService.prepare_headers and read by
 # get_account_value_from_payment, so it never reaches get_column_value_from_payment.
 DECLARED_EXPORT_COLUMNS = sorted(
-    (set(FinancialServiceProviderXlsxTemplate.DEFAULT_COLUMNS) | set(XlsxPaymentPlanBaseService.HEADERS))
+    (set(FinancialServiceProviderXlsxTemplate.DEFAULT_COLUMNS) | set(XlsxPaymentListBaseService.HEADERS))
     - {"account_data"}
 )
 
 
 @pytest.fixture
-def payment_plan():
-    return PaymentPlanFactory(
-        status=PaymentPlan.Status.ACCEPTED,
+def payment_list():
+    return PaymentListFactory(
+        status=PaymentList.Status.ACCEPTED,
     )
 
 
@@ -80,9 +80,9 @@ def household(admin2_area):
 
 
 @pytest.fixture
-def payment(payment_plan, household, fsp, delivery_mechanism):
+def payment(payment_list, household, fsp, delivery_mechanism):
     return PaymentFactory(
-        parent=payment_plan,
+        parent=payment_list,
         household=household,
         collector=household.head_of_household,
         financial_service_provider=fsp,
@@ -167,24 +167,24 @@ def alternate_collector_documents(alternate_collector, household):
 
 
 @pytest.fixture
-def payment_with_snapshot_and_document(payment_plan, payment, registration_token_document):
-    create_payment_plan_snapshot_data(payment_plan)
+def payment_with_snapshot_and_document(payment_list, payment, registration_token_document):
+    create_payment_list_snapshot_data(payment_list)
     payment.refresh_from_db()
     return payment
 
 
 @pytest.fixture
 def payment_with_snapshot_and_document_columns(
-    payment_plan, payment, registration_token_document, national_id_document
+    payment_list, payment, registration_token_document, national_id_document
 ):
-    create_payment_plan_snapshot_data(payment_plan)
+    create_payment_list_snapshot_data(payment_list)
     payment.refresh_from_db()
     return payment
 
 
 @pytest.fixture
-def payment_with_snapshot_and_alternate(payment_plan, payment, alternate_collector_documents):
-    create_payment_plan_snapshot_data(payment_plan)
+def payment_with_snapshot_and_alternate(payment_list, payment, alternate_collector_documents):
+    create_payment_list_snapshot_data(payment_list)
     payment.refresh_from_db()
     return payment
 
@@ -309,9 +309,9 @@ def test_get_column_value_delivery_date_string(payment_with_snapshot_and_documen
     assert value == "2023-05-05"
 
 
-def test_get_column_value_no_snapshot(payment_plan, household, fsp, delivery_mechanism, admin_areas_dict):
+def test_get_column_value_no_snapshot(payment_list, household, fsp, delivery_mechanism, admin_areas_dict):
     payment = PaymentFactory(
-        parent=payment_plan,
+        parent=payment_list,
         household=household,
         collector=household.head_of_household,
         financial_service_provider=fsp,
@@ -549,9 +549,9 @@ def test_get_column_from_core_field_missing_core_field(payment_with_snapshot_and
     assert value is None
 
 
-def test_get_column_from_core_field_no_snapshot(payment_plan, household, fsp, delivery_mechanism):
+def test_get_column_from_core_field_no_snapshot(payment_list, household, fsp, delivery_mechanism):
     payment = PaymentFactory(
-        parent=payment_plan,
+        parent=payment_list,
         household=household,
         collector=household.head_of_household,
         financial_service_provider=fsp,
@@ -569,20 +569,20 @@ def test_get_column_from_core_field_no_snapshot(payment_plan, household, fsp, de
 
 
 def test_get_column_from_core_field_country_origin(
-    payment_plan,
+    payment_list,
     fsp,
     delivery_mechanism,
 ):
     country = CountryFactory(iso_code3="TST")
     household = HouseholdFactory(country_origin=country)
     payment = PaymentFactory(
-        parent=payment_plan,
+        parent=payment_list,
         household=household,
         collector=household.head_of_household,
         financial_service_provider=fsp,
         delivery_type=delivery_mechanism,
     )
-    create_payment_plan_snapshot_data(payment_plan)
+    create_payment_list_snapshot_data(payment_list)
     payment.refresh_from_db()
     value = FinancialServiceProviderXlsxTemplate.get_column_from_core_field(
         payment,

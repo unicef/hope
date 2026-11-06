@@ -33,48 +33,46 @@ export function RevertForceFailedButton({
   const { t } = useTranslation();
   const [isOpenModal, setOpenModal] = useState(false);
   const { businessArea, programId } = useBaseUrl();
-  const { paymentPlanId } = useParams();
+  const { paymentListId } = useParams();
   const { showMessage } = useSnackbar();
   const queryClient = useQueryClient();
-  const {
-    mutate: revertMarkAsFailed,
-    isPending: loadingRevertMarkAsFailed,
-  } = useMutation({
-    mutationFn: ({
-      businessAreaSlug,
-      id,
-      paymentPlanId: ppId,
-      programCode,
-      requestBody,
-    }: {
-      businessAreaSlug: string;
-      id: string;
-      paymentPlanId: string;
-      programCode: string;
-      requestBody: RevertMarkPaymentAsFailed;
-    }) =>
-      RestService.restBusinessAreasProgramsPaymentPlansPaymentsRevertMarkAsFailedCreate(
-        {
-          businessAreaSlug,
-          paymentId: id,
-          paymentPlanPk: ppId,
-          programCode,
-          requestBody,
-        },
-      ),
-    onSuccess: () => {
-      showMessage(t('Force failed has been reverted.'));
-      setOpenModal(false);
-      queryClient.invalidateQueries({
-        queryKey: restQueryKey(
-          RestService.restBusinessAreasProgramsPaymentPlansPaymentsRetrieve,
+  const { mutate: revertMarkAsFailed, isPending: loadingRevertMarkAsFailed } =
+    useMutation({
+      mutationFn: ({
+        businessAreaSlug,
+        id,
+        paymentListId: ppId,
+        programCode,
+        requestBody,
+      }: {
+        businessAreaSlug: string;
+        id: string;
+        paymentListId: string;
+        programCode: string;
+        requestBody: RevertMarkPaymentAsFailed;
+      }) =>
+        RestService.restBusinessAreasProgramsPaymentListsPaymentsRevertMarkAsFailedCreate(
+          {
+            businessAreaSlug,
+            paymentId: id,
+            paymentListPk: ppId,
+            programCode,
+            requestBody,
+          },
         ),
-      });
-    },
-    onError: (error: any) => {
-      showApiErrorMessages(error, showMessage);
-    },
-  });
+      onSuccess: () => {
+        showMessage(t('Force failed has been reverted.'));
+        setOpenModal(false);
+        queryClient.invalidateQueries({
+          queryKey: restQueryKey(
+            RestService.restBusinessAreasProgramsPaymentListsPaymentsRetrieve,
+          ),
+        });
+      },
+      onError: (error: any) => {
+        showApiErrorMessages(error, showMessage);
+      },
+    });
   const validationSchema = Yup.object().shape({
     deliveredQuantity: Yup.number()
       .min(0)
@@ -89,7 +87,7 @@ export function RevertForceFailedButton({
     revertMarkAsFailed({
       businessAreaSlug: businessArea,
       programCode: programId,
-      paymentPlanId,
+      paymentListId,
       id: paymentId,
       requestBody: {
         deliveredQuantity: formValues.deliveredQuantity,

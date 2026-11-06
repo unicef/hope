@@ -6,15 +6,15 @@ import { BlackLink } from '@core/BlackLink';
 import { StatusBox } from '@core/StatusBox';
 import { ClickableTableRow } from '@core/Table/ClickableTableRow';
 import type { MouseEvent, ReactElement } from 'react';
-import type { PaymentList } from '@restgenerated/models/PaymentList';
+import type { PaymentRow } from '@restgenerated/models/PaymentRow';
 
 interface LookUpPaymentRecordTableRowProps {
-  paymentRecord: PaymentList;
+  paymentRecord: PaymentRow;
   openInNewTab: boolean;
-  selected: Array<PaymentList>;
+  selected: Array<PaymentRow>;
   checkboxClickHandler: (
     event: MouseEvent<HTMLTableRowElement> | MouseEvent<HTMLButtonElement>,
-    selectedPaymentRecord: PaymentList,
+    selectedPaymentRecord: PaymentRow,
   ) => void;
 }
 

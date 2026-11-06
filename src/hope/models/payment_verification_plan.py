@@ -43,7 +43,7 @@ class PaymentVerificationPlan(TimeStampedUUIDModel, ConcurrencyModel, UnicefIden
     ACTIVITY_LOG_MAPPING = create_mapping_dict(
         [
             "status",
-            "payment_plan",
+            "payment_list",
             "sampling",
             "verification_channel",
             "sample_size",
@@ -89,10 +89,11 @@ class PaymentVerificationPlan(TimeStampedUUIDModel, ConcurrencyModel, UnicefIden
         (VERIFICATION_CHANNEL_XLSX, "XLSX"),
     )
 
-    payment_plan = models.ForeignKey(
-        "payment.PaymentPlan",
+    payment_list = models.ForeignKey(
+        "payment.PaymentList",
         on_delete=models.CASCADE,
         related_name="payment_verification_plans",
+        db_column="payment_plan_id",
     )
     status = models.CharField(max_length=50, choices=get_status_choices, default=STATUS_PENDING)
     verification_channel = models.CharField(max_length=50, choices=get_verification_channel_choices)
@@ -141,7 +142,7 @@ class PaymentVerificationPlan(TimeStampedUUIDModel, ConcurrencyModel, UnicefIden
 
     @property
     def business_area(self) -> BusinessArea:
-        return self.payment_plan.business_area
+        return self.payment_list.business_area
 
     @property
     def get_xlsx_verification_file(self) -> FileTemp:
@@ -198,7 +199,7 @@ class PaymentVerificationPlan(TimeStampedUUIDModel, ConcurrencyModel, UnicefIden
 
     @property
     def get_program(self) -> "Program":
-        return self.payment_plan.program_cycle.program
+        return self.payment_list.program_cycle.program
 
 
 @receiver(
@@ -207,7 +208,7 @@ class PaymentVerificationPlan(TimeStampedUUIDModel, ConcurrencyModel, UnicefIden
     dispatch_uid="update_verification_status_in_cash_plan",
 )
 def update_verification_status_in_cash_plan(sender: Any, instance: PaymentVerificationPlan, **kwargs: Any) -> None:
-    build_summary(instance.payment_plan)
+    build_summary(instance.payment_list)
 
 
 @receiver(
@@ -218,4 +219,4 @@ def update_verification_status_in_cash_plan(sender: Any, instance: PaymentVerifi
 def update_verification_status_in_cash_plan_on_delete(
     sender: Any, instance: PaymentVerificationPlan, **kwargs: Any
 ) -> None:
-    build_summary(instance.payment_plan)
+    build_summary(instance.payment_list)

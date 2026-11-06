@@ -25,12 +25,12 @@ import { responsiveValue } from 'src/responsive';
 
 export interface FinishVerificationPlanProps {
   verificationPlan: PaymentVerificationPlanDetails['paymentVerificationPlans'][number];
-  paymentPlanId: string;
+  paymentListId: string;
 }
 
 export function FinishVerificationPlan({
   verificationPlan,
-  paymentPlanId,
+  paymentListId,
 }: FinishVerificationPlanProps): ReactElement {
   const { t } = useTranslation();
   const [finishDialogOpen, setFinishDialogOpen] = useState(false);
@@ -44,7 +44,7 @@ export function FinishVerificationPlan({
       RestService.restBusinessAreasProgramsPaymentVerificationsFinishVerificationPlanCreate(
         {
           businessAreaSlug: businessArea,
-          id: paymentPlanId,
+          id: paymentListId,
           programCode: programCode,
           verificationPlanId: verificationPlan.id,
         },

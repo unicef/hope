@@ -3,7 +3,7 @@ import logging
 from hope.models import (
     Household,
     Individual,
-    PaymentPlan,
+    PaymentList,
     Program,
     TargetingCriteriaRule,
     TargetingCriteriaRuleFilter,
@@ -24,7 +24,7 @@ def get_existing_unicef_ids(ids_string: str, model: type[Household] | type[Indiv
 
 
 def from_input_to_targeting_criteria(
-    targeting_criteria_input: dict, program: "Program", payment_plan: PaymentPlan
+    targeting_criteria_input: dict, program: "Program", payment_list: PaymentList
 ) -> None:
     # TODO: FIX ME PLEASE ["rules"] ????
     for rule in targeting_criteria_input.pop("rules", []):
@@ -38,7 +38,7 @@ def from_input_to_targeting_criteria(
             individual_ids = get_existing_unicef_ids(individual_ids, Individual, program)
 
         tc_rule = TargetingCriteriaRule(
-            payment_plan=payment_plan,
+            payment_list=payment_list,
             household_ids=household_ids,
             individual_ids=individual_ids,
             alternative_collectors_ids=rule.get("alternative_collectors_ids", ""),

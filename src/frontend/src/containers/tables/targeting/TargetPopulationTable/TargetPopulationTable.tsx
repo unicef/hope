@@ -17,7 +17,7 @@ import { useProgramContext } from 'src/programContext';
 import styled from 'styled-components';
 import { headCells } from './TargetPopulationTableHeadCells';
 import { TargetPopulationTableRow } from './TargetPopulationTableRow';
-import { GroupHeaderRow } from '@components/core/Table/GroupHeaderRow';
+import { PaymentPlanHeaderRow } from '@components/core/Table/PaymentPlanHeaderRow';
 
 interface TargetPopulationProps {
   filter;
@@ -70,12 +70,18 @@ export function TargetPopulationTable({
 
   const table = useTableState({
     rowsPerPageOptions: [10, 15, 20],
-    defaultOrderBy: 'paymentPlanGroup__name,-createdAt',
+    // Rows sit under a header per payment plan, so by default the plan sorts first
+    // (then the plan's creation date: a name is unique per cycle only, and this
+    // table spans every cycle of the programme).
+    defaultOrdering: 'payment_plan_name,payment_plan,-created_at',
     resetPageOn: filterVariables,
   });
   const { page } = table;
   const listVariables = useMemo(
-    () => ({ ...filterVariables, ...table.paginationParams }),
+    () => ({
+      ...filterVariables,
+      ...table.paginationParams,
+    }),
     [filterVariables, table.paginationParams],
   );
 
@@ -159,15 +165,14 @@ export function TargetPopulationTable({
         renderRow={(row: TargetPopulationList) => {
           const idx = results.indexOf(row);
           const prev = results[idx - 1];
-          const isNewGroup =
-            idx === 0 ||
-            prev?.paymentPlanGroup?.id !== row.paymentPlanGroup?.id;
+          const isNewPaymentPlan =
+            idx === 0 || prev?.paymentPlan?.id !== row.paymentPlan?.id;
           return (
             <>
-              {isNewGroup && (
-                <GroupHeaderRow
-                  name={row.paymentPlanGroup?.name}
-                  id={row.paymentPlanGroup?.id}
+              {isNewPaymentPlan && (
+                <PaymentPlanHeaderRow
+                  name={row.paymentPlan?.name}
+                  id={row.paymentPlan?.id}
                 />
               )}
               <TargetPopulationTableRow

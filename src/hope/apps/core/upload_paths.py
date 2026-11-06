@@ -27,11 +27,10 @@ PROGRAM_PATHS = {
     "grievance.GrievanceDocument": "grievance_ticket.programs",
     "grievance.GrievanceTicket": "programs",
     "household.Document": "individual.program",
-    "payment.PaymentPlan": "program_cycle.program",
-    "payment.PaymentPlanGroup": "cycle.program",
-    "payment.PaymentPlanSupportingDocument": "payment_plan.program_cycle.program",
-    "payment.PaymentVerificationPlan": "payment_plan.program_cycle.program",
-    "payment.WesternUnionPaymentPlanReport": "payment_plan.program_cycle.program",
+    "payment.PaymentList": "program_cycle.program",
+    "payment.PaymentPlan": "cycle.program",
+    "payment.PaymentVerificationPlan": "payment_list.program_cycle.program",
+    "payment.WesternUnionPaymentListReport": "payment_list.program_cycle.program",
     "periodic_data_update.PDUXlsxUpload": "template.program",
 }
 

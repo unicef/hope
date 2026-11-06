@@ -78,7 +78,7 @@ class XlsxVerificationExportService(XlsxExportBaseService):
 
     def __init__(self, payment_verification_plan: PaymentVerificationPlan) -> None:
         self.payment_verification_plan = payment_verification_plan
-        self.is_social_worker_program = payment_verification_plan.payment_plan.program.is_social_worker_program
+        self.is_social_worker_program = payment_verification_plan.payment_list.program.is_social_worker_program
         self.payment_record_verifications = payment_verification_plan.payment_record_verifications.select_related(
             "payment__head_of_household",
             "payment__household__admin1",

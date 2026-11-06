@@ -22,7 +22,7 @@ class SurveyAdmin(ViewOnUiMixin, HOPEModelAdminBase):
     readonly_fields = (
         "category",
         "created_by",
-        "payment_plan",
+        "payment_list",
         "program",
         "business_area",
     )

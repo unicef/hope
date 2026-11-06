@@ -16,8 +16,8 @@ import hope.models.financial_service_provider
 import hope.models.financial_service_provider_xlsx_template
 import hope.models.fsp_name_mapping
 import hope.models.payment
-import hope.models.payment_plan
-import hope.models.payment_plan_split
+import hope.models.payment_list
+import hope.models.payment_list_split
 import hope.models.payment_verification
 import hope.models.payment_verification_plan
 import hope.models.payment_verification_summary
@@ -179,7 +179,7 @@ class Migration(migrations.Migration):
             name="background_action_status",
             field=models.CharField(
                 blank=True,
-                choices=hope.models.payment_plan.PaymentPlan.BackgroundActionStatus.get_choices,
+                choices=hope.models.payment_list.PaymentList.BackgroundActionStatus.get_choices,
                 db_index=True,
                 default=None,
                 help_text="Background Action Status for celery task [sys]",
@@ -192,7 +192,7 @@ class Migration(migrations.Migration):
             name="build_status",
             field=models.CharField(
                 blank=True,
-                choices=hope.models.payment_plan.PaymentPlan.BuildStatus.get_choices,
+                choices=hope.models.payment_list.PaymentList.BuildStatus.get_choices,
                 db_index=True,
                 default=None,
                 help_text="Build Status for celery task [sys]",
@@ -204,7 +204,7 @@ class Migration(migrations.Migration):
             model_name="paymentplan",
             name="status",
             field=models.CharField(
-                choices=hope.models.payment_plan.PaymentPlan.Status.get_choices,
+                choices=hope.models.payment_list.PaymentList.Status.get_choices,
                 db_index=True,
                 default="TP_OPEN",
                 help_text="Status [sys]",
@@ -215,7 +215,7 @@ class Migration(migrations.Migration):
             model_name="paymentplansplit",
             name="split_type",
             field=models.CharField(
-                choices=hope.models.payment_plan_split.PaymentPlanSplit.SplitType.get_choices,
+                choices=hope.models.payment_list_split.PaymentListSplit.SplitType.get_choices,
                 default="NO_SPLIT",
                 max_length=24,
             ),

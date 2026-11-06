@@ -23,7 +23,7 @@ from extras.test_utils.factories import (
 from hope.apps.account.permissions import Permissions
 from hope.apps.dashboard.services import DashboardGlobalDataCache
 from hope.apps.dashboard.views import DashboardReportView
-from hope.models import BusinessArea, Payment, PaymentPlan, RoleAssignment
+from hope.models import BusinessArea, Payment, PaymentList, RoleAssignment
 
 
 @pytest.fixture
@@ -101,7 +101,7 @@ def populate_dashboard_cache(area_kabul):
                 household=household,
                 program=program,
                 business_area=ba,
-                parent__status=PaymentPlan.Status.ACCEPTED,
+                parent__status=PaymentList.Status.ACCEPTED,
                 status=payment_status,
             )
         return household

@@ -7,7 +7,7 @@ import { Radio } from '@mui/material';
 import TableCell from '@mui/material/TableCell';
 import type { TargetPopulationList } from '@restgenerated/models/TargetPopulationList';
 import {
-  paymentPlanStatusToColor,
+  paymentListStatusToColor,
   targetPopulationStatusDisplayMap,
 } from '@utils/utils';
 import type { ReactElement } from 'react';
@@ -69,7 +69,7 @@ export function TargetPopulationTableRow({
       <TableCell align="left">
         <StatusBox
           status={targetPopulation.status}
-          statusToColor={paymentPlanStatusToColor}
+          statusToColor={paymentListStatusToColor}
           statusNameMapping={targetPopulationStatusDisplayMap}
         />
       </TableCell>

@@ -52,14 +52,18 @@ const BUTTONS_BY_STATUS: Record<string, Record<string, string>> = {
     'button-abort': PERMISSIONS.PM_ABORT,
   },
   ACCEPTED: {
-    'button-reconciliation-export': PERMISSIONS.PM_VIEW_LIST,
+    'button-reconciliation-export': PERMISSIONS.PM_PAYMENT_PLAN_EXPORT_XLSX,
     'button-reconciliation-import':
       PERMISSIONS.PM_IMPORT_XLSX_WITH_RECONCILIATION,
   },
   FINISHED: {
-    'button-reconciliation-export': PERMISSIONS.PM_VIEW_LIST,
+    'button-reconciliation-export': PERMISSIONS.PM_PAYMENT_PLAN_EXPORT_XLSX,
     'button-reconciliation-import':
       PERMISSIONS.PM_IMPORT_XLSX_WITH_RECONCILIATION,
+    'button-set-ready-for-closure': PERMISSIONS.PM_MARK_READY_FOR_CLOSURE,
+  },
+  READY_FOR_CLOSURE: {
+    'button-send-back': PERMISSIONS.PM_MARK_READY_FOR_CLOSURE,
     'button-close': PERMISSIONS.PM_CLOSE_FINISHED,
   },
   ABORTED: { 'button-reactivate': PERMISSIONS.PM_REACTIVATE_ABORT },

@@ -1,6 +1,6 @@
 import { TableWrapper } from '@components/core/TableWrapper';
 import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
-import { PaymentPlanStatusEnum } from '@restgenerated/models/PaymentPlanStatusEnum';
+import { PaymentListStatusEnum } from '@restgenerated/models/PaymentListStatusEnum';
 import { createApiParams } from '@utils/apiUtils';
 import { restQueryKey } from '@utils/queryKeys';
 import { useBaseUrl } from '@hooks/useBaseUrl';
@@ -58,7 +58,7 @@ export function LookUpTargetPopulationTableSurveys({
         min: filter.createdAtRangeMin || null,
         max: filter.createdAtRangeMax || null,
       }),
-      statusNot: PaymentPlanStatusEnum.OPEN,
+      statusNot: PaymentListStatusEnum.OPEN,
       isTargetPopulation: true,
       businessAreaSlug: businessArea,
       programCode: programId,
@@ -91,7 +91,7 @@ export function LookUpTargetPopulationTableSurveys({
     listVariables,
   );
   const {
-    data: paymentPlansData,
+    data: paymentListsData,
     isLoading,
     isFetching,
     error,
@@ -136,7 +136,7 @@ export function LookUpTargetPopulationTableSurveys({
       <UniversalRestTable
         title={noTitle ? null : t('Target Populations')}
         headCells={enableRadioButton ? headCells : headCells.slice(1)}
-        data={paymentPlansData}
+        data={paymentListsData}
         isLoading={isLoading}
         isFetching={isFetching}
         error={error}

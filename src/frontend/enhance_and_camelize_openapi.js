@@ -74,13 +74,13 @@ function findFieldMappings(openApiSchema, enumName, endpoint) {
 
           // Define mapping rules for specific endpoints
           const mappingRules = {
-            'payment-plan-background-action-status': {
+            'payment-list-background-action-status': {
               requiredField: 'background_action_status',
-              allowedSchemas: ['paymentplan', 'targetpopulation'],
+              allowedSchemas: ['paymentlist', 'targetpopulation'],
             },
-            'payment-plan-status': {
+            'payment-list-status': {
               requiredField: 'status',
-              allowedSchemas: ['paymentplan', 'followuppaymentplan'],
+              allowedSchemas: ['paymentlist', 'followuppaymentlist'],
             },
             'payment-verification-plan-status': {
               requiredField: 'status',

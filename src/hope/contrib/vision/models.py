@@ -40,6 +40,7 @@ class FundsCommitmentHeader(models.Model):
         PaymentPlan,
         blank=True,
         related_name="funds_commitment_headers",
+        db_table="vision_fundscommitmentheader_payment_plan_groups",
     )
     objects = FundsCommitmentHeaderQuerySet.as_manager()
 

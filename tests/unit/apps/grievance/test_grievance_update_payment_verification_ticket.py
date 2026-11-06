@@ -20,7 +20,7 @@ from extras.test_utils.factories.grievance import (
 )
 from extras.test_utils.factories.payment import (
     PaymentFactory,
-    PaymentPlanFactory,
+    PaymentListFactory,
     PaymentVerificationFactory,
     PaymentVerificationPlanFactory,
     PaymentVerificationSummaryFactory,
@@ -82,18 +82,18 @@ def household(afghanistan: BusinessArea, program: Program) -> HouseholdFactory:
 
 @pytest.fixture
 def payment_verification_ticket(afghanistan: BusinessArea, program: Program, household: HouseholdFactory):
-    payment_plan = PaymentPlanFactory(
+    payment_list = PaymentListFactory(
         name="TEST",
         program_cycle=program.cycles.first(),
         business_area=afghanistan,
     )
-    PaymentVerificationSummaryFactory(payment_plan=payment_plan)
+    PaymentVerificationSummaryFactory(payment_list=payment_list)
     payment_verification_plan = PaymentVerificationPlanFactory(
-        payment_plan=payment_plan,
+        payment_list=payment_list,
         status=PaymentVerificationPlan.STATUS_ACTIVE,
     )
     payment = PaymentFactory(
-        parent=payment_plan,
+        parent=payment_list,
         household=household,
         currency=CurrencyFactory(code="PLN", name="Polish Zloty"),
         program=program,

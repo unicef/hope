@@ -37,11 +37,11 @@ def get_rule_security_choices() -> tuple:
 
 
 class Rule(NaturalKeyModel, LimitBusinessAreaModelMixin):
-    TYPE_PAYMENT_PLAN = "PAYMENT_PLAN"
+    TYPE_PAYMENT_LIST = "PAYMENT_PLAN"
     TYPE_TARGETING = "TARGETING"
 
     TYPE_CHOICES = (
-        (TYPE_PAYMENT_PLAN, "Payment Plan"),
+        (TYPE_PAYMENT_LIST, "Payment List"),
         (TYPE_TARGETING, "Targeting"),
     )
 
@@ -81,7 +81,7 @@ class Rule(NaturalKeyModel, LimitBusinessAreaModelMixin):
         choices=get_rule_type_choices,
         max_length=50,
         default=TYPE_TARGETING,
-        help_text="Use Rule for Targeting or Payment Plan",
+        help_text="Use Rule for Targeting or Payment List",
     )
     flags = JSONField(default=dict, blank=True)
 

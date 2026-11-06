@@ -1,21 +1,21 @@
 import pytest
 
 from extras.test_utils.selenium import HopeTestBrowser
-from hope.models import PaymentPlan
+from hope.models import PaymentList
 
 pytestmark = pytest.mark.django_db()
 
 
 def test_activate_verification_plan_flow(
     login: HopeTestBrowser,
-    pending_verification_payment_plan: PaymentPlan,
+    pending_verification_payment_list: PaymentList,
 ) -> None:
     """Regression for PR #6001 — block concurrent activation of verification plans."""
-    payment_plan = pending_verification_payment_plan
-    program = payment_plan.program_cycle.program
+    payment_list = pending_verification_payment_list
+    program = payment_list.program_cycle.program
     url = (
-        f"/{payment_plan.business_area.slug}/programs/{program.code}"
-        f"/payment-verification/payment-plan/{payment_plan.id}"
+        f"/{payment_list.business_area.slug}/programs/{program.code}"
+        f"/payment-verification/payment-list/{payment_list.id}"
     )
     login.open(url)
 

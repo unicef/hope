@@ -3,7 +3,7 @@ import type { HeadCell } from '@components/core/Table/EnhancedTableHead';
 export const headCells: HeadCell<any>[] = [
   {
     disablePadding: false,
-    label: 'Payment Plan ID',
+    label: 'Payment List ID',
     id: 'unicefId',
     numeric: false,
     dataCy: 'unicefId',

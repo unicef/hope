@@ -13,7 +13,7 @@ class Message(TimeStampedUUIDModel, AdminUrlMixin, UnicefIdentifiedModel):
             "body",
             "business_area",
             "households",
-            "payment_plan",
+            "payment_list",
             "registration_data_import",
             "sampling_type",
             "full_list_arguments",
@@ -45,12 +45,13 @@ class Message(TimeStampedUUIDModel, AdminUrlMixin, UnicefIdentifiedModel):
     business_area = models.ForeignKey("core.BusinessArea", on_delete=models.CASCADE)
     # Recipients Lookup criteria
     households = models.ManyToManyField("household.Household", related_name="messages", blank=True)
-    payment_plan = models.ForeignKey(
-        "payment.PaymentPlan",
+    payment_list = models.ForeignKey(
+        "payment.PaymentList",
         related_name="messages",
         blank=True,
         null=True,
         on_delete=models.SET_NULL,
+        db_column="payment_plan_id",
     )
     registration_data_import = models.ForeignKey(
         "registration_data.RegistrationDataImport",

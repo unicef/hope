@@ -9,7 +9,7 @@ The Payment Verification module allows UNICEF to check that beneficiaries have r
 
 ## How to create a payment verification plan
 
-1. Click on Payment Verification tab on the main menu and then select the payment plan that you want to perform payment verification on.
+1. Click on Payment Verification tab on the main menu and then select the payment list that you want to perform payment verification on.
     ![Image](_screenshots/verification/ver_30.png)
 2. Click on CREATE VERIFICATION PLAN
     ![Image](_screenshots/verification/ver_31.png)

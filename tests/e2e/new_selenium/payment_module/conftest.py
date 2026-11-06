@@ -15,13 +15,15 @@ from extras.test_utils.factories import (
     HouseholdFactory,
     PaymentFactory,
     PaymentHouseholdSnapshotFactory,
+    PaymentListFactory,
     PaymentPlanFactory,
-    PaymentPlanGroupFactory,
     RuleCommitFactory,
 )
 from extras.test_utils.factories.program import ProgramCycleFactory, ProgramFactory
+from extras.test_utils.factories.targeting import TargetingCriteriaRuleFactory, TargetingCriteriaRuleFilterFactory
 from hope.apps.account.permissions import Permissions
 from hope.apps.payment.services.follow_up_instruction_service import FollowUpInstructionService
+from hope.apps.payment.services.payment_list_services import PaymentListService
 from hope.models import (
     BusinessArea,
     Currency,
@@ -30,8 +32,8 @@ from hope.models import (
     FinancialServiceProviderXlsxTemplate,
     FollowUpInstruction,
     Payment,
+    PaymentList,
     PaymentPlan,
-    PaymentPlanGroup,
     Program,
     ProgramCycle,
     Rule,
@@ -47,55 +49,60 @@ PM_VIEW_PERMISSIONS = (
 )
 
 
-def payment_plan_url(payment_plan: PaymentPlan) -> str:
+def payment_list_url(payment_list: PaymentList) -> str:
     return (
-        f"/{payment_plan.business_area.slug}/programs/{payment_plan.program.code}"
-        f"/payment-module/payment-plans/{payment_plan.id}"
+        f"/{payment_list.business_area.slug}/programs/{payment_list.program.code}"
+        f"/payment-module/payment-lists/{payment_list.id}"
     )
 
 
-@pytest.fixture
-def finished_payment_plan(business_area: BusinessArea) -> PaymentPlan:
-    program = ProgramFactory(business_area=business_area, status=Program.ACTIVE)
-    return PaymentPlanFactory(
-        business_area=business_area,
-        program_cycle=program.cycles.first(),
-        status=PaymentPlan.Status.FINISHED,
+def payment_plan_url(payment_list: PaymentList) -> str:
+    return (
+        f"/{payment_list.business_area.slug}/programs/{payment_list.program.code}"
+        f"/payment-module/payment-plans/{payment_list.payment_plan_id}"
+    )
+
+
+def _group_with_plan(
+    program_cycle: ProgramCycle, group_status: str, plan_status: str, **group_fields: Any
+) -> PaymentPlan:
+    group = PaymentPlanFactory(cycle=program_cycle, status=group_status, **group_fields)
+    PaymentListFactory(
+        business_area=program_cycle.program.business_area,
+        program_cycle=program_cycle,
+        payment_plan=group,
+        status=plan_status,
         financial_service_provider=FinancialServiceProviderFactory(),
         delivery_mechanism=DeliveryMechanismFactory(),
     )
+    return group
 
 
 @pytest.fixture
-def ready_for_closure_payment_plan(business_area: BusinessArea) -> PaymentPlan:
-    program = ProgramFactory(business_area=business_area, status=Program.ACTIVE)
-    return PaymentPlanFactory(
-        business_area=business_area,
-        program_cycle=program.cycles.first(),
-        status=PaymentPlan.Status.READY_FOR_CLOSURE,
-        financial_service_provider=FinancialServiceProviderFactory(),
-        delivery_mechanism=DeliveryMechanismFactory(),
+def finished_group(program_cycle: ProgramCycle) -> PaymentPlan:
+    return _group_with_plan(program_cycle, PaymentPlan.Status.FINISHED, PaymentList.Status.FINISHED)
+
+
+@pytest.fixture
+def locked_payment_plan(program_cycle: ProgramCycle) -> PaymentPlan:
+    return _group_with_plan(program_cycle, PaymentPlan.Status.LOCKED, PaymentList.Status.LOCKED)
+
+
+@pytest.fixture
+def closed_group(program_cycle: ProgramCycle, create_super_user: Any) -> PaymentPlan:
+    group = _group_with_plan(
+        program_cycle,
+        PaymentPlan.Status.CLOSED,
+        PaymentList.Status.CLOSED,
+        closed_by=create_super_user,
+        status_date=timezone.now(),
     )
+    ApprovalProcessFactory(payment_plan=group)
+    return group
 
 
 @pytest.fixture
-def closed_payment_plan(business_area: BusinessArea, create_super_user: Any) -> PaymentPlan:
-    program = ProgramFactory(business_area=business_area, status=Program.ACTIVE)
-    pp = PaymentPlanFactory(
-        business_area=business_area,
-        program_cycle=program.cycles.first(),
-        status=PaymentPlan.Status.CLOSED,
-        financial_service_provider=FinancialServiceProviderFactory(),
-        delivery_mechanism=DeliveryMechanismFactory(),
-    )
-    pp.closed_by = create_super_user
-    pp.save(update_fields=["closed_by"])
-    ApprovalProcessFactory(payment_plan=pp)
-    return pp
-
-
-@pytest.fixture
-def payment_plan_for_pagination(business_area: BusinessArea) -> tuple[PaymentPlan, str, str]:
+def payment_list_for_pagination(business_area: BusinessArea) -> tuple[PaymentList, str, str]:
     """OPEN plan with 12 eligible payments -> 2 pages at the default page size of 10.
 
     Regression fixture for PR #6064 (https://github.com/unicef/hope/pull/6064). Returns
@@ -104,10 +111,10 @@ def payment_plan_for_pagination(business_area: BusinessArea) -> tuple[PaymentPla
     newest payment on page 1 and the oldest on page 2.
     """
     program = ProgramFactory(business_area=business_area, status=Program.ACTIVE)
-    plan = PaymentPlanFactory(
+    plan = PaymentListFactory(
         business_area=business_area,
         program_cycle=program.cycles.first(),
-        status=PaymentPlan.Status.OPEN,
+        status=PaymentList.Status.OPEN,
         financial_service_provider=FinancialServiceProviderFactory(),
         delivery_mechanism=DeliveryMechanismFactory(),
     )
@@ -136,13 +143,13 @@ def program_cycle(payment_module_program: Program) -> ProgramCycle:
 
 
 @pytest.fixture
-def payment_plan_group(program_cycle: ProgramCycle) -> PaymentPlanGroup:
-    return PaymentPlanGroupFactory(cycle=program_cycle, name="Original Group Name")
+def payment_plan(program_cycle: ProgramCycle) -> PaymentPlan:
+    return PaymentPlanFactory(cycle=program_cycle, name="Original Group Name")
 
 
 @pytest.fixture
-def second_payment_plan_group(program_cycle: ProgramCycle) -> PaymentPlanGroup:
-    return PaymentPlanGroupFactory(cycle=program_cycle, name="Second Group")
+def second_payment_plan(program_cycle: ProgramCycle) -> PaymentPlan:
+    return PaymentPlanFactory(cycle=program_cycle, name="Second Group")
 
 
 @pytest.fixture
@@ -200,7 +207,7 @@ def fi_source_plans(
     fi_delivery_mechanism: DeliveryMechanism,
     fi_fsp: FinancialServiceProvider,
     fi_xlsx_template: FinancialServiceProviderXlsxTemplate,
-) -> tuple[PaymentPlanGroup, PaymentPlanGroup]:
+) -> tuple[PaymentPlan, PaymentPlan]:
     """Two FINISHED source plans in separate cycles/groups with failed payments.
 
     hh_a: failed payments in BOTH plans (demonstrates >1 failed payment per household).
@@ -212,28 +219,28 @@ def fi_source_plans(
     ba = fi_program.business_area
     cycle_one = ProgramCycleFactory(program=fi_program)
     cycle_two = ProgramCycleFactory(program=fi_program)
-    group_one = cycle_one.payment_plan_groups.first()
-    group_two = cycle_two.payment_plan_groups.first()
+    group_one = cycle_one.payment_plans.first()
+    group_two = cycle_two.payment_plans.first()
 
-    plan_one = PaymentPlanFactory(
+    plan_one = PaymentListFactory(
         name="FI Source Plan One",
         program_cycle=cycle_one,
-        payment_plan_group=group_one,
+        payment_plan=group_one,
         business_area=ba,
         currency=fi_currency,
         delivery_mechanism=fi_delivery_mechanism,
         financial_service_provider=fi_fsp,
-        status=PaymentPlan.Status.FINISHED,
+        status=PaymentList.Status.FINISHED,
     )
-    plan_two = PaymentPlanFactory(
+    plan_two = PaymentListFactory(
         name="FI Source Plan Two",
         program_cycle=cycle_two,
-        payment_plan_group=group_two,
+        payment_plan=group_two,
         business_area=ba,
         currency=fi_currency,
         delivery_mechanism=fi_delivery_mechanism,
         financial_service_provider=fi_fsp,
-        status=PaymentPlan.Status.FINISHED,
+        status=PaymentList.Status.FINISHED,
     )
 
     hh_a = HouseholdFactory(business_area=ba, program=fi_program)
@@ -278,7 +285,7 @@ def fi_source_plans(
 
 @pytest.fixture
 def fi_instruction(
-    fi_source_plans: tuple[PaymentPlanGroup, PaymentPlanGroup],
+    fi_source_plans: tuple[PaymentPlan, PaymentPlan],
     fi_program: Program,
 ) -> FollowUpInstruction:
     """Follow-up instruction created at OPEN state from fi_source_plans."""
@@ -287,17 +294,17 @@ def fi_instruction(
     service = FollowUpInstructionService(program=fi_program)
     return service.create(
         user=user,
-        payment_plan_group_ids=[str(group_one.pk), str(group_two.pk)],
+        payment_plan_ids=[str(group_one.pk), str(group_two.pk)],
         dispersion_start_date=datetime.date(2027, 1, 1),
         dispersion_end_date=datetime.date(2027, 12, 31),
     )
 
 
-def _entitlement_payment_plan(
+def _entitlement_payment_list(
     business_area: BusinessArea,
     status: str,
     entitlements: tuple[Decimal | None, Decimal | None],
-) -> PaymentPlan:
+) -> PaymentList:
     program = ProgramFactory(name="Entitlement E2E Program", status=Program.ACTIVE, business_area=business_area)
     delivery_mechanism = DeliveryMechanismFactory(
         code="entitlement-e2e", name="Entitlement E2E", payment_gateway_id="entitlement-e2e"
@@ -305,21 +312,23 @@ def _entitlement_payment_plan(
     fsp = FinancialServiceProviderFactory(name="Entitlement E2E Provider")
     fsp.delivery_mechanisms.add(delivery_mechanism)
     currency = CurrencyFactory(code="PLN", name="Polish Zloty")
-    payment_plan = PaymentPlanFactory(
+    cycle = ProgramCycleFactory(program=program)
+    group = PaymentPlanFactory(cycle=cycle, exchange_rate=Decimal("2.0"), currency=currency)
+    payment_list = PaymentListFactory(
         name="Entitlement E2E Payment Plan",
-        program_cycle=ProgramCycleFactory(program=program),
+        program_cycle=cycle,
+        payment_plan=group,
         business_area=business_area,
         status=status,
-        plan_type=PaymentPlan.PlanType.REGULAR,
+        plan_type=PaymentList.PlanType.REGULAR,
         financial_service_provider=fsp,
         delivery_mechanism=delivery_mechanism,
         currency=currency,
-        exchange_rate=Decimal("2.0"),
     )
     for index, (size, entitlement) in enumerate(zip((1, 3), entitlements, strict=True), start=1):
         household = HouseholdFactory(size=size, business_area=business_area, program=program)
         payment = PaymentFactory(
-            parent=payment_plan,
+            parent=payment_list,
             household=household,
             collector=household.head_of_household,
             head_of_household=household.head_of_household,
@@ -347,30 +356,30 @@ def _entitlement_payment_plan(
                 "alternate_collector": {},
             },
         )
-    payment_plan.update_money_fields()
-    return payment_plan
+    payment_list.update_money_fields()
+    return payment_list
 
 
 @pytest.fixture
-def locked_entitlement_payment_plan(business_area: BusinessArea) -> PaymentPlan:
-    return _entitlement_payment_plan(business_area, PaymentPlan.Status.LOCKED, (None, None))
+def locked_entitlement_payment_list(business_area: BusinessArea) -> PaymentList:
+    return _entitlement_payment_list(business_area, PaymentList.Status.LOCKED, (None, None))
 
 
 @pytest.fixture
-def entitled_locked_payment_plan(business_area: BusinessArea) -> PaymentPlan:
-    return _entitlement_payment_plan(business_area, PaymentPlan.Status.LOCKED, (Decimal("10.00"), Decimal("30.00")))
+def entitled_locked_payment_list(business_area: BusinessArea) -> PaymentList:
+    return _entitlement_payment_list(business_area, PaymentList.Status.LOCKED, (Decimal("10.00"), Decimal("30.00")))
 
 
 @pytest.fixture
-def entitled_open_payment_plan(business_area: BusinessArea) -> PaymentPlan:
-    return _entitlement_payment_plan(business_area, PaymentPlan.Status.OPEN, (Decimal("100.00"), Decimal("300.00")))
+def entitled_open_payment_list(business_area: BusinessArea) -> PaymentList:
+    return _entitlement_payment_list(business_area, PaymentList.Status.OPEN, (Decimal("100.00"), Decimal("300.00")))
 
 
 @pytest.fixture
 def household_size_entitlement_rule(business_area: BusinessArea) -> Rule:
     commit = RuleCommitFactory(
         rule__name=ENTITLEMENT_RULE_NAME,
-        rule__type=Rule.TYPE_PAYMENT_PLAN,
+        rule__type=Rule.TYPE_PAYMENT_LIST,
         rule__enabled=True,
         rule__definition=ENTITLEMENT_RULE_DEFINITION,
         definition=ENTITLEMENT_RULE_DEFINITION,
@@ -422,27 +431,28 @@ def active_cycle(cycles_program: Program) -> ProgramCycle:
 
 
 @pytest.fixture
-def active_cycle_with_payment_plans(active_cycle: ProgramCycle) -> ProgramCycle:
+def active_cycle_with_payment_lists(active_cycle: ProgramCycle) -> ProgramCycle:
     business_area = active_cycle.program.business_area
-    PaymentPlanFactory(
+    PaymentListFactory(
         program_cycle=active_cycle, business_area=business_area, total_entitled_quantity_usd=Decimal("333.99")
     )
-    PaymentPlanFactory(
+    PaymentListFactory(
         program_cycle=active_cycle, business_area=business_area, total_entitled_quantity_usd=Decimal("1500.00")
     )
     return active_cycle
 
 
-LIFECYCLE_PAYMENT_PLAN_NAME = "Lifecycle E2E Payment Plan"
+LIFECYCLE_PAYMENT_LIST_NAME = "Lifecycle E2E Payment Plan"
 
 
-def _lifecycle_payment_plan(
+def _lifecycle_payment_list(
     business_area: BusinessArea,
-    status: str,
+    group_status: str,
+    plan_status: str,
     payments_count: int = 3,
     collectors_count: int | None = None,
-) -> PaymentPlan:
-    """Payment plan with an FSP, a delivery mechanism, USD and `payments_count` payments.
+) -> PaymentList:
+    """Payment plan in a group with an FSP, a delivery mechanism, USD and `payments_count` payments.
 
     `collectors_count` makes payments share that many collectors, for split by collector.
     """
@@ -452,13 +462,17 @@ def _lifecycle_payment_plan(
     )
     fsp = FinancialServiceProviderFactory(name="Lifecycle E2E Provider")
     fsp.delivery_mechanisms.add(delivery_mechanism)
+    fsp.allowed_business_areas.add(business_area)
     currency = CurrencyFactory(code="USD", name="United States Dollar")
-    payment_plan = PaymentPlanFactory(
-        name=LIFECYCLE_PAYMENT_PLAN_NAME,
-        program_cycle=ProgramCycleFactory(program=program),
+    cycle = ProgramCycleFactory(program=program)
+    group = PaymentPlanFactory(cycle=cycle, name="Lifecycle E2E Group", status=group_status)
+    payment_list = PaymentListFactory(
+        name=LIFECYCLE_PAYMENT_LIST_NAME,
+        program_cycle=cycle,
+        payment_plan=group,
         business_area=business_area,
-        status=status,
-        plan_type=PaymentPlan.PlanType.REGULAR,
+        status=plan_status,
+        plan_type=PaymentList.PlanType.REGULAR,
         financial_service_provider=fsp,
         delivery_mechanism=delivery_mechanism,
         currency=currency,
@@ -467,7 +481,7 @@ def _lifecycle_payment_plan(
     collectors = [household.head_of_household for household in households[: collectors_count or payments_count]]
     for index, household in enumerate(households):
         payment = PaymentFactory(
-            parent=payment_plan,
+            parent=payment_list,
             household=household,
             collector=collectors[index % len(collectors)],
             head_of_household=household.head_of_household,
@@ -482,37 +496,77 @@ def _lifecycle_payment_plan(
             delivered_quantity_usd=None,
         )
         PaymentHouseholdSnapshotFactory(payment=payment, snapshot_data={})
-    if status in (PaymentPlan.Status.IN_APPROVAL, PaymentPlan.Status.IN_AUTHORIZATION):
-        ApprovalProcessFactory(payment_plan=payment_plan)
-    payment_plan.update_money_fields()
-    return payment_plan
+    if group_status in (PaymentPlan.Status.IN_APPROVAL, PaymentPlan.Status.IN_AUTHORIZATION):
+        ApprovalProcessFactory(payment_plan=group)
+    payment_list.update_money_fields()
+    return payment_list
 
 
 @pytest.fixture
-def in_approval_payment_plan(business_area: BusinessArea) -> PaymentPlan:
-    return _lifecycle_payment_plan(business_area, PaymentPlan.Status.IN_APPROVAL)
+def in_approval_group(business_area: BusinessArea) -> PaymentPlan:
+    return _lifecycle_payment_list(
+        business_area, PaymentPlan.Status.IN_APPROVAL, PaymentList.Status.IN_APPROVAL
+    ).payment_plan
 
 
 @pytest.fixture
-def in_authorization_payment_plan(business_area: BusinessArea) -> PaymentPlan:
-    return _lifecycle_payment_plan(business_area, PaymentPlan.Status.IN_AUTHORIZATION)
+def in_authorization_group(business_area: BusinessArea) -> PaymentPlan:
+    return _lifecycle_payment_list(
+        business_area, PaymentPlan.Status.IN_AUTHORIZATION, PaymentList.Status.IN_AUTHORIZATION
+    ).payment_plan
 
 
 @pytest.fixture
-def locked_fsp_payment_plan(business_area: BusinessArea) -> PaymentPlan:
-    return _lifecycle_payment_plan(business_area, PaymentPlan.Status.LOCKED_FSP)
+def locked_lifecycle_group(business_area: BusinessArea) -> PaymentPlan:
+    return _lifecycle_payment_list(business_area, PaymentPlan.Status.LOCKED, PaymentList.Status.LOCKED_FSP).payment_plan
 
 
 @pytest.fixture
-def accepted_payment_plan(business_area: BusinessArea) -> PaymentPlan:
-    return _lifecycle_payment_plan(business_area, PaymentPlan.Status.ACCEPTED, payments_count=25)
+def accepted_lifecycle_group(business_area: BusinessArea) -> PaymentPlan:
+    return _lifecycle_payment_list(
+        business_area, PaymentPlan.Status.ACCEPTED, PaymentList.Status.ACCEPTED, payments_count=25
+    ).payment_plan
 
 
 @pytest.fixture
-def accepted_shared_collectors_payment_plan(business_area: BusinessArea) -> PaymentPlan:
-    return _lifecycle_payment_plan(business_area, PaymentPlan.Status.ACCEPTED, payments_count=12, collectors_count=3)
+def accepted_shared_collectors_group(business_area: BusinessArea) -> PaymentPlan:
+    return _lifecycle_payment_list(
+        business_area,
+        PaymentPlan.Status.ACCEPTED,
+        PaymentList.Status.ACCEPTED,
+        payments_count=12,
+        collectors_count=3,
+    ).payment_plan
 
 
 @pytest.fixture
-def open_payment_plan(business_area: BusinessArea) -> PaymentPlan:
-    return _lifecycle_payment_plan(business_area, PaymentPlan.Status.OPEN)
+def open_payment_list(business_area: BusinessArea) -> PaymentList:
+    return _lifecycle_payment_list(business_area, PaymentPlan.Status.OPEN, PaymentList.Status.OPEN)
+
+
+@pytest.fixture
+def open_lifecycle_group(business_area: BusinessArea) -> PaymentPlan:
+    """OPEN group whose plan is still in targeting, so its currency can still be changed."""
+    return _lifecycle_payment_list(business_area, PaymentPlan.Status.OPEN, PaymentList.Status.TP_OPEN).payment_plan
+
+
+@pytest.fixture
+def aborted_targeted_group(business_area: BusinessArea) -> PaymentPlan:
+    """ABORTED group whose plan's targeting matches the programme's 3 households, so Reactivate can rebuild it."""
+    payment_list = _lifecycle_payment_list(
+        business_area, PaymentPlan.Status.OPEN, PaymentList.Status.TP_OPEN, payments_count=0
+    )
+    rule = TargetingCriteriaRuleFactory(payment_list=payment_list)
+    TargetingCriteriaRuleFilterFactory(targeting_criteria_rule=rule, comparison_method="RANGE", arguments=[1, 10])
+    for size in (1, 3, 5):
+        HouseholdFactory(size=size, business_area=business_area, program=payment_list.program)
+    PaymentListService(payment_list).full_rebuild()
+    payment_list.status = PaymentList.Status.ABORTED
+    payment_list.build_status = PaymentList.BuildStatus.BUILD_STATUS_OK
+    payment_list.abort_comment = "Aborted before the e2e run"
+    payment_list.save(update_fields=["status", "build_status", "abort_comment"])
+    group = payment_list.payment_plan
+    group.status = PaymentPlan.Status.ABORTED
+    group.abort_comment = "Aborted before the e2e run"
+    group.save(update_fields=["status", "abort_comment"])
+    return group

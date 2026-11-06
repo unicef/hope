@@ -7,17 +7,17 @@ import pytest
 
 from extras.test_utils.factories import (
     FileTempFactory,
-    PaymentPlanFactory,
+    PaymentListFactory,
     PaymentVerificationPlanFactory,
     PaymentVerificationSummaryFactory,
     UserFactory,
 )
 from hope.apps.account.permissions import Permissions
 from hope.apps.payment.views import (
-    download_payment_plan_payment_list,
+    download_payment_list,
     download_payment_verification_plan,
 )
-from hope.models import PaymentPlan, PaymentVerificationPlan
+from hope.models import PaymentList, PaymentVerificationPlan
 
 pytestmark = pytest.mark.django_db
 
@@ -28,31 +28,31 @@ def user():
 
 
 @pytest.fixture
-def payment_plan_locked():
-    return PaymentPlanFactory(status=PaymentPlan.Status.LOCKED)
+def payment_list_locked():
+    return PaymentListFactory(status=PaymentList.Status.LOCKED)
 
 
 @pytest.fixture
-def payment_plan_accepted():
-    return PaymentPlanFactory(status=PaymentPlan.Status.ACCEPTED)
+def payment_list_accepted():
+    return PaymentListFactory(status=PaymentList.Status.ACCEPTED)
 
 
 @pytest.fixture
-def payment_plan_with_export_file(payment_plan_locked, user):
+def payment_list_with_export_file(payment_list_locked, user):
     export_file = FileTempFactory(
         file=SimpleUploadedFile("payment-list.xlsx", b"data"),
         created_by=user,
     )
-    payment_plan_locked.export_file_entitlement = export_file
-    payment_plan_locked.save()
-    return payment_plan_locked
+    payment_list_locked.export_file_entitlement = export_file
+    payment_list_locked.save()
+    return payment_list_locked
 
 
 @pytest.fixture
-def payment_verification_plan(payment_plan_accepted):
-    PaymentVerificationSummaryFactory(payment_plan=payment_plan_accepted)
+def payment_verification_plan(payment_list_accepted):
+    PaymentVerificationSummaryFactory(payment_list=payment_list_accepted)
     return PaymentVerificationPlanFactory(
-        payment_plan=payment_plan_accepted,
+        payment_list=payment_list_accepted,
         verification_channel=PaymentVerificationPlan.VERIFICATION_CHANNEL_XLSX,
     )
 
@@ -77,7 +77,8 @@ def test_download_payment_verification_plan_raises_value_error_when_link_is_none
     create_user_role_with_permissions(
         user,
         [Permissions.PAYMENT_VERIFICATION_EXPORT],
-        payment_verification_plan.payment_plan.business_area,
+        payment_verification_plan.payment_list.business_area,
+        program=payment_verification_plan.payment_list.program,
     )
 
     request = rf.get(reverse("download-payment-verification-plan", args=[payment_verification_plan.id]))
@@ -92,25 +93,26 @@ def test_download_payment_verification_plan_raises_value_error_when_link_is_none
             download_payment_verification_plan(request, str(payment_verification_plan.id))
 
 
-def test_download_payment_plan_payment_list_raises_value_error_when_link_is_none(
+def test_download_payment_list_raises_value_error_when_link_is_none(
     rf,
     create_user_role_with_permissions,
-    payment_plan_with_export_file,
+    payment_list_with_export_file,
     user,
 ):
     create_user_role_with_permissions(
         user,
         [Permissions.PM_VIEW_LIST],
-        payment_plan_with_export_file.business_area,
+        payment_list_with_export_file.business_area,
+        program=payment_list_with_export_file.program,
     )
 
-    request = rf.get(reverse("download-payment-plan-payment-list", args=[payment_plan_with_export_file.id]))
+    request = rf.get(reverse("download-payment-list", args=[payment_list_with_export_file.id]))
     request.user = user
 
     with patch(
-        "hope.models.PaymentPlan.entitlement_export_file_link",
+        "hope.models.PaymentList.entitlement_export_file_link",
         new_callable=PropertyMock,
         return_value=None,
     ):
-        with pytest.raises(ValueError, match="Payment plan entitlement export file link must not be None"):
-            download_payment_plan_payment_list(request, str(payment_plan_with_export_file.id))
+        with pytest.raises(ValueError, match="Payment list entitlement export file link must not be None"):
+            download_payment_list(request, str(payment_list_with_export_file.id))

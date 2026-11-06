@@ -10,12 +10,12 @@ from extras.test_utils.factories import (
     HouseholdFactory,
     IndividualFactory,
     PaymentFactory,
-    PaymentPlanFactory,
+    PaymentListFactory,
     ProgramFactory,
     UserFactory,
 )
 from hope.apps.account.permissions import Permissions
-from hope.models import BusinessArea, Household, Message, PaymentPlan, Program, Survey, User
+from hope.models import BusinessArea, Household, Message, PaymentList, Program, Survey, User
 
 pytestmark = pytest.mark.django_db
 
@@ -31,17 +31,17 @@ def attacker_program(attacker_business_area: BusinessArea) -> Program:
 
 
 @pytest.fixture
-def victim_payment_plan() -> PaymentPlan:
+def victim_payment_list() -> PaymentList:
     business_area = BusinessAreaFactory(slug="ukraine")
-    return PaymentPlanFactory(
-        status=PaymentPlan.Status.ACCEPTED,
+    return PaymentListFactory(
+        status=PaymentList.Status.ACCEPTED,
         program_cycle__program=ProgramFactory(business_area=business_area),
     )
 
 
 @pytest.fixture
-def victim_household(victim_payment_plan: PaymentPlan) -> Household:
-    victim_program = victim_payment_plan.program
+def victim_household(victim_payment_list: PaymentList) -> Household:
+    victim_program = victim_payment_list.program
     head_of_household = IndividualFactory(
         household=None,
         program=victim_program,
@@ -55,7 +55,7 @@ def victim_household(victim_payment_plan: PaymentPlan) -> Household:
         head_of_household=head_of_household,
         registration_data_import=head_of_household.registration_data_import,
     )
-    PaymentFactory(parent=victim_payment_plan, household=household, collector=head_of_household)
+    PaymentFactory(parent=victim_payment_list, household=household, collector=head_of_household)
     return household
 
 
@@ -90,10 +90,10 @@ def program_kwargs(attacker_business_area: BusinessArea, attacker_program: Progr
     return {"business_area_slug": attacker_business_area.slug, "program_code": attacker_program.code}
 
 
-def test_create_survey_for_payment_plan_from_other_business_area_is_denied(
+def test_create_survey_for_payment_list_from_other_business_area_is_denied(
     api_client: APIClient,
     program_kwargs: dict[str, str],
-    victim_payment_plan: PaymentPlan,
+    victim_payment_list: PaymentList,
     victim_household: Household,
 ) -> None:
     url = reverse("api:accountability:surveys-list", kwargs=program_kwargs)
@@ -105,7 +105,7 @@ def test_create_survey_for_payment_plan_from_other_business_area_is_denied(
             "body": "body",
             "category": Survey.CATEGORY_MANUAL,
             "sampling_type": Survey.SAMPLING_FULL_LIST,
-            "payment_plan": str(victim_payment_plan.id),
+            "payment_list": str(victim_payment_list.id),
             "full_list_arguments": {"excluded_admin_areas": []},
         },
         format="json",

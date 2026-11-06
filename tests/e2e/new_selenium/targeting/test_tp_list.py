@@ -3,10 +3,10 @@ from collections.abc import Callable
 import pytest
 
 from e2e.new_selenium.conftest import grant_permission
-from extras.test_utils.factories.payment import PaymentPlanFactory
+from extras.test_utils.factories.payment import PaymentListFactory
 from extras.test_utils.selenium import HopeTestBrowser
 from hope.apps.account.permissions import Permissions
-from hope.models import BusinessArea, PaymentPlan, Program, User
+from hope.models import BusinessArea, PaymentList, Program, User
 
 from .conftest import BUILT_TP_NAME
 
@@ -16,12 +16,12 @@ LOCKED_TP_NAME = "Locked Large TP"
 
 
 @pytest.fixture
-def locked_large_tp(built_tp: PaymentPlan) -> PaymentPlan:
-    return PaymentPlanFactory(
+def locked_large_tp(built_tp: PaymentList) -> PaymentList:
+    return PaymentListFactory(
         name=LOCKED_TP_NAME,
         program_cycle=built_tp.program_cycle,
-        payment_plan_group=built_tp.payment_plan_group,
-        status=PaymentPlan.Status.TP_LOCKED,
+        payment_plan=built_tp.payment_plan,
+        status=PaymentList.Status.TP_LOCKED,
         business_area=built_tp.business_area,
         total_households_count=10,
     )
@@ -45,7 +45,7 @@ def filter_by_min_households(browser: HopeTestBrowser) -> None:
 
 
 @pytest.fixture
-def finished_programme_tp(built_tp: PaymentPlan) -> PaymentPlan:
+def finished_programme_tp(built_tp: PaymentList) -> PaymentList:
     Program.objects.filter(id=built_tp.program_cycle.program_id).update(status=Program.FINISHED)
     return built_tp
 
@@ -62,8 +62,8 @@ def test_tp_list_filter(
     browser: HopeTestBrowser,
     user_with_no_permissions: User,
     business_area: BusinessArea,
-    built_tp: PaymentPlan,
-    locked_large_tp: PaymentPlan,
+    built_tp: PaymentList,
+    locked_large_tp: PaymentList,
     apply_filter: Callable[[HopeTestBrowser], None],
     shown: str,
     hidden: str,
@@ -90,7 +90,7 @@ def test_create_button_disabled_when_programme_not_active(
     browser: HopeTestBrowser,
     user_with_no_permissions: User,
     business_area: BusinessArea,
-    finished_programme_tp: PaymentPlan,
+    finished_programme_tp: PaymentList,
 ) -> None:
     program = finished_programme_tp.program_cycle.program
     with grant_permission(

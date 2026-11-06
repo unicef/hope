@@ -2,7 +2,7 @@
 
 from django.db import migrations, models
 
-import hope.models.payment_plan
+import hope.models.payment_list
 
 
 class Migration(migrations.Migration):
@@ -16,7 +16,7 @@ class Migration(migrations.Migration):
             name="background_action_status",
             field=models.CharField(
                 blank=True,
-                choices=hope.models.payment_plan.PaymentPlan.BackgroundActionStatus.get_choices,
+                choices=hope.models.payment_list.PaymentList.BackgroundActionStatus.get_choices,
                 db_index=True,
                 default=None,
                 help_text="Background Action Status for celery task [sys]",

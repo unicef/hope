@@ -2,18 +2,18 @@ import uuid
 
 from hope.apps.core.field_attributes.core_fields_attributes import FieldFactory
 from hope.apps.core.field_attributes.fields_types import Scope
-from hope.models import PaymentPlan
+from hope.models import PaymentList
 
 
-def get_field_by_name(field_name: str, payment_plan: PaymentPlan) -> dict:
+def get_field_by_name(field_name: str, payment_list: PaymentList) -> dict:
     scopes = [Scope.TARGETING]
-    if payment_plan.is_social_worker_program:
+    if payment_list.is_social_worker_program:
         scopes.append(Scope.XLSX_PEOPLE)
     factory = FieldFactory.from_only_scopes(scopes)
     field = dict(factory.to_dict_by("name")[field_name])
     choices = field.pop("_choices", None)
     if choices and callable(choices):
-        field["choices"] = choices(business_area_slug=payment_plan.business_area.slug)
+        field["choices"] = choices(business_area_slug=payment_list.business_area.slug)
     field["id"] = uuid.uuid4()
     return field
 

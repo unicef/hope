@@ -10,7 +10,7 @@ from extras.test_utils.factories import (
     CountryFactory,
     FlexibleAttributeFactory,
     FlexibleAttributeForPDUFactory,
-    PaymentPlanFactory,
+    PaymentListFactory,
     PeriodicFieldDataFactory,
     ProgramFactory,
 )
@@ -32,13 +32,13 @@ def business_area(db: Any) -> Any:
 
 
 @pytest.fixture
-def payment_plan(db: Any) -> Any:
-    return PaymentPlanFactory()
+def payment_list(db: Any) -> Any:
+    return PaymentListFactory()
 
 
 @pytest.fixture
-def rule(payment_plan: Any) -> TargetingCriteriaRule:
-    return TargetingCriteriaRule.objects.create(payment_plan=payment_plan)
+def rule(payment_list: Any) -> TargetingCriteriaRule:
+    return TargetingCriteriaRule.objects.create(payment_list=payment_list)
 
 
 @pytest.fixture
@@ -53,7 +53,7 @@ def api_request_factory() -> APIRequestFactory:
 
 def test_targeting_criteria_serializer_for_not_flex_field_on_hh(
     rule: TargetingCriteriaRule,
-    payment_plan: Any,
+    payment_list: Any,
 ) -> None:
     filter_data = {
         "comparison_method": "EQUALS",
@@ -76,7 +76,7 @@ def test_targeting_criteria_serializer_for_not_flex_field_on_hh(
 
     field_attribute = hh_block["field_attribute"]
     expected = filter_choices(
-        get_field_by_name(rule_filter.field_name, payment_plan),
+        get_field_by_name(rule_filter.field_name, payment_list),
         rule_filter.arguments,
     )
 
@@ -96,7 +96,7 @@ def test_targeting_criteria_serializer_for_not_flex_field_on_hh(
 
 def test_targeting_criteria_serializer_for_not_flex_field_on_ind(
     rule: TargetingCriteriaRule,
-    payment_plan: Any,
+    payment_list: Any,
 ) -> None:
     filter_data = {
         "comparison_method": "EQUALS",
@@ -123,7 +123,7 @@ def test_targeting_criteria_serializer_for_not_flex_field_on_ind(
 
     field_attribute = ind_filter["field_attribute"]
     expected = filter_choices(
-        get_field_by_name(rule_filter.field_name, payment_plan),
+        get_field_by_name(rule_filter.field_name, payment_list),
         rule_filter.arguments,
     )
 
@@ -283,11 +283,11 @@ def test_targeting_criteria_serializer_for_pdu_flex_field(
 
 
 def test_get_field_by_name_does_not_load_all_choices(
-    payment_plan: Any,
+    payment_list: Any,
     django_assert_num_queries: Any,
 ) -> None:
     country = CountryFactory()
-    payment_plan.business_area.countries.add(country)
+    payment_list.business_area.countries.add(country)
     area_type_1 = AreaTypeFactory(country=country, area_level=1)
     area_type_2 = AreaTypeFactory(country=country, area_level=2)
     area1 = AreaFactory(area_type=area_type_1, name="Region A")
@@ -295,12 +295,12 @@ def test_get_field_by_name_does_not_load_all_choices(
     AreaFactory(area_type=area_type_2, name="District X")
 
     with django_assert_num_queries(0):
-        result_size = get_field_by_name("size", payment_plan)
+        result_size = get_field_by_name("size", payment_list)
     assert result_size["name"] == "size"
     assert result_size["choices"] == []
 
     with django_assert_num_queries(1):
-        result_admin1 = get_field_by_name("admin1", payment_plan)
+        result_admin1 = get_field_by_name("admin1", payment_list)
     assert result_admin1["name"] == "admin1"
     choices_values = {c["value"] for c in result_admin1["choices"]}
     assert area1.p_code in choices_values

@@ -11,11 +11,11 @@ import {
 import { BlackLink } from '@components/core/BlackLink';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useTranslation } from 'react-i18next';
-import type { PaginatedPaymentPlanListList } from '@restgenerated/models/PaginatedPaymentPlanListList';
-import type { PaymentPlanList } from '@restgenerated/models/PaymentPlanList';
+import type { PaginatedPaymentListListList } from '@restgenerated/models/PaginatedPaymentListListList';
+import type { PaymentListList } from '@restgenerated/models/PaymentListList';
 
 interface PPDataTableProps {
-  ppData: PaginatedPaymentPlanListList;
+  ppData: PaginatedPaymentListListList;
 }
 
 const PPDataTable: React.FC<PPDataTableProps> = ({ ppData }) => {
@@ -26,20 +26,20 @@ const PPDataTable: React.FC<PPDataTableProps> = ({ ppData }) => {
       <Table size="small">
         <TableHead>
           <TableRow>
-            <TableCell>{t('Payment Plan ID')}</TableCell>
+            <TableCell>{t('Payment List ID')}</TableCell>
             <TableCell>{t('Programme Name')}</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
           {ppData.results && ppData.results.length > 0 ? (
-            ppData.results.map((plan: PaymentPlanList) => {
-              const paymentPlanDetailsPath = `/${businessArea}/programs/${plan.program.code}/payment-module/payment-plans/${plan.id}`;
+            ppData.results.map((plan: PaymentListList) => {
+              const paymentListDetailsPath = `/${businessArea}/programs/${plan.program.code}/payment-module/payment-lists/${plan.id}`;
               const programDetailsPath = `/${baseUrl}/details/${plan.program.code}`;
 
               return (
                 <TableRow key={plan.id} hover>
                   <TableCell>
-                    <BlackLink to={paymentPlanDetailsPath}>
+                    <BlackLink to={paymentListDetailsPath}>
                       {plan.unicefId}
                     </BlackLink>
                   </TableCell>

@@ -1,67 +1,63 @@
-import { useRoutes, Navigate } from 'react-router-dom';
-import EditFollowUpPaymentPlanPage from '@containers/pages/paymentmodule/EditFollowUpPaymentPlanPage';
-import EditPaymentPlanPage from '@containers/pages/paymentmodule/EditPaymentPlanPage';
-import FollowUpPaymentPlanDetailsPage from '@containers/pages/paymentmodule/FollowUpPaymentPlanDetailsPage';
+import { useParams, useRoutes, Navigate } from 'react-router-dom';
+import FollowUpPaymentListDetailsPage from '@containers/pages/paymentmodule/FollowUpPaymentListDetailsPage';
 import PaymentDetailsPage from '@containers/pages/paymentmodule/PaymentDetailsPage';
-import PaymentModulePage from '@containers/pages/paymentmodule/PaymentModulePage';
-import CreatePaymentPlanPage from '@containers/pages/paymentmodule/ProgramCycle/CreatePaymentPlanPage';
-import PaymentPlanDetailsPage from '@containers/pages/paymentmodule/ProgramCycle/PaymentPlanDetails/PaymentPlanDetailsPage';
+import CreatePaymentListPage from '@containers/pages/paymentmodule/ProgramCycle/CreatePaymentListPage';
+import PaymentListDetailsPage from '@containers/pages/paymentmodule/ProgramCycle/PaymentListDetails/PaymentListDetailsPage';
 import ProgramCycleDetailsPage from '@containers/pages/paymentmodule/ProgramCycle/ProgramCycleDetails/ProgramCycleDetailsPage';
 import ProgramCyclePage from '@containers/pages/paymentmodule/ProgramCycle/ProgramCyclePage';
-import PaymentPlanGroupsPage from '@containers/pages/paymentmodule/Groups/PaymentPlanGroupsPage';
-import PaymentPlanGroupDetailsPage from '@containers/pages/paymentmodule/Groups/PaymentPlanGroupDetailsPage';
-import BatchDetailsPage from '@containers/pages/paymentmodule/Groups/BatchDetailsPage';
+import PaymentPlansPage from '@containers/pages/paymentmodule/PaymentPlans/PaymentPlansPage';
+import PaymentPlanDetailsPage from '@containers/pages/paymentmodule/PaymentPlans/PaymentPlanDetailsPage';
 import FollowUpInstructionListPage from '@containers/pages/paymentmodule/FollowUpInstructionListPage';
 import FollowUpInstructionDetailsPage from '@containers/pages/paymentmodule/FollowUpInstructionDetailsPage';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 import type { ReactElement } from 'react';
+
+const LegacyPaymentPlanRedirect = (): ReactElement => {
+  const { paymentPlanId } = useParams<{ paymentPlanId: string }>();
+  const { baseUrl } = useBaseUrl();
+  return (
+    <Navigate
+      to={`/${baseUrl}/payment-module/payment-plans/${paymentPlanId}`}
+      replace
+    />
+  );
+};
 
 export const PaymentModuleRoutes = (): ReactElement => {
   const children = [
     {
-      path: 'payment-plans',
+      path: 'payment-lists',
       children: [
         {
           path: '',
-          element: <PaymentModulePage />,
+          element: <Navigate to="../payment-plans" replace />,
         },
         {
-          path: ':paymentPlanId',
+          path: ':paymentListId',
           children: [
             {
               path: '',
-              element: <PaymentPlanDetailsPage />,
-            },
-            {
-              path: 'edit',
-              element: <EditPaymentPlanPage />,
+              element: <PaymentListDetailsPage />,
             },
           ],
         },
       ],
     },
     {
-      path: 'followup-payment-plans/:paymentPlanId',
+      path: 'followup-payment-lists/:paymentListId',
       children: [
         {
           path: '',
-          element: <FollowUpPaymentPlanDetailsPage />,
-        },
-        {
-          path: 'edit',
-          element: <EditFollowUpPaymentPlanPage />,
+          element: <FollowUpPaymentListDetailsPage />,
         },
       ],
     },
     {
-      path: 'top-up-payment-plans/:paymentPlanId',
+      path: 'top-up-payment-lists/:paymentListId',
       children: [
         {
           path: '',
-          element: <FollowUpPaymentPlanDetailsPage />,
-        },
-        {
-          path: 'edit',
-          element: <EditFollowUpPaymentPlanPage />,
+          element: <FollowUpPaymentListDetailsPage />,
         },
       ],
     },
@@ -70,26 +66,31 @@ export const PaymentModuleRoutes = (): ReactElement => {
       element: <PaymentDetailsPage />,
     },
     {
-      path: 'groups',
+      path: 'payment-plans',
       children: [
         {
           path: '',
-          element: <PaymentPlanGroupsPage />,
+          element: <PaymentPlansPage />,
         },
         {
-          path: ':groupId',
+          path: ':paymentPlanId',
           children: [
             {
               path: '',
-              element: <PaymentPlanGroupDetailsPage />,
-            },
-            {
-              path: 'batches/:tag',
-              element: <BatchDetailsPage />,
+              element: <PaymentPlanDetailsPage />,
             },
           ],
         },
       ],
+    },
+    // Payment plan links sent before the rename used the groups path.
+    {
+      path: 'groups',
+      element: <Navigate to="../payment-plans" replace />,
+    },
+    {
+      path: 'groups/:paymentPlanId',
+      element: <LegacyPaymentPlanRedirect />,
     },
     {
       path: 'follow-up-instructions',
@@ -123,22 +124,18 @@ export const PaymentModuleRoutes = (): ReactElement => {
               element: <ProgramCycleDetailsPage />,
             },
             {
-              path: 'payment-plans',
+              path: 'payment-lists',
               children: [
                 {
                   path: 'new-plan',
-                  element: <CreatePaymentPlanPage />,
+                  element: <CreatePaymentListPage />,
                 },
                 {
-                  path: ':paymentPlanId',
+                  path: ':paymentListId',
                   children: [
                     {
                       path: '',
-                      element: <PaymentPlanDetailsPage />,
-                    },
-                    {
-                      path: 'edit',
-                      element: <EditPaymentPlanPage />,
+                      element: <PaymentListDetailsPage />,
                     },
                   ],
                 },

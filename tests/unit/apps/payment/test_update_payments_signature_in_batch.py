@@ -7,23 +7,23 @@ from extras.test_utils.factories import (
     BusinessAreaFactory,
     HouseholdFactory,
     PaymentFactory,
-    PaymentPlanFactory,
+    PaymentListFactory,
     ProgramFactory,
     UserFactory,
 )
-from hope.apps.payment.services.payment_plan_services import PaymentPlanService
+from hope.apps.payment.services.payment_list_services import PaymentListService
 from hope.models import Payment
 
 pytestmark = pytest.mark.django_db
 
 
 @pytest.fixture
-def payment_plan_context() -> dict[str, Any]:
+def payment_list_context() -> dict[str, Any]:
     business_area = BusinessAreaFactory()
     user = UserFactory()
     program = ProgramFactory(business_area=business_area)
     cycle = program.cycles.first()
-    payment_plan = PaymentPlanFactory(
+    payment_list = PaymentListFactory(
         dispersion_start_date=date(2020, 8, 10),
         dispersion_end_date=date(2020, 12, 10),
         created_by=user,
@@ -43,7 +43,7 @@ def payment_plan_context() -> dict[str, Any]:
     ]
     for household, unicef_id in zip(households, payment_ids, strict=True):
         PaymentFactory(
-            parent=payment_plan,
+            parent=payment_list,
             unicef_id=unicef_id,
             household=household,
             head_of_household=household.head_of_household,
@@ -53,15 +53,15 @@ def payment_plan_context() -> dict[str, Any]:
         )
 
     return {
-        "payment_plan": payment_plan,
+        "payment_list": payment_list,
     }
 
 
-def test_number_of_queries(payment_plan_context: dict[str, Any], django_assert_num_queries: Any) -> None:
+def test_number_of_queries(payment_list_context: dict[str, Any], django_assert_num_queries: Any) -> None:
     Payment.objects.all().update(signature_hash="")
     assert Payment.objects.filter(signature_hash="").count() == 3
     assert Payment.objects.exclude(signature_hash="").count() == 0
     with django_assert_num_queries(5):
-        PaymentPlanService(payment_plan_context["payment_plan"]).recalculate_signatures_in_batch(2)
+        PaymentListService(payment_list_context["payment_list"]).recalculate_signatures_in_batch(2)
     assert Payment.objects.filter(signature_hash="").count() == 0
     assert Payment.objects.exclude(signature_hash="").count() == 3

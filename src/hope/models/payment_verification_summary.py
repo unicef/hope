@@ -7,19 +7,19 @@ from django.utils import timezone
 from hope.models.utils import LongNameIndex, TimeStampedUUIDModel
 
 if TYPE_CHECKING:
-    from hope.models import PaymentPlan
+    from hope.models import PaymentList
 
 
-def build_summary(payment_plan: Optional["PaymentPlan"]) -> None:
-    if not payment_plan:
+def build_summary(payment_list: Optional["PaymentList"]) -> None:
+    if not payment_list:
         return
 
-    statuses_count = payment_plan.payment_verification_plans.aggregate(
+    statuses_count = payment_list.payment_verification_plans.aggregate(
         active=Count("pk", filter=Q(status=PaymentVerificationSummary.STATUS_ACTIVE)),
         pending=Count("pk", filter=Q(status=PaymentVerificationSummary.STATUS_PENDING)),
         finished=Count("pk", filter=Q(status=PaymentVerificationSummary.STATUS_FINISHED)),
     )
-    summary = payment_plan.payment_verification_summary
+    summary = payment_list.payment_verification_summary
     if statuses_count["active"] >= 1:
         summary.mark_as_active()
     elif statuses_count["finished"] >= 1 and statuses_count["active"] == 0 and statuses_count["pending"] == 0:
@@ -54,12 +54,13 @@ class PaymentVerificationSummary(TimeStampedUUIDModel):
     activation_date = models.DateTimeField(null=True, blank=True)
     completion_date = models.DateTimeField(null=True, blank=True)
 
-    payment_plan = models.OneToOneField(
-        "payment.PaymentPlan",
+    payment_list = models.OneToOneField(
+        "payment.PaymentList",
         on_delete=models.CASCADE,
         related_name="payment_verification_summary",
         null=True,
         blank=True,
+        db_column="payment_plan_id",
     )
 
     class Meta:

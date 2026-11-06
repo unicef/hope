@@ -36,13 +36,13 @@ function CommunicationDetails({
               <UniversalMoment>{message.createdAt}</UniversalMoment>
             </LabelizedField>
           </ResponsiveGrid>
-          {message.paymentPlan ? (
+          {message.paymentList ? (
             <ResponsiveGrid size="third" mobileSize="half">
               <LabelizedField label={t('Target Population')}>
                 <BlackLink
-                  to={`/${baseUrl}/target-population/${message?.paymentPlan.id}`}
+                  to={`/${baseUrl}/target-population/${message?.paymentList.id}`}
                 >
-                  {message?.paymentPlan.name}
+                  {message?.paymentList.name}
                 </BlackLink>
               </LabelizedField>
             </ResponsiveGrid>

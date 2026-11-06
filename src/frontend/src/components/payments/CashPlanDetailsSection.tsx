@@ -40,15 +40,15 @@ export function CashPlanDetailsSection({
   return (
     <Grid container rowSpacing={responsiveValue(4, 0)}>
       <Grid size={responsiveValue(12, 7)}>
-        <Title data-cy="div-payment-plan-details">
-          <Typography variant="h6">{t('Payment Plan Details')}</Typography>
+        <Title data-cy="div-payment-list-details">
+          <Typography variant="h6">{t('Payment List Details')}</Typography>
         </Title>
         <Box
           sx={{
             pr: responsiveValue(0, 2),
           }}
         >
-          <Grid data-cy="grid-payment-plan-details" container spacing={3}>
+          <Grid data-cy="grid-payment-list-details" container spacing={3}>
             {[
               {
                 label: t('PROGRAMME NAME'),

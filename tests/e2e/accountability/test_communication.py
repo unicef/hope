@@ -5,8 +5,8 @@ from e2e.page_object.accountability.communication import AccountabilityCommunica
 from e2e.page_object.accountability.comunication_details import (
     AccountabilityCommunicationDetails,
 )
-from extras.test_utils.factories import CommunicationMessageFactory, PaymentPlanFactory
-from hope.models import BusinessArea, DataCollectingType, Message, PaymentPlan, Program, User
+from extras.test_utils.factories import CommunicationMessageFactory, PaymentListFactory
+from hope.models import BusinessArea, DataCollectingType, Message, PaymentList, Program, User
 
 pytestmark = pytest.mark.django_db()
 
@@ -22,9 +22,9 @@ def add_accountability_communication_message() -> Message:
     user = User.objects.first()
     program = Program.objects.get(name="Test Program")
     cycle = program.cycles.first()
-    payment_plan = PaymentPlanFactory(
+    payment_list = PaymentListFactory(
         name="Test Accountability Payment Plan",
-        status=PaymentPlan.Status.TP_LOCKED,
+        status=PaymentList.Status.TP_LOCKED,
         created_by=user,
         business_area=ba,
         program_cycle=cycle,
@@ -33,7 +33,7 @@ def add_accountability_communication_message() -> Message:
         title="You got credit of USD 100",
         body="Greetings, we have sent you USD 100 in your registered account on 2022-09-19 20:00:00 UTC",
         business_area=ba,
-        payment_plan=payment_plan,
+        payment_list=payment_list,
         created_by=user,
         program=program,
     )
@@ -102,7 +102,7 @@ class TestSmokeAccountabilityCommunication:
             in page_accountability_communication_details.get_label_date_created().text
         )
         assert (
-            PaymentPlan.objects.first().name
+            PaymentList.objects.first().name
             in page_accountability_communication_details.get_label_target_population().text
         )
         assert "Recipients" in page_accountability_communication_details.get_table_title().text

@@ -49,7 +49,7 @@ from hope.models import (
     FileTemp,
     Individual,
     Partner,
-    PaymentPlanGroup,
+    PaymentPlan,
     PaymentPlanPurpose,
     Program,
     ProgramCycle,
@@ -80,9 +80,9 @@ class ProgramCycleAdmin(ViewOnUiMixin, LastSyncDateResetMixin, HOPEModelAdminBas
     def frontend_url(self, obj: ProgramCycle) -> str | None:
         return f"/{obj.program.business_area.slug}/programs/{obj.program.code}/payment-module/program-cycles/{obj.id}"
 
-    @button(permission="payment.view_paymentplangroup")
-    def payment_plan_groups(self, request: HttpRequest, pk: "UUID") -> HttpResponseRedirect:
-        url = reverse("admin:payment_paymentplangroup_changelist")
+    @button(permission="payment.view_paymentplan")
+    def payment_plans(self, request: HttpRequest, pk: "UUID") -> HttpResponseRedirect:
+        url = reverse("admin:payment_paymentplan_changelist")
         return HttpResponseRedirect(f"{url}?cycle__id__exact={pk}")
 
 
@@ -300,19 +300,19 @@ class ProgramAdmin(
         return None
 
     @button(
-        permission="payment.add_paymentplan",
+        permission="payment.add_paymentlist",
     )
     def create_target_population_from_list(self, request: HttpRequest, pk: str) -> HttpResponse | None:
         context = self.get_common_context(request, title="Create TargetPopulation")
         program = Program.objects.get(pk=pk)
         business_area = program.business_area
 
-        groups_by_cycle: dict[str, list[dict]] = {}
-        for group in PaymentPlanGroup.objects.filter(cycle__program=program).values("pk", "name", "cycle_id"):
-            groups_by_cycle.setdefault(str(group["cycle_id"]), []).append(
-                {"id": str(group["pk"]), "name": group["name"]}
+        payment_plans_by_cycle: dict[str, list[dict]] = {}
+        for payment_plan in PaymentPlan.objects.filter(cycle__program=program).values("pk", "name", "cycle_id"):
+            payment_plans_by_cycle.setdefault(str(payment_plan["cycle_id"]), []).append(
+                {"id": str(payment_plan["pk"]), "name": payment_plan["name"]}
             )
-        context["groups_by_cycle_json"] = json.dumps(groups_by_cycle)
+        context["payment_plans_by_cycle_json"] = json.dumps(payment_plans_by_cycle)
 
         if "apply" in request.POST:
             form = CreateTargetPopulationTextForm(request.POST, read_only=True, program=program)

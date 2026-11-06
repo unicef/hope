@@ -63,7 +63,7 @@ export function OpenTargetPopulationHeaderButtons({
         id,
       }),
     onSuccess: () => {
-      showMessage(t('Payment Plan has been rebuilt.'));
+      showMessage(t('Payment List has been rebuilt.'));
       queryClient.invalidateQueries({
         queryKey: restQueryKey(
           RestService.restBusinessAreasProgramsTargetPopulationsRetrieve,

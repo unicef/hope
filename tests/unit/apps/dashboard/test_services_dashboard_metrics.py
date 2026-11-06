@@ -23,7 +23,7 @@ from extras.test_utils.factories import (
 )
 from hope.apps.dashboard.services import GLOBAL_SLUG, DashboardDataCache, DashboardGlobalDataCache
 from hope.apps.household.const import DISABLED, NON_BENEFICIARY, NOT_DISABLED
-from hope.models import Payment, PaymentPlan
+from hope.models import Payment, PaymentList
 
 
 @pytest.fixture
@@ -95,7 +95,7 @@ def populate_dashboard_cache(area_kabul):
                 household=household,
                 program=program,
                 business_area=ba,
-                parent__status=PaymentPlan.Status.ACCEPTED,
+                parent__status=PaymentList.Status.ACCEPTED,
                 status=status,
             )
         return household
@@ -399,17 +399,17 @@ def test_dashboard_reconciliation_verification_consistency(reconciliation_test_d
     country_data_current_year = [item for item in country_data if item.get("year") == CURRENT_YEAR]
     assert country_data_current_year, f"No country-specific dashboard data found for {country_name} in {CURRENT_YEAR}"
 
-    sum_finished_plans_country = sum(item.get("finished_payment_plans", 0) for item in country_data_current_year)
-    sum_total_plans_country = sum(item.get("total_payment_plans", 0) for item in country_data_current_year)
-    sum_finished_plans_global = sum(item.get("finished_payment_plans", 0) for item in global_data_filtered_for_country)
-    sum_total_plans_global = sum(item.get("total_payment_plans", 0) for item in global_data_filtered_for_country)
+    sum_finished_plans_country = sum(item.get("finished_payment_lists", 0) for item in country_data_current_year)
+    sum_total_plans_country = sum(item.get("total_payment_lists", 0) for item in country_data_current_year)
+    sum_finished_plans_global = sum(item.get("finished_payment_lists", 0) for item in global_data_filtered_for_country)
+    sum_total_plans_global = sum(item.get("total_payment_lists", 0) for item in global_data_filtered_for_country)
 
     assert sum_finished_plans_country == sum_finished_plans_global, (
-        "Sum of 'finished_payment_plans' should be consistent between country and filtered global dashboards "
+        "Sum of 'finished_payment_lists' should be consistent between country and filtered global dashboards "
         f"(Country: {sum_finished_plans_country}, Global: {sum_finished_plans_global})"
     )
     assert sum_total_plans_country == sum_total_plans_global, (
-        "Sum of 'total_payment_plans' should be consistent between country and filtered global dashboards "
+        "Sum of 'total_payment_lists' should be consistent between country and filtered global dashboards "
         f"(Country: {sum_total_plans_country}, Global: {sum_total_plans_global})"
     )
 
@@ -475,7 +475,7 @@ def test_dashboard_pwd_count_from_individuals(afghanistan, area_kabul, fsp_commo
         household=household,
         program=program,
         business_area=afghanistan,
-        parent__status=PaymentPlan.Status.ACCEPTED,
+        parent__status=PaymentList.Status.ACCEPTED,
         status=Payment.STATUS_SUCCESS,
         delivery_date=TEST_DATE,
         financial_service_provider=fsp_common,
@@ -530,10 +530,10 @@ def test_country_dashboard_never_merges_two_denominations_of_one_currency_code(t
 
 
 @pytest.mark.django_db
-def test_country_dashboard_counts_payment_plans_per_denomination(two_syp_denominations_data) -> None:
+def test_country_dashboard_counts_payment_lists_per_denomination(two_syp_denominations_data) -> None:
     # `plan_group_fields` must stay positionally aligned with CountrySummaryKey, or plan counts
     # land on the wrong bucket -- silently, since the lookup falls back to 0.
     result = DashboardDataCache.refresh_data(TEST_COUNTRY_SLUG)
 
-    plan_counts = {item["currency_vision_code"]: item["total_payment_plans"] for item in result}
+    plan_counts = {item["currency_vision_code"]: item["total_payment_lists"] for item in result}
     assert plan_counts == {"SYP": 3, "SYP01": 2}

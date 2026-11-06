@@ -8,8 +8,8 @@ class PaymentVerificationDetails(BaseComponents):
     page_header_container = 'div[data-cy="page-header-container"]'
     button_new_plan = 'button[data-cy="button-new-plan"]'
     button_edit_plan = 'button[data-cy="button-edit-plan"]'
-    div_payment_plan_details = 'div[data-cy="div-payment-plan-details"]'
-    grid_payment_plan_details = 'div[data-cy="grid-payment-plan-details"]'
+    div_payment_list_details = 'div[data-cy="div-payment-list-details"]'
+    grid_payment_list_details = 'div[data-cy="grid-payment-list-details"]'
     label_programme_name = 'div[data-cy="label-PROGRAMME NAME"]'
     label_payment_records = 'div[data-cy="label-PAYMENT RECORDS"]'
     label_start_date = 'div[data-cy="label-START DATE"]'
@@ -70,11 +70,11 @@ class PaymentVerificationDetails(BaseComponents):
     def get_button_edit_plan(self) -> WebElement:
         return self.wait_for(self.button_edit_plan)
 
-    def get_div_payment_plan_details(self) -> WebElement:
-        return self.wait_for(self.div_payment_plan_details)
+    def get_div_payment_list_details(self) -> WebElement:
+        return self.wait_for(self.div_payment_list_details)
 
-    def get_grid_payment_plan_details(self) -> WebElement:
-        return self.wait_for(self.grid_payment_plan_details)
+    def get_grid_payment_list_details(self) -> WebElement:
+        return self.wait_for(self.grid_payment_list_details)
 
     def get_label_programme_name(self) -> WebElement:
         return self.wait_for(self.label_programme_name)

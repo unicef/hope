@@ -104,7 +104,7 @@ class GrievanceTicketFilter(FilterSet):
     fsp = CharFilter(method="fsp_filter")
     cash_plan = CharFilter(
         field_name="payment_verification_ticket_details",
-        lookup_expr="payment_verification__payment_verification_plan__payment_plan_id",
+        lookup_expr="payment_verification__payment_verification_plan__payment_list_id",
     )
     created_at = filters.DateFromToRangeFilter(field_name="created_at")
 

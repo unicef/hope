@@ -27,7 +27,7 @@ def generate_rule_formulas() -> None:
     rule_2.allowed_business_areas.set([afghanistan])
     RuleCommitFactory(rule=rule_2, definition="result.value=255", language="python", version=11)
     rule_3 = RuleFactory(
-        name="Test Formula for Payment Plan 033",
+        name="Test Formula for Payment List 033",
         definition="result.value=210",
         description="Gives every household a fixed entitlement of 210",
         language="python",
@@ -38,7 +38,7 @@ def generate_rule_formulas() -> None:
     rule_3.allowed_business_areas.set([afghanistan])
     RuleCommitFactory(rule=rule_3, definition="result.value=212", language="python", version=22)
     rule_4 = RuleFactory(
-        name="Test Formula for Payment Plan 044",
+        name="Test Formula for Payment List 044",
         definition="result.value=244",
         description="",
         language="python",

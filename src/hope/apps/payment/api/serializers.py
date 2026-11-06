@@ -7,7 +7,7 @@ from typing import Any, cast
 from django.core.exceptions import ValidationError as DjangoValidationError
 from django.core.files.uploadedfile import UploadedFile
 from django.db import transaction
-from django.db.models import Case, Count, Exists, IntegerField, Max, OuterRef, Prefetch, Q, Sum, When
+from django.db.models import Count, Exists, OuterRef, Prefetch, Q, Sum
 from django.db.models.functions import Coalesce
 from django.shortcuts import get_object_or_404
 from django.urls import reverse
@@ -25,22 +25,25 @@ from hope.apps.core.utils import check_concurrency_version_in_mutation, to_choic
 from hope.apps.household.api.serializers.household import (
     HouseholdDetailSerializer,
     HouseholdSmallSerializer,
+    IndividualSmallSerializer,
 )
 from hope.apps.household.api.serializers.individual import (
     IndividualDetailSerializer,
     IndividualIdNameSerializer,
     IndividualListSerializer,
-    IndividualSmallSerializer,
 )
 from hope.apps.household.const import (
     ROLE_ALTERNATE,
     STATUS_ACTIVE,
     STATUS_INACTIVE,
 )
+from hope.apps.payment.celery_tasks import recalculate_owner_exchange_rate_async_task
+from hope.apps.payment.services.payment_list_services import PaymentListService
 from hope.apps.payment.services.payment_plan_services import PaymentPlanService
 from hope.apps.payment.services.top_up_amount_service import parse_top_up_amount_file
+from hope.apps.payment.utils import get_owner_unore_exchange_rate
 from hope.apps.payment.xlsx.xlsx_error import XlsxError
-from hope.apps.payment.xlsx.xlsx_payment_plan_delivery_import_service import (
+from hope.apps.payment.xlsx.xlsx_payment_list_delivery_import_service import (
     NULL_DELIVERY_POLICIES,
     NULL_DELIVERY_POLICY_RESET,
 )
@@ -59,7 +62,6 @@ from hope.models import (
     AccountAttachment,
     Approval,
     ApprovalProcess,
-    Currency,
     DeliveryMechanism,
     FinancialInstitution,
     FinancialServiceProvider,
@@ -68,9 +70,9 @@ from hope.models import (
     Household,
     Individual,
     Payment,
+    PaymentList,
+    PaymentListSplit,
     PaymentPlan,
-    PaymentPlanGroup,
-    PaymentPlanSplit,
     PaymentPlanSupportingDocument,
     PaymentVerification,
     PaymentVerificationPlan,
@@ -154,13 +156,14 @@ class PaymentPlanSupportingDocumentSerializer(serializers.ModelSerializer):
         return file
 
     def validate(self, data: dict) -> dict:
-        payment_plan = self.context["payment_plan"]
-        data["payment_plan"] = payment_plan
+        # The view passes the owner: {"payment_plan": payment_plan} or {"follow_up_instruction": instruction}.
+        owner = self.context["owner"]
+        data.update(owner)
         data["created_by"] = self.context["request"].user
 
-        if payment_plan.documents.count() >= PaymentPlanSupportingDocument.FILE_LIMIT:
+        if PaymentPlanSupportingDocument.objects.filter(**owner).count() >= PaymentPlanSupportingDocument.FILE_LIMIT:
             raise serializers.ValidationError(
-                f"Payment plan already has the maximum of {PaymentPlanSupportingDocument.FILE_LIMIT} "
+                f"Payment list already has the maximum of {PaymentPlanSupportingDocument.FILE_LIMIT} "
                 f"supporting documents."
             )
         return data
@@ -192,22 +195,12 @@ class AcceptanceProcessSerializer(serializers.Serializer):
     comment = serializers.CharField(max_length=COMMENT_MAX_LENGTH, required=False, allow_blank=True)
 
 
-class PaymentPlanGroupDeliveryExportSerializer(serializers.Serializer):
-    export_tag = serializers.IntegerField(min_value=1, required=False, allow_null=True, default=None)
+class PaymentPlanDeliveryExportSerializer(serializers.Serializer):
     fsp_xlsx_template_id = serializers.CharField(required=False, allow_null=True, default=None)
-    plan_type = serializers.ChoiceField(
-        choices=PaymentPlan.PlanType.choices,
-        required=False,
-        default=PaymentPlan.PlanType.REGULAR,
-    )
-
-
-class PaymentPlanGroupSendXlsxPasswordSerializer(serializers.Serializer):
-    export_tag = serializers.IntegerField(min_value=1)
 
 
 class SplitPaymentPlanSerializer(serializers.Serializer):
-    split_type = serializers.ChoiceField(choices=PaymentPlanSplit.SplitType)  # type: ignore[arg-type]
+    split_type = serializers.ChoiceField(choices=PaymentListSplit.SplitType)  # type: ignore[arg-type]
     payments_no = serializers.IntegerField(required=False)
 
 
@@ -222,7 +215,7 @@ class PaymentPlanImportFileSerializer(serializers.Serializer):
         return file
 
 
-class PaymentPlanGroupReconciliationImportSerializer(PaymentPlanImportFileSerializer):
+class PaymentPlanReconciliationImportSerializer(PaymentPlanImportFileSerializer):
     override = serializers.BooleanField(default=False)
     null_delivery_policy = serializers.ChoiceField(
         choices=NULL_DELIVERY_POLICIES,
@@ -246,7 +239,7 @@ class PaymentVerificationSummarySerializer(serializers.ModelSerializer):
         )
 
     def get_number_of_verification_plans(self, obj: PaymentVerificationSummary) -> int:
-        return obj.payment_plan.payment_verification_plans.count()
+        return obj.payment_list.payment_verification_plans.count()
 
 
 class PaymentVerificationSerializer(serializers.ModelSerializer):
@@ -308,11 +301,13 @@ class PaymentVerificationPlanSerializer(AdminUrlSerializerMixin, serializers.Mod
         return obj.age_filter.get("max") if obj.age_filter else None
 
 
-class FollowUpPaymentPlanSerializer(serializers.ModelSerializer):
+class FollowUpPaymentListSerializer(serializers.ModelSerializer):
     status = serializers.CharField(source="get_status_display")
+    dispersion_start_date = serializers.DateField(read_only=True, allow_null=True)
+    dispersion_end_date = serializers.DateField(read_only=True, allow_null=True)
 
     class Meta:
-        model = PaymentPlan
+        model = PaymentList
         fields = (
             "id",
             "unicef_id",
@@ -341,7 +336,7 @@ class PaymentVerificationPlanDetailsSerializer(serializers.ModelSerializer):
     # verificationPlansTotalCount
 
     class Meta:
-        model = PaymentPlan
+        model = PaymentList
         fields = (
             "id",
             "unicef_id",
@@ -362,12 +357,12 @@ class PaymentVerificationPlanDetailsSerializer(serializers.ModelSerializer):
             "version",
         )
 
-    def _payments_summary(self, payment_plan: PaymentPlan) -> dict[str, int]:
+    def _payments_summary(self, payment_list: PaymentList) -> dict[str, int]:
         if not hasattr(self, "_payments_summary_cache"):
             self._payments_summary_cache: dict[str, dict[str, int]] = {}
-        cache_key = str(payment_plan.pk)
+        cache_key = str(payment_list.pk)
         if cache_key not in self._payments_summary_cache:
-            self._payments_summary_cache[cache_key] = payment_plan.eligible_payments.aggregate(
+            self._payments_summary_cache[cache_key] = payment_list.eligible_payments.aggregate(
                 available_count=Count(
                     "id",
                     filter=Q(status__in=Payment.ALLOW_CREATE_VERIFICATION, delivered_quantity__gt=0),
@@ -378,20 +373,22 @@ class PaymentVerificationPlanDetailsSerializer(serializers.ModelSerializer):
             )
         return self._payments_summary_cache[cache_key]
 
-    def get_available_payment_records_count(self, obj: PaymentPlan) -> int:
+    def get_available_payment_records_count(self, obj: PaymentList) -> int:
         return self._payments_summary(obj)["available_count"]
 
-    def get_eligible_payments_count(self, obj: PaymentPlan) -> int:
+    def get_eligible_payments_count(self, obj: PaymentList) -> int:
         return self._payments_summary(obj)["total_count"]
 
-    def get_bank_reconciliation_success(self, obj: PaymentPlan) -> int:
+    def get_bank_reconciliation_success(self, obj: PaymentList) -> int:
         return self._payments_summary(obj)["delivered_count"]
 
-    def get_bank_reconciliation_error(self, obj: PaymentPlan) -> int:
+    def get_bank_reconciliation_error(self, obj: PaymentList) -> int:
         return self._payments_summary(obj)["error_count"]
 
 
 class PaymentVerificationPlanListSerializer(serializers.ModelSerializer):
+    dispersion_start_date = serializers.DateField(read_only=True, allow_null=True)
+    dispersion_end_date = serializers.DateField(read_only=True, allow_null=True)
     program_cycle_start_date = serializers.DateField(source="program_cycle.start_date")
     program_cycle_end_date = serializers.DateField(source="program_cycle.end_date")
     verification_status = serializers.CharField(source="payment_verification_summary.status")
@@ -400,7 +397,7 @@ class PaymentVerificationPlanListSerializer(serializers.ModelSerializer):
     currency_vision_code = serializers.CharField(source="currency.vision_code", read_only=True, allow_null=True)
 
     class Meta:
-        model = PaymentPlan
+        model = PaymentList
         fields = (
             "id",
             "unicef_id",
@@ -417,7 +414,9 @@ class PaymentVerificationPlanListSerializer(serializers.ModelSerializer):
         )
 
 
-class PaymentPlanSerializer(AdminUrlSerializerMixin, serializers.ModelSerializer):
+class PaymentListSerializer(AdminUrlSerializerMixin, serializers.ModelSerializer):
+    dispersion_start_date = serializers.DateField(read_only=True, allow_null=True)
+    dispersion_end_date = serializers.DateField(read_only=True, allow_null=True)
     status_display = serializers.CharField(source="get_status_display")
     follow_ups = serializers.SerializerMethodField()
     top_ups = serializers.SerializerMethodField()
@@ -425,9 +424,6 @@ class PaymentPlanSerializer(AdminUrlSerializerMixin, serializers.ModelSerializer
     screen_beneficiary = serializers.BooleanField(source="program_cycle.program.screen_beneficiary", read_only=True)
     program_id = serializers.UUIDField(source="program_cycle.program.id", read_only=True)
     program_code = serializers.CharField(source="program_cycle.program.code", read_only=True)
-    reconciliation_window_in_days = serializers.IntegerField(
-        source="program_cycle.program.reconciliation_window_in_days", read_only=True
-    )
     program_cycle_id = serializers.UUIDField(read_only=True)
     last_approval_process_date = serializers.DateTimeField(read_only=True)
     last_approval_process_by = serializers.SerializerMethodField()
@@ -435,7 +431,7 @@ class PaymentPlanSerializer(AdminUrlSerializerMixin, serializers.ModelSerializer
     currency_vision_code = serializers.CharField(source="currency.vision_code", read_only=True, allow_null=True)
 
     class Meta:
-        model = PaymentPlan
+        model = PaymentList
         fields = (
             "id",
             "unicef_id",
@@ -463,41 +459,48 @@ class PaymentPlanSerializer(AdminUrlSerializerMixin, serializers.ModelSerializer
             "admin_url",
             "screen_beneficiary",
             "has_payments_reconciliation_overdue",
-            "reconciliation_window_in_days",
         )
 
     @staticmethod
-    def get_last_approval_process_by(obj: PaymentPlan) -> str | None:
+    def get_last_approval_process_by(obj: PaymentList) -> str | None:
         return str(obj.last_approval_process_by) if obj.last_approval_process_by else None
 
-    @extend_schema_field(FollowUpPaymentPlanSerializer(many=True))
-    def get_follow_ups(self, obj: PaymentPlan) -> Any:
-        plans = [p for p in obj.child_plans.all() if p.plan_type == PaymentPlan.PlanType.FOLLOW_UP]
-        return cast("list[Any]", FollowUpPaymentPlanSerializer(plans, many=True).data)
+    @extend_schema_field(FollowUpPaymentListSerializer(many=True))
+    def get_follow_ups(self, obj: PaymentList) -> Any:
+        plans = [p for p in obj.child_plans.all() if p.plan_type == PaymentList.PlanType.FOLLOW_UP]
+        return cast("list[Any]", FollowUpPaymentListSerializer(plans, many=True).data)
 
-    @extend_schema_field(FollowUpPaymentPlanSerializer(many=True))
-    def get_top_ups(self, obj: PaymentPlan) -> Any:
-        plans = [p for p in obj.child_plans.all() if p.plan_type == PaymentPlan.PlanType.TOP_UP]
-        return cast("list[Any]", FollowUpPaymentPlanSerializer(plans, many=True).data)
+    @extend_schema_field(FollowUpPaymentListSerializer(many=True))
+    def get_top_ups(self, obj: PaymentList) -> Any:
+        plans = [p for p in obj.child_plans.all() if p.plan_type == PaymentList.PlanType.TOP_UP]
+        return cast("list[Any]", FollowUpPaymentListSerializer(plans, many=True).data)
 
 
-class PaymentPlanGroupSmallSerializer(serializers.ModelSerializer):
+class PaymentPlanSmallSerializer(serializers.ModelSerializer):
     class Meta:
-        model = PaymentPlanGroup
+        model = PaymentPlan
         fields = ["id", "unicef_id", "name"]
 
 
-class PaymentPlanListSerializer(serializers.ModelSerializer):
+class PaymentPlanLinkedSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PaymentPlan
+        fields = ["id", "unicef_id", "name", "plan_type", "status"]
+
+
+class PaymentListListSerializer(serializers.ModelSerializer):
+    dispersion_start_date = serializers.DateField(read_only=True, allow_null=True)
+    dispersion_end_date = serializers.DateField(read_only=True, allow_null=True)
     follow_ups = serializers.SerializerMethodField()
     top_ups = serializers.SerializerMethodField()
     created_by = serializers.SerializerMethodField()
     program = ProgramSmallSerializer(read_only=True, source="program_cycle.program")
     currency = serializers.SlugRelatedField(slug_field="code", read_only=True, allow_null=True)
     currency_vision_code = serializers.CharField(source="currency.vision_code", read_only=True, allow_null=True)
-    payment_plan_group = PaymentPlanGroupSmallSerializer(read_only=True)
+    payment_plan = PaymentPlanSmallSerializer(read_only=True, allow_null=True)
 
     class Meta:
-        model = PaymentPlan
+        model = PaymentList
         fields = (
             "id",
             "unicef_id",
@@ -520,23 +523,22 @@ class PaymentPlanListSerializer(serializers.ModelSerializer):
             "created_at",
             "updated_at",
             "program",
-            "payment_plan_group",
-            "export_tag",
+            "payment_plan",
         )
 
     @staticmethod
-    def get_created_by(obj: PaymentPlan) -> str:
+    def get_created_by(obj: PaymentList) -> str:
         return f"{obj.created_by.first_name} {obj.created_by.last_name}"
 
-    @extend_schema_field(FollowUpPaymentPlanSerializer(many=True))
-    def get_follow_ups(self, obj: PaymentPlan) -> Any:
-        plans = [p for p in obj.child_plans.all() if p.plan_type == PaymentPlan.PlanType.FOLLOW_UP]
-        return cast("list[Any]", FollowUpPaymentPlanSerializer(plans, many=True).data)
+    @extend_schema_field(FollowUpPaymentListSerializer(many=True))
+    def get_follow_ups(self, obj: PaymentList) -> Any:
+        plans = [p for p in obj.child_plans.all() if p.plan_type == PaymentList.PlanType.FOLLOW_UP]
+        return cast("list[Any]", FollowUpPaymentListSerializer(plans, many=True).data)
 
-    @extend_schema_field(FollowUpPaymentPlanSerializer(many=True))
-    def get_top_ups(self, obj: PaymentPlan) -> Any:
-        plans = [p for p in obj.child_plans.all() if p.plan_type == PaymentPlan.PlanType.TOP_UP]
-        return cast("list[Any]", FollowUpPaymentPlanSerializer(plans, many=True).data)
+    @extend_schema_field(FollowUpPaymentListSerializer(many=True))
+    def get_top_ups(self, obj: PaymentList) -> Any:
+        plans = [p for p in obj.child_plans.all() if p.plan_type == PaymentList.PlanType.TOP_UP]
+        return cast("list[Any]", FollowUpPaymentListSerializer(plans, many=True).data)
 
 
 class FinancialServiceProviderSerializer(serializers.ModelSerializer):
@@ -632,10 +634,10 @@ class ApprovalProcessSerializer(serializers.ModelSerializer):
         return FilteredActionsListSerializer(actions_data).data
 
 
-def _calculate_volume(payment_plan: "PaymentPlan", field: str) -> Decimal | None:
-    if not payment_plan.financial_service_provider:
+def _calculate_volume(payment_list: "PaymentList", field: str) -> Decimal | None:
+    if not payment_list.financial_service_provider:
         return None
-    return payment_plan.eligible_payments.aggregate(entitlement_sum=Coalesce(Sum(field), Decimal(0.0)))[
+    return payment_list.eligible_payments.aggregate(entitlement_sum=Coalesce(Sum(field), Decimal(0.0)))[
         "entitlement_sum"
     ]
 
@@ -658,14 +660,14 @@ class VolumeByDeliveryMechanismSerializer(serializers.ModelSerializer):
     volume = serializers.SerializerMethodField()
     volume_usd = serializers.SerializerMethodField()
 
-    def get_volume(self, obj: PaymentPlan) -> Decimal | None:  # non-usd
+    def get_volume(self, obj: PaymentList) -> Decimal | None:  # non-usd
         return _calculate_volume(obj, "entitlement_quantity")
 
-    def get_volume_usd(self, obj: PaymentPlan) -> Decimal | None:
+    def get_volume_usd(self, obj: PaymentList) -> Decimal | None:
         return _calculate_volume(obj, "entitlement_quantity_usd")
 
     class Meta:
-        model = PaymentPlan
+        model = PaymentList
         fields = (
             "id",
             "delivery_mechanism",
@@ -674,7 +676,7 @@ class VolumeByDeliveryMechanismSerializer(serializers.ModelSerializer):
         )
 
 
-class PaymentPlanExcludeBeneficiariesSerializer(serializers.Serializer):
+class PaymentListExcludeBeneficiariesSerializer(serializers.Serializer):
     excluded_households_ids = serializers.ListField(child=serializers.CharField())
     exclusion_reason = serializers.CharField(required=False, allow_blank=True)
 
@@ -689,31 +691,22 @@ class RevertMarkPaymentAsFailedSerializer(serializers.Serializer):
     delivery_date = serializers.DateField()
 
 
-class PaymentPlanCreateUpdateSerializer(serializers.ModelSerializer):
+class PaymentListCreateUpdateSerializer(serializers.ModelSerializer):
     id = serializers.UUIDField(read_only=True)
     target_population_id = serializers.UUIDField(source="id")
-    dispersion_start_date = serializers.DateField()
-    dispersion_end_date = serializers.DateField()
-    currency = CurrencySlugRelatedField(
-        on_unchanged_code=OnUnchangedCode.KEEP_CURRENT_ROW,
-        allow_null=True,
-    )
     version = serializers.IntegerField(required=False, read_only=True)
 
     def validate_version(self, value: int | None) -> int | None:
-        payment_plan = self.context.get("payment_plan")
-        if payment_plan and value:
-            check_concurrency_version_in_mutation(value, payment_plan)
+        payment_list = self.context.get("payment_list")
+        if payment_list and value:
+            check_concurrency_version_in_mutation(value, payment_list)
         return value
 
     class Meta:
-        model = PaymentPlan
+        model = PaymentList
         fields = (
             "id",
             "target_population_id",
-            "dispersion_start_date",
-            "dispersion_end_date",
-            "currency",
             "version",
         )
 
@@ -753,27 +746,30 @@ class PaymentPlanCreateTopUpSerializer(PaymentPlanCreateFollowUpSerializer):
         if (fixed_amount is None) == (file is None):
             raise serializers.ValidationError("Provide either a fixed amount or an amount file, not both.")
         if file is not None:
-            attrs["amounts"] = parse_top_up_amount_file(self.context["payment_plan"], file)
+            source_payment_lists = self.context["payment_plan"].payment_lists_qualifying_for_linked_payment_plan(
+                self.context["plan_type"]
+            )
+            attrs["amounts"] = parse_top_up_amount_file(source_payment_lists, file)
         return attrs
 
 
 class FollowUpInstructionCreateSerializer(serializers.Serializer):
     dispersion_start_date = serializers.DateField()
     dispersion_end_date = serializers.DateField()
-    payment_plan_group_ids = serializers.ListField(child=serializers.UUIDField(), allow_empty=False)
+    payment_plan_ids = serializers.ListField(child=serializers.UUIDField(), allow_empty=False)
 
-    def validate_payment_plan_group_ids(self, value: list[Any]) -> list[Any]:
+    def validate_payment_plan_ids(self, value: list[Any]) -> list[Any]:
         if len(value) != len(set(value)):
-            raise serializers.ValidationError("Duplicate Payment Plan Group IDs are not allowed.")
+            raise serializers.ValidationError("Duplicate Payment Plan IDs are not allowed.")
         return value
 
 
-class FollowUpInstructionChildPaymentPlanSummarySerializer(serializers.ModelSerializer):
+class FollowUpInstructionChildPaymentListSummarySerializer(serializers.ModelSerializer):
     currency = serializers.SlugRelatedField(slug_field="code", read_only=True, allow_null=True)
     currency_vision_code = serializers.CharField(source="currency.vision_code", read_only=True, allow_null=True)
-    source_payment_plan_id = serializers.UUIDField(source="source_payment_plan.id", read_only=True)
-    source_payment_plan_unicef_id = serializers.CharField(source="source_payment_plan.unicef_id", read_only=True)
-    source_payment_plan_name = serializers.CharField(source="source_payment_plan.name", read_only=True)
+    source_payment_list_id = serializers.UUIDField(source="source_payment_list.id", read_only=True)
+    source_payment_list_unicef_id = serializers.CharField(source="source_payment_list.unicef_id", read_only=True)
+    source_payment_list_name = serializers.CharField(source="source_payment_list.name", read_only=True)
     households_count = serializers.SerializerMethodField()
     total_entitled_quantity = serializers.SerializerMethodField()
     total_entitled_quantity_usd = serializers.SerializerMethodField()
@@ -783,7 +779,7 @@ class FollowUpInstructionChildPaymentPlanSummarySerializer(serializers.ModelSeri
     total_undelivered_quantity_usd = serializers.SerializerMethodField()
 
     class Meta:
-        model = PaymentPlan
+        model = PaymentList
         fields = (
             "id",
             "unicef_id",
@@ -791,9 +787,9 @@ class FollowUpInstructionChildPaymentPlanSummarySerializer(serializers.ModelSeri
             "status",
             "currency",
             "currency_vision_code",
-            "source_payment_plan_id",
-            "source_payment_plan_unicef_id",
-            "source_payment_plan_name",
+            "source_payment_list_id",
+            "source_payment_list_unicef_id",
+            "source_payment_list_name",
             "households_count",
             "total_entitled_quantity",
             "total_entitled_quantity_usd",
@@ -804,7 +800,7 @@ class FollowUpInstructionChildPaymentPlanSummarySerializer(serializers.ModelSeri
         )
 
     @staticmethod
-    def _summary(obj: PaymentPlan) -> dict[str, Decimal | int]:
+    def _summary(obj: PaymentList) -> dict[str, Decimal | int]:
         if not hasattr(obj, "_follow_up_instruction_payment_summary"):
             obj._follow_up_instruction_payment_summary = obj.payment_items.aggregate(
                 households_count=Count("household_id", filter=Q(excluded=False), distinct=True),
@@ -839,26 +835,26 @@ class FollowUpInstructionChildPaymentPlanSummarySerializer(serializers.ModelSeri
             )
         return obj._follow_up_instruction_payment_summary
 
-    def get_households_count(self, obj: PaymentPlan) -> int:
+    def get_households_count(self, obj: PaymentList) -> int:
         return int(self._summary(obj)["households_count"] or 0)
 
-    def get_total_entitled_quantity(self, obj: PaymentPlan) -> Decimal:
+    def get_total_entitled_quantity(self, obj: PaymentList) -> Decimal:
         return Decimal(self._summary(obj)["total_entitled_quantity"] or 0)
 
-    def get_total_entitled_quantity_usd(self, obj: PaymentPlan) -> Decimal:
+    def get_total_entitled_quantity_usd(self, obj: PaymentList) -> Decimal:
         return Decimal(self._summary(obj)["total_entitled_quantity_usd"] or 0)
 
-    def get_total_delivered_quantity(self, obj: PaymentPlan) -> Decimal:
+    def get_total_delivered_quantity(self, obj: PaymentList) -> Decimal:
         return Decimal(self._summary(obj)["total_delivered_quantity"] or 0)
 
-    def get_total_delivered_quantity_usd(self, obj: PaymentPlan) -> Decimal:
+    def get_total_delivered_quantity_usd(self, obj: PaymentList) -> Decimal:
         return Decimal(self._summary(obj)["total_delivered_quantity_usd"] or 0)
 
-    def get_total_undelivered_quantity(self, obj: PaymentPlan) -> Decimal:
+    def get_total_undelivered_quantity(self, obj: PaymentList) -> Decimal:
         summary = self._summary(obj)
         return Decimal(summary["total_entitled_quantity"] or 0) - (Decimal(summary["total_delivered_quantity"] or 0))
 
-    def get_total_undelivered_quantity_usd(self, obj: PaymentPlan) -> Decimal:
+    def get_total_undelivered_quantity_usd(self, obj: PaymentList) -> Decimal:
         summary = self._summary(obj)
         return Decimal(summary["total_entitled_quantity_usd"] or 0) - (
             Decimal(summary["total_delivered_quantity_usd"] or 0)
@@ -867,11 +863,13 @@ class FollowUpInstructionChildPaymentPlanSummarySerializer(serializers.ModelSeri
 
 class FollowUpInstructionListSerializer(AdminUrlSerializerMixin, serializers.ModelSerializer):
     status = serializers.CharField(read_only=True)
-    background_action_status = serializers.CharField(read_only=True)
+    background_action_status = serializers.ChoiceField(
+        choices=FollowUpInstruction.BackgroundActionStatus.choices, read_only=True, allow_null=True
+    )
     background_action_status_display = serializers.CharField(source="get_background_action_status_display")
-    currency = serializers.SerializerMethodField()
-    currency_vision_code = serializers.SerializerMethodField()
-    child_payment_plans_count = serializers.SerializerMethodField()
+    currency = serializers.SlugRelatedField(slug_field="code", read_only=True, allow_null=True)
+    currency_vision_code = serializers.CharField(source="currency.vision_code", read_only=True, allow_null=True)
+    child_payment_lists_count = serializers.SerializerMethodField()
     households_count = serializers.SerializerMethodField()
     total_entitled_quantity = serializers.SerializerMethodField()
     total_entitled_quantity_usd = serializers.SerializerMethodField()
@@ -879,7 +877,7 @@ class FollowUpInstructionListSerializer(AdminUrlSerializerMixin, serializers.Mod
     total_delivered_quantity_usd = serializers.SerializerMethodField()
     total_undelivered_quantity = serializers.SerializerMethodField()
     total_undelivered_quantity_usd = serializers.SerializerMethodField()
-    export_file_link = serializers.CharField(read_only=True)
+    export_file_link = serializers.SerializerMethodField()
     has_export_file = serializers.BooleanField(read_only=True)
 
     class Meta:
@@ -892,7 +890,7 @@ class FollowUpInstructionListSerializer(AdminUrlSerializerMixin, serializers.Mod
             "background_action_status_display",
             "currency",
             "currency_vision_code",
-            "child_payment_plans_count",
+            "child_payment_lists_count",
             "households_count",
             "total_entitled_quantity",
             "total_entitled_quantity_usd",
@@ -913,23 +911,8 @@ class FollowUpInstructionListSerializer(AdminUrlSerializerMixin, serializers.Mod
             obj._payments_summary_cache = obj.payments_summary()
         return obj._payments_summary_cache
 
-    def get_child_payment_plans_count(self, obj: FollowUpInstruction) -> int:
-        return self._payments_summary(obj)["child_payment_plans_count"]
-
-    @staticmethod
-    def _currency(obj: FollowUpInstruction) -> Currency | None:
-        if not hasattr(obj, "_currency_cache"):
-            payment_plan = obj.payment_plans.first()
-            obj._currency_cache = payment_plan.currency if payment_plan else None
-        return obj._currency_cache
-
-    def get_currency(self, obj: FollowUpInstruction) -> str | None:
-        currency = self._currency(obj)
-        return currency.code if currency else None
-
-    def get_currency_vision_code(self, obj: FollowUpInstruction) -> str | None:
-        currency = self._currency(obj)
-        return currency.vision_code if currency else None
+    def get_child_payment_lists_count(self, obj: FollowUpInstruction) -> int:
+        return self._payments_summary(obj)["child_payment_lists_count"]
 
     def get_households_count(self, obj: FollowUpInstruction) -> int:
         return self._payments_summary(obj)["households_count"]
@@ -952,12 +935,73 @@ class FollowUpInstructionListSerializer(AdminUrlSerializerMixin, serializers.Mod
     def get_total_undelivered_quantity_usd(self, obj: FollowUpInstruction) -> Decimal:
         return self._payments_summary(obj)["total_undelivered_quantity_usd"]
 
+    @staticmethod
+    def get_export_file_link(obj: FollowUpInstruction) -> str | None:
+        if not obj.has_export_file:
+            return None
+        return reverse("download-follow-up-instruction-xlsx", args=[str(obj.id)])
 
-class FollowUpInstructionDetailSerializer(FollowUpInstructionListSerializer):
-    payment_plans = FollowUpInstructionChildPaymentPlanSummarySerializer(many=True, read_only=True)
+
+class OwnerExchangeRateSerializerMixin(serializers.Serializer):
+    unore_exchange_rate = serializers.SerializerMethodField()
+    unore_exchange_rate_unavailable = serializers.SerializerMethodField()
+
+    def _resolve_unore_exchange_rate(self, obj: PaymentPlan | FollowUpInstruction) -> tuple[float | None, bool]:
+        if not hasattr(self, "_owner_unore_exchange_rate_cache"):
+            rate: float | None = None
+            unavailable = False
+            if obj.currency:
+                try:
+                    rate = get_owner_unore_exchange_rate(obj)
+                except Exception as error:  # noqa: BLE001
+                    logger.warning(
+                        "Failed to fetch UNORE exchange rate for %s %s: %s", type(obj).__name__, obj.pk, error
+                    )
+                    unavailable = True
+            self._owner_unore_exchange_rate_cache = (rate, unavailable)
+        return self._owner_unore_exchange_rate_cache
+
+    def get_unore_exchange_rate(self, obj: PaymentPlan | FollowUpInstruction) -> float | None:
+        return self._resolve_unore_exchange_rate(obj)[0]
+
+    def get_unore_exchange_rate_unavailable(self, obj: PaymentPlan | FollowUpInstruction) -> bool:
+        return self._resolve_unore_exchange_rate(obj)[1]
+
+
+class FollowUpInstructionDetailSerializer(OwnerExchangeRateSerializerMixin, FollowUpInstructionListSerializer):
+    exchange_rate = serializers.DecimalField(max_digits=15, decimal_places=8, allow_null=True, read_only=True)
+    custom_exchange_rate = serializers.BooleanField(read_only=True)
+    payment_lists = FollowUpInstructionChildPaymentListSummarySerializer(many=True, read_only=True)
+    approval_process = ApprovalProcessSerializer(read_only=True, many=True)
+    supporting_documents = PaymentPlanSupportingDocumentSerializer(many=True, read_only=True, source="documents")
+    closed_by = serializers.SerializerMethodField()
+    export_pdf_file_summary = serializers.SerializerMethodField()
 
     class Meta(FollowUpInstructionListSerializer.Meta):
-        fields = FollowUpInstructionListSerializer.Meta.fields + ("payment_plans",)  # type: ignore[assignment]
+        fields = FollowUpInstructionListSerializer.Meta.fields + (  # type: ignore[assignment]
+            "payment_lists",
+            "approval_process",
+            "supporting_documents",
+            "abort_comment",
+            "closure_comment",
+            "closed_by",
+            "export_pdf_file_summary",
+            "exchange_rate",
+            "custom_exchange_rate",
+            "unore_exchange_rate",
+            "unore_exchange_rate_unavailable",
+            "version",
+        )
+
+    @staticmethod
+    def get_closed_by(obj: FollowUpInstruction) -> str | None:
+        return f"{obj.closed_by.first_name} {obj.closed_by.last_name}" if obj.closed_by_id else None
+
+    @staticmethod
+    def get_export_pdf_file_summary(obj: FollowUpInstruction) -> str | None:
+        if obj.export_pdf_file_summary_id and obj.export_pdf_file_summary.file:
+            return reverse("download-follow-up-instruction-summary-pdf", args=[str(obj.id)])
+        return None
 
 
 class VisionStateSerializer(serializers.Serializer):
@@ -967,7 +1011,9 @@ class VisionStateSerializer(serializers.Serializer):
     error_code = serializers.CharField(allow_null=True)
 
 
-class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerializer):
+class PaymentListDetailSerializer(AdminUrlSerializerMixin, PaymentListListSerializer):
+    exchange_rate = serializers.DecimalField(max_digits=15, decimal_places=8, allow_null=True, read_only=True)
+    custom_exchange_rate = serializers.BooleanField(read_only=True)
     start_date = UTCDateField(read_only=True, allow_null=True)
     end_date = UTCDateField(read_only=True, allow_null=True)
     background_action_status_display = serializers.CharField(source="get_background_action_status_display")
@@ -980,6 +1026,7 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
     volume_by_delivery_mechanism = serializers.SerializerMethodField()
     delivery_mechanism = DeliveryMechanismSerializer(read_only=True)
     financial_service_provider = FinancialServiceProviderSerializer(read_only=True)
+    approval_process = serializers.SerializerMethodField()
     bank_reconciliation_success = serializers.SerializerMethodField()
     bank_reconciliation_error = serializers.SerializerMethodField()
     can_create_payment_verification_plan = serializers.BooleanField()
@@ -987,26 +1034,13 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
     reconciliation_summary = serializers.SerializerMethodField()
     excluded_households = serializers.SerializerMethodField()
     excluded_individuals = serializers.SerializerMethodField()
-    can_create_follow_up = serializers.SerializerMethodField()
-    can_create_top_up = serializers.BooleanField()
-    can_create_top_up_amendment = serializers.BooleanField()
     total_withdrawn_households_count = serializers.SerializerMethodField()
     unsuccessful_payments_count = serializers.SerializerMethodField()
-    can_send_to_payment_gateway = serializers.BooleanField(source="can_manually_send_to_payment_gateway")
-    vision_integration_enabled = serializers.BooleanField(read_only=True)
-    vision_managed = serializers.BooleanField(read_only=True)
-    vision = serializers.SerializerMethodField()
-    can_split = serializers.SerializerMethodField()
     can_delete = serializers.BooleanField()
-    supporting_documents = PaymentPlanSupportingDocumentSerializer(many=True, read_only=True, source="documents")
     total_households_count_with_valid_phone_no = serializers.SerializerMethodField()
-    split_choices = serializers.SerializerMethodField()
-    approval_process = ApprovalProcessSerializer(read_only=True, many=True)
     steficon_rule = RuleCommitSerializer(read_only=True)
-    source_payment_plan = FollowUpPaymentPlanSerializer(read_only=True)
+    source_payment_list = FollowUpPaymentListSerializer(read_only=True)
     eligible_payments_count = serializers.SerializerMethodField()
-    funds_commitments = serializers.SerializerMethodField()
-    available_funds_commitments = serializers.SerializerMethodField()
     payment_verification_plans = PaymentVerificationPlanSerializer(many=True, read_only=True)
     payment_verification_summary = PaymentVerificationSummarySerializer(read_only=True)
     closed_by = serializers.SerializerMethodField()
@@ -1014,8 +1048,8 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
     unore_exchange_rate_unavailable = serializers.SerializerMethodField()
     payment_plan_purposes = PaymentPlanPurposeSerializer(many=True, read_only=True)
 
-    class Meta(PaymentPlanListSerializer.Meta):
-        fields = PaymentPlanListSerializer.Meta.fields + (  # type: ignore
+    class Meta(PaymentListListSerializer.Meta):
+        fields = PaymentListListSerializer.Meta.fields + (  # type: ignore
             "version",
             "background_action_status",
             "background_action_status_display",
@@ -1030,7 +1064,6 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
             "payments_conflicts_count",
             "delivery_mechanism",
             "volume_by_delivery_mechanism",
-            "split_choices",
             "exclusion_reason",
             "exclude_household_error",
             "bank_reconciliation_success",
@@ -1040,18 +1073,9 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
             "reconciliation_summary",
             "excluded_households",
             "excluded_individuals",
-            "can_create_follow_up",
-            "can_create_top_up",
-            "can_create_top_up_amendment",
             "total_withdrawn_households_count",
             "unsuccessful_payments_count",
-            "can_send_to_payment_gateway",
-            "vision_integration_enabled",
-            "vision_managed",
-            "vision",
-            "can_split",
             "can_delete",
-            "supporting_documents",
             "total_households_count_with_valid_phone_no",
             "financial_service_provider",
             "approval_process",
@@ -1064,14 +1088,12 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
             "male_adults_count",
             "female_adults_count",
             "steficon_rule",
-            "source_payment_plan",
+            "source_payment_list",
             "exchange_rate",
             "custom_exchange_rate",
             "unore_exchange_rate",
             "unore_exchange_rate_unavailable",
             "eligible_payments_count",
-            "funds_commitments",
-            "available_funds_commitments",
             "payment_verification_plans",
             "payment_verification_summary",
             "admin_url",
@@ -1084,12 +1106,12 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
         )
 
     @staticmethod
-    def get_closed_by(obj: PaymentPlan) -> str | None:
+    def get_closed_by(obj: PaymentList) -> str | None:
         if not obj.closed_by_id:
             return None
         return f"{obj.closed_by.first_name} {obj.closed_by.last_name}"
 
-    def _resolve_unore_exchange_rate(self, obj: PaymentPlan) -> tuple[float | None, bool]:
+    def _resolve_unore_exchange_rate(self, obj: PaymentList) -> tuple[float | None, bool]:
         """Fetch the UNORE rate once, returning (rate, unavailable)."""
         if not hasattr(self, "_unore_exchange_rate_cache"):
             rate: float | None = None
@@ -1100,23 +1122,23 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
                 except Exception as e:  # noqa: BLE001
                     # The UNORE exchange rate is fetched from an external API. If that call fails
                     # still load the payment plan instead of 500, and flag it for the UI.
-                    logger.warning("Failed to fetch UNORE exchange rate for PaymentPlan %s: %s", obj.pk, e)
+                    logger.warning("Failed to fetch UNORE exchange rate for PaymentList %s: %s", obj.pk, e)
                     unavailable = True
             self._unore_exchange_rate_cache: tuple[float | None, bool] = (rate, unavailable)
         return self._unore_exchange_rate_cache
 
-    def get_unore_exchange_rate(self, obj: PaymentPlan) -> float | None:
+    def get_unore_exchange_rate(self, obj: PaymentList) -> float | None:
         return self._resolve_unore_exchange_rate(obj)[0]
 
-    def get_unore_exchange_rate_unavailable(self, obj: PaymentPlan) -> bool:
+    def get_unore_exchange_rate_unavailable(self, obj: PaymentList) -> bool:
         return self._resolve_unore_exchange_rate(obj)[1]
 
-    def _payments_summary(self, payment_plan: PaymentPlan) -> dict[str, int]:
+    def _payments_summary(self, payment_list: PaymentList) -> dict[str, int]:
         if not hasattr(self, "_payments_summary_cache"):
             self._payments_summary_cache: dict[str, dict[str, int]] = {}
-        cache_key = str(payment_plan.pk)
+        cache_key = str(payment_list.pk)
         if cache_key not in self._payments_summary_cache:
-            self._payments_summary_cache[cache_key] = payment_plan.eligible_payments.aggregate(
+            self._payments_summary_cache[cache_key] = payment_list.eligible_payments.aggregate(
                 available_count=Count(
                     "id",
                     filter=Q(status__in=Payment.ALLOW_CREATE_VERIFICATION, delivered_quantity__gt=0),
@@ -1148,18 +1170,18 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
             )
         return self._payments_summary_cache[cache_key]
 
-    def get_payments_conflicts_count(self, payment_plan: PaymentPlan) -> int:
-        # count conflict only for OPEN PaymentPlan
-        if payment_plan.status == PaymentPlan.Status.OPEN:
-            return payment_plan.eligible_payments_with_conflicts.filter(payment_plan_hard_conflicted=True).count()
+    def get_payments_conflicts_count(self, payment_list: PaymentList) -> int:
+        # count conflict only for OPEN PaymentList
+        if payment_list.status == PaymentList.Status.OPEN:
+            return payment_list.eligible_payments_with_conflicts.filter(payment_list_hard_conflicted=True).count()
         return 0
 
-    def get_available_payment_records_count(self, payment_plan: PaymentPlan) -> int:
-        return self._payments_summary(payment_plan)["available_count"]
+    def get_available_payment_records_count(self, payment_list: PaymentList) -> int:
+        return self._payments_summary(payment_list)["available_count"]
 
     @extend_schema_field(
         inline_serializer(
-            name="PaymentPlanReconciliationSummary",
+            name="PaymentListReconciliationSummary",
             fields={
                 "delivered_fully": serializers.IntegerField(),
                 "delivered_partially": serializers.IntegerField(),
@@ -1167,7 +1189,7 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
                 "unsuccessful": serializers.IntegerField(),
                 "pending": serializers.IntegerField(),
                 "pending_breakdown": inline_serializer(
-                    name="PaymentPlanPendingBreakdown",
+                    name="PaymentListPendingBreakdown",
                     fields={
                         "pending": serializers.IntegerField(),
                         "sent_to_payment_gateway": serializers.IntegerField(),
@@ -1179,7 +1201,7 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
             },
         )
     )
-    def get_reconciliation_summary(self, obj: PaymentPlan) -> dict[str, Any]:
+    def get_reconciliation_summary(self, obj: PaymentList) -> dict[str, Any]:
         summary = self._payments_summary(obj)
         pending_breakdown = {
             "pending": summary["pending_count"],
@@ -1198,7 +1220,7 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
             "number_of_payments": summary["total_count"],
         }
 
-    def get_excluded_households(self, obj: PaymentPlan) -> dict[str, Any]:
+    def get_excluded_households(self, obj: PaymentList) -> dict[str, Any]:
         qs = (
             Household.objects.filter(unicef_id__in=obj.excluded_beneficiaries_ids, program=obj.program_cycle.program)
             if not obj.is_social_worker_program
@@ -1206,7 +1228,7 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
         )
         return HouseholdSmallSerializer(qs, many=True).data
 
-    def get_excluded_individuals(self, obj: PaymentPlan) -> dict[str, Any]:
+    def get_excluded_individuals(self, obj: PaymentList) -> dict[str, Any]:
         qs = (
             Individual.objects.filter(unicef_id__in=obj.excluded_beneficiaries_ids, program=obj.program_cycle.program)
             if obj.is_social_worker_program
@@ -1214,112 +1236,61 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
         )
         return IndividualSmallSerializer(qs, many=True).data
 
-    def get_can_create_follow_up(self, obj: PaymentPlan) -> bool:
-        # Check there are payments in error/not distributed status and excluded withdrawn households
-        if obj.plan_type == PaymentPlan.PlanType.FOLLOW_UP or obj.is_instruction_managed:
-            return False
-
-        qs = obj.unsuccessful_payments_for_follow_up()
-
-        # Check if all payments are used in FPPs
-        follow_up_payment = obj.payments_used_in_follow_payment_plans()
-
-        return qs.exists() and set(follow_up_payment.values_list("source_payment_id", flat=True)) != set(
-            qs.values_list("id", flat=True)
-        )
-
-    def get_total_withdrawn_households_count(self, obj: PaymentPlan) -> int:
+    def get_total_withdrawn_households_count(self, obj: PaymentList) -> int:
         follow_up_households = Payment.objects.filter(
             is_follow_up=True,
-            parent__source_payment_plan=obj,
+            parent__source_payment_list=obj,
             parent__program_cycle=obj.program_cycle,
             excluded=False,
             household_id=OuterRef("household_id"),
         ).exclude(parent=obj)
         return obj.eligible_payments.filter(household__withdrawn=True).exclude(Exists(follow_up_households)).count()
 
-    def get_unsuccessful_payments_count(self, obj: PaymentPlan) -> int:
+    def get_unsuccessful_payments_count(self, obj: PaymentList) -> int:
         return obj.unsuccessful_payments_for_follow_up().count()
 
-    def get_can_split(self, obj: PaymentPlan) -> bool:
-        if obj.is_instruction_managed:
-            return False
-        if obj.status != PaymentPlan.Status.ACCEPTED:
-            return False
-
-        return not obj.splits.filter(
-            sent_to_payment_gateway=True,
-        ).exists()
-
-    def get_total_households_count_with_valid_phone_no(self, obj: PaymentPlan) -> int:
+    def get_total_households_count_with_valid_phone_no(self, obj: PaymentList) -> int:
         return self._payments_summary(obj)["valid_phone_count"]
 
-    def get_eligible_payments_count(self, obj: PaymentPlan) -> int:
+    def get_eligible_payments_count(self, obj: PaymentList) -> int:
         return self._payments_summary(obj)["total_count"]
 
-    def get_bank_reconciliation_success(self, obj: PaymentPlan) -> int:
+    @extend_schema_field(ApprovalProcessSerializer(many=True))
+    def get_approval_process(self, obj: PaymentList) -> list[dict[str, Any]]:
+        # A payment list is approved together with its payment plan, or with its Follow-Up Instruction;
+        # it shows their approvals.
+        owner = obj.follow_up_instruction if obj.follow_up_instruction_id else obj.payment_plan
+        if owner is None:
+            return []
+        return list(ApprovalProcessSerializer(owner.approval_process.all(), many=True, context=self.context).data)
+
+    def get_bank_reconciliation_success(self, obj: PaymentList) -> int:
         summary = self._payments_summary(obj)
         return summary["delivered_fully_count"] + summary["delivered_partially_count"]
 
-    def get_bank_reconciliation_error(self, obj: PaymentPlan) -> int:
+    def get_bank_reconciliation_error(self, obj: PaymentList) -> int:
         return self._payments_summary(obj)["error_count"]
 
-    def get_split_choices(self, obj: PaymentPlan) -> list[dict[str, Any]]:
-        return to_choice_object(PaymentPlanSplit.SplitType.choices)
-
-    def get_volume_by_delivery_mechanism(self, obj: PaymentPlan) -> dict[str, Any]:
+    def get_volume_by_delivery_mechanism(self, obj: PaymentList) -> dict[str, Any]:
         return VolumeByDeliveryMechanismSerializer([obj], many=True).data
 
-    def get_payment_verification_plans_count(self, obj: PaymentPlan) -> int:
+    def get_payment_verification_plans_count(self, obj: PaymentList) -> int:
         return obj.payment_verification_plans.count()
-
-    @extend_schema_field(FundsCommitmentSerializer(many=True))
-    def get_funds_commitments(self, obj: PaymentPlan) -> list[dict[str, Any]]:
-        headers = obj.funds_commitment_headers.with_derived_fields().prefetch_related(
-            Prefetch("funds_commitment_items", queryset=FundsCommitmentItem.objects.select_related("office"))
-        )
-        return [dict(FundsCommitmentSerializer(header).data) for header in headers]
-
-    @extend_schema_field(FundsCommitmentSerializer(many=True))
-    def get_available_funds_commitments(self, obj: PaymentPlan) -> list[dict[str, Any]]:
-        if obj.vision_managed:
-            return []
-
-        headers = (
-            FundsCommitmentHeader.objects.with_derived_fields()
-            .filter(funds_commitment_items__office_id=obj.business_area_id)
-            .distinct()
-            .prefetch_related(
-                Prefetch("funds_commitment_items", queryset=FundsCommitmentItem.objects.select_related("office"))
-            )
-        )
-
-        return [dict(FundsCommitmentSerializer(header).data) for header in headers]
-
-    @extend_schema_field(VisionStateSerializer)
-    def get_vision(self, obj: PaymentPlan) -> dict[str, Any]:
-        vision_data = obj.vision_data
-        return {
-            "status": obj.vision_status,
-            "vision_id": vision_data.get("vision_id"),
-            "fc_numbers": vision_data.get("fc_numbers", []),
-            "error_code": vision_data.get("error_code"),
-        }
 
 
 class PaymentPlanBulkActionSerializer(serializers.Serializer):
     ids = serializers.ListField(child=serializers.CharField())
     action = serializers.ChoiceField(
         choices=[
-            (PaymentPlan.Action.APPROVE.value, PaymentPlan.Action.APPROVE.label),
-            (PaymentPlan.Action.AUTHORIZE.value, PaymentPlan.Action.AUTHORIZE.label),
-            (PaymentPlan.Action.REVIEW.value, PaymentPlan.Action.REVIEW.label),
+            (PaymentList.Action.APPROVE.value, PaymentList.Action.APPROVE.label),
+            (PaymentList.Action.AUTHORIZE.value, PaymentList.Action.AUTHORIZE.label),
+            (PaymentList.Action.REVIEW.value, PaymentList.Action.REVIEW.label),
         ]
     )
     comment = serializers.CharField(max_length=COMMENT_MAX_LENGTH, required=False, allow_blank=True)
 
 
-class TargetPopulationDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerializer):
+class TargetPopulationDetailSerializer(AdminUrlSerializerMixin, PaymentListListSerializer):
     start_date = UTCDateField(read_only=True, allow_null=True)
     end_date = UTCDateField(read_only=True, allow_null=True)
     background_action_status = serializers.CharField(source="get_background_action_status_display")
@@ -1333,10 +1304,10 @@ class TargetPopulationDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListS
     screen_beneficiary = serializers.BooleanField(source="program_cycle.program.screen_beneficiary", read_only=True)
     payment_plan_purposes = PaymentPlanPurposeSerializer(many=True, read_only=True)
     is_purposes_editable = serializers.SerializerMethodField()
-    payment_plan_group = PaymentPlanGroupSmallSerializer(read_only=True)
+    payment_plan = PaymentPlanSmallSerializer(read_only=True, allow_null=True)
 
-    class Meta(PaymentPlanListSerializer.Meta):
-        fields = PaymentPlanListSerializer.Meta.fields + (  # type: ignore
+    class Meta(PaymentListListSerializer.Meta):
+        fields = PaymentListListSerializer.Meta.fields + (  # type: ignore
             "background_action_status",
             "status",
             "start_date",
@@ -1363,18 +1334,18 @@ class TargetPopulationDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListS
             "build_status",
             "payment_plan_purposes",
             "is_purposes_editable",
-            "payment_plan_group",
+            "payment_plan",
         )
 
     @staticmethod
-    def get_is_purposes_editable(obj: PaymentPlan) -> bool:
-        return not PaymentPlan.objects.filter(
+    def get_is_purposes_editable(obj: PaymentList) -> bool:
+        return not PaymentList.objects.filter(
             program_cycle=obj.program_cycle,
             created_at__gt=obj.created_at,
         ).exists()
 
     @staticmethod
-    def get_failed_wallet_validation_collectors_ids(obj: PaymentPlan) -> list[str | None]:
+    def get_failed_wallet_validation_collectors_ids(obj: PaymentList) -> list[str | None]:
         fsp = getattr(obj, "financial_service_provider", None)
         dm = getattr(obj, "delivery_mechanism", None)
         if not fsp or not dm:
@@ -1388,8 +1359,8 @@ class TargetPopulationDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListS
         )
 
     @staticmethod
-    def get_status_display(obj: PaymentPlan) -> str:
-        return obj.get_status_display().upper() if obj.status in PaymentPlan.PRE_PAYMENT_PLAN_STATUSES else "ASSIGNED"
+    def get_status_display(obj: PaymentList) -> str:
+        return obj.get_status_display().upper() if obj.status in PaymentList.PRE_PAYMENT_LIST_STATUSES else "ASSIGNED"
 
 
 class PaymentVerificationDetailsSerializer(AdminUrlSerializerMixin, serializers.ModelSerializer):
@@ -1418,7 +1389,7 @@ class PaymentChoicesSerializer(serializers.Serializer):
         return [{"name": label, "value": value} for value, label in Payment.STATUS_CHOICE]
 
 
-class PaymentListSerializer(serializers.ModelSerializer):
+class PaymentRowSerializer(serializers.ModelSerializer):
     id = serializers.UUIDField(read_only=True)
     parent_id = serializers.UUIDField(read_only=True)
     parent_unicef_id = serializers.CharField(source="parent.unicef_id")
@@ -1452,15 +1423,15 @@ class PaymentListSerializer(serializers.ModelSerializer):
     fsp_name = serializers.SerializerMethodField()
     fsp_auth_code = serializers.SerializerMethodField()
     verification = serializers.SerializerMethodField()
-    payment_plan_hard_conflicted = serializers.SerializerMethodField()
-    payment_plan_hard_conflicted_data = serializers.SerializerMethodField()
-    payment_plan_soft_conflicted = serializers.SerializerMethodField()
-    payment_plan_soft_conflicted_data = serializers.SerializerMethodField()
+    payment_list_hard_conflicted = serializers.SerializerMethodField()
+    payment_list_hard_conflicted_data = serializers.SerializerMethodField()
+    payment_list_soft_conflicted = serializers.SerializerMethodField()
+    payment_list_soft_conflicted_data = serializers.SerializerMethodField()
     people_individual = IndividualListSerializer(read_only=True)
     program_name = serializers.CharField(source="parent.program.name")
     program_code = serializers.CharField(source="parent.program.code")
-    payment_plan_cycle = serializers.CharField(source="parent.program_cycle.title", read_only=True)
-    payment_plan_group = serializers.CharField(source="parent.payment_plan_group.name", read_only=True, allow_null=True)
+    payment_list_cycle = serializers.CharField(source="parent.program_cycle.title", read_only=True)
+    payment_plan = serializers.CharField(source="parent.payment_plan.name", read_only=True, allow_null=True)
     payment_plan_purposes = serializers.SerializerMethodField()
     delivery_date = UTCDateField(read_only=True, allow_null=True)
 
@@ -1515,16 +1486,16 @@ class PaymentListSerializer(serializers.ModelSerializer):
             "collector_phone_no",
             "collector_phone_no_alt",
             "verification",
-            "payment_plan_hard_conflicted",
-            "payment_plan_hard_conflicted_data",
-            "payment_plan_soft_conflicted",
-            "payment_plan_soft_conflicted_data",
+            "payment_list_hard_conflicted",
+            "payment_list_hard_conflicted_data",
+            "payment_list_soft_conflicted",
+            "payment_list_soft_conflicted_data",
             "people_individual",
             "program_name",
             "program_code",
             "collector_type_display",
-            "payment_plan_cycle",
-            "payment_plan_group",
+            "payment_list_cycle",
+            "payment_plan",
             "payment_plan_purposes",
         )
 
@@ -1553,22 +1524,22 @@ class PaymentListSerializer(serializers.ModelSerializer):
         return collector_data.get(field_name)
 
     def get_snapshot_collector_full_name(self, obj: Payment) -> Any:
-        return PaymentListSerializer.get_collector_field(
+        return PaymentRowSerializer.get_collector_field(
             obj,
             "full_name",
         )
 
     def get_snapshot_alternate_collector_full_name(self, obj: Payment) -> Any:
-        return PaymentListSerializer.get_collector_field(obj, "full_name", ROLE_ALTERNATE)
+        return PaymentRowSerializer.get_collector_field(obj, "full_name", ROLE_ALTERNATE)
 
     def get_snapshot_collector_full_name_latin(self, obj: Payment) -> Any:
-        return PaymentListSerializer.get_collector_field(obj, "full_name_latin")
+        return PaymentRowSerializer.get_collector_field(obj, "full_name_latin")
 
     def get_snapshot_alternate_collector_full_name_latin(self, obj: Payment) -> Any:
-        return PaymentListSerializer.get_collector_field(obj, "full_name_latin", ROLE_ALTERNATE)
+        return PaymentRowSerializer.get_collector_field(obj, "full_name_latin", ROLE_ALTERNATE)
 
     def get_snapshot_alternate_collector_id(self, obj: Payment) -> Any:
-        return PaymentListSerializer.get_collector_field(obj, "id", ROLE_ALTERNATE)
+        return PaymentRowSerializer.get_collector_field(obj, "id", ROLE_ALTERNATE)
 
     def get_fsp_name(self, obj: Payment) -> str:
         return obj.financial_service_provider.name if obj.financial_service_provider else ""
@@ -1594,22 +1565,22 @@ class PaymentListSerializer(serializers.ModelSerializer):
     def get_household_status(self, obj: Payment) -> str:
         return STATUS_ACTIVE if not obj.household.withdrawn else STATUS_INACTIVE
 
-    def get_payment_plan_hard_conflicted(self, obj: Payment) -> bool:
-        return obj.parent.status == PaymentPlan.Status.OPEN and getattr(obj, "payment_plan_hard_conflicted", False)
+    def get_payment_list_hard_conflicted(self, obj: Payment) -> bool:
+        return obj.parent.status == PaymentList.Status.OPEN and getattr(obj, "payment_list_hard_conflicted", False)
 
-    def get_payment_plan_soft_conflicted(self, obj: Payment) -> bool:
-        return obj.parent.status == PaymentPlan.Status.OPEN and getattr(obj, "payment_plan_soft_conflicted", False)
+    def get_payment_list_soft_conflicted(self, obj: Payment) -> bool:
+        return obj.parent.status == PaymentList.Status.OPEN and getattr(obj, "payment_list_soft_conflicted", False)
 
-    def get_payment_plan_hard_conflicted_data(self, obj: Payment) -> list[Any]:
-        if obj.parent.status != PaymentPlan.Status.OPEN:
+    def get_payment_list_hard_conflicted_data(self, obj: Payment) -> list[Any]:
+        if obj.parent.status != PaymentList.Status.OPEN:
             return []
-        conflicts_data = getattr(obj, "payment_plan_hard_conflicted_data", [])
+        conflicts_data = getattr(obj, "payment_list_hard_conflicted_data", [])
         return [json.loads(conflict) for conflict in conflicts_data]
 
-    def get_payment_plan_soft_conflicted_data(self, obj: Payment) -> list[Any]:
-        if obj.parent.status != PaymentPlan.Status.OPEN:
+    def get_payment_list_soft_conflicted_data(self, obj: Payment) -> list[Any]:
+        if obj.parent.status != PaymentList.Status.OPEN:
             return []
-        conflicts_data = getattr(obj, "payment_plan_soft_conflicted_data", [])
+        conflicts_data = getattr(obj, "payment_list_soft_conflicted_data", [])
         return [json.loads(conflict) for conflict in conflicts_data]
 
     def _safe_get(self, obj: Payment, path: str, default: Any = None) -> Any:
@@ -1646,9 +1617,9 @@ class PaymentListSerializer(serializers.ModelSerializer):
         return sorted(purpose.name for purpose in obj.parent.payment_plan_purposes.all())
 
 
-class NotEligiblePaymentListSerializer(PaymentListSerializer):
-    class Meta(PaymentListSerializer.Meta):
-        fields = PaymentListSerializer.Meta.fields + (
+class NotEligiblePaymentRowSerializer(PaymentRowSerializer):
+    class Meta(PaymentRowSerializer.Meta):
+        fields = PaymentRowSerializer.Meta.fields + (
             "conflicted",
             "excluded",
             "has_valid_wallet",
@@ -1661,7 +1632,7 @@ class PaymentDetailParentSerializer(serializers.ModelSerializer):
     payment_verification_plans = PaymentVerificationPlanSerializer(many=True, read_only=True)
 
     class Meta:
-        model = PaymentPlan
+        model = PaymentList
         fields = (
             "id",
             "unicef_id",
@@ -1674,9 +1645,9 @@ class PaymentDetailParentSerializer(serializers.ModelSerializer):
         )
 
 
-class PaymentDetailSerializer(AdminUrlSerializerMixin, PaymentListSerializer):
+class PaymentDetailSerializer(AdminUrlSerializerMixin, PaymentRowSerializer):
     parent = PaymentDetailParentSerializer()
-    source_payment = PaymentListSerializer()
+    source_payment = PaymentRowSerializer()
     household = HouseholdDetailSerializer()
     delivery_mechanism = DeliveryMechanismSerializer(source="parent.delivery_mechanism")
     collector = IndividualDetailSerializer()
@@ -1684,8 +1655,8 @@ class PaymentDetailSerializer(AdminUrlSerializerMixin, PaymentListSerializer):
     extra_fields = serializers.SerializerMethodField()
     fsp_extra_fields = serializers.SerializerMethodField()
 
-    class Meta(PaymentListSerializer.Meta):
-        fields = PaymentListSerializer.Meta.fields + (
+    class Meta(PaymentRowSerializer.Meta):
+        fields = PaymentRowSerializer.Meta.fields + (
             "parent",
             "admin_url",
             "source_payment",
@@ -1704,7 +1675,7 @@ class PaymentDetailSerializer(AdminUrlSerializerMixin, PaymentListSerializer):
         )
 
     def get_snapshot_collector_account_data(self, obj: Payment) -> dict | None:
-        return PaymentListSerializer.get_collector_field(obj, "account_data")
+        return PaymentRowSerializer.get_collector_field(obj, "account_data")
 
     @extend_schema_field(serializers.DictField())
     def get_extra_fields(self, obj: Payment) -> dict[str, object]:
@@ -1715,9 +1686,9 @@ class PaymentDetailSerializer(AdminUrlSerializerMixin, PaymentListSerializer):
         return obj.fsp_extra_fields
 
 
-class PaymentPlanSmallSerializer(serializers.ModelSerializer):
+class PaymentListSmallSerializer(serializers.ModelSerializer):
     class Meta:
-        model = PaymentPlan
+        model = PaymentList
         fields = (
             "id",
             "unicef_id",
@@ -1726,7 +1697,7 @@ class PaymentPlanSmallSerializer(serializers.ModelSerializer):
 
 class PaymentSmallSerializer(serializers.ModelSerializer):
     verification = serializers.SerializerMethodField()
-    parent = PaymentPlanSmallSerializer(read_only=True)
+    parent = PaymentListSmallSerializer(read_only=True)
 
     class Meta:
         model = Payment
@@ -1829,8 +1800,7 @@ class TargetPopulationCreateSerializer(serializers.ModelSerializer):
     rules = TargetingCriteriaRuleSerializer(many=True)
     excluded_ids = serializers.CharField(required=False, allow_blank=True)
     exclusion_reason = serializers.CharField(required=False, allow_blank=True)
-    payment_plan_group_id = serializers.UUIDField()
-    fsp_id = serializers.UUIDField(required=False, allow_null=True)
+    payment_plan_id = serializers.UUIDField()
     delivery_mechanism_code = serializers.CharField(required=False, allow_blank=True, allow_null=True)
     vulnerability_score_min = serializers.DecimalField(required=False, max_digits=6, decimal_places=3)
     vulnerability_score_max = serializers.DecimalField(required=False, max_digits=6, decimal_places=3)
@@ -1843,17 +1813,16 @@ class TargetPopulationCreateSerializer(serializers.ModelSerializer):
     )
 
     class Meta:
-        model = PaymentPlan
+        model = PaymentList
         fields = (
             "id",
             "version",
             "name",
             "program_cycle_id",
-            "payment_plan_group_id",
+            "payment_plan_id",
             "rules",
             "excluded_ids",
             "exclusion_reason",
-            "fsp_id",
             "delivery_mechanism_code",
             "vulnerability_score_min",
             "vulnerability_score_max",
@@ -1867,12 +1836,12 @@ class TargetPopulationCreateSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("At least one Payment Plan Purpose is required.")
         submitted_ids = {p.pk for p in purposes}
         if self.get_program().payment_plan_purposes.filter(id__in=submitted_ids).count() != len(submitted_ids):
-            raise serializers.ValidationError("All purposes must be assigned to the payment plan's program.")
+            raise serializers.ValidationError("All purposes must be assigned to the payment list's program.")
         return purposes
 
     def validate(self, data: dict) -> dict:
         if "payment_plan_purposes" in data and self.instance:
-            is_latest = not PaymentPlan.objects.filter(
+            is_latest = not PaymentList.objects.filter(
                 program_cycle=self.instance.program_cycle,
                 created_at__gt=self.instance.created_at,
             ).exists()
@@ -1889,44 +1858,44 @@ class TargetPopulationCreateSerializer(serializers.ModelSerializer):
         return get_object_or_404(Program, business_area__slug=business_area_slug, code=program_code)
 
     @transaction.atomic
-    def create(self, data: dict) -> PaymentPlan:
+    def create(self, data: dict) -> PaymentList:
         request = self.context["request"]
         program = self.get_program()
         data["program"] = program
         data["created_by"] = request.user
 
-        payment_plan = PaymentPlanService.create(input_data=data, user=request.user, program=program)
+        payment_list = PaymentListService.create(input_data=data, user=request.user, program=program)
         log_create(
-            mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
+            mapping=PaymentList.ACTIVITY_LOG_MAPPING,
             business_area_field="business_area",
             user=request.user,
             programs=str(program.pk),
-            new_object=payment_plan,
+            new_object=payment_list,
         )
-        return payment_plan
+        return payment_list
 
     @transaction.atomic
-    def update(self, payment_plan: PaymentPlan, validated_data: dict) -> PaymentPlan:
+    def update(self, payment_list: PaymentList, validated_data: dict) -> PaymentList:
         request = self.context["request"]
-        check_concurrency_version_in_mutation(validated_data.get("version"), payment_plan)
-        old_payment_plan = copy_model_object(payment_plan)
-        payment_plan = PaymentPlanService(payment_plan=payment_plan).update(input_data=validated_data)
+        check_concurrency_version_in_mutation(validated_data.get("version"), payment_list)
+        old_payment_list = copy_model_object(payment_list)
+        payment_list = PaymentListService(payment_list=payment_list).update(input_data=validated_data)
         log_create(
-            mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
+            mapping=PaymentList.ACTIVITY_LOG_MAPPING,
             business_area_field="business_area",
             user=request.user,
-            programs=payment_plan.program.pk,
-            old_object=old_payment_plan,
-            new_object=payment_plan,
+            programs=payment_list.program.pk,
+            old_object=old_payment_list,
+            new_object=payment_list,
         )
-        return payment_plan
+        return payment_list
 
 
 class TargetPopulationCopySerializer(serializers.Serializer):
     name = serializers.CharField()
     target_population_id = serializers.CharField()
     program_cycle_id = serializers.CharField()
-    payment_plan_group_id = serializers.UUIDField()
+    payment_plan_id = serializers.UUIDField()
     payment_plan_purposes = serializers.PrimaryKeyRelatedField(
         queryset=PaymentPlanPurpose.objects.all(),
         many=True,
@@ -1941,7 +1910,7 @@ class TargetPopulationCopySerializer(serializers.Serializer):
         program_code = request.parser_context["kwargs"]["program_code"]
         program = get_object_or_404(Program, business_area__slug=business_area_slug, code=program_code)
         if program.payment_plan_purposes.filter(id__in=submitted_ids).count() != len(submitted_ids):
-            raise serializers.ValidationError("All purposes must be assigned to the payment plan's program.")
+            raise serializers.ValidationError("All purposes must be assigned to the payment list's program.")
         return purposes
 
 
@@ -1956,18 +1925,18 @@ class ApplyFlatAmountEntitlementSerializer(serializers.Serializer):
 
 
 class ApplyCustomExchangeRateSerializer(serializers.Serializer):
-    unore_exchange_rate = serializers.DecimalField(max_digits=15, decimal_places=8, required=False, allow_null=True)
-    custom_exchange_rate = serializers.DecimalField(max_digits=15, decimal_places=8, required=False, allow_null=True)
+    unore_exchange_rate = serializers.DecimalField(
+        max_digits=15, decimal_places=8, min_value=Decimal("0.00000001"), required=False
+    )
+    custom_exchange_rate = serializers.DecimalField(
+        max_digits=15, decimal_places=8, min_value=Decimal("0.00000001"), required=False
+    )
     version = serializers.IntegerField(required=False)
 
     def validate(self, attrs: dict[str, Any]) -> dict[str, Any]:
-        if attrs.get("custom_exchange_rate") is None and attrs.get("unore_exchange_rate") is None:
+        if ("unore_exchange_rate" in attrs) == ("custom_exchange_rate" in attrs):
             raise serializers.ValidationError(
-                {
-                    api_settings.NON_FIELD_ERRORS_KEY: [
-                        "One of custom_exchange_rate or unore_exchange_rate must be provided."
-                    ]
-                }
+                {api_settings.NON_FIELD_ERRORS_KEY: ["Choose UNORE or provide a positive custom exchange rate."]}
             )
         return attrs
 
@@ -2017,156 +1986,399 @@ class PaymentPlanCloseSerializer(serializers.Serializer):
     closure_comment = serializers.CharField(required=False, allow_blank=True, allow_null=True)
 
 
-class PaymentPlanGroupListSerializer(serializers.ModelSerializer):
+class PaymentPlanListSerializer(serializers.ModelSerializer):
     cycle = ProgramCycleSmallSerializer()
+    financial_service_provider = FinancialServiceProviderSerializer(read_only=True, allow_null=True)
+    currency = serializers.SlugRelatedField(slug_field="code", read_only=True, allow_null=True)
+    currency_vision_code = serializers.CharField(source="currency.vision_code", read_only=True, allow_null=True)
+    source_payment_plan = PaymentPlanSmallSerializer(read_only=True, allow_null=True)
 
     class Meta:
-        model = PaymentPlanGroup
-        fields = ["id", "unicef_id", "name", "cycle", "created_at"]
+        model = PaymentPlan
+        fields = [
+            "id",
+            "unicef_id",
+            "name",
+            "cycle",
+            "status",
+            "plan_type",
+            "source_payment_plan",
+            "financial_service_provider",
+            "currency",
+            "currency_vision_code",
+            "dispersion_start_date",
+            "dispersion_end_date",
+            "created_at",
+        ]
 
 
-class PaymentPlanGroupCreateSerializer(serializers.ModelSerializer):
+class PaymentPlanManagerialSerializer(AdminUrlSerializerMixin, serializers.ModelSerializer):
+    """Row of the managerial console: the payment plan with its programme, totals and the last approval step."""
+
+    status_display = serializers.CharField(source="get_status_display")
+    program = serializers.CharField(source="cycle.program.name")
+    program_id = serializers.UUIDField(source="cycle.program.id")
+    program_code = serializers.CharField(source="cycle.program.code")
+    cycle_title = serializers.CharField(source="cycle.title")
+    financial_service_provider = serializers.CharField(
+        source="financial_service_provider.name", read_only=True, allow_null=True
+    )
+    currency = serializers.SlugRelatedField(slug_field="code", read_only=True, allow_null=True)
+    currency_vision_code = serializers.CharField(source="currency.vision_code", read_only=True, allow_null=True)
+    payment_lists_count = serializers.IntegerField(read_only=True)
+    total_households_count = serializers.IntegerField(source="households_total", read_only=True)
+    total_entitled_quantity_usd = serializers.DecimalField(
+        source="entitled_usd_total", max_digits=15, decimal_places=2, read_only=True
+    )
+    last_approval_process_date = serializers.DateTimeField(read_only=True)
+    last_approval_process_by = serializers.SerializerMethodField()
+    vision_managed = serializers.BooleanField(read_only=True)
+    has_payments_reconciliation_overdue = serializers.BooleanField(read_only=True)
+    reconciliation_window_in_days = serializers.IntegerField(
+        source="cycle.program.reconciliation_window_in_days", read_only=True
+    )
+
+    class Meta:
+        model = PaymentPlan
+        fields = (
+            "id",
+            "unicef_id",
+            "name",
+            "status",
+            "status_display",
+            "program",
+            "program_id",
+            "program_code",
+            "cycle_title",
+            "financial_service_provider",
+            "currency",
+            "currency_vision_code",
+            "payment_lists_count",
+            "total_households_count",
+            "total_entitled_quantity_usd",
+            "last_approval_process_date",
+            "last_approval_process_by",
+            "vision_managed",
+            "has_payments_reconciliation_overdue",
+            "reconciliation_window_in_days",
+            "admin_url",
+        )
+
+    @staticmethod
+    def get_last_approval_process_by(obj: PaymentPlan) -> str | None:
+        return str(obj.last_approval_process_by) if obj.last_approval_process_by else None
+
+
+class PaymentPlanConfigurationMixin(serializers.Serializer):
+    financial_service_provider = ScopedRelatedField(
+        queryset=FinancialServiceProvider.objects.all(),
+        scope="business_area",
+        scope_path="allowed_business_areas",
+        required=False,
+        allow_null=True,
+    )
+
+
+class PaymentPlanCreateSerializer(PaymentPlanConfigurationMixin, serializers.ModelSerializer):
     cycle = ScopedRelatedField(queryset=ProgramCycle.objects.all(), scope="program")
+    currency = CurrencySlugRelatedField(
+        on_unchanged_code=OnUnchangedCode.ALWAYS_ACTIVE, required=False, allow_null=True
+    )
 
     class Meta:
-        model = PaymentPlanGroup
-        fields = ["id", "unicef_id", "name", "cycle"]
+        model = PaymentPlan
+        fields = [
+            "id",
+            "unicef_id",
+            "name",
+            "cycle",
+            "financial_service_provider",
+            "currency",
+            "dispersion_start_date",
+            "dispersion_end_date",
+        ]
         read_only_fields = ["id", "unicef_id"]
         validators = []
 
     def validate(self, attrs: dict) -> dict:
         name = attrs["name"]
         cycle = attrs["cycle"]
-        if PaymentPlanGroup.objects.filter(cycle=cycle, name=name).exists():
-            raise serializers.ValidationError({"name": f"A group named '{name}' already exists in this cycle."})
+        if PaymentPlan.objects.filter(cycle=cycle, name=name).exists():
+            raise serializers.ValidationError({"name": f"A payment plan named '{name}' already exists in this cycle."})
+        PaymentPlanService.validate_dispersion_dates(
+            attrs.get("dispersion_start_date"), attrs.get("dispersion_end_date")
+        )
         return attrs
 
 
-class PaymentPlanGroupUpdateSerializer(serializers.ModelSerializer):
+class PaymentPlanUpdateSerializer(PaymentPlanConfigurationMixin, serializers.ModelSerializer):
+    currency = CurrencySlugRelatedField(
+        on_unchanged_code=OnUnchangedCode.KEEP_CURRENT_ROW, required=False, allow_null=True
+    )
+    version = serializers.IntegerField(required=False, write_only=True)
+
     class Meta:
-        model = PaymentPlanGroup
-        fields = ["id", "unicef_id", "name"]
+        model = PaymentPlan
+        fields = [
+            "id",
+            "unicef_id",
+            "name",
+            "financial_service_provider",
+            "currency",
+            "dispersion_start_date",
+            "dispersion_end_date",
+            "version",
+        ]
         read_only_fields = ["id", "unicef_id"]
 
     def validate_name(self, value: str) -> str:
-        qs = PaymentPlanGroup.objects.filter(cycle=self.instance.cycle, name=value).exclude(pk=self.instance.pk)
+        qs = PaymentPlan.objects.filter(cycle=self.instance.cycle, name=value).exclude(pk=self.instance.pk)
         if qs.exists():
-            raise serializers.ValidationError(f"A group named '{value}' already exists in this cycle.")
+            raise serializers.ValidationError(f"A payment plan named '{value}' already exists in this cycle.")
         return value
 
+    def update(self, instance: PaymentPlan, validated_data: dict) -> PaymentPlan:
+        check_concurrency_version_in_mutation(validated_data.pop("version", None), instance)
+        currency_changed = "currency" in validated_data and validated_data["currency"] != instance.currency
+        dates_changed = (
+            "dispersion_start_date" in validated_data
+            and validated_data["dispersion_start_date"] != instance.dispersion_start_date
+        ) or (
+            "dispersion_end_date" in validated_data
+            and validated_data["dispersion_end_date"] != instance.dispersion_end_date
+        )
+        service = PaymentPlanService(instance)
+        if "financial_service_provider" in validated_data:
+            service.assign_financial_service_provider(validated_data.pop("financial_service_provider"))
+        if "currency" in validated_data:
+            service.assign_currency(validated_data.pop("currency"))
+        if "dispersion_start_date" in validated_data or "dispersion_end_date" in validated_data:
+            service.assign_dispersion_dates(
+                validated_data.pop("dispersion_start_date", instance.dispersion_start_date),
+                validated_data.pop("dispersion_end_date", instance.dispersion_end_date),
+            )
+        payment_plan = super().update(instance, validated_data)
+        if (
+            payment_plan.currency_id
+            and (currency_changed or (dates_changed and not payment_plan.custom_exchange_rate))
+            and payment_plan.payment_lists.exists()
+        ):
+            if not payment_plan.can_start_background_action:
+                raise serializers.ValidationError(
+                    "Wait for the current payment plan action to finish before changing the rate"
+                )
+            payment_plan = cast("PaymentPlan", recalculate_owner_exchange_rate_async_task(payment_plan))
+        return payment_plan
 
-class PaymentPlanGroupBatchSerializer(serializers.Serializer):
-    export_tag = serializers.IntegerField()
-    plan_type = serializers.ChoiceField(choices=PaymentPlan.PlanType.choices)
-    export_file_link = serializers.CharField(allow_null=True)
-    has_password = serializers.BooleanField()
 
-
-class PaymentPlanGroupDetailSerializer(AdminUrlSerializerMixin, PaymentPlanGroupListSerializer):
+class PaymentPlanDetailSerializer(OwnerExchangeRateSerializerMixin, AdminUrlSerializerMixin, PaymentPlanListSerializer):
+    exchange_rate = serializers.DecimalField(max_digits=15, decimal_places=8, allow_null=True, read_only=True)
+    custom_exchange_rate = serializers.BooleanField(read_only=True)
+    vision_managed = serializers.BooleanField(read_only=True)
+    has_verification = serializers.BooleanField(read_only=True)
+    closure_summary = serializers.SerializerMethodField()
+    vision = serializers.SerializerMethodField()
+    funds_commitments = serializers.SerializerMethodField()
+    available_funds_commitments = serializers.SerializerMethodField()
+    can_assign_funds_commitments = serializers.BooleanField(read_only=True)
+    approval_process = ApprovalProcessSerializer(read_only=True, many=True)
+    supporting_documents = PaymentPlanSupportingDocumentSerializer(many=True, read_only=True, source="documents")
+    closed_by = serializers.SerializerMethodField()
     total_entitled_quantity_usd = serializers.SerializerMethodField()
     total_delivered_quantity_usd = serializers.SerializerMethodField()
     total_undelivered_quantity_usd = serializers.SerializerMethodField()
-    payment_plans_count = serializers.SerializerMethodField()
+    payment_lists_count = serializers.SerializerMethodField()
     can_send_to_payment_gateway = serializers.SerializerMethodField()
-    batches = serializers.SerializerMethodField()
+    export_file_delivery = serializers.SerializerMethodField()
+    export_file_has_password = serializers.SerializerMethodField()
     delivery_import_file = serializers.SerializerMethodField()
-    can_export_regular = serializers.SerializerMethodField()
-    can_export_follow_up = serializers.SerializerMethodField()
-    can_export_top_up = serializers.SerializerMethodField()
-    can_export_top_up_amendment = serializers.SerializerMethodField()
+    export_pdf_file_summary = serializers.SerializerMethodField()
+    can_export = serializers.SerializerMethodField()
+    can_regenerate_export = serializers.SerializerMethodField()
+    linked_payment_plans = PaymentPlanLinkedSerializer(read_only=True, many=True)
+    can_split = serializers.BooleanField(read_only=True)
+    split_choices = serializers.SerializerMethodField()
+    can_create_follow_up = serializers.SerializerMethodField()
+    can_create_top_up = serializers.SerializerMethodField()
+    can_create_top_up_amendment = serializers.SerializerMethodField()
 
-    class Meta(PaymentPlanGroupListSerializer.Meta):
-        fields = PaymentPlanGroupListSerializer.Meta.fields + [
+    class Meta(PaymentPlanListSerializer.Meta):
+        fields = PaymentPlanListSerializer.Meta.fields + [
+            "vision_managed",
+            "has_verification",
+            "closure_summary",
+            "exchange_rate",
+            "custom_exchange_rate",
+            "unore_exchange_rate",
+            "unore_exchange_rate_unavailable",
+            "version",
+            "vision",
+            "funds_commitments",
+            "available_funds_commitments",
+            "can_assign_funds_commitments",
             "admin_url",
             "background_action_status",
+            "approval_process",
+            "supporting_documents",
+            "abort_comment",
+            "closure_comment",
+            "closed_by",
+            "status_date",
             "total_entitled_quantity_usd",
             "total_delivered_quantity_usd",
             "total_undelivered_quantity_usd",
-            "payment_plans_count",
+            "payment_lists_count",
             "can_send_to_payment_gateway",
-            "batches",
+            "export_file_delivery",
+            "export_file_has_password",
             "delivery_import_file",
-            "can_export_regular",
-            "can_export_follow_up",
-            "can_export_top_up",
-            "can_export_top_up_amendment",
+            "export_pdf_file_summary",
+            "can_export",
+            "can_regenerate_export",
+            "linked_payment_plans",
+            "can_split",
+            "split_choices",
+            "can_create_follow_up",
+            "can_create_top_up",
+            "can_create_top_up_amendment",
         ]
 
-    @extend_schema_field(PaymentPlanGroupBatchSerializer(many=True))
-    def get_batches(self, obj: PaymentPlanGroup) -> list[dict]:
-        tags_qs = (
-            obj.payment_plans.filter(export_tag__isnull=False)
-            .order_by()
-            .values("export_tag")
-            .annotate(
-                has_file=Max(
-                    Case(When(export_file_delivery__isnull=False, then=1), default=0, output_field=IntegerField())
-                ),
-                has_password=Max(
-                    Case(
-                        When(export_file_delivery__password__isnull=False, then=1),
-                        default=0,
-                        output_field=IntegerField(),
-                    )
-                ),
-                # a batch is exported for a single plan type, so Max just picks that type
-                batch_plan_type=Max("plan_type"),
+    @extend_schema_field(VisionStateSerializer)
+    def get_vision(self, obj: PaymentPlan) -> dict[str, Any]:
+        data = obj.vision_data
+        return {
+            "status": obj.vision_status,
+            "vision_id": data.get("vision_id"),
+            "fc_numbers": data.get("fc_numbers", []),
+            "error_code": data.get("error_code"),
+        }
+
+    @extend_schema_field(FundsCommitmentSerializer(many=True))
+    def get_funds_commitments(self, obj: PaymentPlan) -> list[dict[str, Any]]:
+        headers = (
+            obj.funds_commitment_source_payment_plan.funds_commitment_headers.with_derived_fields().prefetch_related(
+                Prefetch("funds_commitment_items", queryset=FundsCommitmentItem.objects.select_related("office"))
             )
-            .order_by("export_tag")
         )
-        return [
-            {
-                "export_tag": row["export_tag"],
-                "plan_type": row["batch_plan_type"],
-                "export_file_link": (
-                    reverse("download-payment-plan-group-batch", args=[str(obj.id), row["export_tag"]])
-                    if row["has_file"]
-                    else None
-                ),
-                "has_password": bool(row["has_password"]),
-            }
-            for row in tags_qs
-        ]
+        return [dict(FundsCommitmentSerializer(header).data) for header in headers]
 
-    def _has_exportable_plans(self, obj: PaymentPlanGroup, plan_type: str) -> bool:
-        """Whether any plan of a plan_type can be exported."""
-        return obj.payment_plans.filter(
-            plan_type=plan_type,
-            status__in=[PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED],
-            export_tag__isnull=True,
-        ).exists()
+    @extend_schema_field(FundsCommitmentSerializer(many=True))
+    def get_available_funds_commitments(self, obj: PaymentPlan) -> list[dict[str, Any]]:
+        if not obj.can_assign_funds_commitments:
+            return []
+        headers = (
+            FundsCommitmentHeader.objects.with_derived_fields()
+            .filter(funds_commitment_items__office_id=obj.cycle.program.business_area_id)
+            .distinct()
+            .prefetch_related(
+                Prefetch("funds_commitment_items", queryset=FundsCommitmentItem.objects.select_related("office"))
+            )
+        )
+        return [dict(FundsCommitmentSerializer(header).data) for header in headers]
 
-    def get_can_export_regular(self, obj: PaymentPlanGroup) -> bool:
-        return self._has_exportable_plans(obj, PaymentPlan.PlanType.REGULAR)
+    @staticmethod
+    def get_split_choices(obj: PaymentPlan) -> list[dict[str, Any]]:
+        return to_choice_object(PaymentListSplit.SplitType.choices)
 
-    def get_can_export_follow_up(self, obj: PaymentPlanGroup) -> bool:
-        return self._has_exportable_plans(obj, PaymentPlan.PlanType.FOLLOW_UP)
+    @staticmethod
+    def get_can_create_follow_up(obj: PaymentPlan) -> bool:
+        return bool(obj.payment_lists_qualifying_for_linked_payment_plan(PaymentList.PlanType.FOLLOW_UP))
 
-    def get_can_export_top_up(self, obj: PaymentPlanGroup) -> bool:
-        return self._has_exportable_plans(obj, PaymentPlan.PlanType.TOP_UP)
+    @staticmethod
+    def get_can_create_top_up(obj: PaymentPlan) -> bool:
+        return bool(obj.payment_lists_qualifying_for_linked_payment_plan(PaymentList.PlanType.TOP_UP))
 
-    def get_can_export_top_up_amendment(self, obj: PaymentPlanGroup) -> bool:
-        return self._has_exportable_plans(obj, PaymentPlan.PlanType.TOP_UP_AMENDMENT)
+    @staticmethod
+    def get_can_create_top_up_amendment(obj: PaymentPlan) -> bool:
+        return bool(obj.payment_lists_qualifying_for_linked_payment_plan(PaymentList.PlanType.TOP_UP_AMENDMENT))
 
-    def get_total_entitled_quantity_usd(self, obj: PaymentPlanGroup) -> Decimal:
-        result = obj.payment_plans.aggregate(total=Sum("total_entitled_quantity_usd"))
+    @staticmethod
+    def get_closed_by(obj: PaymentPlan) -> str | None:
+        return f"{obj.closed_by.first_name} {obj.closed_by.last_name}" if obj.closed_by_id else None
+
+    @staticmethod
+    def get_export_file_delivery(obj: PaymentPlan) -> str | None:
+        if obj.export_file_delivery_id is None:
+            return None
+        return reverse("download-payment-plan-xlsx", args=[str(obj.id)])
+
+    @staticmethod
+    def get_export_file_has_password(obj: PaymentPlan) -> bool:
+        return obj.export_file_delivery_id is not None and obj.export_file_delivery.password is not None
+
+    @staticmethod
+    def get_can_export(obj: PaymentPlan) -> bool:
+        return obj.can_export
+
+    @staticmethod
+    def get_can_regenerate_export(obj: PaymentPlan) -> bool:
+        return obj.can_regenerate_export
+
+    @extend_schema_field(
+        inline_serializer(
+            name="PaymentPlanClosureSummary",
+            fields={
+                "total_households_count": serializers.IntegerField(),
+                "total_individuals_count": serializers.IntegerField(),
+                "number_of_payments": serializers.IntegerField(),
+                "delivered_fully": serializers.IntegerField(),
+                "delivered_partially": serializers.IntegerField(),
+                "not_delivered": serializers.IntegerField(),
+                "verified": serializers.IntegerField(),
+                "received": serializers.IntegerField(),
+                "not_received": serializers.IntegerField(),
+                "received_with_problems": serializers.IntegerField(),
+            },
+        )
+    )
+    def get_closure_summary(self, obj: PaymentPlan) -> dict[str, int]:
+        """Coverage, delivery and verification figures across every payment list, shown before closing."""
+        coverage = obj.payment_lists.aggregate(
+            total_households_count=Coalesce(Sum("total_households_count"), 0),
+            total_individuals_count=Coalesce(Sum("total_individuals_count"), 0),
+        )
+        delivery = (
+            Payment.objects.filter(parent__payment_plan=obj)
+            .eligible()
+            .aggregate(
+                number_of_payments=Count("id"),
+                delivered_fully=Count("id", filter=Q(status=Payment.STATUS_DISTRIBUTION_SUCCESS)),
+                delivered_partially=Count("id", filter=Q(status=Payment.STATUS_DISTRIBUTION_PARTIAL)),
+                not_delivered=Count("id", filter=Q(status=Payment.STATUS_NOT_DISTRIBUTED)),
+            )
+        )
+        verification = PaymentVerificationPlan.objects.filter(payment_list__payment_plan=obj).aggregate(
+            verified=Coalesce(Sum("responded_count"), 0),
+            received=Coalesce(Sum("received_count"), 0),
+            not_received=Coalesce(Sum("not_received_count"), 0),
+            received_with_problems=Coalesce(Sum("received_with_problems_count"), 0),
+        )
+        return {**coverage, **delivery, **verification}
+
+    def get_total_entitled_quantity_usd(self, obj: PaymentPlan) -> Decimal:
+        result = obj.payment_lists.aggregate(total=Sum("total_entitled_quantity_usd"))
         return result["total"] or Decimal(0.0)
 
-    def get_total_delivered_quantity_usd(self, obj: PaymentPlanGroup) -> Decimal:
-        result = obj.payment_plans.aggregate(total=Sum("total_delivered_quantity_usd"))
+    def get_total_delivered_quantity_usd(self, obj: PaymentPlan) -> Decimal:
+        result = obj.payment_lists.aggregate(total=Sum("total_delivered_quantity_usd"))
         return result["total"] or Decimal(0.0)
 
-    def get_total_undelivered_quantity_usd(self, obj: PaymentPlanGroup) -> Decimal:
-        result = obj.payment_plans.aggregate(total=Sum("total_undelivered_quantity_usd"))
+    def get_total_undelivered_quantity_usd(self, obj: PaymentPlan) -> Decimal:
+        result = obj.payment_lists.aggregate(total=Sum("total_undelivered_quantity_usd"))
         return result["total"] or Decimal(0.0)
 
-    def get_payment_plans_count(self, obj: PaymentPlanGroup) -> int:
-        return obj.payment_plans.count()
+    def get_payment_lists_count(self, obj: PaymentPlan) -> int:
+        return obj.payment_lists.count()
 
-    def get_delivery_import_file(self, obj: PaymentPlanGroup) -> str | None:
+    def get_delivery_import_file(self, obj: PaymentPlan) -> str | None:
         if obj.delivery_import_file_id and obj.delivery_import_file.file:
             return obj.delivery_import_file.file.url
         return None
 
-    def get_can_send_to_payment_gateway(self, obj: PaymentPlanGroup) -> bool:
+    def get_export_pdf_file_summary(self, obj: PaymentPlan) -> str | None:
+        if obj.export_pdf_file_summary_id and obj.export_pdf_file_summary.file:
+            return reverse("download-payment-plan-summary-pdf", args=[str(obj.id)])
+        return None
+
+    def get_can_send_to_payment_gateway(self, obj: PaymentPlan) -> bool:
         return obj.sendable_to_payment_gateway_plans().exists()

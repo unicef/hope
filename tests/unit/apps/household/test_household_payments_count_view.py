@@ -9,12 +9,12 @@ from extras.test_utils.factories import (
     HouseholdFactory,
     PartnerFactory,
     PaymentFactory,
-    PaymentPlanFactory,
+    PaymentListFactory,
     ProgramFactory,
     UserFactory,
 )
 from hope.apps.account.permissions import Permissions
-from hope.models import PaymentPlan, Program
+from hope.models import PaymentList, Program
 
 pytestmark = pytest.mark.django_db
 
@@ -54,7 +54,7 @@ def _count_url(ctx: dict[str, Any]) -> str:
 
 
 def _make_payment(ctx: dict[str, Any], pp_status: str, **payment_kwargs: Any) -> None:
-    plan = PaymentPlanFactory(
+    plan = PaymentListFactory(
         status=pp_status,
         program_cycle__program=ctx["program"],
         business_area=ctx["afghanistan"],
@@ -124,27 +124,27 @@ def test_household_payments_count_includes_only_eligible_and_non_pre_status(
     )
 
     # Eligible payments attached to plans past the pre-plan stage — SHOULD count.
-    _make_payment(payments_count_context, PaymentPlan.Status.OPEN)
-    _make_payment(payments_count_context, PaymentPlan.Status.LOCKED)
-    _make_payment(payments_count_context, PaymentPlan.Status.ACCEPTED)
+    _make_payment(payments_count_context, PaymentList.Status.OPEN)
+    _make_payment(payments_count_context, PaymentList.Status.LOCKED)
+    _make_payment(payments_count_context, PaymentList.Status.ACCEPTED)
 
-    # Parent plan still in a pre-payment-plan status — SHOULD NOT count.
-    _make_payment(payments_count_context, PaymentPlan.Status.TP_OPEN)
-    _make_payment(payments_count_context, PaymentPlan.Status.TP_LOCKED)
-    _make_payment(payments_count_context, PaymentPlan.Status.DRAFT)
+    # Parent plan still in a pre-payment-list status — SHOULD NOT count.
+    _make_payment(payments_count_context, PaymentList.Status.TP_OPEN)
+    _make_payment(payments_count_context, PaymentList.Status.TP_LOCKED)
+    _make_payment(payments_count_context, PaymentList.Status.DRAFT)
 
     # Non-eligible payments on a valid-status plan — SHOULD NOT count.
-    _make_payment(payments_count_context, PaymentPlan.Status.OPEN, conflicted=True)
-    _make_payment(payments_count_context, PaymentPlan.Status.OPEN, excluded=True)
-    _make_payment(payments_count_context, PaymentPlan.Status.OPEN, has_valid_wallet=False)
+    _make_payment(payments_count_context, PaymentList.Status.OPEN, conflicted=True)
+    _make_payment(payments_count_context, PaymentList.Status.OPEN, excluded=True)
+    _make_payment(payments_count_context, PaymentList.Status.OPEN, has_valid_wallet=False)
 
     # Payment belonging to a different household — SHOULD NOT count.
     other_household = HouseholdFactory(
         program=payments_count_context["program"],
         business_area=payments_count_context["afghanistan"],
     )
-    other_plan = PaymentPlanFactory(
-        status=PaymentPlan.Status.OPEN,
+    other_plan = PaymentListFactory(
+        status=PaymentList.Status.OPEN,
         program_cycle__program=payments_count_context["program"],
         business_area=payments_count_context["afghanistan"],
     )

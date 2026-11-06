@@ -10,8 +10,8 @@ from hope.models import AsyncJob, PaymentPlan
 def send_payment_plan_to_vision_async_task_action(job: AsyncJob) -> None:
     with transaction.atomic():
         payment_plan = (
-            PaymentPlan.objects.select_for_update()
-            .select_related("business_area")
+            PaymentPlan.objects.select_for_update(of=("self",))
+            .select_related("cycle__program__business_area", "financial_service_provider", "currency")
             .get(pk=job.config["payment_plan_id"])
         )
         if not payment_plan.can_send_to_vision:
@@ -54,15 +54,13 @@ def send_payment_plan_to_vision_async_task(payment_plan: PaymentPlan, user_id: s
         action="hope.contrib.vision.tasks.send_payment_plan_to_vision_async_task_action",
         config={"payment_plan_id": str(payment_plan.pk)},
         group_key="payment",
-        description=f"Send payment plan {payment_plan.pk} to Vision",
+        description=f"Send Payment Plan {payment_plan.pk} to Vision",
     )
 
 
 def notify_payment_plan_status_to_vision_async_task_action(job: AsyncJob) -> None:
     payment_plan = PaymentPlan.objects.select_related(
-        "business_area",
-        "currency",
-        "financial_service_provider",
+        "cycle__program__business_area", "currency", "financial_service_provider"
     ).get(pk=job.config["payment_plan_id"])
     VisionAPI().notify_payment_plan_status(payment_plan, job.config["vision_status"])
 
@@ -82,5 +80,5 @@ def notify_payment_plan_status_to_vision_async_task(
             "vision_status": vision_status,
         },
         group_key="payment",
-        description=f"Notify Vision that payment plan {payment_plan.pk} is {vision_status}",
+        description=f"Notify Vision that Payment Plan {payment_plan.pk} is {vision_status}",
     )

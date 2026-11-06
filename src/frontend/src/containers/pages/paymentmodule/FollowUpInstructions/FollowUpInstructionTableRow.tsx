@@ -7,7 +7,7 @@ import { TableCell } from '@mui/material';
 import type { FollowUpInstructionList } from '@restgenerated/models/FollowUpInstructionList';
 import {
   formatCurrencyWithSymbol,
-  paymentPlanStatusToColor,
+  paymentListStatusToColor,
 } from '@utils/utils';
 import type { ReactElement } from 'react';
 
@@ -41,13 +41,13 @@ export const FollowUpInstructionTableRow = ({
       <TableCell align="left">
         <StatusBox
           status={instruction.status}
-          statusToColor={paymentPlanStatusToColor}
+          statusToColor={paymentListStatusToColor}
         />
       </TableCell>
       <TableCell align="left">
         {instruction.backgroundActionStatusDisplay || '-'}
       </TableCell>
-      <TableCell align="right">{instruction.childPaymentPlansCount}</TableCell>
+      <TableCell align="right">{instruction.childPaymentListsCount}</TableCell>
       <TableCell align="right">{instruction.householdsCount}</TableCell>
       <TableCell align="right">
         {formatInstructionAmount(

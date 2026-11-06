@@ -19,7 +19,7 @@ from extras.test_utils.factories import (
     HouseholdFactory,
     IndividualFactory,
     PaymentFactory,
-    PaymentPlanFactory,
+    PaymentListFactory,
     PDUXlsxTemplateFactory,
     PDUXlsxUploadFactory,
     ProgramFactory,
@@ -83,7 +83,7 @@ def date_attribute(program: Program) -> FlexibleAttribute:
 @pytest.fixture
 def individual(add_people: Individual) -> Individual:
     program = Program.objects.filter(name="Test Program").first()
-    payment_plan = PaymentPlanFactory(
+    payment_list = PaymentListFactory(
         name="TEST",
         program_cycle=program.cycles.first(),
         business_area=BusinessArea.objects.first(),
@@ -92,7 +92,7 @@ def individual(add_people: Individual) -> Individual:
     )
     PaymentFactory(
         household=add_people.household,
-        parent=payment_plan,
+        parent=payment_list,
         entitlement_quantity=21.36,
         delivered_quantity=21.36,
         currency=Currency.objects.get(code="PLN"),

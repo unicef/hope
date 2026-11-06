@@ -11,10 +11,10 @@ import {
 import { BlackLink } from '@components/core/BlackLink';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useTranslation } from 'react-i18next';
-import type { PaginatedPaymentListList } from '@restgenerated/models/PaginatedPaymentListList';
+import type { PaginatedPaymentRowList } from '@restgenerated/models/PaginatedPaymentRowList';
 
 interface PaymentsDataTableProps {
-  paymentsData: PaginatedPaymentListList;
+  paymentsData: PaginatedPaymentRowList;
 }
 
 const PaymentsDataTable: React.FC<PaymentsDataTableProps> = ({
@@ -29,7 +29,7 @@ const PaymentsDataTable: React.FC<PaymentsDataTableProps> = ({
           <TableRow>
             <TableCell>{t('Payment ID')}</TableCell>
             <TableCell>{t('Programme Name')}</TableCell>
-            <TableCell>{t('Payment Plan ID')}</TableCell>
+            <TableCell>{t('Payment List ID')}</TableCell>
             <TableCell>{t('Household ID')}</TableCell>
             <TableCell>{t('Individual ID')}</TableCell>
             <TableCell>{t('Individual Full Name')}</TableCell>
@@ -40,7 +40,7 @@ const PaymentsDataTable: React.FC<PaymentsDataTableProps> = ({
             paymentsData.results.map((payment) => {
               const paymentDetailsPath = `/${businessArea}/programs/${payment.programCode}/payment-module/payments/${payment.id}`;
               const programDetailsPath = `/${baseUrl}/details/${payment.programCode}`;
-              const paymentPlanDetailsPath = `/${businessArea}/programs/${payment.programCode}/payment-module/payment-plans/${payment.parentId}`;
+              const paymentListDetailsPath = `/${businessArea}/programs/${payment.programCode}/payment-module/payment-lists/${payment.parentId}`;
               const householdDetailsPath = `/${businessArea}/programs/${payment.programCode}/population/household/${payment.householdId}`;
               const individualDetailsPath = `/${businessArea}/programs/${payment.programCode}/population/individuals/${payment.hohId}`;
 
@@ -57,7 +57,7 @@ const PaymentsDataTable: React.FC<PaymentsDataTableProps> = ({
                     </BlackLink>
                   </TableCell>
                   <TableCell>
-                    <BlackLink to={paymentPlanDetailsPath}>
+                    <BlackLink to={paymentListDetailsPath}>
                       {payment.parentUnicefId}
                     </BlackLink>
                   </TableCell>

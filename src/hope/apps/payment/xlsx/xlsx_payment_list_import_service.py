@@ -1,0 +1,226 @@
+from decimal import Decimal
+import io
+from typing import IO, TYPE_CHECKING, Union
+
+from django.contrib.admin.options import get_content_type_for_model
+from django.utils import timezone
+import openpyxl
+from openpyxl.cell import Cell
+
+from hope.apps.activity_log.utils import copy_model_object
+from hope.apps.payment.utils import bulk_log_payment_changes, get_quantity_in_usd, to_decimal
+from hope.apps.payment.xlsx.base_xlsx_import_service import XlsxImportBaseService
+from hope.apps.payment.xlsx.xlsx_error import XlsxError
+from hope.apps.payment.xlsx.xlsx_payment_list_base_service import (
+    XlsxPaymentListBaseService,
+)
+from hope.models import FileTemp, Payment, PaymentList, User
+
+if TYPE_CHECKING:
+    from django.contrib.auth.base_user import AbstractBaseUser
+    from django.contrib.auth.models import AnonymousUser
+
+Row = tuple[Cell]
+
+
+class XlsxPaymentListImportService(XlsxPaymentListBaseService, XlsxImportBaseService):
+    BATCH_SIZE = 1000
+
+    def __init__(self, payment_list: PaymentList, file: io.BytesIO | IO[bytes]) -> None:
+        self.payment_list = payment_list
+        self.pp_currency_exchange_date = self.payment_list.currency_exchange_date
+        self.file = file
+        self.payments_dict: dict[str, Payment] = {str(x.unicef_id): x for x in payment_list.eligible_payments.all()}
+        self.errors: list[XlsxError] = []
+        self.is_updated = False
+        self.xlsx_headers: list[str | None] = []
+        self.header_to_index: dict[str, int] = {}
+        self.required_columns = [
+            self.COLUMN_PAYMENT_ID,
+            self.COLUMN_ENTITLEMENT_QUANTITY,
+        ]
+        self.headers = list(self.HEADERS)
+        if self.payment_list.is_social_worker_program:
+            self.headers.remove("household_size")
+            self.headers.remove("household_id")
+            self.headers.remove("collector_id")
+        else:
+            self.headers.remove("individual_id")
+
+    def open_workbook(self) -> openpyxl.Workbook:
+        wb = openpyxl.load_workbook(self.file, data_only=True)
+        self.wb = wb
+        self.sheet_name = self.payment_sheet_name(wb.sheetnames) or self.TITLE
+        self.ws_payments = wb[self.sheet_name]
+        self._resolve_header_positions()
+        return wb
+
+    def validate(self) -> None:
+        self._validate_headers()
+        if not self.errors:
+            self._validate_rows()
+            self._validate_imported_file()
+
+    def import_payment_list(self, user_id: str | None = None) -> None:
+        self._raise_if_required_columns_are_missing()
+        payments_to_save = []
+        log_pairs: list = []
+        old_by_id = {payment.id: payment for payment in self.payments_dict.values()}
+
+        for row in self.ws_payments.iter_rows(min_row=2):
+            if not any(cell.value for cell in row):
+                continue
+            if payment := self._import_row(row):
+                payments_to_save.append(payment)
+                old_payment = old_by_id.get(payment.id)
+                if old_payment is not None:
+                    # _import_row returns a bare Payment(id, entitlement_*) with every other field at its
+                    # model default, so diffing it against old_payment would log spurious changes for
+                    # status/delivered_quantity/etc. Log against a faithful copy of the current row with only
+                    # entitlement_quantity overlaid, so the diff is exactly the field the import changes.
+                    new_for_log = copy_model_object(old_payment)
+                    new_for_log.entitlement_quantity = payment.entitlement_quantity
+                    log_pairs.append((old_payment, new_for_log))
+
+            if len(payments_to_save) == self.BATCH_SIZE:
+                self._save_payments(payments_to_save)
+                payments_to_save = []
+
+        if payments_to_save:
+            self._save_payments(payments_to_save)
+
+        user = User.objects.filter(pk=user_id).first() if user_id else None
+        bulk_log_payment_changes(log_pairs, user)
+
+    def _save_payments(self, payments_to_save: list[Payment]) -> None:
+        Payment.objects.bulk_update(
+            payments_to_save,
+            fields=(
+                "entitlement_quantity",
+                "entitlement_quantity_usd",
+                "entitlement_date",
+            ),
+        )
+        payments_ids = [payment.id for payment in payments_to_save]
+        payments = Payment.objects.filter(id__in=payments_ids).select_related(
+            "household_snapshot", "delivery_type", "currency"
+        )
+        for payment in payments:
+            payment.update_signature_hash()
+        Payment.objects.bulk_update(payments, fields=("signature_hash",))
+
+    def _validate_headers(self) -> None:
+        if not self.header_to_index:
+            self._resolve_header_positions()
+
+        for required_header in self.required_columns:
+            if required_header not in self.header_to_index:
+                self.errors.append(
+                    XlsxError(
+                        self.sheet_name,
+                        None,
+                        f"Header {required_header} is required",
+                    )
+                )
+
+    def _resolve_header_positions(self) -> None:
+        self.xlsx_headers = [header.value for header in self.ws_payments[1]]
+        self.header_to_index = {
+            header_name: index for index, header_name in enumerate(self.xlsx_headers) if isinstance(header_name, str)
+        }
+
+    def _raise_if_required_columns_are_missing(self) -> None:
+        if not self.header_to_index:
+            self._resolve_header_positions()
+        missing_columns = [column for column in self.required_columns if column not in self.header_to_index]
+        if missing_columns:
+            required_columns = ", ".join(missing_columns)
+            raise ValueError(f"Header {required_columns} is required")
+
+    def _get_cell(self, row: Row, header_name: str) -> Cell:
+        column_index = self.header_to_index[header_name]
+        return row[column_index]
+
+    def _validate_payment_id(self, row: Row, payments_ids: list[str]) -> None:
+        cell = self._get_cell(row, self.COLUMN_PAYMENT_ID)
+        if cell.value not in payments_ids:
+            self.errors.append(
+                XlsxError(
+                    self.sheet_name,
+                    cell.coordinate,
+                    f"This payment id {cell.value} is not in Payment List",
+                )
+            )
+
+    def _validate_entitlement(self, row: Row) -> None:
+        payment_id = self._get_cell(row, self.COLUMN_PAYMENT_ID).value
+        payment = self.payments_dict.get(str(payment_id))
+        if payment is None:
+            return
+        entitlement_amount = self._get_cell(row, self.COLUMN_ENTITLEMENT_QUANTITY).value
+        if entitlement_amount is not None and entitlement_amount != "":
+            converted_entitlement_amount = to_decimal(str(entitlement_amount)) or Decimal(0.0)
+            if converted_entitlement_amount != payment.entitlement_quantity:
+                self.is_updated = True
+
+    def _validate_imported_file(self) -> None:
+        if not self.is_updated:
+            self.errors.append(
+                XlsxError(
+                    self.sheet_name,
+                    None,
+                    "There aren't any updates in imported file, please add changes and try again",
+                )
+            )
+
+    def _validate_rows(self) -> None:
+        payments_ids = list(self.payments_dict.keys())
+        for row in self.ws_payments.iter_rows(min_row=2):
+            if not any(cell.value for cell in row):
+                continue
+            self._validate_payment_id(row, payments_ids)
+            self._validate_entitlement(row)
+
+    def _import_row(self, row: Row) -> Payment | None:
+        payment_id = self._get_cell(row, self.COLUMN_PAYMENT_ID).value
+        entitlement_amount = self._get_cell(row, self.COLUMN_ENTITLEMENT_QUANTITY).value
+
+        payment = self.payments_dict.get(str(payment_id))
+
+        if payment is None:
+            return None
+
+        if entitlement_amount is not None and entitlement_amount != "":
+            converted_entitlement_amount = to_decimal(str(entitlement_amount)) or Decimal(0.0)
+            if converted_entitlement_amount != payment.entitlement_quantity:
+                entitlement_date = timezone.now()
+                entitlement_quantity_usd = get_quantity_in_usd(
+                    amount=converted_entitlement_amount,
+                    currency=self.payment_list.currency,
+                    exchange_rate=Decimal(self.payment_list.exchange_rate or 0),
+                    currency_exchange_date=self.pp_currency_exchange_date,
+                )
+                return Payment(
+                    id=payment.id,
+                    entitlement_quantity=converted_entitlement_amount,
+                    entitlement_date=entitlement_date,
+                    entitlement_quantity_usd=entitlement_quantity_usd,
+                )
+        return None
+
+    def create_import_xlsx_file(self, user: Union["User", "AbstractBaseUser", "AnonymousUser"]) -> PaymentList:
+        # remove old imported file
+        self.payment_list.remove_imported_file()
+
+        # create new imported xlsx file
+        xlsx_file = FileTemp.objects.create(
+            object_id=self.payment_list.pk,
+            content_type=get_content_type_for_model(self.payment_list),
+            created_by=user,
+            file=self.file,
+        )
+
+        self.payment_list.imported_file = xlsx_file
+        self.payment_list.save()
+
+        return self.payment_list

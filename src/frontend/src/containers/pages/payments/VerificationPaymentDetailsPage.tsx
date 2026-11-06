@@ -22,7 +22,7 @@ import type { PaymentDetail } from '@restgenerated/models/PaymentDetail';
 function VerificationPaymentDetailsPage(): ReactElement {
   const { t } = useTranslation();
   const { businessArea, programId } = useBaseUrl();
-  const { paymentPlanId, id } = useParams();
+  const { paymentListId, id } = useParams();
   const permissions = usePermissions();
   const {
     data: payment,
@@ -33,7 +33,7 @@ function VerificationPaymentDetailsPage(): ReactElement {
       RestService.restBusinessAreasProgramsPaymentVerificationsVerificationsRetrieve,
       {
         businessAreaSlug: businessArea,
-        paymentVerificationPk: paymentPlanId,
+        paymentVerificationPk: paymentListId,
         id,
         programCode: programId,
       },
@@ -42,7 +42,7 @@ function VerificationPaymentDetailsPage(): ReactElement {
       RestService.restBusinessAreasProgramsPaymentVerificationsVerificationsRetrieve(
         {
           businessAreaSlug: businessArea,
-          paymentVerificationPk: paymentPlanId,
+          paymentVerificationPk: paymentListId,
           id,
           programCode: programId,
         },
@@ -77,8 +77,8 @@ function VerificationPaymentDetailsPage(): ReactElement {
     )
       ? [
           {
-            title: `${t('Payment Plan')} ${payment.parent?.unicefId}`,
-            to: `/${baseUrl}/payment-verification/payment-plan/${payment.parent?.id}`,
+            title: `${t('Payment List')} ${payment.parent?.unicefId}`,
+            to: `/${baseUrl}/payment-verification/payment-list/${payment.parent?.id}`,
           },
         ]
       : []),
@@ -99,8 +99,8 @@ function VerificationPaymentDetailsPage(): ReactElement {
           enabled={payment.verification?.isManuallyEditable}
           receivedAmount={payment.verification?.receivedAmount}
           paymentId={payment?.id}
-          paymentPlanId={paymentPlanId}
-          verificationPlanId={paymentPlanId}
+          paymentListId={paymentListId}
+          verificationPlanId={paymentListId}
         />
       ) : null}
     </PageHeader>

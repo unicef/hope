@@ -8,11 +8,11 @@ import { useScrollToRefOnChange } from '@hooks/useScrollToRefOnChange';
 import { useTableState } from '@hooks/useTableState';
 import { Box, Paper, Typography } from '@mui/material';
 import type { CountResponse } from '@restgenerated/models/CountResponse';
-import type { NotEligiblePaymentList } from '@restgenerated/models/NotEligiblePaymentList';
-import type { PaginatedNotEligiblePaymentListList } from '@restgenerated/models/PaginatedNotEligiblePaymentListList';
-import type { PaginatedPaymentListList } from '@restgenerated/models/PaginatedPaymentListList';
-import type { PaymentList } from '@restgenerated/models/PaymentList';
-import type { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
+import type { NotEligiblePaymentRow } from '@restgenerated/models/NotEligiblePaymentRow';
+import type { PaginatedNotEligiblePaymentRowList } from '@restgenerated/models/PaginatedNotEligiblePaymentRowList';
+import type { PaginatedPaymentRowList } from '@restgenerated/models/PaginatedPaymentRowList';
+import type { PaymentRow } from '@restgenerated/models/PaymentRow';
+import type { PaymentListDetail } from '@restgenerated/models/PaymentListDetail';
 import type { Profile } from '@restgenerated/models/Profile';
 import { RestService } from '@restgenerated/services/RestService';
 import {
@@ -74,7 +74,7 @@ const notEligibleInitialFilter = {
 
 interface PaymentsTableProps {
   businessArea: string;
-  paymentPlan: PaymentPlanDetail;
+  paymentList: PaymentListDetail;
   permissions: string[];
   canViewDetails?: boolean;
 }
@@ -83,7 +83,7 @@ interface PaymentsTableSectionProps extends PaymentsTableProps {
   notEligible?: boolean;
 }
 
-const ineligibilityCauseHeadCell: HeadCell<PaymentList> = {
+const ineligibilityCauseHeadCell: HeadCell<PaymentRow> = {
   disablePadding: false,
   label: 'Ineligibility Cause',
   id: 'ineligibility_cause',
@@ -102,7 +102,7 @@ const notEligibleHiddenColumns = [
 
 const PaymentsTableSection = ({
   businessArea,
-  paymentPlan,
+  paymentList,
   permissions,
   canViewDetails = false,
   notEligible = false,
@@ -117,7 +117,7 @@ const PaymentsTableSection = ({
     ? notEligibleInitialFilter
     : eligibleInitialFilter;
 
-  const [dialogPayment, setDialogPayment] = useState<PaymentList | null>(null);
+  const [dialogPayment, setDialogPayment] = useState<PaymentRow | null>(null);
   const [filter, setFilter] = useState(
     getFilterFromQueryParams(location, initialFilter),
   );
@@ -165,18 +165,18 @@ const PaymentsTableSection = ({
   const primaryParams = {
     businessAreaSlug: businessArea,
     programCode: programId,
-    paymentPlanPk: paymentPlan.id,
+    paymentListPk: paymentList.id,
   };
   const paymentsListParams = createApiParams(primaryParams, listVariables);
   const listService = notEligible
-    ? RestService.restBusinessAreasProgramsPaymentPlansPaymentsNotEligibleList
-    : RestService.restBusinessAreasProgramsPaymentPlansPaymentsList;
+    ? RestService.restBusinessAreasProgramsPaymentListsPaymentsNotEligibleList
+    : RestService.restBusinessAreasProgramsPaymentListsPaymentsList;
   const {
     data: paymentsData,
     isLoading,
     isFetching,
     error,
-  } = useQuery<PaginatedPaymentListList | PaginatedNotEligiblePaymentListList>({
+  } = useQuery<PaginatedPaymentRowList | PaginatedNotEligiblePaymentRowList>({
     queryKey: restQueryKey(listService, paymentsListParams),
     queryFn: () => listService(paymentsListParams),
     placeholderData: keepPreviousData,
@@ -185,7 +185,7 @@ const PaymentsTableSection = ({
   // Entitlement and exchange-rate actions update payments in a background task while the plan
   // query polls, so the rows are refreshed when the plan's totals or background status change.
   const queryClient = useQueryClient();
-  const planMoneyState = `${paymentPlan.totalEntitledQuantity}|${paymentPlan.totalEntitledQuantityUsd}|${paymentPlan.backgroundActionStatus}`;
+  const planMoneyState = `${paymentList.totalEntitledQuantity}|${paymentList.totalEntitledQuantityUsd}|${paymentList.backgroundActionStatus}`;
   const previousPlanMoneyState = useRef(planMoneyState);
   useEffect(() => {
     if (previousPlanMoneyState.current === planMoneyState) return;
@@ -195,12 +195,12 @@ const PaymentsTableSection = ({
 
   const paymentsCountParams = createApiParams(primaryParams, filterVariables);
   const countService = notEligible
-    ? RestService.restBusinessAreasProgramsPaymentPlansPaymentsNotEligibleCountRetrieve
-    : RestService.restBusinessAreasProgramsPaymentPlansPaymentsCountRetrieve;
+    ? RestService.restBusinessAreasProgramsPaymentListsPaymentsNotEligibleCountRetrieve
+    : RestService.restBusinessAreasProgramsPaymentListsPaymentsCountRetrieve;
   const { data: paymentsCount } = useQuery<CountResponse>({
     queryKey: restQueryKey(countService, paymentsCountParams),
     queryFn: () => countService(paymentsCountParams),
-    enabled: !!businessArea && !!paymentPlan?.id && page === 0,
+    enabled: !!businessArea && !!paymentList?.id && page === 0,
   });
 
   const itemsCount = usePersistedCount(page, paymentsCount);
@@ -284,7 +284,7 @@ const PaymentsTableSection = ({
               error={error}
               data={paymentsData}
               itemsCount={itemsCount}
-              renderRow={(row: PaymentList | NotEligiblePaymentList) => (
+              renderRow={(row: PaymentRow | NotEligiblePaymentRow) => (
                 <PaymentsTableRow
                   key={row.id}
                   payment={row}
@@ -299,7 +299,7 @@ const PaymentsTableSection = ({
         </TableWrapper>
       </div>
       <WarningTooltipTable
-        paymentPlan={paymentPlan}
+        paymentList={paymentList}
         payment={dialogPayment}
         setDialogOpen={() => setDialogPayment(null)}
         canViewDetails={canViewDetails}
@@ -329,15 +329,15 @@ const PaymentsTable = (props: PaymentsTableProps): ReactElement => {
   const notEligibleCountParams = {
     businessAreaSlug: props.businessArea,
     programCode: programId,
-    paymentPlanPk: props.paymentPlan.id,
+    paymentListPk: props.paymentList.id,
   };
   const { data: notEligibleCount } = useQuery<CountResponse>({
     queryKey: restQueryKey(
-      RestService.restBusinessAreasProgramsPaymentPlansPaymentsNotEligibleCountRetrieve,
+      RestService.restBusinessAreasProgramsPaymentListsPaymentsNotEligibleCountRetrieve,
       notEligibleCountParams,
     ),
     queryFn: () =>
-      RestService.restBusinessAreasProgramsPaymentPlansPaymentsNotEligibleCountRetrieve(
+      RestService.restBusinessAreasProgramsPaymentListsPaymentsNotEligibleCountRetrieve(
         notEligibleCountParams,
       ),
     enabled: profile?.isSuperuser === true,

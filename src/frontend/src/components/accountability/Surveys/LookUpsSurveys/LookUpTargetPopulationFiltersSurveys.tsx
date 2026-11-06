@@ -2,10 +2,10 @@ import { MenuItem } from '@mui/material';
 import { Group, Person } from '@mui/icons-material';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { PaymentPlanStatusEnum } from '@restgenerated/models/PaymentPlanStatusEnum';
+import { PaymentListStatusEnum } from '@restgenerated/models/PaymentListStatusEnum';
 import {
   createHandleApplyFilterChange,
-  paymentPlanStatusMapping,
+  paymentListStatusMapping,
 } from '@utils/utils';
 import { DatePickerFilter } from '@core/DatePickerFilter';
 import { FiltersSection } from '@core/FiltersSection';
@@ -57,8 +57,8 @@ function LookUpTargetPopulationFiltersSurveys({
   };
 
   const preparedStatusChoices = isAccountability
-    ? Object.values(PaymentPlanStatusEnum).filter((key) => key !== 'OPEN')
-    : Object.values(PaymentPlanStatusEnum);
+    ? Object.values(PaymentListStatusEnum).filter((key) => key !== 'OPEN')
+    : Object.values(PaymentListStatusEnum);
 
   return (
     <FiltersSection
@@ -87,7 +87,7 @@ function LookUpTargetPopulationFiltersSurveys({
           >
             {preparedStatusChoices.sort().map((key) => (
               <MenuItem key={key} value={key}>
-                {paymentPlanStatusMapping(key)}
+                {paymentListStatusMapping(key)}
               </MenuItem>
             ))}
           </SelectFilter>

@@ -12,7 +12,7 @@ from extras.test_utils.factories import (
     EntitlementCardFactory,
     HouseholdFactory,
     PaymentFactory,
-    PaymentPlanFactory,
+    PaymentListFactory,
     PaymentVerificationFactory,
     PaymentVerificationPlanFactory,
     PaymentVerificationSummaryFactory,
@@ -124,16 +124,16 @@ def rapidpro_task_setup(business_area: Any) -> dict[str, Any]:
     program = ProgramFactory(business_area=business_area, cycle=False)
     cycle = ProgramCycleFactory(program=program, title="Cycle RapidPro")
 
-    payment_plan = PaymentPlanFactory(
+    payment_list = PaymentListFactory(
         program_cycle=cycle,
         business_area=business_area,
         created_by=user,
     )
-    PaymentVerificationSummaryFactory(payment_plan=payment_plan)
+    PaymentVerificationSummaryFactory(payment_list=payment_list)
     payment_verification_plan = PaymentVerificationPlanFactory(
         status=PaymentVerificationPlan.STATUS_ACTIVE,
         verification_channel=PaymentVerificationPlan.VERIFICATION_CHANNEL_RAPIDPRO,
-        payment_plan=payment_plan,
+        payment_list=payment_list,
     )
 
     individuals = []
@@ -150,7 +150,7 @@ def rapidpro_task_setup(business_area: Any) -> dict[str, Any]:
         individuals.append(head)
 
         payment = PaymentFactory(
-            parent=payment_plan,
+            parent=payment_list,
             household=household,
             head_of_household=household.head_of_household,
             delivered_quantity=Decimal(200),
@@ -165,8 +165,8 @@ def rapidpro_task_setup(business_area: Any) -> dict[str, Any]:
         EntitlementCardFactory(household=household)
 
     return {
-        "payment_plan": payment_plan,
-        "verification": payment_plan.payment_verification_plans.first(),
+        "payment_list": payment_list,
+        "verification": payment_list.payment_verification_plans.first(),
         "individuals": individuals,
     }
 

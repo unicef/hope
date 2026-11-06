@@ -459,8 +459,8 @@ class SurveyViewSet(
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         input_data = serializer.validated_data
-        if payment_plan := input_data.get("payment_plan"):
-            households = Household.objects.filter(payment__parent=payment_plan)
+        if payment_list := input_data.get("payment_list"):
+            households = Household.objects.filter(payment__parent=payment_list)
         elif program := self.program:
             households = program.households_with_payments_in_program
         else:

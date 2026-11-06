@@ -32,7 +32,7 @@ class VisionAPI(BaseAPI):
     def __init__(self) -> None:
         super().__init__()
         self.token_url = build_url(self.api_url, "v1/OAuthService/GenerateToken")
-        self.payment_plan_creation_url = build_url(self.api_url, "ps/ezcash/PaymentPlan")
+        self.payment_list_creation_url = build_url(self.api_url, "ps/ezcash/PaymentList")
         self._token_expiry: datetime | None = None
 
     def _acquire_token(self) -> None:
@@ -82,7 +82,7 @@ class VisionAPI(BaseAPI):
             vision_data.setdefault("log", []).append(entry)
 
             current_status = str(vision_data.get("status") or VisionStatus.NOT_SENT.value)
-            plan_is_still_in_review = locked_payment_plan.status == PaymentPlan.Status.IN_REVIEW
+            payment_plan_is_still_in_review = locked_payment_plan.status == PaymentPlan.Status.IN_REVIEW
             vision_attempt_has_not_been_reset = current_status != VisionStatus.NOT_SENT.value
             send_result_updates_status = vision_status is not None
             current_status_can_be_changed_by_send_result = current_status in cls.SEND_MUTABLE_STATUSES
@@ -95,7 +95,7 @@ class VisionAPI(BaseAPI):
                 # The initial POST to Vision returned successfully.
                 initial_request_succeeded
                 # The plan has not been released, rejected, or aborted.
-                and plan_is_still_in_review
+                and payment_plan_is_still_in_review
                 # The Vision attempt was not reset while the request was running.
                 and vision_attempt_has_not_been_reset
             ):
@@ -105,7 +105,7 @@ class VisionAPI(BaseAPI):
                 # Initial sends and retries provide a local status to record; status notifications do not.
                 send_result_updates_status
                 # A late HTTP response must not change an aborted, rejected, or released plan.
-                and plan_is_still_in_review
+                and payment_plan_is_still_in_review
                 # Preserve a newer callback status such as PP_CREATED, FC_NOT_FOUND, or CALLBACK_FAILED.
                 and current_status_can_be_changed_by_send_result
             ):
@@ -132,7 +132,7 @@ class VisionAPI(BaseAPI):
         }
         try:
             self._ensure_token()
-            response, _ = self._post(self.payment_plan_creation_url, payload)
+            response, _ = self._post(self.payment_list_creation_url, payload)
             entry["response"] = response
         except VisionAPIMissingCredentialsError:
             entry["response"] = {"error": "Vision API credentials are not configured"}
@@ -152,8 +152,8 @@ class VisionAPI(BaseAPI):
         return response
 
     def send_payment_plan(self, payment_plan: PaymentPlan) -> dict:
-        if getattr(payment_plan, "sent_to_vision", False) is True:
-            raise VisionAPIError("Payment plan has already been sent to Vision")
+        if payment_plan.sent_to_vision:
+            raise VisionAPIError("Payment Plan has already been sent to Vision")
 
         return self._post_payment_plan(
             payment_plan,

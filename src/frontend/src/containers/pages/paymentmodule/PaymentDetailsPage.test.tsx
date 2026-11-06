@@ -73,7 +73,7 @@ describe('PaymentDetailsPage', () => {
     mockUsePermissions.mockReturnValue([PERMISSIONS.PM_VIEW_DETAILS]);
     retrieve = vi.spyOn(
       RestService,
-      'restBusinessAreasProgramsPaymentPlansPaymentsRetrieve',
+      'restBusinessAreasProgramsPaymentListsPaymentsRetrieve',
     );
   });
 
@@ -99,9 +99,7 @@ describe('PaymentDetailsPage', () => {
 
     renderPage();
 
-    expect(
-      await screen.findByText('Oops! Something went wrong'),
-    ).toBeTruthy();
+    expect(await screen.findByText('Oops! Something went wrong')).toBeTruthy();
     expect(
       screen.queryByText('Payment has been removed or does not exist', {
         exact: false,
@@ -142,7 +140,9 @@ describe('PaymentDetailsPage', () => {
       renderPage();
 
       expect(
-        await screen.findByText(`Payment ${paymentWithoutVerification.unicefId}`),
+        await screen.findByText(
+          `Payment ${paymentWithoutVerification.unicefId}`,
+        ),
       ).toBeTruthy();
       expect(screen.queryByText('Mark as failed')).toBeNull();
     },

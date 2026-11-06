@@ -13,10 +13,11 @@ if TYPE_CHECKING:
 class TargetingCriteriaRule(TimeStampedUUIDModel, TargetingCriteriaRuleQueryingBase):
     """Set of ANDed Filters."""
 
-    payment_plan = models.ForeignKey(
-        "payment.PaymentPlan",
+    payment_list = models.ForeignKey(
+        "payment.PaymentList",
         related_name="rules",
         on_delete=models.CASCADE,
+        db_column="payment_plan_id",
     )
     household_ids = models.TextField(blank=True)
     individual_ids = models.TextField(blank=True)

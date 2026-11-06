@@ -28,7 +28,7 @@ from hope.models import (
     Household,
     Individual,
     Payment,
-    PaymentPlan,
+    PaymentList,
     PaymentVerificationPlan,
 )
 
@@ -145,8 +145,8 @@ class CountrySummaryDict(TypedDict):
     children_counts: float
     pwd_counts: int
     reconciled_count: int
-    finished_payment_plans: int
-    total_payment_plans: int
+    finished_payment_lists: int
+    total_payment_lists: int
     planned_sum_for_group: float
     _seen_households: set[UUID]
     households: int
@@ -159,8 +159,8 @@ class GlobalSummaryDict(TypedDict):
     children_counts: float
     pwd_counts: int
     reconciled_count: int
-    finished_payment_plans: int
-    total_payment_plans: int
+    finished_payment_lists: int
+    total_payment_lists: int
     planned_sum_for_group: float
     _seen_households: set[UUID]
     households: int
@@ -216,12 +216,12 @@ class DashboardCacheBase:
             )
             .filter(
                 parent__status__in=[
-                    PaymentPlan.Status.IN_APPROVAL,
-                    PaymentPlan.Status.IN_AUTHORIZATION,
-                    PaymentPlan.Status.IN_REVIEW,
-                    PaymentPlan.Status.ACCEPTED,
-                    PaymentPlan.Status.FINISHED,
-                    PaymentPlan.Status.CLOSED,
+                    PaymentList.Status.IN_APPROVAL,
+                    PaymentList.Status.IN_AUTHORIZATION,
+                    PaymentList.Status.IN_REVIEW,
+                    PaymentList.Status.ACCEPTED,
+                    PaymentList.Status.FINISHED,
+                    PaymentList.Status.CLOSED,
                 ],
                 program__is_visible=True,
                 parent__is_removed=False,
@@ -247,9 +247,9 @@ class DashboardCacheBase:
     def _get_payment_data(cls, base_queryset: models.QuerySet) -> models.QuerySet:
         date_field = payment_date_field()
         planned_statuses = [
-            PaymentPlan.Status.IN_APPROVAL,
-            PaymentPlan.Status.IN_AUTHORIZATION,
-            PaymentPlan.Status.IN_REVIEW,
+            PaymentList.Status.IN_APPROVAL,
+            PaymentList.Status.IN_AUTHORIZATION,
+            PaymentList.Status.IN_REVIEW,
         ]
         successful_statuses = Payment.DELIVERED_STATUSES
 
@@ -379,7 +379,7 @@ class DashboardCacheBase:
         return household_map
 
     @classmethod
-    def _get_payment_plan_counts(
+    def _get_payment_list_counts(
         cls, base_queryset: models.QuerySet, group_by_annotated_names: list[str]
     ) -> dict[str, dict[tuple, int]]:
         potential_annotations = _dimension_annotations(payment_date_field())
@@ -437,8 +437,8 @@ class DashboardDataCache(DashboardCacheBase):
             "children_counts": 0.0,
             "pwd_counts": 0,
             "reconciled_count": 0,
-            "finished_payment_plans": 0,
-            "total_payment_plans": 0,
+            "finished_payment_lists": 0,
+            "total_payment_lists": 0,
             "planned_sum_for_group": 0.0,
             "_seen_households": set(),
         }
@@ -483,8 +483,8 @@ class DashboardDataCache(DashboardCacheBase):
                     "children_counts": int(round(totals["children_counts"])),
                     "pwd_counts": totals["pwd_counts"],
                     "reconciled": totals["reconciled_count"],
-                    "finished_payment_plans": totals["finished_payment_plans"],
-                    "total_payment_plans": totals["total_payment_plans"],
+                    "finished_payment_lists": totals["finished_payment_lists"],
+                    "total_payment_lists": totals["total_payment_lists"],
                     "total_planned_usd": totals["planned_sum_for_group"],
                 }
             )
@@ -514,8 +514,8 @@ class DashboardDataCache(DashboardCacheBase):
         current_summary = summary[key]
 
         if current_summary["total_payments"] == 0:
-            current_summary["finished_payment_plans"] = plan_counts["finished"].get(key, 0)
-            current_summary["total_payment_plans"] = plan_counts["total"].get(key, 0)
+            current_summary["finished_payment_lists"] = plan_counts["finished"].get(key, 0)
+            current_summary["total_payment_lists"] = plan_counts["total"].get(key, 0)
 
         current_summary["total_usd"] += float(payment.get("payment_quantity_usd") or 0.0)
         current_summary["total_quantity"] += float(payment.get("payment_quantity") or 0.0)
@@ -579,7 +579,7 @@ class DashboardDataCache(DashboardCacheBase):
             "currency_code",
             "currency_vision_code",
         ]
-        plan_counts = cls._get_payment_plan_counts(base_payments_qs, plan_group_fields)
+        plan_counts = cls._get_payment_list_counts(base_payments_qs, plan_group_fields)
 
         all_payment_ids = list(base_payments_qs.values_list("id", flat=True))
         payment_data_iter: Iterable[dict[str, Any]] = cls._iter_payment_data_in_batches(
@@ -640,8 +640,8 @@ class DashboardGlobalDataCache(DashboardCacheBase):
             "children_counts": 0.0,
             "pwd_counts": 0,
             "reconciled_count": 0,
-            "finished_payment_plans": 0,
-            "total_payment_plans": 0,
+            "finished_payment_lists": 0,
+            "total_payment_lists": 0,
             "planned_sum_for_group": 0.0,
             "_seen_households": set(),
         }
@@ -672,8 +672,8 @@ class DashboardGlobalDataCache(DashboardCacheBase):
                     "children_counts": int(round(totals["children_counts"])),
                     "pwd_counts": totals["pwd_counts"],
                     "reconciled": totals["reconciled_count"],
-                    "finished_payment_plans": totals["finished_payment_plans"],
-                    "total_payment_plans": totals["total_payment_plans"],
+                    "finished_payment_lists": totals["finished_payment_lists"],
+                    "total_payment_lists": totals["total_payment_lists"],
                     "total_planned_usd": totals["planned_sum_for_group"],
                 }
             )
@@ -733,7 +733,7 @@ class DashboardGlobalDataCache(DashboardCacheBase):
                 "delivery_type_name",
                 "payment_status",
             ]
-            plan_counts = cls._get_payment_plan_counts(current_year_payments_qs, plan_group_fields)
+            plan_counts = cls._get_payment_list_counts(current_year_payments_qs, plan_group_fields)
 
             all_payment_ids_for_year = list(current_year_payments_qs.values_list("id", flat=True))
             payment_data_iter = cls._iter_payment_data_in_batches(all_payment_ids_for_year)
@@ -780,8 +780,8 @@ class DashboardGlobalDataCache(DashboardCacheBase):
         plan_key = key
 
         if current_summary["total_payments"] == 0:
-            current_summary["finished_payment_plans"] = plan_counts["finished"].get(plan_key, 0)
-            current_summary["total_payment_plans"] = plan_counts["total"].get(plan_key, 0)
+            current_summary["finished_payment_lists"] = plan_counts["finished"].get(plan_key, 0)
+            current_summary["total_payment_lists"] = plan_counts["total"].get(plan_key, 0)
 
         current_summary["total_usd"] += float(payment.get("payment_quantity_usd") or 0.0)
         current_summary["total_payments"] += 1

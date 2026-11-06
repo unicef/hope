@@ -104,7 +104,7 @@ function prepareSampleSizeRequest(
 
   return {
     households: values.households,
-    paymentPlan: values.targetPopulation,
+    paymentList: values.targetPopulation,
     registrationDataImport: values.registrationDataImport,
     samplingType,
     // Always include both arguments but set them appropriately based on sampling type
@@ -351,7 +351,7 @@ const CreateCommunicationPage = (): ReactElement => {
     title: values.title,
     body: values.body,
     households: values.households,
-    paymentPlan: values.targetPopulation,
+    paymentList: values.targetPopulation,
     registrationDataImport: values.registrationDataImport,
     samplingType:
       selectedSampleSizeType === 0

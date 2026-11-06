@@ -181,19 +181,19 @@ def test_choices_currencies(superuser, all_currencies):
     recorder.assertGET("/api/rest/choices/currencies/")
 
 
-def test_choices_payment_plan_status(superuser):
+def test_choices_payment_list_status(superuser):
     recorder = HopeRecorder(DATA_DIR, as_user=superuser)
-    recorder.assertGET("/api/rest/choices/payment-plan-status/")
+    recorder.assertGET("/api/rest/choices/payment-list-status/")
 
 
-def test_choices_payment_plan_bg_action_status(superuser):
+def test_choices_payment_list_bg_action_status(superuser):
     recorder = HopeRecorder(DATA_DIR, as_user=superuser)
-    recorder.assertGET("/api/rest/choices/payment-plan-background-action-status/")
+    recorder.assertGET("/api/rest/choices/payment-list-background-action-status/")
 
 
-def test_choices_payment_plan_type(superuser):
+def test_choices_payment_list_type(superuser):
     recorder = HopeRecorder(DATA_DIR, as_user=superuser)
-    recorder.assertGET("/api/rest/choices/payment-plan-type/")
+    recorder.assertGET("/api/rest/choices/payment-list-type/")
 
 
 def test_choices_payment_verification_plan_status(superuser):

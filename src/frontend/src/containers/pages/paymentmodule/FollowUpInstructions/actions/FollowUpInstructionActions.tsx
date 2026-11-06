@@ -226,7 +226,7 @@ export function FollowUpInstructionActions({
       )}
       {(status === 'ACCEPTED' || status === 'FINISHED') && (
         <>
-          {can(PERMISSIONS.PM_VIEW_LIST) && (
+          {can(PERMISSIONS.PM_PAYMENT_PLAN_EXPORT_XLSX) && (
             <SimpleWorkflowButton
               label="Export XLSX"
               instruction={instruction}
@@ -245,16 +245,48 @@ export function FollowUpInstructionActions({
           )}
         </>
       )}
-      {status === 'FINISHED' && can(PERMISSIONS.PM_CLOSE_FINISHED) && (
+      {status === 'FINISHED' && can(PERMISSIONS.PM_MARK_READY_FOR_CLOSURE) && (
         <SimpleWorkflowButton
-          label="Close"
+          label="Set Ready for Closure"
           instruction={instruction}
           mutationFn={() =>
-            RestService.restBusinessAreasProgramsFollowUpInstructionsCloseRetrieve(
+            RestService.restBusinessAreasProgramsFollowUpInstructionsReadyForClosureCreate(
               commonArgs,
             )
           }
+          successMessage="Follow-up Instruction set ready for closure"
+          dataCy="button-set-ready-for-closure"
+        />
+      )}
+      {status === 'READY_FOR_CLOSURE' &&
+        can(PERMISSIONS.PM_MARK_READY_FOR_CLOSURE) && (
+          <SimpleWorkflowButton
+            label="Send Back"
+            instruction={instruction}
+            mutationFn={() =>
+              RestService.restBusinessAreasProgramsFollowUpInstructionsSendBackToFinishedCreate(
+                commonArgs,
+              )
+            }
+            successMessage="Follow-up Instruction sent back"
+            variant="outlined"
+            dataCy="button-send-back"
+          />
+        )}
+      {status === 'READY_FOR_CLOSURE' && can(PERMISSIONS.PM_CLOSE_FINISHED) && (
+        <ConfirmWorkflowButton
+          label="Close"
+          instruction={instruction}
+          mutationFn={(comment) =>
+            RestService.restBusinessAreasProgramsFollowUpInstructionsCloseCreate(
+              {
+                ...commonArgs,
+                requestBody: { closureComment: comment ?? null },
+              },
+            )
+          }
           successMessage="Follow-up Instruction closed"
+          withComment
           variant="outlined"
           dataCy="button-close"
         />

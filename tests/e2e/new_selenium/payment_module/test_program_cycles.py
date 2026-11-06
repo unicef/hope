@@ -24,7 +24,7 @@ def test_program_cycles_list_shows_status_and_totals(
     browser: HopeTestBrowser,
     user_with_no_permissions: User,
     business_area: BusinessArea,
-    active_cycle_with_payment_plans: ProgramCycle,
+    active_cycle_with_payment_lists: ProgramCycle,
 ) -> None:
     with grant_permission(
         user_with_no_permissions,
@@ -33,7 +33,7 @@ def test_program_cycles_list_shows_status_and_totals(
         Permissions.PM_PROGRAMME_CYCLE_VIEW_LIST,
     ):
         browser.login(username="noperm_user")
-        browser.open(cycles_url(active_cycle_with_payment_plans))
+        browser.open(cycles_url(active_cycle_with_payment_lists))
         browser.wait_for_element_visible(f"{ROW}:nth-of-type(3)")
 
         browser.assert_text("Default Programme Cycle", row_cell(1, "title"))
@@ -101,11 +101,11 @@ def test_finish_and_reactivate_program_cycle(
         assert active_cycle.status == ProgramCycle.ACTIVE
 
 
-def test_finish_program_cycle_with_unreconciled_payment_plans_fails(
+def test_finish_program_cycle_with_unreconciled_payment_lists_fails(
     browser: HopeTestBrowser,
     user_with_no_permissions: User,
     business_area: BusinessArea,
-    active_cycle_with_payment_plans: ProgramCycle,
+    active_cycle_with_payment_lists: ProgramCycle,
 ) -> None:
     with grant_permission(
         user_with_no_permissions,
@@ -116,11 +116,11 @@ def test_finish_program_cycle_with_unreconciled_payment_plans_fails(
         Permissions.PM_PROGRAMME_CYCLE_UPDATE,
     ):
         browser.login(username="noperm_user")
-        browser.open(f"{cycles_url(active_cycle_with_payment_plans)}/{active_cycle_with_payment_plans.id}")
+        browser.open(f"{cycles_url(active_cycle_with_payment_lists)}/{active_cycle_with_payment_lists.id}")
         browser.wait_for_text("Active", STATUS)
 
         browser.click('button[data-cy="button-finish-programme-cycle"]')
-        browser.wait_for_text("All Payment Plans and Follow-Up Payment Plans have to be Reconciled.")
+        browser.wait_for_text("All Payment Lists and Follow-Up Payment Lists have to be Reconciled.")
         browser.assert_text("Active", STATUS)
-        active_cycle_with_payment_plans.refresh_from_db()
-        assert active_cycle_with_payment_plans.status == ProgramCycle.ACTIVE
+        active_cycle_with_payment_lists.refresh_from_db()
+        assert active_cycle_with_payment_lists.status == ProgramCycle.ACTIVE

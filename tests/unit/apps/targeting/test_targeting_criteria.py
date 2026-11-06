@@ -8,12 +8,12 @@ from extras.test_utils.factories import (
     FlexibleAttributeFactory,
     HouseholdFactory,
     IndividualFactory,
-    PaymentPlanFactory,
+    PaymentListFactory,
     UserFactory,
 )
 from hope.models import (
     Household,
-    PaymentPlan,
+    PaymentList,
     TargetingCriteriaRule,
     TargetingCriteriaRuleFilter,
     TargetingIndividualBlockRuleFilter,
@@ -34,9 +34,9 @@ def user():
 
 
 @pytest.fixture
-def payment_plan(user, business_area):
-    return PaymentPlanFactory(
-        name="tp", created_by=user, business_area=business_area, status=PaymentPlan.Status.TP_OPEN
+def payment_list(user, business_area):
+    return PaymentListFactory(
+        name="tp", created_by=user, business_area=business_area, status=PaymentList.Status.TP_OPEN
     )
 
 
@@ -64,14 +64,14 @@ def household_flex_fields():
 
 
 @pytest.fixture
-def apply_household_rule(payment_plan):
+def apply_household_rule(payment_list):
     def _apply(rule_filter: dict):
-        rule = TargetingCriteriaRule.objects.create(payment_plan=payment_plan)
+        rule = TargetingCriteriaRule.objects.create(payment_list=payment_list)
         TargetingCriteriaRuleFilter.objects.create(
             targeting_criteria_rule=rule,
             **rule_filter,
         )
-        return payment_plan
+        return payment_list
 
     return _apply
 
@@ -111,16 +111,16 @@ def households_with_individuals(business_area):
 
 
 @pytest.fixture
-def apply_individual_rules(payment_plan):
+def apply_individual_rules(payment_list):
     def _apply(filters: list[dict]):
-        rule = TargetingCriteriaRule.objects.create(payment_plan=payment_plan, household_ids="", individual_ids="")
+        rule = TargetingCriteriaRule.objects.create(payment_list=payment_list, household_ids="", individual_ids="")
         ind_block = TargetingIndividualRuleFilterBlock.objects.create(targeting_criteria_rule=rule)
         for filter_ in filters:
             TargetingIndividualBlockRuleFilter.objects.create(
                 individuals_filters_block=ind_block,
                 **filter_,
             )
-        return payment_plan
+        return payment_list
 
     return _apply
 
@@ -247,9 +247,9 @@ def test_range(
 
 def test_household_ids(user, business_area, three_households):
     hh1, _, _ = three_households
-    plan = PaymentPlanFactory(created_by=user, business_area=business_area)
+    plan = PaymentListFactory(created_by=user, business_area=business_area)
     TargetingCriteriaRule.objects.create(
-        payment_plan=plan,
+        payment_list=plan,
         household_ids=str(hh1.unicef_id),
         individual_ids="",
     )
@@ -260,9 +260,9 @@ def test_individual_ids(user, business_area, three_households):
     hh1, _, _ = three_households
     individual = IndividualFactory(household=hh1)
 
-    plan = PaymentPlanFactory(created_by=user, business_area=business_area)
+    plan = PaymentListFactory(created_by=user, business_area=business_area)
     TargetingCriteriaRule.objects.create(
-        payment_plan=plan,
+        payment_list=plan,
         household_ids="",
         individual_ids=str(individual.unicef_id),
     )
@@ -273,9 +273,9 @@ def test_household_and_individual_ids(user, business_area, three_households):
     hh1, _, _ = three_households
     individual = IndividualFactory(household=hh1)
 
-    plan = PaymentPlanFactory(created_by=user, business_area=business_area)
+    plan = PaymentListFactory(created_by=user, business_area=business_area)
     TargetingCriteriaRule.objects.create(
-        payment_plan=plan,
+        payment_list=plan,
         household_ids=str(hh1.unicef_id),
         individual_ids=str(individual.unicef_id),
     )

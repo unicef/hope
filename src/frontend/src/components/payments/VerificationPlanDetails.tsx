@@ -31,12 +31,12 @@ const Container = styled(Box)`
 
 interface VerificationPlanDetailsProps {
   verificationPlan: PaymentVerificationPlanDetails['paymentVerificationPlans'][number];
-  paymentPlanNode: PaymentVerificationPlanDetails;
+  paymentListNode: PaymentVerificationPlanDetails;
 }
 
 export function VerificationPlanDetails({
   verificationPlan,
-  paymentPlanNode,
+  paymentListNode,
 }: VerificationPlanDetailsProps): ReactElement {
   const { t } = useTranslation();
 
@@ -61,7 +61,7 @@ export function VerificationPlanDetails({
         </Title>
         <VerificationPlanActions
           verificationPlan={verificationPlan}
-          paymentPlanNode={paymentPlanNode}
+          paymentListNode={paymentListNode}
         />
       </Box>
       <Grid container rowSpacing={responsiveValue(4, 0)}>

@@ -6,8 +6,8 @@ from hope.apps.payment.utils import inactive_currency_reason
 from hope.apps.payment.xlsx.xlsx_follow_up_instruction_base_export_service import (
     XlsxFollowUpInstructionBaseExportService,
 )
-from hope.apps.payment.xlsx.xlsx_payment_plan_delivery_export_service import (
-    XlsxPaymentPlanDeliveryExportService,
+from hope.apps.payment.xlsx.xlsx_payment_list_delivery_export_service import (
+    XlsxPaymentListDeliveryExportService,
 )
 from hope.models import Payment
 
@@ -17,7 +17,7 @@ if TYPE_CHECKING:
 
 class XlsxFollowUpInstructionDeliveryExportService(XlsxFollowUpInstructionBaseExportService):
     def __init__(self, instruction: "FollowUpInstruction") -> None:
-        self.payment_plan_delivery_export_service: XlsxPaymentPlanDeliveryExportService | None = None
+        self.payment_list_delivery_export_service: XlsxPaymentListDeliveryExportService | None = None
         super().__init__(instruction)
 
     @property
@@ -26,32 +26,32 @@ class XlsxFollowUpInstructionDeliveryExportService(XlsxFollowUpInstructionBaseEx
 
     def get_source_headers(self) -> list[str]:
         # Child plans share one currency (FollowUpInstructionService._validate_shared_configuration).
-        if reason := inactive_currency_reason(self.payment_plan):
+        if reason := inactive_currency_reason(self.payment_list):
             raise ValueError(reason)
-        fsp_extra_fields_headers = XlsxPaymentPlanDeliveryExportService.get_fsp_extra_fields_headers(
+        fsp_extra_fields_headers = XlsxPaymentListDeliveryExportService.get_fsp_extra_fields_headers(
             Payment.objects.filter(parent__follow_up_instruction=self.instruction).eligible().only("extras")
         )
-        self.payment_plan_delivery_export_service = XlsxPaymentPlanDeliveryExportService(
-            self.payment_plan,
+        self.payment_list_delivery_export_service = XlsxPaymentListDeliveryExportService(
+            self.payment_list,
             None,
             fsp_extra_fields_headers=fsp_extra_fields_headers,
         )
-        fsp = self.payment_plan.financial_service_provider
-        delivery_mechanism = self.payment_plan.delivery_mechanism
+        fsp = self.payment_list.financial_service_provider
+        delivery_mechanism = self.payment_list.delivery_mechanism
         if fsp is None or delivery_mechanism is None:
-            raise ValueError("Child Payment Plans must define Financial Service Provider and Delivery Mechanism.")
-        fsp_xlsx_template = self.payment_plan_delivery_export_service.get_template(fsp, delivery_mechanism)
+            raise ValueError("Child Payment Lists must define Financial Service Provider and Delivery Mechanism.")
+        fsp_xlsx_template = self.payment_list_delivery_export_service.get_template(fsp, delivery_mechanism)
         if fsp_xlsx_template is None:
-            raise ValueError("FSP XLSX template not found for child Payment Plan delivery export.")
-        return self.payment_plan_delivery_export_service.prepare_headers(fsp_xlsx_template)
+            raise ValueError("FSP XLSX template not found for child Payment List delivery export.")
+        return self.payment_list_delivery_export_service.prepare_headers(fsp_xlsx_template)
 
     def get_payment_row_data(self, payment: Payment) -> dict[str, Any]:
-        if self.payment_plan_delivery_export_service is None:
-            raise ValueError("Payment Plan delivery export service is not initialized.")
+        if self.payment_list_delivery_export_service is None:
+            raise ValueError("Payment List delivery export service is not initialized.")
         return dict(
             zip(
-                self.payment_plan_delivery_export_service.header_list,
-                self.payment_plan_delivery_export_service.get_payment_row(payment),
+                self.payment_list_delivery_export_service.header_list,
+                self.payment_list_delivery_export_service.get_payment_row(payment),
                 strict=True,
             )
         )

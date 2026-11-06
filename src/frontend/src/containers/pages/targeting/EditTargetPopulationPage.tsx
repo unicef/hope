@@ -19,7 +19,7 @@ const EditTargetPopulationPage = (): ReactElement => {
   const { businessArea, programCode } = useBaseUrl();
 
   const {
-    data: paymentPlan,
+    data: paymentList,
     isLoading: loading,
     error,
   } = useQuery<TargetPopulationDetail>({
@@ -39,17 +39,17 @@ const EditTargetPopulationPage = (): ReactElement => {
       }),
   });
 
-  if (loading && !paymentPlan) return <LoadingComponent />;
+  if (loading && !paymentList) return <LoadingComponent />;
 
   if (isPermissionDeniedError(error))
     return <PermissionDenied permission={PERMISSIONS.TARGETING_UPDATE} />;
 
-  if (!paymentPlan || permissions === null) return null;
+  if (!paymentList || permissions === null) return null;
 
   return (
     <EditTargetPopulation
-      paymentPlan={paymentPlan}
-      screenBeneficiary={paymentPlan?.program?.screenBeneficiary}
+      paymentList={paymentList}
+      screenBeneficiary={paymentList?.program?.screenBeneficiary}
     />
   );
 };

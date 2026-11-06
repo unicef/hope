@@ -16,11 +16,12 @@ from extras.test_utils.factories import (
     FileTempFactory,
     FinancialServiceProviderFactory,
     FinancialServiceProviderXlsxTemplateFactory,
+    FollowUpInstructionFactory,
     FspXlsxTemplatePerDeliveryMechanismFactory,
     HouseholdFactory,
     PaymentFactory,
     PaymentHouseholdSnapshotFactory,
-    PaymentPlanFactory,
+    PaymentListFactory,
     PaymentVerificationFactory,
     PaymentVerificationPlanFactory,
     PaymentVerificationSummaryFactory,
@@ -35,7 +36,7 @@ from hope.apps.payment.xlsx.xlsx_follow_up_instruction_delivery_export_service i
 from hope.apps.payment.xlsx.xlsx_follow_up_instruction_reconciliation_import_service import (
     XlsxFollowUpInstructionReconciliationImportService,
 )
-from hope.models import FollowUpInstruction, LogEntry, Payment, PaymentPlan, PaymentVerification
+from hope.models import FollowUpInstruction, LogEntry, Payment, PaymentList, PaymentVerification
 
 pytestmark = pytest.mark.django_db
 
@@ -95,44 +96,45 @@ def delivery_template(fsp, delivery_mechanism):
 
 @pytest.fixture
 def instruction(user, program, business_area):
-    return FollowUpInstruction.objects.create(
+    return FollowUpInstructionFactory(
         business_area=business_area,
         program=program,
         created_by=user,
         background_action_status=FollowUpInstruction.BackgroundActionStatus.XLSX_IMPORTING_RECONCILIATION,
+        exchange_rate=Decimal("1.00"),
+        dispersion_start_date=None,
+        dispersion_end_date=None,
     )
 
 
 @pytest.fixture
-def child_payment_plans(instruction, cycle, business_area, currency, delivery_mechanism, fsp):
-    plan_one = PaymentPlanFactory(
+def child_payment_lists(instruction, cycle, business_area, currency, delivery_mechanism, fsp):
+    plan_one = PaymentListFactory(
         program_cycle=cycle,
         business_area=business_area,
         currency=currency,
         delivery_mechanism=delivery_mechanism,
         financial_service_provider=fsp,
         follow_up_instruction=instruction,
-        plan_type=PaymentPlan.PlanType.FOLLOW_UP,
-        status=PaymentPlan.Status.ACCEPTED,
-        exchange_rate=Decimal("1.00"),
+        plan_type=PaymentList.PlanType.FOLLOW_UP,
+        status=PaymentList.Status.ACCEPTED,
     )
-    plan_two = PaymentPlanFactory(
+    plan_two = PaymentListFactory(
         program_cycle=cycle,
         business_area=business_area,
         currency=currency,
         delivery_mechanism=delivery_mechanism,
         financial_service_provider=fsp,
         follow_up_instruction=instruction,
-        plan_type=PaymentPlan.PlanType.FOLLOW_UP,
-        status=PaymentPlan.Status.ACCEPTED,
-        exchange_rate=Decimal("1.00"),
+        plan_type=PaymentList.PlanType.FOLLOW_UP,
+        status=PaymentList.Status.ACCEPTED,
     )
     return plan_one, plan_two
 
 
 @pytest.fixture
-def instruction_payments(child_payment_plans, fsp, delivery_mechanism, currency):
-    plan_one, plan_two = child_payment_plans
+def instruction_payments(child_payment_lists, fsp, delivery_mechanism, currency):
+    plan_one, plan_two = child_payment_lists
     shared_household = HouseholdFactory(business_area=plan_one.business_area, program=plan_one.program)
     payment_one = PaymentFactory(
         parent=plan_one,
@@ -193,6 +195,18 @@ def instruction_payments(child_payment_plans, fsp, delivery_mechanism, currency)
     return payment_one, payment_two, payment_three
 
 
+def test_instruction_reconciliation_reuses_instruction_rate_and_date(
+    instruction,
+    instruction_payments,
+    django_assert_num_queries,
+):
+    service = XlsxFollowUpInstructionReconciliationImportService(instruction, ContentFile(b"", name="unused.xlsx"))
+    household_id = instruction_payments[0].household.unicef_id
+
+    with django_assert_num_queries(0):
+        service._import_household(household_id, Decimal("0.00"))
+
+
 def _build_reconciliation_file(instruction: FollowUpInstruction) -> bytes:
     workbook = XlsxFollowUpInstructionDeliveryExportService(instruction).generate_workbook()
     worksheet = workbook.active
@@ -217,7 +231,7 @@ def _build_reconciliation_file(instruction: FollowUpInstruction) -> bytes:
 def test_reconciliation_import_happy_path_updates_child_payments_and_removes_stale_export_file(
     user,
     instruction,
-    child_payment_plans,
+    child_payment_lists,
     instruction_payments,
     delivery_template,
     django_capture_on_commit_callbacks,
@@ -236,7 +250,7 @@ def test_reconciliation_import_happy_path_updates_child_payments_and_removes_sta
     job = SimpleNamespace(config={"follow_up_instruction_id": str(instruction.id)})
 
     with patch(
-        "hope.apps.payment.services.payment_plan_services.PaymentPlanService.recalculate_signatures_in_batch"
+        "hope.apps.payment.services.payment_list_services.PaymentListService.recalculate_signatures_in_batch"
     ) as recalculate_mock:
         with django_capture_on_commit_callbacks(execute=True):
             result = import_follow_up_instruction_reconciliation_from_xlsx_async_task_action(job)
@@ -245,8 +259,8 @@ def test_reconciliation_import_happy_path_updates_child_payments_and_removes_sta
     instruction.refresh_from_db()
     for payment in instruction_payments:
         payment.refresh_from_db()
-    for payment_plan in child_payment_plans:
-        payment_plan.refresh_from_db()
+    for payment_list in child_payment_lists:
+        payment_list.refresh_from_db()
 
     assert instruction.background_action_status is None
     assert instruction.export_file_id is None
@@ -259,14 +273,14 @@ def test_reconciliation_import_happy_path_updates_child_payments_and_removes_sta
     assert payment_two.status == Payment.STATUS_DISTRIBUTION_PARTIAL
     assert payment_three.delivered_quantity == Decimal("0.00")
     assert payment_three.status == Payment.STATUS_NOT_DISTRIBUTED
-    assert all(payment_plan.status == PaymentPlan.Status.FINISHED for payment_plan in child_payment_plans)
+    assert all(payment_list.status == PaymentList.Status.FINISHED for payment_list in child_payment_lists)
 
 
 @pytest.mark.enable_activity_log
 def test_reconciliation_import_creates_activity_log_per_child_plan(
     user,
     instruction,
-    child_payment_plans,
+    child_payment_lists,
     instruction_payments,
     delivery_template,
     django_capture_on_commit_callbacks,
@@ -280,25 +294,25 @@ def test_reconciliation_import_creates_activity_log_per_child_plan(
 
     job = SimpleNamespace(config={"follow_up_instruction_id": str(instruction.id), "user_id": str(user.id)})
 
-    with patch("hope.apps.payment.services.payment_plan_services.PaymentPlanService.recalculate_signatures_in_batch"):
+    with patch("hope.apps.payment.services.payment_list_services.PaymentListService.recalculate_signatures_in_batch"):
         with django_capture_on_commit_callbacks(execute=True):
             import_follow_up_instruction_reconciliation_from_xlsx_async_task_action(job)
 
-    child_ids = [payment_plan.id for payment_plan in child_payment_plans]
+    child_ids = [payment_list.id for payment_list in child_payment_lists]
     logs = LogEntry.objects.filter(object_id__in=child_ids, action=LogEntry.UPDATE)
     assert logs.count() == len(child_ids)
     assert all(log.user == user for log in logs)
-    assert all(log.changes["status"]["to"] == PaymentPlan.Status.FINISHED for log in logs)
+    assert all(log.changes["status"]["to"] == PaymentList.Status.FINISHED for log in logs)
 
 
 def test_import_household_skips_payment_when_values_unchanged(
     instruction,
-    child_payment_plans,
+    child_payment_lists,
     currency,
     delivery_mechanism,
     fsp,
 ):
-    plan_one, _ = child_payment_plans
+    plan_one, _ = child_payment_lists
     household = HouseholdFactory(business_area=plan_one.business_area, program=plan_one.program)
     PaymentFactory(
         parent=plan_one,
@@ -334,16 +348,15 @@ def test_import_payment_list_keeps_finished_plan_status(
     delivery_mechanism,
     fsp,
 ):
-    plan = PaymentPlanFactory(
+    plan = PaymentListFactory(
         program_cycle=cycle,
         business_area=business_area,
         currency=currency,
         delivery_mechanism=delivery_mechanism,
         financial_service_provider=fsp,
         follow_up_instruction=instruction,
-        plan_type=PaymentPlan.PlanType.FOLLOW_UP,
-        status=PaymentPlan.Status.FINISHED,
-        exchange_rate=Decimal("1.00"),
+        plan_type=PaymentList.PlanType.FOLLOW_UP,
+        status=PaymentList.Status.FINISHED,
     )
     household = HouseholdFactory(business_area=plan.business_area, program=plan.program)
     payment = PaymentFactory(
@@ -380,7 +393,7 @@ def test_import_payment_list_keeps_finished_plan_status(
     payment.refresh_from_db()
     plan.refresh_from_db()
     assert payment.delivered_quantity == Decimal("100.00")
-    assert plan.status == PaymentPlan.Status.FINISHED
+    assert plan.status == PaymentList.Status.FINISHED
 
 
 def test_reconciliation_import_validation_rejects_negative_household_total(
@@ -445,7 +458,7 @@ def test_reconciliation_import_marks_xlsx_import_error_on_service_validation_err
 def test_reconciliation_import_skips_export_file_cleanup_when_no_export_file(
     instruction,
     instruction_payments,
-    child_payment_plans,
+    child_payment_lists,
     delivery_template,
     user,
     django_capture_on_commit_callbacks,
@@ -459,7 +472,7 @@ def test_reconciliation_import_skips_export_file_cleanup_when_no_export_file(
 
     job = SimpleNamespace(config={"follow_up_instruction_id": str(instruction.id)})
 
-    with patch("hope.apps.payment.services.payment_plan_services.PaymentPlanService.recalculate_signatures_in_batch"):
+    with patch("hope.apps.payment.services.payment_list_services.PaymentListService.recalculate_signatures_in_batch"):
         with django_capture_on_commit_callbacks(execute=True):
             result = import_follow_up_instruction_reconciliation_from_xlsx_async_task_action(job)
 
@@ -471,7 +484,7 @@ def test_reconciliation_import_skips_export_file_cleanup_when_no_export_file(
 def test_reconciliation_import_skips_export_file_cleanup_when_file_was_replaced(
     instruction,
     instruction_payments,
-    child_payment_plans,
+    child_payment_lists,
     delivery_template,
     user,
     django_capture_on_commit_callbacks,
@@ -488,7 +501,7 @@ def test_reconciliation_import_skips_export_file_cleanup_when_file_was_replaced(
 
     job = SimpleNamespace(config={"follow_up_instruction_id": str(instruction.id)})
 
-    with patch("hope.apps.payment.services.payment_plan_services.PaymentPlanService.recalculate_signatures_in_batch"):
+    with patch("hope.apps.payment.services.payment_list_services.PaymentListService.recalculate_signatures_in_batch"):
         with django_capture_on_commit_callbacks(execute=True):
             result = import_follow_up_instruction_reconciliation_from_xlsx_async_task_action(job)
             instruction.export_file = replacement_export_file
@@ -775,13 +788,13 @@ def test_validation_reports_error_when_no_changes_in_file(
 def test_import_updates_payment_verification_to_received_when_full_amount_delivered(
     instruction,
     instruction_payments,
-    child_payment_plans,
+    child_payment_lists,
     delivery_template,
 ):
     payment_one = instruction_payments[0]
-    plan_one = child_payment_plans[0]
-    PaymentVerificationSummaryFactory(payment_plan=plan_one)
-    pvp = PaymentVerificationPlanFactory(payment_plan=plan_one)
+    plan_one = child_payment_lists[0]
+    PaymentVerificationSummaryFactory(payment_list=plan_one)
+    pvp = PaymentVerificationPlanFactory(payment_list=plan_one)
     pv = PaymentVerificationFactory(
         payment=payment_one,
         payment_verification_plan=pvp,
@@ -817,15 +830,15 @@ def test_import_updates_payment_verification_to_received_when_full_amount_delive
 def test_import_updates_payment_verification_to_not_received_when_zero_delivered(
     instruction,
     instruction_payments,
-    child_payment_plans,
+    child_payment_lists,
     delivery_template,
 ):
     payment_three = instruction_payments[2]
-    plan_two = child_payment_plans[1]
+    plan_two = child_payment_lists[1]
     payment_three.delivered_quantity = payment_three.entitlement_quantity
     payment_three.save(update_fields=["delivered_quantity"])
-    PaymentVerificationSummaryFactory(payment_plan=plan_two)
-    pvp = PaymentVerificationPlanFactory(payment_plan=plan_two)
+    PaymentVerificationSummaryFactory(payment_list=plan_two)
+    pvp = PaymentVerificationPlanFactory(payment_list=plan_two)
     pv = PaymentVerificationFactory(
         payment=payment_three,
         payment_verification_plan=pvp,
@@ -861,13 +874,13 @@ def test_import_updates_payment_verification_to_not_received_when_zero_delivered
 def test_import_updates_payment_verification_to_received_with_issues_on_partial_delivery(
     instruction,
     instruction_payments,
-    child_payment_plans,
+    child_payment_lists,
     delivery_template,
 ):
     payment_one = instruction_payments[0]
-    plan_one = child_payment_plans[0]
-    PaymentVerificationSummaryFactory(payment_plan=plan_one)
-    pvp = PaymentVerificationPlanFactory(payment_plan=plan_one)
+    plan_one = child_payment_lists[0]
+    PaymentVerificationSummaryFactory(payment_list=plan_one)
+    pvp = PaymentVerificationPlanFactory(payment_list=plan_one)
     pv = PaymentVerificationFactory(
         payment=payment_one,
         payment_verification_plan=pvp,
@@ -904,13 +917,13 @@ def test_import_updates_payment_verification_to_received_with_issues_on_partial_
 def test_import_skips_payment_verification_update_when_status_already_matches(
     instruction,
     instruction_payments,
-    child_payment_plans,
+    child_payment_lists,
     delivery_template,
 ):
     payment_one = instruction_payments[0]
-    plan_one = child_payment_plans[0]
-    PaymentVerificationSummaryFactory(payment_plan=plan_one)
-    pvp = PaymentVerificationPlanFactory(payment_plan=plan_one)
+    plan_one = child_payment_lists[0]
+    PaymentVerificationSummaryFactory(payment_list=plan_one)
+    pvp = PaymentVerificationPlanFactory(payment_list=plan_one)
     PaymentVerificationFactory(
         payment=payment_one,
         payment_verification_plan=pvp,

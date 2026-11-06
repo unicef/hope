@@ -8,15 +8,19 @@ import pytest
 
 from extras.test_utils.factories.geo import AreaFactory
 from extras.test_utils.factories.household import HouseholdFactory
-from extras.test_utils.factories.payment import FinancialServiceProviderFactory, PaymentFactory, PaymentPlanFactory
+from extras.test_utils.factories.payment import (
+    FinancialServiceProviderFactory,
+    PaymentFactory,
+    PaymentListFactory,
+)
 from hope.models import Payment
 
 pytestmark = pytest.mark.django_db
 
 
 @pytest.fixture
-def payment_plan():
-    return PaymentPlanFactory()
+def payment_list():
+    return PaymentListFactory()
 
 
 @pytest.fixture
@@ -29,18 +33,18 @@ def fsp_xlsx():
 
 
 def test_payment_unique_together():
-    payment_plan = PaymentPlanFactory()
+    payment_list = PaymentListFactory()
     household = HouseholdFactory()
-    PaymentFactory(parent=payment_plan, household=household)
+    PaymentFactory(parent=payment_list, household=household)
     with transaction.atomic():
         with pytest.raises(IntegrityError):
-            PaymentFactory(parent=payment_plan, household=household)
+            PaymentFactory(parent=payment_list, household=household)
 
 
-def test_household_admin2_property(payment_plan):
+def test_household_admin2_property(payment_list):
     admin2 = AreaFactory(name="New admin2")
     household = HouseholdFactory(admin2=admin2)
-    payment = PaymentFactory(parent=payment_plan, household=household)
+    payment = PaymentFactory(parent=payment_list, household=household)
     assert payment.household_admin2 == admin2.name
 
 
@@ -58,17 +62,17 @@ def test_household_admin2_property(payment_plan):
         (Payment.STATUS_MANUALLY_CANCELLED, "-"),
     ],
 )
-def test_payment_status_property(payment_plan, status, expected):
-    payment = PaymentFactory(parent=payment_plan, status=status)
+def test_payment_status_property(payment_list, status, expected):
+    payment = PaymentFactory(parent=payment_list, status=status)
     assert payment.payment_status == expected
 
 
-def test_mark_as_failed(payment_plan, fsp_xlsx):
+def test_mark_as_failed(payment_list, fsp_xlsx):
     payment_invalid_status = PaymentFactory(
-        parent=payment_plan, status=Payment.STATUS_FORCE_FAILED, financial_service_provider=fsp_xlsx
+        parent=payment_list, status=Payment.STATUS_FORCE_FAILED, financial_service_provider=fsp_xlsx
     )
     payment = PaymentFactory(
-        parent=payment_plan,
+        parent=payment_list,
         entitlement_quantity=Decimal("999.00"),
         delivered_quantity=Decimal("111.00"),
         delivered_quantity_usd=Decimal("22.00"),
@@ -87,9 +91,9 @@ def test_mark_as_failed(payment_plan, fsp_xlsx):
     assert payment.status == Payment.STATUS_FORCE_FAILED
 
 
-def test_revert_mark_as_failed(payment_plan, fsp_xlsx):
+def test_revert_mark_as_failed(payment_list, fsp_xlsx):
     payment_entitlement_quantity_none = PaymentFactory(
-        parent=payment_plan,
+        parent=payment_list,
         entitlement_quantity=None,
         entitlement_quantity_usd=None,
         delivered_quantity=None,
@@ -98,13 +102,13 @@ def test_revert_mark_as_failed(payment_plan, fsp_xlsx):
         financial_service_provider=fsp_xlsx,
     )
     payment_invalid_status = PaymentFactory(
-        parent=payment_plan,
+        parent=payment_list,
         entitlement_quantity=Decimal("999.00"),
         status=Payment.STATUS_PENDING,
         financial_service_provider=fsp_xlsx,
     )
     payment = PaymentFactory(
-        parent=payment_plan,
+        parent=payment_list,
         entitlement_quantity=Decimal("999.00"),
         delivered_quantity=Decimal("111.00"),
         status=Payment.STATUS_FORCE_FAILED,
@@ -126,9 +130,9 @@ def test_revert_mark_as_failed(payment_plan, fsp_xlsx):
     assert payment.status == Payment.STATUS_DISTRIBUTION_SUCCESS
 
 
-def test_get_revert_mark_as_failed_status(payment_plan, fsp_xlsx):
+def test_get_revert_mark_as_failed_status(payment_list, fsp_xlsx):
     payment = PaymentFactory(
-        parent=payment_plan, entitlement_quantity=Decimal("999.00"), financial_service_provider=fsp_xlsx
+        parent=payment_list, entitlement_quantity=Decimal("999.00"), financial_service_provider=fsp_xlsx
     )
     delivered_quantity_with_status = (
         (0, Payment.STATUS_NOT_DISTRIBUTED),

@@ -1,0 +1,81 @@
+import { LoadingButton } from '@core/LoadingButton';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { usePermissions } from '@hooks/usePermissions';
+import { useSnackbar } from '@hooks/useSnackBar';
+import { Box } from '@mui/material';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { restQueryKey } from '@utils/queryKeys';
+import type { ReactElement } from 'react';
+import { useTranslation } from 'react-i18next';
+import { hasPermissions, PERMISSIONS } from '../../../../../config/permissions';
+import type { PaymentPlanDetail } from '../types';
+import { RestService } from '@restgenerated/services/RestService';
+import { showApiErrorMessages } from '@utils/utils';
+
+interface SendToPaymentGatewayPaymentPlanButtonProps {
+  paymentPlan: PaymentPlanDetail | null;
+}
+
+export function SendToPaymentGatewayPaymentPlanButton({
+  paymentPlan,
+}: SendToPaymentGatewayPaymentPlanButtonProps): ReactElement | null {
+  const { t } = useTranslation();
+  const { businessArea, programId } = useBaseUrl();
+  const { showMessage } = useSnackbar();
+  const queryClient = useQueryClient();
+  const permissions = usePermissions();
+
+  const { mutate: sendToPaymentGateway, isPending: loadingSend } = useMutation({
+    mutationFn: () =>
+      RestService.restBusinessAreasProgramsPaymentPlansSendToPaymentGatewayCreate(
+        {
+          businessAreaSlug: businessArea,
+          programCode: programId,
+          id: paymentPlan?.id,
+        },
+      ),
+    onSuccess: () => {
+      showMessage(t('Sending to Payment Gateway started'));
+      queryClient.invalidateQueries({
+        queryKey: restQueryKey(
+          RestService.restBusinessAreasProgramsPaymentPlansRetrieve,
+        ),
+      });
+    },
+    onError: (error) => {
+      showApiErrorMessages(
+        error,
+        showMessage,
+        t('Send to Payment Gateway failed'),
+      );
+    },
+  });
+
+  if (!paymentPlan?.canSendToPaymentGateway) return null;
+  if (
+    !hasPermissions(
+      PERMISSIONS.PM_PAYMENT_PLAN_SEND_TO_PAYMENT_GATEWAY,
+      permissions,
+    )
+  )
+    return null;
+
+  return (
+    <Box
+      sx={{
+        m: 2,
+      }}
+    >
+      <LoadingButton
+        loading={loadingSend}
+        color="primary"
+        variant="contained"
+        onClick={() => sendToPaymentGateway()}
+        disabled={loadingSend}
+        data-cy="button-send-to-payment-gateway-group"
+      >
+        {t('Send to Payment Gateway')}
+      </LoadingButton>
+    </Box>
+  );
+}

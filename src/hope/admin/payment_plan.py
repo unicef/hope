@@ -10,7 +10,6 @@ from advanced_filters.admin import AdminAdvancedFiltersMixin
 from django.contrib import admin, messages
 from django.contrib.admin import FieldListFilter
 from django.contrib.admin.options import get_content_type_for_model
-from django.db import transaction
 from django.db.models import Model, Prefetch, QuerySet
 from django.db.models.fields.related import ManyToManyField
 from django.forms import ModelForm, ModelMultipleChoiceField
@@ -22,20 +21,21 @@ from django.utils.html import format_html
 from hope.admin.utils import (
     FieldPkCursorPaginatorAdmin,
     HOPEModelAdminBase,
-    PaymentPlanCeleryTasksMixin,
+    PaymentListCeleryTasksMixin,
     ViewOnUiMixin,
 )
 from hope.apps.activity_log.utils import copy_model_object, create_diff
-from hope.apps.payment.forms import BatchReexportForm, VisionFundsCommitmentHeaderAssignmentForm
+from hope.apps.payment.celery_tasks import recalculate_owner_exchange_rate_async_task
+from hope.apps.payment.forms import GroupReexportForm, VisionFundsCommitmentHeaderAssignmentForm
 from hope.apps.payment.services.payment_gateway import PaymentGatewayAPI
-from hope.apps.payment.services.payment_plan_services import PaymentPlanService
-from hope.apps.payment.utils import get_quantity_in_usd
-from hope.apps.payment.xlsx.xlsx_payment_plan_delivery_import_service import (
+from hope.apps.payment.services.payment_list_services import PaymentListService
+from hope.apps.payment.xlsx.xlsx_payment_list_delivery_import_service import (
     NULL_DELIVERY_POLICY_OPTION,
     NULL_DELIVERY_POLICY_RESET,
     OVERRIDE_OPTION,
 )
 from hope.apps.utils.security import is_root
+from hope.contrib.vision.choices import VisionStatus
 from hope.contrib.vision.models import FundsCommitmentHeader
 from hope.contrib.vision.services import FundsCommitmentAssignmentError, VisionService
 from hope.contrib.vision.tasks import send_payment_plan_to_vision_async_task
@@ -43,9 +43,9 @@ from hope.models import (
     AsyncJob,
     Payment,
     PaymentHouseholdSnapshot,
+    PaymentList,
+    PaymentListSplit,
     PaymentPlan,
-    PaymentPlanGroup,
-    PaymentPlanSplit,
     PaymentPlanSupportingDocument,
     log_create,
 )
@@ -119,18 +119,18 @@ class FundsCommitmentHeaderInline(admin.TabularInline):
     def currency(self, obj: Model) -> str | None:
         return self._header(obj).currency
 
-    def has_add_permission(self, request: HttpRequest, obj: PaymentPlan | None = None) -> bool:
+    def has_add_permission(self, request: HttpRequest, obj: PaymentList | None = None) -> bool:
         return False
 
-    def has_change_permission(self, request: HttpRequest, obj: PaymentPlan | None = None) -> bool:
+    def has_change_permission(self, request: HttpRequest, obj: PaymentList | None = None) -> bool:
         return False
 
-    def has_delete_permission(self, request: HttpRequest, obj: PaymentPlan | None = None) -> bool:
+    def has_delete_permission(self, request: HttpRequest, obj: PaymentList | None = None) -> bool:
         return False
 
 
 class PaymentInstructionInline(admin.TabularInline):
-    model = PaymentPlanSplit
+    model = PaymentListSplit
     extra = 0
     can_delete = False
     common_fields = (
@@ -145,12 +145,12 @@ class PaymentInstructionInline(admin.TabularInline):
     fields = readonly_fields = (*common_fields, *payment_gateway_fields)
     verbose_name_plural = "Payment Instructions"
 
-    def get_fields(self, request: HttpRequest, obj: PaymentPlan | None = None) -> tuple[str, ...]:
+    def get_fields(self, request: HttpRequest, obj: PaymentList | None = None) -> tuple[str, ...]:
         if obj and obj.is_payment_gateway:
             return (*self.common_fields, *self.payment_gateway_fields)
         return self.common_fields
 
-    def get_readonly_fields(self, request: HttpRequest, obj: PaymentPlan | None = None) -> tuple[str, ...]:
+    def get_readonly_fields(self, request: HttpRequest, obj: PaymentList | None = None) -> tuple[str, ...]:
         if obj and obj.is_payment_gateway:
             return (*self.common_fields, *self.payment_gateway_fields)
         return self.common_fields
@@ -159,9 +159,9 @@ class PaymentInstructionInline(admin.TabularInline):
         self._request = request
         return super().get_queryset(request).order_by("order")
 
-    def download_link(self, obj: PaymentPlanSplit) -> str:
+    def download_link(self, obj: PaymentListSplit) -> str:
         request = getattr(self, "_request", None)
-        if not obj.payment_plan.is_payment_gateway or not obj.sent_to_payment_gateway or request is None:
+        if not obj.payment_list.is_payment_gateway or not obj.sent_to_payment_gateway or request is None:
             return "-"
         if not has_payment_instruction_download_permission(request):
             return "-"
@@ -170,13 +170,13 @@ class PaymentInstructionInline(admin.TabularInline):
 
     download_link.short_description = "Download"
 
-    def has_add_permission(self, request: HttpRequest, obj: PaymentPlan | None = None) -> bool:
+    def has_add_permission(self, request: HttpRequest, obj: PaymentList | None = None) -> bool:
         return False
 
-    def has_change_permission(self, request: HttpRequest, obj: PaymentPlan | None = None) -> bool:
+    def has_change_permission(self, request: HttpRequest, obj: PaymentList | None = None) -> bool:
         return False
 
-    def has_delete_permission(self, request: HttpRequest, obj: PaymentPlan | None = None) -> bool:
+    def has_delete_permission(self, request: HttpRequest, obj: PaymentList | None = None) -> bool:
         return False
 
 
@@ -184,21 +184,21 @@ def can_send_to_vision(payment_plan: PaymentPlan) -> bool:
     return payment_plan.can_send_to_vision
 
 
-def can_recover_vision_funds_commitment(payment_plan: PaymentPlan) -> bool:
-    return VisionService.can_recover_with_funds_commitment_headers(payment_plan)
+def can_recover_vision_funds_commitment_payment_plan(payment_plan: PaymentPlan) -> bool:
+    return VisionService.can_recover_payment_plan_with_funds_commitment_headers(payment_plan)
 
 
-def can_sync_with_payment_gateway(payment_plan: PaymentPlan) -> bool:
-    return payment_plan.is_payment_gateway and payment_plan.status in [
-        PaymentPlan.Status.ACCEPTED,
-        PaymentPlan.Status.FINISHED,
+def can_sync_with_payment_gateway(payment_list: PaymentList) -> bool:
+    return payment_list.is_payment_gateway and payment_list.status in [
+        PaymentList.Status.ACCEPTED,
+        PaymentList.Status.FINISHED,
     ]
 
 
-def can_retry_payment_gateway_send(payment_plan: PaymentPlan) -> bool:
+def can_retry_payment_gateway_send(payment_list: PaymentList) -> bool:
     return (
-        payment_plan.background_action_status == PaymentPlan.BackgroundActionStatus.SEND_TO_PAYMENT_GATEWAY_ERROR
-        and payment_plan.can_send_to_payment_gateway
+        payment_list.background_action_status == PaymentList.BackgroundActionStatus.SEND_TO_PAYMENT_GATEWAY_ERROR
+        and payment_list.can_send_to_payment_gateway
     )
 
 
@@ -207,7 +207,7 @@ def has_payment_instruction_download_permission(request: HttpRequest) -> bool:
     return request.user.has_perm(permission)
 
 
-class BasePaymentPlanAdmin(ViewOnUiMixin, HOPEModelAdminBase):
+class BasePaymentListAdmin(ViewOnUiMixin, HOPEModelAdminBase):
     list_display: tuple[str, ...] = (
         "unicef_id",
         "name",
@@ -220,7 +220,7 @@ class BasePaymentPlanAdmin(ViewOnUiMixin, HOPEModelAdminBase):
         ("business_area", AutoCompleteFilter),
         ("program_cycle__program", AutoCompleteFilter),
         ("program_cycle__program__id", ValueFilter),
-        ("currency", AutoCompleteFilter),
+        ("payment_plan__currency", AutoCompleteFilter),
         ("status", ChoicesFieldComboFilter),
         ("build_status", ChoicesFieldComboFilter),
         ("created_by", AutoCompleteFilter),
@@ -228,10 +228,10 @@ class BasePaymentPlanAdmin(ViewOnUiMixin, HOPEModelAdminBase):
     search_fields = ("id", "unicef_id", "name")
     date_hierarchy = "updated_at"
     filter_horizontal = ("payment_plan_purposes",)
+    inlines = [PaymentInstructionInline]
     raw_id_fields = (
         "imported_file",
         "export_file_entitlement",
-        "export_pdf_file_summary",
         "reconciliation_import_file",
     )
     readonly_fields: tuple[str, ...] = (
@@ -249,7 +249,7 @@ class BasePaymentPlanAdmin(ViewOnUiMixin, HOPEModelAdminBase):
         "created_by",
         "closed_by",
         "closure_comment",
-        "source_payment_plan",
+        "source_payment_list",
         "follow_up_instruction",
         "name",
         "start_date",
@@ -284,40 +284,39 @@ class BasePaymentPlanAdmin(ViewOnUiMixin, HOPEModelAdminBase):
         "total_undelivered_quantity_usd",
         "steficon_targeting_applied_date",
         "steficon_applied_date",
-        "export_tag",
         "exclude_household_error",
         "status_date",
     )
 
     def get_form(self, request: HttpRequest, obj: Any = None, change: bool = False, **kwargs: Any) -> type[ModelForm]:
-        request._payment_plan_obj = obj
+        request._payment_list_obj = obj
         return super().get_form(request, obj, change, **kwargs)
 
     def formfield_for_manytomany(
         self, db_field: ManyToManyField, request: HttpRequest, **kwargs: Any
     ) -> ModelMultipleChoiceField | None:
         if db_field.name == "payment_plan_purposes":
-            obj = getattr(request, "_payment_plan_obj", None)
+            obj = getattr(request, "_payment_list_obj", None)
             if obj is not None:
                 kwargs["queryset"] = obj.program_cycle.program.payment_plan_purposes.all()
         return super().formfield_for_manytomany(db_field, request, **kwargs)
 
-    def save_model(self, request: HttpRequest, obj: PaymentPlan, form: Any, change: bool) -> None:
-        old_payment_plan = copy_model_object(PaymentPlan.objects.get(pk=obj.pk)) if change and obj.pk else None
+    def save_model(self, request: HttpRequest, obj: PaymentList, form: Any, change: bool) -> None:
+        old_payment_list = copy_model_object(PaymentList.objects.get(pk=obj.pk)) if change and obj.pk else None
         super().save_model(request, obj, form, change)
         # skip a no-op log when an edit touched only fields outside ACTIVITY_LOG_MAPPING
-        if old_payment_plan is not None and not create_diff(old_payment_plan, obj, PaymentPlan.ACTIVITY_LOG_MAPPING):
+        if old_payment_list is not None and not create_diff(old_payment_list, obj, PaymentList.ACTIVITY_LOG_MAPPING):
             return
         log_create(
-            mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
+            mapping=PaymentList.ACTIVITY_LOG_MAPPING,
             business_area_field="business_area",
             user=request.user,
             programs=obj.program.pk,
-            old_object=old_payment_plan,
+            old_object=old_payment_list,
             new_object=obj,
         )
 
-    def frontend_url(self, obj: PaymentPlan) -> str:
+    def frontend_url(self, obj: PaymentList) -> str:
         raise NotImplementedError
 
     def has_add_permission(self, request: HttpRequest) -> bool:
@@ -327,90 +326,52 @@ class BasePaymentPlanAdmin(ViewOnUiMixin, HOPEModelAdminBase):
         return is_root(request)
 
 
-@admin.register(PaymentPlan)
-class PaymentPlanAdmin(BasePaymentPlanAdmin, PaymentPlanCeleryTasksMixin):
-    list_display = BasePaymentPlanAdmin.list_display + (
+@admin.register(PaymentList)
+class PaymentListAdmin(BasePaymentListAdmin, PaymentListCeleryTasksMixin):
+    list_display = BasePaymentListAdmin.list_display + (
         "background_action_status",
         "use_payment_gateway",
         "plan_type",
     )
-    list_filter = BasePaymentPlanAdmin.list_filter + (
+    list_filter = BasePaymentListAdmin.list_filter + (
         ("background_action_status", ChoicesFieldComboFilter),
-        "use_payment_gateway",
+        "payment_plan__use_payment_gateway",
         ("plan_type", ChoicesFieldComboFilter),
     )
-    readonly_fields = BasePaymentPlanAdmin.readonly_fields + ("plan_type",)
-    inlines = [FundsCommitmentHeaderInline, PaymentInstructionInline]
+    readonly_fields = BasePaymentListAdmin.readonly_fields + ("plan_type", "use_payment_gateway")
+    list_select_related = ("business_area", "program_cycle", "payment_plan", "follow_up_instruction")
+    inlines = [PaymentInstructionInline]
 
     def get_queryset(self, request: HttpRequest) -> QuerySet:
-        return super().get_queryset(request).exclude(status__in=PaymentPlan.PRE_PAYMENT_PLAN_STATUSES)
+        return super().get_queryset(request).exclude(status__in=PaymentList.PRE_PAYMENT_LIST_STATUSES)
 
-    @button(permission="payment.view_paymentplan")
+    @button(permission="payment.view_paymentlist")
     def western_union_reports(self, request: HttpRequest, pk: "UUID") -> HttpResponseRedirect:
-        url = reverse("admin:payment_westernunionpaymentplanreport_changelist")
-        return HttpResponseRedirect(f"{url}?payment_plan__id__exact={pk}")
+        url = reverse("admin:payment_westernunionpaymentlistreport_changelist")
+        return HttpResponseRedirect(f"{url}?payment_list__id__exact={pk}")
 
-    def frontend_url(self, obj: PaymentPlan) -> str:
+    def frontend_url(self, obj: PaymentList) -> str:
         base = f"/{obj.business_area.slug}/programs/{obj.program.code}"
-        if obj.status in PaymentPlan.PRE_PAYMENT_PLAN_STATUSES:
+        if obj.status in PaymentList.PRE_PAYMENT_LIST_STATUSES:
             return f"{base}/target-population/{obj.id}"
-        if obj.plan_type == PaymentPlan.PlanType.FOLLOW_UP:
-            return f"{base}/payment-module/followup-payment-plans/{obj.id}"
-        if obj.plan_type in (PaymentPlan.PlanType.TOP_UP, PaymentPlan.PlanType.TOP_UP_AMENDMENT):
-            return f"{base}/payment-module/top-up-payment-plans/{obj.id}"
-        return f"{base}/payment-module/payment-plans/{obj.id}"
-
-    @button(
-        visible=lambda btn: btn.original.status == PaymentPlan.Status.ACCEPTED,
-        permission="payment.recalculate_exchange_rate",
-    )
-    def recalculate_exchange_rate(self, request: HttpRequest, pk: "UUID") -> HttpResponse:
-        if request.method == "POST":
-            with transaction.atomic():
-                payment_plan = PaymentPlan.objects.get(pk=pk)
-                if payment_plan.currency is None:
-                    raise ValueError("PaymentPlan.currency must not be None")
-                updates = []
-                currency_exchange_date = payment_plan.currency_exchange_date
-                for payment in payment_plan.eligible_payments:
-                    payment.entitlement_quantity_usd = get_quantity_in_usd(
-                        amount=payment.entitlement_quantity,
-                        currency=payment_plan.currency,
-                        exchange_rate=payment_plan.exchange_rate,
-                        currency_exchange_date=currency_exchange_date,
-                    )
-                    payment.delivered_quantity_usd = get_quantity_in_usd(
-                        amount=payment.delivered_quantity,
-                        currency=payment_plan.currency,
-                        exchange_rate=payment_plan.exchange_rate,
-                        currency_exchange_date=currency_exchange_date,
-                    )
-                    updates.append(payment)
-                Payment.objects.bulk_update(updates, ["entitlement_quantity_usd", "delivered_quantity_usd"])
-                payment_plan.update_money_fields()
-
-                # invalidate cache for program cycle list
-                payment_plan.program_cycle.save()
-            return redirect(reverse("admin:payment_paymentplan_change", args=[pk]))
-        return confirm_action(
-            modeladmin=self,
-            request=request,
-            action=self.recalculate_exchange_rate,
-            message="Do you confirm to recalculate USD values based on provided exchange rate?",
-        )
+        if obj.plan_type == PaymentList.PlanType.FOLLOW_UP:
+            return f"{base}/payment-module/followup-payment-lists/{obj.id}"
+        if obj.plan_type in (PaymentList.PlanType.TOP_UP, PaymentList.PlanType.TOP_UP_AMENDMENT):
+            return f"{base}/payment-module/top-up-payment-lists/{obj.id}"
+        return f"{base}/payment-module/payment-lists/{obj.id}"
 
     @button(
         visible=lambda btn: can_sync_with_payment_gateway(btn.original),
-        permission="payment.pm_sync_payment_plan_with_pg",
+        permission="payment.pm_sync_payment_list_with_pg",
     )
     def sync_with_payment_gateway(self, request: HttpRequest, pk: "UUID") -> HttpResponse:
         if request.method == "POST":
             from hope.apps.payment.services.payment_gateway import PaymentGatewayService
 
-            payment_plan = PaymentPlan.objects.get(pk=pk)
-            PaymentGatewayService(user_id=str(request.user.pk)).sync_payment_plan(payment_plan)
+            payment_list = PaymentList.objects.get(pk=pk)
+            PaymentGatewayService(user_id=str(request.user.pk)).sync_payment_list(payment_list)
 
-            return redirect(reverse("admin:payment_paymentplan_change", args=[pk]))
+            return redirect(reverse("admin:payment_paymentlist_change", args=[pk]))
         return confirm_action(
             modeladmin=self,
             request=request,
@@ -420,18 +381,18 @@ class PaymentPlanAdmin(BasePaymentPlanAdmin, PaymentPlanCeleryTasksMixin):
 
     @button(
         visible=lambda btn: can_sync_with_payment_gateway(btn.original),
-        permission="payment.pm_sync_payment_plan_with_pg",
+        permission="payment.pm_sync_payment_list_with_pg",
     )
     def sync_missing_records_with_payment_gateway(self, request: HttpRequest, pk: "UUID") -> HttpResponse:
         if request.method == "POST":
             from hope.apps.payment.services.payment_gateway import PaymentGatewayService
 
-            payment_plan = PaymentPlan.objects.get(pk=pk)
+            payment_list = PaymentList.objects.get(pk=pk)
             PaymentGatewayService(user_id=str(request.user.pk)).add_missing_records_to_payment_instructions(
-                payment_plan
+                payment_list
             )
 
-            return redirect(reverse("admin:payment_paymentplan_change", args=[pk]))
+            return redirect(reverse("admin:payment_paymentlist_change", args=[pk]))
         return confirm_action(
             modeladmin=self,
             request=request,
@@ -439,25 +400,113 @@ class PaymentPlanAdmin(BasePaymentPlanAdmin, PaymentPlanCeleryTasksMixin):
             message="Do you confirm to Sync with Payment Gateway missing Records?",
         )
 
-    @button(permission="payment.view_paymentplan")
+    @button(permission="payment.view_paymentlist")
     def related_configs(self, request: HttpRequest, pk: "UUID") -> HttpResponse:
-        obj = PaymentPlan.objects.get(pk=pk)
+        obj = PaymentList.objects.get(pk=pk)
         url = reverse("admin:payment_deliverymechanismconfig_changelist")
         if not obj.delivery_mechanism or not obj.financial_service_provider:
             self.message_user(
                 request,
-                "This payment plan has no delivery mechanism or financial service provider assigned.",
+                "This payment list has no delivery mechanism or financial service provider assigned.",
                 level="warning",
             )
             return HttpResponseRedirect(url)
         flt = f"delivery_mechanism__exact={obj.delivery_mechanism.id}&fsp__exact={obj.financial_service_provider.id}"
         return HttpResponseRedirect(f"{url}?{flt}")
 
-    @button(permission="payment.view_paymentplan")
+    @button(permission="payment.view_paymentlist")
     def payment_records(self, request: HttpRequest, pk: "UUID") -> HttpResponse:
         url = reverse("admin:payment_payment_changelist")
         filter_by_parent = f"&parent__exact={str(pk)}"
         return HttpResponseRedirect(f"{url}?{filter_by_parent}")
+
+    @button(
+        visible=lambda btn: can_retry_payment_gateway_send(btn.original),
+        permission="payment.pm_sync_payment_list_with_pg",
+    )
+    def retry_payment_gateway_send(self, request: HttpRequest, pk: "UUID") -> HttpResponse:
+        if request.method == "POST":
+            payment_list = PaymentList.objects.select_related("program_cycle").get(pk=pk)
+            program_id = payment_list.program_cycle.program_id
+            old_payment_list = copy_model_object(payment_list)
+            payment_list = PaymentListService(payment_list).execute_update_status_action(
+                input_data={"action": PaymentList.Action.SEND_TO_PAYMENT_GATEWAY},
+                user=request.user,
+                as_manager=True,
+            )
+            log_create(
+                mapping=PaymentList.ACTIVITY_LOG_MAPPING,
+                business_area_field="business_area",
+                user=request.user,
+                programs=program_id,
+                old_object=old_payment_list,
+                new_object=payment_list,
+            )
+            self.message_user(request, "Payment Gateway send retry started", level="success")
+            return redirect(reverse("admin:payment_paymentlist_change", args=[pk]))
+        return confirm_action(
+            modeladmin=self,
+            request=request,
+            action=self.retry_payment_gateway_send,
+            message="Do you confirm retrying the Payment Gateway send for this Payment List?",
+        )
+
+
+@admin.register(PaymentPlan)
+class PaymentPlanAdmin(ViewOnUiMixin, HOPEModelAdminBase):
+    list_display = ("unicef_id", "name", "cycle")
+    search_fields = ("name", "unicef_id")
+    list_filter = (("cycle__program__business_area", AutoCompleteFilter),)
+    inlines = [FundsCommitmentHeaderInline]
+
+    readonly_fields = (
+        "id",
+        "created_at",
+        "updated_at",
+        "unicef_id",
+        "cycle",
+        "name",
+        "financial_service_provider",
+        "currency",
+        "internal_data",
+        "dispersion_start_date",
+        "dispersion_end_date",
+        "exchange_rate",
+        "custom_exchange_rate",
+        "custom_exchange_rate_set_by",
+    )
+
+    def frontend_url(self, obj: PaymentPlan) -> str | None:
+        program = obj.cycle.program
+        return f"/{program.business_area.slug}/programs/{program.code}/payment-module/payment-plans/{obj.id}"
+
+    @button(permission="payment.view_paymentlist")
+    def payment_lists(self, request: HttpRequest, pk: "UUID") -> HttpResponseRedirect:
+        url = reverse("admin:payment_paymentlist_changelist")
+        return HttpResponseRedirect(f"{url}?payment_plan__id__exact={pk}")
+
+    @button(
+        label="Retry USD recalculation",
+        visible=lambda btn: (
+            btn.original.background_action_status == PaymentPlan.BackgroundActionStatus.RECALCULATING_ERROR
+        ),
+        permission="payment.recalculate_exchange_rate",
+    )
+    def retry_usd_recalculation(self, request: HttpRequest, pk: "UUID") -> HttpResponse:
+        if request.method == "POST":
+            payment_plan = PaymentPlan.objects.get(pk=pk)
+            if payment_plan.background_action_status != PaymentPlan.BackgroundActionStatus.RECALCULATING_ERROR:
+                self.message_user(request, "A failed payment plan USD recalculation is required", level=messages.ERROR)
+            else:
+                recalculate_owner_exchange_rate_async_task(payment_plan, str(request.user.pk), fetch_unore_rate=True)
+                self.message_user(request, "Payment Plan USD recalculation retry queued", level=messages.SUCCESS)
+            return redirect(reverse("admin:payment_paymentplan_change", args=[pk]))
+        return confirm_action(
+            modeladmin=self,
+            request=request,
+            action=self.retry_usd_recalculation,
+            message="Retry USD recalculation for every Payment List in this payment plan?",
+        )
 
     @button(
         visible=lambda btn: can_send_to_vision(btn.original),
@@ -473,39 +522,36 @@ class PaymentPlanAdmin(BasePaymentPlanAdmin, PaymentPlanCeleryTasksMixin):
             modeladmin=self,
             request=request,
             action=self.send_to_vision,
-            message="Do you confirm to send this payment plan to Vision?",
+            message="Do you confirm sending this Payment Plan to Vision?",
         )
 
     @button(
-        visible=lambda btn: can_recover_vision_funds_commitment(btn.original),
+        visible=lambda btn: can_recover_vision_funds_commitment_payment_plan(btn.original),
         permission="payment.pm_manage_vision_workflow",
         label="Assign Vision FC Headers",
     )
     def assign_vision_funds_commitment_headers(self, request: HttpRequest, pk: "UUID") -> HttpResponse:
-        payment_plan = PaymentPlan.objects.select_related("business_area", "created_by").get(pk=pk)
+        payment_plan = PaymentPlan.objects.select_related("cycle__program__business_area").get(pk=pk)
         form = VisionFundsCommitmentHeaderAssignmentForm(
             data=request.POST or None,
             payment_plan=payment_plan,
         )
         if request.method == "POST" and form.is_valid():
             try:
-                with transaction.atomic():
-                    locked_payment_plan = (
-                        PaymentPlan.objects.select_for_update().select_related("business_area", "created_by").get(pk=pk)
-                    )
-                    VisionService.recover_with_funds_commitment_headers(
-                        locked_payment_plan,
-                        form.cleaned_data["funds_commitment_headers"],
-                    )
-            except FundsCommitmentAssignmentError:
-                form.add_error(
-                    "funds_commitment_headers",
-                    "Select one or more available Funds Commitment Headers.",
+                VisionService.recover_payment_plan_with_funds_commitment_headers(
+                    payment_plan, form.cleaned_data["funds_commitment_headers"]
                 )
+            except FundsCommitmentAssignmentError as error:
+                if error.status == VisionStatus.FC_NOT_FOUND:
+                    form.add_error("funds_commitment_headers", "Select one or more available Funds Commitment Headers.")
+                else:
+                    form.add_error(
+                        None, "The payment plan's Vision recovery is no longer available. Refresh and try again."
+                    )
             else:
                 self.message_user(
                     request,
-                    "Funds Commitment Headers assigned and the Vision flow continued.",
+                    "Funds Commitment Headers assigned and the Payment Plan released.",
                     level=messages.SUCCESS,
                 )
                 return redirect(reverse("admin:payment_paymentplan_change", args=[pk]))
@@ -521,152 +567,87 @@ class PaymentPlanAdmin(BasePaymentPlanAdmin, PaymentPlanCeleryTasksMixin):
         }
         return render(request, "admin/payment/assign_vision_funds_commitment_items.html", context)
 
-    @button(
-        visible=lambda btn: can_retry_payment_gateway_send(btn.original),
-        permission="payment.pm_sync_payment_plan_with_pg",
-    )
-    def retry_payment_gateway_send(self, request: HttpRequest, pk: "UUID") -> HttpResponse:
-        if request.method == "POST":
-            payment_plan = PaymentPlan.objects.select_related("program_cycle").get(pk=pk)
-            program_id = payment_plan.program_cycle.program_id
-            old_payment_plan = copy_model_object(payment_plan)
-            payment_plan = PaymentPlanService(payment_plan).execute_update_status_action(
-                input_data={"action": PaymentPlan.Action.SEND_TO_PAYMENT_GATEWAY},
-                user=request.user,
-            )
-            log_create(
-                mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
-                business_area_field="business_area",
-                user=request.user,
-                programs=program_id,
-                old_object=old_payment_plan,
-                new_object=payment_plan,
-            )
-            self.message_user(request, "Payment Gateway send retry started", level="success")
-            return redirect(reverse("admin:payment_paymentplan_change", args=[pk]))
-        return confirm_action(
-            modeladmin=self,
-            request=request,
-            action=self.retry_payment_gateway_send,
-            message="Do you confirm retrying the Payment Gateway send for this Payment Plan?",
-        )
-
-
-@admin.register(PaymentPlanGroup)
-class PaymentPlanGroupAdmin(ViewOnUiMixin, HOPEModelAdminBase):
-    list_display = ("unicef_id", "name", "cycle")
-    search_fields = ("name", "unicef_id")
-    list_filter = (("cycle__program__business_area", AutoCompleteFilter),)
-
-    readonly_fields = (
-        "id",
-        "created_at",
-        "updated_at",
-        "unicef_id",
-        "cycle",
-        "name",
-    )
-
-    def frontend_url(self, obj: PaymentPlanGroup) -> str | None:
-        program = obj.cycle.program
-        return f"/{program.business_area.slug}/programs/{program.code}/payment-module/groups/{obj.id}"
-
-    @button(permission="payment.view_paymentplan")
-    def payment_plans(self, request: HttpRequest, pk: "UUID") -> HttpResponseRedirect:
-        url = reverse("admin:payment_paymentplan_changelist")
-        return HttpResponseRedirect(f"{url}?payment_plan_group__id__exact={pk}")
-
-    @button(permission="payment.view_paymentplan")
+    @button(permission="payment.view_paymentlist")
     def target_populations(self, request: HttpRequest, pk: "UUID") -> HttpResponseRedirect:
         url = reverse("admin:payment_targetpopulation_changelist")
-        return HttpResponseRedirect(f"{url}?payment_plan_group__id__exact={pk}")
+        return HttpResponseRedirect(f"{url}?payment_plan__id__exact={pk}")
 
-    @button(permission="payment.restart_exporting_payment_plan_list")
-    def reexport_batch(self, request: HttpRequest, pk: "UUID") -> HttpResponse:
+    @button(permission="payment.restart_exporting_payment_list")
+    def reexport_payment_list(self, request: HttpRequest, pk: "UUID") -> HttpResponse:
         from hope.apps.payment.celery_tasks import (
-            export_payment_plan_group_delivery_xlsx_async_task,
+            export_payment_plan_delivery_xlsx_async_task,
         )
 
-        group = PaymentPlanGroup.objects.get(pk=pk)
+        payment_plan = PaymentPlan.objects.get(pk=pk)
         if request.method == "POST":
-            form = BatchReexportForm(request.POST, payment_plan_group=group)
+            form = GroupReexportForm(request.POST)
             if form.is_valid():
-                export_tag = int(form.cleaned_data["export_tag"])
-                if not group.can_reexport_batch(export_tag):
-                    messages.error(
-                        request,
-                        f"Batch {export_tag} cannot be re-exported: it has no stored export file.",
-                    )
-                    return redirect(reverse("admin:payment_paymentplangroup_change", args=[pk]))
+                if not (payment_plan.can_regenerate_export and payment_plan.can_start_background_action):
+                    messages.error(request, "The payment list cannot be re-exported: no stored export file.")
+                    return redirect(reverse("admin:payment_paymentplan_change", args=[pk]))
                 template_obj = form.cleaned_data.get("template")
                 fsp_xlsx_template_id = str(template_obj.id) if template_obj else None
-                old_group = copy_model_object(group)
-                group.background_action_status = PaymentPlanGroup.BackgroundActionStatus.XLSX_EXPORTING
-                group.save(update_fields=["background_action_status"])
+                old_payment_plan = copy_model_object(payment_plan)
+                payment_plan.background_action_status = PaymentPlan.BackgroundActionStatus.XLSX_EXPORTING
+                payment_plan.save(update_fields=["background_action_status"])
                 log_create(
-                    mapping=PaymentPlanGroup.ACTIVITY_LOG_MAPPING,
+                    mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
                     business_area_field="cycle.program.business_area",
                     user=request.user,
-                    programs=group.cycle.program.pk,
-                    old_object=old_group,
-                    new_object=group,
+                    programs=payment_plan.cycle.program.pk,
+                    old_object=old_payment_plan,
+                    new_object=payment_plan,
                 )
-                export_payment_plan_group_delivery_xlsx_async_task(
-                    group, str(request.user.pk), fsp_xlsx_template_id, export_tag
-                )
-                messages.success(request, f"Re-export started for batch {export_tag}.")
-                return redirect(reverse("admin:payment_paymentplangroup_change", args=[pk]))
+                export_payment_plan_delivery_xlsx_async_task(payment_plan, str(request.user.pk), fsp_xlsx_template_id)
+                messages.success(request, "Re-export of the payment list started.")
+                return redirect(reverse("admin:payment_paymentplan_change", args=[pk]))
         else:
-            form = BatchReexportForm(payment_plan_group=group)
+            form = GroupReexportForm()
 
         return render(
             request,
-            "admin/payment/reexport_batch_form.html",
-            {"form": form, "payment_plan_group": group, "title": "Re-export a delivered batch"},
+            "admin/payment/reexport_payment_plan_form.html",
+            {"form": form, "payment_plan": payment_plan, "title": "Re-export the payment list"},
         )
 
     @button(
-        visible=lambda btn: (
-            btn.original.background_action_status == PaymentPlanGroup.BackgroundActionStatus.XLSX_EXPORTING
-        ),
-        permission="payment.restart_exporting_payment_plan_list",
+        visible=lambda btn: btn.original.background_action_status == PaymentPlan.BackgroundActionStatus.XLSX_EXPORTING,
+        permission="payment.restart_exporting_payment_list",
     )
     def restart_exporting_delivery_xlsx(self, request: HttpRequest, pk: "UUID") -> HttpResponse:
         from hope.apps.payment.celery_tasks import (
-            export_payment_plan_group_delivery_xlsx_async_task,
+            export_payment_plan_delivery_xlsx_async_task,
         )
 
         if request.method == "POST":
-            group = PaymentPlanGroup.objects.get(pk=pk)
+            payment_plan = PaymentPlan.objects.get(pk=pk)
 
             active_jobs = [
                 job
                 for job in AsyncJob.objects.filter(
-                    content_type=get_content_type_for_model(group),
-                    object_id=str(group.pk),
-                    job_name="export_payment_plan_group_delivery_xlsx_async_task",
+                    content_type=get_content_type_for_model(payment_plan),
+                    object_id=str(payment_plan.pk),
+                    job_name="export_payment_plan_delivery_xlsx_async_task",
                 )
                 if job.task_status in job.ACTIVE_STATUSES
             ]
 
             if not active_jobs:
-                messages.error(request, "There is no active export job for this payment plan group.")
-                return redirect(reverse("admin:payment_paymentplangroup_change", args=[pk]))
+                messages.error(request, "There is no active export job for this payment plan.")
+                return redirect(reverse("admin:payment_paymentplan_change", args=[pk]))
 
             user_id = str(request.user.pk)
             for job in active_jobs:
                 config = job.config
                 job.terminate()
-                export_payment_plan_group_delivery_xlsx_async_task(
-                    group,
+                export_payment_plan_delivery_xlsx_async_task(
+                    payment_plan,
                     user_id,
                     config.get("fsp_xlsx_template_id"),
-                    config.get("export_tag"),
-                    config.get("plan_type"),
                 )
 
             messages.success(request, "Successfully restarted delivery XLSX export.")
-            return redirect(reverse("admin:payment_paymentplangroup_change", args=[pk]))
+            return redirect(reverse("admin:payment_paymentplan_change", args=[pk]))
 
         return confirm_action(
             modeladmin=self,
@@ -679,44 +660,44 @@ class PaymentPlanGroupAdmin(ViewOnUiMixin, HOPEModelAdminBase):
         visible=lambda btn: (
             btn.original.background_action_status
             in {
-                PaymentPlanGroup.BackgroundActionStatus.XLSX_IMPORTING_RECONCILIATION,
-                PaymentPlanGroup.BackgroundActionStatus.XLSX_IMPORT_ERROR,
+                PaymentPlan.BackgroundActionStatus.XLSX_IMPORTING_RECONCILIATION,
+                PaymentPlan.BackgroundActionStatus.XLSX_IMPORT_ERROR,
             }
         ),
         permission="payment.restart_importing_reconciliation_xlsx_file",
     )
     def restart_importing_reconciliation_xlsx_file(self, request: HttpRequest, pk: "UUID") -> HttpResponse:
-        from hope.apps.payment.celery_tasks import import_payment_plan_group_delivery_from_xlsx_async_task
+        from hope.apps.payment.celery_tasks import import_payment_plan_delivery_from_xlsx_async_task
 
         if request.method == "POST":
-            group = PaymentPlanGroup.objects.get(pk=pk)
-            if not group.delivery_import_file:
-                messages.error(request, "There is no import file for this payment plan group.")
-                return redirect(reverse("admin:payment_paymentplangroup_change", args=[pk]))
+            payment_plan = PaymentPlan.objects.get(pk=pk)
+            if not payment_plan.delivery_import_file:
+                messages.error(request, "There is no import file for this payment plan.")
+                return redirect(reverse("admin:payment_paymentplan_change", args=[pk]))
 
-            task_name = "import_payment_plan_group_delivery_from_xlsx_async_task"
+            task_name = "import_payment_plan_delivery_from_xlsx_async_task"
             active_jobs = [
                 job
                 for job in AsyncJob.objects.filter(
-                    content_type=get_content_type_for_model(group),
-                    object_id=str(group.pk),
+                    content_type=get_content_type_for_model(payment_plan),
+                    object_id=str(payment_plan.pk),
                     job_name=task_name,
                 )
                 if job.task_status in job.ACTIVE_STATUSES
             ]
 
             can_restart_failed_import = (
-                group.background_action_status == PaymentPlanGroup.BackgroundActionStatus.XLSX_IMPORT_ERROR
+                payment_plan.background_action_status == PaymentPlan.BackgroundActionStatus.XLSX_IMPORT_ERROR
             )
             if active_jobs or can_restart_failed_import:
                 for job in active_jobs:
                     job.terminate()
-                import_options = group.delivery_import_file.extras
-                group.background_action_status = PaymentPlanGroup.BackgroundActionStatus.XLSX_IMPORTING_RECONCILIATION
-                group.save(update_fields=["background_action_status", "updated_at"])
-                original_uploader_id = group.delivery_import_file.created_by_id
-                import_payment_plan_group_delivery_from_xlsx_async_task(
-                    group,
+                import_options = payment_plan.delivery_import_file.extras
+                payment_plan.background_action_status = PaymentPlan.BackgroundActionStatus.XLSX_IMPORTING_RECONCILIATION
+                payment_plan.save(update_fields=["background_action_status", "updated_at"])
+                original_uploader_id = payment_plan.delivery_import_file.created_by_id
+                import_payment_plan_delivery_from_xlsx_async_task(
+                    payment_plan,
                     str(request.user.pk),
                     override=import_options.get(OVERRIDE_OPTION, False),
                     null_delivery_policy=import_options.get(
@@ -727,9 +708,9 @@ class PaymentPlanGroupAdmin(ViewOnUiMixin, HOPEModelAdminBase):
                 )
                 messages.success(request, "Successfully restarted reconciliation import.")
             else:
-                messages.error(request, f"There is no current {task_name} for this payment plan group.")
+                messages.error(request, f"There is no current {task_name} for this payment plan.")
 
-            return redirect(reverse("admin:payment_paymentplangroup_change", args=[pk]))
+            return redirect(reverse("admin:payment_paymentplan_change", args=[pk]))
 
         return confirm_action(
             modeladmin=self,
@@ -779,7 +760,7 @@ class PaymentAdmin(ViewOnUiMixin, FieldPkCursorPaginatorAdmin, AdminAdvancedFilt
         "status",
         "delivery_date",
         ("financial_service_provider__name", "Service Provider"),
-        ("parent", "Payment Plan"),
+        ("parent", "Payment List"),
     )
     cursor_ordering_field = "-created_at"
     inlines = [PaymentHouseholdSnapshotInline]
@@ -901,12 +882,13 @@ class PaymentAdmin(ViewOnUiMixin, FieldPkCursorPaginatorAdmin, AdminAdvancedFilt
 @admin.register(PaymentPlanSupportingDocument)
 class PaymentPlanSupportingDocumentAdmin(HOPEModelAdminBase):
     search_fields = ("title",)
-    list_display = ("title", "payment_plan", "created_by", "uploaded_at")
+    list_display = ("title", "payment_plan", "follow_up_instruction", "created_by", "uploaded_at")
     list_filter = (("created_by", AutoCompleteFilter),)
     readonly_fields = (
         "uploaded_at",
         "created_by",
         "payment_plan",
+        "follow_up_instruction",
     )
 
     def has_add_permission(self, request: HttpRequest) -> bool:

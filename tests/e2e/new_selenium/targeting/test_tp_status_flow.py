@@ -4,7 +4,7 @@ from e2e.new_selenium.conftest import grant_permission
 from extras.test_utils.factories import HouseholdFactory
 from extras.test_utils.selenium import HopeTestBrowser
 from hope.apps.account.permissions import Permissions
-from hope.models import BusinessArea, Household, PaymentPlan, User
+from hope.models import BusinessArea, Household, PaymentList, User
 
 from .conftest import BUILT_TP_NAME, CYCLE_TITLE, GROUP_NAME, HOUSEHOLDS_COUNT, PURPOSE_NAME, STATUS, tp_url
 
@@ -12,7 +12,7 @@ pytestmark = pytest.mark.django_db()
 
 
 @pytest.fixture
-def household_added_after_build(built_tp: PaymentPlan) -> Household:
+def household_added_after_build(built_tp: PaymentList) -> Household:
     return HouseholdFactory(size=2, business_area=built_tp.business_area, program=built_tp.program_cycle.program)
 
 
@@ -20,7 +20,7 @@ def test_lock_hides_edit_actions_and_unlock_restores_them(
     browser: HopeTestBrowser,
     user_with_no_permissions: User,
     business_area: BusinessArea,
-    built_tp: PaymentPlan,
+    built_tp: PaymentList,
 ) -> None:
     with grant_permission(
         user_with_no_permissions,
@@ -44,21 +44,21 @@ def test_lock_hides_edit_actions_and_unlock_restores_them(
         browser.assert_element_absent('button[data-cy="button-rebuild"]')
         browser.assert_element_absent('button[data-cy="button-delete"]')
         built_tp.refresh_from_db()
-        assert built_tp.status == PaymentPlan.Status.TP_LOCKED
+        assert built_tp.status == PaymentList.Status.TP_LOCKED
 
         browser.click('button[data-cy="button-target-population-unlocked"]')
         browser.wait_for_text("OPEN", STATUS)
         browser.wait_for_element_visible('[data-cy="button-edit"]')
         browser.assert_element_absent('button[data-cy="button-target-population-unlocked"]')
         built_tp.refresh_from_db()
-        assert built_tp.status == PaymentPlan.Status.TP_OPEN
+        assert built_tp.status == PaymentList.Status.TP_OPEN
 
 
-def test_mark_ready_turns_tp_into_draft_payment_plan(
+def test_mark_ready_turns_tp_into_draft_payment_list(
     browser: HopeTestBrowser,
     user_with_no_permissions: User,
     business_area: BusinessArea,
-    locked_tp: PaymentPlan,
+    locked_tp: PaymentList,
 ) -> None:
     with grant_permission(
         user_with_no_permissions,
@@ -75,7 +75,7 @@ def test_mark_ready_turns_tp_into_draft_payment_plan(
         browser.click('button[data-cy="button-target-population-modal-send-to-hope"]')
         browser.wait_for_text("READY FOR PAYMENT MODULE", STATUS)
         locked_tp.refresh_from_db()
-        assert locked_tp.status == PaymentPlan.Status.DRAFT
+        assert locked_tp.status == PaymentList.Status.DRAFT
         browser.assert_element_absent('button[data-cy="button-target-population-unlocked"]')
 
 
@@ -83,7 +83,7 @@ def test_rebuild_picks_up_newly_matching_households(
     browser: HopeTestBrowser,
     user_with_no_permissions: User,
     business_area: BusinessArea,
-    built_tp: PaymentPlan,
+    built_tp: PaymentList,
     household_added_after_build: Household,
 ) -> None:
     with grant_permission(
@@ -99,7 +99,7 @@ def test_rebuild_picks_up_newly_matching_households(
         browser.wait_for_text("3", HOUSEHOLDS_COUNT)
 
         browser.click('button[data-cy="button-rebuild"]')
-        browser.wait_for_text("Payment Plan has been rebuilt.")
+        browser.wait_for_text("Payment List has been rebuilt.")
         browser.wait_for_text("4", HOUSEHOLDS_COUNT)
         browser.assert_text(household_added_after_build.unicef_id, "table")
         assert built_tp.payment_items.count() == 4
@@ -109,7 +109,7 @@ def test_delete_open_tp_removes_it_from_the_list(
     browser: HopeTestBrowser,
     user_with_no_permissions: User,
     business_area: BusinessArea,
-    built_tp: PaymentPlan,
+    built_tp: PaymentList,
 ) -> None:
     with grant_permission(
         user_with_no_permissions,
@@ -127,14 +127,14 @@ def test_delete_open_tp_removes_it_from_the_list(
         browser.wait_for_text("Target Population Deleted")
         browser.wait_for_text("No results", "table")
         browser.assert_text_not_visible(BUILT_TP_NAME, "table")
-        assert not PaymentPlan.objects.filter(id=built_tp.id).exists()
+        assert not PaymentList.objects.filter(id=built_tp.id).exists()
 
 
 def test_duplicate_locked_tp_creates_open_copy(
     browser: HopeTestBrowser,
     user_with_no_permissions: User,
     business_area: BusinessArea,
-    locked_tp: PaymentPlan,
+    locked_tp: PaymentList,
 ) -> None:
     with grant_permission(
         user_with_no_permissions,
@@ -142,7 +142,7 @@ def test_duplicate_locked_tp_creates_open_copy(
         Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS,
         Permissions.TARGETING_VIEW_DETAILS,
         Permissions.TARGETING_DUPLICATE,
-        Permissions.PM_PAYMENT_PLAN_GROUP_VIEW_LIST,
+        Permissions.PM_PAYMENT_PLAN_VIEW_LIST,
         Permissions.PM_PROGRAMME_CYCLE_VIEW_LIST,
     ):
         browser.login(username="noperm_user")
@@ -153,8 +153,8 @@ def test_duplicate_locked_tp_creates_open_copy(
         browser.type('input[name="name"]', "Copy of locked TP")
         browser.click('[data-cy="filters-program-cycle-autocomplete"]')
         browser.select_listbox_element(CYCLE_TITLE)
-        browser.wait_for_element_clickable('[data-cy="filters-payment-plan-group-autocomplete"] input')
-        browser.click('[data-cy="filters-payment-plan-group-autocomplete"]')
+        browser.wait_for_element_clickable('[data-cy="filters-payment-plan-autocomplete"] input')
+        browser.click('[data-cy="filters-payment-plan-autocomplete"]')
         browser.select_listbox_element(GROUP_NAME)
         browser.select_chip_option(PURPOSE_NAME, '[data-cy="input-payment-plan-purposes"]')
         browser.click('[role="dialog"] [data-cy="button-target-population-duplicate"]')
@@ -163,4 +163,4 @@ def test_duplicate_locked_tp_creates_open_copy(
         browser.wait_for_text("OPEN", STATUS)
         browser.wait_for_text("3", HOUSEHOLDS_COUNT)
         locked_tp.refresh_from_db()
-        assert locked_tp.status == PaymentPlan.Status.TP_LOCKED
+        assert locked_tp.status == PaymentList.Status.TP_LOCKED

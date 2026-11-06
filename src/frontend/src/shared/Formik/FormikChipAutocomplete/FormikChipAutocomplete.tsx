@@ -97,7 +97,7 @@ export function FormikChipAutocomplete({
             return isLocked ? (
               <Tooltip
                 key={key}
-                title={t('Already used in a Payment Plan')}
+                title={t('Already used in a Payment List')}
                 arrow
               >
                 <span>{chip}</span>

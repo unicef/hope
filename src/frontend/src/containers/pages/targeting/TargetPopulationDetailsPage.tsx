@@ -21,7 +21,7 @@ export const TargetPopulationDetailsPage = (): ReactElement => {
 
   const { businessAreaSlug, programCode } = useBaseUrl();
   const {
-    data: paymentPlan,
+    data: paymentList,
     isLoading: loading,
     error,
   } = useQuery<TargetPopulationDetail>({
@@ -49,7 +49,7 @@ export const TargetPopulationDetailsPage = (): ReactElement => {
     },
   });
 
-  if (loading && !paymentPlan) return <LoadingComponent />;
+  if (loading && !paymentList) return <LoadingComponent />;
 
   if (isPermissionDeniedError(error))
     return <PermissionDenied permission={PERMISSIONS.TARGETING_VIEW_DETAILS} />;
@@ -58,12 +58,12 @@ export const TargetPopulationDetailsPage = (): ReactElement => {
     hasPermissions(PERMISSIONS.TARGETING_DUPLICATE, permissions) &&
     // The duplicate dialog needs the cycle list to pick a cycle.
     hasPermissions(PERMISSIONS.PM_PROGRAMME_CYCLE_VIEW_LIST, permissions) &&
-    Boolean(paymentPlan?.rules);
+    Boolean(paymentList?.rules);
 
   return (
     <>
       <TargetPopulationPageHeader
-        paymentPlan={paymentPlan}
+        paymentList={paymentList}
         canEdit={hasPermissions(PERMISSIONS.TARGETING_UPDATE, permissions)}
         canRemove={hasPermissions(PERMISSIONS.TARGETING_REMOVE, permissions)}
         canDuplicate={canDuplicate}
@@ -71,12 +71,12 @@ export const TargetPopulationDetailsPage = (): ReactElement => {
         canUnlock={hasPermissions(PERMISSIONS.TARGETING_UNLOCK, permissions)}
         canSend={hasPermissions(PERMISSIONS.TARGETING_SEND, permissions)}
       />
-      <TargetPopulationDetails targetPopulation={paymentPlan} />
+      <TargetPopulationDetails targetPopulation={paymentList} />
       <TargetPopulationCore
-        id={paymentPlan?.id}
-        targetPopulation={paymentPlan}
+        id={paymentList?.id}
+        targetPopulation={paymentList}
         permissions={permissions}
-        screenBeneficiary={paymentPlan?.program?.screenBeneficiary}
+        screenBeneficiary={paymentList?.program?.screenBeneficiary}
       />
     </>
   );

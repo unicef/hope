@@ -21,7 +21,7 @@ VISION_RESPONSE_OK = "OK"
 VISION_RESPONSE_KO = "KO"
 VISION_CALLBACK_RECEIVED_MESSAGE = "Callback received"
 VISION_INVALID_CALLBACK_MESSAGE = "Invalid callback payload"
-VISION_PAYMENT_PLAN_NOT_FOUND_MESSAGE = "Payment plan not found"
+VISION_PAYMENT_LIST_NOT_FOUND_MESSAGE = "Payment Plan not found"
 VISION_PAYPLAN_ID_MISSING_MESSAGE = "vision_payplanSno is required"
 VISION_FC_NOT_FOUND_MESSAGE = "FC not found"
 VISION_FC_AMBIGUOUS_MESSAGE = "Multiple FC headers found"
@@ -68,14 +68,14 @@ class PaymentPlanCallbackView(HOPEAPIView, APIView):
     @staticmethod
     def _get_payment_plan(payplan_sno: str) -> PaymentPlan:
         return (
-            PaymentPlan.objects.select_for_update()
-            .select_related("business_area", "created_by")
+            PaymentPlan.objects.select_for_update(of=("self",))
+            .select_related("cycle__program__business_area", "created_by")
             .get(unicef_id=payplan_sno)
         )
 
     @staticmethod
-    def _append_log(payment_plan: Any, payload: dict, response_data: dict) -> None:
-        vision_data = payment_plan.internal_data.setdefault("vision", {})
+    def _append_log(payment_plan: PaymentPlan, payload: dict, response_data: dict) -> None:
+        vision_data = VisionService.vision_data(payment_plan)
         vision_data.setdefault("log", []).append(
             {
                 "timestamp": timezone.now().isoformat(),
@@ -96,7 +96,7 @@ class PaymentPlanCallbackView(HOPEAPIView, APIView):
         except PaymentPlan.DoesNotExist:
             return self._error_response(
                 serializer,
-                message=VISION_PAYMENT_PLAN_NOT_FOUND_MESSAGE,
+                message=VISION_PAYMENT_LIST_NOT_FOUND_MESSAGE,
                 http_status=status.HTTP_404_NOT_FOUND,
             )
 
@@ -113,7 +113,7 @@ class PaymentPlanCallbackView(HOPEAPIView, APIView):
             }
             if (
                 payment_plan.status == PaymentPlan.Status.IN_REVIEW
-                and payment_plan.vision_integration_enabled
+                and payment_plan.vision_managed
                 and payment_plan.vision_status in missing_id_failure_statuses
             ):
                 VisionService.set_status(payment_plan, VisionStatus.CALLBACK_FAILED)

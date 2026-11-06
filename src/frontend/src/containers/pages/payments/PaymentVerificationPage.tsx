@@ -11,12 +11,12 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { getFilterFromQueryParams } from '@utils/utils';
 import PaymentVerificationFilters from '../../tables/payments/PaymentVerificationTable/PaymentVerificationFilters';
-import { PaymentPlanStatusEnum } from '@restgenerated/models/PaymentPlanStatusEnum';
+import { PaymentListStatusEnum } from '@restgenerated/models/PaymentListStatusEnum';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import PaymentVerificationTable from '@containers/tables/payments/PaymentVerificationTable/PaymentVerificationTable';
 
 const initialFilter = {
-  status: [PaymentPlanStatusEnum.FINISHED, PaymentPlanStatusEnum.ACCEPTED],
+  status: [PaymentListStatusEnum.FINISHED, PaymentListStatusEnum.ACCEPTED],
   search: '',
   paymentVerificationSummaryStatus: [],
   serviceProvider: '',

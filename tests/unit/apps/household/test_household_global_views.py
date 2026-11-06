@@ -19,7 +19,7 @@ from extras.test_utils.factories import (
     IndividualRoleInHouseholdFactory,
     PartnerFactory,
     PaymentFactory,
-    PaymentPlanFactory,
+    PaymentListFactory,
     PaymentVerificationFactory,
     PaymentVerificationPlanFactory,
     PaymentVerificationSummaryFactory,
@@ -332,18 +332,18 @@ def household_office_search_context(api_client: Any) -> dict[str, Any]:
     household4, individuals4 = create_household_with_individuals(1)
 
     program_cycle = program.cycles.first()
-    payment_plan = PaymentPlanFactory(
+    payment_list = PaymentListFactory(
         business_area=afghanistan,
         program_cycle=program_cycle,
     )
     payment1 = PaymentFactory(
-        parent=payment_plan,
+        parent=payment_list,
         household=household1,
         head_of_household=individuals1[0],
         program=program,
     )
     payment2 = PaymentFactory(
-        parent=payment_plan,
+        parent=payment_list,
         household=household2,
         head_of_household=individuals2[0],
         program=program,
@@ -409,14 +409,14 @@ def household_office_search_context(api_client: Any) -> dict[str, Any]:
 
     household7, individuals7 = create_household_with_individuals(1)
     payment3 = PaymentFactory(
-        parent=payment_plan,
+        parent=payment_list,
         household=household7,
         head_of_household=individuals7[0],
         program=program,
     )
-    PaymentVerificationSummaryFactory(payment_plan=payment_plan)
+    PaymentVerificationSummaryFactory(payment_list=payment_list)
     payment_verification_plan = PaymentVerificationPlanFactory(
-        payment_plan=payment_plan,
+        payment_list=payment_list,
     )
     payment_verification = PaymentVerificationFactory(
         payment=payment3,
@@ -456,7 +456,7 @@ def household_office_search_context(api_client: Any) -> dict[str, Any]:
         "individuals8": individuals8,
         "payment1": payment1,
         "payment2": payment2,
-        "payment_plan": payment_plan,
+        "payment_list": payment_list,
         "grievance_ticket": grievance_ticket,
         "delete_household_ticket": delete_household_ticket,
         "needs_adjudication_ticket": needs_adjudication_ticket,
@@ -532,7 +532,7 @@ def test_search_by_payment_unicef_id(
     assert response.data["results"][0]["id"] == str(household_office_search_context["household1"].id)
 
 
-def test_search_by_payment_plan_unicef_id(
+def test_search_by_payment_list_unicef_id(
     create_user_role_with_permissions: Any, household_office_search_context: dict[str, Any]
 ) -> None:
     create_user_role_with_permissions(
@@ -542,13 +542,13 @@ def test_search_by_payment_plan_unicef_id(
         program=household_office_search_context["program"],
     )
 
-    household_office_search_context["payment_plan"].refresh_from_db()
+    household_office_search_context["payment_list"].refresh_from_db()
     response = household_office_search_context["api_client"].get(
         reverse(
             household_office_search_context["global_url_name"],
             kwargs={"business_area_slug": household_office_search_context["afghanistan"].slug},
         ),
-        {"office_search": household_office_search_context["payment_plan"].unicef_id},
+        {"office_search": household_office_search_context["payment_list"].unicef_id},
     )
     assert response.status_code == status.HTTP_200_OK
     assert len(response.data["results"]) == 3
