@@ -172,6 +172,7 @@ class IndividualSerializer(serializers.ModelSerializer):
     birth_date = serializers.DateField(validators=[BirthDateValidator()])
     accounts = AccountSerializerUpload(many=True, required=False)
     photo = serializers.CharField(allow_blank=True, required=False)
+    identification_key = serializers.CharField(required=False, allow_null=True, max_length=255)
 
     class Meta:
         model = PendingIndividual
@@ -212,6 +213,7 @@ class HouseholdSerializer(serializers.ModelSerializer):
     size = serializers.IntegerField(required=False, allow_null=True)
     consent_sharing = serializers.MultipleChoiceField(choices=DATA_SHARING_CHOICES, required=False)
     village = serializers.CharField(allow_blank=True, allow_null=True, required=False)
+    identification_key = serializers.CharField(required=False, allow_null=True, max_length=255)
     currency = CurrencySlugRelatedField(
         on_unchanged_code=OnUnchangedCode.ALWAYS_ACTIVE,
         required=False,

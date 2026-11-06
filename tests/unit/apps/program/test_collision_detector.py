@@ -1,12 +1,18 @@
+from datetime import UTC, date, datetime
+from decimal import Decimal
+from uuid import UUID
+
 import pytest
 
 from extras.test_utils.factories import (
+    BiometricDeduplicationEngineSimilarityPairFactory,
     BusinessAreaFactory,
     HouseholdFactory,
     IndividualFactory,
     ProgramFactory,
 )
 from hope.apps.household.const import (
+    DUPLICATE,
     FEMALE,
     MALE,
     REMOVED_BY_COLLISION,
@@ -17,6 +23,7 @@ from hope.models import (
     AccountType,
     Area,
     AreaType,
+    BiometricDedupeSimilarityPair,
     Country,
     Currency,
     Document,
@@ -420,7 +427,7 @@ def test_update_household_moves_the_merged_household_onto_the_active_currency(
     # merge does not keep the deprecated row when the imported code is the same.
     detector = IdentificationKeyCollisionDetector(program)
 
-    with django_assert_num_queries(90):
+    with django_assert_num_queries(91):
         detector.update_household(source_household_on_active_syp)
 
     destination_household_on_deprecated_syp.refresh_from_db()
@@ -710,3 +717,404 @@ def test_collision_skips_withdraw_if_individual_already_withdrawn(
     assert not IndividualRoleInHousehold.objects.filter(
         individual=already_withdrawn_individual, household=destination_household
     ).exists()
+
+
+@pytest.fixture
+def merge_destination_individual(destination_household: tuple[Household, Individual]) -> Individual:
+    return destination_household[0].individuals(manager="all_objects").get(identification_key="IND-KEY-002")
+
+
+@pytest.fixture
+def other_individual(program: Program) -> Individual:
+    return IndividualFactory(
+        rdi_merge_status="MERGED",
+        business_area=program.business_area,
+        program=program,
+        identification_key="IND-KEY-OTHER",
+    )
+
+
+@pytest.fixture
+def pair_source_other(
+    source_household: tuple[Household, Individual], other_individual: Individual, program: Program
+) -> BiometricDedupeSimilarityPair:
+    return BiometricDeduplicationEngineSimilarityPairFactory(
+        program=program,
+        individual1=source_household[1],
+        individual2=other_individual,
+        similarity_score=91,
+    )
+
+
+@pytest.fixture
+def pair_source_destination(
+    source_household: tuple[Household, Individual], merge_destination_individual: Individual, program: Program
+) -> BiometricDedupeSimilarityPair:
+    return BiometricDeduplicationEngineSimilarityPairFactory(
+        program=program,
+        individual1=source_household[1],
+        individual2=merge_destination_individual,
+    )
+
+
+@pytest.fixture
+def pair_source_only(source_household: tuple[Household, Individual], program: Program) -> BiometricDedupeSimilarityPair:
+    return BiometricDeduplicationEngineSimilarityPairFactory(
+        program=program,
+        individual1=source_household[1],
+        individual2=None,
+        similarity_score=0,
+        status_code=BiometricDedupeSimilarityPair.StatusCode.STATUS_412,
+    )
+
+
+def test_update_individual_moves_biometric_pair_onto_destination(
+    source_household: tuple[Household, Individual],
+    merge_destination_individual: Individual,
+    other_individual: Individual,
+    pair_source_other: BiometricDedupeSimilarityPair,
+    program: Program,
+    django_assert_num_queries,
+) -> None:
+    detector = IdentificationKeyCollisionDetector(program)
+
+    with django_assert_num_queries(4):
+        detector._update_individual(merge_destination_individual, source_household[1])
+
+    # the source pair leaves with the source household cascade in _update_household
+    pair = BiometricDedupeSimilarityPair.objects.exclude(pk=pair_source_other.pk).get()
+    assert {pair.individual1_id, pair.individual2_id} == {merge_destination_individual.id, other_individual.id}
+    assert str(pair.individual1_id) < str(pair.individual2_id)
+    assert pair.similarity_score == 91
+    assert pair.status_code == BiometricDedupeSimilarityPair.StatusCode.STATUS_200
+
+
+def test_update_individual_drops_biometric_pair_between_source_and_destination(
+    source_household: tuple[Household, Individual],
+    merge_destination_individual: Individual,
+    pair_source_destination: BiometricDedupeSimilarityPair,
+    program: Program,
+) -> None:
+    detector = IdentificationKeyCollisionDetector(program)
+
+    detector._update_individual(merge_destination_individual, source_household[1])
+
+    assert not BiometricDedupeSimilarityPair.objects.exclude(pk=pair_source_destination.pk).exists()
+
+
+def test_update_individual_moves_single_sided_biometric_pair_onto_destination(
+    source_household: tuple[Household, Individual],
+    merge_destination_individual: Individual,
+    pair_source_only: BiometricDedupeSimilarityPair,
+    program: Program,
+) -> None:
+    detector = IdentificationKeyCollisionDetector(program)
+
+    detector._update_individual(merge_destination_individual, source_household[1])
+
+    pair = BiometricDedupeSimilarityPair.objects.exclude(pk=pair_source_only.pk).get()
+    assert pair.individual1_id == merge_destination_individual.id
+    assert pair.individual2_id is None
+    assert pair.status_code == BiometricDedupeSimilarityPair.StatusCode.STATUS_412
+
+
+@pytest.fixture
+def source_household_with_unique_ids(source_household: tuple[Household, Individual]) -> tuple[Household, Individual]:
+    household, individual = source_household
+    household.originating_id = "API#HH-B"
+    household.save(update_fields=["originating_id"])
+    individual.originating_id = "API#IND-B"
+    individual.country_workspace_id = "CW-16"
+    individual.save(update_fields=["originating_id", "country_workspace_id"])
+    return source_household
+
+
+@pytest.fixture
+def destination_household_with_unique_ids(
+    destination_household: tuple[Household, Individual], merge_destination_individual: Individual
+) -> tuple[Household, Individual]:
+    household = destination_household[0]
+    household.originating_id = "API#HH-A"
+    household.save(update_fields=["originating_id"])
+    merge_destination_individual.originating_id = "API#IND-A"
+    merge_destination_individual.country_workspace_id = "CW-7"
+    merge_destination_individual.save(update_fields=["originating_id", "country_workspace_id"])
+    return destination_household
+
+
+def test_update_individual_takes_over_source_unique_ids(
+    source_household_with_unique_ids: tuple[Household, Individual],
+    destination_household_with_unique_ids: tuple[Household, Individual],
+    merge_destination_individual: Individual,
+    program: Program,
+) -> None:
+    detector = IdentificationKeyCollisionDetector(program)
+
+    detector._update_individual(merge_destination_individual, source_household_with_unique_ids[1])
+
+    merge_destination_individual.refresh_from_db()
+    assert merge_destination_individual.originating_id == "API#IND-B"
+    assert merge_destination_individual.country_workspace_id == "CW-16"
+    assert merge_destination_individual.internal_data["collision_replaced_ids"] == [
+        {"country_workspace_id": "CW-7", "originating_id": "API#IND-A"}
+    ]
+    source_individual = Individual.all_objects.get(id=source_household_with_unique_ids[1].id)
+    assert source_individual.originating_id is None
+    assert source_individual.country_workspace_id is None
+
+
+def test_update_household_takes_over_source_originating_id(
+    source_household_with_unique_ids: tuple[Household, Individual],
+    destination_household_with_unique_ids: tuple[Household, Individual],
+    program: Program,
+) -> None:
+    destination_household_obj, head_of_household = destination_household_with_unique_ids
+    detector = IdentificationKeyCollisionDetector(program)
+
+    detector._update_household(destination_household_obj, source_household_with_unique_ids[0], head_of_household)
+
+    destination_household_obj.refresh_from_db()
+    assert destination_household_obj.originating_id == "API#HH-B"
+    assert destination_household_obj.internal_data["collision_replaced_ids"] == [{"originating_id": "API#HH-A"}]
+    assert not Household.all_objects.filter(id=source_household_with_unique_ids[0].id).exists()
+
+
+@pytest.fixture
+def merge_destination_individual_after_earlier_collision(
+    destination_household_with_unique_ids: tuple[Household, Individual],
+    merge_destination_individual: Individual,
+) -> Individual:
+    merge_destination_individual.internal_data = {
+        "collision_replaced_ids": [{"country_workspace_id": "CW-1", "originating_id": "API#IND-0"}]
+    }
+    merge_destination_individual.save(update_fields=["internal_data"])
+    return merge_destination_individual
+
+
+def test_update_individual_appends_replaced_ids_on_every_collision(
+    source_household_with_unique_ids: tuple[Household, Individual],
+    merge_destination_individual_after_earlier_collision: Individual,
+    program: Program,
+) -> None:
+    detector = IdentificationKeyCollisionDetector(program)
+
+    detector._update_individual(
+        merge_destination_individual_after_earlier_collision, source_household_with_unique_ids[1]
+    )
+
+    merge_destination_individual_after_earlier_collision.refresh_from_db()
+    assert merge_destination_individual_after_earlier_collision.internal_data["collision_replaced_ids"] == [
+        {"country_workspace_id": "CW-1", "originating_id": "API#IND-0"},
+        {"country_workspace_id": "CW-7", "originating_id": "API#IND-A"},
+    ]
+
+
+@pytest.fixture
+def merge_destination_individual_without_ids(merge_destination_individual: Individual) -> Individual:
+    merge_destination_individual.country_workspace_id = None
+    merge_destination_individual.originating_id = None
+    merge_destination_individual.save(update_fields=["country_workspace_id", "originating_id"])
+    return merge_destination_individual
+
+
+def test_update_individual_does_not_record_missing_ids(
+    source_household_with_unique_ids: tuple[Household, Individual],
+    merge_destination_individual_without_ids: Individual,
+    program: Program,
+) -> None:
+    detector = IdentificationKeyCollisionDetector(program)
+
+    detector._update_individual(merge_destination_individual_without_ids, source_household_with_unique_ids[1])
+
+    merge_destination_individual_without_ids.refresh_from_db()
+    assert merge_destination_individual_without_ids.country_workspace_id == "CW-16"
+    assert "collision_replaced_ids" not in (merge_destination_individual_without_ids.internal_data or {})
+
+
+@pytest.fixture
+def merge_destination_individual_removed_by_collision(merge_destination_individual: Individual) -> Individual:
+    merge_destination_individual.internal_data = {
+        "removed_by_collision_detector": {"previous_relationship": "SON_DAUGHTER", "withdrawn_by_collision": True}
+    }
+    merge_destination_individual.relationship = REMOVED_BY_COLLISION
+    merge_destination_individual.withdrawn = True
+    merge_destination_individual.withdrawn_date = datetime(2025, 1, 1, tzinfo=UTC)
+    merge_destination_individual.save(update_fields=["internal_data", "relationship", "withdrawn", "withdrawn_date"])
+    return merge_destination_individual
+
+
+def test_update_individual_restores_member_removed_by_earlier_collision(
+    source_household: tuple[Household, Individual],
+    merge_destination_individual_removed_by_collision: Individual,
+    program: Program,
+) -> None:
+    detector = IdentificationKeyCollisionDetector(program)
+
+    detector._update_individual(merge_destination_individual_removed_by_collision, source_household[1])
+
+    merge_destination_individual_removed_by_collision.refresh_from_db()
+    assert merge_destination_individual_removed_by_collision.withdrawn is False
+    assert merge_destination_individual_removed_by_collision.withdrawn_date is None
+    assert merge_destination_individual_removed_by_collision.relationship == source_household[1].relationship
+    assert "removed_by_collision_detector" not in merge_destination_individual_removed_by_collision.internal_data
+
+
+def test_process_removed_individual_skips_member_already_removed_by_collision(
+    merge_destination_individual_removed_by_collision: Individual,
+    program: Program,
+    django_assert_num_queries,
+) -> None:
+    detector = IdentificationKeyCollisionDetector(program)
+    marker_before = dict(
+        merge_destination_individual_removed_by_collision.internal_data["removed_by_collision_detector"]
+    )
+
+    with django_assert_num_queries(0):
+        detector._process_removed_individual(
+            merge_destination_individual_removed_by_collision,
+            str(merge_destination_individual_removed_by_collision.household_id),
+            None,
+        )
+
+    merge_destination_individual_removed_by_collision.refresh_from_db()
+    assert (
+        merge_destination_individual_removed_by_collision.internal_data["removed_by_collision_detector"]
+        == marker_before
+    )
+
+
+@pytest.fixture
+def merge_destination_individual_removed_by_legacy_collision(merge_destination_individual: Individual) -> Individual:
+    merge_destination_individual.internal_data = {
+        "removed_by_collision_detector": {"previous_relationship": "SON_DAUGHTER"}
+    }
+    merge_destination_individual.relationship = REMOVED_BY_COLLISION
+    merge_destination_individual.withdrawn = True
+    merge_destination_individual.withdrawn_date = datetime(2025, 1, 1, tzinfo=UTC)
+    merge_destination_individual.save(update_fields=["internal_data", "relationship", "withdrawn", "withdrawn_date"])
+    return merge_destination_individual
+
+
+def test_update_individual_restores_member_removed_by_collision_without_withdrawn_flag(
+    source_household: tuple[Household, Individual],
+    merge_destination_individual_removed_by_legacy_collision: Individual,
+    program: Program,
+) -> None:
+    detector = IdentificationKeyCollisionDetector(program)
+
+    detector._update_individual(merge_destination_individual_removed_by_legacy_collision, source_household[1])
+
+    merge_destination_individual_removed_by_legacy_collision.refresh_from_db()
+    assert merge_destination_individual_removed_by_legacy_collision.withdrawn is False
+    assert merge_destination_individual_removed_by_legacy_collision.withdrawn_date is None
+
+
+@pytest.fixture
+def merge_destination_individual_withdrawn_before_collision(merge_destination_individual: Individual) -> Individual:
+    merge_destination_individual.internal_data = {
+        "removed_by_collision_detector": {"previous_relationship": "SON_DAUGHTER", "withdrawn_by_collision": False}
+    }
+    merge_destination_individual.withdrawn = True
+    merge_destination_individual.withdrawn_date = datetime(2025, 1, 1, tzinfo=UTC)
+    merge_destination_individual.save(update_fields=["internal_data", "withdrawn", "withdrawn_date"])
+    return merge_destination_individual
+
+
+def test_update_individual_keeps_withdrawal_made_before_collision(
+    source_household: tuple[Household, Individual],
+    merge_destination_individual_withdrawn_before_collision: Individual,
+    program: Program,
+) -> None:
+    detector = IdentificationKeyCollisionDetector(program)
+
+    detector._update_individual(merge_destination_individual_withdrawn_before_collision, source_household[1])
+
+    merge_destination_individual_withdrawn_before_collision.refresh_from_db()
+    assert merge_destination_individual_withdrawn_before_collision.withdrawn is True
+    assert merge_destination_individual_withdrawn_before_collision.withdrawn_date == datetime(2025, 1, 1, tzinfo=UTC)
+    assert "removed_by_collision_detector" not in merge_destination_individual_withdrawn_before_collision.internal_data
+
+
+def test_update_individual_does_not_record_unchanged_ids(
+    source_household: tuple[Household, Individual],
+    merge_destination_individual: Individual,
+    program: Program,
+) -> None:
+    detector = IdentificationKeyCollisionDetector(program)
+
+    detector._update_individual(merge_destination_individual, source_household[1])
+
+    merge_destination_individual.refresh_from_db()
+    assert "collision_replaced_ids" not in (merge_destination_individual.internal_data or {})
+
+
+DESTINATION_INDIVIDUAL_SYSTEM_VALUES = {
+    "first_registration_date": date(2020, 1, 1),
+    "age_at_registration": 30,
+    "duplicate": True,
+    "deduplication_golden_record_status": DUPLICATE,
+    "deduplication_golden_record_results": {"duplicates": ["IND-OLD"]},
+    "biometric_deduplication_golden_record_status": DUPLICATE,
+    "biometric_deduplication_golden_record_results": [{"id": "IND-OLD"}],
+    "sanction_list_possible_match": True,
+    "sanction_list_confirmed_match": True,
+    "origin_unicef_id": "IND-ORIGIN",
+    "is_migration_handled": True,
+}
+
+DESTINATION_HOUSEHOLD_SYSTEM_VALUES = {
+    "first_registration_date": datetime(2020, 1, 1, tzinfo=UTC),
+    "total_cash_received": Decimal("500.00"),
+    "total_cash_received_usd": Decimal("123.45"),
+    "origin_unicef_id": "HH-ORIGIN",
+    "is_migration_handled": True,
+    "kobo_submission_uuid": UUID("11111111-1111-1111-1111-111111111111"),
+    "flex_registrations_record_id": 42,
+}
+
+
+@pytest.fixture
+def merge_destination_individual_with_system_values(merge_destination_individual: Individual) -> Individual:
+    Individual.objects.filter(pk=merge_destination_individual.pk).update(**DESTINATION_INDIVIDUAL_SYSTEM_VALUES)
+    return merge_destination_individual
+
+
+@pytest.fixture
+def destination_household_with_system_values(
+    destination_household: tuple[Household, Individual],
+) -> tuple[Household, Individual]:
+    Household.objects.filter(pk=destination_household[0].pk).update(**DESTINATION_HOUSEHOLD_SYSTEM_VALUES)
+    return destination_household
+
+
+@pytest.mark.parametrize("field", DESTINATION_INDIVIDUAL_SYSTEM_VALUES)
+def test_update_individual_keeps_destination_system_fields(
+    field: str,
+    source_household: tuple[Household, Individual],
+    merge_destination_individual_with_system_values: Individual,
+    program: Program,
+) -> None:
+    detector = IdentificationKeyCollisionDetector(program)
+
+    detector._update_individual(merge_destination_individual_with_system_values, source_household[1])
+
+    merge_destination_individual_with_system_values.refresh_from_db()
+    assert (
+        getattr(merge_destination_individual_with_system_values, field) == DESTINATION_INDIVIDUAL_SYSTEM_VALUES[field]
+    )
+
+
+@pytest.mark.parametrize("field", DESTINATION_HOUSEHOLD_SYSTEM_VALUES)
+def test_update_household_keeps_destination_system_fields(
+    field: str,
+    source_household: tuple[Household, Individual],
+    destination_household_with_system_values: tuple[Household, Individual],
+    program: Program,
+) -> None:
+    destination_household_obj, head_of_household = destination_household_with_system_values
+    detector = IdentificationKeyCollisionDetector(program)
+
+    detector._update_household(destination_household_obj, source_household[0], head_of_household)
+
+    destination_household_obj.refresh_from_db()
+    assert getattr(destination_household_obj, field) == DESTINATION_HOUSEHOLD_SYSTEM_VALUES[field]

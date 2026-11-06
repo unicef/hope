@@ -4,4 +4,5 @@ nav:
   - Docker: docker.md
   - Maintenance: maintenance.md
   - Timezone: timezone.md
+  - Collision Detection: collision-detection.md
   - Permissions - Changes: permissions-changes.md
