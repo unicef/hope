@@ -603,6 +603,88 @@ def generate_reconciled_payment_plan() -> None:
     payment_plan.update_population_count_fields()
 
 
+RECONCILIATION_WINDOW_DEMO_DAYS = 30
+
+
+def generate_reconciliation_overdue_payment_plans() -> None:
+    """Released plans on both sides of the Test Program's reconciliation window, for the managerial console flag."""
+    afghanistan = BusinessArea.objects.get(slug="afghanistan")
+    root = User.objects.get(username="root")
+    now = timezone.now()
+    program = Program.objects.get(business_area=afghanistan, name="Test Program")
+    program.reconciliation_window_in_days = RECONCILIATION_WINDOW_DEMO_DAYS
+    program.save(update_fields=["reconciliation_window_in_days"])
+    program_cycle = program.cycles.first()
+    purpose = program.payment_plan_purposes.first()
+    dm_cash = DeliveryMechanism.objects.get(code="cash")
+    fsp = FinancialServiceProvider.objects.get(name="Test FSP 1")
+    usd = CurrencyFactory(code="USD", name="United States Dollar")
+    households = Household.objects.filter(
+        program=program,
+        pk__in=[UUID("aa000000-0000-0000-0000-000000000001"), UUID("aa000000-0000-0000-0000-000000000002")],
+    )
+
+    for payment_plan_pk, name, days_since_dispersion in (
+        (
+            UUID("00000000-feed-beef-0000-0000000e0001"),
+            "Reconciliation Overdue Payment Plan",
+            RECONCILIATION_WINDOW_DEMO_DAYS + 15,
+        ),
+        (UUID("00000000-feed-beef-0000-0000000e0002"), "Reconciliation Within Window Payment Plan", 5),
+    ):
+        dispersion_start_date = now - timedelta(days=days_since_dispersion)
+        group, _ = PaymentPlanGroup.objects.get_or_create(cycle=program_cycle, name=f"{name} Group")
+        payment_plan = PaymentPlan.objects.update_or_create(
+            pk=payment_plan_pk,
+            defaults={
+                "name": name,
+                "business_area": afghanistan,
+                "currency": usd,
+                "dispersion_start_date": dispersion_start_date,
+                "dispersion_end_date": dispersion_start_date + timedelta(days=14),
+                "status_date": dispersion_start_date,
+                "status": PaymentPlan.Status.ACCEPTED,
+                "created_by": root,
+                "program_cycle": program_cycle,
+                "payment_plan_group": group,
+                "plan_type": PaymentPlan.PlanType.REGULAR,
+                "financial_service_provider": fsp,
+                "delivery_mechanism": dm_cash,
+            },
+        )[0]
+        payment_plan.payment_plan_purposes.add(purpose)
+        approval_process = payment_plan.approval_process.first() or ApprovalProcessFactory(
+            payment_plan=payment_plan,
+            sent_for_approval_by=root,
+            sent_for_approval_date=dispersion_start_date,
+            sent_for_authorization_by=root,
+            sent_for_authorization_date=dispersion_start_date,
+            sent_for_finance_release_by=root,
+            sent_for_finance_release_date=dispersion_start_date,
+        )
+        for approval_type in (Approval.APPROVAL, Approval.AUTHORIZATION, Approval.FINANCE_RELEASE):
+            if not approval_process.approvals.filter(type=approval_type).exists():
+                ApprovalFactory(approval_process=approval_process, type=approval_type, created_by=root)
+        for household in households:
+            # delivered_quantity stays empty: the payments are not reconciled yet
+            Payment.objects.get_or_create(
+                parent=payment_plan,
+                household=household,
+                defaults={
+                    "business_area": afghanistan,
+                    "currency": usd,
+                    "collector": household.head_of_household,
+                    "delivery_type": dm_cash,
+                    "financial_service_provider": fsp,
+                    "status_date": dispersion_start_date,
+                    "status": Payment.STATUS_SENT_TO_FSP,
+                    "entitlement_quantity": 100,
+                    "program": program,
+                },
+            )
+        payment_plan.update_population_count_fields()
+
+
 def update_fsps() -> None:
     afghanistan = BusinessArea.objects.get(slug="afghanistan")
     for fsp in FinancialServiceProvider.objects.all():

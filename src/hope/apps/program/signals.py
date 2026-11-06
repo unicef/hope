@@ -9,6 +9,7 @@ from hope.api.caches import (
     increment_business_area_and_program_version,
     increment_cache_key,
 )
+from hope.apps.payment.api.caches import invalidate_managerial_payment_plan_list_cache
 from hope.apps.program.utils import (
     create_program_partner_access,
     remove_program_partner_access,
@@ -19,6 +20,9 @@ program_copied = Signal()
 
 # the payment verification list renders the cycle's data, so a cycle change is visible there too
 PROGRAM_CYCLE_LIST_CACHE_KEYS = ("program_cycle_list", "payment_verifications_list")
+
+# programme fields rendered in the managerial list
+MANAGERIAL_LIST_PROGRAM_FIELDS = {"name", "code", "screen_beneficiary", "reconciliation_window_in_days"}
 
 
 def adjust_program_size(program: Program) -> None:
@@ -68,6 +72,9 @@ def increase_program_version_cache(sender: Any, instance: Program, **kwargs: dic
         increment_cache_key(version_key)
 
     transaction.on_commit(_increment)
+    update_fields = kwargs.get("update_fields")
+    if update_fields is None or MANAGERIAL_LIST_PROGRAM_FIELDS & set(update_fields):
+        invalidate_managerial_payment_plan_list_cache(business_area_slug)
 
 
 @receiver(post_save, sender=PayeeType)

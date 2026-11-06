@@ -1,5 +1,6 @@
 from django.core.cache import cache
 from django.test import TestCase
+from freezegun import freeze_time
 import pytest
 
 from extras.test_utils.factories import (
@@ -11,7 +12,7 @@ from extras.test_utils.factories import (
     ProgramFactory,
 )
 from hope.api.caches import get_or_create_cache_key
-from hope.apps.payment.api.caches import invalidate_payment_plan_list_cache
+from hope.apps.payment.api.caches import TodayKeyBit, invalidate_payment_plan_list_cache
 from hope.models import (
     BusinessArea,
     PaymentPlan,
@@ -211,6 +212,51 @@ def test_payment_plan_managerial_status_increments_managerial_list_cache(
     assert get_or_create_cache_key(version_key, 0) > initial_version
 
 
+@pytest.mark.parametrize(
+    "payment_plan_status",
+    [
+        PaymentPlan.Status.LOCKED_FSP,
+        PaymentPlan.Status.FINISHED,
+        PaymentPlan.Status.ABORTED,
+    ],
+)
+def test_payment_plan_leaving_managerial_status_increments_managerial_list_cache(
+    payment_plan: PaymentPlan, business_area: BusinessArea, payment_plan_status: PaymentPlan.Status
+) -> None:
+    cache.clear()
+    version_key = _business_area_version_key(business_area.slug, "management_payment_plans_list")
+    initial_version = get_or_create_cache_key(version_key, 0)
+
+    with TestCase.captureOnCommitCallbacks(execute=True):
+        payment_plan.status = payment_plan_status
+        payment_plan.save()
+
+    assert get_or_create_cache_key(version_key, 0) > initial_version
+
+
+@pytest.mark.parametrize(
+    "payment_plan_status",
+    [
+        PaymentPlan.Status.LOCKED_FSP,
+        PaymentPlan.Status.FINISHED,
+        PaymentPlan.Status.ABORTED,
+    ],
+)
+def test_payment_plan_out_of_managerial_list_unrelated_save_does_not_increment_managerial_list_cache(
+    payment_plan: PaymentPlan, business_area: BusinessArea, payment_plan_status: PaymentPlan.Status
+) -> None:
+    PaymentPlan.objects.filter(pk=payment_plan.pk).update(status=payment_plan_status)
+    payment_plan.refresh_from_db()
+    cache.clear()
+    version_key = _business_area_version_key(business_area.slug, "management_payment_plans_list")
+    initial_version = get_or_create_cache_key(version_key, 0)
+
+    with TestCase.captureOnCommitCallbacks(execute=True):
+        payment_plan.save(update_fields=["background_action_status"])
+
+    assert get_or_create_cache_key(version_key, 0) == initial_version
+
+
 def test_payment_plan_open_does_not_increment_managerial_list_cache(
     payment_plan: PaymentPlan, business_area: BusinessArea
 ) -> None:
@@ -223,3 +269,54 @@ def test_payment_plan_open_does_not_increment_managerial_list_cache(
         payment_plan.save()
 
     assert get_or_create_cache_key(version_key, 0) == initial_version
+
+
+def test_program_save_increments_managerial_list_cache(program: Program, business_area: BusinessArea) -> None:
+    cache.clear()
+    version_key = _business_area_version_key(business_area.slug, "management_payment_plans_list")
+    initial_version = get_or_create_cache_key(version_key, 0)
+
+    with TestCase.captureOnCommitCallbacks(execute=True):
+        program.reconciliation_window_in_days = 30
+        program.save()
+
+    assert get_or_create_cache_key(version_key, 0) > initial_version
+
+
+def test_program_save_of_managerial_field_increments_managerial_list_cache(
+    program: Program, business_area: BusinessArea
+) -> None:
+    cache.clear()
+    version_key = _business_area_version_key(business_area.slug, "management_payment_plans_list")
+    initial_version = get_or_create_cache_key(version_key, 0)
+
+    with TestCase.captureOnCommitCallbacks(execute=True):
+        program.reconciliation_window_in_days = 30
+        program.save(update_fields=["reconciliation_window_in_days"])
+
+    assert get_or_create_cache_key(version_key, 0) > initial_version
+
+
+def test_program_save_of_unrelated_fields_does_not_increment_managerial_list_cache(
+    program: Program, business_area: BusinessArea
+) -> None:
+    cache.clear()
+    version_key = _business_area_version_key(business_area.slug, "management_payment_plans_list")
+    initial_version = get_or_create_cache_key(version_key, 0)
+
+    with TestCase.captureOnCommitCallbacks(execute=True):
+        program.save(update_fields=["household_count", "individual_count"])
+
+    assert get_or_create_cache_key(version_key, 0) == initial_version
+
+
+def test_today_key_bit_changes_daily() -> None:
+    key_bit = TodayKeyBit()
+
+    with freeze_time("2026-11-02 23:59:00"):
+        today = key_bit.get_data(None, None, None, None, (), {})
+    with freeze_time("2026-11-03 00:01:00"):
+        tomorrow = key_bit.get_data(None, None, None, None, (), {})
+
+    assert today == "2026-11-02"
+    assert tomorrow == "2026-11-03"
