@@ -13,6 +13,8 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 
+AD_LOOKUP_TIMEOUT = 5
+
 
 class JobTitleSource(models.TextChoices):
     AD = "AD", "Active Directory"
@@ -38,7 +40,7 @@ class ActorSnapshot:
 
 
 def full_name(user: "User") -> str:
-    return f"{user.first_name} {user.last_name}".strip()
+    return f"{user.first_name} {user.last_name}".strip() or user.email or user.username
 
 
 def fetch_ad_job_title(ms_graph: MicrosoftGraphAPI, user: "User") -> str:
@@ -58,7 +60,9 @@ def build_actor_snapshot(user: "User | None") -> ActorSnapshot:
         return ActorSnapshot(name="", job_title="", job_title_source="")
     name = full_name(user)
     try:
-        job_title = fetch_ad_job_title(MicrosoftGraphAPI(), user)
+        job_title = fetch_ad_job_title(
+            MicrosoftGraphAPI(token_timeout=AD_LOOKUP_TIMEOUT, request_timeout=AD_LOOKUP_TIMEOUT), user
+        )
     except Http404:
         logger.info("User %s not found in AD, using the stored job title", user.pk)
         return ActorSnapshot(name=name, job_title=user.job_title, job_title_source=JobTitleSource.USER_RECORD)

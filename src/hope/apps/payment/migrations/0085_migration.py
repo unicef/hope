@@ -16,7 +16,7 @@ def copy_actor_from_user_record(apps, schema_editor):
         pending = model.objects.filter(**{f"{field}__isnull": False, f"{field}_job_title_source": ""})
         for user in user_model.objects.filter(pk__in=pending.values(f"{field}_id")):
             values = {
-                f"{field}_name": f"{user.first_name} {user.last_name}".strip(),
+                f"{field}_name": f"{user.first_name} {user.last_name}".strip() or user.email or user.username,
                 f"{field}_job_title": user.job_title,
                 f"{field}_job_title_source": "USER_RECORD",
             }

@@ -82,6 +82,12 @@ def legacy_approval_without_user() -> Approval:
     return ApprovalFactory(created_by=None)
 
 
+@pytest.fixture
+def legacy_approval_of_nameless_user(request: pytest.FixtureRequest) -> Approval:
+    nameless = UserFactory(first_name="", last_name="", email="nameless@example.com", job_title=request.param)
+    return ApprovalFactory(created_by=nameless)
+
+
 def test_build_actor_snapshot_arrange_ad_title_act_build_assert_name_and_ad_title(
     user: User, ad: responses.RequestsMock
 ) -> None:
@@ -175,12 +181,25 @@ def test_build_actor_snapshot_arrange_ad_lookup_fails_act_build_assert_stored_ti
     assert snapshot == ActorSnapshot(name="Jan Kowalski", job_title="Stored Title", job_title_source="USER_RECORD")
 
 
-def test_build_actor_snapshot_arrange_user_without_names_act_build_assert_empty_name(
+def test_build_actor_snapshot_arrange_user_without_names_act_build_assert_email_as_name(
     nameless_user: User, ad_without_credentials: None
 ) -> None:
     snapshot = build_actor_snapshot(nameless_user)
 
-    assert snapshot == ActorSnapshot(name="", job_title="Stored Title", job_title_source="USER_RECORD")
+    assert snapshot == ActorSnapshot(
+        name="nameless@example.com", job_title="Stored Title", job_title_source="USER_RECORD"
+    )
+
+
+def test_build_actor_snapshot_arrange_ad_reachable_act_build_assert_short_timeouts(
+    user: User, ad: responses.RequestsMock
+) -> None:
+    ad.add(responses.GET, USERS_URL, json={"value": [{"jobTitle": "Programme Officer"}]})
+
+    build_actor_snapshot(user)
+
+    assert ad.calls[0].request.req_kwargs["timeout"] == 5
+    assert ad.calls[1].request.req_kwargs["timeout"] == 5
 
 
 def test_build_actor_snapshot_arrange_no_user_act_build_assert_empty_snapshot() -> None:
@@ -229,3 +248,17 @@ def test_actor_display_arrange_legacy_row_without_user_act_display_assert_empty(
     legacy_approval_without_user: Approval,
 ) -> None:
     assert actor_display(legacy_approval_without_user, "created_by") == ""
+
+
+@pytest.mark.parametrize(
+    ("legacy_approval_of_nameless_user", "expected"),
+    [
+        pytest.param("Stored Title", "nameless@example.com (Stored Title)", id="with-job-title"),
+        pytest.param("", "nameless@example.com", id="without-job-title"),
+    ],
+    indirect=["legacy_approval_of_nameless_user"],
+)
+def test_actor_display_arrange_legacy_row_of_nameless_user_act_display_assert_email_as_name(
+    legacy_approval_of_nameless_user: Approval, expected: str
+) -> None:
+    assert actor_display(legacy_approval_of_nameless_user, "created_by") == expected
