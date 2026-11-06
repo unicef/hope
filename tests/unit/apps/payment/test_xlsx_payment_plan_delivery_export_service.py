@@ -335,7 +335,6 @@ def group_with_social_worker_program(business_area, fsp, delivery_mechanism, fsp
     program = ProgramFactory(
         business_area=business_area,
         data_collecting_type__type=DataCollectingType.Type.SOCIAL,
-        beneficiary_group__master_detail=False,
     )
     cycle = ProgramCycleFactory(program=program)
     group = PaymentPlanFactory(cycle=cycle)

@@ -1,9 +1,11 @@
 import { BaseSection } from '@components/core/BaseSection';
 import { BlackLink } from '@components/core/BlackLink';
+import { FlagTooltip } from '@components/core/FlagTooltip';
 import { UniversalMoment } from '@components/core/UniversalMoment';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import SearchIcon from '@mui/icons-material/Search';
 import {
+  Box,
   InputAdornment,
   Table,
   TableBody,
@@ -51,12 +53,24 @@ export const ReleasedSection: FC<ReleasedSectionProps> = ({ releasedData }) => {
       headerName: t('Payment Plan ID'),
       width: 200,
       renderCell: (params) => (
-        <BlackLink
-          to={`/${businessArea}/programs/${params.row.programCode}/payment-module/payment-plans/${params.row.id}`}
-          newTab={true}
-        >
-          {params.value}
-        </BlackLink>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <BlackLink
+            to={`/${businessArea}/programs/${params.row.programCode}/payment-module/payment-plans/${params.row.id}`}
+            newTab={true}
+          >
+            {params.value}
+          </BlackLink>
+          {params.row.hasPaymentsReconciliationOverdue && (
+            <Box sx={{ display: 'flex' }} data-cy="reconciliation-overdue-flag">
+              <FlagTooltip
+                message={t(
+                  'Reconciliation overdue: exceeded {{days}}-day reconciliation window',
+                  { days: params.row.reconciliationWindowInDays },
+                )}
+              />
+            </Box>
+          )}
+        </Box>
       ),
     },
     { field: 'name', headerName: t('Name'), width: 200 },

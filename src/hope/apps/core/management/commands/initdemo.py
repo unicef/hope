@@ -87,6 +87,7 @@ from hope.apps.core.management.commands.demo_data.payment import (
     generate_payment_list,
     generate_payment_list_large,
     generate_reconciled_payment_list,
+    generate_reconciliation_overdue_payment_plans,
     update_fsps,
 )
 from hope.apps.core.management.commands.demo_data.pdu import generate_pdu_data
@@ -171,6 +172,8 @@ class Command(BaseCommand):
         self.stdout.write("Generating real cash plans...")
         self.stdout.write("Generating reconciled payment list...")
         generate_reconciled_payment_list()
+        self.stdout.write("Generating reconciliation overdue payment plans...")
+        generate_reconciliation_overdue_payment_plans()
         if os.getenv("INITDEMO_LARGE_PAYMENT_LIST"):
             self.stdout.write("Generating large payment list...")
             generate_payment_list_large()

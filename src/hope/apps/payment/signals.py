@@ -8,6 +8,7 @@ from hope.api.caches import get_or_create_cache_key, increment_cache_key
 from hope.apps.payment.api.caches import (
     PAYMENT_LIST_LIST_CACHE_KEYS,
     PAYMENT_VERIFICATION_LIST_CACHE_KEYS,
+    invalidate_managerial_payment_plan_list_cache,
     invalidate_payment_list_list_cache,
 )
 from hope.models import (
@@ -24,6 +25,18 @@ MANAGERIAL_PAYMENT_LIST_STATUSES = (
     PaymentList.Status.IN_AUTHORIZATION,
     PaymentList.Status.IN_REVIEW,
     PaymentList.Status.ACCEPTED,
+)
+MANAGERIAL_PAYMENT_PLAN_STATUSES = (
+    PaymentPlan.Status.IN_APPROVAL,
+    PaymentPlan.Status.IN_AUTHORIZATION,
+    PaymentPlan.Status.IN_REVIEW,
+    PaymentPlan.Status.ACCEPTED,
+)
+# statuses a plan moves to when it leaves the managerial list (see PaymentPlanFlow)
+MANAGERIAL_EXIT_PAYMENT_PLAN_STATUSES = (
+    PaymentPlan.Status.LOCKED,
+    PaymentPlan.Status.FINISHED,
+    PaymentPlan.Status.ABORTED,
 )
 
 
@@ -53,6 +66,15 @@ def _invalidate_lists(scope: tuple[str, str] | None, specific_view_cache_keys: t
     invalidate_payment_list_list_cache(business_area_slug, program_code, specific_view_cache_keys)
 
 
+def _affects_managerial_list(instance: PaymentPlan, update_fields: Any) -> bool:
+    if instance.status in MANAGERIAL_PAYMENT_PLAN_STATUSES:
+        return True
+    # a plan already out of the list only matters on the save that moved it out
+    return instance.status in MANAGERIAL_EXIT_PAYMENT_PLAN_STATUSES and (
+        update_fields is None or "status" in update_fields
+    )
+
+
 @receiver(post_save, sender=ProgramCycle)
 def create_default_payment_plan(
     sender: Any, instance: ProgramCycle, created: bool, raw: bool = False, **kwargs: dict
@@ -74,10 +96,11 @@ def increment_payment_plan_list_cache(sender: Any, instance: PaymentPlan, **kwar
         business_area_version = get_or_create_cache_key(f"{business_area_slug}:version", 1)
         version_key = f"{business_area_slug}:{business_area_version}:{program_code}:payment_plans_list"
         increment_cache_key(version_key)
-        # Also invalidate the managerial list: a saved payment plan may have entered or left the approval stages.
-        increment_cache_key(f"{business_area_slug}:{business_area_version}:management_payment_lists_list")
 
     transaction.on_commit(_increment)
+
+    if _affects_managerial_list(instance, kwargs.get("update_fields")):
+        invalidate_managerial_payment_plan_list_cache(business_area_slug)
 
 
 @receiver(post_save, sender=PaymentPlanPurpose)
@@ -92,19 +115,13 @@ def increment_payment_list_list_cache(sender: Any, instance: PaymentList, **kwar
     if kwargs.get("raw"):
         return
     # invalidate payment plan lists
-    _invalidate_lists(_program_scope_by_cycle(instance.program_cycle_id), PAYMENT_LIST_LIST_CACHE_KEYS)
+    scope = _program_scope_by_cycle(instance.program_cycle_id)
+    _invalidate_lists(scope, PAYMENT_LIST_LIST_CACHE_KEYS)
 
-    if instance.status not in MANAGERIAL_PAYMENT_LIST_STATUSES:
+    if scope is None or instance.status not in MANAGERIAL_PAYMENT_LIST_STATUSES:
         return
-    # invalidate payment plan managerial list
-    business_area_slug = instance.business_area.slug
-
-    def _increment() -> None:
-        business_area_version = get_or_create_cache_key(f"{business_area_slug}:version", 1)
-        version_key = f"{business_area_slug}:{business_area_version}:management_payment_lists_list"
-        increment_cache_key(version_key)
-
-    transaction.on_commit(_increment)
+    # the managerial console sums each payment plan's lists
+    invalidate_managerial_payment_plan_list_cache(scope[0])
 
 
 @receiver(post_save, sender=PaymentVerificationPlan)

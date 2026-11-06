@@ -125,7 +125,7 @@ def test_includes_when_alternate_collector_has_valid_phone(
 
 
 def test_works_for_social_worker_people_program(set_phone_validity: Callable[..., None]) -> None:
-    beneficiary_group = BeneficiaryGroupFactory(name="Social", master_detail=False)
+    beneficiary_group = BeneficiaryGroupFactory(name="Social")
     dct = DataCollectingTypeFactory(type=DataCollectingType.Type.SOCIAL)
     program = ProgramFactory(data_collecting_type=dct, beneficiary_group=beneficiary_group)
     assert program.is_social_worker_program is True

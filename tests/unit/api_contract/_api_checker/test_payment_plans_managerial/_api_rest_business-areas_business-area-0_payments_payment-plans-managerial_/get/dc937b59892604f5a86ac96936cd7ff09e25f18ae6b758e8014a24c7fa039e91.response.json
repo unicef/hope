@@ -35,6 +35,8 @@
                 "last_approval_process_date": "2025-01-01T00:00:00Z",
                 "last_approval_process_by": null,
                 "vision_managed": false,
+                "has_payments_reconciliation_overdue": false,
+                "reconciliation_window_in_days": 0,
                 "admin_url": "/api/unicorn/payment/paymentplan/ce59a2a7-9c8e-43ca-b8c6-ea124bbe9066/change/"
             }
         ]

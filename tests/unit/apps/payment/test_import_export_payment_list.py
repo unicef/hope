@@ -419,8 +419,6 @@ def test_entitlement_import_updates_only_modified_rows_for_social_worker_program
     django_assert_num_queries,
 ):
     program = payment_list.program
-    program.beneficiary_group.master_detail = False
-    program.beneficiary_group.save()
     program.data_collecting_type.type = DataCollectingType.Type.SOCIAL
     program.save()
     assert payment_list.is_social_worker_program is True
@@ -830,7 +828,6 @@ def test_payment_row_get_account_fields_from_snapshot_data(payment_list, payment
 
 def test_headers_for_social_worker_program(payment_list, xlsx_valid_file):
     program = payment_list.program
-    program.beneficiary_group.master_detail = False
     program.beneficiary_group.name = "People"
     program.beneficiary_group.save()
     program.data_collecting_type.type = DataCollectingType.Type.SOCIAL

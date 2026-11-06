@@ -1881,6 +1881,11 @@ class PaymentPlanManagerialViewSet(
                     Sum("payment_lists__total_entitled_quantity_usd", filter=Q(payment_lists__is_removed=False)),
                     Decimal(0),
                 ),
+                has_unreconciled_payments=Exists(
+                    Payment.objects.eligible()
+                    .unreconciled()
+                    .filter(parent__payment_plan=OuterRef("pk"), parent__is_removed=False)
+                ),
             )
             .order_by("-created_at")
         )

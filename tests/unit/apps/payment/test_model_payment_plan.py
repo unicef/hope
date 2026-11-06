@@ -1,20 +1,24 @@
+from datetime import timedelta
+
 from django.core.exceptions import ValidationError
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.db import connection
 from django.test.utils import CaptureQueriesContext
+from django.utils import timezone
 from flags.models import FlagState
 import pytest
 
 from extras.test_utils.factories import (
     FileTempFactory,
     FinancialServiceProviderFactory,
+    PaymentFactory,
     PaymentListFactory,
     PaymentListSplitFactory,
     PaymentPlanFactory,
     ProgramCycleFactory,
 )
 from hope.contrib.vision.choices import VisionStatus
-from hope.models import FileTemp, FinancialServiceProvider, PaymentList, PaymentPlan
+from hope.models import FileTemp, FinancialServiceProvider, Payment, PaymentList, PaymentPlan
 
 pytestmark = pytest.mark.django_db
 
@@ -338,3 +342,59 @@ def test_remove_export_file_delivery_without_file_is_a_noop(payment_plan):
     payment_plan.remove_export_file_delivery()
 
     assert payment_plan.export_file_delivery is None
+
+
+@pytest.fixture
+def overdue_payment_plan(cycle):
+    cycle.program.reconciliation_window_in_days = 10
+    cycle.program.save(update_fields=["reconciliation_window_in_days"])
+    payment_plan = PaymentPlanFactory(
+        cycle=cycle,
+        status=PaymentPlan.Status.ACCEPTED,
+        dispersion_start_date=timezone.now().date() - timedelta(days=20),
+    )
+    payment_list = PaymentListFactory(
+        program_cycle=cycle, payment_plan=payment_plan, status=PaymentList.Status.ACCEPTED
+    )
+    PaymentFactory(parent=payment_list, delivered_quantity=None)
+    return payment_plan
+
+
+def test_has_payments_reconciliation_overdue_with_unreconciled_payment_past_window(overdue_payment_plan):
+    assert overdue_payment_plan.has_payments_reconciliation_overdue is True
+
+
+def test_has_payments_reconciliation_overdue_false_once_payments_reconciled(overdue_payment_plan):
+    Payment.objects.filter(parent__payment_plan=overdue_payment_plan).update(delivered_quantity=100)
+
+    assert overdue_payment_plan.has_payments_reconciliation_overdue is False
+
+
+def test_has_payments_reconciliation_overdue_false_within_window(overdue_payment_plan):
+    overdue_payment_plan.dispersion_start_date = timezone.now().date() - timedelta(days=5)
+
+    assert overdue_payment_plan.has_payments_reconciliation_overdue is False
+
+
+def test_has_payments_reconciliation_overdue_false_unless_accepted(overdue_payment_plan):
+    overdue_payment_plan.status = PaymentPlan.Status.FINISHED
+
+    assert overdue_payment_plan.has_payments_reconciliation_overdue is False
+
+
+def test_has_payments_reconciliation_overdue_false_without_window(overdue_payment_plan):
+    overdue_payment_plan.cycle.program.reconciliation_window_in_days = 0
+
+    assert overdue_payment_plan.has_payments_reconciliation_overdue is False
+
+
+def test_has_payments_reconciliation_overdue_false_without_dispersion_start_date(overdue_payment_plan):
+    overdue_payment_plan.dispersion_start_date = None
+
+    assert overdue_payment_plan.has_payments_reconciliation_overdue is False
+
+
+def test_has_payments_reconciliation_overdue_uses_annotated_value(overdue_payment_plan):
+    overdue_payment_plan.has_unreconciled_payments = False
+
+    assert overdue_payment_plan.has_payments_reconciliation_overdue is False

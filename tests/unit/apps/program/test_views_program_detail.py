@@ -337,7 +337,11 @@ def test_program_detail(
         "group_label_plural": program.beneficiary_group.group_label_plural,
         "member_label": program.beneficiary_group.member_label,
         "member_label_plural": program.beneficiary_group.member_label_plural,
-        "master_detail": program.beneficiary_group.master_detail,
+    }
+    assert response_data["payee_type"] == {
+        "id": str(program.data_collecting_type.payee_type.id),
+        "name": "Household",
+        "gl_code": "7700410",
     }
     assert response_data["status"] == program.status
     assert response_data["pdu_fields"] == [

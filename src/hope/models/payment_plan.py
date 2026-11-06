@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import date, timedelta
 from decimal import Decimal
 from functools import cached_property
 from typing import TYPE_CHECKING, cast
@@ -16,6 +16,7 @@ from flags.state import flag_state
 from hope.apps.activity_log.utils import create_mapping_dict
 from hope.contrib.vision.choices import VisionStatus
 from hope.models.approval import COMMENT_MAX_LENGTH, Approval
+from hope.models.payment import Payment
 from hope.models.payment_list import PaymentList, last_approval_step
 from hope.models.utils import (
     AdminUrlMixin,
@@ -490,3 +491,19 @@ class PaymentPlan(TimeStampedUUIDModel, UnicefIdentifiedModel, InternalDataField
         ):
             return payment_lists.filter(plan_type=PaymentList.PlanType.FOLLOW_UP)
         return payment_lists
+
+    @property
+    def has_payments_reconciliation_overdue(self) -> bool:
+        reconciliation_window_in_days = self.program.reconciliation_window_in_days
+        if not reconciliation_window_in_days or self.dispersion_start_date is None:
+            return False
+
+        due_date = self.dispersion_start_date + timedelta(days=reconciliation_window_in_days)
+        if self.status != PaymentPlan.Status.ACCEPTED or due_date > timezone.now().date():
+            return False
+
+        # list views annotate this to avoid a query per row
+        has_unreconciled_payments = getattr(self, "has_unreconciled_payments", None)
+        if has_unreconciled_payments is not None:
+            return bool(has_unreconciled_payments)
+        return Payment.objects.eligible().unreconciled().filter(parent__in=self.payment_lists.all()).exists()

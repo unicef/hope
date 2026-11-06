@@ -198,8 +198,7 @@
                     "group_label": "Household",
                     "group_label_plural": "Households",
                     "member_label": "Individual",
-                    "member_label_plural": "Individuals",
-                    "master_detail": true
+                    "member_label_plural": "Individuals"
                 }
             },
             {

@@ -1163,18 +1163,10 @@ class PaymentList(
     @property
     def has_payments_reconciliation_overdue(self) -> bool:
         reconciliation_window_in_days = self.program.reconciliation_window_in_days
-        if not reconciliation_window_in_days:
+        if not reconciliation_window_in_days or self.dispersion_start_date is None:
             return False
 
-        due_date = self.dispersion_start_date + timedelta(days=reconciliation_window_in_days)  # type: ignore[operator]
-        is_overdue = due_date <= now().date()  # type: ignore[operator]
-
-        return (
-            self.status == PaymentList.Status.ACCEPTED
-            and is_overdue
-            and self.eligible_payments.exclude(status__in=Payment.FAILED_STATUSES)
-            .filter(
-                delivered_quantity__isnull=True,
-            )
-            .exists()
-        )
+        due_date = self.dispersion_start_date + timedelta(days=reconciliation_window_in_days)
+        if self.status != PaymentList.Status.ACCEPTED or due_date > now().date():
+            return False
+        return self.eligible_payments.unreconciled().exists()

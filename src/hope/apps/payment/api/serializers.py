@@ -2033,6 +2033,10 @@ class PaymentPlanManagerialSerializer(AdminUrlSerializerMixin, serializers.Model
     last_approval_process_date = serializers.DateTimeField(read_only=True)
     last_approval_process_by = serializers.SerializerMethodField()
     vision_managed = serializers.BooleanField(read_only=True)
+    has_payments_reconciliation_overdue = serializers.BooleanField(read_only=True)
+    reconciliation_window_in_days = serializers.IntegerField(
+        source="cycle.program.reconciliation_window_in_days", read_only=True
+    )
 
     class Meta:
         model = PaymentPlan
@@ -2055,6 +2059,8 @@ class PaymentPlanManagerialSerializer(AdminUrlSerializerMixin, serializers.Model
             "last_approval_process_date",
             "last_approval_process_by",
             "vision_managed",
+            "has_payments_reconciliation_overdue",
+            "reconciliation_window_in_days",
             "admin_url",
         )
 

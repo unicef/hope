@@ -1,7 +1,7 @@
 from decimal import Decimal
 import secrets
 import string
-from typing import Any, Collection
+from typing import Any, Collection, Self
 
 from django.core.exceptions import ValidationError
 from django.core.validators import (
@@ -21,6 +21,7 @@ from strategy_field.fields import StrategyField
 from hope.apps.activity_log.utils import create_mapping_dict
 from hope.apps.household.const import NON_BENEFICIARY
 from hope.apps.program.collision_detectors import collision_detectors_registry
+from hope.apps.program.validators import get_payee_configuration_errors
 from hope.apps.utils.validators import DoubleSpaceValidator, StartEndSpaceValidator
 from hope.models.beneficiary_group import BeneficiaryGroup
 from hope.models.data_collecting_type import DataCollectingType
@@ -165,7 +166,7 @@ class Program(
         BeneficiaryGroup,
         on_delete=models.PROTECT,
         related_name="programs",
-        help_text="Program beneficiary group",
+        help_text="Program payee label",
     )
     business_area = models.ForeignKey("core.BusinessArea", on_delete=models.CASCADE, help_text="Business area")
     admin_areas = models.ManyToManyField("geo.Area", related_name="programs", blank=True, help_text="Admin areas")
@@ -267,6 +268,19 @@ class Program(
 
     objects: ProgramManager = ProgramManager()
 
+    # Set on an unsaved copy so its payee configuration is validated like an edit of the original.
+    copied_from: "Program | None" = None
+    _saved_payee_configuration: tuple[Any, Any] | None = None
+
+    @classmethod
+    def from_db(cls, db: str | None, field_names: Collection[str], values: Collection[Any], **kwargs: Any) -> Self:
+        instance = super().from_db(db, field_names, values, **kwargs)
+        instance._saved_payee_configuration = (
+            instance.__dict__.get("data_collecting_type_id"),
+            instance.__dict__.get("beneficiary_group_id"),
+        )
+        return instance
+
     def clean(self) -> None:
         super().clean()
         if (
@@ -284,13 +298,17 @@ class Program(
             )
         if not self.data_collecting_type_id or not self.beneficiary_group_id:
             return
-        if (
-            self.data_collecting_type.type == DataCollectingType.Type.SOCIAL and self.beneficiary_group.master_detail
-        ) or (
-            self.data_collecting_type.type == DataCollectingType.Type.STANDARD
-            and not self.beneficiary_group.master_detail
-        ):
-            raise ValidationError("Selected combination of data collecting type and beneficiary group is invalid.")
+        is_new = self._state.adding or self.pk is None
+        if is_new or (self.data_collecting_type_id, self.beneficiary_group_id) != self._saved_payee_configuration:
+            previous_program = (
+                self.copied_from
+                if is_new
+                else Program.all_objects.select_related("data_collecting_type").filter(pk=self.pk).first()
+            )
+            if errors := get_payee_configuration_errors(
+                self.data_collecting_type, self.beneficiary_group, previous_program=previous_program
+            ):
+                raise ValidationError(errors)
         if self.pk and not self._state.adding and not self.payment_plan_purposes.exists():
             raise ValidationError("Program must have at least one Payment Plan Purpose.")
         if (
@@ -312,6 +330,7 @@ class Program(
             # save the related object before saving Program
             self.data_collecting_type.save()
         super().save(*args, **kwargs)
+        self._saved_payee_configuration = (self.data_collecting_type_id, self.beneficiary_group_id)
 
     def generate_code(self) -> str:
         code = "".join(secrets.choice(string.ascii_lowercase + string.digits + "-") for _ in range(4))

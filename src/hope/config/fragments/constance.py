@@ -242,7 +242,7 @@ Clear Cache,clear-cache/
     ),
     "DEFAULT_BENEFICIARY_GROUP_NAME": (
         "Household",
-        "Default Beneficiary Group name",
+        "Default Payee Label name",
         str,
     ),
     "GENERIC_IMPORT_MAX_FILE_SIZE_MB": (

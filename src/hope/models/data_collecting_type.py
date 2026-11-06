@@ -39,6 +39,13 @@ class DataCollectingType(TimeStampedModel):
     weight = models.PositiveSmallIntegerField(
         default=0, help_text="Ordering weight: types with a higher weight are listed first"
     )
+    payee_type = models.ForeignKey(
+        "core.PayeeType",
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="data_collecting_types",
+    )
     compatible_types = models.ManyToManyField("self", blank=True, symmetrical=False)
     limit_to = models.ManyToManyField(to="BusinessArea", related_name="data_collecting_types", blank=True)
 
