@@ -1,4 +1,3 @@
-from admin_cursor_paginator import CursorPaginatorAdmin
 from adminfilters.autocomplete import AutoCompleteFilter
 from adminfilters.depot.widget import DepotManager
 from adminfilters.filters import ChoicesFieldComboFilter, ValueFilter
@@ -7,12 +6,12 @@ from django.contrib import admin
 from django.db.models import QuerySet
 from django.http import HttpRequest
 
-from hope.admin.utils import HOPEModelAdminBase, ViewOnUiMixin
+from hope.admin.utils import FieldPkCursorPaginatorAdmin, HOPEModelAdminBase, ViewOnUiMixin
 from hope.models import PaymentVerification
 
 
 @admin.register(PaymentVerification)
-class PaymentVerificationAdmin(ViewOnUiMixin, CursorPaginatorAdmin, HOPEModelAdminBase):
+class PaymentVerificationAdmin(ViewOnUiMixin, FieldPkCursorPaginatorAdmin, HOPEModelAdminBase):
     list_display = (
         "payment",
         "household",

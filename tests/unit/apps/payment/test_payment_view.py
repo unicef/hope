@@ -187,7 +187,7 @@ def payment_people_context(
     user: Any,
 ) -> dict[str, Any]:
     data_collecting_type = DataCollectingTypeFactory(type=DataCollectingType.Type.SOCIAL)
-    beneficiary_group = BeneficiaryGroupFactory(master_detail=False)
+    beneficiary_group = BeneficiaryGroupFactory()
     program = ProgramFactory(
         business_area=business_area,
         status=Program.ACTIVE,

@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from datetime import date, datetime, timedelta
 from decimal import Decimal
 from functools import cached_property
+import os
 from typing import TYPE_CHECKING, Any, Callable, Optional
 
 from dateutil.relativedelta import relativedelta
@@ -1192,7 +1193,7 @@ class PaymentPlan(
     def imported_file_name(self) -> str:
         """Get file to import entitlements."""
         try:
-            return (self.imported_file.file.name or "") if self.imported_file else ""
+            return os.path.basename(self.imported_file.file.name or "") if self.imported_file else ""
         except FileTemp.DoesNotExist:
             return ""
 
@@ -1303,18 +1304,15 @@ class PaymentPlan(
     @property
     def has_payments_reconciliation_overdue(self) -> bool:
         reconciliation_window_in_days = self.program.reconciliation_window_in_days
-        if not reconciliation_window_in_days:
+        if not reconciliation_window_in_days or self.dispersion_start_date is None:
             return False
 
-        due_date = self.dispersion_start_date + timedelta(days=reconciliation_window_in_days)  # type: ignore[operator]
-        is_overdue = due_date <= now().date()  # type: ignore[operator]
+        due_date = self.dispersion_start_date + timedelta(days=reconciliation_window_in_days)
+        if self.status != PaymentPlan.Status.ACCEPTED or due_date > now().date():
+            return False
 
-        return (
-            self.status == PaymentPlan.Status.ACCEPTED
-            and is_overdue
-            and self.eligible_payments.exclude(status__in=Payment.FAILED_STATUSES)
-            .filter(
-                delivered_quantity__isnull=True,
-            )
-            .exists()
-        )
+        # list views annotate this to avoid a query per row
+        has_unreconciled_payments = getattr(self, "has_unreconciled_payments", None)
+        if has_unreconciled_payments is not None:
+            return bool(has_unreconciled_payments)
+        return self.eligible_payments.unreconciled().exists()

@@ -1,6 +1,6 @@
 # Beneficiary Group
 
-The **Beneficiary Group** model controls the dynamic labeling used across the frontend UI. Each `Program` is linked to a `BeneficiaryGroup`, and the group's fields determine what labels users see on various pages.
+The **Beneficiary Group** model (shown as **Payee Label** in the UI and admin) controls the dynamic labeling used across the frontend UI. Each `Program` is linked to a `BeneficiaryGroup`, and the group's fields determine what labels users see on various pages.
 
 ## Model Fields → Labels
 
@@ -11,12 +11,16 @@ The **Beneficiary Group** model controls the dynamic labeling used across the fr
 | `group_label_plural`   | "Households"     | Plural group name — list page headers, tab labels, count labels.                                                                                                           |
 | `member_label`         | "Individual"     | Singular member name — detail page titles, lookup dialogs, filter labels.                                                                                                  |
 | `member_label_plural`  | "Individuals"    | Plural member name — list page headers, table headers, count labels.                                                                                                       |
-| `master_detail`        | `True` / `False` | If `True` → group-member hierarchy (e.g. Household → Individuals). If `False` → only members are shown (e.g. Social Workers). Controls which sections/columns are visible. |
+| `payee_type`           | "Household"      | The Payee Type the Payee Label belongs to. A program can only use a Payee Label of the Payee Type of its Data Collecting Type; the Payee Type also provides the GL code shown on the program. |
+| `data_collecting_types`| `full_collection`| Optional. When set, the Payee Label can only be used with these Data Collecting Types of its Payee Type. Leave empty to allow every Data Collecting Type of the Payee Type.          |
+| `active`               | `True` / `False` | Inactive Payee Labels cannot be chosen for new programs; programs already using them are not affected and can still be copied.                                                  |
+
+Whether the UI shows a group → member hierarchy (e.g. Household → Individuals) or only members (e.g. Social Workers) is driven by the `type` of the program's Data Collecting Type, not by the Payee Label.
 
 
 ## Admin Configuration
 
-Beneficiary Groups are managed in Django Admin under **Programme › Beneficiary Groups**.
+Beneficiary Groups are managed in Django Admin under **Programme › Payee Labels**.
 Changing a label value will immediately affect the frontend for all programs using that group.
 
 > ⚠️ **Warning:** Renaming labels on an existing beneficiary group changes the UI for **all** programs linked to it.

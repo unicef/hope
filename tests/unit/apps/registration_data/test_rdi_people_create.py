@@ -149,7 +149,6 @@ def program(business_area) -> Program:
         business_area=business_area,
         status=Program.ACTIVE,
         data_collecting_type__type=DataCollectingType.Type.SOCIAL,
-        beneficiary_group__master_detail=False,
     )
 
 

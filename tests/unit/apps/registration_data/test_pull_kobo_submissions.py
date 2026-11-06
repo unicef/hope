@@ -3,6 +3,7 @@ from pathlib import Path
 from typing import Any
 from unittest import mock
 
+from freezegun import freeze_time
 import pytest
 
 from extras.test_utils.factories import BusinessAreaFactory, KoboImportDataFactory, ProgramFactory
@@ -46,3 +47,19 @@ def test_pull_kobo_submissions(kobo_context: dict) -> None:
 
     kobo_context["kobo_import_data"].refresh_from_db()
     assert kobo_context["kobo_import_data"].id == result["kobo_import_data_id"]
+
+
+@freeze_time("2026-09-09 12:00:00")
+def test_pull_kobo_submissions_stores_the_file_under_its_business_area(kobo_context: dict) -> None:
+    content = (FILES_DIR / "kobo_submissions_collectors.json").read_text()
+    submissions = json.loads(content)
+    with mock.patch(
+        "hope.apps.registration_data.tasks.pull_kobo_submissions.KoboAPI.get_project_submissions",
+        return_value=submissions,
+    ):
+        PullKoboSubmissions().execute(kobo_context["kobo_import_data"], kobo_context["program"])
+
+    kobo_import_data = kobo_context["kobo_import_data"]
+    kobo_import_data.refresh_from_db()
+
+    assert kobo_import_data.file.name.startswith("2026/afghanistan/_unassigned/project-uid-")

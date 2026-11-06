@@ -2,7 +2,6 @@ import logging
 from typing import Any, Iterable
 from uuid import UUID
 
-from admin_cursor_paginator import CursorPaginatorAdmin
 from admin_extra_buttons.decorators import button
 from adminfilters.autocomplete import AutoCompleteFilter, LinkedAutoCompleteFilter
 from adminfilters.combo import ChoicesFieldComboFilter
@@ -24,6 +23,7 @@ from smart_admin.mixins import FieldsetMixin as SmartFieldsetMixin
 from hope.admin.utils import (
     AutocompleteForeignKeyMixin,
     BusinessAreaForIndividualCollectionListFilter,
+    FieldPkCursorPaginatorAdmin,
     HOPEModelAdminBase,
     LastSyncDateResetMixin,
     LinkedObjectsManagerMixin,
@@ -80,7 +80,7 @@ class IndividualAdmin(
     LinkedObjectsManagerMixin,
     SmartFieldsetMixin,
     RdiMergeStatusAdminMixin,
-    CursorPaginatorAdmin,
+    FieldPkCursorPaginatorAdmin,
     HOPEModelAdminBase,
 ):
     # Custom template to merge AdminAdvancedFiltersMixin and ExtraButtonsMixin
@@ -289,12 +289,16 @@ class BusinessAreaSlugFilter(InputFilter):
 
 @admin.register(IndividualRoleInHousehold)
 class IndividualRoleInHouseholdAdmin(
+    UnicefIdSearchMixin,
     SoftDeletableAdminMixin,
     LastSyncDateResetMixin,
+    FieldPkCursorPaginatorAdmin,
     HOPEModelAdminBase,
     RdiMergeStatusAdminMixin,
 ):
+    cursor_ordering_field = "pk"
     search_fields = ("individual__unicef_id", "household__unicef_id")
+    unicef_id_search_map = {"IND": "individual__unicef_id", "HH": "household__unicef_id"}
     list_display = ("individual", "household", "role", "is_removed")
     list_filter = (
         DepotManager,
@@ -303,6 +307,7 @@ class IndividualRoleInHouseholdAdmin(
         "role",
     )
     show_full_result_count = False
+    show_query_result_count = False
 
     def get_queryset(self, request: HttpRequest) -> QuerySet:
         return (
@@ -329,7 +334,9 @@ class IndividualRoleInHouseholdAdmin(
 
 
 @admin.register(IndividualIdentity)
-class IndividualIdentityAdmin(HOPEModelAdminBase, RdiMergeStatusAdminMixin):
+class IndividualIdentityAdmin(
+    UnicefIdSearchMixin, FieldPkCursorPaginatorAdmin, HOPEModelAdminBase, RdiMergeStatusAdminMixin
+):
     list_display = (
         "number",
         "partner",
@@ -339,7 +346,10 @@ class IndividualIdentityAdmin(HOPEModelAdminBase, RdiMergeStatusAdminMixin):
         ("individual__unicef_id", ValueFilter.factory(label="Individual's UNICEF Id")),
         ("partner", AutoCompleteFilter),
     )
+    cursor_ordering_field = "pk"
     search_fields = ("number", "individual__unicef_id")
+    unicef_id_search_map = {"IND": "individual__unicef_id"}
+    show_query_result_count = False
 
     def get_queryset(self, request: HttpRequest) -> QuerySet:
         return super().get_queryset(request).select_related("individual", "partner", "copied_from", "country")

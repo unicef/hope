@@ -11,9 +11,11 @@ from rest_framework import status
 from extras.test_utils.factories import (
     BeneficiaryGroupFactory,
     BusinessAreaFactory,
+    DataCollectingTypeFactory,
+    PayeeTypeFactory,
     UserFactory,
 )
-from hope.models import BeneficiaryGroup, BusinessArea, User
+from hope.models import BeneficiaryGroup, BusinessArea, DataCollectingType, PayeeType, User
 
 pytestmark = pytest.mark.django_db
 
@@ -29,13 +31,41 @@ def user(db: Any) -> User:
 
 
 @pytest.fixture
-def beneficiary_group1(db: Any) -> BeneficiaryGroup:
-    return BeneficiaryGroupFactory(name="Household")
+def household_payee_type(db: Any) -> PayeeType:
+    return PayeeTypeFactory(name="Household", gl_code="7700410")
 
 
 @pytest.fixture
-def beneficiary_group2(db: Any) -> BeneficiaryGroup:
-    return BeneficiaryGroupFactory(name="Social Workers")
+def incentive_payee_type(db: Any) -> PayeeType:
+    return PayeeTypeFactory(name="Incentive Payee", gl_code="7700430")
+
+
+@pytest.fixture
+def frontline_worker_education(incentive_payee_type: PayeeType) -> DataCollectingType:
+    return DataCollectingTypeFactory(
+        code="frontline_worker_education",
+        type=DataCollectingType.Type.SOCIAL,
+        payee_type=incentive_payee_type,
+    )
+
+
+@pytest.fixture
+def beneficiary_group1(household_payee_type: PayeeType) -> BeneficiaryGroup:
+    return BeneficiaryGroupFactory(name="Household", payee_type=household_payee_type)
+
+
+@pytest.fixture
+def beneficiary_group2(
+    incentive_payee_type: PayeeType, frontline_worker_education: DataCollectingType
+) -> BeneficiaryGroup:
+    beneficiary_group = BeneficiaryGroupFactory(name="Education workers", payee_type=incentive_payee_type)
+    beneficiary_group.data_collecting_types.add(frontline_worker_education)
+    return beneficiary_group
+
+
+@pytest.fixture
+def inactive_beneficiary_group(household_payee_type: PayeeType) -> BeneficiaryGroup:
+    return BeneficiaryGroupFactory(name="Retired", payee_type=household_payee_type, active=False)
 
 
 @pytest.fixture
@@ -67,17 +97,52 @@ def test_list_beneficiary_group(
         "group_label_plural": beneficiary_group1.group_label_plural,
         "member_label": beneficiary_group1.member_label,
         "member_label_plural": beneficiary_group1.member_label_plural,
-        "master_detail": beneficiary_group1.master_detail,
+        "payee_type": str(beneficiary_group1.payee_type_id),
+        "data_collecting_types": [],
+        "active": True,
     } in response.json()["results"]
     assert {
         "id": str(beneficiary_group2.id),
-        "name": "Social Workers",
+        "name": "Education workers",
         "group_label": beneficiary_group2.group_label,
         "group_label_plural": beneficiary_group2.group_label_plural,
         "member_label": beneficiary_group2.member_label,
         "member_label_plural": beneficiary_group2.member_label_plural,
-        "master_detail": beneficiary_group2.master_detail,
+        "payee_type": str(beneficiary_group2.payee_type_id),
+        "data_collecting_types": ["frontline_worker_education"],
+        "active": True,
     } in response.json()["results"]
+
+
+def test_list_beneficiary_group_filtered_by_active_returns_only_active(
+    authenticated_client: Any,
+    beneficiary_group1: BeneficiaryGroup,
+    inactive_beneficiary_group: BeneficiaryGroup,
+    list_url: str,
+) -> None:
+    cache.clear()
+
+    response = authenticated_client.get(list_url, {"active": "true"})
+
+    assert response.status_code == status.HTTP_200_OK
+    assert [result["name"] for result in response.json()["results"]] == ["Household"]
+
+
+def test_list_beneficiary_group_cache_invalidated_when_data_collecting_types_change(
+    authenticated_client: Any,
+    beneficiary_group1: BeneficiaryGroup,
+    frontline_worker_education: DataCollectingType,
+    list_url: str,
+) -> None:
+    response = authenticated_client.get(list_url)
+    etag = response.headers["ETAG"]
+
+    with TestCase.captureOnCommitCallbacks(execute=True):
+        beneficiary_group1.data_collecting_types.add(frontline_worker_education)
+    response = authenticated_client.get(list_url, HTTP_IF_NONE_MATCH=etag)
+
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json()["results"][0]["data_collecting_types"] == ["frontline_worker_education"]
 
 
 def test_list_beneficiary_group_caching(
