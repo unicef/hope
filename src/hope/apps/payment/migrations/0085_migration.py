@@ -3,6 +3,7 @@ from collections import defaultdict
 from django.db import migrations
 from django.db.backends.postgresql.psycopg_any import NumericRange
 from django.db.models import Count, Exists, F, Max, Min, OuterRef, Q, Subquery, Sum
+from django.db.models.functions import Coalesce
 
 # These plans have no exchange rate yet: it is fetched when a plan is opened.
 PLAN_STATUSES_WITHOUT_RATE = frozenset(
@@ -128,18 +129,21 @@ def _free_split_name(groups, group):
 
 
 def copy_values_from_payment_plans(apps, schema_editor):
-    """Give every group the FSP / currency its payment plans agree on.
+    """Give every group the FSP / currency its regular payment plans agree on.
 
-    After the split only a follow-up or top-up whose FSP or currency differs from its source plan can disagree; such a
-    group stops the migration.
+    Follow-ups, top-ups and Follow-Up Instruction children are left out: the next steps move them out of the group,
+    and their group or instruction takes its FSP / currency from them.
     """
     PaymentPlanGroup = apps.get_model("payment", "PaymentPlanGroup")
     PaymentPlan = apps.get_model("payment", "PaymentPlan")
+    regular_plans = Q(
+        payment_plans__is_removed=False,
+        payment_plans__plan_type="REGULAR",
+        payment_plans__follow_up_instruction__isnull=True,
+    )
     counted = PaymentPlanGroup.objects.annotate(
-        fsps=Count(
-            "payment_plans__financial_service_provider", distinct=True, filter=Q(payment_plans__is_removed=False)
-        ),
-        currencies=Count("payment_plans__currency", distinct=True, filter=Q(payment_plans__is_removed=False)),
+        fsps=Count("payment_plans__financial_service_provider", distinct=True, filter=regular_plans),
+        currencies=Count("payment_plans__currency", distinct=True, filter=regular_plans),
     )
     mixed = list(counted.filter(Q(fsps__gt=1) | Q(currencies__gt=1)).values_list("unicef_id", flat=True))
     if mixed:
@@ -156,26 +160,36 @@ def copy_values_from_payment_plans(apps, schema_editor):
 def _first_value(payment_plan_model, field):
     return Subquery(
         payment_plan_model.objects.filter(
-            payment_plan_group=OuterRef("pk"), is_removed=False, **{f"{field}__isnull": False}
+            payment_plan_group=OuterRef("pk"),
+            is_removed=False,
+            plan_type="REGULAR",
+            follow_up_instruction__isnull=True,
+            **{f"{field}__isnull": False},
         ).values(f"{field}_id")[:1]
     )
 
 
 def move_instruction_children_out_of_groups(apps, schema_editor):
-    """Give every Follow-Up Instruction the FSP / currency its children had through their group, then take them out.
+    """Give every Follow-Up Instruction the FSP / currency of its children, then take them out of their groups.
 
-    An instruction is only created over source plans sharing one FSP and one currency, so any child's group has them.
+    A child without its own FSP or currency gives the instruction its group's instead.
     """
     FollowUpInstruction = apps.get_model("payment", "FollowUpInstruction")
     PaymentPlan = apps.get_model("payment", "PaymentPlan")
     children_in_group = PaymentPlan.objects.filter(
         follow_up_instruction=OuterRef("pk"), payment_plan_group__isnull=False
     ).order_by("created_at")
+    child_fsp = children_in_group.filter(financial_service_provider__isnull=False).values("financial_service_provider")
+    child_currency = children_in_group.filter(currency__isnull=False).values("currency")
     FollowUpInstruction.objects.filter(Exists(children_in_group)).update(
-        financial_service_provider_id=Subquery(
-            children_in_group.values("payment_plan_group__financial_service_provider")[:1]
+        financial_service_provider_id=Coalesce(
+            Subquery(child_fsp[:1]),
+            Subquery(children_in_group.values("payment_plan_group__financial_service_provider")[:1]),
         ),
-        currency_id=Subquery(children_in_group.values("payment_plan_group__currency")[:1]),
+        currency_id=Coalesce(
+            Subquery(child_currency[:1]),
+            Subquery(children_in_group.values("payment_plan_group__currency")[:1]),
+        ),
     )
     PaymentPlan.objects.filter(follow_up_instruction__isnull=False).update(payment_plan_group=None)
 
@@ -211,7 +225,8 @@ def move_legacy_child_plans_into_linked_groups(apps, schema_editor):
 
     Children of one source group and one type share a linked group when they also agree on what a group holds once
     for all its plans (status stage, payment gateway flag, FSP, currency, exchange rate), so each new group has one
-    of each. Follow-Up Instruction children are not in any group and are left alone.
+    of each, and the group takes its FSP / currency from them (from the source group when they have none).
+    Follow-Up Instruction children are not in any group and are left alone.
     """
     PaymentPlan = apps.get_model("payment", "PaymentPlan")
     PaymentPlanGroup = apps.get_model("payment", "PaymentPlanGroup")
@@ -230,12 +245,17 @@ def move_legacy_child_plans_into_linked_groups(apps, schema_editor):
             name=_free_linked_group_name(PaymentPlanGroup.objects, source_group, plan_type),
             plan_type=plan_type,
             source_group=source_group,
-            financial_service_provider_id=source_group.financial_service_provider_id,
-            currency_id=source_group.currency_id,
+            financial_service_provider_id=_first_present(children, "financial_service_provider_id")
+            or source_group.financial_service_provider_id,
+            currency_id=_first_present(children, "currency_id") or source_group.currency_id,
             status=group_status_for_plan_statuses([child["status"] for child in children]),
             status_date=max(child["status_date"] for child in children if child["status_date"]),
         )
         PaymentPlan.objects.filter(pk__in=[child["id"] for child in children]).update(payment_plan_group=linked_group)
+
+
+def _first_present(plans, field):
+    return next((plan[field] for plan in plans if plan[field] is not None), None)
 
 
 def bucket_legacy_children(children):

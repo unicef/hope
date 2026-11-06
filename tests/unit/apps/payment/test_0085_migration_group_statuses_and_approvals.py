@@ -262,7 +262,7 @@ def test_legacy_children_move_to_one_linked_group_per_type_and_status(
     assert list(top_up_group.payment_lists.all()) == [legacy_children["top_up"]]
 
 
-def test_linked_group_takes_cycle_currency_and_fsp_from_the_source_group(
+def test_linked_group_of_children_without_fsp_and_currency_takes_them_from_the_source_group(
     historical_apps_with_plan_columns: Apps, group: PaymentPlan, legacy_children: dict[str, PaymentList]
 ) -> None:
     migration_module.move_legacy_child_plans_into_linked_groups(historical_apps_with_plan_columns, schema_editor=None)
@@ -391,3 +391,85 @@ def test_legacy_follow_up_without_an_exchange_rate_joins_the_one_with_a_rate(
         follow_ups_one_without_a_rate["follow_up_one"],
         follow_ups_one_without_a_rate["follow_up_two"],
     }
+
+
+@pytest.fixture
+def other_fsp() -> Any:
+    return FinancialServiceProviderFactory(name="Other FSP")
+
+
+@pytest.fixture
+def other_currency() -> Any:
+    return CurrencyFactory(code="USD", name="United States Dollar")
+
+
+@pytest.fixture
+def follow_up_with_another_fsp_and_currency(
+    historical_apps_with_plan_columns: Apps,
+    group: PaymentPlan,
+    source_plan: PaymentList,
+    legacy_children: dict[str, PaymentList],
+    other_fsp: Any,
+    other_currency: Any,
+) -> PaymentList:
+    with connection.cursor() as cursor:
+        cursor.execute(
+            'UPDATE "payment_paymentplan" SET "financial_service_provider_id" = %s, "currency_id" = %s WHERE "id" = %s',
+            [group.financial_service_provider_id, group.currency_id, source_plan.pk],
+        )
+        cursor.execute(
+            'UPDATE "payment_paymentplan" SET "financial_service_provider_id" = %s, "currency_id" = %s WHERE "id" = %s',
+            [other_fsp.pk, other_currency.pk, legacy_children["top_up"].pk],
+        )
+    return legacy_children["top_up"]
+
+
+def test_follow_up_with_another_fsp_and_currency_does_not_stop_the_group_taking_its_values(
+    historical_apps_with_plan_columns: Apps,
+    group: PaymentPlan,
+    follow_up_with_another_fsp_and_currency: PaymentList,
+) -> None:
+    expected_fsp_id, expected_currency_id = group.financial_service_provider_id, group.currency_id
+    PaymentPlan.objects.filter(pk=group.pk).update(financial_service_provider=None, currency=None)
+
+    migration_module.copy_values_from_payment_plans(historical_apps_with_plan_columns, schema_editor=None)
+
+    group.refresh_from_db()
+    assert group.financial_service_provider_id == expected_fsp_id
+    assert group.currency_id == expected_currency_id
+
+
+def test_regular_plans_with_different_fsps_stop_the_migration_by_group_name(
+    historical_apps_with_plan_columns: Apps,
+    cycle: Any,
+    group: PaymentPlan,
+    source_plan: PaymentList,
+    other_fsp: Any,
+) -> None:
+    second_plan = PaymentListFactory(program_cycle=cycle, payment_plan=group, status=PaymentList.Status.FINISHED)
+    with connection.cursor() as cursor:
+        cursor.execute(
+            'UPDATE "payment_paymentplan" SET "financial_service_provider_id" = %s WHERE "id" = %s',
+            [group.financial_service_provider_id, source_plan.pk],
+        )
+        cursor.execute(
+            'UPDATE "payment_paymentplan" SET "financial_service_provider_id" = %s WHERE "id" = %s',
+            [other_fsp.pk, second_plan.pk],
+        )
+
+    with pytest.raises(RuntimeError, match=f"must be aligned before this migration can run: {group.unicef_id}"):
+        migration_module.copy_values_from_payment_plans(historical_apps_with_plan_columns, schema_editor=None)
+
+
+def test_linked_group_takes_fsp_and_currency_of_its_children(
+    historical_apps_with_plan_columns: Apps,
+    group: PaymentPlan,
+    follow_up_with_another_fsp_and_currency: PaymentList,
+    other_fsp: Any,
+    other_currency: Any,
+) -> None:
+    migration_module.move_legacy_child_plans_into_linked_groups(historical_apps_with_plan_columns, schema_editor=None)
+
+    top_up_group = group.linked_payment_plans.get(plan_type=PaymentList.PlanType.TOP_UP)
+    assert top_up_group.financial_service_provider == other_fsp
+    assert top_up_group.currency == other_currency
