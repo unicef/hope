@@ -48,6 +48,7 @@ from hope.models.kobo_imported_submission import *  # noqa: F403
 from hope.models.log_entry import *  # noqa: F403
 from hope.models.message import *  # noqa: F403
 from hope.models.partner import *  # noqa: F403
+from hope.models.payee_type import *  # noqa: F403
 from hope.models.payment import *  # noqa: F403
 from hope.models.payment_data_collector import *  # noqa: F403
 from hope.models.payment_household_snapshot import *  # noqa: F403

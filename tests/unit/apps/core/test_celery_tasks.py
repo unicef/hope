@@ -9,6 +9,7 @@ from celery.utils.dispatch import Signal
 from django.contrib.sessions.models import Session
 from django.utils import timezone
 import pytest
+from social_django.models import Nonce
 
 from extras.test_utils.factories import PDUOnlineEditFactory
 from hope.apps.core.celery import app
@@ -59,6 +60,13 @@ def expired_and_live_sessions() -> None:
         session_data="",
         expire_date=timezone.now() + timedelta(days=1),
     )
+
+
+@pytest.fixture
+def stale_and_fresh_social_nonces() -> None:
+    now = timezone.now()
+    Nonce.objects.create(server_url="scope", salt="stale", timestamp=int((now - timedelta(days=15)).timestamp()))
+    Nonce.objects.create(server_url="scope", salt="fresh", timestamp=int(now.timestamp()))
 
 
 @pytest.fixture
@@ -535,6 +543,13 @@ def test_clear_expired_sessions_action_deletes_only_expired_sessions(expired_and
     clear_expired_sessions_async_task_action()
 
     assert list(Session.objects.values_list("session_key", flat=True)) == ["live-session"]
+
+
+@pytest.mark.django_db
+def test_clear_expired_sessions_action_deletes_stale_social_auth_nonces(stale_and_fresh_social_nonces: None) -> None:
+    clear_expired_sessions_async_task_action()
+
+    assert list(Nonce.objects.values_list("salt", flat=True)) == ["fresh"]
 
 
 def test_clear_expired_sessions_task_calls_action() -> None:

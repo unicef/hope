@@ -18,45 +18,16 @@ export const NeedsAdjudicationDetailsNew = ({
 }): ReactElement => {
   const { t } = useTranslation();
   const details = ticket.ticketDetails;
-  const {
-    extraData,
-    goldenRecordsIndividual,
-    possibleDuplicate,
-    possibleDuplicates,
-  } = details;
+  const { goldenRecordsIndividual, possibleDuplicates } = details;
   const [selectedIndividualIds, setSelectedIndividualIds] = useState([]);
   const [isEditMode, setIsEditMode] = useState(false);
 
-  const findRecord = (itemId) => (record) => record.hitId === itemId;
+  // The backend scores each individual against the golden record, so the golden record itself has none.
+  const getGoldenRecordSimilarity = (): number | string =>
+    goldenRecordsIndividual?.similarityScore ?? '-';
 
-  const getSimilarity = (records, individualId): number =>
-    records?.find(findRecord(individualId))?.score;
-
-  const getGoldenRecordSimilarity = (): number | string => {
-    const individualId = possibleDuplicate?.id;
-    const extraDataGoldenRecords = extraData?.goldenRecords;
-    const deduplicationGoldenRecordResults =
-      goldenRecordsIndividual?.deduplicationGoldenRecordResults;
-
-    return (
-      getSimilarity(extraDataGoldenRecords, individualId) ||
-      getSimilarity(deduplicationGoldenRecordResults, individualId) ||
-      '-'
-    );
-  };
-
-  const getPossibleDuplicateSimilarity = (): number | string => {
-    const individualId = goldenRecordsIndividual?.id;
-    const extraDataPossibleDuplicate1 = extraData?.possibleDuplicate;
-    const deduplicationGoldenRecordResults =
-      possibleDuplicate?.deduplicationGoldenRecordResults;
-
-    return (
-      getSimilarity(extraDataPossibleDuplicate1, individualId) ||
-      getSimilarity(deduplicationGoldenRecordResults, individualId) ||
-      '-'
-    );
-  };
+  const getPossibleDuplicateSimilarity = (duplicate): number | string =>
+    duplicate?.similarityScore ?? '-';
 
   const isApproved = !!details?.selectedIndividual;
   const isEditable = isEditMode || !isApproved;

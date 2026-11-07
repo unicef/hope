@@ -59,7 +59,7 @@ def social_program(afghanistan: BusinessArea) -> Program:
         data_collecting_type=DataCollectingTypeFactory(
             label="Social", code="social", type=DataCollectingType.Type.SOCIAL
         ),
-        beneficiary_group=BeneficiaryGroupFactory(master_detail=False),
+        beneficiary_group=BeneficiaryGroupFactory(),
     )
 
 

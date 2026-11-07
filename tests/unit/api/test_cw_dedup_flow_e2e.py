@@ -250,7 +250,7 @@ def test_cw_lax_auto_merges_with_duplicate_ticket(
         country_workspace_id=country_workspace_id,
         django_capture_on_commit_callbacks=django_capture_on_commit_callbacks,
         django_assert_num_queries=django_assert_num_queries,
-        expected_queries=191,
+        expected_queries=189,
     )
 
     rdi = RegistrationDataImport.objects.get(id=rdi_id)
@@ -486,7 +486,7 @@ def social_program(user_business_area: BusinessArea) -> Program:
         type=DataCollectingType.Type.SOCIAL.value,
     )
     dct.limit_to.add(user_business_area)
-    beneficiary_group = BeneficiaryGroupFactory(master_detail=False)
+    beneficiary_group = BeneficiaryGroupFactory()
     return ProgramFactory(
         status=Program.DRAFT,
         business_area=user_business_area,
@@ -561,7 +561,7 @@ def test_cw_social_workers_auto_merges_with_duplicate_ticket(
         country_workspace_id=country_workspace_id,
         django_capture_on_commit_callbacks=django_capture_on_commit_callbacks,
         django_assert_num_queries=django_assert_num_queries,
-        expected_queries=195,
+        expected_queries=193,
     )
 
     rdi = RegistrationDataImport.objects.get(id=rdi_id)

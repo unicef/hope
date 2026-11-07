@@ -8,6 +8,7 @@ from django.core.cache import cache
 from django.core.validators import MinLengthValidator, RegexValidator
 from django.db import IntegrityError, models
 from django.db.models import JSONField, Q, QuerySet, UniqueConstraint
+from django.db.models.functions import Collate
 from django.utils import timezone
 from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _
@@ -17,6 +18,7 @@ from rest_framework.exceptions import ValidationError
 
 from hope.apps.activity_log.utils import create_mapping_dict
 from hope.apps.core.languages import Languages
+from hope.apps.core.upload_paths import upload_path
 from hope.apps.core.utils import FlexFieldsEncoder
 from hope.apps.household.const import (
     BLANK,
@@ -216,7 +218,7 @@ class Individual(
     )
 
     individual_id = models.CharField(max_length=255, blank=True, help_text="Individual ID")
-    photo = models.ImageField(blank=True, help_text="Photo")
+    photo = models.ImageField(upload_to=upload_path, max_length=255, blank=True, help_text="Photo")
     full_name = models.CharField(
         max_length=255,
         validators=[MinLengthValidator(2)],
@@ -312,7 +314,11 @@ class Individual(
         help_text="Observed disability status",
     )
     disability_certificate_picture = models.ImageField(
-        blank=True, null=True, help_text="Disability certificate picture"
+        upload_to=upload_path,
+        max_length=255,
+        blank=True,
+        null=True,
+        help_text="Disability certificate picture",
     )
     seeing_disability = models.CharField(
         max_length=50,
@@ -628,6 +634,7 @@ class Individual(
             LongNameIndex(fields=["created_at"], name="household_individual_created_at_c3242865"),
             LongNameIndex(fields=["updated_at"], name="household_individual_updated_at_45b7c40d"),
             LongNameIndex(fields=["unicef_id"], name="household_individual_unicef_id_421e2ff2"),
+            models.Index(Collate("unicef_id", "C"), name="hi_unicef_id_c_idx"),
             LongNameIndex(fields=["full_name"], name="household_individual_full_name_8fa0162b"),
             LongNameIndex(fields=["given_name"], name="household_individual_given_name_1ebbded2"),
             LongNameIndex(fields=["middle_name"], name="household_individual_middle_name_1dfbf837"),

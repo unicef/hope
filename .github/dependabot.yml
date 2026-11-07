@@ -4,6 +4,8 @@ updates:
     directory: "/src/frontend"
     schedule:
       interval: "monthly"
+    cooldown:
+      default-days: 7
     labels:
       - "dependencies"
       - "frontend"
