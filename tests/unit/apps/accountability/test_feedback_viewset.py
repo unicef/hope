@@ -1,6 +1,6 @@
 """Tests for Feedback ViewSet."""
 
-import datetime
+import datetime as dt
 from typing import Any
 
 from django.urls import reverse
@@ -183,7 +183,7 @@ def feedback_old_date(program_active, household_1, individual_1, user, area_1):
         admin2=area_1,
         business_area=program_active.business_area,
     )
-    fb.created_at = timezone.make_aware(datetime.datetime(year=2020, month=3, day=12))
+    fb.created_at = timezone.make_aware(dt.datetime(year=2020, month=3, day=12))
     fb.save()
     return fb
 
@@ -199,7 +199,7 @@ def feedback_jan_2023(household_1, individual_1, user, area_1, business_area):
         admin2=area_1,
         business_area=business_area,
     )
-    fb.created_at = timezone.make_aware(datetime.datetime(year=2023, month=1, day=31))
+    fb.created_at = timezone.make_aware(dt.datetime(year=2023, month=1, day=31))
     fb.save()
     return fb
 
@@ -212,7 +212,7 @@ def feedback_feb_2023(program_2, user_creator):
         created_by=user_creator,
         business_area=program_2.business_area,
     )
-    fb.created_at = timezone.make_aware(datetime.datetime(year=2023, month=2, day=1))
+    fb.created_at = timezone.make_aware(dt.datetime(year=2023, month=2, day=1))
     fb.save()
     return fb
 

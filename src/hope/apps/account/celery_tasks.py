@@ -1,4 +1,4 @@
-import datetime
+import datetime as dt
 import logging
 
 from django.db.models import Q
@@ -16,7 +16,7 @@ def invalidate_permissions_cache_for_user_if_expired_role_async_task_action(job:
     from hope.models import User
 
     try:
-        day_ago = timezone.now() - datetime.timedelta(days=1)
+        day_ago = timezone.now() - dt.timedelta(days=1)
         users = User.objects.filter(
             Q(role_assignments__expiry_date=day_ago.date()) | Q(partner__role_assignments__expiry_date=day_ago.date())
         ).distinct()

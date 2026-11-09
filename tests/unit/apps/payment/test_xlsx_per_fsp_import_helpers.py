@@ -1,6 +1,6 @@
 """Tests for XlsxPaymentPlanDeliveryImportService extracted helpers."""
 
-import datetime
+import datetime as dt
 from datetime import UTC
 from decimal import Decimal
 import io
@@ -69,7 +69,7 @@ def sent_to_fsp_payment(payment_plan):
         delivered_quantity=None,
         delivered_quantity_usd=None,
         entitlement_quantity=Decimal("100.00"),
-        delivery_date=datetime.datetime(2024, 3, 10, 8, 0, 0, tzinfo=UTC),
+        delivery_date=dt.datetime(2024, 3, 10, 8, 0, 0, tzinfo=UTC),
     )
 
 
@@ -266,7 +266,7 @@ def test_validate_delivery_date_returns_when_payment_unknown(service):
 def test_validate_delivery_date_appends_error_for_future_date(service_with_payment, sent_to_fsp_payment):
     service_with_payment.sheetname = "Payment Plan - Payment List"
     service_with_payment.xlsx_headers = ["payment_id", "delivered_quantity", "delivery_date"]
-    future_date = datetime.datetime.now(tz=UTC) + datetime.timedelta(days=30)
+    future_date = dt.datetime.now(tz=UTC) + dt.timedelta(days=30)
     row = _make_row_cells([str(sent_to_fsp_payment.unicef_id), 100, future_date])
     service_with_payment._validate_delivery_date(row)
     assert len(service_with_payment.errors) == 1
@@ -274,9 +274,9 @@ def test_validate_delivery_date_appends_error_for_future_date(service_with_payme
 
 
 def test_parse_delivery_date_converts_date_to_utc_midnight(service_with_payment):
-    result = service_with_payment._parse_delivery_date(datetime.date(2024, 6, 15))
+    result = service_with_payment._parse_delivery_date(dt.date(2024, 6, 15))
 
-    assert result == datetime.datetime(2024, 6, 15, tzinfo=UTC)
+    assert result == dt.datetime(2024, 6, 15, tzinfo=UTC)
 
 
 def test_validate_delivery_date_ignores_empty_cell(

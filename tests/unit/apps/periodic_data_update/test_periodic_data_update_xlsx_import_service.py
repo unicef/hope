@@ -1,6 +1,6 @@
 """Tests for periodic data update XLSX import service."""
 
-import datetime
+import datetime as dt
 from io import BytesIO
 import json
 from tempfile import _TemporaryFileWrapper
@@ -411,7 +411,7 @@ def test_import_data_date_no_collection_date(
         ],
         [["1996-06-21"]],
     )
-    periodic_data_update_template.created_at = datetime.datetime(2021, 3, 7)
+    periodic_data_update_template.created_at = dt.datetime(2021, 3, 7)
     periodic_data_update_template.save()
     service = PDUXlsxImportService(periodic_data_update_upload)
     service.import_data()
@@ -568,7 +568,7 @@ def test_import_data_date_format_correct(
                 "number_of_records": 0,
             }
         ],
-        [[datetime.datetime(2021, 5, 2), datetime.datetime(2021, 5, 2)]],
+        [[dt.datetime(2021, 5, 2), dt.datetime(2021, 5, 2)]],
     )
     service = PDUXlsxImportService(periodic_data_update_upload)
     service.import_data()
@@ -755,8 +755,8 @@ def test_import_cleaned_data(
         "last_name": "Taylor",
         "date_attribute__round_number": 2,
         "date_attribute__round_name": "May",
-        "date_attribute__round_value": datetime.date(1996, 6, 21),
-        "date_attribute__collection_date": datetime.date(2021, 5, 2),
+        "date_attribute__round_value": dt.date(1996, 6, 21),
+        "date_attribute__collection_date": dt.date(2021, 5, 2),
     }
     with pytest.raises(
         ValidationError,
@@ -771,8 +771,8 @@ def test_import_cleaned_data(
         "last_name": "Taylor",
         "date_attribute__round_number": 1,
         "date_attribute__round_name": "May",
-        "date_attribute__round_value": datetime.date(1996, 6, 21),
-        "date_attribute__collection_date": datetime.date(2021, 5, 2),
+        "date_attribute__round_value": dt.date(1996, 6, 21),
+        "date_attribute__collection_date": dt.date(2021, 5, 2),
     }
     with pytest.raises(
         ValidationError,
@@ -788,8 +788,8 @@ def test_import_cleaned_data(
         "last_name": "Taylor",
         "date_attribute__round_number": 1,
         "date_attribute__round_name": "May",
-        "date_attribute__round_value": datetime.date(1996, 6, 21),
-        "date_attribute__collection_date": datetime.date(2021, 5, 2),
+        "date_attribute__round_value": dt.date(1996, 6, 21),
+        "date_attribute__collection_date": dt.date(2021, 5, 2),
     }
     with pytest.raises(
         ValidationError,

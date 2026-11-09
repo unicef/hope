@@ -1,4 +1,4 @@
-import datetime
+import datetime as dt
 from decimal import Decimal
 from typing import TYPE_CHECKING, cast
 
@@ -29,7 +29,7 @@ def mark_as_failed(payment_item: Payment, user_id: str | None = None) -> None:
 def revert_mark_as_failed(
     payment_item: Payment,
     delivered_quantity: Decimal,
-    delivery_date: datetime.date,
+    delivery_date: dt.date,
     user_id: str | None = None,
 ) -> None:
     if payment_item.parent.is_payment_gateway:

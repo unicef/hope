@@ -1,5 +1,5 @@
 from builtins import __build_class__  # noqa
-import datetime
+import datetime as dt
 from decimal import Decimal
 import importlib
 import logging
@@ -53,7 +53,7 @@ class PythonExec(Interpreter):
                 "__build_class__": __build_class__,
                 "__name__": __name__,
                 "__import__": __import__,
-                "date": datetime.date,
+                "date": dt.date,
                 "bytearray": bytearray,
                 "bytes": bytes,
                 "Decimal": Decimal,

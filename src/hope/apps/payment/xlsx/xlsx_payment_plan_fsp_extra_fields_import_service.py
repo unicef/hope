@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-import datetime
+import datetime as dt
 from decimal import Decimal
 from typing import IO, TYPE_CHECKING, Any, cast
 
@@ -196,7 +196,7 @@ class XlsxPaymentPlanFspExtraFieldsImportService(XlsxImportBaseService):
     def _normalize_value(value: Any) -> object:
         if isinstance(value, Decimal):
             return float(value)
-        if isinstance(value, datetime.datetime | datetime.date | datetime.time):
+        if isinstance(value, dt.datetime | dt.date | dt.time):
             return value.isoformat()
         if isinstance(value, int | float | bool | str):
             return value
