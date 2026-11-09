@@ -186,6 +186,7 @@ def test_send_to_vision_queues_task(mock_send, afghanistan, admin_user, program_
 
 
 def _create_closed_payment_plan(afghanistan, admin_user, program_cycle, log=None):
+    """Create a closed, Vision-sent Payment Plan with the given Vision log entries."""
     pp = _create_payment_plan(afghanistan, admin_user, program_cycle, PaymentPlan.Status.CLOSED)
     pp.internal_data = {
         "vision": {

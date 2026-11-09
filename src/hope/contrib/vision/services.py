@@ -198,6 +198,12 @@ class VisionService:
 
     @classmethod
     def closure_notification_entries(cls, payment_plan: PaymentPlan) -> list[dict]:
+        """Return every logged closure-notification attempt for the plan, oldest first.
+
+        Include legacy entries logged as ``status-notification`` carrying the closure payload
+        fields (``totalAmountReconciled`` and ``closureDate``), so retries work for plans whose
+        closure was attempted before the dedicated log entry type existed.
+        """
         vision_data = (payment_plan.internal_data or {}).get("vision", {})
         if not isinstance(vision_data, dict):
             return []

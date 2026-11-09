@@ -188,6 +188,11 @@ def can_send_to_vision(payment_plan: PaymentPlan) -> bool:
 
 
 def can_send_closure_to_vision(payment_plan: PaymentPlan) -> bool:
+    """Return whether the admin may (re)send the plan's closure notification to Vision.
+
+    True for a closed plan that was sent to Vision and whose latest closure notification
+    failed or was never attempted; see ``VisionService.can_notify_vision_of_closure``.
+    """
     return VisionService.can_notify_vision_of_closure(payment_plan)
 
 
@@ -489,6 +494,12 @@ class PaymentPlanAdmin(BasePaymentPlanAdmin, PaymentPlanCeleryTasksMixin):
         label="Send Closure to Vision",
     )
     def send_closure_to_vision(self, request: HttpRequest, pk: "UUID") -> HttpResponse:
+        """Re-queue the closure reconciliation notification to Vision for a closed plan.
+
+        Used when the automatic notification at closure time failed (or never ran): the attempt
+        and its response are recorded in the plan's ``internal_data`` Vision log, and this action
+        makes the retry possible without reopening the plan.
+        """
         if request.method == "POST":
             payment_plan = PaymentPlan.objects.get(pk=pk)
             notify_payment_plan_closure_to_vision_async_task(payment_plan, str(request.user.pk))

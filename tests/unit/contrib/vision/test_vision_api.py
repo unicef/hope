@@ -3,6 +3,7 @@ from datetime import datetime, timedelta, timezone
 from decimal import Decimal
 from unittest.mock import MagicMock, patch
 
+from django.utils import timezone as dj_timezone
 import pytest
 
 from extras.test_utils.factories import (
@@ -83,7 +84,7 @@ def test_urls_are_built_from_a_base_with_a_trailing_slash() -> None:
 
 def test_ensure_token_skips_when_valid() -> None:
     api = VisionAPI()
-    api._token_expiry = datetime.now() + timedelta(hours=1)
+    api._token_expiry = dj_timezone.now() + timedelta(hours=1)
     with patch.object(api, "_acquire_token") as mock_acquire:
         api._ensure_token()
         mock_acquire.assert_not_called()
@@ -91,7 +92,7 @@ def test_ensure_token_skips_when_valid() -> None:
 
 def test_ensure_token_acquires_when_expired() -> None:
     api = VisionAPI()
-    api._token_expiry = datetime.now() - timedelta(hours=1)
+    api._token_expiry = dj_timezone.now() - timedelta(hours=1)
     with patch.object(api, "_acquire_token") as mock_acquire:
         api._ensure_token()
         mock_acquire.assert_called_once()
@@ -104,37 +105,66 @@ def test_no_auth_header_before_token() -> None:
     )
 
 
-@patch("hope.contrib.vision.api.requests.post")
-def test_acquire_token_sets_bearer(mock_post) -> None:
-    mock_post.return_value = MagicMock(
+def test_acquire_token_sets_bearer() -> None:
+    api = VisionAPI()
+    token_response = MagicMock(
         status_code=200,
+        ok=True,
         json=lambda: {
             "access_token": "oauth-token-123",
             "expires_in": "3600",
         },
     )
-    api = VisionAPI()
-    api._acquire_token()
+    with patch.object(api._client, "post", return_value=token_response) as mock_post:
+        api._acquire_token()
+    # Token acquisition posts to the OAuth endpoint only, never to the Payment Plan endpoint.
+    mock_post.assert_called_once_with(
+        api.token_url,
+        data={
+            "client_id": "test-client",
+            "client_secret": "test-secret",
+            "grant_type": "client_credentials",
+        },
+        timeout=60,
+    )
+    assert mock_post.call_args.args[0] != api.payment_plan_creation_url
     assert api._client.headers["Authorization"] == "Bearer oauth-token-123"
     assert api._token_expiry is not None
+    # Expiry is timezone-aware and shortened by the safety buffer.
+    assert api._token_expiry.tzinfo is not None
+    assert api._token_expiry <= dj_timezone.now() + timedelta(seconds=3600 - 60)
 
 
-@patch("hope.contrib.vision.api.requests.post")
-def test_acquire_token_401_raises_error(mock_post) -> None:
-    mock_post.return_value = MagicMock(
+def test_acquire_token_401_raises_error() -> None:
+    api = VisionAPI()
+    token_response = MagicMock(
         status_code=401,
+        ok=False,
         json=lambda: {"ErrorCode": "401", "Error": "Unauthorized"},
     )
-    api = VisionAPI()
-    with pytest.raises(VisionAPIError):
+    with patch.object(api._client, "post", return_value=token_response), pytest.raises(VisionAPIError):
         api._acquire_token()
 
 
-@patch("hope.contrib.vision.api.requests.post")
-def test_acquire_token_missing_credentials_raises_error(mock_post, settings) -> None:
+def test_acquire_token_missing_access_token_raises_error() -> None:
+    api = VisionAPI()
+    token_response = MagicMock(status_code=200, ok=True, json=lambda: {"expires_in": 3600})
+    with patch.object(api._client, "post", return_value=token_response), pytest.raises(VisionAPIError):
+        api._acquire_token()
+
+
+def test_acquire_token_non_json_response_raises_error() -> None:
+    api = VisionAPI()
+    token_response = MagicMock(status_code=200, ok=True, text="<html>not json</html>")
+    token_response.json.side_effect = ValueError("No JSON")
+    with patch.object(api._client, "post", return_value=token_response), pytest.raises(VisionAPIError):
+        api._acquire_token()
+
+
+def test_acquire_token_missing_credentials_raises_error(settings) -> None:
     settings.VISION_CLIENT_ID = ""
     api = VisionAPI()
-    with pytest.raises(VisionAPIMissingCredentialsError):
+    with patch.object(api._client, "post") as mock_post, pytest.raises(VisionAPIMissingCredentialsError):
         api._acquire_token()
     mock_post.assert_not_called()
 
@@ -438,7 +468,47 @@ def test_notify_payment_plan_closure_posts_reconciliation_to_closure_endpoint(
         "closureDate": closure_date.isoformat(),
     }
     assert payment_plan.vision_status == VisionStatus.RELEASED.value
-    assert payment_plan.vision_data["log"][0]["type"] == VisionLogEntryType.CLOSURE_NOTIFICATION.value
+    entry = payment_plan.vision_data["log"][0]
+    assert entry["type"] == VisionLogEntryType.CLOSURE_NOTIFICATION.value
+    # The response is persisted in the plan's internal_data vision log, not just returned.
+    assert entry["response"] == {"status": "ok"}
+    assert entry["payload"] == mock_post.call_args.args[1]
+
+
+@patch("hope.contrib.vision.api.VisionAPI._acquire_token")
+@patch("hope.contrib.vision.api.VisionAPI._post")
+def test_notify_payment_plan_closure_saves_error_response_in_internal_data(
+    mock_post,
+    mock_acquire_token,
+    vision_api_payment_plan_factory,
+    django_assert_num_queries,
+) -> None:
+    mock_post.side_effect = BaseAPI.APIError("closure endpoint failed")
+    payment_plan = vision_api_payment_plan_factory(unicef_id="PP-CLOSURE-FAIL")
+    payment_plan.internal_data = {
+        "vision": {
+            "status": VisionStatus.RELEASED.value,
+            "sent": True,
+            "vision_id": "V12345",
+            "log": [],
+        }
+    }
+    payment_plan.save(update_fields=["internal_data"])
+
+    with django_assert_num_queries(4), pytest.raises(VisionAPIError, match="closure endpoint failed"):
+        VisionAPI().notify_payment_plan_closure(
+            payment_plan,
+            total_amount_reconciled=Decimal("8500.50"),
+            closure_date=datetime(2026, 11, 9, 10, 30, tzinfo=timezone.utc),
+        )
+
+    payment_plan.refresh_from_db(fields=["internal_data"])
+    entry = payment_plan.vision_data["log"][0]
+    assert entry["type"] == VisionLogEntryType.CLOSURE_NOTIFICATION.value
+    assert entry["response"] == {"error": "closure endpoint failed"}
+    assert entry["payload"]["payplanSno"] == "PP-CLOSURE-FAIL"
+    # A failed closure notification must not change the Vision workflow status.
+    assert payment_plan.vision_status == VisionStatus.RELEASED.value
 
 
 @patch("hope.contrib.vision.api.VisionAPI._acquire_token")

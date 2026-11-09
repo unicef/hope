@@ -93,6 +93,11 @@ def notify_payment_plan_status_to_vision_async_task(
 
 
 def notify_payment_plan_closure_to_vision_async_task_action(job: AsyncJob) -> None:
+    """Notify Vision of the closure of a closed, Vision-sent Payment Plan.
+
+    Skip plans that are not closed or were never sent to Vision. Send the plan's total delivered
+    quantity as the total amount reconciled and its status date as the closure date.
+    """
     payment_plan = PaymentPlan.objects.get(pk=job.config["payment_plan_id"])
     if payment_plan.status != PaymentPlan.Status.CLOSED or not payment_plan.sent_to_vision:
         return
@@ -104,6 +109,11 @@ def notify_payment_plan_closure_to_vision_async_task_action(job: AsyncJob) -> No
 
 
 def notify_payment_plan_closure_to_vision_async_task(payment_plan: PaymentPlan, user_id: str) -> AsyncJob | None:
+    """Queue an async job notifying Vision that the Payment Plan was closed.
+
+    Re-queueing replaces any active closure-notification job for the plan, so admin retries never
+    run duplicates of an already pending notification.
+    """
     return AsyncJob.requeue(
         instance=payment_plan,
         owner_id=user_id,
