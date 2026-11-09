@@ -1152,6 +1152,45 @@ def test_can_notify_vision_of_closure(
     assert VisionService.can_notify_vision_of_closure(vision_enabled_payment_plan) is expected
 
 
+def test_closure_notification_entries_non_dict_vision_data_returns_empty(
+    vision_enabled_payment_plan: PaymentPlan,
+) -> None:
+    vision_enabled_payment_plan.internal_data = {"vision": "not-a-dict"}
+    assert VisionService.closure_notification_entries(vision_enabled_payment_plan) == []
+
+
+def test_closure_notification_entries_skips_non_dict_log_entries(
+    vision_enabled_payment_plan: PaymentPlan,
+) -> None:
+    entry = {
+        "type": VisionLogEntryType.CLOSURE_NOTIFICATION.value,
+        "payload": {},
+        "response": {"status": "ok"},
+    }
+    vision_enabled_payment_plan.internal_data = {"vision": {"sent": True, "log": ["oops", entry]}}
+    assert VisionService.closure_notification_entries(vision_enabled_payment_plan) == [entry]
+
+
+def test_can_notify_vision_of_closure_ignores_non_closure_log_entries(
+    vision_enabled_payment_plan: PaymentPlan,
+) -> None:
+    vision_enabled_payment_plan.status = PaymentPlan.Status.CLOSED
+    vision_enabled_payment_plan.internal_data = {
+        "vision": {
+            "sent": True,
+            "log": [
+                {
+                    "type": VisionLogEntryType.API_CALL.value,
+                    "payload": {},
+                    "response": {"error": "api call failed"},
+                }
+            ],
+        }
+    }
+    vision_enabled_payment_plan.save(update_fields=["status", "internal_data"])
+    assert VisionService.can_notify_vision_of_closure(vision_enabled_payment_plan) is True
+
+
 @patch("hope.contrib.vision.tasks.VisionAPI")
 def test_send_payment_plan_to_vision_task_skips_ineligible_plan(
     mock_vision_api,

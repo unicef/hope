@@ -153,6 +153,25 @@ def test_acquire_token_missing_access_token_raises_error() -> None:
         api._acquire_token()
 
 
+def test_acquire_token_non_dict_response_raises_error() -> None:
+    api = VisionAPI()
+    token_response = MagicMock(status_code=200, ok=True, json=lambda: ["token"])
+    with patch.object(api._client, "post", return_value=token_response), pytest.raises(VisionAPIError):
+        api._acquire_token()
+
+
+@pytest.mark.parametrize("expires_in", ["not-a-number", None])
+def test_acquire_token_invalid_expires_in_raises_error(expires_in: str | None) -> None:
+    api = VisionAPI()
+    token_response = MagicMock(
+        status_code=200,
+        ok=True,
+        json=lambda: {"access_token": "oauth-token-123", "expires_in": expires_in},
+    )
+    with patch.object(api._client, "post", return_value=token_response), pytest.raises(VisionAPIError):
+        api._acquire_token()
+
+
 def test_acquire_token_non_json_response_raises_error() -> None:
     api = VisionAPI()
     token_response = MagicMock(status_code=200, ok=True, text="<html>not json</html>")
@@ -509,6 +528,19 @@ def test_notify_payment_plan_closure_saves_error_response_in_internal_data(
     assert entry["payload"]["payplanSno"] == "PP-CLOSURE-FAIL"
     # A failed closure notification must not change the Vision workflow status.
     assert payment_plan.vision_status == VisionStatus.RELEASED.value
+
+
+def test_notify_payment_plan_closure_with_non_dict_vision_data() -> None:
+    payment_plan = MagicMock()
+    payment_plan.vision_data = "unexpected"
+    payment_plan.unicef_id = "PP-NONDICT"
+    with patch.object(VisionAPI, "_post_payment_plan", return_value={}) as mock_post_plan:
+        VisionAPI().notify_payment_plan_closure(
+            payment_plan,
+            total_amount_reconciled=Decimal("8500.50"),
+            closure_date=datetime(2026, 11, 9, 10, 30, tzinfo=timezone.utc),
+        )
+    assert mock_post_plan.call_args.args[1]["visionPayplanSno"] == ""
 
 
 @patch("hope.contrib.vision.api.VisionAPI._acquire_token")
