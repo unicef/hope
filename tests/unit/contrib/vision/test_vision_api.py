@@ -1,5 +1,5 @@
 from collections.abc import Callable
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from decimal import Decimal
 from unittest.mock import MagicMock, patch
 
@@ -398,6 +398,47 @@ def test_notify_payment_plan_status_logs_api_error(
     payment_plan.refresh_from_db(fields=["internal_data"])
     assert payment_plan.vision_status == VisionStatus.NOT_SENT.value
     assert payment_plan.vision_data["log"][0]["response"] == {"error": "status update failed"}
+
+
+@patch("hope.contrib.vision.api.VisionAPI._acquire_token")
+@patch("hope.contrib.vision.api.VisionAPI._post")
+def test_notify_payment_plan_closure_posts_reconciliation_to_closure_endpoint(
+    mock_post,
+    mock_acquire_token,
+    vision_api_payment_plan_factory,
+    django_assert_num_queries,
+) -> None:
+    mock_post.return_value = ({"status": "ok"}, 200)
+    payment_plan = vision_api_payment_plan_factory(unicef_id="PP-CLOSURE")
+    payment_plan.internal_data = {
+        "vision": {
+            "status": VisionStatus.RELEASED.value,
+            "sent": True,
+            "vision_id": "V12345",
+            "log": [],
+        }
+    }
+    payment_plan.save(update_fields=["internal_data"])
+    closure_date = datetime(2026, 11, 9, 10, 30, tzinfo=timezone.utc)
+
+    with django_assert_num_queries(4):
+        response = VisionAPI().notify_payment_plan_closure(
+            payment_plan,
+            total_amount_reconciled=Decimal("8500.50"),
+            closure_date=closure_date,
+        )
+
+    payment_plan.refresh_from_db(fields=["internal_data"])
+    assert response == {"status": "ok"}
+    assert mock_post.call_args.args[0] == "https://test.example.com/ps/ezcash/PaymentPlanClosure"
+    assert mock_post.call_args.args[1] == {
+        "payplanSno": "PP-CLOSURE",
+        "visionPayplanSno": "V12345",
+        "totalAmountReconciled": "8500.50",
+        "closureDate": closure_date.isoformat(),
+    }
+    assert payment_plan.vision_status == VisionStatus.RELEASED.value
+    assert payment_plan.vision_data["log"][0]["type"] == VisionLogEntryType.CLOSURE_NOTIFICATION.value
 
 
 @patch("hope.contrib.vision.api.VisionAPI._acquire_token")

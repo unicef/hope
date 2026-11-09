@@ -1,3 +1,5 @@
+from decimal import Decimal
+
 from django.db import transaction
 from django.utils import timezone
 
@@ -92,9 +94,11 @@ def notify_payment_plan_status_to_vision_async_task(
 
 def notify_payment_plan_closure_to_vision_async_task_action(job: AsyncJob) -> None:
     payment_plan = PaymentPlan.objects.get(pk=job.config["payment_plan_id"])
+    if payment_plan.status != PaymentPlan.Status.CLOSED or not payment_plan.sent_to_vision:
+        return
     VisionAPI().notify_payment_plan_closure(
         payment_plan,
-        total_amount_reconciled=payment_plan.total_delivered_quantity,
+        total_amount_reconciled=payment_plan.total_delivered_quantity or Decimal("0.00"),
         closure_date=payment_plan.status_date,
     )
 

@@ -183,15 +183,18 @@ class VisionAPI(BaseAPI):
         normalized_closure_date = closure_date
         if hasattr(normalized_closure_date, "isoformat"):
             normalized_closure_date = normalized_closure_date.isoformat()
+        # Total delivered quantity is a Decimal, which is not JSON-serializable by the
+        # underlying requests client; Vision expects it as a string, like authAmt.
+        normalized_total_amount_reconciled = "" if total_amount_reconciled is None else str(total_amount_reconciled)
         payload = {
             "payplanSno": payment_plan.unicef_id,
             "visionPayplanSno": vision_payment_plan_id,
-            "totalAmountReconciled": total_amount_reconciled,
+            "totalAmountReconciled": normalized_total_amount_reconciled,
             "closureDate": normalized_closure_date,
         }
         return self._post_payment_plan(
             payment_plan,
             payload,
-            VisionLogEntryType.STATUS_NOTIFICATION,
+            VisionLogEntryType.CLOSURE_NOTIFICATION,
             url=self.payment_plan_closure_url,
         )

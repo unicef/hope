@@ -18,7 +18,7 @@ from extras.test_utils.factories import (
 )
 from hope.admin.funds_commitment_header import FundsCommitmentHeaderAdmin, FundsCommitmentItemInline
 from hope.admin.payment_plan import FundsCommitmentHeaderInline as PaymentPlanFundsCommitmentHeaderInline
-from hope.contrib.vision.choices import VisionStatus
+from hope.contrib.vision.choices import VisionLogEntryType, VisionStatus
 from hope.contrib.vision.models import FundsCommitmentHeader
 from hope.models import PaymentPlan
 
@@ -183,6 +183,103 @@ def test_send_to_vision_queues_task(mock_send, afghanistan, admin_user, program_
     response = admin_client.post(url)
     assert response.status_code == 302, response.content[:500]
     mock_send.assert_called_once_with(pp, str(admin_user.pk))
+
+
+def _create_closed_payment_plan(afghanistan, admin_user, program_cycle, log=None):
+    pp = _create_payment_plan(afghanistan, admin_user, program_cycle, PaymentPlan.Status.CLOSED)
+    pp.internal_data = {
+        "vision": {
+            "sent": True,
+            "status": VisionStatus.RELEASED.value,
+            "vision_id": "00000110",
+            "log": log or [],
+        }
+    }
+    pp.save(update_fields=["internal_data"])
+    return pp
+
+
+def test_send_closure_to_vision_button_visible_when_closure_never_sent(
+    afghanistan, admin_user, program_cycle, admin_client
+) -> None:
+    FlagState.objects.get_or_create(name="VISION_INTEGRATION_ACTIVE", condition="boolean", value="True")
+    pp = _create_closed_payment_plan(afghanistan, admin_user, program_cycle)
+    response = admin_client.get(reverse("admin:payment_paymentplan_change", args=[pp.pk]))
+    assert response.status_code == 200
+    assert 'id="btn-send_closure_to_vision"' in response.content.decode()
+
+
+def test_send_closure_to_vision_button_visible_when_closure_failed(
+    afghanistan, admin_user, program_cycle, admin_client
+) -> None:
+    FlagState.objects.get_or_create(name="VISION_INTEGRATION_ACTIVE", condition="boolean", value="True")
+    pp = _create_closed_payment_plan(
+        afghanistan,
+        admin_user,
+        program_cycle,
+        log=[
+            {
+                "type": VisionLogEntryType.CLOSURE_NOTIFICATION.value,
+                "payload": {},
+                "response": {"error": "Vision request failed"},
+            }
+        ],
+    )
+    response = admin_client.get(reverse("admin:payment_paymentplan_change", args=[pp.pk]))
+    assert response.status_code == 200
+    assert 'id="btn-send_closure_to_vision"' in response.content.decode()
+
+
+def test_send_closure_to_vision_button_hidden_when_closure_succeeded(
+    afghanistan, admin_user, program_cycle, admin_client
+) -> None:
+    FlagState.objects.get_or_create(name="VISION_INTEGRATION_ACTIVE", condition="boolean", value="True")
+    pp = _create_closed_payment_plan(
+        afghanistan,
+        admin_user,
+        program_cycle,
+        log=[
+            {
+                "type": VisionLogEntryType.CLOSURE_NOTIFICATION.value,
+                "payload": {},
+                "response": {"status": "ok"},
+            }
+        ],
+    )
+    response = admin_client.get(reverse("admin:payment_paymentplan_change", args=[pp.pk]))
+    assert response.status_code == 200
+    assert 'id="btn-send_closure_to_vision"' not in response.content.decode()
+
+
+def test_send_closure_to_vision_get_returns_confirmation(afghanistan, admin_user, program_cycle, admin_client) -> None:
+    FlagState.objects.get_or_create(name="VISION_INTEGRATION_ACTIVE", condition="boolean", value="True")
+    pp = _create_closed_payment_plan(afghanistan, admin_user, program_cycle)
+    url = reverse("admin:payment_paymentplan_send_closure_to_vision", args=[pp.pk])
+    response = admin_client.get(url)
+    assert response.status_code == 200
+    assert "Do you confirm to send this payment plan closure to Vision?" in response.content.decode()
+
+
+@patch("hope.admin.payment_plan.notify_payment_plan_closure_to_vision_async_task")
+def test_send_closure_to_vision_queues_task(
+    mock_notify_closure, afghanistan, admin_user, program_cycle, admin_client
+) -> None:
+    pp = _create_closed_payment_plan(
+        afghanistan,
+        admin_user,
+        program_cycle,
+        log=[
+            {
+                "type": VisionLogEntryType.CLOSURE_NOTIFICATION.value,
+                "payload": {},
+                "response": {"error": "Vision request failed"},
+            }
+        ],
+    )
+    url = reverse("admin:payment_paymentplan_send_closure_to_vision", args=[pp.pk])
+    response = admin_client.post(url)
+    assert response.status_code == 302, response.content[:500]
+    mock_notify_closure.assert_called_once_with(pp, str(admin_user.pk))
 
 
 def test_manual_fc_header_recovery_shows_warning_and_available_header(

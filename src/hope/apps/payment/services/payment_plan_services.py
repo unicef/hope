@@ -1683,9 +1683,9 @@ class PaymentPlanService:
         return self.payment_plan
 
     def close(self, closure_comment: str | None = None, user_id: str | None = None) -> PaymentPlan:
-        notify_vision_closed = self.payment_plan.sent_to_vision
         with transaction.atomic():
             payment_plan = PaymentPlan.objects.select_for_update().get(pk=self.payment_plan.pk)
+            notify_vision_closed = payment_plan.sent_to_vision
             if payment_plan.status != PaymentPlan.Status.READY_FOR_CLOSURE:
                 raise ValidationError(
                     f"Close Payment Plan is possible only within Status {PaymentPlan.Status.READY_FOR_CLOSURE}"
