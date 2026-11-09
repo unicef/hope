@@ -10,8 +10,11 @@ from hope.models import AsyncJob, PaymentPlan
 def send_payment_plan_to_vision_async_task_action(job: AsyncJob) -> None:
     with transaction.atomic():
         payment_plan = (
-            PaymentPlan.objects.select_for_update()
-            .select_related("business_area")
+            PaymentPlan.objects.select_for_update(of=("self",))
+            .select_related(
+                "business_area",
+                "program_cycle__program__data_collecting_type__payee_type",
+            )
             .get(pk=job.config["payment_plan_id"])
         )
         if not payment_plan.can_send_to_vision:
@@ -63,6 +66,7 @@ def notify_payment_plan_status_to_vision_async_task_action(job: AsyncJob) -> Non
         "business_area",
         "currency",
         "financial_service_provider",
+        "program_cycle__program__data_collecting_type__payee_type",
     ).get(pk=job.config["payment_plan_id"])
     VisionAPI().notify_payment_plan_status(payment_plan, job.config["vision_status"])
 
