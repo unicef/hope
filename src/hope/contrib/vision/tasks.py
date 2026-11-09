@@ -88,3 +88,24 @@ def notify_payment_plan_status_to_vision_async_task(
         group_key="payment",
         description=f"Notify Vision that payment plan {payment_plan.pk} is {vision_status}",
     )
+
+
+def notify_payment_plan_closure_to_vision_async_task_action(job: AsyncJob) -> None:
+    payment_plan = PaymentPlan.objects.get(pk=job.config["payment_plan_id"])
+    VisionAPI().notify_payment_plan_closure(
+        payment_plan,
+        total_amount_reconciled=payment_plan.total_delivered_quantity,
+        closure_date=payment_plan.status_date,
+    )
+
+
+def notify_payment_plan_closure_to_vision_async_task(payment_plan: PaymentPlan, user_id: str) -> AsyncJob | None:
+    return AsyncJob.requeue(
+        instance=payment_plan,
+        owner_id=user_id,
+        job_name="notify_payment_plan_closure_to_vision",
+        action="hope.contrib.vision.tasks.notify_payment_plan_closure_to_vision_async_task_action",
+        config={"payment_plan_id": str(payment_plan.pk)},
+        group_key="payment",
+        description=f"Notify Vision that payment plan {payment_plan.pk} was closed",
+    )

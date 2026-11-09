@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta
-from typing import cast
+from typing import Any, cast
 
 from django.conf import settings
 from django.db import transaction
@@ -33,6 +33,7 @@ class VisionAPI(BaseAPI):
         super().__init__()
         self.token_url = build_url(self.api_url, "v1/OAuthService/GenerateToken")
         self.payment_plan_creation_url = build_url(self.api_url, "ps/ezcash/PaymentPlan")
+        self.payment_plan_closure_url = build_url(self.api_url, "ps/ezcash/PaymentPlanClosure")
         self._token_expiry: datetime | None = None
 
     def _acquire_token(self) -> None:
@@ -120,6 +121,8 @@ class VisionAPI(BaseAPI):
         payment_plan: PaymentPlan,
         payload: dict,
         log_entry_type: VisionLogEntryType,
+        *,
+        url: str | None = None,
     ) -> dict:
         is_initial_send = log_entry_type == VisionLogEntryType.API_CALL
         success_status = VisionStatus.WAITING_FOR_CALLBACK if is_initial_send else None
@@ -132,7 +135,7 @@ class VisionAPI(BaseAPI):
         }
         try:
             self._ensure_token()
-            response, _ = self._post(self.payment_plan_creation_url, payload)
+            response, _ = self._post(url or self.payment_plan_creation_url, payload)
             entry["response"] = response
         except VisionAPIMissingCredentialsError:
             entry["response"] = {"error": "Vision API credentials are not configured"}
@@ -165,3 +168,30 @@ class VisionAPI(BaseAPI):
         payload = dict(PaymentPlanPayloadSerializer(payment_plan).data)
         payload["status"] = vision_status
         return self._post_payment_plan(payment_plan, payload, VisionLogEntryType.STATUS_NOTIFICATION)
+
+    def notify_payment_plan_closure(
+        self,
+        payment_plan: PaymentPlan,
+        *,
+        total_amount_reconciled: Any,
+        closure_date: Any,
+    ) -> dict:
+        vision_data = payment_plan.vision_data if hasattr(payment_plan, "vision_data") else {}
+        vision_payment_plan_id = ""
+        if isinstance(vision_data, dict):
+            vision_payment_plan_id = str(vision_data.get("vision_id") or "")
+        normalized_closure_date = closure_date
+        if hasattr(normalized_closure_date, "isoformat"):
+            normalized_closure_date = normalized_closure_date.isoformat()
+        payload = {
+            "payplanSno": payment_plan.unicef_id,
+            "visionPayplanSno": vision_payment_plan_id,
+            "totalAmountReconciled": total_amount_reconciled,
+            "closureDate": normalized_closure_date,
+        }
+        return self._post_payment_plan(
+            payment_plan,
+            payload,
+            VisionLogEntryType.STATUS_NOTIFICATION,
+            url=self.payment_plan_closure_url,
+        )

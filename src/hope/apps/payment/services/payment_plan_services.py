@@ -1683,6 +1683,7 @@ class PaymentPlanService:
         return self.payment_plan
 
     def close(self, closure_comment: str | None = None, user_id: str | None = None) -> PaymentPlan:
+        notify_vision_closed = self.payment_plan.sent_to_vision
         with transaction.atomic():
             payment_plan = PaymentPlan.objects.select_for_update().get(pk=self.payment_plan.pk)
             if payment_plan.status != PaymentPlan.Status.READY_FOR_CLOSURE:
@@ -1700,6 +1701,15 @@ class PaymentPlanService:
             payment_plan.refresh_from_db(
                 fields=["status", "status_date", "closure_comment", "closed_by_id", "updated_at"]
             )
+            if notify_vision_closed:
+                from hope.contrib.vision.tasks import notify_payment_plan_closure_to_vision_async_task
+
+                transaction.on_commit(
+                    lambda: notify_payment_plan_closure_to_vision_async_task(
+                        payment_plan, user_id or str(payment_plan.created_by_id)
+                    ),
+                    robust=True,
+                )
 
         self.payment_plan = payment_plan
         return self.payment_plan
