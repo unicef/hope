@@ -1,5 +1,5 @@
 import copy
-import datetime
+import datetime as dt
 import json
 
 from django.utils import timezone
@@ -133,7 +133,7 @@ def user() -> object:
 def record_defaults() -> dict:
     return {
         "registration": 2,
-        "timestamp": timezone.make_aware(datetime.datetime(2022, 4, 1)),
+        "timestamp": timezone.make_aware(dt.datetime(2022, 4, 1)),
     }
 
 
@@ -325,7 +325,7 @@ def test_import_data_to_datahub(
     )
 
     service = GenericRegistrationService(registration)
-    rdi = service.create_rdi(user, f"generic rdi {datetime.datetime.now()}")
+    rdi = service.create_rdi(user, f"generic rdi {dt.datetime.now()}")
     records_ids = [record.id for record in records]
     service.process_records(rdi.id, records_ids)
 
@@ -385,7 +385,7 @@ def test_import_data_to_datahub_household_individual(
         ),
     ]
     service = GenericRegistrationService(registration)
-    rdi = service.create_rdi(user, f"generic rdi {datetime.datetime.now()}")
+    rdi = service.create_rdi(user, f"generic rdi {dt.datetime.now()}")
     records_ids = [record.id for record in records]
     service.process_records(rdi.id, records_ids)
 
@@ -434,7 +434,7 @@ def test_import_leaves_latin_names_empty_when_not_provided(
         files=json.dumps({}).encode(),
     )
     service = GenericRegistrationService(registration)
-    rdi = service.create_rdi(user, f"generic rdi latin {datetime.datetime.now()}")
+    rdi = service.create_rdi(user, f"generic rdi latin {dt.datetime.now()}")
     service.process_records(rdi.id, [record.id])
 
     individual = PendingIndividual.objects.get(given_name="Wiktor")
@@ -483,7 +483,7 @@ def test_phone_number_validation_flags(
         ]
     )
     service = GenericRegistrationService(registration)
-    rdi = service.create_rdi(user, f"generic rdi phone {datetime.datetime.now()}")
+    rdi = service.create_rdi(user, f"generic rdi phone {dt.datetime.now()}")
     service.process_records(rdi.id, [r.id for r in records])
 
     valid = PendingIndividual.objects.get(given_name="Jan")

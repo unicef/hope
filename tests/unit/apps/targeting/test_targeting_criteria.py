@@ -1,4 +1,4 @@
-import datetime
+import datetime as dt
 
 from dateutil.relativedelta import relativedelta
 import pytest
@@ -82,7 +82,7 @@ def households_with_individuals(business_area):
         household=None,
         sex="MALE",
         marital_status="MARRIED",
-        birth_date=datetime.date.today() - relativedelta(years=20, days=5),
+        birth_date=dt.date.today() - relativedelta(years=20, days=5),
         observed_disability=["HEARING"],
     )
     hh1 = HouseholdFactory(business_area=business_area, head_of_household=ind_1, size=1)
@@ -93,7 +93,7 @@ def households_with_individuals(business_area):
         household=None,
         sex="MALE",
         marital_status="SINGLE",
-        birth_date=datetime.date.today() - relativedelta(years=24, days=5),
+        birth_date=dt.date.today() - relativedelta(years=24, days=5),
         observed_disability=["NONE"],
     )
     hh2 = HouseholdFactory(business_area=business_area, head_of_household=ind_2, size=2)
@@ -103,7 +103,7 @@ def households_with_individuals(business_area):
         household=hh2,
         sex="FEMALE",
         marital_status="MARRIED",
-        birth_date=datetime.date.today() - relativedelta(years=26, days=-5),
+        birth_date=dt.date.today() - relativedelta(years=26, days=-5),
         observed_disability=["NONE"],
     )
 

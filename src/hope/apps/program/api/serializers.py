@@ -31,7 +31,7 @@ from hope.models import (
 )
 
 if TYPE_CHECKING:
-    import datetime
+    import datetime as dt
 
     from rest_framework.utils.serializer_helpers import ReturnDict
 
@@ -183,7 +183,7 @@ class ProgramCycleCreateSerializer(serializers.ModelSerializer):
         return value
 
     @staticmethod
-    def _validate_cycle_start_date(start_date: datetime.date, program: Program) -> None:
+    def _validate_cycle_start_date(start_date: dt.date, program: Program) -> None:
         if program.end_date:
             if not (program.start_date <= start_date <= program.end_date):
                 raise serializers.ValidationError(
@@ -195,7 +195,7 @@ class ProgramCycleCreateSerializer(serializers.ModelSerializer):
             )
 
     @staticmethod
-    def _validate_cycle_end_date(end_date: datetime.date, start_date: datetime.date, program: Program) -> None:
+    def _validate_cycle_end_date(end_date: dt.date, start_date: dt.date, program: Program) -> None:
         if not program.end_date and end_date < program.start_date:
             raise serializers.ValidationError(
                 {"end_date": "Programme Cycle end date cannot be before programme start date."}
@@ -251,11 +251,11 @@ class ProgramCycleUpdateSerializer(serializers.ModelSerializer):
         return value
 
     @staticmethod
-    def _parse_program_dates(program: Program) -> tuple[datetime.date, datetime.date | None]:
-        program_start_date: datetime.date | None = (
+    def _parse_program_dates(program: Program) -> tuple[dt.date, dt.date | None]:
+        program_start_date: dt.date | None = (
             parse_date(program.start_date) if isinstance(program.start_date, str) else program.start_date
         )
-        program_end_date: datetime.date | None = (
+        program_end_date: dt.date | None = (
             (parse_date(program.end_date) if isinstance(program.end_date, str) else program.end_date)
             if program.end_date
             else None
@@ -265,7 +265,7 @@ class ProgramCycleUpdateSerializer(serializers.ModelSerializer):
         return program_start_date, program_end_date
 
     def _validate_update_start_date(
-        self, start_date: datetime.date, program_start_date: datetime.date, program_end_date: datetime.date | None
+        self, start_date: dt.date, program_start_date: dt.date, program_end_date: dt.date | None
     ) -> None:
         if program_end_date:
             if not (program_start_date <= start_date <= program_end_date):
@@ -281,10 +281,10 @@ class ProgramCycleUpdateSerializer(serializers.ModelSerializer):
 
     def _validate_update_end_date(
         self,
-        end_date: datetime.date,
-        start_date: datetime.date | None,
-        program_start_date: datetime.date,
-        program_end_date: datetime.date | None,
+        end_date: dt.date,
+        start_date: dt.date | None,
+        program_start_date: dt.date,
+        program_end_date: dt.date | None,
     ) -> None:
         if program_end_date and not (program_start_date <= end_date <= program_end_date):
             raise serializers.ValidationError(

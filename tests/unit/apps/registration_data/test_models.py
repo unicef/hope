@@ -1,6 +1,6 @@
 """Tests for registration data models."""
 
-import datetime
+import datetime as dt
 from typing import Any
 
 from django.db import IntegrityError, transaction
@@ -70,7 +70,7 @@ def imported_individual_with_household(
 ) -> Individual:
     ind = IndividualFactory(
         full_name="Jane Doe",
-        birth_date=datetime.datetime(1991, 3, 4),
+        birth_date=dt.datetime(1991, 3, 4),
         registration_data_import=registration_data_import,
         rdi_merge_status=Individual.PENDING,
     )

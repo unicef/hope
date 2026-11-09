@@ -104,7 +104,9 @@ class Command(BaseCommand):
                 seed_rdi = self._create_seed_rdi(ba, program, tag)
                 population = {}
                 for key, given, family, dob, sex in POPULATION:
-                    ind = self._create_golden_individual(ba, program, seed_rdi, given, family, dob, sex)
+                    ind = self._create_golden_individual(
+                        ba, program, seed_rdi, given_name=given, family_name=family, birth_date=dob, sex=sex
+                    )
                     population[key] = {"id": str(ind.id), "unicef_id": ind.unicef_id}
 
             ok, msg = rebuild_program_indexes(str(program.id))
@@ -319,6 +321,7 @@ class Command(BaseCommand):
         ba: BusinessArea,
         program: Program,
         rdi: RegistrationDataImport,
+        *,
         given_name: str,
         family_name: str,
         birth_date: date,

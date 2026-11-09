@@ -1,5 +1,5 @@
 import base64
-import datetime
+import datetime as dt
 import json
 from typing import Any
 
@@ -117,12 +117,12 @@ def digital_wallet_delivery_mechanism(generic_crypto_fi: FinancialInstitution) -
 
 
 @pytest.fixture
-def submission_timestamp() -> datetime.datetime:
-    return timezone.make_aware(datetime.datetime(2026, 6, 15))
+def submission_timestamp() -> dt.datetime:
+    return timezone.make_aware(dt.datetime(2026, 6, 15))
 
 
 @pytest.fixture
-def usdc_record(registration: Any, submission_timestamp: datetime.datetime) -> Record:
+def usdc_record(registration: Any, submission_timestamp: dt.datetime) -> Record:
     return RecordFactory(
         registration=registration.source_id,
         timestamp=submission_timestamp,
@@ -150,7 +150,7 @@ def usdc_record(registration: Any, submission_timestamp: datetime.datetime) -> R
 
 
 @pytest.fixture
-def usdc_record_with_latin_names(registration: Any, submission_timestamp: datetime.datetime) -> Record:
+def usdc_record_with_latin_names(registration: Any, submission_timestamp: dt.datetime) -> Record:
     return RecordFactory(
         registration=registration.source_id,
         timestamp=submission_timestamp,
@@ -185,7 +185,7 @@ def test_creates_household_in_ukraine_for_regular_programme(
     tax_id_document_type: Any,
     digital_wallet_delivery_mechanism: DeliveryMechanism,
     usdc_record: Record,
-    submission_timestamp: datetime.datetime,
+    submission_timestamp: dt.datetime,
 ) -> None:
     service = UkraineUSDCRegistrationService(registration)
     rdi = service.create_rdi(user, "usdc rdi")
@@ -391,7 +391,7 @@ def test_rejects_record_with_more_than_one_individual(
     ukraine_country: Any,
     tax_id_document_type: Any,
     digital_wallet_delivery_mechanism: DeliveryMechanism,
-    submission_timestamp: datetime.datetime,
+    submission_timestamp: dt.datetime,
 ) -> None:
     record = RecordFactory(
         registration=registration.source_id,
@@ -436,7 +436,7 @@ def test_invalid_individual_rejects_record(
     ukraine_country: Any,
     tax_id_document_type: Any,
     digital_wallet_delivery_mechanism: DeliveryMechanism,
-    submission_timestamp: datetime.datetime,
+    submission_timestamp: dt.datetime,
 ) -> None:
     record = RecordFactory(
         registration=registration.source_id,
@@ -493,7 +493,7 @@ def test_no_wallet_account_when_address_missing(
     tax_id_document_type: Any,
     digital_wallet_delivery_mechanism: DeliveryMechanism,
     generic_crypto_fi: FinancialInstitution,
-    submission_timestamp: datetime.datetime,
+    submission_timestamp: dt.datetime,
 ) -> None:
     record = RecordFactory(
         registration=registration.source_id,
@@ -529,7 +529,7 @@ def test_no_attachment_when_wallet_address_missing(
     tax_id_document_type: Any,
     digital_wallet_delivery_mechanism: DeliveryMechanism,
     generic_crypto_fi: FinancialInstitution,
-    submission_timestamp: datetime.datetime,
+    submission_timestamp: dt.datetime,
     settings: Any,
     tmp_path: Any,
 ) -> None:
@@ -646,7 +646,7 @@ def test_rejects_record_with_no_individuals(
     ukraine_country: Any,
     tax_id_document_type: Any,
     digital_wallet_delivery_mechanism: DeliveryMechanism,
-    submission_timestamp: datetime.datetime,
+    submission_timestamp: dt.datetime,
 ) -> None:
     record = RecordFactory(
         registration=registration.source_id,

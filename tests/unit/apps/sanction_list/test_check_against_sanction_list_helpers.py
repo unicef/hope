@@ -1,7 +1,7 @@
 """Tests for CheckAgainstSanctionListTask helper methods."""
 
 import base64
-import datetime
+import datetime as dt
 import io
 from unittest.mock import MagicMock
 
@@ -32,7 +32,7 @@ def test_create_results_attachment_with_data():
     individual.second_name = "Doe"
     individual.third_name = ""
     individual.fourth_name = ""
-    individual.dates_of_birth.values_list.return_value = [datetime.date(1990, 5, 15)]
+    individual.dates_of_birth.values_list.return_value = [dt.date(1990, 5, 15)]
 
     task = CheckAgainstSanctionListTask()
     result = task._create_results_attachment({3: individual})

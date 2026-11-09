@@ -1,4 +1,4 @@
-import datetime
+import datetime as dt
 from typing import Any
 
 from django.test import TestCase
@@ -71,7 +71,7 @@ def household_with_previous_values(program: Program) -> Any:
         program=program,
         business_area=program.business_area,
         create_role=False,
-        start=timezone.make_aware(datetime.datetime(2022, 1, 1)),
+        start=timezone.make_aware(dt.datetime(2022, 1, 1)),
         country=CountryFactory(iso_code3="POL"),
         admin1=AreaFactory(p_code="AF9999"),
         facility=FacilityFactory(
@@ -216,7 +216,7 @@ def test_save_datetime_field_records_previous_value_as_isoformat(
         "issue_type": {
             "household_data_update_issue_type_extras": {
                 "household": household_with_previous_values,
-                "household_data": {"start": datetime.date(2023, 1, 5)},
+                "household_data": {"start": dt.date(2023, 1, 5)},
             }
         }
     }
@@ -263,7 +263,7 @@ def test_update_datetime_field_records_previous_value_as_isoformat(
     update_extras = {
         "household_data_update_issue_type_extras": {
             "household": household_with_previous_values,
-            "household_data": {"start": datetime.date(2023, 1, 5)},
+            "household_data": {"start": dt.date(2023, 1, 5)},
         }
     }
 

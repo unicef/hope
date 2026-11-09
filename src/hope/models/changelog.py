@@ -1,4 +1,4 @@
-import datetime
+import datetime as dt
 
 from django.db import models
 from django.urls import reverse
@@ -9,7 +9,7 @@ class Changelog(models.Model):
     description = models.TextField(blank=True)
     version = models.CharField(max_length=30, help_text=_("HOPE version"))
     active = models.BooleanField(default=False)
-    date = models.DateField(default=datetime.date.today)
+    date = models.DateField(default=dt.date.today)
 
     class Meta:
         app_label = "changelog"

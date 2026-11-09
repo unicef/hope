@@ -1,4 +1,4 @@
-import datetime
+import datetime as dt
 from decimal import Decimal
 from itertools import groupby
 import logging
@@ -1048,7 +1048,7 @@ class PaymentPlanService:
                 "For delivery mechanism Transfer to Digital Wallet only currency USDC can be assigned."
             )
 
-    def _validate_dispersion_end_date(self, dispersion_end_date: datetime.date) -> None:
+    def _validate_dispersion_end_date(self, dispersion_end_date: dt.date) -> None:
         if dispersion_end_date <= timezone.now().date():
             raise ValidationError(f"Dispersion End Date [{dispersion_end_date}] cannot be a past date")
 
@@ -1156,8 +1156,8 @@ class PaymentPlanService:
     def _create_child_payment_plan(
         self,
         user: Union["User", "AbstractBaseUser", "AnonymousUser"],
-        dispersion_start_date: datetime.date,
-        dispersion_end_date: datetime.date,
+        dispersion_start_date: dt.date,
+        dispersion_end_date: dt.date,
         plan_type: str,
         name_suffix: str,
     ) -> PaymentPlan:
@@ -1323,8 +1323,8 @@ class PaymentPlanService:
     def create_follow_up(
         self,
         user: Union["User", "AbstractBaseUser", "AnonymousUser"],
-        dispersion_start_date: datetime.date,
-        dispersion_end_date: datetime.date,
+        dispersion_start_date: dt.date,
+        dispersion_end_date: dt.date,
         follow_up_instruction: "FollowUpInstruction | None" = None,
     ) -> PaymentPlan:
         source_pp = self.payment_plan
@@ -1348,8 +1348,8 @@ class PaymentPlanService:
     def create_top_up(
         self,
         user: Union["User", "AbstractBaseUser", "AnonymousUser"],
-        dispersion_start_date: datetime.date,
-        dispersion_end_date: datetime.date,
+        dispersion_start_date: dt.date,
+        dispersion_end_date: dt.date,
         fixed_amount: Decimal | None = None,
         amounts: dict[str, Decimal] | None = None,
     ) -> PaymentPlan:
@@ -1384,8 +1384,8 @@ class PaymentPlanService:
     def create_top_up_amendment(
         self,
         user: Union["User", "AbstractBaseUser", "AnonymousUser"],
-        dispersion_start_date: datetime.date,
-        dispersion_end_date: datetime.date,
+        dispersion_start_date: dt.date,
+        dispersion_end_date: dt.date,
         fixed_amount: Decimal | None = None,
         amounts: dict[str, Decimal] | None = None,
     ) -> PaymentPlan:
@@ -1438,8 +1438,8 @@ class PaymentPlanService:
         *,
         plan_type: "PaymentPlan.PlanType",
         user: Union["User", "AbstractBaseUser", "AnonymousUser"],
-        dispersion_start_date: datetime.date,
-        dispersion_end_date: datetime.date,
+        dispersion_start_date: dt.date,
+        dispersion_end_date: dt.date,
         top_up_amount: "Decimal | dict[str, Decimal] | None" = None,
     ) -> PaymentPlan:
         """Create a child plan of the requested type.
@@ -1828,13 +1828,13 @@ class PaymentPlanService:
 
     @classmethod
     def send_reconciliation_overdue_emails(cls) -> None:
-        today = datetime.date.today()
+        today = dt.date.today()
 
         overdue_payment_plans = (
             PaymentPlan.objects.annotate(
                 due_date=ExpressionWrapper(
                     F("dispersion_start_date")
-                    + F("program_cycle__program__reconciliation_window_in_days") * datetime.timedelta(days=1),
+                    + F("program_cycle__program__reconciliation_window_in_days") * dt.timedelta(days=1),
                     output_field=DateField(),
                 )
             )

@@ -1,4 +1,4 @@
-import datetime
+import datetime as dt
 from typing import Any
 
 from django.db.models import Q
@@ -372,7 +372,7 @@ class PDUOnlineEditSaveDataSerializer(serializers.Serializer):
                 f"Field '{field_name}' expects a string value for date, got {type(field_value).__name__}"
             )
         try:
-            datetime.date.fromisoformat(field_value)
+            dt.date.fromisoformat(field_value)
         except (TypeError, ValueError):
             raise serializers.ValidationError(f"Field '{field_name}' has invalid date format. Expected YYYY-MM-DD")
 

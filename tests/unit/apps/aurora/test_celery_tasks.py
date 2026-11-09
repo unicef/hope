@@ -1,6 +1,6 @@
 import base64
 from contextlib import contextmanager
-import datetime
+import datetime as dt
 import json
 from typing import Any, Callable, Optional
 from unittest.mock import Mock, patch
@@ -650,13 +650,13 @@ def test_ukraine_new_registration_form(
     assert hh.admin3 is None
     assert hh.enumerator_rec_id == 655384
 
-    assert ind_1.birth_date == datetime.date(1990, 11, 11)
+    assert ind_1.birth_date == dt.date(1990, 11, 11)
     assert ind_1.disability == NOT_DISABLED
     assert ind_1.phone_no == "+380952025248"
     assert ind_1.relationship == HEAD
     assert ind_1.sex == MALE
 
-    assert ind_2.birth_date == datetime.date(2023, 3, 6)
+    assert ind_2.birth_date == dt.date(2023, 3, 6)
     assert ind_2.sex == FEMALE
     assert ind_2.relationship == SON_DAUGHTER
     assert ind_2.disability == DISABLED

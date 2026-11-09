@@ -1,6 +1,6 @@
 """Tests for user profile API views."""
 
-import datetime
+import datetime as dt
 from types import SimpleNamespace
 from typing import Any
 
@@ -87,7 +87,7 @@ def partner(afghanistan: BusinessArea, ukraine: BusinessArea) -> Partner:
 def user(partner: Partner) -> User:
     return UserFactory(
         partner=partner,
-        last_login=timezone.make_aware(datetime.datetime.strptime("2021-01-11", "%Y-%m-%d")),
+        last_login=timezone.make_aware(dt.datetime.strptime("2021-01-11", "%Y-%m-%d")),
     )
 
 
