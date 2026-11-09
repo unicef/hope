@@ -139,6 +139,7 @@ class PaymentPlanPayloadSerializer(serializers.Serializer):
     auth_amt_usd = serializers.CharField(source="total_entitled_quantity_usd")
     exchange_rate = serializers.DecimalField(max_digits=15, decimal_places=8, allow_null=True)
     head_vendor = serializers.CharField(source="financial_service_provider.name")
+    gl_code = serializers.CharField(source="program_cycle.program.data_collecting_type.payee_type.gl_code")
 
     def to_representation(self, instance: Any) -> dict[str, Any]:
         data = super().to_representation(instance)
