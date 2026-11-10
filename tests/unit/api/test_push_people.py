@@ -4,13 +4,17 @@ import pytest
 from rest_framework import status
 from rest_framework.reverse import reverse
 
-from extras.test_utils.factories.core import BeneficiaryGroupFactory, DataCollectingTypeFactory
+from extras.test_utils.factories.core import (
+    BeneficiaryGroupFactory,
+    DataCollectingTypeFactory,
+    FlexibleAttributeFactory,
+)
 from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory
 from extras.test_utils.factories.household import DocumentTypeFactory
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 from hope.api.endpoints.rdi.push_people import PeopleUploadMixin, PushPeopleSerializer
-from hope.api.endpoints.rdi.stored_images import get_stored_image_prefix
+from hope.api.endpoints.rdi.stored_images import get_stored_image_directory
 from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hope.apps.household.const import (
     DISABLED,
@@ -25,6 +29,7 @@ from hope.models import (
     Area,
     DataCollectingType,
     DocumentType,
+    FlexibleAttribute,
     PendingAccount,
     PendingDocument,
     PendingHousehold,
@@ -446,8 +451,13 @@ def test_push_single_person_with_a_retired_currency_is_rejected(
 
 
 @pytest.fixture
-def file_prefix(business_area, program) -> str:
-    return get_stored_image_prefix(business_area.slug, program)
+def file_directory(business_area, program) -> str:
+    return get_stored_image_directory(business_area.slug, program.code)
+
+
+@pytest.fixture
+def file_prefix(program, file_directory) -> str:
+    return f"{program.start_date.year}/{file_directory}"
 
 
 @pytest.fixture
@@ -585,7 +595,7 @@ def test_upload_person_with_file_name_longer_than_the_column_returns_error(
 
 @pytest.mark.parametrize("field", ["photo", "disability_certificate_picture"])
 def test_upload_person_with_file_of_another_program_returns_error(
-    token_api_client, push_people_url, person_payload, file_prefix, store_image, field
+    token_api_client, push_people_url, person_payload, file_directory, store_image, field
 ) -> None:
     other_program_file = store_image("2025/other-area/zz99/CW_ind_1_photo.png")
     person_payload[field] = other_program_file
@@ -593,8 +603,77 @@ def test_upload_person_with_file_of_another_program_returns_error(
     response = token_api_client.post(push_people_url, [person_payload], format="json")
 
     assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert response.json() == {"0": {field: [f"File name must start with '{file_prefix}'."]}}
+    assert response.json() == {"0": {field: [f"File name must start with '<year>/{file_directory}'."]}}
     assert not PendingIndividual.objects.exists()
+
+
+@pytest.fixture
+def image_flex_attribute(db) -> FlexibleAttribute:
+    return FlexibleAttributeFactory(
+        name="individual_photo_i_f",
+        label={"English(EN)": "Individual Photo"},
+        type=FlexibleAttribute.IMAGE,
+        associated_with=FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL,
+    )
+
+
+@pytest.mark.parametrize("flex_field", ["individual_photo_i_f", "individual_photo"])
+def test_upload_person_with_image_flex_field_keeps_the_file_name(
+    token_api_client,
+    push_people_url,
+    person_payload,
+    stored_image,
+    image_flex_attribute,
+    afghanistan_country,
+    flex_field,
+) -> None:
+    person_payload["flex_fields"] = {flex_field: f"/{stored_image}"}
+
+    response = token_api_client.post(push_people_url, [person_payload], format="json")
+
+    assert response.status_code == status.HTTP_201_CREATED, str(response.json())
+    individual = PendingIndividual.objects.get(country_workspace_id="cw-files-1")
+    assert individual.flex_fields[flex_field] == stored_image
+
+
+@pytest.mark.parametrize("flex_field", ["individual_photo_i_f", "individual_photo"])
+def test_upload_person_with_missing_image_flex_field_file_returns_error(
+    token_api_client, push_people_url, person_payload, file_prefix, image_flex_attribute, flex_field
+) -> None:
+    person_payload["flex_fields"] = {flex_field: f"{file_prefix}does_not_exist.png"}
+
+    response = token_api_client.post(push_people_url, [person_payload], format="json")
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response.json() == {
+        "0": {"flex_fields": {flex_field: [f"File '{file_prefix}does_not_exist.png' does not exist in storage."]}}
+    }
+    assert not PendingIndividual.objects.exists()
+
+
+def test_upload_person_with_image_flex_field_of_another_program_returns_error(
+    token_api_client, push_people_url, person_payload, file_directory, store_image, image_flex_attribute
+) -> None:
+    person_payload["flex_fields"] = {"individual_photo_i_f": store_image("2025/other-area/zz99/CW_ind_1_photo.png")}
+
+    response = token_api_client.post(push_people_url, [person_payload], format="json")
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response.json() == {
+        "0": {"flex_fields": {"individual_photo_i_f": [f"File name must start with '<year>/{file_directory}'."]}}
+    }
+    assert not PendingIndividual.objects.exists()
+
+
+def test_upload_person_leaves_other_flex_fields_alone(
+    token_api_client, push_people_url, person_payload, image_flex_attribute, afghanistan_country
+) -> None:
+    person_payload["flex_fields"] = {"free_text": "../not a file"}
+
+    response = token_api_client.post(push_people_url, [person_payload], format="json")
+
+    assert response.status_code == status.HTTP_201_CREATED, str(response.json())
+    assert PendingIndividual.objects.get(country_workspace_id="cw-files-1").flex_fields["free_text"] == "../not a file"
 
 
 def test_create_individual_passes_the_file_names_through(rdi, stored_image) -> None:
@@ -697,7 +776,7 @@ def test_push_single_person_stores_country_workspace_id(
     assert ind.country_workspace_id == "42"
 
 
-def test_push_people_creates_account_attachments(
+def test_push_people_creates_accounts(
     token_api_client,
     push_people_url,
     program,
@@ -705,7 +784,6 @@ def test_push_people_creates_account_attachments(
     afghanistan_country,
     bank_account_type,
     generic_bank,
-    base64_image,
 ) -> None:
     data = [
         {
@@ -716,14 +794,8 @@ def test_push_people_creates_account_attachments(
             "sex": "FEMALE",
             "type": "",
             "program": str(program.id),
-            "country_workspace_id": "cw-wallet-attachments",
-            "accounts": [
-                {
-                    "type": "bank",
-                    "number": "123",
-                    "attachments": [{"title": "Wallet number image", "file": base64_image}],
-                }
-            ],
+            "country_workspace_id": "cw-accounts",
+            "accounts": [{"type": "bank", "number": "123"}],
         }
     ]
 
@@ -731,6 +803,6 @@ def test_push_people_creates_account_attachments(
 
     assert response.status_code == status.HTTP_201_CREATED, str(response.json())
     account = PendingAccount.objects.get(individual__full_name="Jane Wallet")
-    attachment = account.attachments.get()
-    assert attachment.title == "Wallet number image"
-    assert attachment.file.name
+    assert account.number == "123"
+    assert account.account_type.key == "bank"
+    assert account.financial_institution == generic_bank

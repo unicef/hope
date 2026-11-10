@@ -1,9 +1,8 @@
-from collections.abc import Callable
 from unittest.mock import MagicMock, patch
 
 import pytest
 
-from hope.api.endpoints.rdi.lax import CreateLaxHouseholds, clean_image_flex_fields
+from hope.api.endpoints.rdi.lax import CreateLaxHouseholds
 
 
 @pytest.fixture
@@ -66,48 +65,3 @@ def test_resolve_countries_with_country_and_origin(
     assert mock_household.country == us_country
     assert mock_household.country_origin == ca_country
     mock_pending_household_cls.objects.bulk_create.assert_called_once()
-
-
-PREFIX = "2025/afghanistan/ab12/"
-
-
-def test_clean_image_flex_fields_normalizes_valid_value(store_image: Callable[[str], str]) -> None:
-    file_name = store_image(f"{PREFIX}CW_ind_1_photo.png")
-    flex_fields = {"photo": f"/{file_name}", "note": "/not/an/image"}
-
-    errors = clean_image_flex_fields(flex_fields, {"photo"}, PREFIX)
-
-    assert errors == {}
-    assert flex_fields == {"photo": file_name, "note": "/not/an/image"}
-
-
-def test_clean_image_flex_fields_missing_file() -> None:
-    flex_fields = {"photo": f"{PREFIX}missing.png"}
-
-    errors = clean_image_flex_fields(flex_fields, {"photo"}, PREFIX)
-
-    assert errors == {"photo": [f"File '{PREFIX}missing.png' does not exist in storage."]}
-    assert flex_fields == {"photo": f"{PREFIX}missing.png"}
-
-
-def test_clean_image_flex_fields_file_of_another_program(store_image: Callable[[str], str]) -> None:
-    file_name = store_image("2025/other-area/zz99/CW_ind_1_photo.png")
-
-    errors = clean_image_flex_fields({"photo": file_name}, {"photo"}, PREFIX)
-
-    assert errors == {"photo": [f"File name must start with '{PREFIX}'."]}
-
-
-def test_clean_image_flex_fields_name_longer_than_flex_field_limit() -> None:
-    errors = clean_image_flex_fields({"photo": f"{PREFIX}{'a' * 1024}.png"}, {"photo"}, PREFIX)
-
-    assert errors == {"photo": ["File name must have no more than 1024 characters."]}
-
-
-def test_clean_image_flex_fields_non_string_value() -> None:
-    assert clean_image_flex_fields({"photo": 12345}, {"photo"}, PREFIX) == {"photo": ["Expected a file name."]}
-
-
-@pytest.mark.parametrize("flex_fields", [None, {}, {"photo": ""}, {"photo": None}, {"other": "x"}])
-def test_clean_image_flex_fields_nothing_to_check(flex_fields: dict | None) -> None:
-    assert clean_image_flex_fields(flex_fields, {"photo"}, PREFIX) == {}

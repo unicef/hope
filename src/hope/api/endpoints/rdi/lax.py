@@ -29,11 +29,10 @@ from hope.api.endpoints.rdi.cw_ids import (
 )
 from hope.api.endpoints.rdi.mixin import HouseholdUploadMixin
 from hope.api.endpoints.rdi.stored_images import (
-    STORED_IMAGE_PREFIX_CONTEXT_KEY,
+    STORED_IMAGE_DIRECTORY_CONTEXT_KEY,
+    ImageFlexFieldsValidationMixin,
     StoredImageField,
-    get_stored_image_error,
-    get_stored_image_prefix,
-    normalize_stored_image_name,
+    get_stored_image_directory,
 )
 from hope.api.endpoints.rdi.upload import BirthDateValidator
 from hope.api.utils import CurrencySlugRelatedField, OnUnchangedCode
@@ -69,7 +68,6 @@ from hope.models import (
 )
 
 if TYPE_CHECKING:
-    from collections.abc import Iterable
     from uuid import UUID
 
     from rest_framework.request import Request
@@ -77,7 +75,6 @@ if TYPE_CHECKING:
     from hope.models import BusinessArea, Program
 
 BATCH_SIZE = 100
-FLEX_FIELD_FILE_NAME_MAX_LENGTH = 1024  # Azure blob name limit, flex fields are stored in a JSON column
 logger = logging.getLogger(__name__)
 
 
@@ -89,41 +86,6 @@ class IndividualsBulkStaging:
     prepared_accounts: list[dict] = field(default_factory=list)
     doc_country_codes: set[str] = field(default_factory=set)
     doc_type_keys: set[str] = field(default_factory=set)
-
-
-def clean_image_flex_fields(
-    flex_fields: dict | None, image_field_names: Iterable[str], prefix: str
-) -> dict[str, list[str]]:
-    """Normalize IMAGE type flex fields in place and return errors keyed by flex field name."""
-    if not flex_fields:
-        return {}
-
-    errors: dict[str, list[str]] = {}
-    for field_name in image_field_names:
-        value = flex_fields.get(field_name)
-        if not value:
-            continue
-        if not isinstance(value, str):
-            errors[field_name] = ["Expected a file name."]
-            continue
-        file_name = normalize_stored_image_name(value)
-        if error := get_stored_image_error(file_name, prefix, FLEX_FIELD_FILE_NAME_MAX_LENGTH):
-            errors[field_name] = [error]
-        else:
-            flex_fields[field_name] = file_name
-    return errors
-
-
-class ImageFlexFieldsValidationMixin:
-    context: dict[str, Any]
-
-    def validate_flex_fields(self, value: dict | None) -> dict | None:
-        if not value:
-            return value
-        image_field_names = self.context["get_image_flex_fields"]() or ()
-        if errors := clean_image_flex_fields(value, image_field_names, self.context[STORED_IMAGE_PREFIX_CONTEXT_KEY]):
-            raise ValidationError(errors)
-        return value
 
 
 class DocumentTypeKeyField(serializers.CharField):
@@ -336,8 +298,8 @@ class CreateLaxBaseView(HOPEAPIBusinessAreaView, HandleFlexFieldsMixin):
         return self.selected_rdi.program
 
     @cached_property
-    def _stored_image_prefix(self) -> str:
-        return get_stored_image_prefix(self.selected_business_area.slug, self._rdi_program)
+    def _stored_image_directory(self) -> str:
+        return get_stored_image_directory(self.selected_business_area.slug, self._rdi_program.code)
 
 
 class CreateLaxIndividuals(CreateLaxBaseView):
@@ -500,7 +462,7 @@ class CreateLaxIndividuals(CreateLaxBaseView):
                         "get_image_flex_fields": partial(
                             self.get_image_flex_fields, FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL
                         ),
-                        STORED_IMAGE_PREFIX_CONTEXT_KEY: self._stored_image_prefix,
+                        STORED_IMAGE_DIRECTORY_CONTEXT_KEY: self._stored_image_directory,
                     },
                 )
 
@@ -699,7 +661,7 @@ class CreateLaxHouseholds(CreateLaxBaseView, HouseholdUploadMixin):
                     "get_image_flex_fields": partial(
                         self.get_image_flex_fields, FlexibleAttribute.ASSOCIATED_WITH_HOUSEHOLD
                     ),
-                    STORED_IMAGE_PREFIX_CONTEXT_KEY: self._stored_image_prefix,
+                    STORED_IMAGE_DIRECTORY_CONTEXT_KEY: self._stored_image_directory,
                 },
             )
             if serializer.is_valid():

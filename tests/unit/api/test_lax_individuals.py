@@ -20,7 +20,7 @@ from extras.test_utils.factories import (
     UserFactory,
 )
 from hope.api.endpoints.rdi.lax import IndividualSerializer
-from hope.api.endpoints.rdi.stored_images import get_stored_image_prefix
+from hope.api.endpoints.rdi.stored_images import get_stored_image_directory
 from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hope.apps.household.const import (
     BLANK,
@@ -124,8 +124,13 @@ def lax_push_url(lax_business_area, lax_rdi) -> str:
 
 
 @pytest.fixture
-def file_prefix(lax_rdi: RegistrationDataImport) -> str:
-    return get_stored_image_prefix(lax_rdi.business_area.slug, lax_rdi.program)
+def file_directory(lax_rdi: RegistrationDataImport) -> str:
+    return get_stored_image_directory(lax_rdi.business_area.slug, lax_rdi.program.code)
+
+
+@pytest.fixture
+def file_prefix(lax_rdi: RegistrationDataImport, file_directory: str) -> str:
+    return f"{lax_rdi.program.start_date.year}/{file_directory}"
 
 
 @pytest.fixture
@@ -958,7 +963,7 @@ def test_create_individual_with_missing_disability_certificate_picture_returns_e
 
 
 def test_create_individual_with_file_of_another_program_returns_error(
-    lax_api_client, lax_push_url, store_image, file_prefix
+    lax_api_client, lax_push_url, store_image, file_directory
 ):
     individual_data = {
         "country_workspace_id": "IND_OTHER_PROGRAM",
@@ -971,7 +976,7 @@ def test_create_individual_with_file_of_another_program_returns_error(
 
     assert response.status_code == status.HTTP_201_CREATED, str(response.json())
     assert response.data["accepted"] == 0
-    assert response.data["results"][0]["photo"] == [f"File name must start with '{file_prefix}'."]
+    assert response.data["results"][0]["photo"] == [f"File name must start with '<year>/{file_directory}'."]
 
 
 def test_create_individual_with_invalid_file_name_returns_error(lax_api_client, lax_push_url):

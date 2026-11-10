@@ -19,7 +19,7 @@ from extras.test_utils.factories import (
     RoleFactory,
     UserFactory,
 )
-from hope.api.endpoints.rdi.stored_images import get_stored_image_prefix
+from hope.api.endpoints.rdi.stored_images import get_stored_image_directory
 from hope.apps.program.collision_detectors import IdentificationKeyCollisionDetector
 from hope.models import (
     Area,
@@ -86,8 +86,13 @@ def lax_households_url(business_area: BusinessArea, rdi: RegistrationDataImport)
 
 
 @pytest.fixture
-def file_prefix(rdi: RegistrationDataImport) -> str:
-    return get_stored_image_prefix(rdi.business_area.slug, rdi.program)
+def file_directory(rdi: RegistrationDataImport) -> str:
+    return get_stored_image_directory(rdi.business_area.slug, rdi.program.code)
+
+
+@pytest.fixture
+def file_prefix(rdi: RegistrationDataImport, file_directory: str) -> str:
+    return f"{rdi.program.start_date.year}/{file_directory}"
 
 
 @pytest.fixture
@@ -522,7 +527,7 @@ def test_create_household_with_file_of_another_program_returns_error(
     head_of_household: PendingIndividual,
     primary_collector: PendingIndividual,
     store_image: Callable[[str], str],
-    file_prefix: str,
+    file_directory: str,
 ) -> None:
     household_data = {
         "country": "AF",
@@ -540,7 +545,7 @@ def test_create_household_with_file_of_another_program_returns_error(
 
     assert response.status_code == status.HTTP_201_CREATED, str(response.json())
     assert response.data["accepted"] == 0
-    assert response.data["results"][0]["consent_sign"] == [f"File name must start with '{file_prefix}'."]
+    assert response.data["results"][0]["consent_sign"] == [f"File name must start with '<year>/{file_directory}'."]
 
 
 def test_create_household_with_missing_consent_sign_file_returns_error(

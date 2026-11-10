@@ -16,17 +16,15 @@ from hope.api.endpoints.rdi.common import (
     NullableChoiceField,
 )
 from hope.api.endpoints.rdi.cw_ids import duplicated_cw_ids, existing_cw_ids
+from hope.api.endpoints.rdi.lax import AccountLaxSerializer, DocumentSerializerLax
 from hope.api.endpoints.rdi.mixin import AccountMixin, DocumentMixin
 from hope.api.endpoints.rdi.stored_images import (
-    STORED_IMAGE_PREFIX_CONTEXT_KEY,
+    STORED_IMAGE_DIRECTORY_CONTEXT_KEY,
+    ImageFlexFieldsValidationMixin,
     StoredImageField,
-    get_stored_image_prefix,
+    get_stored_image_directory,
 )
-from hope.api.endpoints.rdi.upload import (
-    AccountSerializerUpload,
-    BirthDateValidator,
-    DocumentSerializerUpload,
-)
+from hope.api.endpoints.rdi.upload import BirthDateValidator
 from hope.api.utils import CurrencySlugRelatedField, OnUnchangedCode
 from hope.apps.household.const import (
     BLANK,
@@ -44,8 +42,8 @@ from hope.apps.periodic_data_update.utils import populate_pdu_with_null_values
 from hope.models import (
     Area,
     Country,
+    FlexibleAttribute,
     Grant,
-    PendingDocument,
     PendingHousehold,
     PendingIndividual,
     RegistrationDataImport,
@@ -53,6 +51,8 @@ from hope.models import (
 
 if TYPE_CHECKING:
     from rest_framework.request import Request
+
+INDIVIDUAL_FLEX_FIELD_SUFFIX = "_i_f"
 
 PEOPLE_TYPE_CHOICES = (
     (BLANK, "None"),
@@ -93,11 +93,7 @@ class PushPeopleListSerializer(serializers.ListSerializer):
         return attrs
 
 
-class PeopleDocumentSerializer(DocumentSerializerUpload):
-    image = StoredImageField(model_field=(PendingDocument, "photo"), allow_blank=True, required=False)
-
-
-class PushPeopleSerializer(serializers.ModelSerializer):
+class PushPeopleSerializer(ImageFlexFieldsValidationMixin, serializers.ModelSerializer):
     first_registration_date = serializers.DateTimeField(default=timezone.now)
     last_registration_date = serializers.DateTimeField(default=timezone.now)
     observed_disability = serializers.MultipleChoiceField(
@@ -106,8 +102,8 @@ class PushPeopleSerializer(serializers.ModelSerializer):
         required=False,
     )
     marital_status = serializers.ChoiceField(choices=MARITAL_STATUS_CHOICE, allow_blank=True, required=False)
-    documents = PeopleDocumentSerializer(many=True, required=False)
-    accounts = AccountSerializerUpload(many=True, required=False)
+    documents = DocumentSerializerLax(many=True, required=False)
+    accounts = AccountLaxSerializer(many=True, required=False)
     birth_date = serializers.DateField(validators=[BirthDateValidator()])
     photo = StoredImageField(model_field=(PendingIndividual, "photo"), allow_blank=True, required=False)
     disability_certificate_picture = StoredImageField(
@@ -273,6 +269,16 @@ class PushPeopleToRDIView(HOPEAPIBusinessAreaView, PeopleUploadMixin, HOPEAPIVie
         except RegistrationDataImport.DoesNotExist:
             raise Http404
 
+    @cached_property
+    def image_flex_field_names(self) -> set[str]:
+        """Names of the IMAGE flex fields of individuals, both as registered and without the ``_i_f`` suffix."""
+        names = FlexibleAttribute.objects.filter(
+            associated_with=FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL,
+            type=FlexibleAttribute.IMAGE,
+            is_removed=False,
+        ).values_list("name", flat=True)
+        return {key for name in names for key in (name, name.removesuffix(INDIVIDUAL_FLEX_FIELD_SUFFIX))}
+
     @extend_schema(request=PushPeopleSerializer)
     @atomic()
     def post(self, request: "Request", business_area: str, rdi: UUID) -> Response:
@@ -281,8 +287,9 @@ class PushPeopleToRDIView(HOPEAPIBusinessAreaView, PeopleUploadMixin, HOPEAPIVie
             many=True,
             context={
                 "business_area": self.selected_business_area,
-                STORED_IMAGE_PREFIX_CONTEXT_KEY: get_stored_image_prefix(
-                    self.selected_business_area.slug, self.selected_rdi.program
+                "get_image_flex_fields": lambda: self.image_flex_field_names,
+                STORED_IMAGE_DIRECTORY_CONTEXT_KEY: get_stored_image_directory(
+                    self.selected_business_area.slug, self.selected_rdi.program.code
                 ),
             },
         )
