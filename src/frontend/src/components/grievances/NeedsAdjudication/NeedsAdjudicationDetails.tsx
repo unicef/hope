@@ -9,7 +9,7 @@ import { NeedsAdjudicationActions } from './NeedsAdjudicationActions';
 import { NeedsAdjudicationTable } from './NeedsAdjudicationTable';
 import type { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
 
-export const NeedsAdjudicationDetailsNew = ({
+export const NeedsAdjudicationDetails = ({
   ticket,
   canApprove,
 }: {
