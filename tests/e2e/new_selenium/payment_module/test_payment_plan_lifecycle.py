@@ -1,4 +1,4 @@
-import datetime
+import datetime as dt
 from decimal import Decimal
 from unittest import mock
 
@@ -217,8 +217,8 @@ def test_edit_payment_plan(
     pln_currency: Currency,
 ) -> None:
     payment_plan = open_payment_plan
-    start_date = datetime.date.today() + datetime.timedelta(days=10)
-    end_date = start_date + datetime.timedelta(days=20)
+    start_date = dt.date.today() + dt.timedelta(days=10)
+    end_date = start_date + dt.timedelta(days=20)
     # No target population or cycle list permission: the edit page must not need them.
     with grant_permission(user_with_no_permissions, business_area, *PM_VIEW_PERMISSIONS, Permissions.PM_CREATE):
         open_payment_plan_as(browser, payment_plan, "OPEN")

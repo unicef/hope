@@ -1,6 +1,6 @@
 """Tests for Survey ViewSet."""
 
-import datetime
+import datetime as dt
 from typing import Any
 from unittest.mock import MagicMock, patch
 
@@ -66,7 +66,7 @@ def user_creator(partner):
 
 @pytest.fixture
 def household_1(program_active, business_area):
-    birth_date_for_50yo = timezone.now().date() - datetime.timedelta(days=50 * 365)
+    birth_date_for_50yo = timezone.now().date() - dt.timedelta(days=50 * 365)
     rdi = RegistrationDataImportFactory(program=program_active, business_area=business_area)
     hoh = IndividualFactory(
         household=None,
@@ -154,7 +154,7 @@ def srv_created_2021(program_active, business_area, user, payment_plan):
         category=Survey.CATEGORY_SMS,
         payment_plan=payment_plan,
     )
-    srv.created_at = timezone.make_aware(datetime.datetime(year=2021, month=3, day=12))
+    srv.created_at = timezone.make_aware(dt.datetime(year=2021, month=3, day=12))
     srv.save()
     return srv
 
@@ -172,7 +172,7 @@ def srv_created_2020(program_active, business_area, user_creator, payment_plan):
         category=Survey.CATEGORY_MANUAL,
         payment_plan=payment_plan,
     )
-    srv.created_at = timezone.make_aware(datetime.datetime(year=2020, month=5, day=15))
+    srv.created_at = timezone.make_aware(dt.datetime(year=2020, month=5, day=15))
     srv.save()
     return srv
 

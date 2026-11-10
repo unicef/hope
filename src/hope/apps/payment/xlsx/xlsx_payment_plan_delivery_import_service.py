@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-import datetime
+import datetime as dt
 from decimal import Decimal, InvalidOperation
 import logging
 from typing import IO, TYPE_CHECKING, Any, cast
@@ -215,7 +215,7 @@ class XlsxPaymentPlanDeliveryImportService(XlsxImportBaseService):
     def _parse_delivered_quantity(cls, value: Any) -> Decimal | None:
         if cls._is_empty_quantity(value):
             return None
-        if isinstance(value, bool | datetime.date):
+        if isinstance(value, bool | dt.date):
             raise ValueError
         try:
             quantity = Decimal(str(value).strip())
@@ -313,7 +313,7 @@ class XlsxPaymentPlanDeliveryImportService(XlsxImportBaseService):
         try:
             delivery_date = self._parse_delivery_date(cell.value)
             date_value = delivery_date.date()
-            if date_value > datetime.date.today() or date_value < self.payment_plan.program.start_date:
+            if date_value > dt.date.today() or date_value < self.payment_plan.program.start_date:
                 self.errors.append(
                     XlsxError(
                         self.sheetname,
@@ -475,12 +475,12 @@ class XlsxPaymentPlanDeliveryImportService(XlsxImportBaseService):
                 files.delete()
                 plan.delete()
 
-    def _parse_delivery_date(self, value: Any) -> datetime.datetime:
+    def _parse_delivery_date(self, value: Any) -> dt.datetime:
         if isinstance(value, str):
             value = parse(value)
-        elif isinstance(value, datetime.date) and not isinstance(value, datetime.datetime):
-            value = datetime.datetime.combine(value, datetime.time.min)
-        if not isinstance(value, datetime.datetime):
+        elif isinstance(value, dt.date) and not isinstance(value, dt.datetime):
+            value = dt.datetime.combine(value, dt.time.min)
+        if not isinstance(value, dt.datetime):
             raise TypeError("value is not a date")
         if value.tzinfo is None:
             value = pytz.utc.localize(value)
@@ -593,7 +593,7 @@ class XlsxPaymentPlanDeliveryImportService(XlsxImportBaseService):
                 continue
             if isinstance(value, Decimal):
                 value = float(value)
-            elif isinstance(value, datetime.datetime):
+            elif isinstance(value, dt.datetime):
                 value = value.isoformat()
             elif not isinstance(value, int | float | bool):
                 value = str(value)

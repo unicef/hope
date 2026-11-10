@@ -1,4 +1,4 @@
-import datetime
+import datetime as dt
 from decimal import Decimal
 from tempfile import NamedTemporaryFile
 from typing import Any
@@ -1542,7 +1542,7 @@ def test_remove_old_cash_plan_payment_verification_xlsx() -> None:
         file_temp.flush()
     pp = PaymentPlanFactory(status=PaymentPlan.Status.FINISHED)
     payment_verification_plan = PaymentVerificationPlanFactory(payment_plan=pp)
-    creation_time = timezone.now() - datetime.timedelta(days=99)
+    creation_time = timezone.now() - dt.timedelta(days=99)
     FileTempFactory(
         object_id=payment_verification_plan.pk,
         content_type=get_content_type_for_model(payment_verification_plan),
@@ -1569,7 +1569,7 @@ def test_remove_old_payment_plan_payment_list_xlsx(payment_plan) -> None:
     with NamedTemporaryFile(delete=False) as file_temp:
         file_temp.write(file_content)
         file_temp.flush()
-    creation_time = timezone.now() - datetime.timedelta(days=99)
+    creation_time = timezone.now() - dt.timedelta(days=99)
     FileTempFactory(
         object_id=payment_plan.pk,
         content_type=get_content_type_for_model(payment_plan),
@@ -2729,9 +2729,9 @@ def test_send_payment_notification_emails_action_sends_email() -> None:
 
 def test_wu_ftp_sync_uses_default_31_day_lookback_window() -> None:
     with patch.object(western_union_reports_service, "WesternUnionReportsService") as mock_service_cls:
-        lower_bound = datetime.datetime.now() - datetime.timedelta(days=31)
+        lower_bound = dt.datetime.now() - dt.timedelta(days=31)
         periodic_sync_payment_plan_invoices_western_union_ftp_async_task_action()
-        upper_bound = datetime.datetime.now() - datetime.timedelta(days=31)
+        upper_bound = dt.datetime.now() - dt.timedelta(days=31)
 
     mock_service_cls.return_value.process_files_since.assert_called_once()
     called_since = mock_service_cls.return_value.process_files_since.call_args[0][0]
@@ -2741,9 +2741,9 @@ def test_wu_ftp_sync_uses_default_31_day_lookback_window() -> None:
 @override_config(WU_FTP_SYNC_LOOKBACK_DAYS=7)
 def test_wu_ftp_sync_respects_configured_lookback_window() -> None:
     with patch.object(western_union_reports_service, "WesternUnionReportsService") as mock_service_cls:
-        lower_bound = datetime.datetime.now() - datetime.timedelta(days=7)
+        lower_bound = dt.datetime.now() - dt.timedelta(days=7)
         periodic_sync_payment_plan_invoices_western_union_ftp_async_task_action()
-        upper_bound = datetime.datetime.now() - datetime.timedelta(days=7)
+        upper_bound = dt.datetime.now() - dt.timedelta(days=7)
 
     mock_service_cls.return_value.process_files_since.assert_called_once()
     called_since = mock_service_cls.return_value.process_files_since.call_args[0][0]

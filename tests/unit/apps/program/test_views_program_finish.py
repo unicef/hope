@@ -1,6 +1,6 @@
 """Tests for program finish API endpoint."""
 
-import datetime
+import datetime as dt
 from typing import Any, Callable
 
 import pytest
@@ -42,8 +42,8 @@ def program(afghanistan: BusinessArea) -> Program:
         business_area=afghanistan,
         status=Program.ACTIVE,
         name="Test Program For Finish",
-        start_date=datetime.date(2031, 1, 1),
-        end_date=datetime.date(2033, 12, 31),
+        start_date=dt.date(2031, 1, 1),
+        end_date=dt.date(2033, 12, 31),
     )
     # There cannot be any active cycles for the program to finish
     for cycle in program.cycles.filter(status=ProgramCycle.ACTIVE):

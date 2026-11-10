@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-import datetime
+import datetime as dt
 from decimal import Decimal
 from io import BytesIO
 import logging
@@ -142,7 +142,7 @@ class XlsxFollowUpInstructionReconciliationImportService(XlsxImportBaseService):
         delivered_quantity = cell.value
         if delivered_quantity is None or str(delivered_quantity).strip() == "":
             return
-        if isinstance(delivered_quantity, datetime.date):
+        if isinstance(delivered_quantity, dt.date):
             self.errors.append(
                 XlsxError(
                     self.sheetname,
@@ -228,7 +228,7 @@ class XlsxFollowUpInstructionReconciliationImportService(XlsxImportBaseService):
                 )
 
     @staticmethod
-    def _normalize_delivery_date(payment: Payment, delivered_quantity: Decimal | None) -> datetime.datetime | None:
+    def _normalize_delivery_date(payment: Payment, delivered_quantity: Decimal | None) -> dt.datetime | None:
         if delivered_quantity and delivered_quantity > 0:
             return payment.delivery_date or to_utc_midnight(timezone.now())
         return None

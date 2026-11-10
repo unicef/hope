@@ -1,6 +1,6 @@
 """Tests for program copy API endpoint."""
 
-import datetime
+import datetime as dt
 from typing import Any, Callable
 
 import pytest
@@ -147,8 +147,8 @@ def program_to_copy(
         data_collecting_type=dct_original,
         beneficiary_group=bg_original,
         sector=Program.EDUCATION,
-        start_date=datetime.date(2023, 1, 1),
-        end_date=datetime.date(2023, 12, 31),
+        start_date=dt.date(2023, 1, 1),
+        end_date=dt.date(2023, 12, 31),
         partner_access=Program.NONE_PARTNERS_ACCESS,
         budget=100,
         population_goal=10,
@@ -316,8 +316,8 @@ def test_copy_program(
     # Check copied fields
     assert new_program.name == "Copied Program Name"
     assert new_program.code == "copy"
-    assert new_program.start_date == datetime.date(2024, 1, 1)
-    assert new_program.end_date == datetime.date(2024, 12, 31)
+    assert new_program.start_date == dt.date(2024, 1, 1)
+    assert new_program.end_date == dt.date(2024, 12, 31)
     assert new_program.sector == Program.HEALTH
     assert new_program.description == "Description for copied program."
     assert new_program.budget == 50000
@@ -343,8 +343,8 @@ def test_copy_program(
     original_program = Program.objects.get(id=program_to_copy.id)
     assert original_program.name == "Test Program To Copy"
     assert original_program.code == "orig"
-    assert original_program.start_date == datetime.date(2023, 1, 1)
-    assert original_program.end_date == datetime.date(2023, 12, 31)
+    assert original_program.start_date == dt.date(2023, 1, 1)
+    assert original_program.end_date == dt.date(2023, 12, 31)
     assert original_program.description == "Test Program To Copy Description"
     assert original_program.budget == 100
     assert original_program.population_goal == 10

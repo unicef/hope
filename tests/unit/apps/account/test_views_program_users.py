@@ -1,6 +1,6 @@
 """Tests for program users API views."""
 
-import datetime
+import datetime as dt
 import json
 from typing import Any, Callable
 
@@ -121,7 +121,7 @@ def user1(partner, afghanistan, role1):
     user = UserFactory(
         partner=partner,
         first_name="Bob",
-        last_login=timezone.make_aware(datetime.datetime.strptime("2021-01-11", "%Y-%m-%d")),
+        last_login=timezone.make_aware(dt.datetime.strptime("2021-01-11", "%Y-%m-%d")),
     )
     RoleAssignmentFactory(user=user, business_area=afghanistan, role=role1)
     return user

@@ -1,4 +1,4 @@
-import datetime
+import datetime as dt
 import logging
 
 from django.contrib.admin.options import get_content_type_for_model
@@ -150,7 +150,7 @@ def merge_pdu_online_edit_async_task(pdu_online_edit: PDUOnlineEdit) -> None:
 
 def remove_old_pdu_template_files_async_task_action(job: AsyncRetryJob) -> None:
     with transaction.atomic():
-        days = datetime.datetime.now() - datetime.timedelta(days=int(job.config["expiration_days"]))
+        days = dt.datetime.now() - dt.timedelta(days=int(job.config["expiration_days"]))
         file_qs = FileTemp.objects.filter(
             content_type=get_content_type_for_model(PDUXlsxTemplate),
             created__lt=days,
@@ -193,7 +193,7 @@ def send_pdu_online_edit_notification_emails_async_task_action(job: AsyncRetryJo
         pdu_online_edit,
         job.config["action"],
         action_user,
-        datetime.datetime.fromisoformat(job.config["action_date"]),
+        dt.datetime.fromisoformat(job.config["action_date"]),
     ).send_email_notification()
 
 

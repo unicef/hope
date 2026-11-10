@@ -1,4 +1,4 @@
-import datetime
+import datetime as dt
 from unittest.mock import Mock, patch
 import uuid
 
@@ -42,7 +42,7 @@ def _rdi(
         country_workspace_id=None if legacy else str(uuid.uuid4()),
     )
     RegistrationDataImport.objects.filter(pk=rdi.pk).update(
-        import_date=timezone.now() - datetime.timedelta(hours=arrived_hours_ago)
+        import_date=timezone.now() - dt.timedelta(hours=arrived_hours_ago)
     )
     return rdi
 

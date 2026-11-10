@@ -1,4 +1,4 @@
-import datetime
+import datetime as dt
 import json
 from typing import Any
 
@@ -34,13 +34,13 @@ class StrictBooleanField(forms.Field):
 
 
 class StrictDateField(forms.DateField):
-    def to_python(self, value: Any) -> datetime.date | None:
+    def to_python(self, value: Any) -> dt.date | None:
         """Override to cover other cases, i.e. integer value provided."""
         if value in self.empty_values:
             return None
-        if isinstance(value, datetime.datetime):
+        if isinstance(value, dt.datetime):
             return value.date()
-        if isinstance(value, datetime.date):  # pragma: no cover
+        if isinstance(value, dt.date):  # pragma: no cover
             return value
         if isinstance(value, str):
             return super().to_python(value)

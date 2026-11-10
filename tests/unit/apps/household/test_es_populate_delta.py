@@ -5,7 +5,7 @@ remove-by-id) are mocked, so these tests need no live Elasticsearch cluster. The
 delta detection (`_program_delta`) is exercised directly against factories.
 """
 
-import datetime
+import datetime as dt
 from io import StringIO
 from unittest.mock import MagicMock, patch
 import uuid
@@ -49,14 +49,14 @@ OPTS = {"dry_run": False, "chunk_size": 2000, "parallel": False}
 
 
 def test_parse_since_naive_is_made_aware() -> None:
-    dt = Command._parse_since("2026-07-01T09:00:00")
-    assert timezone.is_aware(dt)
+    parsed_dt = Command._parse_since("2026-07-01T09:00:00")
+    assert timezone.is_aware(parsed_dt)
 
 
 def test_parse_since_accepts_z_suffix_as_utc() -> None:
-    dt = Command._parse_since("2026-07-01T09:00:00Z")
-    assert timezone.is_aware(dt)
-    assert dt.utcoffset() == datetime.timedelta(0)
+    parsed_dt = Command._parse_since("2026-07-01T09:00:00Z")
+    assert timezone.is_aware(parsed_dt)
+    assert parsed_dt.utcoffset() == dt.timedelta(0)
 
 
 def test_parse_since_invalid_raises() -> None:
@@ -69,7 +69,7 @@ def test_parse_since_invalid_raises() -> None:
 
 def test_program_delta_direct_individual_change_is_present() -> None:
     prog = ProgramFactory(status=Program.ACTIVE)
-    since = timezone.now() - datetime.timedelta(days=1)
+    since = timezone.now() - dt.timedelta(days=1)
     ind = IndividualFactory(program=prog, business_area=prog.business_area)
 
     delta = Command._program_delta(str(prog.id), since)
@@ -81,7 +81,7 @@ def test_program_delta_direct_individual_change_is_present() -> None:
 def test_program_delta_changed_document_marks_owner_present() -> None:
     prog = ProgramFactory(status=Program.ACTIVE)
     since = timezone.now()
-    past = since - datetime.timedelta(hours=1)
+    past = since - dt.timedelta(hours=1)
     ind = IndividualFactory(program=prog, business_area=prog.business_area)
     Individual.all_merge_status_objects.filter(pk=ind.pk).update(updated_at=past)  # not via direct
     DocumentFactory(individual=ind)  # fresh updated_at -> triggers via documents
@@ -94,7 +94,7 @@ def test_program_delta_changed_document_marks_owner_present() -> None:
 def test_program_delta_changed_identity_marks_owner_present() -> None:
     prog = ProgramFactory(status=Program.ACTIVE)
     since = timezone.now()
-    past = since - datetime.timedelta(hours=1)
+    past = since - dt.timedelta(hours=1)
     ind = IndividualFactory(program=prog, business_area=prog.business_area)
     Individual.all_merge_status_objects.filter(pk=ind.pk).update(updated_at=past)
     IndividualIdentityFactory(individual=ind)  # fresh `modified` -> triggers via identities
@@ -107,7 +107,7 @@ def test_program_delta_changed_identity_marks_owner_present() -> None:
 def test_program_delta_soft_deleted_individual_goes_to_removed() -> None:
     prog = ProgramFactory(status=Program.ACTIVE)
     since = timezone.now()
-    future = since + datetime.timedelta(hours=1)
+    future = since + dt.timedelta(hours=1)
     ind = IndividualFactory(program=prog, business_area=prog.business_area)
     Individual.all_objects.filter(pk=ind.pk).update(is_removed=True, updated_at=future)
 
@@ -119,7 +119,7 @@ def test_program_delta_soft_deleted_individual_goes_to_removed() -> None:
 
 def test_program_delta_direct_household_change_is_present() -> None:
     prog = ProgramFactory(status=Program.ACTIVE)
-    since = timezone.now() - datetime.timedelta(days=1)
+    since = timezone.now() - dt.timedelta(days=1)
     hh = HouseholdFactory(program=prog, business_area=prog.business_area)
 
     delta = Command._program_delta(str(prog.id), since)
@@ -132,7 +132,7 @@ def test_program_delta_household_change_marks_members_present() -> None:
     # re-index its members even if the member individual itself did not change.
     prog = ProgramFactory(status=Program.ACTIVE)
     since = timezone.now()
-    past = since - datetime.timedelta(hours=1)
+    past = since - dt.timedelta(hours=1)
     hh = HouseholdFactory(program=prog, business_area=prog.business_area)  # fresh updated_at
     member = IndividualFactory(program=prog, business_area=prog.business_area, household=hh)
     Individual.all_merge_status_objects.filter(pk=member.pk).update(updated_at=past)  # not via direct
@@ -147,7 +147,7 @@ def test_program_delta_head_change_marks_household_present() -> None:
     # must re-index the household.
     prog = ProgramFactory(status=Program.ACTIVE)
     since = timezone.now()
-    past = since - datetime.timedelta(hours=1)
+    past = since - dt.timedelta(hours=1)
     head = IndividualFactory(program=prog, business_area=prog.business_area)  # fresh updated_at
     hh = HouseholdFactory(program=prog, business_area=prog.business_area, head_of_household=head)
     Household.objects.filter(pk=hh.pk).update(updated_at=past)  # not via direct
@@ -160,7 +160,7 @@ def test_program_delta_head_change_marks_household_present() -> None:
 def test_program_delta_head_document_marks_household_present() -> None:
     prog = ProgramFactory(status=Program.ACTIVE)
     since = timezone.now()
-    past = since - datetime.timedelta(hours=1)
+    past = since - dt.timedelta(hours=1)
     head = IndividualFactory(program=prog, business_area=prog.business_area)
     hh = HouseholdFactory(program=prog, business_area=prog.business_area, head_of_household=head)
     Household.objects.filter(pk=hh.pk).update(updated_at=past)  # not via direct
@@ -178,7 +178,7 @@ def test_reference_data_change_is_detected() -> None:
     from hope.models import BusinessArea
 
     since = timezone.now()
-    future = since + datetime.timedelta(hours=1)
+    future = since + dt.timedelta(hours=1)
     ba = BusinessAreaFactory()
     BusinessArea.objects.filter(pk=ba.pk).update(updated_at=future)
 
@@ -187,7 +187,7 @@ def test_reference_data_change_is_detected() -> None:
 
 def test_reference_data_unchanged_returns_empty() -> None:
     BusinessAreaFactory()
-    since = timezone.now() + datetime.timedelta(hours=1)
+    since = timezone.now() + dt.timedelta(hours=1)
     assert Command._reference_data_changed(since) == []
 
 
@@ -361,7 +361,7 @@ def test_disabled_elasticsearch_flag_aborts() -> None:
 def test_since_processes_every_active_program(mock_process) -> None:
     # No cross-program pre-filter: every in-scope program is handed to _process_program.
     prog = ProgramFactory(status=Program.ACTIVE)
-    since = (timezone.now() - datetime.timedelta(days=1)).isoformat()
+    since = (timezone.now() - dt.timedelta(days=1)).isoformat()
 
     call_command(CMD, "--since", since, stdout=StringIO())
 
@@ -373,7 +373,7 @@ def test_since_processes_every_active_program(mock_process) -> None:
 @override_config(IS_ELASTICSEARCH_ENABLED=True)
 def test_since_failure_is_listed_and_command_errors(mock_process) -> None:
     prog = ProgramFactory(status=Program.ACTIVE)
-    since = (timezone.now() - datetime.timedelta(days=1)).isoformat()
+    since = (timezone.now() - dt.timedelta(days=1)).isoformat()
     out = StringIO()
 
     with pytest.raises(CommandError):
@@ -413,7 +413,7 @@ def test_reconcile_only_does_not_sync(mock_check, mock_process) -> None:
 @override_config(IS_ELASTICSEARCH_ENABLED=True)
 def test_scope_no_match_warns_and_skips(mock_process) -> None:
     ProgramFactory(status=Program.ACTIVE)
-    since = (timezone.now() - datetime.timedelta(days=1)).isoformat()
+    since = (timezone.now() - dt.timedelta(days=1)).isoformat()
     out = StringIO()
 
     call_command(CMD, "--since", since, "--program", "no-such-code", stdout=out)

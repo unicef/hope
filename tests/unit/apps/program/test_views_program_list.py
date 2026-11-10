@@ -1,6 +1,6 @@
 """Tests for program list API endpoint."""
 
-import datetime
+import datetime as dt
 from enum import Enum
 from typing import Any, Callable
 
@@ -276,12 +276,12 @@ def test_program_list_ordering(
     program_draft_first = ProgramFactory(
         business_area=afghanistan,
         status=Program.DRAFT,
-        start_date=datetime.datetime(2000, 1, 1),
+        start_date=dt.datetime(2000, 1, 1),
     )
     program_draft_second = ProgramFactory(
         business_area=afghanistan,
         status=Program.DRAFT,
-        start_date=datetime.datetime(2001, 1, 1),
+        start_date=dt.datetime(2001, 1, 1),
     )
     for prog in [
         program,
@@ -531,8 +531,8 @@ def test_filter_by_start_date(
     list_url: str,
     create_user_role_with_permissions: Callable,
 ) -> None:
-    program1 = ProgramFactory(business_area=afghanistan, start_date=datetime.datetime(2023, 1, 1))
-    program2 = ProgramFactory(business_area=afghanistan, start_date=datetime.datetime(2022, 1, 1))
+    program1 = ProgramFactory(business_area=afghanistan, start_date=dt.datetime(2023, 1, 1))
+    program2 = ProgramFactory(business_area=afghanistan, start_date=dt.datetime(2022, 1, 1))
     create_user_role_with_permissions(
         user,
         [Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS],
@@ -563,13 +563,13 @@ def test_filter_by_end_date(
 ) -> None:
     program1 = ProgramFactory(
         business_area=afghanistan,
-        start_date=datetime.datetime(2020, 1, 1),
-        end_date=datetime.datetime(2022, 1, 1),
+        start_date=dt.datetime(2020, 1, 1),
+        end_date=dt.datetime(2022, 1, 1),
     )
     program2 = ProgramFactory(
         business_area=afghanistan,
-        start_date=datetime.datetime(2020, 1, 1),
-        end_date=datetime.datetime(2023, 1, 1),
+        start_date=dt.datetime(2020, 1, 1),
+        end_date=dt.datetime(2023, 1, 1),
     )
     create_user_role_with_permissions(
         user,

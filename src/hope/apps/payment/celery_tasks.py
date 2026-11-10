@@ -1,4 +1,4 @@
-import datetime
+import datetime as dt
 from decimal import Decimal
 from functools import partial
 import logging
@@ -129,7 +129,7 @@ def remove_old_cash_plan_payment_verification_xlsx_async_task_action(job: AsyncR
     from hope.models import FileTemp
 
     past_days = int(job.config.get("past_days", 30))
-    days = datetime.datetime.now() - datetime.timedelta(days=past_days)
+    days = dt.datetime.now() - dt.timedelta(days=past_days)
     ct = ContentType.objects.get(app_label="payment", model="paymentverificationplan")
     files_qs = FileTemp.objects.filter(content_type=ct, created__lte=days)
     removed_count = files_qs.count()
@@ -970,7 +970,7 @@ def remove_old_payment_plan_payment_list_xlsx_async_task_action(job: AsyncRetryJ
     from hope.models import FileTemp, PaymentPlan
 
     past_days = int(job.config.get("past_days", 30))
-    days = datetime.datetime.now() - datetime.timedelta(days=past_days)
+    days = dt.datetime.now() - dt.timedelta(days=past_days)
     file_qs = FileTemp.objects.filter(content_type=get_content_type_for_model(PaymentPlan), created__lte=days)
     removed_count = file_qs.count()
     if not removed_count:
@@ -1441,7 +1441,7 @@ def send_payment_notification_emails_async_task_action(job: AsyncJob) -> None:
         payment_plan,
         job.config["action"],
         action_user,
-        datetime.datetime.fromisoformat(job.config["action_date"]),
+        dt.datetime.fromisoformat(job.config["action_date"]),
     ).send_email_notification()
 
 
@@ -1796,14 +1796,14 @@ class CheckRapidProVerificationTask:
 
 
 def periodic_sync_payment_plan_invoices_western_union_ftp_async_task_action(job: AsyncRetryJob | None = None) -> None:
-    from datetime import datetime, timedelta
+    from datetime import timedelta
 
     from constance import config
 
     from hope.apps.payment.services.western_union_reports_service import WesternUnionReportsService
 
     service = WesternUnionReportsService()
-    service.process_files_since(datetime.now() - timedelta(days=config.WU_FTP_SYNC_LOOKBACK_DAYS))
+    service.process_files_since(dt.datetime.now() - timedelta(days=config.WU_FTP_SYNC_LOOKBACK_DAYS))
 
 
 @app.task()

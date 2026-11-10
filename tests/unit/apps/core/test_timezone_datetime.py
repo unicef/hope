@@ -1,4 +1,4 @@
-import datetime
+import datetime as dt
 from datetime import UTC
 
 from django.utils import timezone
@@ -12,7 +12,7 @@ from hope.apps.core.utils import timezone_datetime
     "date_input",
     [
         "2022-09-24",
-        datetime.date(2022, 9, 24),
+        dt.date(2022, 9, 24),
         timezone.datetime(2022, 9, 24, tzinfo=pytz.timezone("Europe/Warsaw")),
     ],
 )

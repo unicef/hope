@@ -1,6 +1,6 @@
 import copy
 import csv
-import datetime
+import datetime as dt
 from io import StringIO
 import json
 
@@ -220,7 +220,7 @@ def make_record(
 def record(record_fields: dict, record_files: dict) -> object:
     return RecordFactory(
         registration=25,
-        timestamp=timezone.make_aware(datetime.datetime(2023, 5, 1)),
+        timestamp=timezone.make_aware(dt.datetime(2023, 5, 1)),
         source_id=1,
         files=json.dumps(record_files).encode(),
         fields=record_fields,
@@ -302,7 +302,7 @@ def test_record_has_duplicate_national_id(
     document_type: object,
 ) -> None:
     service = NigeriaPeopleRegistrationService(registration)
-    rdi = service.create_rdi(user, f"nigeria rdi {datetime.datetime.now()}")
+    rdi = service.create_rdi(user, f"nigeria rdi {dt.datetime.now()}")
 
     mapping = {
         "defaults": {"individuals_key": "individual-details"},
@@ -343,7 +343,7 @@ def test_record_has_duplicate_account_number_matches_exact_string_only(
     assert account_type
 
     service = NigeriaPeopleRegistrationService(registration)
-    rdi = service.create_rdi(user, f"nigeria rdi {datetime.datetime.now()}")
+    rdi = service.create_rdi(user, f"nigeria rdi {dt.datetime.now()}")
     mapping = service.get_mapping(registration.mapping)
 
     assert service._record_has_duplicate_account_number({}, rdi, mapping) is False
@@ -389,7 +389,7 @@ def test_record_has_duplicate_account_number_ignores_other_program_accounts(
     assert account_type
 
     service = NigeriaPeopleRegistrationService(registration)
-    rdi = service.create_rdi(user, f"nigeria rdi {datetime.datetime.now()}")
+    rdi = service.create_rdi(user, f"nigeria rdi {dt.datetime.now()}")
     mapping = service.get_mapping(registration.mapping)
     AccountFactory(number="2087008012")
 
@@ -438,7 +438,7 @@ def test_import_data_to_datahub(
     assert financial_institution_mapping
 
     service = NigeriaPeopleRegistrationService(registration)
-    rdi = service.create_rdi(user, f"nigeria rdi {datetime.datetime.now()}")
+    rdi = service.create_rdi(user, f"nigeria rdi {dt.datetime.now()}")
     service.process_records(rdi.id, [record.id])
 
     assert PendingHousehold.objects.count() == 1
@@ -531,7 +531,7 @@ def test_import_data_skips_duplicate_national_id_in_same_rdi(
     )
 
     service = NigeriaPeopleRegistrationService(registration)
-    rdi = service.create_rdi(user, f"nigeria rdi {datetime.datetime.now()}")
+    rdi = service.create_rdi(user, f"nigeria rdi {dt.datetime.now()}")
     service.process_records(rdi.id, [record.id, duplicate_record.id])
 
     duplicate_record.refresh_from_db()
@@ -581,7 +581,7 @@ def test_import_data_skips_duplicate_account_number_in_same_batch(
     )
 
     service = NigeriaPeopleRegistrationService(registration)
-    rdi = service.create_rdi(user, f"nigeria rdi {datetime.datetime.now()}")
+    rdi = service.create_rdi(user, f"nigeria rdi {dt.datetime.now()}")
     service.process_records(rdi.id, [record.id, duplicate_record.id])
 
     record.refresh_from_db()
@@ -618,7 +618,7 @@ def test_import_data_does_not_skip_valid_duplicate_account_after_failed_record_i
 
     invalid_record = RecordFactory(
         registration=25,
-        timestamp=timezone.make_aware(datetime.datetime(2023, 5, 1)),
+        timestamp=timezone.make_aware(dt.datetime(2023, 5, 1)),
         source_id=1,
         files=json.dumps(record_files).encode(),
         fields=make_record_fields(
@@ -642,7 +642,7 @@ def test_import_data_does_not_skip_valid_duplicate_account_after_failed_record_i
     )
 
     service = NigeriaPeopleRegistrationService(registration)
-    rdi = service.create_rdi(user, f"nigeria rdi {datetime.datetime.now()}")
+    rdi = service.create_rdi(user, f"nigeria rdi {dt.datetime.now()}")
     service.process_records(rdi.id, [invalid_record.id, valid_record.id])
 
     invalid_record.refresh_from_db()
@@ -681,7 +681,7 @@ def test_import_data_skips_record_if_account_number_already_imported(
     AccountFactory(individual=pending_individual, number="2087008012")
 
     service = NigeriaPeopleRegistrationService(registration)
-    rdi = service.create_rdi(user, f"nigeria rdi {datetime.datetime.now()}")
+    rdi = service.create_rdi(user, f"nigeria rdi {dt.datetime.now()}")
     service.process_records(rdi.id, [record.id])
 
     record.refresh_from_db()
@@ -723,7 +723,7 @@ def test_import_data_skips_record_if_national_id_already_imported(
     )
 
     service = NigeriaPeopleRegistrationService(registration)
-    rdi = service.create_rdi(user, f"nigeria rdi {datetime.datetime.now()}")
+    rdi = service.create_rdi(user, f"nigeria rdi {dt.datetime.now()}")
     service.process_records(rdi.id, [record.id])
 
     record.refresh_from_db()

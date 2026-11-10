@@ -1,5 +1,5 @@
 import base64
-import datetime
+import datetime as dt
 import io
 import json
 from typing import Any
@@ -67,7 +67,7 @@ def john_doe(sanction_list: SanctionList) -> SanctionListIndividual:
         second_name="Doe",
         full_name="John Doe",
     )
-    SanctionListIndividualDateOfBirthFactory(individual=individual, date=datetime.date(1980, 1, 1))
+    SanctionListIndividualDateOfBirthFactory(individual=individual, date=dt.date(1980, 1, 1))
     return individual
 
 
@@ -80,8 +80,8 @@ def individual_with_two_birth_dates(sanction_list: SanctionList) -> SanctionList
         third_name="ThirdName",
         fourth_name="FourthName",
     )
-    SanctionListIndividualDateOfBirthFactory(individual=individual, date=datetime.date(1981, 1, 1))
-    SanctionListIndividualDateOfBirthFactory(individual=individual, date=datetime.date(1980, 2, 1))
+    SanctionListIndividualDateOfBirthFactory(individual=individual, date=dt.date(1981, 1, 1))
+    SanctionListIndividualDateOfBirthFactory(individual=individual, date=dt.date(1980, 2, 1))
     return individual
 
 
@@ -227,7 +227,7 @@ def test_execute_matches_two_name_row_with_date_cell(
     django_assert_num_queries: Any,
 ) -> None:
     mailjet_mock = mocker.patch("hope.apps.sanction_list.tasks.check_against_sanction_list.MailjetClient")
-    uploaded = make_uploaded_file([("john", "doe", None, None, datetime.date(1980, 1, 1))])
+    uploaded = make_uploaded_file([("john", "doe", None, None, dt.date(1980, 1, 1))])
 
     with django_assert_num_queries(7):
         CheckAgainstSanctionListTask().execute(uploaded.id, "check.xlsx")
