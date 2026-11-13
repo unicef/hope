@@ -139,9 +139,9 @@ const componentGroups: ComponentGroup[] = [
     title: 'Reporting',
     icon: <AssessmentIcon />,
     items: [
-      { name: 'Report', host: 'reporting.hope.unicef.org' },
-      { name: 'Dashboard', host: 'dashboard.hope.unicef.org' },
-      { name: 'Cash Dashboard', host: 'cash.hope.unicef.org' },
+      { name: 'Report', host: 'reporting.unicef.org' },
+      { name: 'Dashboard', host: 'dashboard.unicef.org' },
+      { name: 'Cash Dashboard', host: 'cash.unicef.org' },
     ],
   },
 ];
