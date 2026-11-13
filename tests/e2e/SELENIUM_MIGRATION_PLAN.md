@@ -26,7 +26,7 @@ grep -rcE '^\s*def test_' tests/e2e --include='test_*.py' --exclude-dir=new_sele
 | # | Module (old path) | Old tests | Migrated | Status |
 |---|---|---:|---:|---|
 | 1 | `login_via_admin_panel` | 7 | 7 | ✅ |
-| 2 | `error_page` + `access_denied` | 3 | 0 | ⬜ |
+| 2 | `error_page` + `access_denied` | 3 | 3 | ✅ |
 | 3 | `program_log` | 2 | 0 | ⬜ |
 | 4 | `programme_user` | 1 | 0 | ⬜ |
 | 5 | `country_search` | 3 | 0 | ⬜ |
@@ -46,9 +46,9 @@ grep -rcE '^\s*def test_' tests/e2e --include='test_*.py' --exclude-dir=new_sele
 | 19 | `grievance/grievance_dashboard` | 2 | 0 | ⬜ |
 | 20 | `grievance/grievance_tickets` | 25 | 0 | ⬜ |
 | 21 | Old infra cleanup | – | – | ⬜ |
-| | **Total** | **155** | **7** | **5 %** |
+| | **Total** | **155** | **10** | **6 %** |
 
-`[█░░░░░░░░░░░░░░░░░░░] 7 / 155`. Update it after each PR: 1 block per ~8 tests.
+`[█░░░░░░░░░░░░░░░░░░░] 10 / 155`. Update it after each PR: 1 block per ~8 tests.
 
 The new suite already has 46 test files and ~250 test functions. These do not count toward the 155.
 
@@ -71,10 +71,10 @@ Legend: `NEW <new_selenium/...>` · `COVERED <existing new test>` (verify assert
 - [ ] `page_object/admin_panel/` and the `page_admin_panel` fixture are still used by `grievance_tickets/test_e2e_grievance_tickets.py::test_grievance_tickets_go_to_admin_panel_button`. Delete them in module 20.
 
 ### 2. `error_page/` (2) + `access_denied/` (1) → `new_selenium/error_page/test_error_pages.py`
-- [ ] test_page_not_found_for_missing_program → NEW, parametrize missing program / unknown route
-- [ ] test_page_not_found_for_unknown_route → NEW (param)
-- [ ] test_access_denied_for_user_without_business_area → NEW (uses `user_with_no_permissions`)
-- [ ] Delete `page_object/error_page/`
+- [x] test_page_not_found_for_missing_program → NEW `test_page_not_found[missing-program]`
+- [x] test_page_not_found_for_unknown_route → NEW `test_page_not_found[unknown-route]`
+- [x] test_access_denied_for_user_without_business_area → NEW `test_access_denied_for_user_without_business_area`
+- [x] Delete `page_object/error_page/` and the `page_error` / `page_access_denied` fixtures
 
 ### 3. `program_log/test_program_log.py` (2) → `new_selenium/activity_log/test_activity_log.py`
 - [ ] test_smoke_program_log → NEW (programme log lists an entry created by a factory)
