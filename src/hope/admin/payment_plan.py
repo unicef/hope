@@ -38,7 +38,10 @@ from hope.apps.payment.xlsx.xlsx_payment_plan_delivery_import_service import (
 from hope.apps.utils.security import is_root
 from hope.contrib.vision.models import FundsCommitmentHeader
 from hope.contrib.vision.services import FundsCommitmentAssignmentError, VisionService
-from hope.contrib.vision.tasks import send_payment_plan_to_vision_async_task
+from hope.contrib.vision.tasks import (
+    notify_payment_plan_closure_to_vision_async_task,
+    send_payment_plan_to_vision_async_task,
+)
 from hope.models import (
     AsyncJob,
     Payment,
@@ -182,6 +185,15 @@ class PaymentInstructionInline(admin.TabularInline):
 
 def can_send_to_vision(payment_plan: PaymentPlan) -> bool:
     return payment_plan.can_send_to_vision
+
+
+def can_send_closure_to_vision(payment_plan: PaymentPlan) -> bool:
+    """Return whether the admin may (re)send the plan's closure notification to Vision.
+
+    True for a closed plan that was sent to Vision and whose latest closure notification
+    failed or was never attempted; see ``VisionService.can_notify_vision_of_closure``.
+    """
+    return VisionService.can_notify_vision_of_closure(payment_plan)
 
 
 def can_recover_vision_funds_commitment(payment_plan: PaymentPlan) -> bool:
@@ -474,6 +486,30 @@ class PaymentPlanAdmin(BasePaymentPlanAdmin, PaymentPlanCeleryTasksMixin):
             request=request,
             action=self.send_to_vision,
             message="Do you confirm to send this payment plan to Vision?",
+        )
+
+    @button(
+        visible=lambda btn: can_send_closure_to_vision(btn.original),
+        permission="payment.pm_manage_vision_workflow",
+        label="Send Closure to Vision",
+    )
+    def send_closure_to_vision(self, request: HttpRequest, pk: "UUID") -> HttpResponse:
+        """Re-queue the closure reconciliation notification to Vision for a closed plan.
+
+        Used when the automatic notification at closure time failed (or never ran): the attempt
+        and its response are recorded in the plan's ``internal_data`` Vision log, and this action
+        makes the retry possible without reopening the plan.
+        """
+        if request.method == "POST":
+            payment_plan = PaymentPlan.objects.get(pk=pk)
+            notify_payment_plan_closure_to_vision_async_task(payment_plan, str(request.user.pk))
+            self.message_user(request, "Sending closure notification to Vision started", level="success")
+            return redirect(reverse("admin:payment_paymentplan_change", args=[pk]))
+        return confirm_action(
+            modeladmin=self,
+            request=request,
+            action=self.send_closure_to_vision,
+            message="Do you confirm to send this payment plan closure to Vision?",
         )
 
     @button(

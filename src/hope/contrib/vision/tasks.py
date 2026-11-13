@@ -1,3 +1,5 @@
+from decimal import Decimal
+
 from django.db import transaction
 from django.utils import timezone
 
@@ -87,4 +89,37 @@ def notify_payment_plan_status_to_vision_async_task(
         },
         group_key="payment",
         description=f"Notify Vision that payment plan {payment_plan.pk} is {vision_status}",
+    )
+
+
+def notify_payment_plan_closure_to_vision_async_task_action(job: AsyncJob) -> None:
+    """Notify Vision of the closure of a closed, Vision-sent Payment Plan.
+
+    Skip plans that are not closed or were never sent to Vision. Send the plan's total delivered
+    quantity as the total amount reconciled and its status date as the closure date.
+    """
+    payment_plan = PaymentPlan.objects.get(pk=job.config["payment_plan_id"])
+    if payment_plan.status != PaymentPlan.Status.CLOSED or not payment_plan.sent_to_vision:
+        return
+    VisionAPI().notify_payment_plan_closure(
+        payment_plan,
+        total_amount_reconciled=payment_plan.total_delivered_quantity or Decimal("0.00"),
+        closure_date=payment_plan.status_date,
+    )
+
+
+def notify_payment_plan_closure_to_vision_async_task(payment_plan: PaymentPlan, user_id: str) -> AsyncJob | None:
+    """Queue an async job notifying Vision that the Payment Plan was closed.
+
+    Re-queueing replaces any active closure-notification job for the plan, so admin retries never
+    run duplicates of an already pending notification.
+    """
+    return AsyncJob.requeue(
+        instance=payment_plan,
+        owner_id=user_id,
+        job_name="notify_payment_plan_closure_to_vision",
+        action="hope.contrib.vision.tasks.notify_payment_plan_closure_to_vision_async_task_action",
+        config={"payment_plan_id": str(payment_plan.pk)},
+        group_key="payment",
+        description=f"Notify Vision that payment plan {payment_plan.pk} was closed",
     )

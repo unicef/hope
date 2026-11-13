@@ -6,6 +6,7 @@ from hope.contrib.vision.choices import (
     VISION_CREATION_ACKNOWLEDGEMENT_MUTABLE_STATUSES,
     VISION_RECOVERABLE_STATUSES,
     VisionErrorCode,
+    VisionLogEntryType,
     VisionStatus,
 )
 from hope.contrib.vision.models import FundsCommitmentHeader, FundsCommitmentItem
@@ -194,6 +195,47 @@ class VisionService:
             )
         cls.assign_selected_funds_commitment_headers(payment_plan, funds_commitment_headers)
         cls.complete_funds_commitment_assignment(payment_plan)
+
+    @classmethod
+    def closure_notification_entries(cls, payment_plan: PaymentPlan) -> list[dict]:
+        """Return every logged closure-notification attempt for the plan, oldest first.
+
+        Include legacy entries logged as ``status-notification`` carrying the closure payload
+        fields (``totalAmountReconciled`` and ``closureDate``), so retries work for plans whose
+        closure was attempted before the dedicated log entry type existed.
+        """
+        vision_data = (payment_plan.internal_data or {}).get("vision", {})
+        if not isinstance(vision_data, dict):
+            return []
+        entries = []
+        for entry in vision_data.get("log", []):
+            if not isinstance(entry, dict):
+                continue
+            if entry.get("type") == VisionLogEntryType.CLOSURE_NOTIFICATION.value:
+                entries.append(entry)
+            elif entry.get("type") == VisionLogEntryType.STATUS_NOTIFICATION.value:
+                # Closure notifications logged before the dedicated entry type existed used the
+                # status-notification type; they carry the closure payload fields.
+                payload = entry.get("payload") or {}
+                if {"totalAmountReconciled", "closureDate"} <= set(payload.keys()):
+                    entries.append(entry)
+        return entries
+
+    @classmethod
+    def can_notify_vision_of_closure(cls, payment_plan: PaymentPlan) -> bool:
+        """Return whether the plan may (re)send its closure notification to Vision.
+
+        Allow retrying until one attempt succeeds. The latest closure notification's response is stored
+        in the Vision log under ``internal_data["vision"]["log"]``; a missing entry means it was never
+        attempted (e.g. closed before this flow existed) and an ``error`` response means it failed.
+        """
+        if payment_plan.status != PaymentPlan.Status.CLOSED or not payment_plan.sent_to_vision:
+            return False
+        entries = cls.closure_notification_entries(payment_plan)
+        if not entries:
+            return True
+        response = entries[-1].get("response") or {}
+        return bool(response.get("error"))
 
     @classmethod
     def can_recover_with_funds_commitment_headers(cls, payment_plan: PaymentPlan) -> bool:
