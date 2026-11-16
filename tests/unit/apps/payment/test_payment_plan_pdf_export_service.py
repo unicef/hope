@@ -101,7 +101,8 @@ def payment_list(
 def payment_plan(payment_list: PaymentList) -> PaymentPlan:
     group = payment_list.payment_plan
     group.status = PaymentPlan.Status.ACCEPTED
-    group.save(update_fields=["status"])
+    group.exchange_rate = Decimal("2.12500000")
+    group.save(update_fields=["status", "exchange_rate"])
     return group
 
 
@@ -178,6 +179,7 @@ def test_group_generate_pdf_summary_aggregates_every_plan_in_the_group(
         [payment_list, second_payment_list_in_group], key=lambda p: p.unicef_id
     )
     assert pdf_context_data["approval_process"] == group_approval_process
+    assert pdf_context_data["exchange_rate"] == Decimal("2.12500000")
     assert pdf_context_data["approval"].comment == "group approved"
     assert pdf_context_data["authorization"] is None
     assert pdf_context_data["reconciliation"]["reconciled"] == 3
@@ -208,7 +210,10 @@ def test_group_get_email_context(payment_plan: PaymentPlan) -> None:
 def instruction(program_and_cycle: dict[str, Any], financial_service_provider: Any) -> FollowUpInstruction:
     program = program_and_cycle["program"]
     return FollowUpInstructionFactory(
-        program=program, business_area=program.business_area, financial_service_provider=financial_service_provider
+        program=program,
+        business_area=program.business_area,
+        financial_service_provider=financial_service_provider,
+        exchange_rate=Decimal("3.25000000"),
     )
 
 
@@ -288,6 +293,7 @@ def test_instruction_generate_pdf_summary_uses_the_instruction_approvals_and_pay
     pdf_context_data = generate_pdf_from_html_mock.call_args.kwargs["data"]
     assert pdf_context_data["payment_lists"] == [instruction_child]
     assert pdf_context_data["status"] == "Accepted"
+    assert pdf_context_data["exchange_rate"] == Decimal("3.25000000")
     assert pdf_context_data["cycle_title"] == program_and_cycle["program_cycle"].title
     assert pdf_context_data["approval"].comment == "instruction approved"
     assert pdf_context_data["reconciliation"]["reconciled"] == 1

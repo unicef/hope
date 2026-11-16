@@ -36,6 +36,12 @@
       <td>{{ fsp.vision_vendor_number }}</td>
     </tr>
     <tr>
+      <td></td>
+      <td></td>
+      <td>FX Rate Applied</td>
+      <td>{{ exchange_rate|default_if_none:"-"|floatformat:8 }}</td>
+    </tr>
+    <tr>
       <td colspan="4" class="header">SUMMARY</td>
     </tr>
     <tr>
