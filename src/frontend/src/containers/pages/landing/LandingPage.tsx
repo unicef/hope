@@ -9,7 +9,6 @@ import ListAltIcon from '@mui/icons-material/ListAlt';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import SendIcon from '@mui/icons-material/Send';
-import SettingsIcon from '@mui/icons-material/Settings';
 import VerifiedUserIcon from '@mui/icons-material/VerifiedUser';
 import { Box, Typography } from '@mui/material';
 import type { FC, ReactElement } from 'react';
@@ -97,13 +96,11 @@ const capabilities: { icon: ReactElement; label: string }[] = [
 interface ComponentLink {
   name: string;
   host: string;
-  onHold?: boolean;
 }
 
 interface ComponentGroup {
   title: string;
   icon: ReactElement;
-  onHold?: boolean;
   items: ComponentLink[];
 }
 
@@ -114,25 +111,14 @@ const componentGroups: ComponentGroup[] = [
     items: [
       { name: 'Hope', host: 'hope.unicef.org' },
       { name: 'Workspace', host: 'workspace.hope.unicef.org' },
-      { name: 'Beneficiary', host: 'portal.hope.unicef.org', onHold: true },
     ],
   },
   {
-    title: 'Data Collecting',
+    title: 'Data Collection',
     icon: <AssignmentIcon />,
     items: [
       { name: 'Aurora', host: 'aurora.hope.unicef.org' },
       { name: 'Kobo', host: 'kobo.hope.unicef.org' },
-    ],
-  },
-  {
-    title: 'Services',
-    icon: <SettingsIcon />,
-    onHold: true,
-    items: [
-      { name: 'PG', host: 'payment.hope.unicef.org', onHold: true },
-      { name: 'Dedup', host: 'dedup.hope.unicef.org', onHold: true },
-      { name: 'Documents', host: 'documents.hope.unicef.org', onHold: true },
     ],
   },
   {
@@ -145,27 +131,6 @@ const componentGroups: ComponentGroup[] = [
     ],
   },
 ];
-
-const OnHoldBadge: FC<{ inverted?: boolean }> = ({ inverted }) => (
-  <Box
-    component="span"
-    sx={{
-      ml: 'auto',
-      px: 1.25,
-      py: 0.25,
-      borderRadius: '12px',
-      fontSize: 12,
-      fontWeight: 500,
-      letterSpacing: '0.5px',
-      textTransform: 'uppercase',
-      whiteSpace: 'nowrap',
-      color: inverted ? NAVY_BLUE : '#4E606A',
-      bgcolor: inverted ? '#ffffff' : '#ECEFF1',
-    }}
-  >
-    On hold
-  </Box>
-);
 
 export const LandingPage: FC = () => (
   <Container
@@ -298,7 +263,7 @@ export const LandingPage: FC = () => (
       <Box
         sx={{
           display: 'grid',
-          gridTemplateColumns: responsiveValue('1fr', '1fr 1fr'),
+          gridTemplateColumns: responsiveValue('1fr', 'repeat(3, 1fr)'),
           gap: 6,
         }}
       >
@@ -327,7 +292,6 @@ export const LandingPage: FC = () => (
               >
                 {group.title}
               </Typography>
-              {group.onHold && <OnHoldBadge inverted />}
             </Box>
             <Box component="ul" sx={{ listStyle: 'none', p: 0, m: 0 }}>
               {group.items.map((item, index) => (
@@ -338,15 +302,11 @@ export const LandingPage: FC = () => (
                     px: 6,
                     py: 4,
                     borderTop: index === 0 ? 'none' : '1px solid #ECEFF1',
-                    opacity: item.onHold ? 0.65 : 1,
                   }}
                 >
-                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                    <Typography sx={{ fontWeight: 500, fontSize: 16 }}>
-                      {item.name}
-                    </Typography>
-                    {item.onHold && !group.onHold && <OnHoldBadge />}
-                  </Box>
+                  <Typography sx={{ fontWeight: 500, fontSize: 16, mb: 1 }}>
+                    {item.name}
+                  </Typography>
                   <Underlined
                     href={`https://${item.host}`}
                     target="_blank"
