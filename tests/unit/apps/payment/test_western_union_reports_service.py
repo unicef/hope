@@ -9,8 +9,8 @@ import zipfile
 
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.utils import timezone
-import openpyxl
 from freezegun import freeze_time
+import openpyxl
 import pytest
 
 from extras.test_utils.factories import (
