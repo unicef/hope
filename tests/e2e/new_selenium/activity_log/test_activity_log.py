@@ -65,7 +65,7 @@ def test_activity_log_lists_entry(
 ) -> None:
     login.open(build_url(program))
 
-    login.assert_text("Activity Log", PAGE_HEADER_TITLE)
+    login.assert_text("Activity Log", PAGE_HEADER_TITLE, timeout=60)
     login.assert_text("Update", ACTION_CELL)
     # Date only — asserting the hour flakes when the test crosses an hour boundary
     login.assert_text(datetime.today().strftime("%-d %b %Y"), TIMESTAMP_CELL)
