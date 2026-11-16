@@ -3,9 +3,7 @@
 from decimal import Decimal
 
 import django.core.validators
-from django.db import migrations, models
-from django.db.models.functions import Abs
-from django.db.models.lookups import LessThan
+from django.db import migrations
 
 import hope.apps.core.fields
 
@@ -17,31 +15,15 @@ PAYMENT_PLAN_COLUMNS = (
 )
 
 
-def payment_plan_currency_precision_constraint() -> models.CheckConstraint:
-    condition = models.Q()
-    for column in PAYMENT_PLAN_COLUMNS:
-        condition &= models.Q(**{f"{column}__isnull": True}) | (
-            models.Q(**{f"{column}__gte": Decimal(0)}) & models.Q(LessThan(Abs(column), Decimal(100000000000000000000)))
-        )
-    return models.CheckConstraint(condition=condition, name="payment_plan_currency_precision")
-
-
 def change_payment_plan_columns(apps, schema_editor):
     connection = schema_editor.connection
     table = schema_editor.quote_name(apps.get_model("payment", "PaymentPlan")._meta.db_table)
     columns = [schema_editor.quote_name(name) for name in PAYMENT_PLAN_COLUMNS]
     alterations = ", ".join(f"ALTER COLUMN {column} TYPE numeric" for column in columns)
-    precision_checks = " AND ".join(
-        f"({column} IS NULL OR ({column} >= 0 AND abs({column}) < 100000000000000000000))" for column in columns
-    )
     with connection.cursor() as cursor:
         cursor.execute("SET LOCAL lock_timeout = '1s'")
         cursor.execute("SET LOCAL statement_timeout = '30s'")
         cursor.execute(f"ALTER TABLE {table} {alterations}")
-        cursor.execute(
-            f"ALTER TABLE {table} ADD CONSTRAINT {schema_editor.quote_name('payment_plan_currency_precision')} "
-            f"CHECK ({precision_checks}) NOT VALID"
-        )
 
 
 class Migration(migrations.Migration):
@@ -104,10 +86,6 @@ class Migration(migrations.Migration):
                         validators=[django.core.validators.MinValueValidator(Decimal(0))],
                         verbose_name="Total undelivered quantity in USD",
                     ),
-                ),
-                migrations.AddConstraint(
-                    model_name="paymentplan",
-                    constraint=payment_plan_currency_precision_constraint(),
                 ),
             ],
         ),

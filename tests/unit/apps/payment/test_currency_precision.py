@@ -149,7 +149,15 @@ def test_payment_save_rounds_amounts_above_ten_fractional_digits(payment):
     assert payment.entitlement_quantity_usd == Decimal("123.1234567892")
 
 
-def test_payment_plan_save_load_pads_legacy_two_decimal_values(payment, django_assert_num_queries):
+@pytest.mark.parametrize("invalid_amount", [Decimal("-0.01"), Decimal(100000000000000000000)])
+def test_payment_save_rejects_negative_or_overrange_usd_amount(payment, invalid_amount):
+    payment.entitlement_quantity_usd = invalid_amount
+
+    with pytest.raises(ValidationError):
+        payment.save(update_fields=["entitlement_quantity_usd"])
+
+
+def test_payment_plan_save_normalizes_two_decimal_usd_value(payment, django_assert_num_queries):
     payment_plan = payment.parent
     payment_plan.total_entitled_quantity_usd = Decimal("123.45")
     payment_plan.save(update_fields=["total_entitled_quantity_usd"])
