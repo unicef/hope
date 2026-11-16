@@ -8,11 +8,20 @@ logger = logging.getLogger(__name__)
 
 
 @dataclasses.dataclass
-class SimilarityPair:
+class HDEFinding:
     score: float
-    status_code: str
     first: str | None = None
     second: str | None = None
+
+
+@dataclasses.dataclass(kw_only=True)
+class BiometricHDEFinding(HDEFinding):
+    status_code: str
+
+
+@dataclasses.dataclass(kw_only=True)
+class BiographicHDEFinding(HDEFinding):
+    proximity_to_score: float
 
 
 class DeduplicationEngineAPI(BaseAPI):
@@ -29,13 +38,14 @@ class DeduplicationEngineAPI(BaseAPI):
     API_MISSING_CREDENTIALS_EXCEPTION_CLASS = DeduplicationEngineMissingAPICredentialsError
 
     class Endpoints:
-        GET_RDI_BIOMETRIC_FINDINGS = "deduplication_sets/{rdi_country_workspace_id}/findings/"
+        GET_RDI_BIOMETRIC_FINDINGS = "deduplication_sets/{rdi_country_workspace_id}/biometric_findings/"
+        GET_RDI_BIOGRAPHIC_FINDINGS = "deduplication_sets/{rdi_country_workspace_id}/biographic_findings/"
 
     @staticmethod
-    def _create_get_rdi_biometric_findings_params(
-        status_code: str | None,
-        updated_after: str | None,
-        updated_before: str | None,
+    def _create_get_rdi_findings_params(
+        status_code: str | None = None,
+        updated_after: str | None = None,
+        updated_before: str | None = None,
     ) -> str | None:
         filters: dict[str, str] = {}
         if status_code:
@@ -57,8 +67,24 @@ class DeduplicationEngineAPI(BaseAPI):
         url = self.get_url(
             self.Endpoints.GET_RDI_BIOMETRIC_FINDINGS.format(rdi_country_workspace_id=rdi_country_workspace_id)
         )
-        params = self._create_get_rdi_biometric_findings_params(
+        params = self._create_get_rdi_findings_params(
             status_code=status_code,
+            updated_after=updated_after,
+            updated_before=updated_before,
+        )
+        return self._get_paginated(url, params=params)
+
+    def get_rdi_biographic_findings(
+        self,
+        rdi_country_workspace_id: str,
+        *,
+        updated_after: str | None = None,
+        updated_before: str | None = None,
+    ) -> list[dict]:
+        url = self.get_url(
+            self.Endpoints.GET_RDI_BIOGRAPHIC_FINDINGS.format(rdi_country_workspace_id=rdi_country_workspace_id)
+        )
+        params = self._create_get_rdi_findings_params(
             updated_after=updated_after,
             updated_before=updated_before,
         )
