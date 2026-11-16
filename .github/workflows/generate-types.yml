@@ -5,7 +5,7 @@ on:
   workflow_call:
 jobs:
   generate-types:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     env:
       DOCKER_DEFAULT_PLATFORM: linux/amd64
       DATABASE_URL: postgres://postgres:postgres@localhost:5432/aurora
@@ -44,7 +44,7 @@ jobs:
             libcairo2 \
             libcairo2-dev \
             libffi-dev \
-            libgdk-pixbuf2.0-0 \
+            libgdk-pixbuf-2.0-0 \
             libpango-1.0-0 \
             libpangocairo-1.0-0 \
             shared-mime-info
