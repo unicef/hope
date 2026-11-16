@@ -25,7 +25,6 @@ from rest_framework.viewsets import GenericViewSet, ModelViewSet
 
 from hope.api.caches import cached_response, etag_decorator
 from hope.apps.account.permissions import ALL_GRIEVANCES_CREATE_MODIFY, Permissions
-from hope.apps.core.api.filters import UpdatedAtFilter
 from hope.apps.core.api.mixins import (
     BaseViewSet,
     BusinessAreaMixin,
@@ -45,9 +44,9 @@ from hope.apps.program.api.caches import (
     ProgramCycleKeyConstructor,
     ProgramListKeyConstructor,
 )
-from hope.apps.program.api.filters import ProgramCycleFilter, ProgramFilter
+from hope.apps.program.api.filters import BeneficiaryGroupFilter, ProgramCycleFilter, ProgramFilter
 from hope.apps.program.api.serializers import (
-    BeneficiaryGroupSerializer,
+    BeneficiaryGroupListSerializer,
     ProgramCopySerializer,
     ProgramCreateSerializer,
     ProgramCycleCreateSerializer,
@@ -148,7 +147,7 @@ class ProgramViewSet(
                     queryset=FlexibleAttribute.objects.select_related("pdu_data").order_by("created_at"),
                 )
             )
-            .select_related("beneficiary_group", "data_collecting_type", "business_area")
+            .select_related("beneficiary_group", "data_collecting_type__payee_type", "business_area")
             .annotate(status_rank=status_rank_expr)
             .order_by("status_rank", "start_date")
         )
@@ -538,10 +537,10 @@ class BeneficiaryGroupViewSet(
     GenericViewSet,
 ):
     permission_classes = [IsAuthenticated]
-    queryset = BeneficiaryGroup.objects.all()
-    serializer_class = BeneficiaryGroupSerializer
+    queryset = BeneficiaryGroup.objects.prefetch_related("data_collecting_types")
+    serializer_class = BeneficiaryGroupListSerializer
     filter_backends = (OrderingFilter, DjangoFilterBackend)
-    filterset_class = UpdatedAtFilter
+    filterset_class = BeneficiaryGroupFilter
 
     @etag_decorator(BeneficiaryGroupKeyConstructor)
     @cached_response(key_func=BeneficiaryGroupKeyConstructor())

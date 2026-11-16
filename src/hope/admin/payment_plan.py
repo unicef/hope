@@ -2,7 +2,6 @@ from datetime import date
 from decimal import Decimal
 from typing import TYPE_CHECKING, Any, cast
 
-from admin_cursor_paginator import CursorPaginatorAdmin
 from admin_extra_buttons.decorators import button
 from admin_extra_buttons.mixins import confirm_action
 from adminfilters.autocomplete import AutoCompleteFilter
@@ -20,7 +19,12 @@ from django.shortcuts import redirect, render
 from django.urls import reverse
 from django.utils.html import format_html
 
-from hope.admin.utils import HOPEModelAdminBase, PaymentPlanCeleryTasksMixin, ViewOnUiMixin
+from hope.admin.utils import (
+    FieldPkCursorPaginatorAdmin,
+    HOPEModelAdminBase,
+    PaymentPlanCeleryTasksMixin,
+    ViewOnUiMixin,
+)
 from hope.apps.activity_log.utils import copy_model_object, create_diff
 from hope.apps.payment.forms import BatchReexportForm, VisionFundsCommitmentHeaderAssignmentForm
 from hope.apps.payment.services.payment_gateway import PaymentGatewayAPI
@@ -744,7 +748,7 @@ class PaymentHouseholdSnapshotInline(admin.StackedInline):
 
 
 @admin.register(Payment)
-class PaymentAdmin(ViewOnUiMixin, CursorPaginatorAdmin, AdminAdvancedFiltersMixin, HOPEModelAdminBase):
+class PaymentAdmin(ViewOnUiMixin, FieldPkCursorPaginatorAdmin, AdminAdvancedFiltersMixin, HOPEModelAdminBase):
     search_fields = ("unicef_id",)
     list_display = (
         "unicef_id",

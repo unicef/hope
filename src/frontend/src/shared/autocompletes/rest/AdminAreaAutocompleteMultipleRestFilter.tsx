@@ -183,7 +183,7 @@ export function AdminAreaAutocompleteMultipleRestFilter({
       noOptionsText="No options available"
       isOptionEqualToValue={(option, value1) =>
         (option as AdminAreaOption)?.value ===
-        (value1 as AdminAreaOption)?.value
+        (value1 as any)?.value
       }
       renderOption={(props, rawOption, { selected }) => {
         const option = rawOption as AdminAreaOption;

@@ -73,10 +73,10 @@ class HouseholdDataUpdateService(DataChangeService):
         roles = household_data.pop("roles", [])
         to_date_string(household_data, "start")
         to_date_string(household_data, "end")
-        handle_image_field(household_data, "consent_sign")
+        handle_image_field(household_data, "consent_sign", household)
         flex_fields = {to_snake_case(field): value for field, value in household_data.pop("flex_fields", {}).items()}
         verify_flex_fields(flex_fields, "households")
-        save_images(flex_fields, "households")
+        save_images(flex_fields, "households", household)
         household_data_with_approve_status = {
             to_snake_case(field): {"value": value, "approve_status": False} for field, value in household_data.items()
         }
@@ -139,13 +139,13 @@ class HouseholdDataUpdateService(DataChangeService):
         new_household_data = household_data_update_new_extras.get("household_data", {})
         to_date_string(new_household_data, "start")
         to_date_string(new_household_data, "end")
-        handle_image_field(new_household_data, "consent_sign")
+        handle_image_field(new_household_data, "consent_sign", household)
         roles = new_household_data.pop("roles", [])
         flex_fields = {
             to_snake_case(field): value for field, value in new_household_data.pop("flex_fields", {}).items()
         }
         verify_flex_fields(flex_fields, "households")
-        save_images(flex_fields, "households")
+        save_images(flex_fields, "households", household)
         household_data_with_approve_status = {
             to_snake_case(field): {"value": value, "approve_status": False}
             for field, value in new_household_data.items()

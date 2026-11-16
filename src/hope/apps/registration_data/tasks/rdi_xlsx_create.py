@@ -16,6 +16,7 @@ from openpyxl.cell import Cell
 from openpyxl.worksheet.worksheet import Worksheet
 
 from hope.apps.core.currency_resolution import resolve_active_currency
+from hope.apps.core.upload_paths import upload_path
 from hope.apps.core.utils import SheetImageLoader, timezone_datetime
 from hope.apps.household.const import (
     HEAD,
@@ -183,7 +184,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
             file = File(file_io, name=file_name)
 
             if is_flex_field:
-                return default_storage.save(file_name, file)
+                return default_storage.save(upload_path(self.program, file_name), file)
 
             return file
         return "" if is_field_required is True else None
@@ -504,9 +505,9 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
     def _create_pending_object_factory(self, sheet_title: str, rdi: RegistrationDataImport) -> Callable:
         """Create a partial factory for PendingHousehold or PendingIndividual."""
         if sheet_title == "households":
-            return partial(PendingHousehold, registration_data_import=rdi, program_id=rdi.program.id)
+            return partial(PendingHousehold, registration_data_import=rdi, program=rdi.program)
         if sheet_title == "individuals":
-            return partial(PendingIndividual, registration_data_import=rdi, program_id=rdi.program.id)
+            return partial(PendingIndividual, registration_data_import=rdi, program=rdi.program)
         raise ValueError(f"Unhandled sheet label '{sheet_title!r}'")
 
     def _find_header_indices(self, first_row: Any) -> tuple[int | None, int | None]:

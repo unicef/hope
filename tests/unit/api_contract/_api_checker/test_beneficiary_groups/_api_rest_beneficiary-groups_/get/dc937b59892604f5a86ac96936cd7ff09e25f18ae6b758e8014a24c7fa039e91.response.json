@@ -23,7 +23,9 @@
                 "group_label_plural": "Households",
                 "member_label": "Individual",
                 "member_label_plural": "Individuals",
-                "master_detail": true
+                "payee_type": "8d1f5a4e-2c7b-4f0e-9b3a-6e1d2c4b5a70",
+                "data_collecting_types": [],
+                "active": true
             }
         ]
     },

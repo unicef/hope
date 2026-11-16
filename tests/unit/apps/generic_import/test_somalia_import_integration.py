@@ -39,7 +39,7 @@ def business_area() -> BusinessArea:
 @pytest.fixture
 def program(business_area) -> Program:
     dct = DataCollectingTypeFactory(type=DataCollectingType.Type.SOCIAL)
-    bg = BeneficiaryGroupFactory(master_detail=False)
+    bg = BeneficiaryGroupFactory()
     return ProgramFactory(
         business_area=business_area,
         status=Program.ACTIVE,

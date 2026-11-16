@@ -18,6 +18,7 @@ from extras.test_utils.factories import (
     HouseholdFactory,
     IndividualFactory,
     PartnerFactory,
+    PayeeTypeFactory,
     PeriodicFieldDataFactory,
     ProgramFactory,
     RoleAssignmentFactory,
@@ -32,6 +33,7 @@ from hope.models import (
     DataCollectingType,
     FlexibleAttribute,
     Partner,
+    PayeeType,
     PeriodicFieldData,
     Program,
     User,
@@ -83,6 +85,26 @@ def dct_compatible(dct_original: Any) -> DataCollectingType:
 
 
 @pytest.fixture
+def incentive_payee_type(db: Any) -> PayeeType:
+    return PayeeTypeFactory(name="Incentive Payee", gl_code="7700430")
+
+
+@pytest.fixture
+def dct_compatible_of_other_payee_type(
+    dct_original: DataCollectingType, incentive_payee_type: PayeeType
+) -> DataCollectingType:
+    dct = DataCollectingTypeFactory(
+        label="Compatible Other Payee Type",
+        code="compother",
+        type=DataCollectingType.Type.STANDARD,
+        active=True,
+        payee_type=incentive_payee_type,
+    )
+    dct_original.compatible_types.add(dct)
+    return dct
+
+
+@pytest.fixture
 def dct_incompatible(db: Any) -> DataCollectingType:
     return DataCollectingTypeFactory(
         label="Incompatible DCT",
@@ -94,7 +116,22 @@ def dct_incompatible(db: Any) -> DataCollectingType:
 
 @pytest.fixture
 def bg_original(db: Any) -> BeneficiaryGroup:
-    return BeneficiaryGroupFactory(name="Original BG", master_detail=True)
+    return BeneficiaryGroupFactory(name="Original BG")
+
+
+@pytest.fixture
+def bg_original_restricted_to_original_dct(
+    bg_original: BeneficiaryGroup, dct_original: DataCollectingType
+) -> BeneficiaryGroup:
+    bg_original.data_collecting_types.add(dct_original)
+    return bg_original
+
+
+@pytest.fixture
+def bg_original_deactivated(program_to_copy: Program, bg_original: BeneficiaryGroup) -> BeneficiaryGroup:
+    bg_original.active = False
+    bg_original.save()
+    return bg_original
 
 
 @pytest.fixture
@@ -474,6 +511,65 @@ def test_copy_program_incompatible_dct(
     )
 
 
+def test_copy_program_with_compatible_dct_of_other_payee_type_returns_400(
+    authenticated_client: Any,
+    user: User,
+    afghanistan: BusinessArea,
+    copy_url: str,
+    base_copy_payload: dict,
+    dct_compatible_of_other_payee_type: DataCollectingType,
+    setup_partners_with_role_assignments: None,
+    create_user_role_with_permissions: Callable,
+) -> None:
+    create_user_role_with_permissions(
+        user,
+        [Permissions.PROGRAMME_DUPLICATE],
+        afghanistan,
+        whole_business_area_access=True,
+    )
+    payload = {
+        **base_copy_payload,
+        "data_collecting_type": dct_compatible_of_other_payee_type.code,
+    }
+
+    response = authenticated_client.post(copy_url, payload)
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response.json() == {
+        "data_collecting_type": ["Data Collecting Type must belong to the Payee Type of the original Program."]
+    }
+
+
+def test_copy_program_with_compatible_dct_not_permitted_for_payee_label_returns_400(
+    authenticated_client: Any,
+    user: User,
+    afghanistan: BusinessArea,
+    copy_url: str,
+    base_copy_payload: dict,
+    dct_compatible: DataCollectingType,
+    bg_original_restricted_to_original_dct: BeneficiaryGroup,
+    setup_partners_with_role_assignments: None,
+    create_user_role_with_permissions: Callable,
+) -> None:
+    create_user_role_with_permissions(
+        user,
+        [Permissions.PROGRAMME_DUPLICATE],
+        afghanistan,
+        whole_business_area_access=True,
+    )
+    payload = {
+        **base_copy_payload,
+        "data_collecting_type": dct_compatible.code,
+    }
+
+    response = authenticated_client.post(copy_url, payload)
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response.json() == {
+        "beneficiary_group": ["Payee Label is not permitted for the selected Data Collecting Type."]
+    }
+
+
 def test_copy_program_dct_invalid(
     authenticated_client: Any,
     user: User,
@@ -728,3 +824,41 @@ def test_copy_program_selected_access_without_partner(
 
     assert "partners" in response.json()
     assert "Please assign access to your partner before saving the Program." in response.json()["partners"][0]
+
+
+@pytest.mark.parametrize(
+    "dct_fixture",
+    [
+        pytest.param("dct_original", id="same_dct"),
+        pytest.param("dct_compatible", id="compatible_dct_of_same_payee_type"),
+    ],
+)
+def test_copy_program_with_deactivated_payee_label_returns_201(
+    authenticated_client: Any,
+    user: User,
+    afghanistan: BusinessArea,
+    copy_url: str,
+    base_copy_payload: dict,
+    bg_original_deactivated: BeneficiaryGroup,
+    dct_fixture: str,
+    request: pytest.FixtureRequest,
+    setup_partners_with_role_assignments: None,
+    create_user_role_with_permissions: Callable,
+) -> None:
+    create_user_role_with_permissions(
+        user,
+        [Permissions.PROGRAMME_DUPLICATE],
+        afghanistan,
+        whole_business_area_access=True,
+    )
+    payload = {
+        **base_copy_payload,
+        "data_collecting_type": request.getfixturevalue(dct_fixture).code,
+    }
+
+    response = authenticated_client.post(copy_url, payload)
+
+    assert response.status_code == status.HTTP_201_CREATED
+    new_program = Program.objects.get(name="Copied Program Name", business_area=afghanistan)
+    assert new_program.beneficiary_group.name == "Original BG"
+    assert new_program.beneficiary_group.active is False

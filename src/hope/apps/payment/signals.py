@@ -8,6 +8,7 @@ from hope.api.caches import get_or_create_cache_key, increment_cache_key
 from hope.apps.payment.api.caches import (
     PAYMENT_PLAN_LIST_CACHE_KEYS,
     PAYMENT_VERIFICATION_LIST_CACHE_KEYS,
+    invalidate_managerial_payment_plan_list_cache,
     invalidate_payment_plan_list_cache,
 )
 from hope.models import (
@@ -24,6 +25,12 @@ MANAGERIAL_PAYMENT_PLAN_STATUSES = (
     PaymentPlan.Status.IN_AUTHORIZATION,
     PaymentPlan.Status.IN_REVIEW,
     PaymentPlan.Status.ACCEPTED,
+)
+# statuses a plan moves to when it leaves the managerial list (see PaymentPlanFlow)
+MANAGERIAL_EXIT_PAYMENT_PLAN_STATUSES = (
+    PaymentPlan.Status.LOCKED_FSP,
+    PaymentPlan.Status.FINISHED,
+    PaymentPlan.Status.ABORTED,
 )
 
 
@@ -51,6 +58,15 @@ def _invalidate_lists(scope: tuple[str, str] | None, specific_view_cache_keys: t
         return
     business_area_slug, program_code = scope
     invalidate_payment_plan_list_cache(business_area_slug, program_code, specific_view_cache_keys)
+
+
+def _affects_managerial_list(instance: PaymentPlan, update_fields: Any) -> bool:
+    if instance.status in MANAGERIAL_PAYMENT_PLAN_STATUSES:
+        return True
+    # a plan already out of the list only matters on the save that moved it out
+    return instance.status in MANAGERIAL_EXIT_PAYMENT_PLAN_STATUSES and (
+        update_fields is None or "status" in update_fields
+    )
 
 
 @receiver(post_save, sender=ProgramCycle)
@@ -90,19 +106,12 @@ def increment_payment_plan_list_cache(sender: Any, instance: PaymentPlan, **kwar
     if kwargs.get("raw"):
         return
     # invalidate payment plan lists
-    _invalidate_lists(_program_scope_by_cycle(instance.program_cycle_id), PAYMENT_PLAN_LIST_CACHE_KEYS)
+    scope = _program_scope_by_cycle(instance.program_cycle_id)
+    _invalidate_lists(scope, PAYMENT_PLAN_LIST_CACHE_KEYS)
 
-    if instance.status not in MANAGERIAL_PAYMENT_PLAN_STATUSES:
+    if scope is None or not _affects_managerial_list(instance, kwargs.get("update_fields")):
         return
-    # invalidate payment plan managerial list
-    business_area_slug = instance.business_area.slug
-
-    def _increment() -> None:
-        business_area_version = get_or_create_cache_key(f"{business_area_slug}:version", 1)
-        version_key = f"{business_area_slug}:{business_area_version}:management_payment_plans_list"
-        increment_cache_key(version_key)
-
-    transaction.on_commit(_increment)
+    invalidate_managerial_payment_plan_list_cache(scope[0])
 
 
 @receiver(post_save, sender=PaymentVerificationPlan)

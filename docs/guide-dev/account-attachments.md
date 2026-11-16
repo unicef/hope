@@ -89,7 +89,7 @@ It prints a `migrated / skipped / failed` tally at the end.
 
 ### RDI API upload
 
-`AccountSerializerUpload` (`src/hope/api/endpoints/rdi/upload.py`) accepts an optional `attachments` array on each account:
+`AccountSerializerUpload` (`src/hope/api/endpoints/rdi/upload.py`) accepts an optional `attachments` array on each account of the `rdi-upload`, `rdi-push` and `rdi-push-lax` endpoints:
 
 ```json
 {
@@ -105,9 +105,11 @@ It prints a `migrated / skipped / failed` tally at the end.
 }
 ```
 
-`file` is base64, the same encoding the endpoint already uses for photos and documents. One payload can carry any number of attachments per account, so their count is checked against `FILE_LIMIT` up front. The size is checked **before decoding**: base64 packs 3 bytes into 4 characters, so `len(value) * 3 // 4` is enough to reject an oversized blob without ever holding the decoded image in memory. The model then enforces the exact limit once the file exists.
+`file` is base64, the same encoding those endpoints use for photos and documents. One payload can carry any number of attachments per account, so their count is checked against `FILE_LIMIT` up front. The size is checked **before decoding**: base64 packs 3 bytes into 4 characters, so `len(value) * 3 // 4` is enough to reject an oversized blob without ever holding the decoded image in memory. The model then enforces the exact limit once the file exists.
 
 `AccountMixin.save_account` (`src/hope/api/endpoints/rdi/mixin.py`) pops `attachments` off the payload, creates the `PendingAccount`, and writes one `AccountAttachment` per entry, reusing `PhotoMixin.get_photo` to turn the base64 into a file.
+
+`rdi-push-lax-individuals`, `rdi-push-lax-households` and `rdi-push-people` do not take attachments yet. They share `DocumentSerializerLax` and `AccountLaxSerializer` (`src/hope/api/endpoints/rdi/lax.py`), and `AccountLaxSerializer` has no `attachments` field, so the key is ignored if a client sends it.
 
 ## Django admin
 

@@ -12,6 +12,7 @@ from rest_framework.response import Response
 
 from hope.api.endpoints.base import HOPEAPIBusinessAreaViewSet
 from hope.apps.core.api.filters import UpdatedAtFilter
+from hope.apps.program.validators import get_payee_configuration_errors
 from hope.models import Grant, Program
 
 if TYPE_CHECKING:
@@ -35,6 +36,11 @@ class ProgramAPISerializer(serializers.ModelSerializer):
             "data_collecting_type",
             "beneficiary_group",
         )
+
+    def validate(self, data: dict[str, Any]) -> dict[str, Any]:
+        if errors := get_payee_configuration_errors(data["data_collecting_type"], data["beneficiary_group"]):
+            raise serializers.ValidationError(errors)
+        return data
 
 
 class ProgramViewSet(CreateModelMixin, ListModelMixin, HOPEAPIBusinessAreaViewSet, GenericAPIView):

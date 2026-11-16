@@ -19,6 +19,7 @@ class DataCollectingTypeAdmin(AutocompleteForeignKeyMixin, AdminFiltersMixin, ad
         "label",
         "code",
         "type",
+        "payee_type",
         "active",
         "deprecated",
         "individual_filters_available",
@@ -29,6 +30,7 @@ class DataCollectingTypeAdmin(AutocompleteForeignKeyMixin, AdminFiltersMixin, ad
     )
     list_filter = (
         ("limit_to", AutoCompleteFilter),
+        ("payee_type", AutoCompleteFilter),
         "type",
         "active",
         "individual_filters_available",

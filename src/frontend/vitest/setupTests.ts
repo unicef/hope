@@ -67,9 +67,10 @@ afterAll(() => server.close());
 // styled-components generates component ids (`sc-*`) and their paired class
 // hashes from a process-global counter, so they depend on module evaluation
 // order and differ between local runs and CI workers. Normalize them so DOM
-// snapshots stay deterministic.
-const SC_COMPONENT_ID = /^sc-[a-zA-Z]+$/;
-const SC_GENERATED_CLASS = /^[a-zA-Z]{4,8}$/;
+// snapshots stay deterministic. Hashes are letters only, except that
+// styled-components splits any "ad" pair with a dash (adblock guard).
+const SC_COMPONENT_ID = /^sc-(?:[a-zA-Z]|(?<=a)-(?=d))+$/i;
+const SC_GENERATED_CLASS = /^(?:[a-zA-Z]|(?<=a)-(?=d)){4,9}$/i;
 // Emotion folds the class name it receives into its own hash, so a labelled
 // `css-<hash>-<Label>` class on a styled-components element inherits that
 // instability. Keep the label, drop the hash.

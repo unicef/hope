@@ -6,6 +6,7 @@ from django.core.files.storage import default_storage
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.management import call_command
 from django.urls import reverse
+from freezegun import freeze_time
 from PIL import Image
 import pytest
 from rest_framework import status
@@ -220,6 +221,38 @@ def grant_create_permission(
 
 
 @pytest.fixture
+def add_individual_payload(
+    user: User,
+    grievance_context: dict[str, Any],
+    load_test_image: Callable[[], SimpleUploadedFile],
+) -> dict[str, Any]:
+    extra_path = "extras.issue_type.add_individual_issue_type_extras."
+    return {
+        "description": "Test",
+        "assigned_to": str(user.id),
+        "issue_type": GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_ADD_INDIVIDUAL,
+        "category": GrievanceTicket.CATEGORY_DATA_CHANGE,
+        "consent": True,
+        "language": "PL",
+        f"{extra_path}household": str(grievance_context["household"].id),
+        f"{extra_path}individual_data.given_name": "Test",
+        f"{extra_path}individual_data.full_name": "Test Test",
+        f"{extra_path}individual_data.family_name": "Romaniak",
+        f"{extra_path}individual_data.sex": "MALE",
+        f"{extra_path}individual_data.birth_date": "1980-02-01",
+        f"{extra_path}individual_data.marital_status": SINGLE,
+        f"{extra_path}individual_data.estimated_birth_date": False,
+        f"{extra_path}individual_data.relationship": RELATIONSHIP_UNKNOWN,
+        f"{extra_path}individual_data.documents[0].key": IDENTIFICATION_TYPE_TO_KEY_MAPPING[
+            IDENTIFICATION_TYPE_NATIONAL_ID
+        ],
+        f"{extra_path}individual_data.documents[0].country": "POL",
+        f"{extra_path}individual_data.documents[0].number": "123-123-UX-321",
+        f"{extra_path}individual_data.documents[0].photo": load_test_image(),
+    }
+
+
+@pytest.fixture
 def household_with_sex_group_counts_and_flex_field(grievance_context: dict[str, Any]) -> Any:
     FlexibleAttributeFactory(
         name="hh_total_eligible_ind_h_f",
@@ -256,43 +289,102 @@ def individual_with_identification_key(grievance_context: dict[str, Any]) -> Any
 def test_grievance_create_individual_data_change(
     authenticated_client: Any,
     grant_create_permission: None,
+    list_url: str,
+    add_individual_payload: dict[str, Any],
+) -> None:
+    response = authenticated_client.post(list_url, add_individual_payload, format="multipart")
+
+    assert response.status_code == status.HTTP_201_CREATED
+    assert "id" in response.data[0]
+    assert response.data[0]["ticket_details"]["individual_data"]["documents"][0]["photo"] is not None
+    assert response.data[0]["ticket_details"]["individual_data"]["documents"][0]["photoraw"] is not None
+
+
+@freeze_time("2026-09-09 12:00:00")
+def test_add_individual_stores_the_document_photo_under_the_business_area_without_a_program(
+    authenticated_client: Any,
+    grant_create_permission: None,
+    list_url: str,
+    add_individual_payload: dict[str, Any],
+) -> None:
+    response = authenticated_client.post(list_url, add_individual_payload, format="multipart")
+
+    assert response.status_code == status.HTTP_201_CREATED
+    ticket = GrievanceTicket.objects.get(id=response.data[0]["id"])
+    assert list(ticket.programs.all()) == []
+    photoraw = response.data[0]["ticket_details"]["individual_data"]["documents"][0]["photoraw"]
+    assert photoraw.startswith("2026/afghanistan/_unassigned/")
+
+
+def test_individual_data_update_stores_the_document_photo_under_the_individual_program(
+    authenticated_client: Any,
+    grant_create_permission: None,
     user: User,
+    business_area: BusinessArea,
+    program: Program,
     grievance_context: dict[str, Any],
     list_url: str,
     load_test_image: Callable[[], SimpleUploadedFile],
 ) -> None:
-    extra_path = "extras.issue_type.add_individual_issue_type_extras."
+    extra_path = "extras.issue_type.individual_data_update_issue_type_extras."
     response = authenticated_client.post(
         list_url,
         {
             "description": "Test",
             "assigned_to": str(user.id),
-            "issue_type": GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_ADD_INDIVIDUAL,
+            "issue_type": GrievanceTicket.ISSUE_TYPE_INDIVIDUAL_DATA_CHANGE_DATA_UPDATE,
             "category": GrievanceTicket.CATEGORY_DATA_CHANGE,
             "consent": True,
             "language": "PL",
-            f"{extra_path}household": str(grievance_context["household"].id),
-            f"{extra_path}individual_data.given_name": "Test",
-            f"{extra_path}individual_data.full_name": "Test Test",
-            f"{extra_path}individual_data.family_name": "Romaniak",
-            f"{extra_path}individual_data.sex": "MALE",
-            f"{extra_path}individual_data.birth_date": "1980-02-01",
-            f"{extra_path}individual_data.marital_status": SINGLE,
-            f"{extra_path}individual_data.estimated_birth_date": False,
-            f"{extra_path}individual_data.relationship": RELATIONSHIP_UNKNOWN,
+            f"{extra_path}individual": str(grievance_context["individual"].id),
             f"{extra_path}individual_data.documents[0].key": IDENTIFICATION_TYPE_TO_KEY_MAPPING[
-                IDENTIFICATION_TYPE_NATIONAL_ID
+                IDENTIFICATION_TYPE_NATIONAL_PASSPORT
             ],
             f"{extra_path}individual_data.documents[0].country": "POL",
-            f"{extra_path}individual_data.documents[0].number": "123-123-UX-321",
+            f"{extra_path}individual_data.documents[0].number": "321-321-XU-987",
             f"{extra_path}individual_data.documents[0].photo": load_test_image(),
         },
         format="multipart",
     )
+
     assert response.status_code == status.HTTP_201_CREATED
-    assert "id" in response.data[0]
-    assert response.data[0]["ticket_details"]["individual_data"]["documents"][0]["photo"] is not None
-    assert response.data[0]["ticket_details"]["individual_data"]["documents"][0]["photoraw"] is not None
+    ticket = GrievanceTicket.objects.get(id=response.data[0]["id"])
+    assert list(ticket.programs.all()) == []
+    photoraw = response.data[0]["ticket_details"]["individual_data"]["documents"][0]["value"]["photoraw"]
+    assert photoraw.startswith(f"{program.start_date.year}/{business_area.slug}/{program.code}/")
+
+
+def test_household_data_update_stores_the_consent_sign_under_the_household_program(
+    authenticated_client: Any,
+    grant_create_permission: None,
+    user: User,
+    business_area: BusinessArea,
+    program: Program,
+    grievance_context: dict[str, Any],
+    list_url: str,
+    load_test_image: Callable[[], SimpleUploadedFile],
+) -> None:
+    extra_path = "extras.issue_type.household_data_update_issue_type_extras."
+    response = authenticated_client.post(
+        list_url,
+        {
+            "description": "Test",
+            "assigned_to": str(user.id),
+            "issue_type": GrievanceTicket.ISSUE_TYPE_HOUSEHOLD_DATA_CHANGE_DATA_UPDATE,
+            "category": GrievanceTicket.CATEGORY_DATA_CHANGE,
+            "consent": True,
+            "language": "PL",
+            f"{extra_path}household": str(grievance_context["household"].id),
+            f"{extra_path}household_data.consent_sign": load_test_image(),
+        },
+        format="multipart",
+    )
+
+    assert response.status_code == status.HTTP_201_CREATED
+    ticket = GrievanceTicket.objects.get(id=response.data[0]["id"])
+    assert list(ticket.programs.all()) == []
+    consent_sign = ticket.household_data_update_ticket_details.household_data["consent_sign"]["value"]
+    assert consent_sign.startswith(f"{program.start_date.year}/{business_area.slug}/{program.code}/")
 
 
 def test_grievance_update_individual_data_change(

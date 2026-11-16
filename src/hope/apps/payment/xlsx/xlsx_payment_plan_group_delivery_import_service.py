@@ -11,6 +11,7 @@ from hope.apps.activity_log.utils import copy_model_object
 from hope.apps.payment.flows import PaymentPlanFlow
 from hope.apps.payment.services.payment_plan_services import PaymentPlanService
 from hope.apps.payment.utils import log_payment_plan_change
+from hope.apps.payment.xlsx.utils import get_last_data_row
 from hope.apps.payment.xlsx.xlsx_error import XlsxError
 from hope.apps.payment.xlsx.xlsx_payment_plan_delivery_import_service import (
     DELIVERY_ATTEMPTED_BUT_FAILED_VALUE,
@@ -72,6 +73,7 @@ class XlsxPaymentPlanGroupDeliveryImportService:
         self.source_row_numbers: dict[str, int] = {}
         self.headers: list[str] = []
         self.sheetname = ""
+        self.last_data_row = 1
         self.ws: Worksheet | None = None
         self.wb: openpyxl.Workbook | None = None
         self.per_plan_services: dict[str, XlsxPaymentPlanDeliveryImportService] = {}
@@ -151,6 +153,7 @@ class XlsxPaymentPlanGroupDeliveryImportService:
         self.wb = wb
         self.ws = wb[wb.sheetnames[0]]
         self.sheetname = wb.sheetnames[0]
+        self.last_data_row = get_last_data_row(self.ws)
         self.headers = [cell.value for cell in self.ws[1]]
         self._prepare_payment_data()
         return wb
@@ -175,7 +178,7 @@ class XlsxPaymentPlanGroupDeliveryImportService:
         seen_ids: set[str] = set()
         payment_id_idx = self.headers.index("payment_id")
         delivered_quantity_idx = self.headers.index("delivered_quantity")
-        for row in self.ws.iter_rows(min_row=2):
+        for row in self.ws.iter_rows(min_row=2, max_row=self.last_data_row):
             if not any(cell.value for cell in row):
                 continue
             id_cell = row[payment_id_idx]
@@ -261,7 +264,7 @@ class XlsxPaymentPlanGroupDeliveryImportService:
         self.source_row_numbers = {}
         seen_ids: set[str] = set()
         payment_id_idx = self.headers.index("payment_id")
-        for row in self.ws.iter_rows(min_row=2):
+        for row in self.ws.iter_rows(min_row=2, max_row=self.last_data_row):
             if not any(cell.value for cell in row):
                 continue
             payment_id_value = row[payment_id_idx].value
@@ -376,7 +379,9 @@ class XlsxPaymentPlanGroupDeliveryImportService:
             raise RuntimeError("open_workbook() must be called before reading import results")
         updated_rows = sum(service.actual_updated_rows_count for service in self.per_plan_services.values())
         reset_rows = sum(service.action_counts[service.ACTION_RESET] for service in self.per_plan_services.values())
-        total_rows = sum(1 for row in self.ws.iter_rows(min_row=2) if any(cell.value for cell in row))
+        total_rows = sum(
+            1 for row in self.ws.iter_rows(min_row=2, max_row=self.last_data_row) if any(cell.value for cell in row)
+        )
         return {
             "total_rows": total_rows,
             "updated_rows": updated_rows,

@@ -19,6 +19,7 @@ from hope.models import (
     FlexibleAttribute,
     FlexibleAttributeChoice,
     FlexibleAttributeGroup,
+    PayeeType,
     PaymentPlanPurpose,
     PeriodicFieldData,
     StorageFile,
@@ -45,6 +46,15 @@ class BusinessAreaFactory(DjangoModelFactory):
     timezone = "UTC"
 
 
+class PayeeTypeFactory(DjangoModelFactory):
+    class Meta:
+        model = PayeeType
+        django_get_or_create = ("name",)
+
+    name = "Household"
+    gl_code = "7700410"
+
+
 class BeneficiaryGroupFactory(DjangoModelFactory):
     class Meta:
         model = BeneficiaryGroup
@@ -55,6 +65,7 @@ class BeneficiaryGroupFactory(DjangoModelFactory):
     group_label_plural = "Households"
     member_label = "Individual"
     member_label_plural = "Individuals"
+    payee_type = factory.SubFactory(PayeeTypeFactory)
 
 
 class CurrencyFactory(DjangoModelFactory):
@@ -83,6 +94,7 @@ class DataCollectingTypeFactory(DjangoModelFactory):
     code = factory.Sequence(lambda n: f"dct_{n}")
     label = factory.Sequence(lambda n: f"DCT {n}")
     type = DataCollectingType.Type.STANDARD
+    payee_type = factory.SubFactory(PayeeTypeFactory)
 
 
 class PeriodicFieldDataFactory(DjangoModelFactory):

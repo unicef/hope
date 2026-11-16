@@ -16,6 +16,7 @@ from extras.test_utils.factories import (
     HouseholdFactory,
     IndividualFactory,
     PartnerFactory,
+    PayeeTypeFactory,
     PaymentPlanFactory,
     PaymentPlanPurposeFactory,
     PeriodicFieldDataFactory,
@@ -35,8 +36,10 @@ from hope.models import (
     DataCollectingType,
     FlexibleAttribute,
     Partner,
+    PayeeType,
     PeriodicFieldData,
     Program,
+    RegistrationDataImport,
     User,
 )
 
@@ -98,23 +101,42 @@ def area2(country: Country) -> Area:
 
 
 @pytest.fixture
-def dct_standard() -> DataCollectingType:
-    return DataCollectingTypeFactory(label="Full", code="full", type=DataCollectingType.Type.STANDARD)
+def household_payee_type(db: Any) -> PayeeType:
+    return PayeeTypeFactory(name="Household", gl_code="7700410")
 
 
 @pytest.fixture
-def dct_social() -> DataCollectingType:
-    return DataCollectingTypeFactory(label="SW Full", code="sw_full", type=DataCollectingType.Type.SOCIAL)
+def incentive_payee_type(db: Any) -> PayeeType:
+    return PayeeTypeFactory(name="Incentive Payee", gl_code="7700430")
 
 
 @pytest.fixture
-def bg_household() -> BeneficiaryGroup:
-    return BeneficiaryGroupFactory(name="Household", master_detail=True)
+def dct_standard(household_payee_type: PayeeType) -> DataCollectingType:
+    return DataCollectingTypeFactory(
+        label="Full", code="full", type=DataCollectingType.Type.STANDARD, payee_type=household_payee_type
+    )
 
 
 @pytest.fixture
-def bg_sw() -> BeneficiaryGroup:
-    return BeneficiaryGroupFactory(name="Social Worker", master_detail=False)
+def dct_social(incentive_payee_type: PayeeType) -> DataCollectingType:
+    return DataCollectingTypeFactory(
+        label="SW Full", code="sw_full", type=DataCollectingType.Type.SOCIAL, payee_type=incentive_payee_type
+    )
+
+
+@pytest.fixture
+def bg_household(household_payee_type: PayeeType) -> BeneficiaryGroup:
+    return BeneficiaryGroupFactory(name="Household", payee_type=household_payee_type)
+
+
+@pytest.fixture
+def bg_sw(incentive_payee_type: PayeeType) -> BeneficiaryGroup:
+    return BeneficiaryGroupFactory(name="Social Worker", payee_type=incentive_payee_type)
+
+
+@pytest.fixture
+def bg_household_2(household_payee_type: PayeeType) -> BeneficiaryGroup:
+    return BeneficiaryGroupFactory(name="Beneficiary Group 2", payee_type=household_payee_type)
 
 
 @pytest.fixture
@@ -152,6 +174,22 @@ def program(initial_program_data: dict, afghanistan: BusinessArea, partner: Part
         role=role_with_all_permissions,
     )
     return program
+
+
+@pytest.fixture
+def program_with_inactive_payee_configuration(
+    program: Program, household_payee_type: PayeeType, bg_household: BeneficiaryGroup
+) -> Program:
+    household_payee_type.active = False
+    household_payee_type.save()
+    bg_household.active = False
+    bg_household.save()
+    return program
+
+
+@pytest.fixture
+def program_rdi(program: Program, afghanistan: BusinessArea) -> RegistrationDataImport:
+    return RegistrationDataImportFactory(program=program, business_area=afghanistan)
 
 
 @pytest.fixture
@@ -587,7 +625,7 @@ def test_update_data_collecting_type_for_program_with_population(
     assert program.data_collecting_type == dct_standard
 
 
-def test_update_data_collecting_type_invalid_with_beneficiary_group(
+def test_update_data_collecting_type_of_other_payee_type_returns_400(
     authenticated_client: Any,
     user: User,
     afghanistan: BusinessArea,
@@ -604,21 +642,75 @@ def test_update_data_collecting_type_invalid_with_beneficiary_group(
         afghanistan,
         whole_business_area_access=True,
     )
-
     payload = {
         **base_payload_for_update_without_changes,
         "data_collecting_type": dct_social.code,
     }
-    response = authenticated_client.put(update_url, payload)
-    assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert "beneficiary_group" in response.json()
-    assert (
-        response.json()["beneficiary_group"][0]
-        == "Selected combination of data collecting type and beneficiary group is invalid."
-    )
 
+    response = authenticated_client.put(update_url, payload)
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response.json() == {"beneficiary_group": ["Payee Label does not belong to the selected Payee Type."]}
     program.refresh_from_db()
     assert program.data_collecting_type == dct_standard
+
+
+def test_update_data_collecting_type_and_beneficiary_group_of_other_payee_type_for_draft_program(
+    authenticated_client: Any,
+    user: User,
+    afghanistan: BusinessArea,
+    program: Program,
+    update_url: str,
+    base_payload_for_update_without_changes: dict,
+    dct_social: DataCollectingType,
+    bg_sw: BeneficiaryGroup,
+    create_user_role_with_permissions: Callable,
+) -> None:
+    create_user_role_with_permissions(
+        user,
+        [Permissions.PROGRAMME_UPDATE],
+        afghanistan,
+        whole_business_area_access=True,
+    )
+    payload = {
+        **base_payload_for_update_without_changes,
+        "data_collecting_type": dct_social.code,
+        "beneficiary_group": str(bg_sw.id),
+    }
+
+    response = authenticated_client.put(update_url, payload)
+
+    assert response.status_code == status.HTTP_200_OK
+    program.refresh_from_db()
+    assert program.data_collecting_type == dct_social
+    assert program.beneficiary_group == bg_sw
+
+
+def test_update_program_with_unchanged_inactive_beneficiary_group_and_payee_type_returns_200(
+    authenticated_client: Any,
+    user: User,
+    afghanistan: BusinessArea,
+    program_with_inactive_payee_configuration: Program,
+    update_url: str,
+    base_payload_for_update_without_changes: dict,
+    create_user_role_with_permissions: Callable,
+) -> None:
+    create_user_role_with_permissions(
+        user,
+        [Permissions.PROGRAMME_UPDATE],
+        afghanistan,
+        whole_business_area_access=True,
+    )
+    payload = {
+        **base_payload_for_update_without_changes,
+        "description": "Updated description.",
+    }
+
+    response = authenticated_client.put(update_url, payload)
+
+    assert response.status_code == status.HTTP_200_OK
+    program_with_inactive_payee_configuration.refresh_from_db()
+    assert program_with_inactive_payee_configuration.description == "Updated description."
 
 
 def test_update_beneficiary_group(
@@ -629,6 +721,7 @@ def test_update_beneficiary_group(
     update_url: str,
     base_payload_for_update_without_changes: dict,
     base_expected_response_without_changes: dict,
+    bg_household_2: BeneficiaryGroup,
     create_user_role_with_permissions: Callable,
 ) -> None:
     create_user_role_with_permissions(
@@ -637,25 +730,24 @@ def test_update_beneficiary_group(
         afghanistan,
         whole_business_area_access=True,
     )
-    bg_2 = BeneficiaryGroupFactory(name="Beneficiary Group 2", master_detail=True)
 
     payload = {
         **base_payload_for_update_without_changes,
-        "beneficiary_group": str(bg_2.id),
+        "beneficiary_group": str(bg_household_2.id),
     }
     response = authenticated_client.put(update_url, payload)
     assert response.status_code == status.HTTP_200_OK
 
     program.refresh_from_db()
-    assert program.beneficiary_group == bg_2
+    assert program.beneficiary_group == bg_household_2
     assert response.json() == {
         **base_expected_response_without_changes,
-        "beneficiary_group": str(bg_2.id),
+        "beneficiary_group": str(bg_household_2.id),
         "version": program.version,
     }
 
 
-def test_update_beneficiary_group_invalid_with_data_collecting_type(
+def test_update_beneficiary_group_of_other_payee_type_returns_400(
     authenticated_client: Any,
     user: User,
     afghanistan: BusinessArea,
@@ -672,18 +764,15 @@ def test_update_beneficiary_group_invalid_with_data_collecting_type(
         afghanistan,
         whole_business_area_access=True,
     )
-
     payload = {
         **base_payload_for_update_without_changes,
         "beneficiary_group": str(bg_sw.id),
     }
+
     response = authenticated_client.put(update_url, payload)
+
     assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert "beneficiary_group" in response.json()
-    assert (
-        response.json()["beneficiary_group"][0]
-        == "Selected combination of data collecting type and beneficiary group is invalid."
-    )
+    assert response.json() == {"beneficiary_group": ["Payee Label does not belong to the selected Payee Type."]}
 
     program.refresh_from_db()
     assert program.beneficiary_group == bg_household
@@ -697,6 +786,8 @@ def test_update_beneficiary_group_invalid_with_population(
     update_url: str,
     base_payload_for_update_without_changes: dict,
     bg_household: BeneficiaryGroup,
+    bg_household_2: BeneficiaryGroup,
+    program_rdi: RegistrationDataImport,
     create_user_role_with_permissions: Callable,
 ) -> None:
     create_user_role_with_permissions(
@@ -705,18 +796,15 @@ def test_update_beneficiary_group_invalid_with_population(
         afghanistan,
         whole_business_area_access=True,
     )
-    bg_2 = BeneficiaryGroupFactory(name="Beneficiary Group 2", master_detail=True)
-
-    RegistrationDataImportFactory(program=program, business_area=afghanistan)
 
     payload = {
         **base_payload_for_update_without_changes,
-        "beneficiary_group": str(bg_2.id),
+        "beneficiary_group": str(bg_household_2.id),
     }
     response = authenticated_client.put(update_url, payload)
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert "beneficiary_group" in response.json()
-    assert response.json()["beneficiary_group"][0] == "Beneficiary Group cannot be updated if Program has population."
+    assert response.json()["beneficiary_group"][0] == "Payee Label cannot be updated if Program has population."
 
     program.refresh_from_db()
     assert program.beneficiary_group == bg_household
