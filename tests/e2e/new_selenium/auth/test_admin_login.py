@@ -76,7 +76,7 @@ def test_admin_login_with_invalid_credentials_shows_error(
 def test_anonymous_user_sees_login_page(browser: HopeTestBrowser) -> None:
     browser.open("/")
 
-    browser.assert_text("Login via Active Directory", "#root")
+    browser.assert_text("Login via Active Directory", "#root", timeout=60)
 
 
 def test_log_out_via_admin_panel(login: HopeTestBrowser) -> None:

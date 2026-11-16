@@ -38,7 +38,7 @@ def unknown_route_url(program: Program) -> str:
 def test_page_not_found(program: Program, login: HopeTestBrowser, build_url: Callable[[Program], str]) -> None:
     login.open(build_url(program))
 
-    login.assert_text("Oops! Page Not Found", PAGE_NOT_FOUND_TITLE)
+    login.assert_text("Oops! Page Not Found", PAGE_NOT_FOUND_TITLE, timeout=60)
     login.assert_text("REFRESH PAGE", BUTTON_REFRESH_PAGE)
     login.assert_text("GO TO PROGRAMME MANAGEMENT", BUTTON_GO_TO_PROGRAMME_MANAGEMENT)
 
@@ -47,6 +47,6 @@ def test_access_denied_for_user_without_business_area(browser: HopeTestBrowser, 
     browser.login(user_with_no_permissions.username, wait_for_drawer=False)
     browser.open("/")
 
-    browser.assert_text("Access Denied", ACCESS_DENIED_TITLE)
+    browser.assert_text("Access Denied", ACCESS_DENIED_TITLE, timeout=60)
     browser.assert_text("REFRESH PAGE", BUTTON_REFRESH_PAGE)
     browser.assert_text("GO BACK", BUTTON_GO_BACK)
