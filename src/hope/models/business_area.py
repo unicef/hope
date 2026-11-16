@@ -120,7 +120,14 @@ class BusinessArea(NaturalKeyModel, TimeStampedUUIDModel):
         default=5,
         help_text="If amount of duplicates for single individual exceeds this limit deduplication is aborted",
     )
-    deduplication_ignore_withdraw = models.BooleanField(default=False)
+    deduplication_ignore_withdraw = models.BooleanField(
+        default=False,
+        help_text=(
+            "If checked, withdrawn individuals are ignored as deduplication matches "
+            "(biographic and biometric): they are not marked as duplicates "
+            "and no Needs Adjudication tickets are created for them"
+        ),
+    )
     biometric_deduplication_threshold = models.FloatField(
         default=0.0,
         help_text="Threshold for Face Image Deduplication",
