@@ -458,7 +458,9 @@ def generate_payment_list() -> None:  # noqa: PLR0915
     pp2.payment_plan_purposes.add(purpose)
     PaymentListService(payment_list=pp2).full_rebuild()
     pp3_name = "Test TP for PM (ready to create Payment List)"
-    pp3_group, _ = PaymentPlan.objects.get_or_create(cycle=program_cycle, name=f"{pp3_name} Group")
+    pp3_group, _ = PaymentPlan.objects.update_or_create(
+        cycle=program_cycle, name=f"{pp3_name} Group", defaults={"financial_service_provider": fsp_1}
+    )
     pp3 = PaymentList.objects.update_or_create(
         name=pp3_name,
         program_cycle=program_cycle,
@@ -468,7 +470,6 @@ def generate_payment_list() -> None:  # noqa: PLR0915
             "status_date": now,
             "created_by": root,
             "payment_plan": pp3_group,
-            "financial_service_provider": fsp_1,
             "delivery_mechanism": delivery_mechanism_cash,
         },
     )[0]
