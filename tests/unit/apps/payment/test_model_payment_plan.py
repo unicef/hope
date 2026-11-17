@@ -418,7 +418,7 @@ def test_update_money_fields_clamps_negative_usd_remainder(payment_plan):
     payment_plan.update_money_fields()
     payment_plan.refresh_from_db(fields=["total_undelivered_quantity_usd"])
 
-    assert payment_plan.total_undelivered_quantity_usd == Decimal("0")
+    assert payment_plan.total_undelivered_quantity_usd == Decimal(0)
 
 
 def test_not_excluded_payments():

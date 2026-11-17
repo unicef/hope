@@ -152,7 +152,5 @@ class FollowUpInstruction(TimeStampedUUIDModel, UnicefIdentifiedModel, AdminUrlM
             "total_delivered_quantity": total_delivered_quantity,
             "total_delivered_quantity_usd": total_delivered_quantity_usd,
             "total_undelivered_quantity": summary["total_undelivered_quantity"] or Decimal(0),
-            "total_undelivered_quantity_usd": max(
-                summary["total_undelivered_quantity_usd"] or Decimal(0), Decimal(0)
-            ),
+            "total_undelivered_quantity_usd": max(summary["total_undelivered_quantity_usd"] or Decimal(0), Decimal(0)),
         }

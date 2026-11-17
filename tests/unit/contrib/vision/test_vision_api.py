@@ -200,6 +200,15 @@ def test_payment_plan_payload_includes_null_exchange_rate(
     assert payload["exchangeRate"] is None
 
 
+def test_payment_plan_payload_rounds_usd_amount_to_two_decimal_places(vision_api_payment_plan_factory) -> None:
+    payment_plan = vision_api_payment_plan_factory()
+    payment_plan.total_entitled_quantity_usd = Decimal("1234.5678912345")
+
+    payload = PaymentPlanPayloadSerializer(payment_plan).data
+
+    assert payload["authAmtUsd"] == "1234.57"
+
+
 @patch("hope.contrib.vision.api.VisionAPI._acquire_token")
 @patch("hope.contrib.vision.api.VisionAPI._post")
 def test_send_payment_plan_with_different_currency(

@@ -1,3 +1,4 @@
+from decimal import ROUND_HALF_UP
 from typing import Any
 
 from rest_framework import serializers
@@ -136,7 +137,13 @@ class PaymentPlanPayloadSerializer(serializers.Serializer):
     payplan_desc = serializers.CharField(source="name")
     currency = serializers.CharField(source="currency.vision_code")
     auth_amt = serializers.CharField(source="total_entitled_quantity")
-    auth_amt_usd = serializers.CharField(source="total_entitled_quantity_usd")
+    auth_amt_usd = serializers.DecimalField(
+        source="total_entitled_quantity_usd",
+        max_digits=30,
+        decimal_places=2,
+        rounding=ROUND_HALF_UP,
+        coerce_to_string=True,
+    )
     exchange_rate = serializers.DecimalField(max_digits=15, decimal_places=8, allow_null=True)
     head_vendor = serializers.CharField(source="financial_service_provider.name")
     gl_code = serializers.CharField(source="program_cycle.program.data_collecting_type.payee_type.gl_code")
