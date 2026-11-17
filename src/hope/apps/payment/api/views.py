@@ -1862,7 +1862,7 @@ class PaymentPlanManagerialViewSet(
             super()
             .get_queryset()
             .filter(status__in=self.MANAGERIAL_STATUSES)
-            .select_related("cycle__program", "financial_service_provider", "currency")
+            .select_related("cycle__program__business_area", "financial_service_provider", "currency")
             .prefetch_related(
                 Prefetch(
                     "approval_process",

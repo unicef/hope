@@ -297,14 +297,19 @@ class PaymentPlan(TimeStampedUUIDModel, UnicefIdentifiedModel, InternalDataField
 
     @property
     def vision_managed(self) -> bool:
-        if (
-            self.plan_type == PaymentList.PlanType.FOLLOW_UP
-            or not flag_state("VISION_INTEGRATION_ACTIVE")
-            or not self.business_area.vision_integration_active
-        ):
+        return self.calculate_vision_managed()
+
+    def calculate_vision_managed(
+        self, *, vision_integration_active: bool | None = None, has_payment_lists: bool | None = None
+    ) -> bool:
+        if self.plan_type == PaymentList.PlanType.FOLLOW_UP:
+            return False
+        if vision_integration_active is None:
+            vision_integration_active = flag_state("VISION_INTEGRATION_ACTIVE")
+        if not vision_integration_active or not self.business_area.vision_integration_active:
             return False
         if self.status == self.Status.IN_REVIEW:
-            return self.payment_lists.exists()
+            return self.payment_lists.exists() if has_payment_lists is None else has_payment_lists
         return self.vision_status != VisionStatus.NOT_SENT.value
 
     @property

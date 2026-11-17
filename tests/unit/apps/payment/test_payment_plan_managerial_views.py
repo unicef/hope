@@ -118,6 +118,38 @@ def vision_managerial_context(managerial_context: dict[str, Any]) -> dict[str, A
     return managerial_context
 
 
+@pytest.fixture
+def vision_managerial_context_with_empty_group(vision_managerial_context: dict[str, Any]) -> dict[str, Any]:
+    PaymentPlanFactory(cycle=vision_managerial_context["group1"].cycle, status=PaymentPlan.Status.IN_REVIEW)
+    return vision_managerial_context
+
+
+def _count_queries_containing(queries: CaptureQueriesContext, text: str) -> int:
+    return sum(text in query["sql"] for query in queries.captured_queries)
+
+
+def test_managerial_vision_managed_has_no_per_plan_queries(
+    vision_managerial_context_with_empty_group: dict[str, Any],
+    create_user_role_with_permissions: Any,
+) -> None:
+    context = vision_managerial_context_with_empty_group
+    create_user_role_with_permissions(
+        context["user"], [Permissions.PAYMENT_VIEW_LIST_MANAGERIAL], context["business_area"], context["program1"]
+    )
+    cache.clear()
+
+    with CaptureQueriesContext(connection) as queries:
+        response = context["client"].get(context["url"], {"status": PaymentPlan.Status.IN_REVIEW})
+
+    assert response.status_code == status.HTTP_200_OK
+    rows = response.json()["results"]
+    assert len(rows) == 2
+    assert rows[0]["vision_managed"] is False
+    assert rows[1]["vision_managed"] is True
+    assert _count_queries_containing(queries, 'FROM "flags_flagstate"') <= 1
+    assert _count_queries_containing(queries, 'SELECT 1 AS "a" FROM "payment_paymentplan"') == 0
+
+
 @pytest.mark.parametrize(
     ("permissions", "expected_status"),
     [

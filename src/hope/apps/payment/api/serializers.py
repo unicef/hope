@@ -1,4 +1,5 @@
 from decimal import Decimal
+from functools import cached_property
 import json
 import logging
 import os
@@ -13,6 +14,7 @@ from django.shortcuts import get_object_or_404
 from django.urls import reverse
 from django.utils import timezone
 from drf_spectacular.utils import extend_schema_field, inline_serializer
+from flags.state import flag_state
 from rest_framework import serializers
 from rest_framework.settings import api_settings
 
@@ -2032,7 +2034,7 @@ class PaymentPlanManagerialSerializer(AdminUrlSerializerMixin, serializers.Model
     )
     last_approval_process_date = serializers.DateTimeField(read_only=True)
     last_approval_process_by = serializers.SerializerMethodField()
-    vision_managed = serializers.BooleanField(read_only=True)
+    vision_managed = serializers.SerializerMethodField()
     has_payments_reconciliation_overdue = serializers.BooleanField(read_only=True)
     reconciliation_window_in_days = serializers.IntegerField(
         source="cycle.program.reconciliation_window_in_days", read_only=True
@@ -2067,6 +2069,16 @@ class PaymentPlanManagerialSerializer(AdminUrlSerializerMixin, serializers.Model
     @staticmethod
     def get_last_approval_process_by(obj: PaymentPlan) -> str | None:
         return str(obj.last_approval_process_by) if obj.last_approval_process_by else None
+
+    @cached_property
+    def vision_integration_active(self) -> bool:
+        return flag_state("VISION_INTEGRATION_ACTIVE")
+
+    def get_vision_managed(self, obj: PaymentPlan) -> bool:
+        return obj.calculate_vision_managed(
+            vision_integration_active=self.vision_integration_active,
+            has_payment_lists=obj.payment_lists_count > 0,
+        )
 
 
 class PaymentPlanConfigurationMixin(serializers.Serializer):
