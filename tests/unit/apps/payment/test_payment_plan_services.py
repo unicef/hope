@@ -820,6 +820,49 @@ def test_vision_release_accepts_group_and_all_review_plans(
     )
 
 
+@pytest.fixture
+def gateway_ready_vision_group(group_in_review, locked_payment_list):
+    group_in_review.use_payment_gateway = True
+    group_in_review.save(update_fields=["use_payment_gateway"])
+    PaymentListSplitFactory(payment_list=locked_payment_list, sent_to_payment_gateway=False)
+    return group_in_review, locked_payment_list
+
+
+@pytest.mark.enable_activity_log
+@patch("hope.apps.payment.services.payment_list_services.send_to_payment_gateway_async_task")
+@patch("hope.apps.payment.services.payment_plan_services.recalculate_owner_exchange_rate_async_task")
+@patch("hope.apps.payment.services.payment_plan_services.send_payment_plan_notification_emails_async_task")
+def test_vision_release_sends_gateway_eligible_list_and_logs_it(
+    mock_notify,
+    mock_recalculate,
+    mock_gateway_send,
+    gateway_ready_vision_group,
+    django_capture_on_commit_callbacks,
+    django_assert_num_queries,
+):
+    group, payment_list = gateway_ready_vision_group
+
+    with django_capture_on_commit_callbacks(execute=True):
+        PaymentPlanService(group).release_from_vision()
+
+    payment_list.refresh_from_db()
+    assert payment_list.status == PaymentList.Status.ACCEPTED
+    assert payment_list.background_action_status == PaymentList.BackgroundActionStatus.SEND_TO_PAYMENT_GATEWAY
+    mock_notify.assert_called_once()
+    mock_recalculate.assert_called_once()
+    mock_gateway_send.assert_called_once()
+    sent_list, user_id = mock_gateway_send.call_args.args
+    assert sent_list.pk == payment_list.pk
+    assert user_id == str(payment_list.created_by_id)
+    with django_assert_num_queries(1):
+        log = LogEntry.objects.get(object_id=payment_list.pk, changes__has_key="background_action_status")
+    assert log.changes["background_action_status"] == {
+        "from": None,
+        "to": PaymentList.BackgroundActionStatus.SEND_TO_PAYMENT_GATEWAY,
+    }
+    assert log.user == payment_list.created_by
+
+
 @pytest.mark.enable_activity_log
 @patch("hope.apps.payment.services.payment_plan_services.send_payment_plan_notification_emails_async_task")
 def test_approve_logs_event_on_group(mock_notify, group_in_approval, user):
