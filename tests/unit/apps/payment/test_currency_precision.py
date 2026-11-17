@@ -154,7 +154,7 @@ def test_payment_save_rejects_negative_or_overrange_usd_amount(payment, invalid_
         payment.save(update_fields=["entitlement_quantity_usd"])
 
 
-@pytest.mark.parametrize("lookup_value", [Decimal("-1"), Decimal("100000000000000000000")])
+@pytest.mark.parametrize("lookup_value", [Decimal(-1), Decimal(100000000000000000000)])
 def test_payment_plan_filter_accepts_negative_and_overrange_usd_bounds(lookup_value):
     filter_set = PaymentPlanFilter(
         {"total_entitled_quantity_usd_from": str(lookup_value)},
