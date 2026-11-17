@@ -87,7 +87,7 @@ def test_urls_are_built_from_a_base_with_a_trailing_slash() -> None:
     api = VisionAPI()
 
     assert api.token_url == "https://test.example.com/v1/OAuthService/GenerateToken"
-    assert api.payment_list_creation_url == "https://test.example.com/ps/ezcash/PaymentList"
+    assert api.payment_plan_creation_url == "https://test.example.com/ps/ezcash/PaymentPlan"
 
 
 def test_ensure_token_skips_when_valid() -> None:
@@ -175,7 +175,7 @@ def _make_mock_group(**overrides) -> MagicMock:
 
 @patch("hope.contrib.vision.api.VisionAPI._acquire_token")
 @patch("hope.contrib.vision.api.VisionAPI._post")
-def test_send_payment_list(mock_post, mock_acquire_token, vision_api_group_factory) -> None:
+def test_send_payment_plan(mock_post, mock_acquire_token, vision_api_group_factory) -> None:
     mock_post.return_value = ({"status": "ok"}, 200)
     api = VisionAPI()
     pp = vision_api_group_factory(unicef_id="PP001")
@@ -183,7 +183,7 @@ def test_send_payment_list(mock_post, mock_acquire_token, vision_api_group_facto
     assert result == {"status": "ok"}
     mock_acquire_token.assert_called_once()
     mock_post.assert_called_once_with(
-        "https://test.example.com/ps/ezcash/PaymentList",
+        "https://test.example.com/ps/ezcash/PaymentPlan",
         {
             "businessArea": "FI01",
             "vendorNumber": "V100004",
@@ -198,7 +198,7 @@ def test_send_payment_list(mock_post, mock_acquire_token, vision_api_group_facto
     )
 
 
-def test_payment_list_payload_includes_null_exchange_rate(
+def test_payment_plan_payload_includes_null_exchange_rate(
     group_without_exchange_rate,
     django_assert_num_queries,
 ) -> None:
@@ -210,7 +210,7 @@ def test_payment_list_payload_includes_null_exchange_rate(
 
 @patch("hope.contrib.vision.api.VisionAPI._acquire_token")
 @patch("hope.contrib.vision.api.VisionAPI._post")
-def test_send_payment_list_with_different_currency(
+def test_send_payment_plan_with_different_currency(
     mock_post,
     mock_acquire_token,
     vision_api_group_factory,
@@ -224,7 +224,7 @@ def test_send_payment_list_with_different_currency(
     result = api.send_payment_plan(pp)
     assert result == {"status": "ok"}
     mock_post.assert_called_once_with(
-        "https://test.example.com/ps/ezcash/PaymentList",
+        "https://test.example.com/ps/ezcash/PaymentPlan",
         {
             "businessArea": "FI01",
             "vendorNumber": "V100004",
@@ -241,7 +241,7 @@ def test_send_payment_list_with_different_currency(
 
 @patch("hope.contrib.vision.api.VisionAPI._acquire_token")
 @patch("hope.contrib.vision.api.VisionAPI._post")
-def test_send_payment_list_sends_vision_code_not_code(mock_post, mock_acquire_token, vision_api_group_factory) -> None:
+def test_send_payment_plan_sends_vision_code_not_code(mock_post, mock_acquire_token, vision_api_group_factory) -> None:
     mock_post.return_value = ({"status": "ok"}, 200)
     api = VisionAPI()
     pp = vision_api_group_factory(
@@ -273,11 +273,11 @@ def test_vision_api_error_is_raised(vision_api_group_factory) -> None:
             assert pp.vision_status == "SEND_FAILED"
 
 
-def test_send_payment_list_logs_4xx_error(vision_api_group_factory) -> None:
+def test_send_payment_plan_logs_4xx_error(vision_api_group_factory) -> None:
     with patch("hope.contrib.vision.api.VisionAPI._acquire_token"):
         with patch("hope.contrib.vision.api.VisionAPI._post") as mock_post:
             mock_post.side_effect = BaseAPI.APIError(
-                'VisionAPI Invalid response: <Response [400]>, b\'{"error": "bad request"}\', https://test.example.com/ps/ezcash/PaymentList'
+                'VisionAPI Invalid response: <Response [400]>, b\'{"error": "bad request"}\', https://test.example.com/ps/ezcash/PaymentPlan'
             )
             api = VisionAPI()
             pp = vision_api_group_factory()
@@ -293,7 +293,7 @@ def test_send_payment_list_logs_4xx_error(vision_api_group_factory) -> None:
             assert pp.vision_status == "SEND_FAILED"
 
 
-def test_send_payment_list_persists_missing_credentials_failure(
+def test_send_payment_plan_persists_missing_credentials_failure(
     settings,
     vision_api_group_factory,
     django_assert_num_queries,
@@ -312,7 +312,7 @@ def test_send_payment_list_persists_missing_credentials_failure(
 
 @patch("hope.contrib.vision.api.VisionAPI._acquire_token")
 @patch("hope.contrib.vision.api.VisionAPI._post")
-def test_send_payment_list_logs_payload_and_response(
+def test_send_payment_plan_logs_payload_and_response(
     mock_post,
     mock_acquire_token,
     vision_api_group_factory,
@@ -339,7 +339,7 @@ def test_send_payment_list_logs_payload_and_response(
 
 @patch("hope.contrib.vision.api.VisionAPI._acquire_token")
 @patch("hope.contrib.vision.api.VisionAPI._post")
-def test_notify_payment_list_status_uses_payment_list_endpoint_without_changing_workflow_state(
+def test_notify_payment_plan_status_uses_payment_plan_endpoint_without_changing_workflow_state(
     mock_post,
     mock_acquire_token,
     vision_api_group_factory,
@@ -361,14 +361,14 @@ def test_notify_payment_list_status_uses_payment_list_endpoint_without_changing_
     payment_list.refresh_from_db(fields=["internal_data"])
     assert response == {"status": "ok"}
     payload = mock_post.call_args.args[1]
-    assert mock_post.call_args.args[0] == "https://test.example.com/ps/ezcash/PaymentList"
+    assert mock_post.call_args.args[0] == "https://test.example.com/ps/ezcash/PaymentPlan"
     assert payload["payplanSno"] == "PP-STATUS"
     assert payload["status"] == "REJECTED"
     assert payment_list.vision_status == VisionStatus.NOT_SENT.value
     assert payment_list.vision_data["log"][0]["type"] == VisionLogEntryType.STATUS_NOTIFICATION.value
 
 
-def test_notify_payment_list_status_logs_missing_credentials_without_changing_workflow_state(
+def test_notify_payment_plan_status_logs_missing_credentials_without_changing_workflow_state(
     settings,
     vision_api_group_factory,
     django_assert_num_queries,
@@ -388,7 +388,7 @@ def test_notify_payment_list_status_logs_missing_credentials_without_changing_wo
 
 @patch("hope.contrib.vision.api.VisionAPI._acquire_token")
 @patch("hope.contrib.vision.api.VisionAPI._post")
-def test_notify_payment_list_status_logs_api_error(
+def test_notify_payment_plan_status_logs_api_error(
     mock_post,
     mock_acquire_token,
     vision_api_group_factory,
@@ -407,7 +407,7 @@ def test_notify_payment_list_status_logs_api_error(
 
 @patch("hope.contrib.vision.api.VisionAPI._acquire_token")
 @patch("hope.contrib.vision.api.VisionAPI._post")
-def test_send_payment_list_already_sent_raises_error(
+def test_send_payment_plan_already_sent_raises_error(
     mock_post,
     mock_acquire_token,
     vision_api_group_factory,

@@ -32,7 +32,7 @@ class VisionAPI(BaseAPI):
     def __init__(self) -> None:
         super().__init__()
         self.token_url = build_url(self.api_url, "v1/OAuthService/GenerateToken")
-        self.payment_list_creation_url = build_url(self.api_url, "ps/ezcash/PaymentList")
+        self.payment_plan_creation_url = build_url(self.api_url, "ps/ezcash/PaymentPlan")
         self._token_expiry: datetime | None = None
 
     def _acquire_token(self) -> None:
@@ -132,7 +132,7 @@ class VisionAPI(BaseAPI):
         }
         try:
             self._ensure_token()
-            response, _ = self._post(self.payment_list_creation_url, payload)
+            response, _ = self._post(self.payment_plan_creation_url, payload)
             entry["response"] = response
         except VisionAPIMissingCredentialsError:
             entry["response"] = {"error": "Vision API credentials are not configured"}
