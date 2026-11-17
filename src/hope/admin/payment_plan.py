@@ -476,6 +476,20 @@ class PaymentPlanAdmin(ViewOnUiMixin, HOPEModelAdminBase):
         "custom_exchange_rate_set_by",
     )
 
+    def save_model(self, request: HttpRequest, obj: PaymentPlan, form: Any, change: bool) -> None:
+        old_payment_plan = copy_model_object(PaymentPlan.objects.get(pk=obj.pk)) if change and obj.pk else None
+        super().save_model(request, obj, form, change)
+        if old_payment_plan is not None and not create_diff(old_payment_plan, obj, PaymentPlan.ACTIVITY_LOG_MAPPING):
+            return
+        log_create(
+            mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
+            business_area_field="cycle.program.business_area",
+            user=request.user,
+            programs=obj.cycle.program.pk,
+            old_object=old_payment_plan,
+            new_object=obj,
+        )
+
     def frontend_url(self, obj: PaymentPlan) -> str | None:
         program = obj.cycle.program
         return f"/{program.business_area.slug}/programs/{program.code}/payment-module/payment-plans/{obj.id}"
