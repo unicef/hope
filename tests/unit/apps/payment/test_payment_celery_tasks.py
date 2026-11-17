@@ -34,7 +34,7 @@ from extras.test_utils.factories import (
     UserFactory,
     WesternUnionPaymentListReportFactory,
 )
-from hope.apps.core.celery_tasks import NonRetriableTaskError, async_retry_job_task
+from hope.apps.core.celery_tasks import async_retry_job_task
 from hope.apps.household.const import ROLE_PRIMARY
 from hope.apps.payment.celery_tasks import (
     create_payment_list_xlsx_async_task,
@@ -54,6 +54,7 @@ from hope.apps.payment.celery_tasks import (
     import_payment_plan_delivery_from_xlsx_async_task_action,
     import_payment_plan_fsp_extra_fields_from_xlsx_async_task,
     import_payment_plan_fsp_extra_fields_from_xlsx_async_task_action,
+    mark_owner_exchange_rate_recalculation_error,
     mark_payment_list_rebuild_error,
     notify_payment_plan_reconciliation_import_failure,
     payment_list_apply_engine_rule_async_task,
@@ -1149,18 +1150,30 @@ def test_stored_owner_rate_recalculates_delivered_usd(owner_with_two_payment_lis
     assert first_payment.delivered_quantity_usd == Decimal("20.00")
 
 
+@pytest.fixture
+def queued_owner_rate_job(owner_with_two_payment_lists) -> AsyncRetryJob:
+    group, _, _ = owner_with_two_payment_lists
+    with patch("hope.apps.payment.celery_tasks.AsyncRetryJob.queue", autospec=True):
+        recalculate_owner_exchange_rate_async_task(group)
+    return AsyncRetryJob.objects.latest("pk")
+
+
 @patch("hope.apps.payment.celery_tasks.get_owner_unore_exchange_rate", return_value=None)
-def test_missing_unore_rate_marks_owner_error(mock_unore_rate: Mock, owner_with_two_payment_lists) -> None:
+def test_missing_unore_rate_marks_owner_error(
+    mock_unore_rate: Mock, owner_with_two_payment_lists, queued_owner_rate_job: AsyncRetryJob
+) -> None:
     group, first_payment, _ = owner_with_two_payment_lists
 
-    with pytest.raises(NonRetriableTaskError, match="positive exchange rate"):
-        queue_and_run_retry_task(recalculate_owner_exchange_rate_async_task, owner=group)
+    with pytest.raises(ValueError, match="positive exchange rate"):
+        async_retry_job_task.apply(
+            (queued_owner_rate_job._meta.label_lower, queued_owner_rate_job.pk, queued_owner_rate_job.version)
+        ).get()
 
     group.refresh_from_db()
     first_payment.refresh_from_db()
     assert group.background_action_status == PaymentPlan.BackgroundActionStatus.RECALCULATING_ERROR
     assert first_payment.entitlement_quantity_usd is None
-    mock_unore_rate.assert_called_once()
+    assert mock_unore_rate.call_count == 4
 
 
 @patch("hope.models.async_job.AsyncRetryJob.queue")
@@ -1175,19 +1188,60 @@ def test_owner_rate_recalculation_marks_owner_busy_before_queue(
     group.refresh_from_db()
     job = AsyncRetryJob.objects.latest("pk")
     assert group.background_action_status == PaymentPlan.BackgroundActionStatus.RECALCULATING
-    assert "on_failure_action" not in job.config
+    assert job.config["on_failure_action"] == (
+        "hope.apps.payment.celery_tasks.mark_owner_exchange_rate_recalculation_error"
+    )
     mock_queue.assert_called_once()
 
 
 @patch("hope.apps.core.celery_tasks.async_retry_job_task.retry")
-def test_owner_rate_recalculation_failure_sets_error_without_retry(mock_retry: Mock, payment_list) -> None:
+def test_owner_rate_recalculation_keeps_owner_busy_while_retrying(mock_retry: Mock, payment_list) -> None:
+    mock_retry.side_effect = Retry("retry")
     with patch("hope.apps.payment.celery_tasks.get_owner_unore_exchange_rate", side_effect=Exception("test")):
-        with pytest.raises(NonRetriableTaskError, match="test"):
+        with pytest.raises(Retry):
             queue_and_run_retry_task(recalculate_owner_exchange_rate_async_task, owner=payment_list.payment_plan)
 
-    mock_retry.assert_not_called()
+    mock_retry.assert_called_once()
     payment_list.payment_plan.refresh_from_db()
-    assert payment_list.payment_plan.background_action_status == PaymentPlan.BackgroundActionStatus.RECALCULATING_ERROR
+    assert payment_list.payment_plan.background_action_status == PaymentPlan.BackgroundActionStatus.RECALCULATING
+
+
+@pytest.fixture
+def queued_instruction_rate_job(follow_up_instruction) -> AsyncRetryJob:
+    with patch("hope.apps.payment.celery_tasks.AsyncRetryJob.queue", autospec=True):
+        recalculate_owner_exchange_rate_async_task(follow_up_instruction)
+    return AsyncRetryJob.objects.latest("pk")
+
+
+def test_owner_rate_recalculation_failure_marks_instruction_after_retries(
+    follow_up_instruction, queued_instruction_rate_job: AsyncRetryJob
+) -> None:
+    mark_owner_exchange_rate_recalculation_error(queued_instruction_rate_job, TimeoutError("UNORE timeout"))
+
+    follow_up_instruction.refresh_from_db()
+    assert (
+        follow_up_instruction.background_action_status
+        == follow_up_instruction.BackgroundActionStatus.RECALCULATING_ERROR
+    )
+
+
+@pytest.fixture
+def superseded_group_rate_job(queued_owner_rate_job: AsyncRetryJob, owner_with_two_payment_lists) -> AsyncRetryJob:
+    group, _, _ = owner_with_two_payment_lists
+    group.background_action_status = None
+    group.save(update_fields=["background_action_status", "updated_at"])
+    return queued_owner_rate_job
+
+
+def test_owner_rate_recalculation_failure_does_not_change_superseded_owner(
+    owner_with_two_payment_lists, superseded_group_rate_job: AsyncRetryJob
+) -> None:
+    group, _, _ = owner_with_two_payment_lists
+
+    mark_owner_exchange_rate_recalculation_error(superseded_group_rate_job, TimeoutError("UNORE timeout"))
+
+    group.refresh_from_db()
+    assert group.background_action_status is None
 
 
 @patch("hope.apps.payment.services.payment_list_services.PaymentListService")

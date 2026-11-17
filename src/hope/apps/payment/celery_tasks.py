@@ -898,20 +898,17 @@ def _run_owner_exchange_rate_recalculation(
 
 
 def recalculate_owner_exchange_rate_async_task_action(job: AsyncRetryJob) -> None:
-    from hope.apps.core.celery_tasks import NonRetriableTaskError
-
     owner_model = cast("type[PaymentPlan] | type[FollowUpInstruction]", job.content_type.model_class())
-    try:
-        _run_owner_exchange_rate_recalculation(job, owner_model)
-    except NonRetriableTaskError:
-        raise
-    except Exception as error:
-        with transaction.atomic():
-            owner = owner_model.objects.select_for_update().get(pk=job.object_id)
-            if owner.background_action_status == owner.BackgroundActionStatus.RECALCULATING:
-                owner.background_action_status = owner.BackgroundActionStatus.RECALCULATING_ERROR
-                owner.save(update_fields=["background_action_status", "updated_at", "version"])
-        raise NonRetriableTaskError(str(error)) from error
+    _run_owner_exchange_rate_recalculation(job, owner_model)
+
+
+def mark_owner_exchange_rate_recalculation_error(job: AsyncRetryJob, _exception: Exception) -> None:
+    owner_model = cast("type[PaymentPlan] | type[FollowUpInstruction]", job.content_type.model_class())
+    with transaction.atomic():
+        owner = owner_model.objects.select_for_update().get(pk=job.object_id)
+        if owner.background_action_status == owner.BackgroundActionStatus.RECALCULATING:
+            owner.background_action_status = owner.BackgroundActionStatus.RECALCULATING_ERROR
+            owner.save(update_fields=["background_action_status", "updated_at", "version"])
 
 
 def recalculate_owner_exchange_rate_async_task(
@@ -920,6 +917,7 @@ def recalculate_owner_exchange_rate_async_task(
     config = {
         "user_id": user_id,
         "fetch_unore_rate": fetch_unore_rate,
+        "on_failure_action": "hope.apps.payment.celery_tasks.mark_owner_exchange_rate_recalculation_error",
     }
     with transaction.atomic():
         locked_owner = type(owner).objects.select_for_update().get(pk=owner.pk)
