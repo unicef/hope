@@ -73,7 +73,6 @@ from e2e.page_object.programme_population.periodic_data_update_templates import 
 from e2e.page_object.programme_population.periodic_data_update_uploads import (
     PDUXlsxUploads,
 )
-from e2e.page_object.programme_users.programme_users import ProgrammeUsers
 from e2e.page_object.targeting.targeting import Targeting
 from e2e.page_object.targeting.targeting_create import TargetingCreate
 from e2e.page_object.targeting.targeting_details import TargetingDetails
@@ -580,11 +579,6 @@ def page_accountability_surveys(request: FixtureRequest, browser: Chrome) -> Acc
 @pytest.fixture
 def page_accountability_surveys_details(request: FixtureRequest, browser: Chrome) -> AccountabilitySurveysDetails:
     return AccountabilitySurveysDetails(browser)
-
-
-@pytest.fixture
-def page_programme_users(request: FixtureRequest, browser: Chrome) -> ProgrammeUsers:
-    return ProgrammeUsers(browser)
 
 
 @pytest.fixture
