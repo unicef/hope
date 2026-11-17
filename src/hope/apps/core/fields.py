@@ -32,7 +32,7 @@ class HopeCurrencyField(models.DecimalField):
     def db_type(self, connection: Any) -> str:
         return "numeric"
 
-    def to_python(self, value: Any) -> Decimal | None:
+    def get_db_prep_save(self, value: Any, connection: Any) -> Any:
         if value is None:
-            return None
-        return normalize_currency_decimal(value)
+            return super().get_db_prep_save(value, connection)
+        return super().get_db_prep_save(normalize_currency_decimal(value), connection)

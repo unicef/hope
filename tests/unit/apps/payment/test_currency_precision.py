@@ -11,6 +11,7 @@ from rest_framework.exceptions import ValidationError as DRFValidationError
 from extras.test_utils.factories.payment import PaymentFactory
 from hope.apps.core.api.fields import HopeCurrencyDecimalField
 from hope.apps.core.fields import HopeCurrencyField, normalize_currency_decimal
+from hope.apps.payment.api.filters import PaymentPlanFilter
 from hope.apps.payment.api.serializers import PaymentListSerializer
 from hope.apps.payment.services.handle_total_cash_in_households import handle_total_cash_in_specific_households
 from hope.apps.payment.services.payment_gateway import PaymentPayloadSerializer
@@ -68,10 +69,6 @@ def test_currency_rounding_uses_half_up(source, expected):
 
 def test_currency_form_accepts_ten_decimal_places():
     assert HopeCurrencyField().formfield().clean("123.1234567890") == Decimal("123.1234567890")
-
-
-def test_currency_field_rounds_more_than_ten_decimal_places():
-    assert HopeCurrencyField().to_python("123.12345678915") == Decimal("123.1234567892")
 
 
 def test_currency_field_uses_unbounded_postgresql_numeric_type():
@@ -155,6 +152,17 @@ def test_payment_save_rejects_negative_or_overrange_usd_amount(payment, invalid_
 
     with pytest.raises(ValidationError):
         payment.save(update_fields=["entitlement_quantity_usd"])
+
+
+@pytest.mark.parametrize("lookup_value", [Decimal("-1"), Decimal("100000000000000000000")])
+def test_payment_plan_filter_accepts_negative_and_overrange_usd_bounds(lookup_value):
+    filter_set = PaymentPlanFilter(
+        {"total_entitled_quantity_usd_from": str(lookup_value)},
+        queryset=PaymentPlan.objects.all(),
+    )
+
+    assert filter_set.is_valid()
+    assert isinstance(filter_set.qs.exists(), bool)
 
 
 def test_payment_plan_save_normalizes_two_decimal_usd_value(payment, django_assert_num_queries):
