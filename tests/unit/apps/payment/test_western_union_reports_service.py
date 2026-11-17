@@ -1710,11 +1710,16 @@ def test_generate_report_xlsx_contains_headers_and_totals(
     ]
     assert worksheet["K2"].value == "Advice"
     assert worksheet["A4"].value == "Principal Total"
-    assert worksheet["E4"].value == "100.00"
+    assert worksheet["E4"].value == 100
+    assert worksheet["E4"].data_type == "n"
+    assert worksheet["E4"].number_format == "0.00"
     assert worksheet["A5"].value == "Charges Total"
-    assert worksheet["E5"].value == "3.00"
+    assert worksheet["E5"].value == 3
+    assert worksheet["E5"].data_type == "n"
     assert worksheet["A6"].value == "Refunds Total"
-    assert worksheet["E6"].value == "0"
+    assert worksheet["E6"].value == 0
+    assert worksheet["E6"].data_type == "n"
+    assert worksheet["E6"].number_format == "0.00"
 
 
 def test_generate_reports_for_invoice_creates_report_and_registers_notification_callback(
@@ -1805,9 +1810,9 @@ def test_generate_report_uses_payment_plan_data(
             payment=payment,
             mtcn="MTCN-1",
             transaction_status="2",
-            principal_amount=Decimal("123456789.1234567891"),
-            charges_amount=Decimal("0.0000000001"),
-            fee_amount=Decimal("0.0000000002"),
+            principal_amount=Decimal("123456789.12"),
+            charges_amount=Decimal("0.10"),
+            fee_amount=Decimal("0.20"),
         )
     ]
 
@@ -1819,13 +1824,18 @@ def test_generate_report_uses_payment_plan_data(
 
     assert filename.startswith(f"WU_REPORT_{payment.parent.business_area.slug}_{payment.parent.unicef_id}_")
     assert worksheet["K2"].value == "Advice"
-    assert worksheet["H2"].value == "123456789.1234567891"
-    assert worksheet["I2"].value == "0.0000000001"
-    assert worksheet["J2"].value == "0.0000000002"
-    assert worksheet["E4"].value == "123456789.1234567891"
-    assert worksheet["E5"].value == "0.0000000001"
-    assert worksheet["H2"].data_type == "s"
-    assert worksheet["E4"].data_type == "s"
+    assert worksheet["H2"].value == 123456789.12
+    assert worksheet["I2"].value == 0.1
+    assert worksheet["J2"].value == 0.2
+    assert worksheet["E4"].value == 123456789.12
+    assert worksheet["E5"].value == 0.1
+    assert worksheet["H2"].data_type == "n"
+    assert worksheet["I2"].data_type == "n"
+    assert worksheet["J2"].data_type == "n"
+    assert worksheet["E4"].data_type == "n"
+    assert worksheet["E5"].data_type == "n"
+    assert worksheet["H2"].number_format == "0.00"
+    assert worksheet["E4"].number_format == "0.00"
 
 
 def test_generate_report_marks_mtcn_mismatch_in_workbook(

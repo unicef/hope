@@ -729,22 +729,26 @@ class WesternUnionReportsService:
                     payment_data.payment_plan_unicef_id,
                     payment_data.programme,
                     payment_data.fc,
-                    format(payment_data.principal_amount, "f"),
-                    format(payment_data.charges_amount, "f"),
-                    format(payment_data.fee_amount, "f"),
+                    payment_data.principal_amount,
+                    payment_data.charges_amount,
+                    payment_data.fee_amount,
                     payment_data.ad_name_value,
                 ]
             )
+            for column in ("H", "I", "J"):
+                ws[f"{column}{ws.max_row}"].number_format = "0.00"
 
         ws.append([])
 
-        ws.append(["Principal Total", "", "", "", format(report_data.principal_total, "f")])
-        ws.append(["Charges Total", "", "", "", format(report_data.charges_total, "f")])
-        ws.append(["Refunds Total", "", "", "", format(report_data.refunds_total, "f")])
+        ws.append(["Principal Total", "", "", "", report_data.principal_total])
+        ws.append(["Charges Total", "", "", "", report_data.charges_total])
+        ws.append(["Refunds Total", "", "", "", report_data.refunds_total])
 
         last_row = ws.max_row
         for row_number in range(last_row - 3, last_row + 1):
             ws[f"A{row_number}"].font = Font(bold=True)
+        for row_number in range(last_row - 2, last_row + 1):
+            ws[f"E{row_number}"].number_format = "0.00"
 
         return wb
 
