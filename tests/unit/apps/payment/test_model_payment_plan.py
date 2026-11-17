@@ -408,6 +408,19 @@ def test_update_money_fields_preserves_tenth_place(high_precision_payment_plan, 
     assert high_precision_payment_plan.total_undelivered_quantity_usd == Decimal("1000000000000000000.0000000001")
 
 
+def test_update_money_fields_clamps_negative_usd_remainder(payment_plan):
+    PaymentFactory(
+        parent=payment_plan,
+        entitlement_quantity_usd=Decimal("33.33"),
+        delivered_quantity_usd=Decimal("33.3333333333"),
+    )
+
+    payment_plan.update_money_fields()
+    payment_plan.refresh_from_db(fields=["total_undelivered_quantity_usd"])
+
+    assert payment_plan.total_undelivered_quantity_usd == Decimal("0")
+
+
 def test_not_excluded_payments():
     payment_plan = PaymentPlanFactory()
     PaymentFactory(parent=payment_plan, conflicted=False, currency=CurrencyFactory(code="PLN", name="Polish Zloty"))

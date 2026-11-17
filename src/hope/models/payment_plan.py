@@ -801,7 +801,7 @@ class PaymentPlan(
             self.total_delivered_quantity_usd = payments.get("total_delivered_quantity_usd", 0.00)
 
             self.total_undelivered_quantity = payments["total_undelivered_quantity"]
-            self.total_undelivered_quantity_usd = payments["total_undelivered_quantity_usd"]
+            self.total_undelivered_quantity_usd = max(payments["total_undelivered_quantity_usd"], Decimal(0))
 
             self.save(
                 update_fields=[

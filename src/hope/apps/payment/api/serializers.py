@@ -852,7 +852,8 @@ class FollowUpInstructionChildPaymentPlanSummarySerializer(serializers.ModelSeri
         return Decimal(self._summary(obj)["total_undelivered_quantity"] or 0)
 
     def get_total_undelivered_quantity_usd(self, obj: PaymentPlan) -> Decimal:
-        return _usd_for_api(Decimal(self._summary(obj)["total_undelivered_quantity_usd"] or 0))
+        amount = Decimal(self._summary(obj)["total_undelivered_quantity_usd"] or 0)
+        return _usd_for_api(max(amount, Decimal(0)))
 
 
 class FollowUpInstructionListSerializer(AdminUrlSerializerMixin, serializers.ModelSerializer):
@@ -940,7 +941,8 @@ class FollowUpInstructionListSerializer(AdminUrlSerializerMixin, serializers.Mod
         return self._payments_summary(obj)["total_undelivered_quantity"]
 
     def get_total_undelivered_quantity_usd(self, obj: FollowUpInstruction) -> Decimal:
-        return _usd_for_api(self._payments_summary(obj)["total_undelivered_quantity_usd"])
+        amount = self._payments_summary(obj)["total_undelivered_quantity_usd"]
+        return _usd_for_api(max(amount, Decimal(0)))
 
 
 class FollowUpInstructionDetailSerializer(FollowUpInstructionListSerializer):
