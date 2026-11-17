@@ -7,9 +7,9 @@ from django.db import connection
 import pytest
 
 MIGRATION_CASES = (
-    ("payment", "0083_migration", "Payment", "PAYMENT_COLUMNS", "change_payment_columns", 15),
+    ("payment", "0086_migration", "Payment", "PAYMENT_COLUMNS", "change_payment_columns", 15),
     ("payment", "0084_migration", "PaymentPlan", "PAYMENT_PLAN_COLUMNS", "change_payment_plan_columns", 15),
-    ("household", "0053_migration", "Household", "HOUSEHOLD_CASH_COLUMNS", "change_household_cash_columns", 64),
+    ("household", "0056_migration", "Household", "HOUSEHOLD_CASH_COLUMNS", "change_household_cash_columns", 64),
 )
 
 
