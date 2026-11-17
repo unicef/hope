@@ -162,15 +162,19 @@ class FinancialServiceProviderAdminForm(forms.ModelForm):
     def locked_payment_lists_for_fsp(
         obj: FinancialServiceProvider,
     ) -> QuerySet[PaymentList]:
-        return PaymentList.objects.filter(
-            ~Q(
-                status__in=[
-                    PaymentList.Status.OPEN,
-                    PaymentList.Status.FINISHED,
-                ],
-            ),
-            financial_service_provider=obj,
-        ).distinct()
+        return cast(
+            "QuerySet[PaymentList]",
+            PaymentList.objects.filter(
+                ~Q(
+                    status__in=[
+                        PaymentList.Status.OPEN,
+                        PaymentList.Status.FINISHED,
+                    ],
+                ),
+                Q(payment_plan__financial_service_provider=obj)
+                | Q(follow_up_instruction__financial_service_provider=obj),
+            ).distinct(),
+        )
 
     def clean(self) -> dict[str, Any] | None:
         if self.instance:
