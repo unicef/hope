@@ -1,5 +1,10 @@
 {% extends "admin/base_site.html" %}
 
+{% block extrahead %}
+  {{ block.super }}
+  {{ form.media }}
+{% endblock extrahead %}
+
 {% block content %}
   <p class="messagelist warning">
     {% if vision_receipt_unconfirmed %}
