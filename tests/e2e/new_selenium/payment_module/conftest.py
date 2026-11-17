@@ -1,4 +1,4 @@
-import datetime
+import datetime as dt
 from decimal import Decimal
 from typing import Any
 
@@ -117,7 +117,7 @@ def payment_plan_for_pagination(business_area: BusinessArea) -> tuple[PaymentPla
     base = timezone.now()
     for index, payment in enumerate(payments):
         # index 0 = newest (page 1), index 11 = oldest (page 2, last row).
-        Payment.objects.filter(pk=payment.pk).update(created_at=base - datetime.timedelta(minutes=index))
+        Payment.objects.filter(pk=payment.pk).update(created_at=base - dt.timedelta(minutes=index))
     return plan, payments[0].unicef_id, payments[11].unicef_id
 
 
@@ -288,8 +288,8 @@ def fi_instruction(
     return service.create(
         user=user,
         payment_plan_group_ids=[str(group_one.pk), str(group_two.pk)],
-        dispersion_start_date=datetime.date(2027, 1, 1),
-        dispersion_end_date=datetime.date(2027, 12, 31),
+        dispersion_start_date=dt.date(2027, 1, 1),
+        dispersion_end_date=dt.date(2027, 12, 31),
     )
 
 
@@ -387,16 +387,16 @@ def cycles_program(business_area: BusinessArea) -> Program:
     program = ProgramFactory(
         business_area=business_area,
         status=Program.ACTIVE,
-        start_date=today - datetime.timedelta(days=30),
-        end_date=today + datetime.timedelta(days=30),
+        start_date=today - dt.timedelta(days=30),
+        end_date=today + dt.timedelta(days=30),
         cycle=False,
     )
     ProgramCycleFactory(
         program=program,
         title="Default Programme Cycle",
         status=ProgramCycle.FINISHED,
-        start_date=today - datetime.timedelta(days=25),
-        end_date=today - datetime.timedelta(days=20),
+        start_date=today - dt.timedelta(days=25),
+        end_date=today - dt.timedelta(days=20),
     )
     return program
 
@@ -409,14 +409,14 @@ def active_cycle(cycles_program: Program) -> ProgramCycle:
         title="Test Programme Cycle 001",
         status=ProgramCycle.ACTIVE,
         start_date=today,
-        end_date=today + datetime.timedelta(days=5),
+        end_date=today + dt.timedelta(days=5),
     )
     ProgramCycleFactory(
         program=cycles_program,
         title="Programme Cycle in Draft",
         status=ProgramCycle.DRAFT,
-        start_date=today + datetime.timedelta(days=6),
-        end_date=today + datetime.timedelta(days=16),
+        start_date=today + dt.timedelta(days=6),
+        end_date=today + dt.timedelta(days=16),
     )
     return cycle
 

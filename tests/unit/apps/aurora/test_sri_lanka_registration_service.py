@@ -1,4 +1,4 @@
-import datetime
+import datetime as dt
 import json
 from typing import Any
 
@@ -147,7 +147,7 @@ def sri_lanka_records(registration: Any, sri_lanka_admin_areas: dict[str, Any]) 
         }
     ]
 
-    timestamp = timezone.make_aware(datetime.datetime(2022, 4, 1))
+    timestamp = timezone.make_aware(dt.datetime(2022, 4, 1))
     empty_files = json.dumps({}).encode()
     record1 = RecordFactory(
         registration=registration.source_id,
@@ -184,7 +184,7 @@ def test_import_data_to_datahub(
     sri_lanka_records: list[Record],
 ) -> None:
     service = SriLankaRegistrationService(registration)
-    rdi = service.create_rdi(user, f"sri_lanka rdi {datetime.datetime.now()}")
+    rdi = service.create_rdi(user, f"sri_lanka rdi {dt.datetime.now()}")
     records_ids = [record.id for record in sri_lanka_records]
     service.process_records(rdi.id, records_ids)
 
@@ -231,7 +231,7 @@ def test_import_leaves_latin_names_empty_when_not_provided(
     sri_lanka_records: list[Record],
 ) -> None:
     service = SriLankaRegistrationService(registration)
-    rdi = service.create_rdi(user, f"sri_lanka rdi latin {datetime.datetime.now()}")
+    rdi = service.create_rdi(user, f"sri_lanka rdi latin {dt.datetime.now()}")
     service.process_records(rdi.id, [record.id for record in sri_lanka_records])
 
     head = PendingIndividual.objects.filter(relationship="HEAD").first()
@@ -250,7 +250,7 @@ def test_import_record_twice(
     sri_lanka_records: list[Record],
 ) -> None:
     service = SriLankaRegistrationService(registration)
-    rdi = service.create_rdi(user, f"sri_lanka rdi {datetime.datetime.now()}")
+    rdi = service.create_rdi(user, f"sri_lanka rdi {dt.datetime.now()}")
 
     service.process_records(rdi.id, [sri_lanka_records[0].id])
     sri_lanka_records[0].refresh_from_db()
@@ -272,7 +272,7 @@ def test_collector_phone_number_marked_valid(
     sri_lanka_records: list[Record],
 ) -> None:
     service = SriLankaRegistrationService(registration)
-    rdi = service.create_rdi(user, f"sri_lanka rdi {datetime.datetime.now()}")
+    rdi = service.create_rdi(user, f"sri_lanka rdi {dt.datetime.now()}")
     records_ids = [record.id for record in sri_lanka_records]
     service.process_records(rdi.id, records_ids)
 
@@ -293,7 +293,7 @@ def test_child_phone_number_marked_invalid(
     record.save(update_fields=["fields"])
 
     service = SriLankaRegistrationService(registration)
-    rdi = service.create_rdi(user, f"sri_lanka rdi {datetime.datetime.now()}")
+    rdi = service.create_rdi(user, f"sri_lanka rdi {dt.datetime.now()}")
     service.process_records(rdi.id, [record.id])
 
     assert PendingIndividual.objects.get(full_name="Nevalidova").phone_no_valid is False

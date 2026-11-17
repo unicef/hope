@@ -1,4 +1,4 @@
-import datetime
+import datetime as dt
 from typing import Any, Callable
 
 from django.utils import timezone
@@ -65,7 +65,7 @@ def household_from_individuals(make_household: Callable[..., Household]) -> Call
 
     def _make(recalculate_composition: bool, collects_individual_data: bool) -> Household:
         household = make_household(recalculate_composition, collects_individual_data)
-        household.last_registration_date = timezone.make_aware(datetime.datetime(2024, 1, 1))
+        household.last_registration_date = timezone.make_aware(dt.datetime(2024, 1, 1))
         household.save(update_fields=["last_registration_date"])
 
         program = household.program
@@ -83,29 +83,27 @@ def household_from_individuals(make_household: Callable[..., Household]) -> Call
         head = household.head_of_household
         head.relationship = HEAD
         head.sex = FEMALE
-        head.birth_date = datetime.date(2020, 1, 1)
+        head.birth_date = dt.date(2020, 1, 1)
         head.pregnant = False
         head.disability = NOT_DISABLED
         head.withdrawn = False
         head.duplicate = False
         head.save()
 
-        IndividualFactory(**common, relationship=COUSIN, sex=MALE, birth_date=datetime.date(2000, 1, 1))
+        IndividualFactory(**common, relationship=COUSIN, sex=MALE, birth_date=dt.date(2000, 1, 1))
         IndividualFactory(
             **{**common, "disability": DISABLED},
             relationship=COUSIN,
             sex=FEMALE,
-            birth_date=datetime.date(2015, 1, 1),
+            birth_date=dt.date(2015, 1, 1),
         )
-        IndividualFactory(**common, relationship=NON_BENEFICIARY, sex=MALE, birth_date=datetime.date(2020, 1, 1))
+        IndividualFactory(**common, relationship=NON_BENEFICIARY, sex=MALE, birth_date=dt.date(2020, 1, 1))
+        IndividualFactory(**common, relationship=COUSIN, sex=FEMALE, birth_date=dt.date(1950, 1, 1), pregnant=True)
         IndividualFactory(
-            **common, relationship=COUSIN, sex=FEMALE, birth_date=datetime.date(1950, 1, 1), pregnant=True
-        )
-        IndividualFactory(
-            **{**common, "withdrawn": True}, relationship=COUSIN, sex=FEMALE, birth_date=datetime.date(2020, 1, 1)
+            **{**common, "withdrawn": True}, relationship=COUSIN, sex=FEMALE, birth_date=dt.date(2020, 1, 1)
         )
         IndividualFactory(
-            **{**common, "duplicate": True}, relationship=COUSIN, sex=FEMALE, birth_date=datetime.date(2020, 1, 1)
+            **{**common, "duplicate": True}, relationship=COUSIN, sex=FEMALE, birth_date=dt.date(2020, 1, 1)
         )
         return household
 
@@ -221,20 +219,20 @@ def test_recalculate_composition_true_populates_both(
 @pytest.mark.parametrize(
     ("sex", "birth_date", "expected_child_hoh", "expected_fchild_hoh"),
     [
-        (FEMALE, datetime.date(2020, 1, 1), True, True),  # minor female head
-        (MALE, datetime.date(2020, 1, 1), True, False),  # minor male head
-        (FEMALE, datetime.date(1980, 1, 1), False, False),  # adult head
+        (FEMALE, dt.date(2020, 1, 1), True, True),  # minor female head
+        (MALE, dt.date(2020, 1, 1), True, False),  # minor male head
+        (FEMALE, dt.date(1980, 1, 1), False, False),  # adult head
     ],
 )
 def test_child_hoh_flags_from_head(
     make_household: Callable[..., Household],
     sex: str,
-    birth_date: datetime.date,
+    birth_date: dt.date,
     expected_child_hoh: bool,
     expected_fchild_hoh: bool,
 ) -> None:
     household = make_household(recalculate_composition=True, collects_individual_data=False)
-    household.last_registration_date = timezone.make_aware(datetime.datetime(2024, 1, 1))
+    household.last_registration_date = timezone.make_aware(dt.datetime(2024, 1, 1))
     household.save(update_fields=["last_registration_date"])
     head = household.head_of_household
     head.relationship = HEAD
@@ -269,13 +267,13 @@ def household_with_sex_variants(make_household: Callable[..., Household]) -> Hou
     """For each of OTHER/NOT_COLLECTED sex: one active beneficiary (counted) plus
     non-beneficiary, withdrawn and duplicate variants (all excluded from the counters)."""
     household = make_household(recalculate_composition=False, collects_individual_data=True)
-    household.last_registration_date = timezone.make_aware(datetime.datetime(2024, 1, 1))
+    household.last_registration_date = timezone.make_aware(dt.datetime(2024, 1, 1))
     household.save(update_fields=["last_registration_date"])
 
     head = household.head_of_household
     head.relationship = HEAD
     head.sex = FEMALE
-    head.birth_date = datetime.date(1990, 1, 1)
+    head.birth_date = dt.date(1990, 1, 1)
     head.withdrawn = False
     head.duplicate = False
     head.save()
@@ -287,7 +285,7 @@ def household_with_sex_variants(make_household: Callable[..., Household]) -> Hou
         "registration_data_import": household.registration_data_import,
         "withdrawn": False,
         "duplicate": False,
-        "birth_date": datetime.date(1990, 1, 1),
+        "birth_date": dt.date(1990, 1, 1),
     }
     IndividualFactory(**common, relationship=COUSIN, sex=OTHER)
     IndividualFactory(**common, relationship=NON_BENEFICIARY, sex=OTHER)
