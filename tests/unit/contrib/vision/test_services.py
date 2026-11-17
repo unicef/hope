@@ -57,6 +57,12 @@ def matching_headers(vision_group: PaymentPlan) -> list:
 
 
 @pytest.fixture
+def vision_group_with_stale_header(vision_group: PaymentPlan, matching_headers: list) -> PaymentPlan:
+    vision_group.funds_commitment_headers.add(matching_headers[1])
+    return vision_group
+
+
+@pytest.fixture
 def group_waiting_for_vision(vision_group: PaymentPlan) -> PaymentPlan:
     VisionService.set_status(vision_group, VisionStatus.WAITING_FOR_CALLBACK)
     vision_group.save(update_fields=["internal_data"])
@@ -130,6 +136,16 @@ def test_callback_assigns_multiple_headers(
     with django_assert_num_queries(1):
         assigned = set(vision_group.funds_commitment_headers.all())
     assert assigned == set(matching_headers)
+
+
+def test_callback_replaces_existing_header(
+    vision_group_with_stale_header: PaymentPlan, matching_headers: list, django_assert_num_queries
+) -> None:
+    VisionService.assign_funds_commitment_headers_from_callback(vision_group_with_stale_header, ["FC123"])
+
+    with django_assert_num_queries(1):
+        assigned = list(vision_group_with_stale_header.funds_commitment_headers.all())
+    assert assigned == [matching_headers[0]]
 
 
 def test_callback_rejects_missing_header_without_partial_assignment(

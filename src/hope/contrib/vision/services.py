@@ -72,7 +72,7 @@ class VisionService:
         matched_numbers = {header.funds_commitment_number for header in matching_headers}
         if not requested_numbers or matched_numbers != requested_numbers:
             raise FundsCommitmentAssignmentError(VisionStatus.FC_NOT_FOUND)
-        payment_plan.funds_commitment_headers.add(*matching_headers)
+        payment_plan.funds_commitment_headers.set(matching_headers)
         return matching_headers
 
     @classmethod
