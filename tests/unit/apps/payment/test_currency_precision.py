@@ -146,6 +146,15 @@ def test_payment_save_rounds_amounts_above_ten_fractional_digits(payment):
     assert payment.entitlement_quantity_usd == Decimal("123.1234567892")
 
 
+def test_payment_bulk_update_rounds_amounts_above_ten_fractional_digits(payment):
+    payment.entitlement_quantity_usd = Decimal("123.12345678915")
+
+    Payment.objects.bulk_update([payment], ["entitlement_quantity_usd"])
+    payment.refresh_from_db(fields=["entitlement_quantity_usd"])
+
+    assert payment.entitlement_quantity_usd == Decimal("123.1234567892")
+
+
 @pytest.mark.parametrize("invalid_amount", [Decimal("-0.01"), Decimal(100000000000000000000)])
 def test_payment_save_rejects_negative_or_overrange_usd_amount(payment, invalid_amount):
     payment.entitlement_quantity_usd = invalid_amount

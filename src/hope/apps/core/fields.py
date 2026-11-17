@@ -33,6 +33,7 @@ class HopeCurrencyField(models.DecimalField):
         return "numeric"
 
     def get_db_prep_save(self, value: Any, connection: Any) -> Any:
-        if value is None:
+        # Let Django prepare bulk_update() expressions.
+        if value is None or hasattr(value, "as_sql"):
             return super().get_db_prep_save(value, connection)
         return super().get_db_prep_save(normalize_currency_decimal(value), connection)
