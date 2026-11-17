@@ -26,6 +26,7 @@ from hope.apps.periodic_data_update.service.periodic_data_update_export_template
 )
 from hope.apps.periodic_data_update.service.periodic_data_update_import_service import (
     PDUXlsxImportService,
+    StrictDateField,
 )
 from hope.apps.periodic_data_update.utils import populate_pdu_with_null_values
 from hope.models import BusinessArea, PDUXlsxTemplate, PDUXlsxUpload, PeriodicFieldData, Program, RegistrationDataImport
@@ -937,3 +938,15 @@ def test_import_data_round_mismatch_validation_error(
     assert periodic_data_update_upload.status == PDUXlsxUpload.Status.FAILED
     error_data = json.loads(periodic_data_update_upload.error_message)
     assert ["Round number mismatch for field date_attribute. Expected: 2, Got: 1"] in error_data["non_form_errors"]
+
+
+@pytest.mark.parametrize(
+    ("value", "expected"),
+    [
+        (dt.date(2021, 5, 2), dt.date(2021, 5, 2)),
+        (dt.datetime(2021, 5, 2), dt.date(2021, 5, 2)),
+    ],
+)
+def test_strict_date_field_to_python(value: Any, expected: dt.date) -> None:
+    field = StrictDateField()
+    assert field.to_python(value) == expected
