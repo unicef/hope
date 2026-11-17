@@ -1161,6 +1161,41 @@ def instruction_approval_process(approval_instruction) -> ApprovalProcess:
     return ApprovalProcessFactory(follow_up_instruction=approval_instruction, approval_number_required=2)
 
 
+@pytest.fixture
+def review_child(approval_instruction, cycle, business_area, currency) -> PaymentList:
+    return PaymentListFactory(
+        program_cycle=cycle,
+        business_area=business_area,
+        currency=currency,
+        follow_up_instruction=approval_instruction,
+        plan_type=PaymentList.PlanType.FOLLOW_UP,
+        status=PaymentList.Status.IN_REVIEW,
+    )
+
+
+@pytest.fixture
+def recalculating_review_instruction(approval_instruction, review_child) -> FollowUpInstruction:
+    approval_instruction.background_action_status = FollowUpInstruction.BackgroundActionStatus.RECALCULATING
+    approval_instruction.save(update_fields=["background_action_status", "updated_at"])
+    return approval_instruction
+
+
+def test_release_rejects_instruction_with_background_action_before_recording_approval(
+    user: Any,
+    recalculating_review_instruction: FollowUpInstruction,
+    review_child: PaymentList,
+    instruction_approval_process: ApprovalProcess,
+) -> None:
+    with pytest.raises(ValidationError, match="Release is not available while another background action"):
+        FollowUpInstructionService(instruction=recalculating_review_instruction).acceptance_process(
+            PaymentList.Action.REVIEW.value, user
+        )
+
+    review_child.refresh_from_db()
+    assert instruction_approval_process.approvals.count() == 0
+    assert review_child.status == PaymentList.Status.IN_REVIEW
+
+
 @patch(
     "hope.apps.payment.services.follow_up_instruction_service.send_follow_up_instruction_notification_emails_async_task"
 )

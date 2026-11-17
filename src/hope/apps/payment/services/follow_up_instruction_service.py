@@ -35,7 +35,7 @@ from hope.models import (
 )
 
 if TYPE_CHECKING:
-    import datetime
+    import datetime as dt
 
     from hope.models import Program, User
 
@@ -127,8 +127,8 @@ class FollowUpInstructionService:
         self,
         user: "User",
         payment_plan_ids: list[str],
-        dispersion_start_date: datetime.date,
-        dispersion_end_date: datetime.date,
+        dispersion_start_date: dt.date,
+        dispersion_end_date: dt.date,
     ) -> FollowUpInstruction:
         source_plans = self._get_applicable_source_payment_lists(payment_plan_ids)
         source_payment_plan = source_plans[0].payment_plan
@@ -287,6 +287,8 @@ class FollowUpInstructionService:
             raise ValidationError(
                 f"Not possible to create {action} for Follow Up Instruction within status {instruction_status}"
             )
+        if approval_type == Approval.FINANCE_RELEASE:
+            self._validate_no_background_action_in_progress("Release")
         approval_process = instruction.approval_process.first()
         if approval_process is None:
             raise ValidationError(f"Approval Process object not found for Follow Up Instruction {instruction.pk}")
