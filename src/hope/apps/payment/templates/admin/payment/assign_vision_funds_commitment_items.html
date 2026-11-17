@@ -1,9 +1,16 @@
 {% extends "admin/base_site.html" %}
+{% load static %}
 
 {% block extrahead %}
+  <script src="{% url 'admin:jsi18n' %}"></script>
   {{ block.super }}
-  {{ form.media }}
 {% endblock extrahead %}
+
+{% block extrastyle %}
+  {{ block.super }}
+  <link rel="stylesheet" type="text/css" href="{% static "admin/css/forms.css" %}">
+  <link rel="stylesheet" type="text/css" href="{% static "admin/css/widgets.css" %}">
+{% endblock extrastyle %}
 
 {% block content %}
   <p class="messagelist warning">
