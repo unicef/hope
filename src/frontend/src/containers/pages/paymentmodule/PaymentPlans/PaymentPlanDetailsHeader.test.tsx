@@ -45,7 +45,7 @@ const renderHeader = (
   backgroundActionStatus: PaymentPlanDetailBackgroundActionStatusEnum | null,
   status: PaymentPlanStatusEnum = PaymentPlanStatusEnum.OPEN,
   approvalProcess: PaymentPlanDetail['approvalProcess'] = [],
-  extra: Partial<PaymentPlanDetail> = {},
+  extra: Partial<PaymentPlanDetail> & { visionManaged?: boolean } = {},
 ) =>
   render(
     <MemoryRouter>
@@ -285,6 +285,18 @@ describe('PaymentPlanDetailsHeader', () => {
       expect(screen.queryByTestId('button-send-for-approval')).toBeNull();
     },
   );
+
+  it('hides Mark as released for a Vision-managed plan while keeping Reject', () => {
+    mockUsePermissions.mockReturnValue([
+      PERMISSIONS.PM_ACCEPTANCE_PROCESS_FINANCIAL_REVIEW,
+    ]);
+    renderHeader(null, PaymentPlanStatusEnum.IN_REVIEW, [], {
+      visionManaged: true,
+    });
+
+    expect(screen.queryByTestId('button-mark-as-released')).toBeNull();
+    expect(screen.getByTestId('button-reject')).not.toBeNull();
+  });
 
   it('hides stage actions without the stage permission', () => {
     mockUsePermissions.mockReturnValue([

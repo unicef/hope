@@ -72,16 +72,21 @@ function ApprovalButtons({
   }
   const stage = STAGE_ACTIONS[paymentPlan.status];
   if (!stage || !hasPermissions(stage.permission, permissions)) return null;
+  const canShowStageAction =
+    stage.action !== 'markAsReleased' ||
+    !('visionManaged' in paymentPlan && paymentPlan.visionManaged === true);
   return (
     <>
       <AcceptanceActionPaymentPlanButton
         paymentPlan={paymentPlan}
         action="reject"
       />
-      <AcceptanceActionPaymentPlanButton
-        paymentPlan={paymentPlan}
-        action={stage.action}
-      />
+      {canShowStageAction && (
+        <AcceptanceActionPaymentPlanButton
+          paymentPlan={paymentPlan}
+          action={stage.action}
+        />
+      )}
     </>
   );
 }
