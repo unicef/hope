@@ -1,5 +1,5 @@
 import copy
-import datetime
+import datetime as dt
 import json
 
 from django.utils import timezone
@@ -122,7 +122,7 @@ def registration(project: object, registration_mapping: dict) -> object:
 def record_defaults() -> dict:
     return {
         "registration": 2,
-        "timestamp": timezone.make_aware(datetime.datetime(2022, 4, 1)),
+        "timestamp": timezone.make_aware(dt.datetime(2022, 4, 1)),
     }
 
 
@@ -215,7 +215,7 @@ def test_import_data_to_datahub(
     )
 
     service = PeopleRegistrationService(registration)
-    rdi = service.create_rdi(user, f"generic rdi {datetime.datetime.now()}")
+    rdi = service.create_rdi(user, f"generic rdi {dt.datetime.now()}")
     service.process_records(rdi.id, [record.id])
 
     assert Record.objects.filter(id=record.id, ignored=False).count() == 1
@@ -255,7 +255,7 @@ def test_import_data_to_datahub_household_individual(
         files=json.dumps(record_files).encode(),
     )
     service = PeopleRegistrationService(registration)
-    rdi = service.create_rdi(user, f"generic rdi {datetime.datetime.now()}")
+    rdi = service.create_rdi(user, f"generic rdi {dt.datetime.now()}")
     service.process_records(rdi.id, [record.id])
 
     assert Record.objects.filter(id=record.id, ignored=False).count() == 1

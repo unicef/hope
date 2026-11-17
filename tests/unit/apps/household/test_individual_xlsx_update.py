@@ -1,4 +1,4 @@
-import datetime
+import datetime as dt
 from io import BytesIO
 from pathlib import Path
 
@@ -284,10 +284,10 @@ def test_complex_update_individual(xlsx_update_valid_file_complex, individuals) 
     assert individuals[2].phone_no == "934-25-25-199"
     assert individuals[3].phone_no == "934-25-25-121"
 
-    assert individuals[0].birth_date == datetime.date(1965, 8, 5)
-    assert individuals[1].birth_date == datetime.date(1965, 8, 6)
-    assert individuals[2].birth_date == datetime.date(1965, 8, 7)
-    assert individuals[3].birth_date == datetime.date(1985, 8, 12)
+    assert individuals[0].birth_date == dt.date(1965, 8, 5)
+    assert individuals[1].birth_date == dt.date(1965, 8, 6)
+    assert individuals[2].birth_date == dt.date(1965, 8, 7)
+    assert individuals[3].birth_date == dt.date(1985, 8, 12)
 
 
 def test_raise_error_when_invalid_phone_number(xlsx_update_invalid_phone_no_file, individuals) -> None:
