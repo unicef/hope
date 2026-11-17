@@ -885,8 +885,8 @@ def test_validate_no_background_action_in_progress_raises_when_exporting(
     )
     service = FollowUpInstructionService(instruction=instruction)
 
-    with pytest.raises(ValidationError, match="background action is in progress"):
-        service._validate_no_background_action_in_progress("Test action")
+    with pytest.raises(ValidationError, match="Another background action is already in progress"):
+        service._validate_no_background_action_in_progress()
 
 
 def test_abort_transitions_child_payment_lists_to_aborted(
@@ -1055,6 +1055,41 @@ def locked_fsp_children(approval_instruction, cycle, business_area, currency) ->
     ]
 
 
+@pytest.fixture(
+    params=[
+        pytest.param(
+            FollowUpInstruction.BackgroundActionStatus.RECALCULATING,
+            "Another background action is already in progress",
+            id="running",
+        ),
+        pytest.param(
+            FollowUpInstruction.BackgroundActionStatus.RECALCULATING_ERROR,
+            "USD recalculation failed for this instruction",
+            id="failed",
+        ),
+    ]
+)
+def instruction_with_unsettled_recalculation(
+    request: Any, approval_instruction: FollowUpInstruction, locked_fsp_children: list[PaymentList]
+) -> tuple[FollowUpInstruction, str]:
+    status, expected_message = request.param
+    approval_instruction.background_action_status = status
+    approval_instruction.save(update_fields=["background_action_status", "updated_at"])
+    return approval_instruction, expected_message
+
+
+def test_send_for_approval_rejects_unsettled_recalculation(
+    user: Any, instruction_with_unsettled_recalculation: tuple[FollowUpInstruction, str]
+) -> None:
+    instruction, expected_message = instruction_with_unsettled_recalculation
+
+    with pytest.raises(ValidationError, match=expected_message):
+        FollowUpInstructionService(instruction=instruction).send_for_approval(user)
+
+    assert not ApprovalProcess.objects.filter(follow_up_instruction=instruction).exists()
+    assert set(instruction.payment_lists.values_list("status", flat=True)) == {PaymentList.Status.LOCKED_FSP}
+
+
 @pytest.fixture
 def threshold_above_one_child(business_area) -> AcceptanceProcessThreshold:
     return AcceptanceProcessThreshold.objects.create(
@@ -1186,7 +1221,7 @@ def test_release_rejects_instruction_with_background_action_before_recording_app
     review_child: PaymentList,
     instruction_approval_process: ApprovalProcess,
 ) -> None:
-    with pytest.raises(ValidationError, match="Release is not available while another background action"):
+    with pytest.raises(ValidationError, match="Another background action is already in progress"):
         FollowUpInstructionService(instruction=recalculating_review_instruction).acceptance_process(
             PaymentList.Action.REVIEW.value, user
         )

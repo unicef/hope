@@ -210,13 +210,13 @@ class FollowUpInstructionService:
         if reason := inactive_currency_reason(self._get_child_payment_lists()[0]):
             raise ValidationError(reason)
 
-    def _validate_no_background_action_in_progress(self, action_label: str) -> None:
+    def _validate_no_background_action_in_progress(self) -> None:
         instruction = self._require_instruction()
         if instruction.background_action_status not in (
             None,
             *FollowUpInstruction.BACKGROUND_ACTION_ERROR_STATES,
         ):
-            raise ValidationError(f"{action_label} is not available while another background action is in progress.")
+            raise ValidationError("Another background action is already in progress.")
 
     @staticmethod
     def _log_payment_list_change(
@@ -257,6 +257,11 @@ class FollowUpInstructionService:
         """Send every child plan for approval; one approval process, on the instruction, sized by its total."""
         instruction = self._locked_for_update()
         self._validate_child_payment_lists_statuses({PaymentList.Status.LOCKED_FSP}, "Send for Approval")
+        if instruction.background_action_status == FollowUpInstruction.BackgroundActionStatus.RECALCULATING_ERROR:
+            raise ValidationError(
+                "USD recalculation failed for this instruction. Retry it before sending for approval."
+            )
+        self._validate_no_background_action_in_progress()
         for payment_list in self._get_child_payment_lists():
             old_payment_list = cast("PaymentList", copy_model_object(payment_list))
             PaymentListService(payment_list).transition_send_for_approval()
@@ -288,7 +293,7 @@ class FollowUpInstructionService:
                 f"Not possible to create {action} for Follow Up Instruction within status {instruction_status}"
             )
         if approval_type == Approval.FINANCE_RELEASE:
-            self._validate_no_background_action_in_progress("Release")
+            self._validate_no_background_action_in_progress()
         approval_process = instruction.approval_process.first()
         if approval_process is None:
             raise ValidationError(f"Approval Process object not found for Follow Up Instruction {instruction.pk}")
@@ -389,7 +394,7 @@ class FollowUpInstructionService:
             },
             "Instruction reconciliation export",
         )
-        self._validate_no_background_action_in_progress("Instruction reconciliation export")
+        self._validate_no_background_action_in_progress()
         self._validate_instruction_has_eligible_payments()
         self._validate_delivery_template_exists()
         self._validate_currency_is_active()
@@ -418,7 +423,7 @@ class FollowUpInstructionService:
             },
             "Instruction reconciliation import",
         )
-        self._validate_no_background_action_in_progress("Instruction reconciliation import")
+        self._validate_no_background_action_in_progress()
         file.seek(0)
         file_temp = FileTemp.objects.create(
             object_id=instruction.pk,
