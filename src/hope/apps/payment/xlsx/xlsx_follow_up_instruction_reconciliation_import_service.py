@@ -48,7 +48,7 @@ class XlsxFollowUpInstructionReconciliationImportService(XlsxImportBaseService):
         self.old_payments: dict = {}
         self.payment_verifications_to_save: list[PaymentVerification] = []
         self.payment_plans_to_update: dict[str, PaymentPlan] = {}
-        self.currency_exchange_dates: dict[str, datetime.date] = {}
+        self.currency_exchange_dates: dict[str, dt.date] = {}
         self.payment_verification_plans_to_update: dict[str, Any] = {}
         self.is_updated = False
 

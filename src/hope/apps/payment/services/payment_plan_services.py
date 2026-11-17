@@ -1232,7 +1232,7 @@ class PaymentPlanService:
                     amount=quantity,
                     currency=self.payment_plan.currency,
                     exchange_rate=exchange_rate,
-                    currency_exchange_date=cast("datetime.date", currency_exchange_date),
+                    currency_exchange_date=cast("dt.date", currency_exchange_date),
                     exchange_rates_client=exchange_rates_client,
                 )
             if copy_entitlement:
