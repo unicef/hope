@@ -152,7 +152,7 @@ class BiometricDedupeSimilarityPair(models.Model):
                 is_removed=False,
                 **{f"{id_field_name}__in": unique_ids},
             )
-            .order_by("-withdrawn")
+            .order_by("-withdrawn", "created_at", "id")
             .values_list(id_field_name, "id")
         }
 
