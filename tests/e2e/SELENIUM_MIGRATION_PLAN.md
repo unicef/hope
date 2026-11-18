@@ -29,7 +29,7 @@ grep -rcE '^\s*def test_' tests/e2e --include='test_*.py' --exclude-dir=new_sele
 | 2 | `error_page` + `access_denied` | 3 | 3 | ✅ |
 | 3 | `program_log` | 2 | 2 | ✅ |
 | 4 | `programme_user` | 1 | 1 | ✅ |
-| 5 | `country_search` | 3 | 0 | ⬜ |
+| 5 | `country_search` | 3 | 3 | ✅ |
 | 6 | `country_dashboard` | 1 | 0 | ⬜ |
 | 7 | `managerial_console` | 2 | 0 | ⬜ |
 | 8 | `drawer` | 4 | 0 | ⬜ |
@@ -46,9 +46,9 @@ grep -rcE '^\s*def test_' tests/e2e --include='test_*.py' --exclude-dir=new_sele
 | 19 | `grievance/grievance_dashboard` | 2 | 0 | ⬜ |
 | 20 | `grievance/grievance_tickets` | 25 | 0 | ⬜ |
 | 21 | Old infra cleanup | – | – | ⬜ |
-| | **Total** | **155** | **13** | **8 %** |
+| | **Total** | **155** | **16** | **10 %** |
 
-`[██░░░░░░░░░░░░░░░░░░] 13 / 155`. Update it after each PR: 1 block per ~8 tests.
+`[██░░░░░░░░░░░░░░░░░░] 16 / 155`. Update it after each PR: 1 block per ~8 tests.
 
 The new suite already has 46 test files and ~250 test functions. These do not count toward the 155.
 
@@ -86,10 +86,10 @@ Legend: `NEW <new_selenium/...>` · `COVERED <existing new test>` (verify assert
 - [x] Delete `page_object/programme_users/` and the `page_programme_users` fixture
 
 ### 5. `country_search/test_country_search.py` (3) → `new_selenium/country_search/test_country_search.py`
-- [ ] test_country_search_finds_household_by_id → NEW, parametrize household / individual
-- [ ] test_country_search_finds_individual_by_id → NEW (param)
-- [ ] test_country_search_shows_no_results_for_unknown_id → NEW
-- [ ] Delete `page_object/country_search/`
+- [x] test_country_search_finds_household_by_id → NEW `test_country_search_finds_beneficiary_by_id[household]`
+- [x] test_country_search_finds_individual_by_id → NEW `test_country_search_finds_beneficiary_by_id[individual]`
+- [x] test_country_search_shows_no_results_for_unknown_id → NEW `test_country_search_shows_no_results_for_unknown_id`
+- [x] Delete `page_object/country_search/` and the `page_country_search` fixture
 
 ### 6. `country_dashboard/test_country_dashboard.py` (1) → `new_selenium/dashboard/test_country_dashboard.py`
 - [ ] test_smoke_country_dashboard → NEW (assert values from factory data, not only labels)
