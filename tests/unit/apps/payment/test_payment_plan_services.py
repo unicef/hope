@@ -704,6 +704,17 @@ def group_sent_to_vision(group_in_review, locked_payment_list):
     return group_in_review
 
 
+@pytest.fixture
+def group_sent_to_vision_with_flags_disabled(group_sent_to_vision):
+    FlagState.objects.update_or_create(
+        name="VISION_INTEGRATION_ACTIVE", condition="boolean", defaults={"value": "False"}
+    )
+    business_area = group_sent_to_vision.business_area
+    business_area.vision_integration_active = False
+    business_area.save(update_fields=["vision_integration_active"])
+    return group_sent_to_vision
+
+
 @patch("hope.contrib.vision.tasks.notify_payment_plan_status_to_vision_async_task")
 @patch("hope.apps.payment.services.payment_plan_services.send_payment_plan_notification_emails_async_task")
 def test_reject_invalidates_vision_attempt_and_tells_vision(
@@ -716,6 +727,24 @@ def test_reject_invalidates_vision_attempt_and_tells_vision(
     assert group_sent_to_vision.status == PaymentPlan.Status.LOCKED
     assert group_sent_to_vision.vision_data["status"] == VisionStatus.NOT_SENT.value
     mock_notify_vision.assert_called_once_with(group_sent_to_vision, str(user.pk), "REJECTED")
+
+
+@patch("hope.apps.payment.services.payment_plan_services.send_payment_plan_notification_emails_async_task")
+def test_manual_release_after_vision_flags_are_disabled_invalidates_attempt(
+    mock_notify, group_sent_to_vision_with_flags_disabled, locked_payment_list, user
+):
+    assert group_sent_to_vision_with_flags_disabled.sent_to_vision is True
+    assert group_sent_to_vision_with_flags_disabled.vision_managed is False
+
+    PaymentPlanService(group_sent_to_vision_with_flags_disabled).acceptance_process(
+        PaymentList.Action.REVIEW.value, user
+    )
+
+    group_sent_to_vision_with_flags_disabled.refresh_from_db()
+    locked_payment_list.refresh_from_db()
+    assert group_sent_to_vision_with_flags_disabled.status == PaymentPlan.Status.ACCEPTED
+    assert locked_payment_list.status == PaymentList.Status.ACCEPTED
+    assert group_sent_to_vision_with_flags_disabled.vision_data == {"status": VisionStatus.NOT_SENT.value}
 
 
 @patch("hope.apps.payment.services.payment_plan_services.send_payment_plan_notification_emails_async_task")
@@ -1025,6 +1054,24 @@ def test_abort_moves_group_and_plans(group_in_approval, locked_payment_list, use
     assert group_in_approval.status == PaymentPlan.Status.ABORTED
     assert group_in_approval.abort_comment == "wrong amounts"
     assert locked_payment_list.status == PaymentList.Status.ABORTED
+
+
+@patch("hope.contrib.vision.tasks.notify_payment_plan_status_to_vision_async_task")
+def test_abort_invalidates_vision_attempt_and_notifies_vision(
+    mock_notify_vision, group_sent_to_vision, locked_payment_list, user, django_capture_on_commit_callbacks
+):
+    assert group_sent_to_vision.sent_to_vision is True
+
+    with django_capture_on_commit_callbacks(execute=True):
+        PaymentPlanService(group_sent_to_vision).abort("stop", user)
+        mock_notify_vision.assert_not_called()
+
+    group_sent_to_vision.refresh_from_db()
+    locked_payment_list.refresh_from_db()
+    assert group_sent_to_vision.status == PaymentPlan.Status.ABORTED
+    assert locked_payment_list.status == PaymentList.Status.ABORTED
+    assert group_sent_to_vision.vision_data == {"status": VisionStatus.NOT_SENT.value}
+    mock_notify_vision.assert_called_once_with(group_sent_to_vision, str(user.pk), "ABORTED")
 
 
 def test_abort_rejects_open_group(open_group, locked_payment_list, user):
