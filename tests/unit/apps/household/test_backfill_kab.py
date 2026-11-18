@@ -1,4 +1,4 @@
-import datetime
+import datetime as dt
 from typing import Any, Callable
 
 from django.core.management import call_command
@@ -56,12 +56,12 @@ def household_present(make_household: Callable[..., Household]) -> Household:
 @pytest.fixture
 def household_from_individuals(make_household: Callable[..., Household]) -> Household:
     household = make_household(collects_individual_data=True)
-    household.last_registration_date = timezone.make_aware(datetime.datetime(2024, 1, 1))
+    household.last_registration_date = timezone.make_aware(dt.datetime(2024, 1, 1))
     household.save(update_fields=["last_registration_date"])
     head = household.head_of_household
     head.relationship = HEAD
     head.sex = FEMALE
-    head.birth_date = datetime.date(2020, 1, 1)
+    head.birth_date = dt.date(2020, 1, 1)
     head.save()
     IndividualFactory(
         household=household,
@@ -70,7 +70,7 @@ def household_from_individuals(make_household: Callable[..., Household]) -> Hous
         registration_data_import=household.registration_data_import,
         relationship=COUSIN,
         sex=FEMALE,
-        birth_date=datetime.date(2000, 1, 1),
+        birth_date=dt.date(2000, 1, 1),
     )
     return household
 
@@ -152,13 +152,13 @@ def household_boundary_cases(make_household: Callable[..., Household]) -> Househ
     """Every counter dimension plus birth dates exactly on the 6/18/60-year cutoffs,
     so any divergence between the Python-date and SQL-interval cutoff arithmetic shows up."""
     household = make_household(collects_individual_data=True)
-    household.last_registration_date = timezone.make_aware(datetime.datetime(2024, 1, 1))
+    household.last_registration_date = timezone.make_aware(dt.datetime(2024, 1, 1))
     household.save(update_fields=["last_registration_date"])
 
     head = household.head_of_household
     head.relationship = HEAD
     head.sex = FEMALE
-    head.birth_date = datetime.date(2018, 1, 1)  # exactly 6 years before last_registration_date
+    head.birth_date = dt.date(2018, 1, 1)  # exactly 6 years before last_registration_date
     head.withdrawn = False
     head.duplicate = False
     head.save()
@@ -171,19 +171,17 @@ def household_boundary_cases(make_household: Callable[..., Household]) -> Househ
         "withdrawn": False,
         "duplicate": False,
     }
-    IndividualFactory(**common, relationship=COUSIN, sex=MALE, birth_date=datetime.date(2006, 1, 1))  # exactly 18y
-    IndividualFactory(**common, relationship=COUSIN, sex=FEMALE, birth_date=datetime.date(1964, 1, 1))  # exactly 60y
+    IndividualFactory(**common, relationship=COUSIN, sex=MALE, birth_date=dt.date(2006, 1, 1))  # exactly 18y
+    IndividualFactory(**common, relationship=COUSIN, sex=FEMALE, birth_date=dt.date(1964, 1, 1))  # exactly 60y
     IndividualFactory(
-        **{**common, "disability": DISABLED}, relationship=COUSIN, sex=FEMALE, birth_date=datetime.date(2015, 1, 1)
+        **{**common, "disability": DISABLED}, relationship=COUSIN, sex=FEMALE, birth_date=dt.date(2015, 1, 1)
     )
-    IndividualFactory(**common, relationship=COUSIN, sex=FEMALE, birth_date=datetime.date(1990, 1, 1), pregnant=True)
-    IndividualFactory(**common, relationship=NON_BENEFICIARY, sex=OTHER, birth_date=datetime.date(1990, 1, 1))
+    IndividualFactory(**common, relationship=COUSIN, sex=FEMALE, birth_date=dt.date(1990, 1, 1), pregnant=True)
+    IndividualFactory(**common, relationship=NON_BENEFICIARY, sex=OTHER, birth_date=dt.date(1990, 1, 1))
     IndividualFactory(
-        **{**common, "withdrawn": True}, relationship=COUSIN, sex=NOT_COLLECTED, birth_date=datetime.date(1990, 1, 1)
+        **{**common, "withdrawn": True}, relationship=COUSIN, sex=NOT_COLLECTED, birth_date=dt.date(1990, 1, 1)
     )
-    IndividualFactory(
-        **{**common, "duplicate": True}, relationship=COUSIN, sex=MALE, birth_date=datetime.date(1990, 1, 1)
-    )
+    IndividualFactory(**{**common, "duplicate": True}, relationship=COUSIN, sex=MALE, birth_date=dt.date(1990, 1, 1))
     return household
 
 

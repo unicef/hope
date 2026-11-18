@@ -1,17 +1,20 @@
-import base64
-from io import BytesIO
+from collections.abc import Callable
 
-from PIL import Image
 import pytest
 from rest_framework import status
 from rest_framework.reverse import reverse
 
-from extras.test_utils.factories.core import BeneficiaryGroupFactory, DataCollectingTypeFactory
+from extras.test_utils.factories.core import (
+    BeneficiaryGroupFactory,
+    DataCollectingTypeFactory,
+    FlexibleAttributeFactory,
+)
 from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory
 from extras.test_utils.factories.household import DocumentTypeFactory
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 from hope.api.endpoints.rdi.push_people import PeopleUploadMixin, PushPeopleSerializer
+from hope.api.endpoints.rdi.stored_images import get_stored_image_directory
 from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hope.apps.household.const import (
     DISABLED,
@@ -26,6 +29,7 @@ from hope.models import (
     Area,
     DataCollectingType,
     DocumentType,
+    FlexibleAttribute,
     PendingAccount,
     PendingDocument,
     PendingHousehold,
@@ -35,6 +39,8 @@ from hope.models import (
 )
 
 pytestmark = pytest.mark.django_db
+
+PHOTO_MAX_LENGTH = PendingIndividual._meta.get_field("photo").max_length
 
 
 @pytest.fixture
@@ -445,30 +451,243 @@ def test_push_single_person_with_a_retired_currency_is_rejected(
 
 
 @pytest.fixture
-def base64_photo() -> tuple[str, str]:
-    prefix = "data:image/png;base64,"
-    buffer = BytesIO()
-    image = Image.new("RGB", (1, 1), color="blue")
-    image.save(buffer, format="PNG")
-    photo_data = base64.b64encode(buffer.getvalue()).decode("utf-8")
-    return f"{prefix}{photo_data}", photo_data
+def file_directory(business_area, program) -> str:
+    return get_stored_image_directory(business_area.slug, program.code)
 
 
-def test_create_individual_with_photo_remove_prefix(rdi, base64_photo) -> None:
-    base64_photo_with_prefix, photo_data = base64_photo
-    prefix = "data:image/png;base64,"
+@pytest.fixture
+def file_prefix(program, file_directory) -> str:
+    return f"{program.start_date.year}/{file_directory}"
 
+
+@pytest.fixture
+def stored_image(store_image: Callable[[str], str], file_prefix: str) -> str:
+    return store_image(f"{file_prefix}CW_ind_1_photo.png")
+
+
+@pytest.fixture
+def person_payload(program) -> dict:
+    return {
+        "residence_status": "IDP",
+        "village": "village1",
+        "country": "AF",
+        "full_name": "John Doe",
+        "birth_date": "2000-01-01",
+        "sex": "NOT_COLLECTED",
+        "type": "",
+        "program": str(program.id),
+        "country_workspace_id": "cw-files-1",
+    }
+
+
+def test_upload_person_with_files_keeps_the_file_names(
+    token_api_client,
+    push_people_url,
+    person_payload,
+    stored_image,
+    store_image,
+    file_prefix,
+    birth_certificate_doc_type,
+    afghanistan_country,
+) -> None:
+    certificate = store_image(f"{file_prefix}CW_ind_1_disability_certificate_picture.png")
+    document_image = store_image(f"{file_prefix}CW_doc_1_image.png")
+    person_payload |= {
+        "photo": f"/{stored_image}",
+        "disability_certificate_picture": certificate,
+        "documents": [
+            {
+                "document_number": "10",
+                "image": document_image,
+                "country": "AF",
+                "type": birth_certificate_doc_type.key,
+            }
+        ],
+    }
+
+    response = token_api_client.post(push_people_url, [person_payload], format="json")
+
+    assert response.status_code == status.HTTP_201_CREATED, str(response.json())
+    individual = PendingIndividual.objects.get(country_workspace_id="cw-files-1")
+    assert individual.photo.name == stored_image
+    assert individual.disability_certificate_picture.name == certificate
+    assert individual.documents.get().photo.name == document_image
+
+
+@pytest.mark.parametrize("empty_certificate", ["", None])
+def test_upload_person_with_empty_files(
+    token_api_client,
+    push_people_url,
+    person_payload,
+    birth_certificate_doc_type,
+    afghanistan_country,
+    empty_certificate,
+) -> None:
+    person_payload |= {
+        "photo": "",
+        "disability_certificate_picture": empty_certificate,
+        "documents": [{"document_number": "10", "image": "", "country": "AF", "type": birth_certificate_doc_type.key}],
+    }
+
+    response = token_api_client.post(push_people_url, [person_payload], format="json")
+
+    assert response.status_code == status.HTTP_201_CREATED, str(response.json())
+    individual = PendingIndividual.objects.get(country_workspace_id="cw-files-1")
+    assert not individual.photo
+    assert not individual.disability_certificate_picture
+    assert not individual.documents.get().photo
+
+
+@pytest.mark.parametrize("field", ["photo", "disability_certificate_picture"])
+def test_upload_person_with_missing_file_returns_error(
+    token_api_client, push_people_url, person_payload, file_prefix, field
+) -> None:
+    person_payload[field] = f"{file_prefix}does_not_exist.png"
+
+    response = token_api_client.post(push_people_url, [person_payload], format="json")
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response.json() == {"0": {field: [f"File '{file_prefix}does_not_exist.png' does not exist in storage."]}}
+    assert not PendingIndividual.objects.exists()
+
+
+def test_upload_person_with_missing_document_image_returns_error(
+    token_api_client, push_people_url, person_payload, file_prefix, birth_certificate_doc_type, afghanistan_country
+) -> None:
+    person_payload["documents"] = [
+        {
+            "document_number": "10",
+            "image": f"{file_prefix}does_not_exist.png",
+            "country": "AF",
+            "type": birth_certificate_doc_type.key,
+        }
+    ]
+
+    response = token_api_client.post(push_people_url, [person_payload], format="json")
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response.json() == {
+        "0": {"documents": {"0": {"image": [f"File '{file_prefix}does_not_exist.png' does not exist in storage."]}}}
+    }
+    assert not PendingIndividual.objects.exists()
+
+
+def test_upload_person_with_unsafe_file_name_returns_error(token_api_client, push_people_url, person_payload) -> None:
+    person_payload["photo"] = "../../etc/passwd"
+
+    response = token_api_client.post(push_people_url, [person_payload], format="json")
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response.json() == {"0": {"photo": ["Invalid file name '../../etc/passwd'."]}}
+
+
+@pytest.mark.parametrize("field", ["photo", "disability_certificate_picture"])
+def test_upload_person_with_file_name_longer_than_the_column_returns_error(
+    token_api_client, push_people_url, person_payload, file_prefix, field
+) -> None:
+    person_payload[field] = f"{file_prefix}{'a' * PHOTO_MAX_LENGTH}.png"
+
+    response = token_api_client.post(push_people_url, [person_payload], format="json")
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response.json() == {"0": {field: [f"File name must have no more than {PHOTO_MAX_LENGTH} characters."]}}
+
+
+@pytest.mark.parametrize("field", ["photo", "disability_certificate_picture"])
+def test_upload_person_with_file_of_another_program_returns_error(
+    token_api_client, push_people_url, person_payload, file_directory, store_image, field
+) -> None:
+    other_program_file = store_image("2025/other-area/zz99/CW_ind_1_photo.png")
+    person_payload[field] = other_program_file
+
+    response = token_api_client.post(push_people_url, [person_payload], format="json")
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response.json() == {"0": {field: [f"File name must start with '<year>/{file_directory}'."]}}
+    assert not PendingIndividual.objects.exists()
+
+
+@pytest.fixture
+def image_flex_attribute(db) -> FlexibleAttribute:
+    return FlexibleAttributeFactory(
+        name="individual_photo_i_f",
+        label={"English(EN)": "Individual Photo"},
+        type=FlexibleAttribute.IMAGE,
+        associated_with=FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL,
+    )
+
+
+@pytest.mark.parametrize("flex_field", ["individual_photo_i_f", "individual_photo"])
+def test_upload_person_with_image_flex_field_keeps_the_file_name(
+    token_api_client,
+    push_people_url,
+    person_payload,
+    stored_image,
+    image_flex_attribute,
+    afghanistan_country,
+    flex_field,
+) -> None:
+    person_payload["flex_fields"] = {flex_field: f"/{stored_image}"}
+
+    response = token_api_client.post(push_people_url, [person_payload], format="json")
+
+    assert response.status_code == status.HTTP_201_CREATED, str(response.json())
+    individual = PendingIndividual.objects.get(country_workspace_id="cw-files-1")
+    assert individual.flex_fields[flex_field] == stored_image
+
+
+@pytest.mark.parametrize("flex_field", ["individual_photo_i_f", "individual_photo"])
+def test_upload_person_with_missing_image_flex_field_file_returns_error(
+    token_api_client, push_people_url, person_payload, file_prefix, image_flex_attribute, flex_field
+) -> None:
+    person_payload["flex_fields"] = {flex_field: f"{file_prefix}does_not_exist.png"}
+
+    response = token_api_client.post(push_people_url, [person_payload], format="json")
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response.json() == {
+        "0": {"flex_fields": {flex_field: [f"File '{file_prefix}does_not_exist.png' does not exist in storage."]}}
+    }
+    assert not PendingIndividual.objects.exists()
+
+
+def test_upload_person_with_image_flex_field_of_another_program_returns_error(
+    token_api_client, push_people_url, person_payload, file_directory, store_image, image_flex_attribute
+) -> None:
+    person_payload["flex_fields"] = {"individual_photo_i_f": store_image("2025/other-area/zz99/CW_ind_1_photo.png")}
+
+    response = token_api_client.post(push_people_url, [person_payload], format="json")
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response.json() == {
+        "0": {"flex_fields": {"individual_photo_i_f": [f"File name must start with '<year>/{file_directory}'."]}}
+    }
+    assert not PendingIndividual.objects.exists()
+
+
+def test_upload_person_leaves_other_flex_fields_alone(
+    token_api_client, push_people_url, person_payload, image_flex_attribute, afghanistan_country
+) -> None:
+    person_payload["flex_fields"] = {"free_text": "../not a file"}
+
+    response = token_api_client.post(push_people_url, [person_payload], format="json")
+
+    assert response.status_code == status.HTTP_201_CREATED, str(response.json())
+    assert PendingIndividual.objects.get(country_workspace_id="cw-files-1").flex_fields["free_text"] == "../not a file"
+
+
+def test_create_individual_passes_the_file_names_through(rdi, stored_image) -> None:
     person_data = {
         "type": "NON_BENEFICIARY",
-        "photo": base64_photo_with_prefix,
+        "photo": stored_image,
         "first_name": "WithPhoto",
         "birth_date": "2000-01-01",
         "first_registration_date": "2000-01-01",
         "last_registration_date": "2000-01-01",
     }
-    assert base64_photo_with_prefix.startswith(prefix) is True
     people_upload_mixin = PeopleUploadMixin()
     people_upload_mixin.selected_rdi = rdi
+
     individual = people_upload_mixin._create_individual(
         documents=[],
         accounts=[],
@@ -477,20 +696,13 @@ def test_create_individual_with_photo_remove_prefix(rdi, base64_photo) -> None:
         rdi=rdi,
     )
 
-    assert individual.photo.name.startswith(
-        f"{rdi.program.start_date.year}/{rdi.program.business_area.slug}/{rdi.program.code}/{rdi.program.code}"
-    )
-    assert individual.photo.name.endswith(".png")
-    photo_saved = base64.b64encode(individual.photo.read()).decode("utf-8")
-    assert photo_saved.startswith(prefix) is False
-    assert photo_saved == photo_data
+    assert individual.photo.name == stored_image
 
 
-def test_create_individual_resolves_the_programme_without_refetching_it(rdi, base64_photo, django_assert_num_queries):
-    base64_photo_with_prefix, _ = base64_photo
+def test_create_individual_resolves_the_programme_without_refetching_it(rdi, stored_image, django_assert_num_queries):
     person_data = {
         "type": "NON_BENEFICIARY",
-        "photo": base64_photo_with_prefix,
+        "photo": stored_image,
         "first_name": "WithPhoto",
         "birth_date": "2000-01-01",
         "first_registration_date": "2000-01-01",
@@ -564,7 +776,7 @@ def test_push_single_person_stores_country_workspace_id(
     assert ind.country_workspace_id == "42"
 
 
-def test_push_people_creates_account_attachments(
+def test_push_people_creates_accounts(
     token_api_client,
     push_people_url,
     program,
@@ -572,7 +784,6 @@ def test_push_people_creates_account_attachments(
     afghanistan_country,
     bank_account_type,
     generic_bank,
-    base64_image,
 ) -> None:
     data = [
         {
@@ -583,14 +794,8 @@ def test_push_people_creates_account_attachments(
             "sex": "FEMALE",
             "type": "",
             "program": str(program.id),
-            "country_workspace_id": "cw-wallet-attachments",
-            "accounts": [
-                {
-                    "type": "bank",
-                    "number": "123",
-                    "attachments": [{"title": "Wallet number image", "file": base64_image}],
-                }
-            ],
+            "country_workspace_id": "cw-accounts",
+            "accounts": [{"type": "bank", "number": "123"}],
         }
     ]
 
@@ -598,6 +803,6 @@ def test_push_people_creates_account_attachments(
 
     assert response.status_code == status.HTTP_201_CREATED, str(response.json())
     account = PendingAccount.objects.get(individual__full_name="Jane Wallet")
-    attachment = account.attachments.get()
-    assert attachment.title == "Wallet number image"
-    assert attachment.file.name
+    assert account.number == "123"
+    assert account.account_type.key == "bank"
+    assert account.financial_institution == generic_bank

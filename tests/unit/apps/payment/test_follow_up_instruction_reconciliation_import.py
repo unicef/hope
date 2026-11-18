@@ -1,4 +1,4 @@
-import datetime
+import datetime as dt
 from decimal import Decimal
 from tempfile import NamedTemporaryFile
 from types import SimpleNamespace
@@ -621,7 +621,7 @@ def test_validation_reports_error_for_date_as_delivered_quantity(
     workbook = XlsxFollowUpInstructionDeliveryExportService(instruction).generate_workbook()
     worksheet = workbook.active
     headers = [cell.value for cell in worksheet[1]]
-    worksheet.cell(row=2, column=headers.index("delivered_quantity") + 1).value = datetime.date(2024, 1, 1)
+    worksheet.cell(row=2, column=headers.index("delivered_quantity") + 1).value = dt.date(2024, 1, 1)
 
     with NamedTemporaryFile(suffix=".xlsx") as tmp:
         workbook.save(tmp.name)

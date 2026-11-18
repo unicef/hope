@@ -210,6 +210,7 @@ def test_send_payment_plan(mock_post, mock_acquire_token, vision_api_payment_pla
             "authAmtUsd": "10000.00",
             "exchangeRate": "1.25000000",
             "headVendor": "Head Vendor Name",
+            "glCode": "7700410",
         },
     )
 
@@ -251,6 +252,7 @@ def test_send_payment_plan_with_different_currency(
             "authAmtUsd": "10000.00",
             "exchangeRate": "1.25000000",
             "headVendor": "Head Vendor Name",
+            "glCode": "7700410",
         },
     )
 
