@@ -223,8 +223,11 @@ class AbstractCollisionDetector:
         # 4. Update relationship to REMOVED_BY_COLLISION
         individual.relationship = REMOVED_BY_COLLISION
         individual.save(update_fields=["relationship", "internal_data"])
+        # D7: Relationship is being changed and it impacts the
+        # scoring. HDE needs to be notified about this change.
 
         # 5. Remove roles from IndividualRoleInHousehold
+        # Individual role in household is not tracked in HDE, no need to update that.
         IndividualRoleInHousehold.all_objects.filter(individual=individual, household_id=household_id).delete()
 
         # 6. Withdraw the individual (only if not already withdrawn)

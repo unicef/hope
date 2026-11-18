@@ -267,12 +267,20 @@ class RegistrationDataImportAdmin(ViewOnUiMixin, AdminAutoCompleteSearchMixin, H
             Household.objects.filter(registration_data_import=rdi).values_list("head_of_household_id", flat=True)
         )
 
+        # +        # all_objects: the rdi.delete() cascade also hard-deletes soft-deleted individuals
+        # +        cw_ids = list(
+        # +            Individual.all_objects.filter(registration_data_import=rdi, country_workspace_id__isnull=False)
+        # +            .values_list("country_workspace_id", flat=True)
+        # +        )
+
         GrievanceTicket.objects.filter(
             RegistrationDataImportAdmin.generate_query_for_all_grievances_tickets(rdi)
         ).filter(business_area=rdi.business_area).delete()
         Household.objects.filter(registration_data_import=rdi).update(head_of_household=None)
         Individual.objects.filter(id__in=hoh_ids).delete()
         rdi.delete()
+        # +        if cw_ids:
+        # +            transaction.on_commit(lambda: notify_hde_individuals_deleted(cw_ids))
         # remove elastic search records linked to individuals and household
         if rdi.program.status == Program.ACTIVE:
             remove_elasticsearch_documents_by_matching_ids(individuals_ids, get_individual_doc(str(rdi.program.id)))

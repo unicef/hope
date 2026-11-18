@@ -370,6 +370,8 @@ class IndividualDataUpdateService(DataChangeService):
             updated_at=timezone.now(),
         )
 
+        # U1 goes here
+
         invalidate_household_and_individual_list_cache(new_individual.program_id)
         relationship_to_head_of_household = individual_data.get("relationship")
         if (

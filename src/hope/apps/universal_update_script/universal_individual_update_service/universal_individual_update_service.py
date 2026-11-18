@@ -434,6 +434,9 @@ class UniversalIndividualUpdateService:
         Document.objects.bulk_create(documents_to_create)
         Household.objects.bulk_update(households_to_update, household_fields_to_update)
         Individual.objects.bulk_update(individuals_to_update, individual_fields_to_update)
+
+        # U4 goes here
+
         populate_index(
             Individual.objects.filter(id__in=[individual.id for individual in individuals_to_update]),
             get_individual_doc(str(self.program.id)),

@@ -91,6 +91,8 @@ class IndividualXlsxUpdate:
 
         Individual.objects.bulk_update(individuals, columns)
 
+        # U3 goes here
+
         # An empty `household_ids` must never reach the task — it would recalculate every household.
         household_ids = sorted({str(individual.household_id) for individual in individuals if individual.household_id})
         if household_ids and RECALCULATION_INDIVIDUAL_FIELDS.intersection(columns):
