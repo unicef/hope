@@ -2,7 +2,13 @@ from decimal import Decimal
 import importlib
 from typing import Any, Callable
 
+from django.apps.registry import Apps
+from django.db import connection
+from django.db.migrations.loader import MigrationLoader
 import pytest
+
+from extras.test_utils.factories import PaymentListFactory, PaymentPlanFactory, ProgramCycleFactory
+from hope.models import PaymentList, PaymentPlan
 
 migration_module = importlib.import_module("hope.apps.payment.migrations.0085_migration")
 
@@ -216,3 +222,47 @@ def test_instruction_child_goes_with_its_source_plan_and_does_not_split_the_grou
         [instruction_child_and_its_source[0]],
         [instruction_child_and_its_source[1], instruction_child_and_its_source[2]],
     ]
+
+
+@pytest.fixture
+def historical_apps(settings: Any) -> Apps:
+    settings.MIGRATION_MODULES = {}
+    state = MigrationLoader(connection).project_state(("payment", "0084_migration"))
+    with connection.cursor() as cursor:
+        cursor.execute(
+            'ALTER TABLE "payment_paymentplan" ADD COLUMN "financial_service_provider_id" uuid NULL, '
+            'ADD COLUMN "currency_id" uuid NULL, ADD COLUMN "use_payment_gateway" boolean NOT NULL DEFAULT false, '
+            'ADD COLUMN "exchange_rate" numeric(15, 8) NULL'
+        )
+    return state.apps
+
+
+@pytest.fixture(params=(False, True), ids=("next_name", "name_collision"))
+def group_with_different_plan_stages(
+    request: Any, historical_apps: Apps
+) -> tuple[PaymentPlan, PaymentList, PaymentList, str, int]:
+    cycle = ProgramCycleFactory()
+    group = PaymentPlanFactory(cycle=cycle, name="Batch")
+    if request.param:
+        PaymentPlanFactory(cycle=cycle, name="Batch (2)")
+    finished = PaymentListFactory(program_cycle=cycle, payment_plan=group, status=PaymentList.Status.FINISHED)
+    open_plan = PaymentListFactory(program_cycle=cycle, payment_plan=group, status=PaymentList.Status.OPEN)
+    return group, finished, open_plan, "Batch (3)" if request.param else "Batch (2)", 3 if request.param else 2
+
+
+@pytest.mark.django_db
+def test_split_groups_creates_next_free_name_and_moves_only_the_earlier_stage(
+    historical_apps: Apps,
+    group_with_different_plan_stages: tuple[PaymentPlan, PaymentList, PaymentList, str, int],
+) -> None:
+    group, finished, open_plan, expected_name, expected_group_count = group_with_different_plan_stages
+
+    migration_module.split_groups_whose_plans_differ(historical_apps, schema_editor=None)
+
+    new_group = PaymentPlan.objects.get(cycle=group.cycle, name=expected_name)
+    finished.refresh_from_db()
+    open_plan.refresh_from_db()
+    assert finished.payment_plan_id == group.pk
+    assert open_plan.payment_plan_id == new_group.pk
+    assert new_group.cycle_id == group.cycle_id
+    assert PaymentPlan.objects.filter(cycle=group.cycle).count() == expected_group_count
