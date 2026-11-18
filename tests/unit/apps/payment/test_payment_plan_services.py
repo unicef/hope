@@ -635,6 +635,23 @@ def test_approve_rejects_group_in_wrong_status(locked_payment_plan, user):
 
 
 @pytest.fixture
+def stale_group_in_approval(group_in_approval):
+    PaymentPlan.objects.filter(pk=group_in_approval.pk).update(status=PaymentPlan.Status.IN_AUTHORIZATION)
+    return group_in_approval
+
+
+def test_acceptance_process_rejects_stale_group_status(stale_group_in_approval, user):
+    assert stale_group_in_approval.status == PaymentPlan.Status.IN_APPROVAL
+
+    with pytest.raises(ValidationError) as error:
+        PaymentPlanService(stale_group_in_approval).acceptance_process(PaymentList.Action.APPROVE.value, user)
+
+    assert error.value.detail[0] == "Not possible to create APPROVE for Payment Plan within status IN_AUTHORIZATION"
+    assert PaymentPlan.objects.get(pk=stale_group_in_approval.pk).status == PaymentPlan.Status.IN_AUTHORIZATION
+    assert not stale_group_in_approval.approval_process.get().approvals.exists()
+
+
+@pytest.fixture
 def group_in_approval_without_approval_process(cycle):
     return PaymentPlanFactory(cycle=cycle, status=PaymentPlan.Status.IN_APPROVAL)
 

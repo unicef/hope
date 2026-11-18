@@ -185,6 +185,9 @@ def test_group_generate_pdf_summary_aggregates_every_plan_in_the_group(
     assert pdf_context_data["reconciliation"]["reconciled"] == 3
     assert pdf_context_data["reconciliation"]["pending"] == 1
     assert pdf_context_data["reconciliation"]["reconciled_usd"] == Decimal("50.00")
+    assert pdf_context_data["reconciliation"]["reconciled_local"] == Decimal("25.00")
+    assert pdf_context_data["reconciliation"]["failed_usd"] == Decimal("210.00")
+    assert pdf_context_data["reconciliation"]["failed_local"] == Decimal("105.00")
 
 
 def test_group_get_email_context(payment_plan: PaymentPlan) -> None:

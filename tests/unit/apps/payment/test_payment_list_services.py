@@ -594,6 +594,28 @@ def draft_payment_list(payment_list_base: PaymentList) -> PaymentList:
 
 
 @pytest.fixture
+def draft_payment_list_with_wrong_currency_payment(draft_payment_list: PaymentList) -> tuple[PaymentList, Payment]:
+    payment_plan = draft_payment_list.payment_plan
+    payment_plan.exchange_rate = Decimal(2)
+    payment_plan.save(update_fields=["exchange_rate"])
+    payment = PaymentFactory(parent=draft_payment_list, currency=CurrencyFactory(code="USD"))
+    return draft_payment_list, payment
+
+
+@freeze_time("2026-10-05")
+def test_open_sets_payment_items_currency_from_payment_plan(
+    draft_payment_list_with_wrong_currency_payment: tuple[PaymentList, Payment],
+) -> None:
+    payment_list, payment = draft_payment_list_with_wrong_currency_payment
+    assert payment.currency_id != payment_list.payment_plan.currency_id
+
+    PaymentListService(payment_list).open()
+
+    payment.refresh_from_db()
+    assert payment.currency_id == payment_list.payment_plan.currency_id
+
+
+@pytest.fixture
 def unore_unavailable(request: pytest.FixtureRequest, settings: Any) -> Generator[requests_mock_lib.Mocker, None, None]:
     settings.USE_DUMMY_EXCHANGE_RATES = False
     settings.EXCHANGE_RATES_API_KEY = "TEST_API_KEY"
