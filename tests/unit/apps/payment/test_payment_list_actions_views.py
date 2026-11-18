@@ -403,6 +403,10 @@ def test_apply_custom_exchange_rate(
     )
     payment_list_actions_context["pp"].status = PaymentList.Status.IN_REVIEW
     payment_list_actions_context["pp"].save(update_fields=["status"])
+    payment_plan = payment_list_actions_context["pp"].payment_plan
+    payment_plan.status = PaymentPlan.Status.IN_REVIEW
+    payment_plan.save(update_fields=["status"])
+    payment_plan.refresh_from_db(fields=["version"])
 
     with TestCase.captureOnCommitCallbacks(execute=True):
         response = payment_list_actions_context["client"].post(
@@ -494,6 +498,10 @@ def test_apply_custom_exchange_rate_requires_one_rate_value(
     )
     payment_list_actions_context["pp"].status = PaymentList.Status.IN_REVIEW
     payment_list_actions_context["pp"].save(update_fields=["status"])
+    payment_plan = payment_list_actions_context["pp"].payment_plan
+    payment_plan.status = PaymentPlan.Status.IN_REVIEW
+    payment_plan.save(update_fields=["status"])
+    payment_plan.refresh_from_db(fields=["version"])
 
     response = payment_list_actions_context["client"].post(
         payment_list_actions_context["url_custom_exchange_rate"],
@@ -552,6 +560,9 @@ def test_apply_unore_exchange_rate_clears_custom_flag(
     group.custom_exchange_rate_set_by = payment_list_actions_context["user"]
     group.save(update_fields=["custom_exchange_rate", "exchange_rate", "custom_exchange_rate_set_by"])
     payment_list_actions_context["pp"].save(update_fields=["status"])
+    group.status = PaymentPlan.Status.IN_REVIEW
+    group.save(update_fields=["status"])
+    group.refresh_from_db(fields=["version"])
 
     with TestCase.captureOnCommitCallbacks(execute=True):
         response = payment_list_actions_context["client"].post(
@@ -1347,15 +1358,19 @@ def test_apply_custom_exchange_rate_rejects_version_read_before_another_apply(
     payment_list_actions_context["pp"].status = PaymentList.Status.IN_REVIEW
     payment_list_actions_context["pp"].save(update_fields=["status"])
     group = payment_list_actions_context["pp"].payment_plan
+    group.status = PaymentPlan.Status.IN_REVIEW
+    group.save(update_fields=["status"])
+    group.refresh_from_db(fields=["version"])
     version_read_by_both_users = group.version
-    payment_list_actions_context["client"].post(
+    first_response = payment_list_actions_context["client"].post(
         payment_list_actions_context["url_custom_exchange_rate"],
         {"custom_exchange_rate": "1.25000000", "version": version_read_by_both_users},
         format="json",
     )
+    assert first_response.status_code == status.HTTP_200_OK
     group.refresh_from_db()
-    group.background_action_status = None
-    group.save(update_fields=["background_action_status"])
+    assert group.version != version_read_by_both_users
+    PaymentPlan.objects.filter(pk=group.pk).update(background_action_status=None)
 
     response = payment_list_actions_context["client"].post(
         payment_list_actions_context["url_custom_exchange_rate"],
@@ -1419,6 +1434,46 @@ def test_instruction_custom_exchange_rate_updates_instruction_and_child(
     assert context["instruction"].background_action_status == "RECALCULATING"
     assert context["pp"].background_action_status is None
     mock_queue.assert_called_once()
+
+
+@patch("hope.models.async_job.AsyncRetryJob.queue")
+def test_instruction_custom_exchange_rate_rejects_stale_version(
+    mock_queue: Mock,
+    instruction_exchange_rate_context: dict[str, Any],
+    create_user_role_with_permissions: Any,
+) -> None:
+    context = instruction_exchange_rate_context
+    create_user_role_with_permissions(
+        context["user"],
+        [Permissions.PM_CUSTOM_EXCHANGE_RATE],
+        context["business_area"],
+        context["program_active"],
+    )
+    instruction = context["instruction"]
+    old_version = instruction.version
+
+    with TestCase.captureOnCommitCallbacks(execute=True):
+        first_response = context["client"].post(
+            context["url_custom_exchange_rate"],
+            {"custom_exchange_rate": "1.25000000", "version": old_version},
+            format="json",
+        )
+    assert first_response.status_code == status.HTTP_200_OK
+    mock_queue.assert_called_once()
+
+    instruction.refresh_from_db()
+    assert instruction.version != old_version
+    FollowUpInstruction.objects.filter(pk=instruction.pk).update(background_action_status=None)
+    response = context["client"].post(
+        context["url_custom_exchange_rate"],
+        {"custom_exchange_rate": "2.50000000", "version": old_version},
+        format="json",
+    )
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert "Someone has modified this" in str(response.data)
+    instruction.refresh_from_db()
+    assert instruction.exchange_rate == Decimal("1.25000000")
 
 
 @patch("hope.models.async_job.AsyncRetryJob.queue")

@@ -5,6 +5,7 @@ import django.core.validators
 from django.db import migrations, models
 from django.db.models import Case, F, Value, When
 import django.db.models.deletion
+from django.db.models.functions import Replace
 
 # Celery tasks and job actions renamed with the payment list rename: periodic tasks and jobs store these paths.
 TASK_RENAMES = {
@@ -63,6 +64,21 @@ CONFIG_KEY_SQL = (
     "UPDATE core_asyncjob SET config = (config - %s) || jsonb_build_object(%s, config -> %s) WHERE config ? %s",
     "UPDATE core_periodicasyncjob SET config = (config - %s) || jsonb_build_object(%s, config -> %s) WHERE config ? %s",
 )
+FAILURE_ACTION_RENAMES = {
+    "hope.apps.payment.celery_tasks.mark_payment_plan_rebuild_error": "hope.apps.payment.celery_tasks.mark_payment_list_rebuild_error",
+    "hope.apps.payment.celery_tasks.notify_payment_plan_group_reconciliation_import_failure": "hope.apps.payment.celery_tasks.notify_payment_plan_reconciliation_import_failure",
+}
+FAILURE_ACTION_SQL = (
+    (
+        "UPDATE core_asyncjob SET config = config || jsonb_build_object('on_failure_action', %s) "
+        "WHERE config ->> 'on_failure_action' = %s"
+    ),
+    (
+        "UPDATE core_periodicasyncjob SET config = config || jsonb_build_object('on_failure_action', %s) "
+        "WHERE config ->> 'on_failure_action' = %s"
+    ),
+)
+VISION_NOTIFICATION_JOB_NAME_PREFIXES = ("notify_payment_plan_group_", "notify_payment_plan_")
 DEFAULT_ACTIONS = ("add", "change", "delete", "view")
 MODEL_PERMISSION_RENAMES = (
     ("paymentlistsplit", "paymentplansplit", "paymentlistsplit", "payment list split", "payment plan split"),
@@ -138,6 +154,18 @@ def _rename_tasks(apps, schema_editor, renames: dict[str, str], key_renames) -> 
             schema_editor.execute(sql, [old_key, new_key, old_key, old_key])
 
 
+def _rename_job_metadata(apps, schema_editor, failure_action_renames, notification_name_prefixes) -> None:
+    old_prefix, new_prefix = notification_name_prefixes
+    for job_model_name in ("AsyncJob", "PeriodicAsyncJob"):
+        job_model = apps.get_model("core", job_model_name)
+        job_model.objects.filter(job_name__startswith=old_prefix, job_name__endswith="_to_vision").update(
+            job_name=Replace("job_name", Value(old_prefix), Value(new_prefix))
+        )
+    for sql in FAILURE_ACTION_SQL:
+        for old_action, new_action in failure_action_renames.items():
+            schema_editor.execute(sql, [new_action, old_action])
+
+
 def _mapped(field: str, renames: dict[str, str]) -> Case:
     return Case(*(When(**{field: old}, then=Value(new)) for old, new in renames.items()), default=F(field))
 
@@ -145,12 +173,19 @@ def _mapped(field: str, renames: dict[str, str]) -> Case:
 def forwards(apps, schema_editor) -> None:
     _rename_permissions(apps, forward=True)
     _rename_tasks(apps, schema_editor, TASK_RENAMES, CONFIG_KEY_RENAMES)
+    _rename_job_metadata(apps, schema_editor, FAILURE_ACTION_RENAMES, VISION_NOTIFICATION_JOB_NAME_PREFIXES)
 
 
 def backwards(apps, schema_editor) -> None:
     _rename_permissions(apps, forward=False)
     reverse_keys = tuple((new, old) for old, new in reversed(CONFIG_KEY_RENAMES))
     _rename_tasks(apps, schema_editor, {new: old for old, new in TASK_RENAMES.items()}, reverse_keys)
+    _rename_job_metadata(
+        apps,
+        schema_editor,
+        {new: old for old, new in FAILURE_ACTION_RENAMES.items()},
+        tuple(reversed(VISION_NOTIFICATION_JOB_NAME_PREFIXES)),
+    )
 
 
 class Migration(migrations.Migration):
