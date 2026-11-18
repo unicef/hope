@@ -76,6 +76,34 @@ def group_with_failed_fc(group_waiting_for_vision: PaymentPlan) -> PaymentPlan:
     return group_waiting_for_vision
 
 
+@pytest.fixture(params=(PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.ABORTED))
+def group_that_left_review(request, group_waiting_for_vision: PaymentPlan) -> PaymentPlan:
+    group_waiting_for_vision.status = request.param
+    VisionService.vision_data(group_waiting_for_vision)["sent"] = True
+    group_waiting_for_vision.save(update_fields=["status", "internal_data"])
+    return group_waiting_for_vision
+
+
+@pytest.fixture
+def released_group_with_header(vision_group_with_stale_header: PaymentPlan) -> PaymentPlan:
+    vision_group_with_stale_header.status = PaymentPlan.Status.ACCEPTED
+    VisionService.set_status(vision_group_with_stale_header, VisionStatus.RELEASED)
+    VisionService.vision_data(vision_group_with_stale_header).update(
+        sent=True, vision_id="VISION-ORIGINAL", fc_numbers=["FC456"]
+    )
+    vision_group_with_stale_header.save(update_fields=["status", "internal_data"])
+    return vision_group_with_stale_header
+
+
+@pytest.fixture
+def group_with_failed_fc_and_payload(group_with_failed_fc: PaymentPlan) -> PaymentPlan:
+    VisionService.vision_data(group_with_failed_fc).update(
+        sent=True, vision_id="VISION-ORIGINAL", fc_numbers=["UNKNOWN"]
+    )
+    group_with_failed_fc.save(update_fields=["internal_data"])
+    return group_with_failed_fc
+
+
 @pytest.fixture
 def disabled_vision_group(group_waiting_for_vision: PaymentPlan) -> PaymentPlan:
     FlagState.objects.filter(name="VISION_INTEGRATION_ACTIVE", condition="boolean").update(value="False")
@@ -241,6 +269,69 @@ def test_corrected_callback_releases_group(
     assert group_with_failed_fc.status == PaymentPlan.Status.ACCEPTED
     assert group_with_failed_fc.vision_status == VisionStatus.RELEASED.value
     assert list(group_with_failed_fc.funds_commitment_headers.all()) == [matching_headers[0]]
+
+
+def test_late_callback_does_not_change_group_that_left_review(
+    group_that_left_review: PaymentPlan, matching_headers: list
+) -> None:
+    original_status = group_that_left_review.status
+    assert group_that_left_review.vision_managed is True
+
+    failed = VisionService.process_callback(
+        group_that_left_review,
+        vision_payment_plan_id="VISION-LATE",
+        vision_result="SUCCESS",
+        fc_numbers=["FC123"],
+    )
+
+    assert failed is False
+    assert group_that_left_review.status == original_status
+    assert group_that_left_review.vision_data == {"status": VisionStatus.WAITING_FOR_CALLBACK.value, "sent": True}
+    assert not group_that_left_review.funds_commitment_headers.exists()
+
+
+def test_late_callback_does_not_replace_released_group_fc(
+    released_group_with_header: PaymentPlan, matching_headers: list
+) -> None:
+    assert released_group_with_header.vision_managed is True
+
+    failed = VisionService.process_callback(
+        released_group_with_header,
+        vision_payment_plan_id="VISION-LATE",
+        vision_result="SUCCESS",
+        fc_numbers=["FC123"],
+    )
+
+    assert failed is False
+    assert released_group_with_header.status == PaymentPlan.Status.ACCEPTED
+    assert released_group_with_header.vision_data == {
+        "status": VisionStatus.RELEASED.value,
+        "sent": True,
+        "vision_id": "VISION-ORIGINAL",
+        "fc_numbers": ["FC456"],
+    }
+    assert list(released_group_with_header.funds_commitment_headers.all()) == [matching_headers[1]]
+
+
+def test_creation_ack_after_fc_failure_keeps_the_failure(
+    group_with_failed_fc_and_payload: PaymentPlan,
+) -> None:
+    failed = VisionService.process_callback(
+        group_with_failed_fc_and_payload,
+        vision_payment_plan_id="VISION-LATE",
+        vision_result="SUCCESS",
+        fc_numbers=[],
+    )
+
+    assert failed is False
+    assert group_with_failed_fc_and_payload.status == PaymentPlan.Status.IN_REVIEW
+    assert group_with_failed_fc_and_payload.vision_data == {
+        "status": VisionStatus.FC_NOT_FOUND.value,
+        "sent": True,
+        "vision_id": "VISION-ORIGINAL",
+        "fc_numbers": ["UNKNOWN"],
+    }
+    assert not group_with_failed_fc_and_payload.funds_commitment_headers.exists()
 
 
 def test_unsolicited_callback_does_not_start_group_workflow(vision_group: PaymentPlan) -> None:
