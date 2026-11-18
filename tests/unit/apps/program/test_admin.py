@@ -172,6 +172,18 @@ def incentive_payee_label(incentive_payee_type: PayeeType) -> BeneficiaryGroup:
 
 
 @pytest.fixture
+def incentive_program(
+    business_area: BusinessArea, frontline_worker_dct: DataCollectingType, incentive_payee_label: BeneficiaryGroup
+) -> Program:
+    return ProgramFactory(
+        name="Incentive Programme",
+        business_area=business_area,
+        data_collecting_type=frontline_worker_dct,
+        beneficiary_group=incentive_payee_label,
+    )
+
+
+@pytest.fixture
 def program_on_household_beneficiary_group(household_beneficiary_group: BeneficiaryGroup) -> Program:
     return ProgramFactory(beneficiary_group=household_beneficiary_group)
 
@@ -912,3 +924,33 @@ def test_beneficiary_group_form_rejects_changing_payee_type_of_label_used_by_pro
 
     assert form.is_valid() is False
     assert form.errors["payee_type"] == ["Cannot change the Payee Type of a Payee Label used by programs"]
+
+
+def test_changelist_shows_payee_type_of_program(django_app: Any, user: User, incentive_program: Program) -> None:
+    response = django_app.get(reverse("admin:program_program_changelist"), user=user)
+
+    assert response.status_code == status.HTTP_200_OK
+    assert list(response.context["cl"].result_list) == [incentive_program]
+    assert "Incentive Payee" in response.text
+
+
+def test_changelist_filters_by_payee_type(
+    django_app: Any, user: User, program: Program, incentive_program: Program, incentive_payee_type: PayeeType
+) -> None:
+    response = django_app.get(
+        reverse("admin:program_program_changelist"),
+        params={"data_collecting_type__payee_type__exact": str(incentive_payee_type.pk)},
+        user=user,
+    )
+
+    assert response.status_code == status.HTTP_200_OK
+    assert list(response.context["cl"].result_list) == [incentive_program]
+
+
+def test_changelist_sorts_by_payee_type(
+    django_app: Any, user: User, program: Program, incentive_program: Program
+) -> None:
+    response = django_app.get(reverse("admin:program_program_changelist"), params={"o": "8"}, user=user)
+
+    assert response.status_code == status.HTTP_200_OK
+    assert list(response.context["cl"].result_list) == [program, incentive_program]
