@@ -200,6 +200,7 @@ class IndividualAdmin(
     def save_model(self, request: HttpRequest, obj: Individual, form: Any, change: bool) -> None:
         recalculation_needed = bool(RECALCULATION_INDIVIDUAL_FIELDS.intersection(form.changed_data))
         super().save_model(request, obj, form, change)
+        # U2 goes here
         if not recalculation_needed:
             return
         if obj.household:

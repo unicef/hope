@@ -146,6 +146,13 @@ class RegistrationDataImportViewSet(
 
         remove_rdi_population(rdi, delete_rdi=False)
 
+        # cw_ids = list(Individual.all_objects.filter(registration_data_import=rdi, country_workspace_id__isnull=False)
+        # .values_list("country_workspace_id", flat=True))
+        # remove_rdi_population(rdi, delete_rdi=False)
+        # ...
+        # if cw_ids:
+        # transaction.on_commit(lambda: notify_hde_individuals_deleted(cw_ids))
+
         rdi.erased = True
         rdi.save()
 
