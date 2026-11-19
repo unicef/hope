@@ -1,4 +1,4 @@
-import datetime
+import datetime as dt
 
 import pytest
 
@@ -163,8 +163,8 @@ def head_individual(business_area: object, program_from: object, rdi_from: objec
         registration_data_import=rdi_from,
         business_area=business_area,
         program=program_from,
-        first_registration_date=datetime.date(2021, 1, 1),
-        last_registration_date=datetime.date(2021, 1, 1),
+        first_registration_date=dt.date(2021, 1, 1),
+        last_registration_date=dt.date(2021, 1, 1),
         given_name="Test",
         full_name="Test Testowski",
         middle_name="",
@@ -173,7 +173,7 @@ def head_individual(business_area: object, program_from: object, rdi_from: objec
         phone_no_alternative="",
         relationship=HEAD,
         sex=MALE,
-        birth_date=datetime.date(1955, 9, 7),
+        birth_date=dt.date(1955, 9, 7),
     )
 
 
@@ -189,8 +189,8 @@ def base_household_context(
 ) -> dict:
     household = HouseholdFactory(
         registration_data_import=rdi_from,
-        first_registration_date=datetime.datetime(2021, 1, 1, tzinfo=datetime.timezone.utc),
-        last_registration_date=datetime.datetime(2021, 1, 1, tzinfo=datetime.timezone.utc),
+        first_registration_date=dt.datetime(2021, 1, 1, tzinfo=dt.timezone.utc),
+        last_registration_date=dt.datetime(2021, 1, 1, tzinfo=dt.timezone.utc),
         program=program_from,
         business_area=business_area,
         admin1=admin_areas[0],
@@ -210,8 +210,8 @@ def base_household_context(
         registration_data_import=rdi_from,
         business_area=business_area,
         program=program_from,
-        first_registration_date=datetime.date(2024, 2, 21),
-        last_registration_date=datetime.date(2024, 2, 24),
+        first_registration_date=dt.date(2024, 2, 21),
+        last_registration_date=dt.date(2024, 2, 24),
     )
     return {"household": household, "individuals": [head_individual, second_individual]}
 
@@ -405,8 +405,8 @@ def test_not_import_excluded_objects(
         program=program_from,
         withdrawn=True,
         relationship=HEAD,
-        first_registration_date=datetime.date(2024, 2, 21),
-        last_registration_date=datetime.date(2024, 2, 24),
+        first_registration_date=dt.date(2024, 2, 21),
+        last_registration_date=dt.date(2024, 2, 24),
     )
     household_withdrawn = HouseholdFactory(
         registration_data_import=rdi_from,
@@ -423,8 +423,8 @@ def test_not_import_excluded_objects(
         business_area=business_area,
         program=program_from,
         withdrawn=True,
-        first_registration_date=datetime.date(2024, 2, 21),
-        last_registration_date=datetime.date(2024, 2, 24),
+        first_registration_date=dt.date(2024, 2, 21),
+        last_registration_date=dt.date(2024, 2, 24),
     )
     duplicate_individual = IndividualFactory(
         household=household_withdrawn,
@@ -432,8 +432,8 @@ def test_not_import_excluded_objects(
         business_area=business_area,
         program=program_from,
         duplicate=True,
-        first_registration_date=datetime.date(2024, 2, 21),
-        last_registration_date=datetime.date(2024, 2, 24),
+        first_registration_date=dt.date(2024, 2, 21),
+        last_registration_date=dt.date(2024, 2, 24),
     )
 
     household_collection = HouseholdCollectionFactory()
@@ -445,8 +445,8 @@ def test_not_import_excluded_objects(
         business_area=business_area,
         program=program_from,
         relationship=HEAD,
-        first_registration_date=datetime.date(2024, 2, 21),
-        last_registration_date=datetime.date(2024, 2, 24),
+        first_registration_date=dt.date(2024, 2, 21),
+        last_registration_date=dt.date(2024, 2, 24),
     )
     household_already_in_program = HouseholdFactory(
         registration_data_import=rdi_from,
@@ -469,8 +469,8 @@ def test_not_import_excluded_objects(
             business_area=business_area,
             program=program_to,
             relationship=HEAD,
-            first_registration_date=datetime.date(2024, 2, 21),
-            last_registration_date=datetime.date(2024, 2, 24),
+            first_registration_date=dt.date(2024, 2, 21),
+            last_registration_date=dt.date(2024, 2, 24),
         ),
         create_role=False,
         household_collection=household_collection,
@@ -687,8 +687,8 @@ def test_import_program_population_import_from_ids(
         registration_data_import=rdi_from,
         business_area=business_area,
         program=program_from,
-        first_registration_date=datetime.date(2021, 2, 1),
-        last_registration_date=datetime.date(2021, 2, 1),
+        first_registration_date=dt.date(2021, 2, 1),
+        last_registration_date=dt.date(2021, 2, 1),
         given_name="Test_1",
         full_name="Test_1 Testowski_1",
         family_name="Testowski_1",
@@ -696,8 +696,8 @@ def test_import_program_population_import_from_ids(
     )
     household_1 = HouseholdFactory(
         registration_data_import=rdi_from,
-        first_registration_date=datetime.datetime(2021, 2, 1, tzinfo=datetime.timezone.utc),
-        last_registration_date=datetime.datetime(2021, 2, 1, tzinfo=datetime.timezone.utc),
+        first_registration_date=dt.datetime(2021, 2, 1, tzinfo=dt.timezone.utc),
+        last_registration_date=dt.datetime(2021, 2, 1, tzinfo=dt.timezone.utc),
         program=program_from,
         business_area=business_area,
         head_of_household=household_1_head,
@@ -709,8 +709,8 @@ def test_import_program_population_import_from_ids(
         registration_data_import=rdi_from,
         business_area=business_area,
         program=program_from,
-        first_registration_date=datetime.date(2024, 2, 21),
-        last_registration_date=datetime.date(2024, 2, 24),
+        first_registration_date=dt.date(2024, 2, 21),
+        last_registration_date=dt.date(2024, 2, 24),
     )
     IndividualRoleInHouseholdFactory(
         household=household_1,
@@ -723,8 +723,8 @@ def test_import_program_population_import_from_ids(
         registration_data_import=rdi_from,
         business_area=business_area,
         program=program_from,
-        first_registration_date=datetime.date(2021, 3, 1),
-        last_registration_date=datetime.date(2021, 3, 1),
+        first_registration_date=dt.date(2021, 3, 1),
+        last_registration_date=dt.date(2021, 3, 1),
         given_name="Test_2",
         full_name="Test_2 Testowski_2",
         family_name="Testowski_2",
@@ -732,8 +732,8 @@ def test_import_program_population_import_from_ids(
     )
     household_2 = HouseholdFactory(
         registration_data_import=rdi_from,
-        first_registration_date=datetime.datetime(2021, 3, 1, tzinfo=datetime.timezone.utc),
-        last_registration_date=datetime.datetime(2021, 3, 1, tzinfo=datetime.timezone.utc),
+        first_registration_date=dt.datetime(2021, 3, 1, tzinfo=dt.timezone.utc),
+        last_registration_date=dt.datetime(2021, 3, 1, tzinfo=dt.timezone.utc),
         program=program_from,
         business_area=business_area,
         head_of_household=household_2_head,
@@ -745,8 +745,8 @@ def test_import_program_population_import_from_ids(
         registration_data_import=rdi_from,
         business_area=business_area,
         program=program_from,
-        first_registration_date=datetime.date(2024, 3, 21),
-        last_registration_date=datetime.date(2024, 3, 24),
+        first_registration_date=dt.date(2024, 3, 21),
+        last_registration_date=dt.date(2024, 3, 24),
     )
     IndividualRoleInHouseholdFactory(
         household=household_2,
@@ -829,8 +829,8 @@ def test_import_program_population_exclude_external_collectors(
         registration_data_import=rdi_from,
         business_area=business_area,
         program=program_from,
-        first_registration_date=datetime.date(2021, 2, 1),
-        last_registration_date=datetime.date(2021, 2, 1),
+        first_registration_date=dt.date(2021, 2, 1),
+        last_registration_date=dt.date(2021, 2, 1),
         given_name="Test_1",
         full_name="Test_1 Testowski_1",
         family_name="Testowski_1",
@@ -838,8 +838,8 @@ def test_import_program_population_exclude_external_collectors(
     )
     household_1 = HouseholdFactory(
         registration_data_import=rdi_from,
-        first_registration_date=datetime.datetime(2021, 2, 1, tzinfo=datetime.timezone.utc),
-        last_registration_date=datetime.datetime(2021, 2, 1, tzinfo=datetime.timezone.utc),
+        first_registration_date=dt.datetime(2021, 2, 1, tzinfo=dt.timezone.utc),
+        last_registration_date=dt.datetime(2021, 2, 1, tzinfo=dt.timezone.utc),
         program=program_from,
         business_area=business_area,
         head_of_household=household_1_head,
@@ -851,8 +851,8 @@ def test_import_program_population_exclude_external_collectors(
         registration_data_import=rdi_from,
         business_area=business_area,
         program=program_from,
-        first_registration_date=datetime.date(2024, 2, 21),
-        last_registration_date=datetime.date(2024, 2, 24),
+        first_registration_date=dt.date(2024, 2, 21),
+        last_registration_date=dt.date(2024, 2, 24),
     )
     external_collector_primary = IndividualFactory(
         program=program_from,
@@ -875,8 +875,8 @@ def test_import_program_population_exclude_external_collectors(
         registration_data_import=rdi_from,
         business_area=business_area,
         program=program_from,
-        first_registration_date=datetime.date(2021, 3, 1),
-        last_registration_date=datetime.date(2021, 3, 1),
+        first_registration_date=dt.date(2021, 3, 1),
+        last_registration_date=dt.date(2021, 3, 1),
         given_name="Test_2",
         full_name="Test_2 Testowski_2",
         family_name="Testowski_2",
@@ -884,8 +884,8 @@ def test_import_program_population_exclude_external_collectors(
     )
     household_2 = HouseholdFactory(
         registration_data_import=rdi_from,
-        first_registration_date=datetime.datetime(2021, 3, 1, tzinfo=datetime.timezone.utc),
-        last_registration_date=datetime.datetime(2021, 3, 1, tzinfo=datetime.timezone.utc),
+        first_registration_date=dt.datetime(2021, 3, 1, tzinfo=dt.timezone.utc),
+        last_registration_date=dt.datetime(2021, 3, 1, tzinfo=dt.timezone.utc),
         program=program_from,
         business_area=business_area,
         head_of_household=household_2_head,
@@ -897,8 +897,8 @@ def test_import_program_population_exclude_external_collectors(
         registration_data_import=rdi_from,
         business_area=business_area,
         program=program_from,
-        first_registration_date=datetime.date(2024, 3, 21),
-        last_registration_date=datetime.date(2024, 3, 24),
+        first_registration_date=dt.date(2024, 3, 21),
+        last_registration_date=dt.date(2024, 3, 24),
     )
     IndividualRoleInHouseholdFactory(
         household=household_2,

@@ -1,4 +1,4 @@
-import datetime
+import datetime as dt
 from typing import Any
 import uuid
 
@@ -69,7 +69,7 @@ class PDUOnlineEditMergeService(PDURoundValueMixin):
                     f"Invalid type for field {field_name}. Expected string for date, got {type(value).__name__}."
                 )
             try:
-                return datetime.date.fromisoformat(value)
+                return dt.date.fromisoformat(value)
             except (TypeError, ValueError):
                 raise ValidationError(f"Invalid date format for field {field_name}. Expected YYYY-MM-DD.")
         elif expected_type == PeriodicFieldData.STRING and not isinstance(value, str):
