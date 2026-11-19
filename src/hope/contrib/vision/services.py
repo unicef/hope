@@ -124,6 +124,9 @@ class VisionService:
         # Any callback for the active request confirms that Vision received the Payment Plan.
         vision_data["sent"] = True
         is_payment_plan_created_acknowledgement = vision_result == "SUCCESS" and not normalized_fc_numbers
+        is_successful_fc_callback = vision_result == "SUCCESS" or (
+            vision_result == "FC CREATE" and bool(normalized_fc_numbers)
+        )
         fc_assignment_failed = False
         if is_payment_plan_created_acknowledgement:
             # A repeated creation acknowledgement must not replace a later FC result or failure.
@@ -138,7 +141,7 @@ class VisionService:
             else:
                 # Do not display FC numbers from an earlier callback when the latest callback did not provide any.
                 vision_data.pop("fc_numbers", None)
-            if vision_result != "SUCCESS":
+            if not is_successful_fc_callback:
                 cls.set_status(
                     payment_plan,
                     VisionStatus.CALLBACK_FAILED,

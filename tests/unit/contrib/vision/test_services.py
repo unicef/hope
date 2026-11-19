@@ -302,9 +302,11 @@ def test_process_callback_creation_acknowledgement_preserves_later_fc_failure(
     }
 
 
+@pytest.mark.parametrize("vision_result", ["SUCCESS", "FC CREATE"])
 def test_process_callback_records_fc_assignment_failure(
     vision_payment_plan: PaymentPlan,
     django_assert_num_queries,
+    vision_result: str,
 ) -> None:
     VisionService.set_status(vision_payment_plan, VisionStatus.WAITING_FOR_CALLBACK)
 
@@ -312,7 +314,7 @@ def test_process_callback_records_fc_assignment_failure(
         fc_assignment_failed = VisionService.process_callback(
             vision_payment_plan,
             vision_payment_plan_id="VISION-1",
-            vision_result="SUCCESS",
+            vision_result=vision_result,
             fc_numbers=["UNKNOWN"],
         )
 
@@ -346,6 +348,30 @@ def test_process_callback_failure_stores_returned_fc_numbers(
         "sent": True,
         "vision_id": "VISION-1",
         "fc_numbers": ["FC123"],
+        "status": VisionStatus.CALLBACK_FAILED.value,
+        "error_code": VisionErrorCode.VISION_STATUS_FAILED.value,
+    }
+
+
+def test_process_callback_fc_create_without_numbers_records_failure(
+    vision_payment_plan: PaymentPlan,
+    django_assert_num_queries,
+) -> None:
+    VisionService.set_status(vision_payment_plan, VisionStatus.PP_CREATED)
+
+    with django_assert_num_queries(1):
+        fc_assignment_failed = VisionService.process_callback(
+            vision_payment_plan,
+            vision_payment_plan_id="VISION-1",
+            vision_result="FC CREATE",
+            fc_numbers=[],
+        )
+
+    assert fc_assignment_failed is False
+    assert vision_payment_plan.status == PaymentPlan.Status.IN_REVIEW
+    assert vision_payment_plan.vision_data == {
+        "sent": True,
+        "vision_id": "VISION-1",
         "status": VisionStatus.CALLBACK_FAILED.value,
         "error_code": VisionErrorCode.VISION_STATUS_FAILED.value,
     }
@@ -830,6 +856,7 @@ def test_process_callback_assigns_fc_releases_and_sends_to_pg(
     assert vision_payment_plan.vision_status == VisionStatus.RELEASED.value
 
 
+@pytest.mark.parametrize("vision_result", ["SUCCESS", "FC CREATE"])
 @patch("hope.apps.payment.services.payment_plan_services.PaymentPlanService.execute_update_status_action")
 @patch("hope.apps.payment.services.payment_plan_services.PaymentPlanService.release_from_vision")
 def test_process_callback_assigns_fc_releases_without_pg_send(
@@ -838,6 +865,7 @@ def test_process_callback_assigns_fc_releases_without_pg_send(
     vision_payment_plan: PaymentPlan,
     matching_fc_items: list,
     django_assert_num_queries,
+    vision_result: str,
 ) -> None:
     VisionService.set_status(vision_payment_plan, VisionStatus.WAITING_FOR_CALLBACK)
     with (
@@ -847,7 +875,7 @@ def test_process_callback_assigns_fc_releases_without_pg_send(
         VisionService.process_callback(
             vision_payment_plan,
             vision_payment_plan_id="VISION-1",
-            vision_result="SUCCESS",
+            vision_result=vision_result,
             fc_numbers=["FC123"],
         )
 
