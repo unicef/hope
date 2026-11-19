@@ -348,13 +348,14 @@ class PaymentPlan(TimeStampedUUIDModel, UnicefIdentifiedModel, InternalDataField
 
     def payment_lists_qualifying_for_linked_payment_plan(self, plan_type: "PaymentList.PlanType") -> list[PaymentList]:
         """Payment lists that a linked Follow-Up / Top-Up / Amendment payment plan would get a child list for."""
-        if self.plan_type not in self.LINKED_GROUP_SOURCE_PLAN_TYPES[plan_type]:
+        if (
+            self.plan_type not in self.LINKED_GROUP_SOURCE_PLAN_TYPES[plan_type]
+            or self.status not in self.CHILD_GROUP_SOURCE_STATUSES
+        ):
             return []
         payment_lists = list(self.payment_lists.order_by("created_at"))
         if plan_type == PaymentList.PlanType.FOLLOW_UP:
             return [plan for plan in payment_lists if plan.unsuccessful_payments_for_follow_up().exists()]
-        if self.status not in self.CHILD_GROUP_SOURCE_STATUSES:
-            return []
         return [plan for plan in payment_lists if plan.eligible_payments_for_child_plan().exists()]
 
     @property

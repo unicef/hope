@@ -34,6 +34,7 @@ from hope.models import (
     LogEntry,
     Payment,
     PaymentList,
+    PaymentPlan,
 )
 
 pytestmark = pytest.mark.django_db
@@ -131,6 +132,7 @@ def _create_source_payment_list(
     delivery_mechanism: Any,
     fsp: Any,
     with_failed_payment: bool,
+    status: PaymentList.Status = PaymentList.Status.FINISHED,
 ) -> PaymentList:
     payment_list = PaymentListFactory(
         name=f"Source payment plan {group.id}",
@@ -140,7 +142,7 @@ def _create_source_payment_list(
         currency=currency,
         delivery_mechanism=delivery_mechanism,
         financial_service_provider=fsp,
-        status=PaymentList.Status.FINISHED,
+        status=status,
     )
     PaymentFactory(
         parent=payment_list,
@@ -198,8 +200,8 @@ def test_create_creates_follow_up_instruction_from_multiple_groups(
     delivery_mechanism,
     fsp,
 ):
-    group_one = PaymentPlanFactory(cycle=cycle)
-    group_two = PaymentPlanFactory(cycle=second_cycle)
+    group_one = PaymentPlanFactory(cycle=cycle, status=PaymentPlan.Status.FINISHED)
+    group_two = PaymentPlanFactory(cycle=second_cycle, status=PaymentPlan.Status.FINISHED)
     source_one = _create_source_payment_list(
         cycle=cycle,
         group=group_one,
@@ -234,7 +236,7 @@ def test_create_creates_follow_up_instruction_from_multiple_groups(
 
 @pytest.fixture
 def instruction_over_one_group(user, program, cycle, business_area, currency, delivery_mechanism, fsp):
-    group = PaymentPlanFactory(cycle=cycle)
+    group = PaymentPlanFactory(cycle=cycle, status=PaymentPlan.Status.FINISHED)
     _create_source_payment_list(
         cycle=cycle,
         group=group,
@@ -276,7 +278,7 @@ def test_create_leaves_child_payment_lists_outside_any_group(instruction_over_on
 
 @pytest.fixture
 def instruction_over_one_payment_gateway_group(user, program, cycle, business_area, currency, delivery_mechanism, fsp):
-    group = PaymentPlanFactory(cycle=cycle, use_payment_gateway=True)
+    group = PaymentPlanFactory(cycle=cycle, status=PaymentPlan.Status.FINISHED, use_payment_gateway=True)
     _create_source_payment_list(
         cycle=cycle,
         group=group,
@@ -312,8 +314,8 @@ def test_create_logs_activity_for_each_child_payment_list(
     delivery_mechanism,
     fsp,
 ):
-    group_one = PaymentPlanFactory(cycle=cycle)
-    group_two = PaymentPlanFactory(cycle=second_cycle)
+    group_one = PaymentPlanFactory(cycle=cycle, status=PaymentPlan.Status.FINISHED)
+    group_two = PaymentPlanFactory(cycle=second_cycle, status=PaymentPlan.Status.FINISHED)
     source_one = _create_source_payment_list(
         cycle=cycle,
         group=group_one,
@@ -355,7 +357,7 @@ def test_create_excludes_source_plans_with_existing_follow_up_child(
     delivery_mechanism,
     fsp,
 ):
-    group = PaymentPlanFactory(cycle=cycle)
+    group = PaymentPlanFactory(cycle=cycle, status=PaymentPlan.Status.FINISHED)
     source_one = _create_source_payment_list(
         cycle=cycle,
         group=group,
@@ -411,7 +413,7 @@ def test_create_excludes_source_plans_with_manual_follow_up_child(
     delivery_mechanism,
     fsp,
 ):
-    group = PaymentPlanFactory(cycle=cycle)
+    group = PaymentPlanFactory(cycle=cycle, status=PaymentPlan.Status.FINISHED)
     source_one = _create_source_payment_list(
         cycle=cycle,
         group=group,
@@ -461,7 +463,7 @@ def test_create_does_not_exclude_source_plans_with_top_up_child(
     delivery_mechanism,
     fsp,
 ):
-    group = PaymentPlanFactory(cycle=cycle)
+    group = PaymentPlanFactory(cycle=cycle, status=PaymentPlan.Status.FINISHED)
     source_one = _create_source_payment_list(
         cycle=cycle,
         group=group,
@@ -511,7 +513,7 @@ def test_create_raises_validation_error_when_no_applicable_source_plans(
     delivery_mechanism,
     fsp,
 ):
-    group = PaymentPlanFactory(cycle=cycle)
+    group = PaymentPlanFactory(cycle=cycle, status=PaymentPlan.Status.FINISHED)
     _create_source_payment_list(
         cycle=cycle,
         group=group,
@@ -531,6 +533,34 @@ def test_create_raises_validation_error_when_no_applicable_source_plans(
         )
 
 
+@pytest.fixture
+def in_approval_group_with_failed_payment(cycle, business_area, currency, delivery_mechanism, fsp):
+    group = PaymentPlanFactory(cycle=cycle, status=PaymentPlan.Status.IN_APPROVAL)
+    _create_source_payment_list(
+        cycle=cycle,
+        group=group,
+        business_area=business_area,
+        currency=currency,
+        delivery_mechanism=delivery_mechanism,
+        fsp=fsp,
+        with_failed_payment=True,
+        status=PaymentList.Status.IN_APPROVAL,
+    )
+    return group
+
+
+def test_create_rejects_source_group_before_acceptance(user, program, cycle, in_approval_group_with_failed_payment):
+    with pytest.raises(ValidationError, match="only be created from Accepted or Finished Payment Plans"):
+        FollowUpInstructionService(program).create(
+            user=user,
+            payment_plan_ids=[str(in_approval_group_with_failed_payment.id)],
+            dispersion_start_date=cycle.start_date + timedelta(days=1),
+            dispersion_end_date=cycle.start_date + timedelta(days=2),
+        )
+
+    assert not FollowUpInstruction.objects.filter(program=program).exists()
+
+
 def test_create_raises_validation_error_for_mixed_currency(
     user,
     program,
@@ -541,8 +571,8 @@ def test_create_raises_validation_error_for_mixed_currency(
     delivery_mechanism,
     fsp,
 ):
-    group = PaymentPlanFactory(cycle=cycle)
-    other_group = PaymentPlanFactory(cycle=cycle)
+    group = PaymentPlanFactory(cycle=cycle, status=PaymentPlan.Status.FINISHED)
+    other_group = PaymentPlanFactory(cycle=cycle, status=PaymentPlan.Status.FINISHED)
     _create_source_payment_list(
         cycle=cycle,
         group=group,
@@ -580,8 +610,8 @@ def test_create_raises_validation_error_for_mixed_use_payment_gateway(
     delivery_mechanism,
     fsp,
 ):
-    group = PaymentPlanFactory(cycle=cycle, use_payment_gateway=True)
-    other_group = PaymentPlanFactory(cycle=cycle)
+    group = PaymentPlanFactory(cycle=cycle, status=PaymentPlan.Status.FINISHED, use_payment_gateway=True)
+    other_group = PaymentPlanFactory(cycle=cycle, status=PaymentPlan.Status.FINISHED)
     _create_source_payment_list(
         cycle=cycle,
         group=group,
@@ -612,7 +642,7 @@ def test_create_raises_validation_error_for_mixed_use_payment_gateway(
 
 @pytest.fixture
 def group_ids_paid_in_both_syp_denominations(cycle, business_area, deprecated_syp, active_syp, delivery_mechanism, fsp):
-    deprecated_group = PaymentPlanFactory(cycle=cycle)
+    deprecated_group = PaymentPlanFactory(cycle=cycle, status=PaymentPlan.Status.FINISHED)
     _create_source_payment_list(
         cycle=cycle,
         group=deprecated_group,
@@ -622,7 +652,7 @@ def group_ids_paid_in_both_syp_denominations(cycle, business_area, deprecated_sy
         fsp=fsp,
         with_failed_payment=True,
     )
-    active_group = PaymentPlanFactory(cycle=cycle)
+    active_group = PaymentPlanFactory(cycle=cycle, status=PaymentPlan.Status.FINISHED)
     _create_source_payment_list(
         cycle=cycle,
         group=active_group,

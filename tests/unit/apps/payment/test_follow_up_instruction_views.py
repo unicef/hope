@@ -30,7 +30,7 @@ from extras.test_utils.factories import (
     UserFactory,
 )
 from hope.apps.account.permissions import Permissions
-from hope.models import FollowUpInstruction, Payment, PaymentList
+from hope.models import FollowUpInstruction, Payment, PaymentList, PaymentPlan
 
 pytestmark = pytest.mark.django_db
 
@@ -504,7 +504,7 @@ def test_create_follow_up_instruction(
 ) -> None:
     ctx = follow_up_context
     create_user_role_with_permissions(ctx["user"], [Permissions.PM_CREATE], ctx["business_area"], ctx["program"])
-    group = PaymentPlanFactory(cycle=ctx["cycle"])
+    group = PaymentPlanFactory(cycle=ctx["cycle"], status=PaymentPlan.Status.FINISHED)
     source_plan = PaymentListFactory(
         name="Source payment plan",
         program_cycle=ctx["cycle"],

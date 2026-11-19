@@ -63,6 +63,8 @@ class FollowUpInstructionService:
         payment_plans = list(PaymentPlan.objects.filter(id__in=payment_plan_ids, cycle__program=self.program))
         if len(payment_plans) != len(payment_plan_ids):
             raise ValidationError("One or more Payment Plans do not exist in the selected program.")
+        if any(payment_plan.status not in PaymentPlan.CHILD_GROUP_SOURCE_STATUSES for payment_plan in payment_plans):
+            raise ValidationError("Follow-Up Instructions can only be created from Accepted or Finished Payment Plans.")
         return payment_plans
 
     def _get_applicable_source_payment_lists(self, payment_plan_ids: list[str]) -> list[PaymentList]:

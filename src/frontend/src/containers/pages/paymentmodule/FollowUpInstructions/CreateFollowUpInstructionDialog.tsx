@@ -18,6 +18,7 @@ import {
 import type { FollowUpInstructionCreate } from '@restgenerated/models/FollowUpInstructionCreate';
 import type { FollowUpInstructionDetail } from '@restgenerated/models/FollowUpInstructionDetail';
 import type { PaginatedPaymentPlanListList } from '@restgenerated/models/PaginatedPaymentPlanListList';
+import { PaymentPlanStatusEnum } from '@restgenerated/models/PaymentPlanStatusEnum';
 import { RestService } from '@restgenerated/services/RestService';
 import { FormikDateField } from '@shared/Formik/FormikDateField';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -67,6 +68,7 @@ export function CreateFollowUpInstructionDialog(): ReactElement {
     businessAreaSlug: businessArea,
     programCode: programId,
     limit: 200,
+    status: [PaymentPlanStatusEnum.ACCEPTED, PaymentPlanStatusEnum.FINISHED],
   };
   const { data: paymentPlansData } = useQuery<PaginatedPaymentPlanListList>({
     queryKey: restQueryKey(

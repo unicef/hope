@@ -1229,6 +1229,33 @@ def failed_payment(locked_payment_list):
 
 
 @pytest.fixture
+def in_approval_group_with_failed_payment(open_group, failed_payment):
+    open_group.status = PaymentPlan.Status.IN_APPROVAL
+    open_group.save(update_fields=["status"])
+    return open_group
+
+
+def test_create_follow_up_rejected_before_source_group_is_accepted(
+    in_approval_group_with_failed_payment, user, django_assert_num_queries
+):
+    group = in_approval_group_with_failed_payment
+    with django_assert_num_queries(0):
+        eligible_payment_lists = group.payment_lists_qualifying_for_linked_payment_plan(PaymentList.PlanType.FOLLOW_UP)
+    assert eligible_payment_lists == []
+
+    with pytest.raises(ValidationError) as error:
+        PaymentPlanService(group).create_linked_payment_plan(
+            PaymentList.PlanType.FOLLOW_UP, user, date(2099, 1, 1), date(2099, 12, 31)
+        )
+
+    assert (
+        error.value.detail[0]
+        == "A Follow Up can only be created from an Accepted or Finished payment plan, got IN_APPROVAL"
+    )
+    assert not group.linked_payment_plans.exists()
+
+
+@pytest.fixture
 def follow_up_group(accepted_group, failed_payment, user):
     return PaymentPlanService(accepted_group).create_linked_payment_plan(
         PaymentList.PlanType.FOLLOW_UP, user, date(2099, 1, 1), date(2099, 12, 31)

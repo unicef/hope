@@ -80,10 +80,7 @@ class PaymentPlanService:
                 f"A {plan_type.label} cannot be created from a "
                 f"{source_payment_plan.get_plan_type_display()} payment plan."
             )
-        if (
-            plan_type != PaymentList.PlanType.FOLLOW_UP
-            and source_payment_plan.status not in PaymentPlan.CHILD_GROUP_SOURCE_STATUSES
-        ):
+        if source_payment_plan.status not in PaymentPlan.CHILD_GROUP_SOURCE_STATUSES:
             raise ValidationError(
                 f"A {plan_type.label} can only be created from an Accepted or Finished payment plan, "
                 f"got {source_payment_plan.status}"

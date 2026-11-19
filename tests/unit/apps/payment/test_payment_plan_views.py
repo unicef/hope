@@ -3819,6 +3819,41 @@ def accepted_group_with_failed_payment(cycle: Any) -> Any:
     return group
 
 
+@pytest.fixture
+def in_approval_group_with_failed_payment(accepted_group_with_failed_payment: Any) -> Any:
+    group = accepted_group_with_failed_payment
+    group.status = PaymentPlan.Status.IN_APPROVAL
+    group.save(update_fields=["status"])
+    group.payment_lists.update(status=PaymentList.Status.IN_APPROVAL)
+    return group
+
+
+def test_create_follow_up_rejects_in_approval_group_with_failed_payment(
+    client: Any,
+    user: Any,
+    business_area: Any,
+    program: Any,
+    in_approval_group_with_failed_payment: Any,
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(
+        user, [Permissions.PM_CREATE, Permissions.PM_PAYMENT_PLAN_VIEW_DETAIL], business_area, program=program
+    )
+    group = in_approval_group_with_failed_payment
+
+    detail_response = client.get(_detail_url(business_area.slug, program.code, group.id))
+    create_response = client.post(
+        _group_action_url(business_area.slug, program.code, group.id, "create-follow-up"),
+        {"dispersion_start_date": "2099-01-01", "dispersion_end_date": "2099-12-31"},
+        format="json",
+    )
+
+    assert detail_response.status_code == status.HTTP_200_OK
+    assert detail_response.json()["can_create_follow_up"] is False
+    assert create_response.status_code == status.HTTP_400_BAD_REQUEST
+    assert not group.linked_payment_plans.exists()
+
+
 def test_create_follow_up_on_group_with_permission_returns_linked_group(
     client: Any,
     user: Any,
