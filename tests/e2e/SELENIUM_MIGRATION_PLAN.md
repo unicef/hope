@@ -27,9 +27,9 @@ grep -rcE '^\s*def test_' tests/e2e --include='test_*.py' --exclude-dir=new_sele
 |---|---|---:|---:|---|
 | 1 | `login_via_admin_panel` | 7 | 7 | ✅ |
 | 2 | `error_page` + `access_denied` | 3 | 3 | ✅ |
-| 3 | `program_log` | 2 | 0 | ⬜ |
-| 4 | `programme_user` | 1 | 0 | ⬜ |
-| 5 | `country_search` | 3 | 0 | ⬜ |
+| 3 | `program_log` | 2 | 2 | ✅ |
+| 4 | `programme_user` | 1 | 1 | ✅ |
+| 5 | `country_search` | 3 | 3 | ✅ |
 | 6 | `country_dashboard` | 1 | 0 | ⬜ |
 | 7 | `managerial_console` | 2 | 0 | ⬜ |
 | 8 | `drawer` | 4 | 0 | ⬜ |
@@ -46,9 +46,9 @@ grep -rcE '^\s*def test_' tests/e2e --include='test_*.py' --exclude-dir=new_sele
 | 19 | `grievance/grievance_dashboard` | 2 | 0 | ⬜ |
 | 20 | `grievance/grievance_tickets` | 25 | 0 | ⬜ |
 | 21 | Old infra cleanup | – | – | ⬜ |
-| | **Total** | **155** | **10** | **6 %** |
+| | **Total** | **155** | **16** | **10 %** |
 
-`[█░░░░░░░░░░░░░░░░░░░] 10 / 155`. Update it after each PR: 1 block per ~8 tests.
+`[██░░░░░░░░░░░░░░░░░░] 16 / 155`. Update it after each PR: 1 block per ~8 tests.
 
 The new suite already has 46 test files and ~250 test functions. These do not count toward the 155.
 
@@ -77,19 +77,19 @@ Legend: `NEW <new_selenium/...>` · `COVERED <existing new test>` (verify assert
 - [x] Delete `page_object/error_page/` and the `page_error` / `page_access_denied` fixtures
 
 ### 3. `program_log/test_program_log.py` (2) → `new_selenium/activity_log/test_activity_log.py`
-- [ ] test_smoke_program_log → NEW (programme log lists an entry created by a factory)
-- [ ] test_smoke_activity_log → NEW
-- [ ] Delete `page_object/program_log/`
+- [x] test_smoke_program_log → NEW `test_activity_log_lists_entry[programme-log]` (entry created by `LogEntryFactory`; the finish flow itself is covered by `program_details/test_programme_status.py::test_finish_programme`)
+- [x] test_smoke_activity_log → NEW `test_activity_log_lists_entry[activity-log]`
+- [x] Delete `page_object/program_log/` and the `page_program_log` fixture
 
 ### 4. `programme_user/test_programme_user.py` (1) → `new_selenium/program_details/test_programme_users.py`
-- [ ] test_smoke_programme_users → NEW
-- [ ] Delete `page_object/programme_users/`
+- [x] test_smoke_programme_users → NEW `test_programme_users_lists_user_with_roles`
+- [x] Delete `page_object/programme_users/` and the `page_programme_users` fixture
 
 ### 5. `country_search/test_country_search.py` (3) → `new_selenium/country_search/test_country_search.py`
-- [ ] test_country_search_finds_household_by_id → NEW, parametrize household / individual
-- [ ] test_country_search_finds_individual_by_id → NEW (param)
-- [ ] test_country_search_shows_no_results_for_unknown_id → NEW
-- [ ] Delete `page_object/country_search/`
+- [x] test_country_search_finds_household_by_id → NEW `test_country_search_finds_beneficiary_by_id[household]`
+- [x] test_country_search_finds_individual_by_id → NEW `test_country_search_finds_beneficiary_by_id[individual]`
+- [x] test_country_search_shows_no_results_for_unknown_id → NEW `test_country_search_shows_no_results_for_unknown_id`
+- [x] Delete `page_object/country_search/` and the `page_country_search` fixture
 
 ### 6. `country_dashboard/test_country_dashboard.py` (1) → `new_selenium/dashboard/test_country_dashboard.py`
 - [ ] test_smoke_country_dashboard → NEW (assert values from factory data, not only labels)
