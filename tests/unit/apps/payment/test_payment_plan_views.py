@@ -1780,6 +1780,7 @@ def test_export_sets_background_action_status_to_exporting(
 ) -> None:
     create_user_role_with_permissions(user, [Permissions.PM_PAYMENT_PLAN_EXPORT_XLSX], business_area, program=program)
     group = group_with_accepted_plan_and_payment
+    version_before_export = group.version
 
     with patch("hope.apps.payment.api.views.export_payment_plan_delivery_xlsx_async_task"):
         response = client.post(_export_url(business_area.slug, program.code, group.id))
@@ -1787,6 +1788,7 @@ def test_export_sets_background_action_status_to_exporting(
     assert response.status_code == status.HTTP_200_OK
     group.refresh_from_db()
     assert group.background_action_status == PaymentPlan.BackgroundActionStatus.XLSX_EXPORTING
+    assert group.version != version_before_export
 
 
 @pytest.mark.enable_activity_log

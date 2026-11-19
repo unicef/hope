@@ -536,6 +536,7 @@ class PaymentPlanService:
                 "background_action_status",
                 "updated_at",
                 "internal_data",
+                "version",
             )
         )
         if notify_vision:

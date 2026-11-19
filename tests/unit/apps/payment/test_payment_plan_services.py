@@ -1064,11 +1064,14 @@ def test_close_without_comment_allowed_when_every_plan_was_verified(ready_group,
 
 
 def test_abort_moves_group_and_plans(group_in_approval, locked_payment_list, user):
+    version_before_abort = group_in_approval.version
+
     PaymentPlanService(group_in_approval).abort("wrong amounts", user)
 
     group_in_approval.refresh_from_db()
     locked_payment_list.refresh_from_db()
     assert group_in_approval.status == PaymentPlan.Status.ABORTED
+    assert group_in_approval.version != version_before_abort
     assert group_in_approval.abort_comment == "wrong amounts"
     assert locked_payment_list.status == PaymentList.Status.ABORTED
 

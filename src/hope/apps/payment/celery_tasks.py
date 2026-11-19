@@ -285,14 +285,14 @@ def export_payment_plan_delivery_xlsx_async_task_action(job: AsyncRetryJob) -> N
             with transaction.atomic():
                 service.save_xlsx_file(user)
                 payment_plan.background_action_status = None
-                payment_plan.save(update_fields=["background_action_status", "updated_at"])
+                payment_plan.save(update_fields=["background_action_status", "updated_at", "version"])
                 log_payment_plan_change(payment_plan, old_payment_plan, job.config["user_id"])
             if payment_plan.cycle.program.business_area.enable_email_notification:
                 send_email_notification(service, user)
         except UnexportablePaymentListsError as exc:
             logger.warning(f"{exc} {' '.join(exc.skipped_reasons)}")
             payment_plan.background_action_status = PaymentPlan.BackgroundActionStatus.XLSX_EXPORT_ERROR
-            payment_plan.save(update_fields=["background_action_status", "updated_at"])
+            payment_plan.save(update_fields=["background_action_status", "updated_at", "version"])
             log_payment_plan_change(payment_plan, old_payment_plan, job.config["user_id"])
             job.errors = {**job.errors, "export_skipped_payment_lists": exc.skipped_reasons}
             job.save(update_fields=["errors"])
@@ -300,7 +300,7 @@ def export_payment_plan_delivery_xlsx_async_task_action(job: AsyncRetryJob) -> N
         except Exception:
             logger.exception("Export Payment Plan Delivery XLSX Error")
             payment_plan.background_action_status = PaymentPlan.BackgroundActionStatus.XLSX_EXPORT_ERROR
-            payment_plan.save(update_fields=["background_action_status", "updated_at"])
+            payment_plan.save(update_fields=["background_action_status", "updated_at", "version"])
             log_payment_plan_change(payment_plan, old_payment_plan, job.config["user_id"])
             raise
 
@@ -478,12 +478,12 @@ def import_payment_plan_fsp_extra_fields_from_xlsx_async_task_action(job: AsyncR
         with transaction.atomic():
             service.import_payment_list(job.config.get("user_id"))
             payment_plan.background_action_status = None
-            payment_plan.save(update_fields=["background_action_status", "updated_at"])
+            payment_plan.save(update_fields=["background_action_status", "updated_at", "version"])
             log_payment_plan_change(payment_plan, old_payment_plan, job.config.get("user_id"))
     except Exception:
         logger.exception("Unexpected error during Payment Plan FSP extra fields XLSX import")
         payment_plan.background_action_status = PaymentPlan.BackgroundActionStatus.XLSX_IMPORT_ERROR
-        payment_plan.save(update_fields=["background_action_status", "updated_at"])
+        payment_plan.save(update_fields=["background_action_status", "updated_at", "version"])
         log_payment_plan_change(payment_plan, old_payment_plan, job.config.get("user_id"))
         raise
 
@@ -597,7 +597,7 @@ def import_payment_plan_delivery_from_xlsx_async_task_action(job: AsyncRetryJob)
     )
     if delivery_import_file is None:
         payment_plan.background_action_status = PaymentPlan.BackgroundActionStatus.XLSX_IMPORT_ERROR
-        payment_plan.save(update_fields=["background_action_status", "updated_at"])
+        payment_plan.save(update_fields=["background_action_status", "updated_at", "version"])
         log_payment_plan_change(payment_plan, old_payment_plan, job.config.get("user_id"))
         raise NonRetriableTaskError("The reconciliation import file no longer exists.")
     if str(delivery_import_file.object_id) != str(payment_plan.pk):
@@ -632,13 +632,13 @@ def import_payment_plan_delivery_from_xlsx_async_task_action(job: AsyncRetryJob)
         service.open_workbook()
         service.import_payment_list(job.config.get("user_id"))
         payment_plan.background_action_status = None
-        payment_plan.save(update_fields=["background_action_status", "updated_at"])
+        payment_plan.save(update_fields=["background_action_status", "updated_at", "version"])
         log_payment_plan_change(payment_plan, old_payment_plan, job.config.get("user_id"))
         if notification:
             transaction.on_commit(partial(notification.send_success, **service.get_result_counts()))
     except XlsxPaymentPlanDeliveryImportError as exc:
         payment_plan.background_action_status = PaymentPlan.BackgroundActionStatus.XLSX_IMPORT_ERROR
-        payment_plan.save(update_fields=["background_action_status", "updated_at"])
+        payment_plan.save(update_fields=["background_action_status", "updated_at", "version"])
         log_payment_plan_change(payment_plan, old_payment_plan, job.config.get("user_id"))
         job.errors = {
             **job.errors,
@@ -654,7 +654,7 @@ def import_payment_plan_delivery_from_xlsx_async_task_action(job: AsyncRetryJob)
     except Exception:
         logger.exception("Import Payment Plan Delivery XLSX Error")
         payment_plan.background_action_status = PaymentPlan.BackgroundActionStatus.XLSX_IMPORT_ERROR
-        payment_plan.save(update_fields=["background_action_status", "updated_at"])
+        payment_plan.save(update_fields=["background_action_status", "updated_at", "version"])
         log_payment_plan_change(payment_plan, old_payment_plan, job.config.get("user_id"))
         raise
 
@@ -840,7 +840,7 @@ def _run_owner_exchange_rate_recalculation(
         )
         if not plans:
             owner.background_action_status = None
-            owner.save(update_fields=["background_action_status", "updated_at"])
+            owner.save(update_fields=["background_action_status", "updated_at", "version"])
             return
         set_sentry_business_area_tag(owner.business_area.name)
         exchange_date = owner.currency_exchange_date
@@ -894,7 +894,7 @@ def _run_owner_exchange_rate_recalculation(
         for cycle in cycles.values():
             cycle.save()
         owner.background_action_status = None
-        owner.save(update_fields=["background_action_status", "updated_at"])
+        owner.save(update_fields=["background_action_status", "updated_at", "version"])
 
 
 def recalculate_owner_exchange_rate_async_task_action(job: AsyncRetryJob) -> None:
@@ -924,7 +924,7 @@ def recalculate_owner_exchange_rate_async_task(
         if locked_owner.background_action_status not in (None, *locked_owner.BACKGROUND_ACTION_ERROR_STATES):
             raise ValidationError("Another owner background action is in progress")
         locked_owner.background_action_status = locked_owner.BackgroundActionStatus.RECALCULATING
-        locked_owner.save(update_fields=["background_action_status", "updated_at"])
+        locked_owner.save(update_fields=["background_action_status", "updated_at", "version"])
         AsyncRetryJob.queue_task(
             instance=locked_owner,
             owner_id=user_id,

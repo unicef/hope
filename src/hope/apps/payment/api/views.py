@@ -2626,7 +2626,7 @@ class PaymentPlanViewSet(
 
         old_payment_plan = copy_model_object(payment_plan)
         payment_plan.background_action_status = PaymentPlan.BackgroundActionStatus.XLSX_EXPORTING
-        payment_plan.save(update_fields=["background_action_status"])
+        payment_plan.save(update_fields=["background_action_status", "version"])
         log_create(
             mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
             business_area_field="cycle.program.business_area",
@@ -2726,7 +2726,7 @@ class PaymentPlanViewSet(
         old_payment_plan = copy_model_object(payment_plan)
         payment_plan.delivery_import_file = file_temp
         payment_plan.background_action_status = PaymentPlan.BackgroundActionStatus.XLSX_IMPORTING_RECONCILIATION
-        payment_plan.save(update_fields=["delivery_import_file", "background_action_status"])
+        payment_plan.save(update_fields=["delivery_import_file", "background_action_status", "version"])
         log_create(
             mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
             business_area_field="cycle.program.business_area",
@@ -2811,7 +2811,7 @@ class PaymentPlanViewSet(
         )
         old_payment_plan = copy_model_object(payment_plan)
         payment_plan.background_action_status = PaymentPlan.BackgroundActionStatus.XLSX_IMPORTING_FSP_EXTRA_FIELDS
-        payment_plan.save(update_fields=["background_action_status", "updated_at"])
+        payment_plan.save(update_fields=["background_action_status", "updated_at", "version"])
         log_create(
             mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
             business_area_field="cycle.program.business_area",

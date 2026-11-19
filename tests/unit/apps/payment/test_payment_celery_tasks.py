@@ -2097,6 +2097,7 @@ def test_export_delivery_task_creates_group_file(payment_plan_with_accepted_plan
     group = payment_plan_with_accepted_plan
     group.background_action_status = PaymentPlan.BackgroundActionStatus.XLSX_EXPORTING
     group.save(update_fields=["background_action_status"])
+    version_before_completion = group.version
 
     queue_and_run_retry_task(export_payment_plan_delivery_xlsx_async_task, group, str(user.pk))
 
@@ -2104,6 +2105,7 @@ def test_export_delivery_task_creates_group_file(payment_plan_with_accepted_plan
     assert group.export_file_delivery is not None
     assert group.export_file_delivery.file.name.endswith(".xlsx")
     assert group.background_action_status is None
+    assert group.version != version_before_completion
 
 
 def test_export_delivery_task_queues_job_with_fsp_xlsx_template_id(payment_plan_with_accepted_plan, user) -> None:
@@ -2136,6 +2138,7 @@ def test_export_delivery_task_sets_error_status_on_failure(payment_plan_with_acc
     group = payment_plan_with_accepted_plan
     group.background_action_status = PaymentPlan.BackgroundActionStatus.XLSX_EXPORTING
     group.save(update_fields=["background_action_status"])
+    version_before_failure = group.version
 
     with (
         patch(
@@ -2153,6 +2156,7 @@ def test_export_delivery_task_sets_error_status_on_failure(payment_plan_with_acc
 
     group.refresh_from_db()
     assert group.background_action_status == PaymentPlan.BackgroundActionStatus.XLSX_EXPORT_ERROR
+    assert group.version != version_before_failure
 
 
 @patch("hope.apps.payment.celery_tasks.send_email_notification")
