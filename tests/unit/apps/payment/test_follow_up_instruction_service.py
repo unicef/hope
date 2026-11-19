@@ -1058,13 +1058,17 @@ def locked_fsp_children(approval_instruction, cycle, business_area, currency) ->
 @pytest.fixture(
     params=[
         pytest.param(
-            FollowUpInstruction.BackgroundActionStatus.RECALCULATING,
-            "Another background action is already in progress",
+            (
+                FollowUpInstruction.BackgroundActionStatus.RECALCULATING,
+                "Another background action is already in progress",
+            ),
             id="running",
         ),
         pytest.param(
-            FollowUpInstruction.BackgroundActionStatus.RECALCULATING_ERROR,
-            "USD recalculation failed for this instruction",
+            (
+                FollowUpInstruction.BackgroundActionStatus.RECALCULATING_ERROR,
+                "USD recalculation failed for this instruction",
+            ),
             id="failed",
         ),
     ]

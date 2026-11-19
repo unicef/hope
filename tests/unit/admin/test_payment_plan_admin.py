@@ -52,7 +52,7 @@ def test_payment_plan_admin_save_logs_edit(
 
     with django_assert_num_queries(1):
         log = LogEntry.objects.get(object_id=payment_plan.pk, action=LogEntry.UPDATE)
-    assert log.changes[field] == {"from": old_value, "to": new_value}
+    assert log.changes[field] == {"from": str(old_value), "to": str(new_value)}
     assert log.user == admin_request.user
     assert list(log.programs.values_list("pk", flat=True)) == [payment_plan.cycle.program.pk]
 

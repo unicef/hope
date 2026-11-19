@@ -745,7 +745,7 @@ def test_callback_view_not_found_returns_404(mock_get, mock_log_entry) -> None:
         "status": "KO",
         "messageId": "abc123",
         "payplanSno": "UNKNOWN",
-        "message": "Payment Plan not found",
+        "message": "Payment plan not found",
     }
 
 

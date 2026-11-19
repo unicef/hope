@@ -35,6 +35,10 @@ def historical_apps(settings: Any) -> Apps:
             'ADD COLUMN "custom_exchange_rate" boolean NOT NULL DEFAULT false, '
             'ADD COLUMN "custom_exchange_rate_set_by_id" uuid NULL'
         )
+        # The historical schema allows unowned plans; drop the current constraint before creating test rows.
+        cursor.execute(
+            'ALTER TABLE "payment_paymentplan" DROP CONSTRAINT "payment_plan_in_group_or_instruction_unless_removed"'
+        )
     return state.apps
 
 
@@ -280,10 +284,14 @@ def test_reverse_rate_copy_restores_group_rate_fields_to_its_plan(
 ) -> None:
     migration_module.copy_exchange_rates_to_payment_plans(historical_apps, schema_editor)
 
-    historical_plan = historical_apps.get_model("payment", "PaymentPlan").objects.get(pk=accepted_plan.pk)
-    assert historical_plan.exchange_rate == Decimal("2.25")
-    assert historical_plan.custom_exchange_rate is True
-    assert historical_plan.custom_exchange_rate_set_by_id == rate_setter.pk
+    historical_plan = (
+        historical_apps.get_model("payment", "PaymentPlan")
+        .objects.values("exchange_rate", "custom_exchange_rate", "custom_exchange_rate_set_by_id")
+        .get(pk=accepted_plan.pk)
+    )
+    assert historical_plan["exchange_rate"] == Decimal("2.25")
+    assert historical_plan["custom_exchange_rate"] is True
+    assert historical_plan["custom_exchange_rate_set_by_id"] == rate_setter.pk
 
 
 @pytest.fixture
@@ -301,19 +309,19 @@ def test_reverse_rate_copy_restores_instruction_rate_to_its_child(
 ) -> None:
     migration_module.copy_exchange_rates_to_payment_plans(historical_apps, schema_editor)
 
-    historical_plan = historical_apps.get_model("payment", "PaymentPlan").objects.get(pk=instruction_child.pk)
-    assert historical_plan.exchange_rate == Decimal("3.25")
-    assert historical_plan.custom_exchange_rate is False
-    assert historical_plan.custom_exchange_rate_set_by_id is None
+    historical_plan = (
+        historical_apps.get_model("payment", "PaymentPlan")
+        .objects.values("exchange_rate", "custom_exchange_rate", "custom_exchange_rate_set_by_id")
+        .get(pk=instruction_child.pk)
+    )
+    assert historical_plan["exchange_rate"] == Decimal("3.25")
+    assert historical_plan["custom_exchange_rate"] is False
+    assert historical_plan["custom_exchange_rate_set_by_id"] is None
 
 
 @pytest.fixture
 def unowned_plan_with_rate(accepted_plan: PaymentList) -> PaymentList:
-    # The current schema requires an owner; 0084 removed that constraint before this data step runs.
     with connection.cursor() as cursor:
-        cursor.execute(
-            'ALTER TABLE "payment_paymentplan" DROP CONSTRAINT "payment_plan_in_group_or_instruction_unless_removed"'
-        )
         cursor.execute(
             'UPDATE "payment_paymentplan" SET "payment_plan_group_id" = NULL WHERE "id" = %s', [accepted_plan.pk]
         )

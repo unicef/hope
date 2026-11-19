@@ -194,6 +194,23 @@ describe('PaymentPlanDetailsHeader', () => {
     expect(screen.queryByTestId('button-lock-group')).toBeNull();
   });
 
+  it.each([
+    [PaymentPlanStatusEnum.OPEN, 'button-lock-group'],
+    [PaymentPlanStatusEnum.LOCKED, 'button-unlock-group'],
+  ] as const)(
+    'disables %s locking actions for an inactive programme',
+    (status, buttonId) => {
+      vi.spyOn(programContext, 'useProgramContext').mockReturnValue({
+        ...fakeContextProgram,
+        isActiveProgram: false,
+      });
+      mockUsePermissions.mockReturnValue([PERMISSIONS.PM_LOCK_AND_UNLOCK_FSP]);
+      renderHeader(null, status);
+
+      expect(screen.getByTestId(buttonId).hasAttribute('disabled')).toBe(true);
+    },
+  );
+
   it('hides Lock without the lock permission', () => {
     renderHeader(null, PaymentPlanStatusEnum.OPEN);
 

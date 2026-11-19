@@ -247,7 +247,8 @@ def group_with_different_plan_stages(
         PaymentPlanFactory(cycle=cycle, name="Batch (2)")
     finished = PaymentListFactory(program_cycle=cycle, payment_plan=group, status=PaymentList.Status.FINISHED)
     open_plan = PaymentListFactory(program_cycle=cycle, payment_plan=group, status=PaymentList.Status.OPEN)
-    return group, finished, open_plan, "Batch (3)" if request.param else "Batch (2)", 3 if request.param else 2
+    expected_group_count = PaymentPlan.objects.filter(cycle=cycle).count() + 1
+    return group, finished, open_plan, "Batch (3)" if request.param else "Batch (2)", expected_group_count
 
 
 @pytest.mark.django_db

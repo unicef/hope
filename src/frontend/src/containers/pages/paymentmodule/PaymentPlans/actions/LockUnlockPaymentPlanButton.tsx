@@ -12,6 +12,7 @@ import { showApiErrorMessages } from '@utils/utils';
 import type { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import { hasPermissions, PERMISSIONS } from '../../../../../config/permissions';
+import { useProgramContext } from '../../../../../programContext';
 import type { PaymentPlanDetail } from '../types';
 
 interface LockUnlockPaymentPlanButtonProps {
@@ -22,6 +23,7 @@ export function LockUnlockPaymentPlanButton({
   paymentPlan,
 }: LockUnlockPaymentPlanButtonProps): ReactElement | null {
   const { t } = useTranslation();
+  const { isActiveProgram } = useProgramContext();
   const { businessArea, programId } = useBaseUrl();
   const { showMessage } = useSnackbar();
   const confirm = useConfirmation();
@@ -84,6 +86,7 @@ export function LockUnlockPaymentPlanButton({
     <Box sx={{ p: 2 }}>
       <LoadingButton
         loading={isPending}
+        disabled={!isActiveProgram}
         variant={isLocked ? 'outlined' : 'contained'}
         color="primary"
         onClick={handleClick}
