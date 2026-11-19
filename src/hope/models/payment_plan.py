@@ -358,6 +358,41 @@ class PaymentPlan(TimeStampedUUIDModel, UnicefIdentifiedModel, InternalDataField
             return [plan for plan in payment_lists if plan.unsuccessful_payments_for_follow_up().exists()]
         return [plan for plan in payment_lists if plan.eligible_payments_for_child_plan().exists()]
 
+    def has_payment_lists_qualifying_for_linked_payment_plan(self, plan_type: "PaymentList.PlanType") -> bool:
+        if (
+            self.plan_type not in self.LINKED_GROUP_SOURCE_PLAN_TYPES[plan_type]
+            or self.status not in self.CHILD_GROUP_SOURCE_STATUSES
+        ):
+            return False
+
+        payments = Payment.objects.eligible().filter(
+            parent__payment_plan_id=self.pk,
+            parent__plan_type=self.plan_type,
+            parent__is_removed=False,
+            household__withdrawn=False,
+        )
+        if plan_type == PaymentList.PlanType.FOLLOW_UP:
+            existing_children = Payment.objects.filter(
+                is_follow_up=True,
+                parent__source_payment_list_id=OuterRef("parent_id"),
+                parent__program_cycle_id=OuterRef("parent__program_cycle_id"),
+                excluded=False,
+                household_id=OuterRef("household_id"),
+            ).exclude(parent_id=OuterRef("parent_id"))
+            payments = payments.filter(status__in=Payment.FAILED_STATUSES)
+        else:
+            child_type = (
+                PaymentList.PlanType.TOP_UP_AMENDMENT
+                if self.plan_type == PaymentList.PlanType.TOP_UP
+                else PaymentList.PlanType.TOP_UP
+            )
+            existing_children = Payment.objects.filter(
+                parent__plan_type=child_type,
+                parent__source_payment_list_id=OuterRef("parent_id"),
+                household_id=OuterRef("household_id"),
+            )
+        return payments.exclude(Exists(existing_children)).exists()
+
     @property
     def currency_exchange_date(self) -> date:
         if self.status in (

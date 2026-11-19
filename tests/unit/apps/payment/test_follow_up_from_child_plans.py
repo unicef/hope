@@ -66,6 +66,7 @@ def top_up_with_failed_payment(business_area: Any, cycle: ProgramCycle, purpose:
             plan_type=PaymentList.PlanType.TOP_UP,
             source_payment_plan=regular_pp.payment_plan,
             currency=regular_pp.currency,
+            status=PaymentPlan.Status.FINISHED,
         ),
         payment_plan_purposes=[purpose],
     )
@@ -117,6 +118,7 @@ def amendment_with_failed_payment(top_up_with_failed_payment: PaymentList, purpo
             plan_type=PaymentList.PlanType.TOP_UP_AMENDMENT,
             source_payment_plan=top_up_with_failed_payment.payment_plan,
             currency=top_up_with_failed_payment.currency,
+            status=PaymentPlan.Status.FINISHED,
         ),
         payment_plan_purposes=[purpose],
     )

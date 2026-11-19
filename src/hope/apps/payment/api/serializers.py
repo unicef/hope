@@ -2294,15 +2294,15 @@ class PaymentPlanDetailSerializer(OwnerExchangeRateSerializerMixin, AdminUrlSeri
 
     @staticmethod
     def get_can_create_follow_up(obj: PaymentPlan) -> bool:
-        return bool(obj.payment_lists_qualifying_for_linked_payment_plan(PaymentList.PlanType.FOLLOW_UP))
+        return obj.has_payment_lists_qualifying_for_linked_payment_plan(PaymentList.PlanType.FOLLOW_UP)
 
     @staticmethod
     def get_can_create_top_up(obj: PaymentPlan) -> bool:
-        return bool(obj.payment_lists_qualifying_for_linked_payment_plan(PaymentList.PlanType.TOP_UP))
+        return obj.has_payment_lists_qualifying_for_linked_payment_plan(PaymentList.PlanType.TOP_UP)
 
     @staticmethod
     def get_can_create_top_up_amendment(obj: PaymentPlan) -> bool:
-        return bool(obj.payment_lists_qualifying_for_linked_payment_plan(PaymentList.PlanType.TOP_UP_AMENDMENT))
+        return obj.has_payment_lists_qualifying_for_linked_payment_plan(PaymentList.PlanType.TOP_UP_AMENDMENT)
 
     @staticmethod
     def get_closed_by(obj: PaymentPlan) -> str | None:
