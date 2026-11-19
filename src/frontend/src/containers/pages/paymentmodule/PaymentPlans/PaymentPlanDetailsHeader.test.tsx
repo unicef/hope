@@ -2,6 +2,8 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { TestProviders } from 'src/testUtils/testProviders';
+import { fakeContextProgram } from 'src/testUtils/testUtils';
+import * as programContext from 'src/programContext';
 import { PaymentPlanDetailBackgroundActionStatusEnum } from '@restgenerated/models/PaymentPlanDetailBackgroundActionStatusEnum';
 import { PaymentPlanStatusEnum } from '@restgenerated/models/PaymentPlanStatusEnum';
 import { RestService } from '@restgenerated/services/RestService';
@@ -460,6 +462,40 @@ describe('PaymentPlanDetailsHeader', () => {
       );
     },
   );
+
+  it.each([
+    [PaymentPlanStatusEnum.FINISHED, 'button-set-ready-for-closure'],
+    [PaymentPlanStatusEnum.READY_FOR_CLOSURE, 'button-send-back'],
+  ] as const)(
+    'allows the closure action in %s after the programme is finished',
+    (status, buttonId) => {
+      vi.spyOn(programContext, 'useProgramContext').mockReturnValue({
+        ...fakeContextProgram,
+        isActiveProgram: false,
+      });
+      mockUsePermissions.mockReturnValue([
+        PERMISSIONS.PM_MARK_READY_FOR_CLOSURE,
+      ]);
+      renderHeader(null, status);
+
+      expect(screen.getByTestId(buttonId).hasAttribute('disabled')).toBe(false);
+    },
+  );
+
+  it('keeps Reactivate disabled after the programme is finished', () => {
+    vi.spyOn(programContext, 'useProgramContext').mockReturnValue({
+      ...fakeContextProgram,
+      isActiveProgram: false,
+    });
+    mockUsePermissions.mockReturnValue([PERMISSIONS.PM_REACTIVATE_ABORT]);
+    renderHeader(null, PaymentPlanStatusEnum.ABORTED);
+
+    expect(
+      screen
+        .getByTestId('button-reactivate-payment-plan')
+        .hasAttribute('disabled'),
+    ).toBe(true);
+  });
 
   it('hides closure actions without the permissions', () => {
     renderHeader(null, PaymentPlanStatusEnum.READY_FOR_CLOSURE);

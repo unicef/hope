@@ -105,7 +105,7 @@ export function PaymentPlanClosureActionButton({
         variant="contained"
         onClick={() => mutate()}
         loading={isPending}
-        disabled={!isActiveProgram}
+        disabled={action === 'reactivate' && !isActiveProgram}
         data-cy={config.dataCy}
         data-perm={config.permission}
       >
