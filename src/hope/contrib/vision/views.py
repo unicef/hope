@@ -82,7 +82,11 @@ class PaymentPlanCallbackView(HOPEAPIView, APIView):
         creator. The AD lookup for that record is done here, before `post` locks the Payment Plan row.
         Any other callback, an unknown plan, or a plan the callback cannot release returns None.
         """
-        if serializer.validated_data.get("status") != "SUCCESS" or not serializer.validated_data.get("fc_numbers"):
+        if (
+            serializer.validated_data.get("status") != "SUCCESS"
+            or not serializer.validated_data.get("fc_numbers")
+            or not serializer.validated_vision_payplan_sno
+        ):
             return None
         payment_plan = (
             PaymentPlan.objects.select_related("business_area", "created_by")

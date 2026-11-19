@@ -919,6 +919,7 @@ def test_release_actor_snapshot_arrange_success_with_fc_act_build_assert_creator
         pytest.param({"payplanSno": "PP044", "status": "SUCCESS", "fc_numbers": []}, id="creation_acknowledgement"),
         pytest.param({"payplanSno": "PP044", "status": "FAILED", "fc_numbers": ["FC123"]}, id="failure"),
         pytest.param({"payplanSno": "PP-MISSING", "status": "SUCCESS", "fc_numbers": ["FC123"]}, id="unknown_plan"),
+        pytest.param({"payplanSno": "PP044", "status": "SUCCESS", "fc_numbers": ["FC123"]}, id="missing_vision_id"),
     ],
 )
 @patch("hope.apps.account.actor_snapshot.MicrosoftGraphAPI")

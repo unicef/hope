@@ -736,8 +736,14 @@ def test_approval_process_serializer_all_fields(approval_process_context: dict[s
 
 def test_approval_process_serializer_arrange_snapshot_rows_act_serialize_assert_snapshot_values_shown(
     snapshot_approval_process_context: dict[str, Any],
+    django_assert_num_queries,
 ) -> None:
-    data = ApprovalProcessSerializer(instance=snapshot_approval_process_context["approval_process"]).data
+    approval_process = snapshot_approval_process_context["approval_process"]
+    approval_process.refresh_from_db()
+
+    # five payment_approval selects and one account_user fetch for the finance release row without a snapshot
+    with django_assert_num_queries(6):
+        data = ApprovalProcessSerializer(instance=approval_process).data
 
     assert data["sent_for_approval_by"] == "Old Name (Old Title)"
     assert data["sent_for_authorization_by"] == "Old Name"
