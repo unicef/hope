@@ -77,3 +77,35 @@ In HOPE we put logic into services. Since biographic deduplication for country w
 2. `src/hope/apps/registration_data/services/deduplication_engine.py` - storing deduplication statistics in both RDI and Individual attributes.
 3. `src/hope/apps/registration_data/tasks/rdi_merge.py` - wire logic in merge.
 4.
+
+## Branch `346504-export-population-to-hde-es`
+
+### Summary
+
+`export_population_to_hde_es` is a one-off management command that copies the merged population of a business area into HDE's biographic Elasticsearch, so new CW registrations are deduplicated against people registered before the BA switched to CW. It writes straight to that ES. It does not call the HDE API and computes no findings.
+
+```
+HDE_ELASTICSEARCH_HOST=https://user:pass@hde-es:9200 HDE_ELASTICSEARCH_PREFIX=<HDE's ELASTICSEARCH_PREFIX> \
+  manage.py export_population_to_hde_es --business-area afghanistan [ukraine ...] [--program abcd] [--dry-run] [--chunk-size 2000]
+```
+
+### Document contract
+
+Follows HDE `apps/biographic/search/index.py` and `schemas.py` on `feature/324-biographic-dedup` (PR #341, not merged).
+
+- Index `{prefix}biographic_{ba_slug}_{program_code}`, one per program, so the command loops over the BA's programs.
+- `_id = "0:{reference_pk}"`, `dataset_id = "0"`, `status = "approved"`. HDE reserves set `0` for documents HOPE writes itself, and `process.rebuild` keeps them.
+- Payload: `given_name`, `family_name`, `full_name`, `middle_name`, `birth_date` (ISO), `phone_no`, `phone_no_alternative` (E164, empty as `""`), `sex`, `relationship`.
+
+### Behaviour
+
+- HDE creates the index, not HOPE. If any program's index is missing, or it does not map `dataset_id`/`status` as `keyword`, the command stops before writing anything, also when several business areas are given. Writing to a missing index would let ES create it with a dynamic mapping, without HDE's analyzers or similarity script.
+- Population: `Individual.available_objects` (merged, not removed) of `ACTIVE` programs, without withdrawn individuals. Withdrawn individuals can share a `country_workspace_id` with a live one and would overwrite its `_id`. Programs without a population are skipped and their index is not checked.
+
+### For reviewers
+
+1. **ID contract is open.** `reference_pk = country_workspace_id or str(Individual.id)` (`hde_reference_pk`, marked TODO). Biographic findings are resolved by `country_workspace_id` only, so a finding pointing at an individual exported under its HOPE id is dropped. Options (assign a CW id to legacy individuals / extend the lookup to HOPE ids / prefixed id) are still to be agreed with HDE.
+2. The export is a snapshot. Later changes in HOPE (withdrawals, grievance updates) do not reach HDE.
+3. Phones are sent in E164, as in HOPE's own index. If CW sends another format, phones will not match.
+4. To confirm with HDE: slug vs BA code in the index name; how a program without CW RDIs gets its group and index.
+5. `*/management/commands/*` is omitted in `.coveragerc`, so patch coverage does not count the command. It is covered by `tests/unit/apps/registration_data/test_export_population_to_hde_es_command.py`.
