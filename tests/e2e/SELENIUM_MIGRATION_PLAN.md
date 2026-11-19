@@ -33,7 +33,7 @@ grep -rcE '^\s*def test_' tests/e2e --include='test_*.py' --exclude-dir=new_sele
 | 6 | `country_dashboard` | 1 | 0 | ⬜ |
 | 7 | `managerial_console` | 2 | 0 | ⬜ |
 | 8 | `drawer` | 4 | 0 | ⬜ |
-| 9 | `accountability` | 4 | 0 | ⬜ |
+| 9 | `accountability` | 4 | 4 | ✅ |
 | 10 | `programme_population` (hh/ind/PDU) | 12 | 0 | ⬜ |
 | 11 | `people` | 7 | 0 | ⬜ |
 | 12 | `programme_management` | 8 | 0 | ⬜ |
@@ -46,9 +46,9 @@ grep -rcE '^\s*def test_' tests/e2e --include='test_*.py' --exclude-dir=new_sele
 | 19 | `grievance/grievance_dashboard` | 2 | 0 | ⬜ |
 | 20 | `grievance/grievance_tickets` | 25 | 0 | ⬜ |
 | 21 | Old infra cleanup | – | – | ⬜ |
-| | **Total** | **155** | **16** | **10 %** |
+| | **Total** | **155** | **20** | **13 %** |
 
-`[██░░░░░░░░░░░░░░░░░░] 16 / 155`. Update it after each PR: 1 block per ~8 tests.
+`[███░░░░░░░░░░░░░░░░░] 20 / 155`. Update it after each PR: 1 block per ~8 tests.
 
 The new suite already has 46 test files and ~250 test functions. These do not count toward the 155.
 
@@ -107,11 +107,11 @@ Legend: `NEW <new_selenium/...>` · `COVERED <existing new test>` (verify assert
 - [ ] test_inactive_draft_subheader → NEW
 
 ### 9. `accountability/` (4) → `new_selenium/accountability/`
-- [ ] test_smoke_accountability_communication → NEW `test_communication.py`
-- [ ] test_smoke_accountability_communication_details → NEW `test_communication.py`
-- [ ] test_smoke_accountability_surveys → NEW `test_surveys.py`
-- [ ] test_smoke_accountability_surveys_details → NEW `test_surveys.py`
-- [ ] Delete `page_object/accountability/`
+- [x] test_smoke_accountability_communication → NEW `test_communication.py::test_communication_list_shows_message`
+- [x] test_smoke_accountability_communication_details → NEW `test_communication.py::test_communication_details_shows_message`
+- [x] test_smoke_accountability_surveys → NEW `test_surveys.py::test_surveys_list_shows_survey`
+- [x] test_smoke_accountability_surveys_details → NEW `test_surveys.py::test_survey_details_shows_survey_and_recipient`
+- [x] Delete `page_object/accountability/`, the four `page_accountability_*` fixtures and the unused `get_nav_accountability` / `_communication` / `_surveys` helpers
 
 ### 10. `programme_population/` (12) → `new_selenium/programme_population/`
 - [ ] test_smoke_page_households → NEW `test_households.py`

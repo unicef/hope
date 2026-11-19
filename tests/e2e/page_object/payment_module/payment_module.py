@@ -71,15 +71,6 @@ class PaymentModule(BaseComponents):
     def get_nav_feedback(self) -> WebElement:
         return self.wait_for(self.nav_feedback)
 
-    def get_nav_accountability(self) -> WebElement:
-        return self.wait_for(self.nav_accountability)
-
-    def get_nav_communication(self) -> WebElement:
-        return self.wait_for(self.nav_communication)
-
-    def get_nav_surveys(self) -> WebElement:
-        return self.wait_for(self.nav_surveys)
-
     def get_nav_programme_users(self) -> WebElement:
         return self.wait_for(self.nav_programme_users)
 

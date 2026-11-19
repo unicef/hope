@@ -38,9 +38,6 @@ class BaseComponents(Common):
     nav_grievance_tickets = 'a[data-cy="nav-Grievance Tickets"]'
     nav_grievance_dashboard = 'a[data-cy="nav-Grievance Dashboard"]'
     nav_feedback = 'a[data-cy="nav-Feedback"]'
-    nav_accountability = 'a[data-cy="nav-Accountability"]'
-    nav_communication = 'a[data-cy="nav-Communication"]'
-    nav_surveys = 'a[data-cy="nav-Surveys"]'
     nav_programme_users = 'a[data-cy="nav-Programme Users"]'
     nav_activity_log = 'a[data-cy="nav-Activity Log"]'
     nav_resources_knowledge_base = 'a[data-cy="nav-resources-Knowledge Base"]'
@@ -166,15 +163,6 @@ class BaseComponents(Common):
 
     def get_nav_feedback(self) -> WebElement:
         return self.wait_for(self.nav_feedback)
-
-    def get_nav_accountability(self) -> WebElement:
-        return self.wait_for(self.nav_accountability)
-
-    def get_nav_communication(self) -> WebElement:
-        return self.wait_for(self.nav_communication)
-
-    def get_nav_surveys(self) -> WebElement:
-        return self.wait_for(self.nav_surveys)
 
     def get_nav_programme_users(self) -> WebElement:
         return self.wait_for(self.nav_programme_users)

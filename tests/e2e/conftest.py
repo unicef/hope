@@ -22,12 +22,6 @@ from selenium.common.exceptions import TimeoutException
 from selenium.webdriver import Chrome
 from selenium.webdriver.chrome.options import Options
 
-from e2e.page_object.accountability.communication import AccountabilityCommunication
-from e2e.page_object.accountability.comunication_details import (
-    AccountabilityCommunicationDetails,
-)
-from e2e.page_object.accountability.surveys import AccountabilitySurveys
-from e2e.page_object.accountability.surveys_details import AccountabilitySurveysDetails
 from e2e.page_object.admin_panel.admin_panel import AdminPanel
 from e2e.page_object.country_dashboard.country_dashboard import CountryDashboard
 from e2e.page_object.error_page.access_denied import AccessDenied
@@ -572,30 +566,8 @@ def page_program_cycle_details(request: FixtureRequest, browser: Chrome) -> Prog
 
 
 @pytest.fixture
-def page_accountability_surveys(request: FixtureRequest, browser: Chrome) -> AccountabilitySurveys:
-    return AccountabilitySurveys(browser)
-
-
-@pytest.fixture
-def page_accountability_surveys_details(request: FixtureRequest, browser: Chrome) -> AccountabilitySurveysDetails:
-    return AccountabilitySurveysDetails(browser)
-
-
-@pytest.fixture
 def page_programme_users(request: FixtureRequest, browser: Chrome) -> ProgrammeUsers:
     return ProgrammeUsers(browser)
-
-
-@pytest.fixture
-def page_accountability_communication(request: FixtureRequest, browser: Chrome) -> AccountabilityCommunication:
-    return AccountabilityCommunication(browser)
-
-
-@pytest.fixture
-def page_accountability_communication_details(
-    request: FixtureRequest, browser: Chrome
-) -> AccountabilityCommunicationDetails:
-    return AccountabilityCommunicationDetails(browser)
 
 
 @pytest.fixture
