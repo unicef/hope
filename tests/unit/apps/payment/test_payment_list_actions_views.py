@@ -459,6 +459,43 @@ def test_group_exchange_rate_uses_group_status_even_when_child_plan_is_busy(
     mock_queue.assert_called_once()
 
 
+@pytest.mark.parametrize(
+    "background_action_status",
+    [
+        PaymentList.BackgroundActionStatus.RULE_ENGINE_RUN,
+        PaymentList.BackgroundActionStatus.XLSX_IMPORTING_ENTITLEMENTS,
+        PaymentList.BackgroundActionStatus.IMPORTING_ENTITLEMENTS,
+    ],
+)
+def test_group_exchange_rate_waits_for_entitlement_action(
+    payment_list_actions_context: dict[str, Any],
+    create_user_role_with_permissions: Any,
+    background_action_status: PaymentList.BackgroundActionStatus,
+) -> None:
+    context = payment_list_actions_context
+    create_user_role_with_permissions(
+        context["user"], [Permissions.PM_CUSTOM_EXCHANGE_RATE], context["business_area"], context["program_active"]
+    )
+    payment_list = context["pp"]
+    payment_list.status = PaymentList.Status.LOCKED
+    payment_list.background_action_status = background_action_status
+    payment_list.save(update_fields=["status", "background_action_status"])
+    group = payment_list.payment_plan
+    original_rate = group.exchange_rate
+
+    response = context["client"].post(
+        context["url_custom_exchange_rate"],
+        {"custom_exchange_rate": "1.25000000", "version": group.version},
+        format="json",
+    )
+
+    group.refresh_from_db()
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert "Wait for the current entitlement action to finish before changing the rate" in response.data
+    assert group.exchange_rate == original_rate
+    assert group.background_action_status is None
+
+
 def test_apply_custom_exchange_rate_validation_errors(
     payment_list_actions_context: dict[str, Any],
     create_user_role_with_permissions: Any,
@@ -832,6 +869,39 @@ def test_list_changes_are_refused_once_payment_plan_is_locked(
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert "This Payment List can be changed only while its Payment Plan is Open." in response.data
     payment_list.refresh_from_db()
+    assert payment_list.background_action_status is None
+
+
+@pytest.mark.parametrize(
+    ("permission", "url_key"),
+    [
+        (Permissions.PM_APPLY_RULE_ENGINE_FORMULA_WITH_ENTITLEMENTS, "url_apply_steficon"),
+        (Permissions.PM_IMPORT_XLSX_WITH_ENTITLEMENTS, "url_import_entitlement_xlsx"),
+        (Permissions.PM_APPLY_RULE_ENGINE_FORMULA_WITH_ENTITLEMENTS, "url_import_entitlement_flat_amount"),
+    ],
+)
+def test_entitlement_actions_wait_for_group_exchange_rate_recalculation(
+    payment_list_actions_context: dict[str, Any],
+    create_user_role_with_permissions: Any,
+    permission: Permissions,
+    url_key: str,
+) -> None:
+    context = payment_list_actions_context
+    create_user_role_with_permissions(
+        context["user"], [permission], context["business_area"], context["program_active"]
+    )
+    payment_list = context["pp"]
+    payment_list.status = PaymentList.Status.LOCKED
+    payment_list.save(update_fields=["status"])
+    PaymentPlan.objects.filter(pk=payment_list.payment_plan_id).update(
+        background_action_status=PaymentPlan.BackgroundActionStatus.RECALCULATING
+    )
+
+    response = context["client"].post(context[url_key], {}, format="json")
+
+    payment_list.refresh_from_db()
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert "Wait for the Payment Plan exchange rate recalculation to finish." in response.data
     assert payment_list.background_action_status is None
 
 

@@ -2380,6 +2380,10 @@ class PaymentPlanViewSet(
         check_concurrency_version_in_mutation(data.get("version"), payment_plan)
         if payment_plan.background_action_status not in (None, *PaymentPlan.BACKGROUND_ACTION_ERROR_STATES):
             raise ValidationError("Wait for the current payment plan action to finish before changing the rate")
+        if payment_plan.payment_lists.filter(
+            background_action_status__in=PaymentList.ENTITLEMENT_BACKGROUND_ACTION_STATES
+        ).exists():
+            raise ValidationError("Wait for the current entitlement action to finish before changing the rate")
 
         user = cast("User", request.user)
         old_payment_plan = cast("PaymentPlan", copy_model_object(payment_plan))

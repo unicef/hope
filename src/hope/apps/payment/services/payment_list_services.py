@@ -198,16 +198,17 @@ class PaymentListService:
             )
 
     def validate_payment_plan_open(self) -> None:
-        """Refuse a list change once the list's Payment Plan is no longer OPEN.
+        """Refuse a list change while its Payment Plan is locked or recalculating.
 
-        The plan row is read with a row lock, so a change sent while Lock Payment Plan is running waits for it and is
-        refused, instead of saving the list over the LOCKED_FSP status the lock gave it.
+        The plan row lock serializes list changes with plan locking and exchange rate changes.
         """
         if self.payment_list.payment_plan_id is None:
             return
         payment_plan = PaymentPlan.objects.select_for_update().get(pk=self.payment_list.payment_plan_id)
         if payment_plan.status != PaymentPlan.Status.OPEN:
             raise ValidationError("This Payment List can be changed only while its Payment Plan is Open.")
+        if payment_plan.background_action_status == PaymentPlan.BackgroundActionStatus.RECALCULATING:
+            raise ValidationError("Wait for the Payment Plan exchange rate recalculation to finish.")
 
     def validate_action(self) -> None:
         actions = list(self.actions_map.keys())

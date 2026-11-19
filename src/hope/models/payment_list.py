@@ -255,6 +255,12 @@ class PaymentList(
         def get_choices() -> list[tuple[str, str]]:
             return PaymentList.BackgroundActionStatus.choices
 
+    ENTITLEMENT_BACKGROUND_ACTION_STATES = (
+        BackgroundActionStatus.RULE_ENGINE_RUN,
+        BackgroundActionStatus.XLSX_IMPORTING_ENTITLEMENTS,
+        BackgroundActionStatus.IMPORTING_ENTITLEMENTS,
+    )
+
     BACKGROUND_ACTION_ERROR_STATES = [
         BackgroundActionStatus.XLSX_EXPORT_ERROR,
         BackgroundActionStatus.XLSX_IMPORT_ERROR,
