@@ -1853,9 +1853,8 @@ class PaymentPlanManagerialViewSet(
     PERMISSIONS = [Permissions.PAYMENT_VIEW_LIST_MANAGERIAL]
     business_area_model_field = "cycle__program__business_area"
     program_model_field = "cycle__program"
-    filter_backends = (filters.DjangoFilterBackend, SearchFilter, OrderingFilter)
+    filter_backends = (filters.DjangoFilterBackend, OrderingFilter)
     filterset_class = PaymentPlanFilter
-    search_fields = ("unicef_id", "id", "^name")
 
     def get_queryset(self) -> QuerySet:
         return (

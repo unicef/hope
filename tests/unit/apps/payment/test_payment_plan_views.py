@@ -1751,6 +1751,23 @@ def test_search_by_unicef_id(
     assert str(groups_for_unicef_id_search["other"].id) not in returned_ids
 
 
+def test_search_by_uuid(
+    client: Any,
+    user: Any,
+    business_area: Any,
+    program: Any,
+    groups_for_name_search: Any,
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(user, [Permissions.PM_PAYMENT_PLAN_VIEW_LIST], business_area, program=program)
+    target = groups_for_name_search["alpha"]
+
+    response = client.get(_list_url(business_area.slug, program.code), {"search": str(target.id)})
+
+    assert response.status_code == status.HTTP_200_OK
+    assert [group["id"] for group in response.json()["results"]] == [str(target.id)]
+
+
 def test_export_with_correct_permission_returns_200(
     client: Any,
     user: Any,

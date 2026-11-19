@@ -203,6 +203,24 @@ def test_list_groups_shows_only_programmes_the_user_may_see(
     assert {group["unicef_id"] for group in response.json()["results"]} == {"PPG-MAN-001", "PPG-MAN-002"}
 
 
+@pytest.mark.parametrize("field", ["id", "name"])
+def test_list_groups_searches_by_uuid_and_multi_word_name(
+    managerial_context: dict[str, Any], create_user_role_with_permissions: Any, field: str
+) -> None:
+    context = managerial_context
+    create_user_role_with_permissions(
+        context["user"],
+        [Permissions.PAYMENT_VIEW_LIST_MANAGERIAL],
+        context["business_area"],
+        whole_business_area_access=True,
+    )
+
+    response = context["client"].get(context["url"], {"search": str(getattr(context["group1"], field))})
+
+    assert response.status_code == status.HTTP_200_OK
+    assert [group["id"] for group in response.json()["results"]] == [str(context["group1"].id)]
+
+
 def test_list_groups_row_carries_programme_totals_and_configuration(
     managerial_context: dict[str, Any],
     create_user_role_with_permissions: Any,

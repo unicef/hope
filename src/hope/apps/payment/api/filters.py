@@ -260,7 +260,7 @@ class PaymentPlanFilter(FilterSet):
         fields = ["cycle", "status", "plan_type"]
 
     def search_filter(self, qs: QuerySet, name: str, value: str) -> QuerySet:
-        return qs.filter(Q(unicef_id__icontains=value) | Q(name__istartswith=value))
+        return qs.filter(Q(id__icontains=value) | Q(unicef_id__icontains=value) | Q(name__istartswith=value))
 
 
 class PaymentVerificationRecordFilter(FilterSet):
