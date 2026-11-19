@@ -262,6 +262,30 @@ def test_legacy_children_move_to_one_linked_group_per_type_and_status(
     assert list(top_up_group.payment_lists.all()) == [legacy_children["top_up"]]
 
 
+@pytest.fixture
+def long_named_group_with_collision(
+    historical_apps_with_plan_columns: Apps, group: PaymentPlan, legacy_children: dict[str, PaymentList]
+) -> PaymentPlan:
+    group.name = "X" * 255
+    group.save(update_fields=["name"])
+    first_suffix = " Follow Up 1"
+    PaymentPlanFactory(cycle=group.cycle, name=f"{group.name[: 255 - len(first_suffix)]}{first_suffix}")
+    return group
+
+
+def test_legacy_child_group_name_fits_the_column_and_skips_a_collision(
+    historical_apps_with_plan_columns: Apps, long_named_group_with_collision: PaymentPlan
+) -> None:
+    group = long_named_group_with_collision
+
+    migration_module.move_legacy_child_plans_into_linked_groups(historical_apps_with_plan_columns, schema_editor=None)
+
+    linked_group = group.linked_payment_plans.get(plan_type=PaymentList.PlanType.FOLLOW_UP)
+    suffix = " Follow Up 2"
+    assert linked_group.name == f"{group.name[: 255 - len(suffix)]}{suffix}"
+    assert len(linked_group.name) == 255
+
+
 def test_linked_group_of_children_without_fsp_and_currency_takes_them_from_the_source_group(
     historical_apps_with_plan_columns: Apps, group: PaymentPlan, legacy_children: dict[str, PaymentList]
 ) -> None:

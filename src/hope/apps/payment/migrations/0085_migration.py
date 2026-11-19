@@ -282,7 +282,8 @@ def bucket_legacy_children(children):
 def _free_linked_group_name(groups, source_group, plan_type):
     sequence_number = groups.filter(source_group=source_group, plan_type=plan_type).count() + 1
     while True:
-        name = f"{source_group.name} {CHILD_GROUP_LABELS[plan_type]} {sequence_number}"
+        suffix = f" {CHILD_GROUP_LABELS[plan_type]} {sequence_number}"
+        name = f"{source_group.name[: 255 - len(suffix)]}{suffix}"
         if not groups.filter(cycle_id=source_group.cycle_id, name=name).exists():
             return name
         sequence_number += 1
