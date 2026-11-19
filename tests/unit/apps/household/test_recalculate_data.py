@@ -1,4 +1,4 @@
-import datetime
+import datetime as dt
 from typing import Any
 from unittest.mock import MagicMock, patch
 
@@ -97,21 +97,21 @@ def household_with_individuals(
         {
             "relationship": COUSIN,
             "sex": FEMALE,
-            "birth_date": datetime.date(1981, 8, 8),
+            "birth_date": dt.date(1981, 8, 8),
             "pregnant": True,
             "physical_disability": "LOT_DIFFICULTY",
         },
         {
             "relationship": GRANDDAUGHTER_GRANDSON,
             "sex": FEMALE,
-            "birth_date": datetime.date(1993, 9, 1),
+            "birth_date": dt.date(1993, 9, 1),
             "pregnant": True,
             "selfcare_disability": "CANNOT_DO",
         },
         {
             "relationship": BROTHER_SISTER,
             "sex": FEMALE,
-            "birth_date": datetime.date(2015, 7, 29),
+            "birth_date": dt.date(2015, 7, 29),
             "pregnant": False,
             "seeing_disability": "LOT_DIFFICULTY",
             "hearing_disability": "LOT_DIFFICULTY",
@@ -123,21 +123,21 @@ def household_with_individuals(
         {
             "relationship": AUNT_UNCLE,
             "sex": FEMALE,
-            "birth_date": datetime.date(2009, 7, 29),
+            "birth_date": dt.date(2009, 7, 29),
             "pregnant": False,
             "hearing_disability": "CANNOT_DO",
         },
         {
             "relationship": NON_BENEFICIARY,
             "sex": MALE,
-            "birth_date": datetime.date(2015, 7, 29),
+            "birth_date": dt.date(2015, 7, 29),
             "pregnant": False,
             "hearing_disability": "CANNOT_DO",
         },
         {
             "relationship": COUSIN,
             "sex": MALE,
-            "birth_date": datetime.date(1961, 7, 29),
+            "birth_date": dt.date(1961, 7, 29),
             "pregnant": False,
             "memory_disability": "LOT_DIFFICULTY",
             "comms_disability": "LOT_DIFFICULTY",
@@ -146,7 +146,7 @@ def household_with_individuals(
     head = household.head_of_household
     head.relationship = HEAD
     head.sex = FEMALE
-    head.birth_date = datetime.date(2021, 6, 29)
+    head.birth_date = dt.date(2021, 6, 29)
     head.pregnant = False
     head.memory_disability = "LOT_DIFFICULTY"
     head.registration_data_import = registration_data_import
@@ -159,7 +159,7 @@ def household_with_individuals(
             business_area=business_area,
             program=program,
             registration_data_import=registration_data_import,
-            first_registration_date=timezone.make_aware(datetime.datetime(2021, 1, 11)),
+            first_registration_date=timezone.make_aware(dt.datetime(2021, 1, 11)),
             **data,
         )
         individuals.append(ind)
@@ -241,7 +241,7 @@ def test_recalculation_for_last_registration_date(
     head = household.head_of_household
     head.relationship = HEAD
     head.sex = FEMALE
-    head.birth_date = datetime.date(2022, 1, 1)
+    head.birth_date = dt.date(2022, 1, 1)
     head.pregnant = False
     head.memory_disability = "LOT_DIFFICULTY"
     head.registration_data_import = registration_data_import
@@ -251,21 +251,21 @@ def test_recalculation_for_last_registration_date(
         {
             "relationship": COUSIN,
             "sex": FEMALE,
-            "birth_date": datetime.date(1981, 1, 1),
+            "birth_date": dt.date(1981, 1, 1),
             "pregnant": True,
             "physical_disability": "LOT_DIFFICULTY",
         },
         {
             "relationship": GRANDDAUGHTER_GRANDSON,
             "sex": FEMALE,
-            "birth_date": datetime.date(1993, 1, 1),
+            "birth_date": dt.date(1993, 1, 1),
             "pregnant": True,
             "selfcare_disability": "CANNOT_DO",
         },
         {
             "relationship": BROTHER_SISTER,
             "sex": FEMALE,
-            "birth_date": datetime.date(2000, 1, 1),
+            "birth_date": dt.date(2000, 1, 1),
             "pregnant": False,
             "seeing_disability": "LOT_DIFFICULTY",
             "hearing_disability": "LOT_DIFFICULTY",
@@ -277,21 +277,21 @@ def test_recalculation_for_last_registration_date(
         {
             "relationship": AUNT_UNCLE,
             "sex": FEMALE,
-            "birth_date": datetime.date(2009, 1, 1),
+            "birth_date": dt.date(2009, 1, 1),
             "pregnant": False,
             "hearing_disability": "CANNOT_DO",
         },
         {
             "relationship": NON_BENEFICIARY,
             "sex": MALE,
-            "birth_date": datetime.date(2020, 1, 1),
+            "birth_date": dt.date(2020, 1, 1),
             "pregnant": False,
             "hearing_disability": "CANNOT_DO",
         },
         {
             "relationship": COUSIN,
             "sex": MALE,
-            "birth_date": datetime.date(1955, 1, 1),
+            "birth_date": dt.date(1955, 1, 1),
             "pregnant": False,
             "memory_disability": "LOT_DIFFICULTY",
             "comms_disability": "LOT_DIFFICULTY",
@@ -306,7 +306,7 @@ def test_recalculation_for_last_registration_date(
             **data,
         )
 
-    household.last_registration_date = timezone.make_aware(datetime.datetime(2023, 1, 2))
+    household.last_registration_date = timezone.make_aware(dt.datetime(2023, 1, 2))
     household.save()
 
     recalculate_data(household=household, save=True)
