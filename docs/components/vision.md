@@ -39,7 +39,7 @@ When either flag is disabled:
 2. HOPE queues the Vision request after the database transaction commits.
 3. A successful request sets the Vision state to `WAITING_FOR_CALLBACK`.
 4. The first callback confirms that Vision created the Payment Plan and sets `PP_CREATED`.
-5. The second successful callback provides one or more FC numbers.
+5. The `FC CREATE` callback provides one or more FC numbers.
 6. HOPE validates and assigns all matching FC headers.
 7. Successful assignment releases the Payment Plan automatically and moves it to `ACCEPTED`.
 8. A Payment Gateway plan is sent to Payment Gateway automatically. A non-Payment Gateway plan becomes available for
@@ -95,6 +95,8 @@ Duplicate callbacks do not repeat release or delivery side effects.
 | Missing Vision identifier on an active plan in review | `CALLBACK_FAILED` | Remains `IN_REVIEW`; no FC changes |
 | Plan has no active Vision request | Unchanged | Callback is logged; no workflow changes |
 | `SUCCESS` without `fc_numbers` after Vision creates the plan | `PP_CREATED` | Remains `IN_REVIEW` and waits for the FC callback |
+| `FC CREATE` with `fc_numbers` | `FC_ASSOCIATED`, then `RELEASED` if all FCs match | Moves to `ACCEPTED` and continues to delivery |
+| `FC CREATE` without `fc_numbers` | `CALLBACK_FAILED` | Remains `IN_REVIEW`; no FC changes |
 | Vision reports failure | `CALLBACK_FAILED` | Remains `IN_REVIEW`; no FC changes |
 | Any FC number has no eligible HOPE header | `FC_NOT_FOUND` | Remains `IN_REVIEW`; no FC changes |
 | FC assignment succeeds | `FC_ASSOCIATED`, then `RELEASED` | Moves to `ACCEPTED` and continues to delivery |
