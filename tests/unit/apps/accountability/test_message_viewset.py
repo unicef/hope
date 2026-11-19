@@ -1,6 +1,6 @@
 """Tests for Message ViewSet."""
 
-import datetime
+import datetime as dt
 from typing import Any
 from unittest.mock import MagicMock, patch
 from urllib.parse import urlencode
@@ -95,7 +95,7 @@ def rdi(program_active, business_area):
 
 @pytest.fixture
 def individual_hoh_1(program_active, business_area, rdi):
-    birth_date_for_50yo = timezone.now().date() - datetime.timedelta(days=50 * 365)
+    birth_date_for_50yo = timezone.now().date() - dt.timedelta(days=50 * 365)
     return IndividualFactory(
         household=None,
         birth_date=birth_date_for_50yo,
@@ -110,7 +110,7 @@ def individual_hoh_1(program_active, business_area, rdi):
 
 @pytest.fixture
 def individual_hoh_2(program_active, business_area, rdi):
-    birth_date_for_50yo = timezone.now().date() - datetime.timedelta(days=50 * 365)
+    birth_date_for_50yo = timezone.now().date() - dt.timedelta(days=50 * 365)
     return IndividualFactory(
         household=None,
         birth_date=birth_date_for_50yo,
@@ -125,7 +125,7 @@ def individual_hoh_2(program_active, business_area, rdi):
 
 @pytest.fixture
 def individual_hoh_3(program_active, business_area, rdi):
-    birth_date_for_50yo = timezone.now().date() - datetime.timedelta(days=50 * 365)
+    birth_date_for_50yo = timezone.now().date() - dt.timedelta(days=50 * 365)
     return IndividualFactory(
         household=None,
         birth_date=birth_date_for_50yo,
@@ -264,7 +264,7 @@ def msg_created_2021(program_active, business_area, user):
         created_by=user,
         sampling_type=Survey.SAMPLING_FULL_LIST,
     )
-    msg.created_at = timezone.make_aware(datetime.datetime(year=2021, month=3, day=12))
+    msg.created_at = timezone.make_aware(dt.datetime(year=2021, month=3, day=12))
     msg.save()
     return msg
 
@@ -279,7 +279,7 @@ def msg_created_2020(program_active, business_area, user):
         created_by=user,
         sampling_type=Survey.SAMPLING_RANDOM,
     )
-    msg.created_at = timezone.make_aware(datetime.datetime(year=2020, month=5, day=15))
+    msg.created_at = timezone.make_aware(dt.datetime(year=2020, month=5, day=15))
     msg.save()
     return msg
 

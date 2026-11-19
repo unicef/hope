@@ -11,7 +11,12 @@ def send_payment_plan_to_vision_async_task_action(job: AsyncJob) -> None:
     with transaction.atomic():
         payment_plan = (
             PaymentPlan.objects.select_for_update(of=("self",))
-            .select_related("cycle__program__business_area", "financial_service_provider", "currency")
+            .select_related(
+                "cycle__program__business_area",
+                "cycle__program__data_collecting_type__payee_type",
+                "financial_service_provider",
+                "currency",
+            )
             .get(pk=job.config["payment_plan_id"])
         )
         if not payment_plan.can_send_to_vision:
@@ -60,7 +65,10 @@ def send_payment_plan_to_vision_async_task(payment_plan: PaymentPlan, user_id: s
 
 def notify_payment_plan_status_to_vision_async_task_action(job: AsyncJob) -> None:
     payment_plan = PaymentPlan.objects.select_related(
-        "cycle__program__business_area", "currency", "financial_service_provider"
+        "cycle__program__business_area",
+        "cycle__program__data_collecting_type__payee_type",
+        "currency",
+        "financial_service_provider",
     ).get(pk=job.config["payment_plan_id"])
     VisionAPI().notify_payment_plan_status(payment_plan, job.config["vision_status"])
 

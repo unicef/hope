@@ -1,4 +1,4 @@
-import datetime
+import datetime as dt
 
 import pytest
 from rest_framework.test import APIClient
@@ -233,7 +233,7 @@ def test_getting_individual_with_status_paid(
     payment = PaymentFactory(
         household=household,
         currency=CurrencyFactory(code="PLN", name="Polish Zloty"),
-        delivery_date=datetime.date.today(),
+        delivery_date=dt.date.today(),
         delivered_quantity=1,
     )
 
@@ -243,7 +243,7 @@ def test_getting_individual_with_status_paid(
     assert data["info"] is not None
     info = data["info"]
     assert info["status"] == "paid"
-    assert datetime.datetime.fromisoformat(info["date"].replace("Z", "")).date() == payment.delivery_date
+    assert dt.datetime.fromisoformat(info["date"].replace("Z", "")).date() == payment.delivery_date
 
 
 def test_getting_non_existent_household(api_client) -> None:
@@ -278,14 +278,14 @@ def test_getting_household_with_status_paid(api_client, merged_household_context
         household=household,
         delivered_quantity=1000,
         collector=individual,
-        delivery_date=datetime.date.today(),
+        delivery_date=dt.date.today(),
     )
     response = api_client.get(f"/api/hh-status?detail_id={detail_id}")
     assert response.status_code == 200
     data = response.json()
     info = data["info"]
     assert info["status"] == "paid"
-    assert datetime.datetime.fromisoformat(info["date"].replace("Z", "")).date() == payment.delivery_date
+    assert dt.datetime.fromisoformat(info["date"].replace("Z", "")).date() == payment.delivery_date
     assert "individual" not in info
 
 

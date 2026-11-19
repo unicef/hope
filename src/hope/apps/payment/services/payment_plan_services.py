@@ -1,4 +1,4 @@
-import datetime
+import datetime as dt
 from decimal import Decimal
 from typing import TYPE_CHECKING, cast
 
@@ -62,8 +62,8 @@ class PaymentPlanService:
         self,
         plan_type: "PaymentList.PlanType",
         user: "User",
-        dispersion_start_date: datetime.date,
-        dispersion_end_date: datetime.date,
+        dispersion_start_date: dt.date,
+        dispersion_end_date: dt.date,
         top_up_amount: Decimal | dict[str, Decimal] | None = None,
     ) -> PaymentPlan:
         """Create a Follow-Up / Top-Up / Amendment of this payment plan as a new linked payment plan.
@@ -209,7 +209,7 @@ class PaymentPlanService:
         self.payment_plan.custom_exchange_rate_set_by = None
 
     def assign_dispersion_dates(
-        self, dispersion_start_date: datetime.date | None, dispersion_end_date: datetime.date | None
+        self, dispersion_start_date: dt.date | None, dispersion_end_date: dt.date | None
     ) -> None:
         """Set the payment plan's dispersion dates; the caller saves it. Its payment lists read them from it."""
         payment_plan = self.payment_plan
@@ -232,8 +232,8 @@ class PaymentPlanService:
 
     @staticmethod
     def validate_dispersion_dates(
-        dispersion_start_date: datetime.date | None,
-        dispersion_end_date: datetime.date | None,
+        dispersion_start_date: dt.date | None,
+        dispersion_end_date: dt.date | None,
         *,
         end_date_changed: bool = True,
     ) -> None:

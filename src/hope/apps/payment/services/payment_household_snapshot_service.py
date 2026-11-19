@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-import datetime
+import datetime as dt
 from decimal import Decimal
 from typing import Any, Callable
 from uuid import UUID
@@ -42,8 +42,8 @@ excluded_household_fields = ["_state", "_prefetched_objects_cache"]
 encode_typedict: dict[type, Callable[[Any], Any]] = {
     UUID: str,
     PhoneNumber: str,
-    datetime.datetime: lambda x: x.strftime("%Y-%m-%d %H:%M:%S"),
-    datetime.date: lambda x: x.strftime("%Y-%m-%d"),
+    dt.datetime: lambda x: x.strftime("%Y-%m-%d %H:%M:%S"),
+    dt.date: lambda x: x.strftime("%Y-%m-%d"),
     Country: lambda x: x.iso_code3,
     Decimal: str,
 }
