@@ -23,6 +23,26 @@ const LegacyPaymentPlanRedirect = (): ReactElement => {
   );
 };
 
+const LegacyPaymentListRedirect = ({
+  listPath,
+}: {
+  listPath: 'followup-payment-lists' | 'top-up-payment-lists' | 'payment-lists';
+}): ReactElement => {
+  const { paymentPlanId, programCycleId } = useParams<{
+    paymentPlanId: string;
+    programCycleId: string;
+  }>();
+  const { baseUrl } = useBaseUrl();
+  const cyclePath = programCycleId ? `program-cycles/${programCycleId}/` : '';
+
+  return (
+    <Navigate
+      to={`/${baseUrl}/payment-module/${cyclePath}${listPath}/${paymentPlanId}`}
+      replace
+    />
+  );
+};
+
 export const PaymentModuleRoutes = (): ReactElement => {
   const children = [
     {
@@ -93,6 +113,14 @@ export const PaymentModuleRoutes = (): ReactElement => {
       element: <LegacyPaymentPlanRedirect />,
     },
     {
+      path: 'followup-payment-plans/:paymentPlanId',
+      element: <LegacyPaymentListRedirect listPath="followup-payment-lists" />,
+    },
+    {
+      path: 'top-up-payment-plans/:paymentPlanId',
+      element: <LegacyPaymentListRedirect listPath="top-up-payment-lists" />,
+    },
+    {
       path: 'follow-up-instructions',
       children: [
         {
@@ -140,6 +168,10 @@ export const PaymentModuleRoutes = (): ReactElement => {
                   ],
                 },
               ],
+            },
+            {
+              path: 'payment-plans/:paymentPlanId',
+              element: <LegacyPaymentListRedirect listPath="payment-lists" />,
             },
           ],
         },

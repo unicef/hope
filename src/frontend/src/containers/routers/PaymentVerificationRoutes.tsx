@@ -1,8 +1,21 @@
-import { useRoutes, Navigate } from 'react-router-dom';
+import { useParams, useRoutes, Navigate } from 'react-router-dom';
 import type { ReactElement } from 'react';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 import PaymentListVerificationDetailsPage from '@containers/pages/payments/PaymentListVerificationDetailsPage';
 import PaymentVerificationPage from '@containers/pages/payments/PaymentVerificationPage';
 import VerificationPaymentDetailsPage from '@containers/pages/payments/VerificationPaymentDetailsPage';
+
+const LegacyPaymentPlanVerificationRedirect = (): ReactElement => {
+  const { paymentPlanId } = useParams<{ paymentPlanId: string }>();
+  const { baseUrl } = useBaseUrl();
+
+  return (
+    <Navigate
+      to={`/${baseUrl}/payment-verification/payment-list/${paymentPlanId}`}
+      replace
+    />
+  );
+};
 
 export const PaymentVerificationRoutes = (): ReactElement => {
   const paymentVerificationRoutes = [
@@ -16,6 +29,10 @@ export const PaymentVerificationRoutes = (): ReactElement => {
         {
           path: 'payment-list/:paymentListId',
           element: <PaymentListVerificationDetailsPage />,
+        },
+        {
+          path: 'payment-plan/:paymentPlanId',
+          element: <LegacyPaymentPlanVerificationRedirect />,
         },
         {
           path: 'payment-list/:paymentListId/verification/payment/:id',
