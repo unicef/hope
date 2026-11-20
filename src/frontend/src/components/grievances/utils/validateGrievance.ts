@@ -9,6 +9,11 @@ import {
   LATIN_NAME_FORMAT_ERROR,
   LATIN_NAME_REGEX,
 } from './latinNames';
+import {
+  EMAIL_FIELDS,
+  PHONE_NUMBER_FIELDS,
+  getFieldFormatError,
+} from './fieldFormats';
 export function isEmpty(value): boolean {
   return value === undefined || value === null || value === '';
 }
@@ -39,6 +44,37 @@ function validateLatinNameData(values): { [key: string]: string } {
     }
   }
   return latinErrors;
+}
+
+function validateFormatRows(rows, fieldsDict): string | undefined {
+  for (const row of rows || []) {
+    if (!row?.fieldName || row.isFlexField) {
+      continue;
+    }
+    const fieldDef = fieldsDict?.[row.fieldName];
+    const formatError = getFieldFormatError(
+      row.fieldName,
+      row.fieldValue,
+      fieldDef?.type,
+    );
+    if (formatError) {
+      return `${fieldDef?.labelEn || row.fieldName}: ${formatError}`;
+    }
+  }
+  return undefined;
+}
+
+function validateFormatData(values): { [key: string]: string } {
+  const individualData = values.individualData || {};
+  const formatErrors: { [key: string]: string } = {};
+  for (const fieldName of [...PHONE_NUMBER_FIELDS, ...EMAIL_FIELDS]) {
+    const key = camelCase(fieldName);
+    const formatError = getFieldFormatError(fieldName, individualData[key]);
+    if (formatError) {
+      formatErrors[key] = formatError;
+    }
+  }
+  return formatErrors;
 }
 
 export function validate(
@@ -101,6 +137,13 @@ export function validate(
           }
         });
       }
+      const householdFormatError = validateFormatRows(
+        values.householdDataUpdateFields,
+        householdFieldsDict,
+      );
+      if (householdFormatError) {
+        errors.householdDataUpdateFields = householdFormatError;
+      }
     }
     if (issueType === GRIEVANCE_ISSUE_TYPES.DELETE_INDIVIDUAL) {
       if (!values.selectedIndividual) {
@@ -149,6 +192,13 @@ export function validate(
       const latinNameError = validateLatinNameRows(values);
       if (latinNameError) {
         errors.individualDataUpdateFields = latinNameError;
+      }
+      const individualFormatError = validateFormatRows(
+        values.individualDataUpdateFields,
+        individualFieldsDict,
+      );
+      if (individualFormatError) {
+        errors.individualDataUpdateFields = individualFormatError;
       }
 
       if (values.individualDataUpdateFieldsDocuments?.length) {
@@ -214,7 +264,10 @@ export function validate(
     category === GRIEVANCE_CATEGORIES.DATA_CHANGE &&
     issueType === GRIEVANCE_ISSUE_TYPES.ADD_INDIVIDUAL
   ) {
-    const individualDataErrors = validateLatinNameData(values);
+    const individualDataErrors = {
+      ...validateLatinNameData(values),
+      ...validateFormatData(values),
+    };
     const individualData = values.individualData || {};
     if (addIndividualFieldsData) {
       for (const field of addIndividualFieldsData) {
@@ -308,6 +361,13 @@ export function validateUsingSteps(
           }
         });
       }
+      const householdFormatError = validateFormatRows(
+        values.householdDataUpdateFields,
+        householdFieldsDict,
+      );
+      if (householdFormatError) {
+        errors.householdDataUpdateFields = householdFormatError;
+      }
     }
     if (issueType === GRIEVANCE_ISSUE_TYPES.DELETE_INDIVIDUAL) {
       if (!values.selectedIndividual && activeStep === GrievanceSteps.Lookup) {
@@ -357,6 +417,13 @@ export function validateUsingSteps(
       const latinNameError = validateLatinNameRows(values);
       if (latinNameError) {
         errors.individualDataUpdateFields = latinNameError;
+      }
+      const individualFormatError = validateFormatRows(
+        values.individualDataUpdateFields,
+        individualFieldsDict,
+      );
+      if (individualFormatError) {
+        errors.individualDataUpdateFields = individualFormatError;
       }
 
       if (values.individualDataUpdateFieldsDocuments?.length) {
@@ -458,7 +525,10 @@ export function validateUsingSteps(
     issueType === GRIEVANCE_ISSUE_TYPES.ADD_INDIVIDUAL &&
     activeStep === GrievanceSteps.Description
   ) {
-    const individualDataErrors = validateLatinNameData(values);
+    const individualDataErrors = {
+      ...validateLatinNameData(values),
+      ...validateFormatData(values),
+    };
     const individualData = values.individualData || {};
 
     if (addIndividualFieldsData) {
