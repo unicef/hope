@@ -81,7 +81,7 @@ const PaymentVerificationFilters = ({
           <SearchTextField
             value={filter.search}
             data-cy="filter-search"
-            label="Payment Plan ID"
+            label="Payment List ID"
             onChange={(e) => handleFilterChange('search', e.target.value)}
             fullWidth
           />

@@ -20,10 +20,10 @@ import type { FC } from 'react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ProgramSelect, useSortAndFilter } from './useSortAndFilter';
-import type { PaginatedPaymentPlanList } from '@restgenerated/models/PaginatedPaymentPlanList';
+import type { PaginatedPaymentPlanManagerialList } from '@restgenerated/models/PaginatedPaymentPlanManagerialList';
 
 interface ReleasedSectionProps {
-  releasedData: PaginatedPaymentPlanList;
+  releasedData: PaginatedPaymentPlanManagerialList;
 }
 
 export const ReleasedSection: FC<ReleasedSectionProps> = ({ releasedData }) => {
@@ -55,7 +55,7 @@ export const ReleasedSection: FC<ReleasedSectionProps> = ({ releasedData }) => {
       renderCell: (params) => (
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           <BlackLink
-            to={`/${businessArea}/programs/${params.row.programCode}/payment-module/${params.row.planType === 'FOLLOW_UP' ? 'followup-payment-plans' : 'payment-plans'}/${params.row.id}`}
+            to={`/${businessArea}/programs/${params.row.programCode}/payment-module/payment-plans/${params.row.id}`}
             newTab={true}
           >
             {params.value}
@@ -73,6 +73,7 @@ export const ReleasedSection: FC<ReleasedSectionProps> = ({ releasedData }) => {
         </Box>
       ),
     },
+    { field: 'name', headerName: t('Name'), width: 200 },
     { field: 'program', headerName: t('Programme Name'), width: 200 },
     {
       field: 'totalEntitledQuantityUsd',

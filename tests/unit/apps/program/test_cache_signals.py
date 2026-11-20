@@ -85,11 +85,11 @@ def test_program_cycle_save_increments_verification_list_cache(program_cycle: Pr
     assert get_or_create_cache_key(version_key, 0) > initial_version
 
 
-def test_program_cycle_save_does_not_increment_payment_plan_list_cache(
+def test_program_cycle_save_does_not_increment_payment_list_list_cache(
     program_cycle: ProgramCycle, program: Program
 ) -> None:
     cache.clear()
-    version_key = _version_key(program.business_area.slug, program.code, "payment_plans_list")
+    version_key = _version_key(program.business_area.slug, program.code, "payment_lists_list")
     initial_version = get_or_create_cache_key(version_key, 0)
 
     with TestCase.captureOnCommitCallbacks(execute=True):

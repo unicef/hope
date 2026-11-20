@@ -12,8 +12,10 @@ def send_payment_plan_to_vision_async_task_action(job: AsyncJob) -> None:
         payment_plan = (
             PaymentPlan.objects.select_for_update(of=("self",))
             .select_related(
-                "business_area",
-                "program_cycle__program__data_collecting_type__payee_type",
+                "cycle__program__business_area",
+                "cycle__program__data_collecting_type__payee_type",
+                "financial_service_provider",
+                "currency",
             )
             .get(pk=job.config["payment_plan_id"])
         )
@@ -57,16 +59,16 @@ def send_payment_plan_to_vision_async_task(payment_plan: PaymentPlan, user_id: s
         action="hope.contrib.vision.tasks.send_payment_plan_to_vision_async_task_action",
         config={"payment_plan_id": str(payment_plan.pk)},
         group_key="payment",
-        description=f"Send payment plan {payment_plan.pk} to Vision",
+        description=f"Send Payment Plan {payment_plan.pk} to Vision",
     )
 
 
 def notify_payment_plan_status_to_vision_async_task_action(job: AsyncJob) -> None:
     payment_plan = PaymentPlan.objects.select_related(
-        "business_area",
+        "cycle__program__business_area",
+        "cycle__program__data_collecting_type__payee_type",
         "currency",
         "financial_service_provider",
-        "program_cycle__program__data_collecting_type__payee_type",
     ).get(pk=job.config["payment_plan_id"])
     VisionAPI().notify_payment_plan_status(payment_plan, job.config["vision_status"])
 
@@ -86,5 +88,5 @@ def notify_payment_plan_status_to_vision_async_task(
             "vision_status": vision_status,
         },
         group_key="payment",
-        description=f"Notify Vision that payment plan {payment_plan.pk} is {vision_status}",
+        description=f"Notify Vision that Payment Plan {payment_plan.pk} is {vision_status}",
     )

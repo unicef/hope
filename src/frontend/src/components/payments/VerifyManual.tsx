@@ -30,7 +30,7 @@ export interface Props {
   receivedAmount: string;
   verificationPlanId: string;
   paymentId: string;
-  paymentPlanId: string;
+  paymentListId: string;
 }
 
 export function VerifyManual({

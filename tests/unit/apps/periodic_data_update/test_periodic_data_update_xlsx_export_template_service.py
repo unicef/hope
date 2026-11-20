@@ -15,7 +15,7 @@ from extras.test_utils.factories import (
     HouseholdFactory,
     IndividualFactory,
     PaymentFactory,
-    PaymentPlanFactory,
+    PaymentListFactory,
     PDUXlsxTemplateFactory,
     PeriodicFieldDataFactory,
     ProgramFactory,
@@ -320,7 +320,7 @@ def test_get_individuals_queryset_target_population_id_filter(
     individual_other_2.household = household2
     individual_other_2.save()
 
-    pp = PaymentPlanFactory()
+    pp = PaymentListFactory()
     PaymentFactory(parent=pp, household=household, collector=individuals[0])
     periodic_data_update_template.filters = {"target_population_id": str(pp.pk)}
     periodic_data_update_template.save()

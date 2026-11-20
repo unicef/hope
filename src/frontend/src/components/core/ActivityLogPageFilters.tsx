@@ -55,7 +55,7 @@ export function ActivityLogPageFilters({
     household: `${beneficiaryGroup?.groupLabel}`,
     individual: `${beneficiaryGroup?.memberLabel}`,
     grievanceticket: 'Grievance Tickets',
-    paymentverificationplan: 'Payment Plan Payment Verification',
+    paymentverificationplan: 'Payment List Payment Verification',
     targetpopulation: 'Target Population',
     registrationdataimport: 'Registration Data Import',
   };

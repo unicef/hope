@@ -21,7 +21,7 @@ export function FspHeader({
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
       title: t('Payment Module'),
-      to: `/${baseUrl}/payment-module/payment-plans`,
+      to: `/${baseUrl}/payment-module/payment-lists`,
     },
   ];
 

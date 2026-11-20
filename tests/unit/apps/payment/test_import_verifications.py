@@ -16,7 +16,7 @@ from extras.test_utils.factories.geo import AreaFactory
 from extras.test_utils.factories.household import EntitlementCardFactory, HouseholdFactory, IndividualFactory
 from extras.test_utils.factories.payment import (
     PaymentFactory,
-    PaymentPlanFactory,
+    PaymentListFactory,
     PaymentVerificationFactory,
     PaymentVerificationPlanFactory,
     PaymentVerificationSummaryFactory,
@@ -53,14 +53,14 @@ def program_cycle(program):
 
 
 @pytest.fixture
-def payment_plan(program_cycle, business_area):
-    return PaymentPlanFactory(program_cycle=program_cycle, business_area=business_area)
+def payment_list(program_cycle, business_area):
+    return PaymentListFactory(program_cycle=program_cycle, business_area=business_area)
 
 
 @pytest.fixture
-def verification_plan(payment_plan):
-    PaymentVerificationSummaryFactory(payment_plan=payment_plan)
-    return PaymentVerificationPlanFactory(payment_plan=payment_plan)
+def verification_plan(payment_list):
+    PaymentVerificationSummaryFactory(payment_list=payment_list)
+    return PaymentVerificationPlanFactory(payment_list=payment_list)
 
 
 @pytest.fixture
@@ -73,7 +73,7 @@ def verification_setup(verification_plan, program, business_area, admin_areas):
             admin2=admin_areas[0],
         )
         payment = PaymentFactory(
-            parent=verification_plan.payment_plan,
+            parent=verification_plan.payment_list,
             household=household,
             head_of_household=household.head_of_household,
             delivered_quantity=Decimal("150.00"),
@@ -88,7 +88,7 @@ def verification_setup(verification_plan, program, business_area, admin_areas):
         EntitlementCardFactory(household=household)
         payments.append(payment)
     return {
-        "payment_plan": verification_plan.payment_plan,
+        "payment_list": verification_plan.payment_list,
         "verification_plan": verification_plan,
         "payments": payments,
     }
@@ -135,7 +135,7 @@ def test_validation_valid_not_changed_file(verification_setup):
 
 def test_validation_valid_status_changed_for_people(verification_setup):
     verification_plan = verification_setup["verification_plan"]
-    dct = verification_plan.payment_plan.program_cycle.program.data_collecting_type
+    dct = verification_plan.payment_list.program_cycle.program.data_collecting_type
     dct.type = DataCollectingType.Type.SOCIAL
     dct.save()
     export_service = XlsxVerificationExportService(verification_plan)
@@ -390,57 +390,57 @@ def test_import_valid_status_changed_received_yes_full(verification_setup):
 def test_validation_of_unordered_columns(mock_check_version: Any, file_name: str):
     program = ProgramFactory()
     program_cycle = program.cycles.first()
-    payment_plan = PaymentPlanFactory(program_cycle=program_cycle, business_area=program.business_area)
+    payment_list = PaymentListFactory(program_cycle=program_cycle, business_area=program.business_area)
     registration_data_import = RegistrationDataImportFactory(
-        business_area=payment_plan.business_area,
-        program=payment_plan.program,
+        business_area=payment_list.business_area,
+        program=payment_list.program,
     )
 
     hoh1 = IndividualFactory(
         household=None,
-        business_area=payment_plan.business_area,
-        program=payment_plan.program,
+        business_area=payment_list.business_area,
+        program=payment_list.program,
         registration_data_import=registration_data_import,
     )
     household_1 = HouseholdFactory(
-        business_area=payment_plan.business_area,
-        program=payment_plan.program,
+        business_area=payment_list.business_area,
+        program=payment_list.program,
         registration_data_import=registration_data_import,
         head_of_household=hoh1,
     )
     payment_1 = PaymentFactory(
         id=uuid.UUID("0329a41f-affd-4669-9e38-38ec2d6699b3"),
-        parent=payment_plan,
+        parent=payment_list,
         household=household_1,
         entitlement_quantity=Decimal("120.00"),
         delivered_quantity=Decimal("150.00"),
-        program=payment_plan.program,
+        program=payment_list.program,
         collector=household_1.head_of_household,
     )
 
     hoh2 = IndividualFactory(
         household=None,
-        business_area=payment_plan.business_area,
-        program=payment_plan.program,
+        business_area=payment_list.business_area,
+        program=payment_list.program,
         registration_data_import=registration_data_import,
     )
     household_2 = HouseholdFactory(
-        business_area=payment_plan.business_area,
-        program=payment_plan.program,
+        business_area=payment_list.business_area,
+        program=payment_list.program,
         registration_data_import=registration_data_import,
         head_of_household=hoh2,
     )
     payment_2 = PaymentFactory(
         id=uuid.UUID("299811ef-b123-427d-b77d-9fd5d1bc8946"),
-        parent=payment_plan,
+        parent=payment_list,
         household=household_2,
         entitlement_quantity=Decimal("120.00"),
         delivered_quantity=Decimal("150.00"),
-        program=payment_plan.program,
+        program=payment_list.program,
         collector=household_2.head_of_household,
     )
-    PaymentVerificationSummaryFactory(payment_plan=payment_plan)
-    payment_verification_plan = PaymentVerificationPlanFactory(payment_plan=payment_plan)
+    PaymentVerificationSummaryFactory(payment_list=payment_list)
+    payment_verification_plan = PaymentVerificationPlanFactory(payment_list=payment_list)
 
     PaymentVerificationFactory(
         payment=payment_1,

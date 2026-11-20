@@ -42,7 +42,7 @@ interface XlsxImportDialogProps<
 
 /**
  * Shared "select an XLSX file and import it" dialog used by reconciliation
- * uploads on both Follow-up Instructions and Payment Plan Groups.
+ * uploads on both Follow-up Instructions and Payment Plans.
  */
 export function XlsxImportDialog<
   TFormData extends PaymentPlanImportFile = PaymentPlanImportFile,

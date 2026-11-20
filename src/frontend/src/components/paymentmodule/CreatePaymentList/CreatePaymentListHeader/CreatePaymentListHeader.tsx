@@ -1,0 +1,100 @@
+import type { BreadCrumbsItem } from '@core/BreadCrumbs';
+import { LoadingButton } from '@core/LoadingButton';
+import { PageHeader } from '@core/PageHeader';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { Box, Button } from '@mui/material';
+import type { ProgramCycleList } from '@restgenerated/models/ProgramCycleList';
+import { RestService } from '@restgenerated/services/RestService';
+import { restQueryKey } from '@utils/queryKeys';
+import { useQuery } from '@tanstack/react-query';
+import type { ReactElement } from 'react';
+import { useTranslation } from 'react-i18next';
+import { Link, useParams } from 'react-router-dom';
+import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
+
+interface CreatePaymentListHeaderProps {
+  handleSubmit: () => Promise<void>;
+  permissions: string[];
+  loadingCreate: boolean;
+}
+
+export function CreatePaymentListHeader({
+  handleSubmit,
+  permissions,
+  loadingCreate,
+}: CreatePaymentListHeaderProps): ReactElement {
+  const { t } = useTranslation();
+  const { businessArea, programId } = useBaseUrl();
+  const { programCycleId } = useParams();
+
+  const programCycleParams = {
+    businessAreaSlug: businessArea,
+    id: programCycleId,
+    programCode: programId,
+  };
+  const { data: programCycleData, isLoading: isLoadingProgramCycle } =
+    useQuery<ProgramCycleList>({
+      queryKey: restQueryKey(
+        RestService.restBusinessAreasProgramsCyclesRetrieve,
+        programCycleParams,
+      ),
+      queryFn: () => {
+        return RestService.restBusinessAreasProgramsCyclesRetrieve(
+          programCycleParams,
+        );
+      },
+    });
+
+  if (isLoadingProgramCycle) {
+    return null;
+  }
+
+  const breadCrumbsItems: BreadCrumbsItem[] = [
+    {
+      title: t('Payment Module'),
+      to: '../../..',
+    },
+    {
+      title: `${programCycleData?.title}`,
+      to: '../..',
+    },
+  ];
+
+  return (
+    <PageHeader
+      title={t('New Payment List')}
+      breadCrumbs={
+        hasPermissions(PERMISSIONS.PM_VIEW_LIST, permissions)
+          ? breadCrumbsItems
+          : null
+      }
+    >
+      <Box
+        sx={{
+          display: 'flex',
+          mt: 2,
+          mb: 2,
+        }}
+      >
+        <Box
+          sx={{
+            mr: 3,
+          }}
+        >
+          <Button component={Link} to={'../..'}>
+            {t('Cancel')}
+          </Button>
+        </Box>
+        <LoadingButton
+          loading={loadingCreate}
+          variant="contained"
+          color="primary"
+          onClick={handleSubmit}
+          data-cy="button-save-payment-list"
+        >
+          {t('Save')}
+        </LoadingButton>
+      </Box>
+    </PageHeader>
+  );
+}

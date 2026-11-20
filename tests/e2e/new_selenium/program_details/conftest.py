@@ -5,7 +5,7 @@ from django.utils import timezone
 import pytest
 
 from extras.test_utils.factories import BusinessAreaFactory, PaymentPlanPurposeFactory
-from extras.test_utils.factories.payment import PaymentPlanFactory
+from extras.test_utils.factories.payment import PaymentListFactory
 from extras.test_utils.factories.program import ProgramCycleFactory, ProgramFactory
 from hope.models import BusinessArea, PaymentPlanPurpose, Program, ProgramCycle
 
@@ -55,7 +55,7 @@ def program_with_purpose(business_area: BusinessArea, ba_purpose: PaymentPlanPur
     prog.payment_plan_purposes.add(ba_purpose)
     # Create a payment plan that uses this purpose so it shows as locked (used in PP)
     cycle = ProgramCycleFactory(program=prog)
-    pp = PaymentPlanFactory(
+    pp = PaymentListFactory(
         program_cycle=cycle,
         business_area=business_area,
         payment_plan_purposes=[ba_purpose],
@@ -121,7 +121,7 @@ def active_programme_with_active_cycle(business_area: BusinessArea) -> Program:
 @pytest.fixture
 def programme_with_open_ended_cycle(business_area: BusinessArea) -> Program:
     program = _programme(business_area, Program.ACTIVE, ("Default Programme Cycle", ProgramCycle.DRAFT, -25, None))
-    PaymentPlanFactory(
+    PaymentListFactory(
         program_cycle=program.cycles.get(),
         business_area=business_area,
         total_entitled_quantity_usd=Decimal("1234.99"),

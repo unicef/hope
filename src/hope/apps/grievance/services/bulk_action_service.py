@@ -126,7 +126,7 @@ class BulkActionService:
         action_user: User | None = None,
     ) -> QuerySet[GrievanceTicket]:
         if urgency not in [x for x, y in URGENCY_CHOICES]:
-            raise ValidationError("Invalid priority")
+            raise ValidationError("Invalid urgency")
         queryset = self._open_tickets(tickets_ids, business_area_slug)
         updated_count = queryset.update(urgency=urgency, user_modified=timezone.now(), user_modified_by=action_user)
         if updated_count != len(tickets_ids):

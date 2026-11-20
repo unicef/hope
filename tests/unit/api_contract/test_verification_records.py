@@ -10,12 +10,12 @@ from extras.test_utils.factories.core import BusinessAreaFactory
 from extras.test_utils.factories.household import HouseholdFactory, IndividualRoleInHouseholdFactory
 from extras.test_utils.factories.payment import (
     PaymentFactory,
-    PaymentPlanFactory,
+    PaymentListFactory,
     PaymentVerificationFactory,
     PaymentVerificationPlanFactory,
 )
 from extras.test_utils.factories.program import ProgramFactory
-from hope.models import PaymentPlan
+from hope.models import PaymentList
 
 pytestmark = pytest.mark.django_db
 
@@ -50,21 +50,21 @@ def role_assignment(request, db, superuser, business_area, role):
 
 
 @frozenfixture()
-def payment_plan(request, db, business_area, program, superuser):
+def payment_list(request, db, business_area, program, superuser):
     cycle = program.cycles.first()
-    return PaymentPlanFactory(
+    return PaymentListFactory(
         business_area=business_area,
         program_cycle=cycle,
         created_by=superuser,
-        status=PaymentPlan.Status.FINISHED,
+        status=PaymentList.Status.FINISHED,
     )
 
 
 @frozenfixture()
-def payment_verification_summary(request, db, payment_plan):
+def payment_verification_summary(request, db, payment_list):
     from hope.models.payment_verification_summary import PaymentVerificationSummary
 
-    summary, _ = PaymentVerificationSummary.objects.get_or_create(payment_plan=payment_plan)
+    summary, _ = PaymentVerificationSummary.objects.get_or_create(payment_list=payment_list)
     return summary
 
 
@@ -84,9 +84,9 @@ def household_role(request, db, household):
 
 
 @frozenfixture()
-def payment_verification(request, db, payment_plan, payment_verification_summary, household, household_role):
-    verification_plan = PaymentVerificationPlanFactory(payment_plan=payment_plan)
-    payment = PaymentFactory(parent=payment_plan, household=household, collector=household.head_of_household)
+def payment_verification(request, db, payment_list, payment_verification_summary, household, household_role):
+    verification_plan = PaymentVerificationPlanFactory(payment_list=payment_list)
+    payment = PaymentFactory(parent=payment_list, household=household, collector=household.head_of_household)
     return PaymentVerificationFactory(
         payment_verification_plan=verification_plan,
         payment=payment,
@@ -95,19 +95,19 @@ def payment_verification(request, db, payment_plan, payment_verification_summary
 
 
 def test_list_verification_records(superuser, business_area, program, role_assignment, payment_verification):
-    payment_plan = payment_verification.payment_verification_plan.payment_plan
+    payment_list = payment_verification.payment_verification_plan.payment_list
     recorder = HopeRecorder(DATA_DIR, as_user=superuser)
     recorder.assertGET(
         f"/api/rest/business-areas/{business_area.slug}/programs/{program.code}"
-        f"/payment-verifications/{payment_plan.pk}/verifications/"
+        f"/payment-verifications/{payment_list.pk}/verifications/"
     )
 
 
 def test_retrieve_verification_record(superuser, business_area, program, role_assignment, payment_verification):
-    payment_plan = payment_verification.payment_verification_plan.payment_plan
+    payment_list = payment_verification.payment_verification_plan.payment_list
     payment = payment_verification.payment
     recorder = HopeRecorder(DATA_DIR, as_user=superuser)
     recorder.assertGET(
         f"/api/rest/business-areas/{business_area.slug}/programs/{program.code}"
-        f"/payment-verifications/{payment_plan.pk}/verifications/{payment.pk}/"
+        f"/payment-verifications/{payment_list.pk}/verifications/{payment.pk}/"
     )

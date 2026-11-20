@@ -5,7 +5,7 @@ from extras.test_utils.factories import (
     HouseholdFactory,
     IndividualFactory,
     PaymentFactory,
-    PaymentPlanFactory,
+    PaymentListFactory,
     TicketNeedsAdjudicationDetailsFactory,
 )
 from hope.apps.grievance.models import GrievanceTicket
@@ -34,14 +34,14 @@ def targeting_flag_data(business_area):
     representative2 = IndividualFactory(household=None)
     household2.representatives.set([representative2])
 
-    payment_plan = PaymentPlanFactory(
+    payment_list = PaymentListFactory(
         business_area=business_area,
         flag_exclude_if_active_adjudication_ticket=True,
         flag_exclude_if_on_sanction_list=True,
     )
 
-    PaymentFactory(parent=payment_plan, household=household1)
-    PaymentFactory(parent=payment_plan, household=household2)
+    PaymentFactory(parent=payment_list, household=household1)
+    PaymentFactory(parent=payment_list, household=household2)
 
     golden_record = IndividualFactory(household=None)
 

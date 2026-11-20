@@ -12,7 +12,8 @@ from hope.models import (
     BusinessArea,
     Household,
     Individual,
-    PaymentPlanGroup,
+    PaymentList,
+    PaymentPlan,
     PendingDocument,
     PendingHousehold,
     PendingIndividual,
@@ -169,9 +170,13 @@ class CreateTargetPopulationTextForm(forms.Form):
             label="Programme Cycle",
         )
 
-        self.fields["payment_plan_group"] = forms.ModelChoiceField(
-            queryset=PaymentPlanGroup.objects.filter(cycle__program=self.program),
-            label="Payment Plan Group",
+        self.fields["payment_plan"] = forms.ModelChoiceField(
+            queryset=PaymentPlan.objects.filter(
+                cycle__program=self.program,
+                status=PaymentPlan.Status.OPEN,
+                plan_type=PaymentList.PlanType.REGULAR,
+            ),
+            label="Payment Plan",
         )
 
         if read_only:
@@ -180,7 +185,7 @@ class CreateTargetPopulationTextForm(forms.Form):
             self.fields["target_field"].widget = HiddenInput()
             self.fields["separator"].widget = HiddenInput()
             self.fields["program_cycle"].widget = HiddenInput()
-            self.fields["payment_plan_group"].widget = HiddenInput()
+            self.fields["payment_plan"].widget = HiddenInput()
 
     def clean_criteria(self) -> list | None:
         try:
@@ -192,6 +197,14 @@ class CreateTargetPopulationTextForm(forms.Form):
             )
         except (KeyError, Error) as e:
             raise ValidationError(str(e))
+
+    def clean(self) -> dict[str, Any]:
+        cleaned_data = super().clean() or {}
+        program_cycle = cleaned_data.get("program_cycle")
+        payment_plan = cleaned_data.get("payment_plan")
+        if program_cycle and payment_plan and payment_plan.cycle_id != program_cycle.pk:
+            self.add_error("payment_plan", "Payment Plan must belong to the selected Programme Cycle.")
+        return cleaned_data
 
 
 class MassEnrollForm(forms.Form):

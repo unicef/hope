@@ -10,13 +10,13 @@ from rest_framework.reverse import reverse
 from extras.test_utils.factories import (
     BusinessAreaFactory,
     PartnerFactory,
-    PaymentPlanFactory,
+    PaymentListFactory,
     ProgramCycleFactory,
     ProgramFactory,
     UserFactory,
 )
 from hope.apps.account.permissions import Permissions
-from hope.models import BusinessArea, Partner, PaymentPlan, Program, ProgramCycle, User
+from hope.models import BusinessArea, Partner, PaymentList, Program, ProgramCycle, User
 
 pytestmark = pytest.mark.django_db
 
@@ -221,7 +221,7 @@ def test_finish_program_with_active_cycles(
     assert program.status == Program.ACTIVE
 
 
-def test_finish_program_with_unreconciled_payment_plans(
+def test_finish_program_with_unreconciled_payment_lists(
     authenticated_client: Any,
     user: User,
     afghanistan: BusinessArea,
@@ -241,20 +241,20 @@ def test_finish_program_with_unreconciled_payment_plans(
         status=ProgramCycle.FINISHED,
     )
 
-    PaymentPlanFactory(
+    PaymentListFactory(
         program_cycle=program_cycle,
-        status=PaymentPlan.Status.IN_REVIEW,
+        status=PaymentList.Status.IN_REVIEW,
     )
 
     response = authenticated_client.post(finish_url)
     assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert "All Payment Plans and Follow-Up Payment Plans have to be Reconciled." in response.json()
+    assert "All Payment Lists and Follow-Up Payment Lists have to be Reconciled." in response.json()
 
     program.refresh_from_db()
     assert program.status == Program.ACTIVE
 
 
-def test_finish_program_with_reconciled_payment_plans(
+def test_finish_program_with_reconciled_payment_lists(
     authenticated_client: Any,
     user: User,
     afghanistan: BusinessArea,
@@ -274,17 +274,17 @@ def test_finish_program_with_reconciled_payment_plans(
         status=ProgramCycle.FINISHED,
     )
 
-    PaymentPlanFactory(
+    PaymentListFactory(
         program_cycle=program_cycle,
-        status=PaymentPlan.Status.ACCEPTED,
+        status=PaymentList.Status.ACCEPTED,
     )
-    PaymentPlanFactory(
+    PaymentListFactory(
         program_cycle=program_cycle,
-        status=PaymentPlan.Status.FINISHED,
+        status=PaymentList.Status.FINISHED,
     )
-    PaymentPlanFactory(
+    PaymentListFactory(
         program_cycle=program_cycle,
-        status=PaymentPlan.Status.TP_LOCKED,
+        status=PaymentList.Status.TP_LOCKED,
     )
 
     response = authenticated_client.post(finish_url)

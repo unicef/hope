@@ -12,12 +12,12 @@ from rest_framework.reverse import reverse
 from extras.test_utils.factories import (
     BusinessAreaFactory,
     PartnerFactory,
-    PaymentPlanFactory,
+    PaymentListFactory,
     ProgramFactory,
     UserFactory,
 )
 from hope.apps.account.permissions import Permissions
-from hope.models import PaymentPlan
+from hope.models import PaymentList
 
 pytestmark = pytest.mark.django_db
 
@@ -54,37 +54,37 @@ def programs(business_area):
 def target_populations(business_area, programs):
     program1, program2 = programs
     with freezegun.freeze_time("2022-01-01"):
-        tp1 = PaymentPlanFactory(
+        tp1 = PaymentListFactory(
             business_area=business_area,
             program_cycle=program1.cycles.first(),
-            status=PaymentPlan.Status.TP_OPEN,
+            status=PaymentList.Status.TP_OPEN,
             name="Test TP 1",
         )
         tp1.created_at = "2022-01-01T04:00:00Z"
         tp1.save()
 
-        tp2 = PaymentPlanFactory(
+        tp2 = PaymentListFactory(
             business_area=business_area,
             program_cycle=program1.cycles.first(),
-            status=PaymentPlan.Status.TP_LOCKED,
+            status=PaymentList.Status.TP_LOCKED,
             name="Test TP 2",
         )
         tp2.created_at = "2022-01-01T03:00:00Z"
         tp2.save()
 
-        tp3 = PaymentPlanFactory(
+        tp3 = PaymentListFactory(
             business_area=business_area,
             program_cycle=program1.cycles.first(),
-            status=PaymentPlan.Status.OPEN,
+            status=PaymentList.Status.OPEN,
             name="Test 3 TP",
         )
         tp3.created_at = "2022-01-01T02:00:00Z"
         tp3.save()
 
-        tp_program2 = PaymentPlanFactory(
+        tp_program2 = PaymentListFactory(
             business_area=business_area,
             program_cycle=program2.cycles.first(),
-            status=PaymentPlan.Status.OPEN,
+            status=PaymentList.Status.OPEN,
             name="Test TP Program 2",
         )
         tp_program2.created_at = "2022-01-01T01:00:00Z"
@@ -212,8 +212,8 @@ def test_list_target_populations(
     }
     for key, value in expected_1.items():
         assert response_json[0][key] == value
-    group = tp1.payment_plan_group
-    assert response_json[0]["payment_plan_group"] == {
+    group = tp1.payment_plan
+    assert response_json[0]["payment_plan"] == {
         "id": str(group.id),
         "unicef_id": group.unicef_id,
         "name": group.name,
@@ -257,7 +257,7 @@ def test_list_target_populations_filter(
         program1,
     )
 
-    response = api_client_for_user.get(list_url, {"status": PaymentPlan.Status.TP_OPEN})
+    response = api_client_for_user.get(list_url, {"status": PaymentList.Status.TP_OPEN})
     assert response.status_code == status.HTTP_200_OK
     assert len(response.json()["results"]) == 1
 
@@ -318,7 +318,7 @@ def test_list_target_populations_caching(
         assert response.headers["etag"] == etag
 
     with TestCase.captureOnCommitCallbacks(execute=True):
-        tp1.status = PaymentPlan.Status.TP_LOCKED
+        tp1.status = PaymentList.Status.TP_LOCKED
         tp1.save()
 
     with CaptureQueriesContext(connection) as ctx:

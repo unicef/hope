@@ -11,7 +11,7 @@ from rest_framework.exceptions import ValidationError
 
 from extras.test_utils.factories import (
     BusinessAreaFactory,
-    PaymentPlanFactory,
+    PaymentListFactory,
     PaymentPlanPurposeFactory,
     ProgramCycleFactory,
     ProgramFactory,
@@ -132,19 +132,19 @@ def test_set_finish(cycle: ProgramCycle) -> None:
 
 def test_total_entitled_quantity_usd(cycle: ProgramCycle) -> None:
     assert cycle.total_entitled_quantity_usd == Decimal("0.0")
-    PaymentPlanFactory(program_cycle=cycle, total_entitled_quantity_usd=Decimal(123.99))
+    PaymentListFactory(program_cycle=cycle, total_entitled_quantity_usd=Decimal(123.99))
     assert cycle.total_entitled_quantity_usd == Decimal("123.99")
 
 
 def test_total_undelivered_quantity_usd(cycle: ProgramCycle) -> None:
     assert cycle.total_undelivered_quantity_usd == Decimal("0.0")
-    PaymentPlanFactory(program_cycle=cycle, total_undelivered_quantity_usd=Decimal(222.33))
+    PaymentListFactory(program_cycle=cycle, total_undelivered_quantity_usd=Decimal(222.33))
     assert cycle.total_undelivered_quantity_usd == Decimal("222.33")
 
 
 def test_total_delivered_quantity_usd(cycle: ProgramCycle) -> None:
     assert cycle.total_delivered_quantity_usd == Decimal("0.0")
-    PaymentPlanFactory(program_cycle=cycle, total_delivered_quantity_usd=Decimal(333.11))
+    PaymentListFactory(program_cycle=cycle, total_delivered_quantity_usd=Decimal(333.11))
     assert cycle.total_delivered_quantity_usd == Decimal("333.11")
 
 

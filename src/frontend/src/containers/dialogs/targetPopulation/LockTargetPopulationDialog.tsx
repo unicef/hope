@@ -59,7 +59,7 @@ export const LockTargetPopulationDialog = ({
           RestService.restBusinessAreasProgramsTargetPopulationsList,
         ),
       });
-      showMessage(t('Payment Plan has been locked.'));
+      showMessage(t('Payment List has been locked.'));
     },
   });
 

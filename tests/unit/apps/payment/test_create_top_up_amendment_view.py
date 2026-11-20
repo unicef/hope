@@ -8,6 +8,7 @@ from extras.test_utils.factories import (
     BusinessAreaFactory,
     CurrencyFactory,
     PaymentFactory,
+    PaymentListFactory,
     PaymentPlanFactory,
     PaymentPlanPurposeFactory,
     ProgramCycleFactory,
@@ -15,7 +16,7 @@ from extras.test_utils.factories import (
     UserFactory,
 )
 from hope.apps.account.permissions import Permissions
-from hope.models import Payment, PaymentPlan, Program
+from hope.models import Payment, PaymentList, PaymentPlan, Program
 
 pytestmark = pytest.mark.django_db
 
@@ -31,23 +32,32 @@ def amendment_view_context(api_client: Callable, business_area: Any) -> dict[str
     program = ProgramFactory(business_area=business_area, status=Program.ACTIVE)
     cycle = ProgramCycleFactory(program=program)
     currency = CurrencyFactory(code="PLN", name="Polish Zloty")
-    regular_pp = PaymentPlanFactory(
+    regular_pp = PaymentListFactory(
         business_area=business_area,
         program_cycle=cycle,
-        plan_type=PaymentPlan.PlanType.REGULAR,
+        plan_type=PaymentList.PlanType.REGULAR,
+        status=PaymentList.Status.ACCEPTED,
+        currency=currency,
+    )
+    top_up_group = PaymentPlanFactory(
+        name="Standard Group Top Up 1",
+        cycle=cycle,
+        plan_type=PaymentList.PlanType.TOP_UP,
+        source_payment_plan=regular_pp.payment_plan,
         status=PaymentPlan.Status.ACCEPTED,
         currency=currency,
     )
-    top_up_pp = PaymentPlanFactory(
+    top_up_pp = PaymentListFactory(
         name="Standard PP Top Up",
         business_area=business_area,
         program_cycle=cycle,
-        plan_type=PaymentPlan.PlanType.TOP_UP,
-        status=PaymentPlan.Status.ACCEPTED,
-        source_payment_plan=regular_pp,
-        currency=currency,
+        plan_type=PaymentList.PlanType.TOP_UP,
+        status=PaymentList.Status.ACCEPTED,
+        source_payment_list=regular_pp,
+        payment_plan=top_up_group,
     )
     purpose = PaymentPlanPurposeFactory()
+    program.payment_plan_purposes.add(purpose)
     top_up_pp.payment_plan_purposes.add(purpose)
     PaymentFactory(parent=top_up_pp, status=Payment.STATUS_DISTRIBUTION_SUCCESS)
     url = reverse(
@@ -55,7 +65,7 @@ def amendment_view_context(api_client: Callable, business_area: Any) -> dict[str
         kwargs={
             "business_area_slug": business_area.slug,
             "program_code": program.code,
-            "pk": top_up_pp.pk,
+            "pk": top_up_group.pk,
         },
     )
     return {
@@ -63,6 +73,7 @@ def amendment_view_context(api_client: Callable, business_area: Any) -> dict[str
         "user": user,
         "program": program,
         "top_up_pp": top_up_pp,
+        "top_up_group": top_up_group,
         "client": api_client(user),
         "url": url,
     }
@@ -97,7 +108,7 @@ def test_create_top_up_amendment_view_arrange_permissions_act_post_assert_status
     assert response.status_code == expected_status
 
 
-def test_create_top_up_amendment_view_arrange_eligible_top_up_act_post_assert_amendment_payload(
+def test_create_top_up_amendment_view_arrange_eligible_top_up_group_act_post_assert_linked_group_payload(
     amendment_view_context: dict[str, Any],
     create_user_role_with_permissions: Any,
 ) -> None:
@@ -116,9 +127,12 @@ def test_create_top_up_amendment_view_arrange_eligible_top_up_act_post_assert_am
 
     assert response.status_code == status.HTTP_201_CREATED
     data = response.json()
-    assert data["plan_type"] == PaymentPlan.PlanType.TOP_UP_AMENDMENT
-    assert data["name"] == "Standard PP Top Up Amendment"
-    assert "id" in data["source_payment_plan"]
+    assert data["plan_type"] == PaymentList.PlanType.TOP_UP_AMENDMENT
+    assert data["name"] == "Standard Group Top Up 1 Top Up Amendment 1"
+    assert data["source_payment_plan"]["id"] == str(amendment_view_context["top_up_group"].id)
+    amendment_pp = PaymentList.objects.get(payment_plan_id=data["id"])
+    assert amendment_pp.name == "Standard PP Top Up Amendment"
+    assert amendment_pp.source_payment_list == amendment_view_context["top_up_pp"]
 
 
 def test_create_top_up_amendment_view_arrange_missing_dispersion_dates_act_post_assert_400(

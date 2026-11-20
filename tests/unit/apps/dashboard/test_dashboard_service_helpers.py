@@ -40,8 +40,8 @@ def test_create_empty_country_summary_returns_correct_keys():
         "children_counts",
         "pwd_counts",
         "reconciled_count",
-        "finished_payment_plans",
-        "total_payment_plans",
+        "finished_payment_lists",
+        "total_payment_lists",
         "planned_sum_for_group",
         "_seen_households",
         "households",
@@ -59,8 +59,8 @@ def test_create_empty_country_summary_default_values():
     assert result["children_counts"] == 0.0
     assert result["pwd_counts"] == 0
     assert result["reconciled_count"] == 0
-    assert result["finished_payment_plans"] == 0
-    assert result["total_payment_plans"] == 0
+    assert result["finished_payment_lists"] == 0
+    assert result["total_payment_lists"] == 0
     assert result["planned_sum_for_group"] == 0.0
     assert result["_seen_households"] == set()
 
@@ -98,8 +98,8 @@ def test_build_country_summary_results_single_entry():
             "children_counts": 7.6,
             "pwd_counts": 3,
             "reconciled_count": 5,
-            "finished_payment_plans": 2,
-            "total_payment_plans": 4,
+            "finished_payment_lists": 2,
+            "total_payment_lists": 4,
             "planned_sum_for_group": 2000.0,
             "_seen_households": {hh_id},
         }
@@ -124,8 +124,8 @@ def test_build_country_summary_results_single_entry():
     assert r["children_counts"] == 8
     assert r["pwd_counts"] == 3
     assert r["reconciled"] == 5
-    assert r["finished_payment_plans"] == 2
-    assert r["total_payment_plans"] == 4
+    assert r["finished_payment_lists"] == 2
+    assert r["total_payment_lists"] == 4
     assert r["total_planned_usd"] == 2000.0
 
 
@@ -240,8 +240,8 @@ def test_global_create_empty_summary_returns_correct_keys():
         "children_counts",
         "pwd_counts",
         "reconciled_count",
-        "finished_payment_plans",
-        "total_payment_plans",
+        "finished_payment_lists",
+        "total_payment_lists",
         "planned_sum_for_group",
         "_seen_households",
         "households",
@@ -258,8 +258,8 @@ def test_global_create_empty_summary_default_values():
     assert result["children_counts"] == 0.0
     assert result["pwd_counts"] == 0
     assert result["reconciled_count"] == 0
-    assert result["finished_payment_plans"] == 0
-    assert result["total_payment_plans"] == 0
+    assert result["finished_payment_lists"] == 0
+    assert result["total_payment_lists"] == 0
     assert result["planned_sum_for_group"] == 0.0
     assert result["_seen_households"] == set()
 
@@ -292,8 +292,8 @@ def test_global_build_summary_results_single_entry():
             "children_counts": 12.3,
             "pwd_counts": 5,
             "reconciled_count": 10,
-            "finished_payment_plans": 3,
-            "total_payment_plans": 6,
+            "finished_payment_lists": 3,
+            "total_payment_lists": 6,
             "planned_sum_for_group": 8000.0,
             "_seen_households": hh_ids,
         }
@@ -314,8 +314,8 @@ def test_global_build_summary_results_single_entry():
     assert r["children_counts"] == 12
     assert r["pwd_counts"] == 5
     assert r["reconciled"] == 10
-    assert r["finished_payment_plans"] == 3
-    assert r["total_payment_plans"] == 6
+    assert r["finished_payment_lists"] == 3
+    assert r["total_payment_lists"] == 6
     assert r["total_planned_usd"] == 8000.0
 
 

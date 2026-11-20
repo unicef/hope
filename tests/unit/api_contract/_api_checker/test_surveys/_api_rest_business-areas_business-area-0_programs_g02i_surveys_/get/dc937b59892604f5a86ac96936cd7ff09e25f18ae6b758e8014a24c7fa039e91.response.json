@@ -22,7 +22,7 @@
                 "category": "Survey with manual process",
                 "sampling_type": "FULL_LIST",
                 "flow_id": null,
-                "payment_plan": null,
+                "payment_list": null,
                 "sample_file_path": null,
                 "has_valid_sample_file": null,
                 "rapid_pro_url": null,

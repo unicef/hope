@@ -1,6 +1,6 @@
 from typing import TYPE_CHECKING
 
-from hope.models.payment_plan import PaymentPlan
+from hope.models.payment_list import PaymentList
 from hope.models.utils import SoftDeletableManager
 
 if TYPE_CHECKING:
@@ -9,10 +9,10 @@ if TYPE_CHECKING:
 
 class TargetPopulationManager(SoftDeletableManager["TargetPopulation"]):
     def get_queryset(self) -> "QuerySet[TargetPopulation]":
-        return super().get_queryset().filter(status__in=PaymentPlan.PRE_PAYMENT_PLAN_STATUSES)
+        return super().get_queryset().filter(status__in=PaymentList.PRE_PAYMENT_LIST_STATUSES)
 
 
-class TargetPopulation(PaymentPlan):
+class TargetPopulation(PaymentList):
     objects: TargetPopulationManager = TargetPopulationManager()  # type: ignore[assignment]
 
     class Meta:

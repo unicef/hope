@@ -12,14 +12,14 @@ from extras.test_utils.factories import (
     IndividualFactory,
     IndividualRoleInHouseholdFactory,
     PaymentFactory,
-    PaymentPlanFactory,
+    PaymentListFactory,
 )
 from extras.test_utils.factories.account import PartnerFactory
 from extras.test_utils.factories.geo import CountryFactory
 from extras.test_utils.factories.household import IndividualIdentityFactory
 from hope.apps.household.const import ROLE_PRIMARY, UNHCR, WFP
 from hope.apps.payment.services import payment_household_snapshot_service
-from hope.apps.payment.services.payment_household_snapshot_service import create_payment_plan_snapshot_data
+from hope.apps.payment.services.payment_household_snapshot_service import create_payment_list_snapshot_data
 from hope.models import MergeStatusModel
 
 pytestmark = pytest.mark.django_db
@@ -41,8 +41,8 @@ def financial_service_provider():
 
 
 @pytest.fixture
-def payment_plan():
-    return PaymentPlanFactory()
+def payment_list():
+    return PaymentListFactory()
 
 
 @pytest.fixture
@@ -90,7 +90,7 @@ def collector_identities(household_one):
 @pytest.fixture
 def payments(
     account,
-    payment_plan,
+    payment_list,
     household_one,
     household_two,
     delivery_mechanism,
@@ -98,7 +98,7 @@ def payments(
 ):
     return [
         PaymentFactory(
-            parent=payment_plan,
+            parent=payment_list,
             household=household_one,
             head_of_household=household_one.head_of_household,
             collector=household_one.head_of_household,
@@ -106,7 +106,7 @@ def payments(
             delivery_type=delivery_mechanism,
         ),
         PaymentFactory(
-            parent=payment_plan,
+            parent=payment_list,
             household=household_two,
             head_of_household=household_two.head_of_household,
             collector=household_two.head_of_household,
@@ -117,13 +117,13 @@ def payments(
 
 
 @pytest.fixture
-def batch_payment_plan():
-    return PaymentPlanFactory()
+def batch_payment_list():
+    return PaymentListFactory()
 
 
 @pytest.fixture
-def batch_payments(batch_payment_plan):
-    return [PaymentFactory(parent=batch_payment_plan) for _ in range(20)]
+def batch_payments(batch_payment_list):
+    return [PaymentFactory(parent=batch_payment_list) for _ in range(20)]
 
 
 @pytest.fixture
@@ -131,7 +131,7 @@ def cross_household_collector_setup(
     account_type,
     delivery_mechanism,
     financial_service_provider,
-    payment_plan,
+    payment_list,
 ):
     member_household = HouseholdFactory()
     collector_household = HouseholdFactory(create_role=False)
@@ -153,7 +153,7 @@ def cross_household_collector_setup(
         rdi_merge_status=MergeStatusModel.MERGED,
     )
     member_household_payment = PaymentFactory(
-        parent=payment_plan,
+        parent=payment_list,
         household=member_household,
         head_of_household=member_household.head_of_household,
         collector=member_household.head_of_household,
@@ -161,32 +161,32 @@ def cross_household_collector_setup(
         delivery_type=delivery_mechanism,
     )
     collector_household_payment = PaymentFactory(
-        parent=payment_plan,
+        parent=payment_list,
         household=collector_household,
         head_of_household=collector_household.head_of_household,
         collector=external_collector,
         financial_service_provider=financial_service_provider,
         delivery_type=delivery_mechanism,
     )
-    return payment_plan, member_household_payment, collector_household_payment, external_collector
+    return payment_list, member_household_payment, collector_household_payment, external_collector
 
 
 @pytest.fixture
 def payment_without_primary_collector(
-    payment_plan,
+    payment_list,
     delivery_mechanism,
     financial_service_provider,
 ):
     household = HouseholdFactory(create_role=False)
     payment = PaymentFactory(
-        parent=payment_plan,
+        parent=payment_list,
         household=household,
         head_of_household=household.head_of_household,
         collector=household.head_of_household,
         financial_service_provider=financial_service_provider,
         delivery_type=delivery_mechanism,
     )
-    return payment_plan, payment
+    return payment_list, payment
 
 
 @pytest.fixture
@@ -198,8 +198,8 @@ def household_document(household_one):
     )
 
 
-def test_build_snapshot(payment_plan, payments, household_one, household_two) -> None:
-    create_payment_plan_snapshot_data(payment_plan)
+def test_build_snapshot(payment_list, payments, household_one, household_two) -> None:
+    create_payment_list_snapshot_data(payment_list)
 
     payment_one, payment_two = payments
 
@@ -222,8 +222,8 @@ def test_build_snapshot(payment_plan, payments, household_one, household_two) ->
     }
 
 
-def test_build_snapshot_stores_collector_identities(payment_plan, payments, collector_identities) -> None:
-    create_payment_plan_snapshot_data(payment_plan)
+def test_build_snapshot_stores_collector_identities(payment_list, payments, collector_identities) -> None:
+    create_payment_list_snapshot_data(payment_list)
 
     payment_one = payments[0]
     payment_one.refresh_from_db()
@@ -234,8 +234,8 @@ def test_build_snapshot_stores_collector_identities(payment_plan, payments, coll
     ]
 
 
-def test_build_snapshot_serializes_document_dates_as_dates(payment_plan, payments, household_document) -> None:
-    create_payment_plan_snapshot_data(payment_plan)
+def test_build_snapshot_serializes_document_dates_as_dates(payment_list, payments, household_document) -> None:
+    create_payment_list_snapshot_data(payment_list)
     payment = payments[0]
     payment.refresh_from_db()
 
@@ -245,22 +245,22 @@ def test_build_snapshot_serializes_document_dates_as_dates(payment_plan, payment
     assert document["expiry_date"] == "2030-02-03"
 
 
-def test_batching(batch_payment_plan, batch_payments, monkeypatch) -> None:
+def test_batching(batch_payment_list, batch_payments, monkeypatch) -> None:
     monkeypatch.setattr(payment_household_snapshot_service, "page_size", 2)
 
-    assert batch_payment_plan.payment_items.count() == len(batch_payments)
+    assert batch_payment_list.payment_items.count() == len(batch_payments)
 
-    create_payment_plan_snapshot_data(batch_payment_plan)
+    create_payment_list_snapshot_data(batch_payment_list)
 
-    assert batch_payment_plan.payment_items.filter(household_snapshot__isnull=False).count() == len(batch_payments)
+    assert batch_payment_list.payment_items.filter(household_snapshot__isnull=False).count() == len(batch_payments)
 
 
 def test_collector_account_data_is_scoped_to_role_household(cross_household_collector_setup) -> None:
-    payment_plan, member_household_payment, collector_household_payment, external_collector = (
+    payment_list, member_household_payment, collector_household_payment, external_collector = (
         cross_household_collector_setup
     )
 
-    create_payment_plan_snapshot_data(payment_plan)
+    create_payment_list_snapshot_data(payment_list)
 
     member_household_payment.refresh_from_db()
     collector_household_payment.refresh_from_db()
@@ -278,9 +278,9 @@ def test_collector_account_data_is_scoped_to_role_household(cross_household_coll
 
 
 def test_build_snapshot_without_primary_collector(payment_without_primary_collector) -> None:
-    payment_plan, payment = payment_without_primary_collector
+    payment_list, payment = payment_without_primary_collector
 
-    create_payment_plan_snapshot_data(payment_plan)
+    create_payment_list_snapshot_data(payment_list)
 
     payment.refresh_from_db()
     assert "primary_collector" not in payment.household_snapshot.snapshot_data

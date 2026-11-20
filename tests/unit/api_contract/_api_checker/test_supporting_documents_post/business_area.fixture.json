@@ -2,7 +2,7 @@
     "business_area": {
         "master": {
             "model": "core.businessarea",
-            "pk": "cf557c6c-6f4f-41d6-972c-74ee9b501336",
+            "pk": "03872da7-1b88-460e-a2f3-24889bdb650e",
             "fields": {
                 "created_at": "2025-01-01T00:00:00Z",
                 "updated_at": "2025-01-01T00:00:00Z",
@@ -21,11 +21,13 @@
                 "rdi_import_xlsx_disabled": false,
                 "active": true,
                 "enable_email_notification": true,
+                "vision_integration_active": false,
                 "rapid_pro_host": null,
                 "rapid_pro_payment_verification_token": null,
                 "rapid_pro_messages_token": null,
                 "rapid_pro_survey_token": null,
                 "postpone_deduplication": false,
+                "ingest_source": "ALL_EXCEPT_COUNTRY_WORKSPACE",
                 "deduplication_duplicate_score": 6.0,
                 "deduplication_possible_duplicate_score": 6.0,
                 "deduplication_batch_duplicates_percentage": 50,

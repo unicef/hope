@@ -7,8 +7,8 @@ import { Radio } from '@mui/material';
 import TableCell from '@mui/material/TableCell';
 import type { TargetPopulationList } from '@restgenerated/models/TargetPopulationList';
 import {
-  paymentPlanStatusMapping,
-  paymentPlanStatusToColor,
+  paymentListStatusMapping,
+  paymentListStatusToColor,
 } from '@utils/utils';
 import type { ReactElement } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -69,8 +69,8 @@ export function LookUpTargetPopulationTableRowSurveys({
       <TableCell align="left">
         <StatusBox
           status={targetPopulation.status}
-          statusToColor={paymentPlanStatusToColor}
-          statusNameMapping={paymentPlanStatusMapping}
+          statusToColor={paymentListStatusToColor}
+          statusNameMapping={paymentListStatusMapping}
         />
       </TableCell>
       <TableCell align="left">

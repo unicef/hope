@@ -21,12 +21,12 @@ import { responsiveValue } from 'src/responsive';
 
 export interface DiscardVerificationPlanProps {
   paymentVerificationPlanId: string;
-  paymentPlanId: string;
+  paymentListId: string;
 }
 
 export function DiscardVerificationPlan({
   paymentVerificationPlanId,
-  paymentPlanId,
+  paymentListId,
 }: DiscardVerificationPlanProps): ReactElement {
   const { t } = useTranslation();
   const [discardDialogOpen, setDiscardDialogOpen] = useState(false);
@@ -40,7 +40,7 @@ export function DiscardVerificationPlan({
       RestService.restBusinessAreasProgramsPaymentVerificationsDiscardVerificationPlanCreate(
         {
           businessAreaSlug: businessArea,
-          id: paymentPlanId,
+          id: paymentListId,
           programCode: programCode,
           verificationPlanId: paymentVerificationPlanId,
         },

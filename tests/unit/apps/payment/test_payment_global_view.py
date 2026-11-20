@@ -10,11 +10,11 @@ from extras.test_utils.factories.account import PartnerFactory, UserFactory
 from extras.test_utils.factories.core import BusinessAreaFactory
 from extras.test_utils.factories.grievance import GrievanceTicketFactory, TicketSensitiveDetailsFactory
 from extras.test_utils.factories.household import HouseholdFactory, IndividualFactory
-from extras.test_utils.factories.payment import PaymentFactory, PaymentPlanFactory
+from extras.test_utils.factories.payment import PaymentFactory, PaymentListFactory
 from extras.test_utils.factories.program import ProgramFactory
 from hope.apps.account.permissions import Permissions
 from hope.apps.grievance.models import GrievanceTicket
-from hope.models import Payment, PaymentPlan, Program
+from hope.models import Payment, PaymentList, Program
 
 pytestmark = pytest.mark.django_db
 
@@ -50,12 +50,12 @@ def program_cycle(program_active):
 
 
 @pytest.fixture
-def payment_plan(user, business_area, program_cycle):
-    return PaymentPlanFactory(
+def payment_list(user, business_area, program_cycle):
+    return PaymentListFactory(
         name="Payment Plan",
         business_area=business_area,
         program_cycle=program_cycle,
-        status=PaymentPlan.Status.OPEN,
+        status=PaymentList.Status.OPEN,
         created_by=user,
         created_at="2022-02-24",
     )
@@ -67,10 +67,10 @@ def base_household(business_area, program_active):
 
 
 @pytest.fixture
-def base_payment(payment_plan, base_household, program_active):
+def base_payment(payment_list, base_household, program_active):
     head = base_household.head_of_household
     return PaymentFactory(
-        parent=payment_plan,
+        parent=payment_list,
         household=base_household,
         head_of_household=head,
         collector=head,
@@ -82,9 +82,9 @@ def base_payment(payment_plan, base_household, program_active):
 
 
 @pytest.fixture
-def not_eligible_payment(payment_plan, program_active):
+def not_eligible_payment(payment_list, program_active):
     return PaymentFactory(
-        parent=payment_plan,
+        parent=payment_list,
         program=program_active,
         status=Payment.STATUS_NOT_ELIGIBLE,
         excluded=True,
@@ -158,7 +158,7 @@ def test_count_endpoint(
     program_active,
     api_client_user,
     global_urls,
-    payment_plan,
+    payment_list,
     base_payment,
     not_eligible_payment,
 ) -> None:
@@ -169,7 +169,7 @@ def test_count_endpoint(
         program_active,
     )
     PaymentFactory(
-        parent=payment_plan,
+        parent=payment_list,
         program=program_active,
         status=Payment.STATUS_PENDING,
     )
@@ -187,7 +187,7 @@ def test_ordering(
     program_active,
     api_client_user,
     global_urls,
-    payment_plan,
+    payment_list,
     base_payment,
 ) -> None:
     create_user_role_with_permissions(
@@ -197,13 +197,13 @@ def test_ordering(
         program_active,
     )
     PaymentFactory(
-        parent=payment_plan,
+        parent=payment_list,
         program=program_active,
         delivered_quantity=Decimal("100.00"),
         status=Payment.STATUS_SUCCESS,
     )
     PaymentFactory(
-        parent=payment_plan,
+        parent=payment_list,
         program=program_active,
         delivered_quantity=Decimal("500.00"),
         status=Payment.STATUS_SUCCESS,
@@ -238,10 +238,10 @@ def test_excludes_pre_payment_statuses(
         program_active,
     )
 
-    pp_tp_open = PaymentPlanFactory(
+    pp_tp_open = PaymentListFactory(
         business_area=business_area,
         program_cycle=program_cycle,
-        status=PaymentPlan.Status.TP_OPEN,
+        status=PaymentList.Status.TP_OPEN,
     )
     PaymentFactory(
         parent=pp_tp_open,
@@ -266,10 +266,10 @@ def test_program_filtering(
     program_no_access = ProgramFactory(business_area=business_area, status=Program.ACTIVE)
     cycle_no_access = program_no_access.cycles.first()
 
-    pp_no_access = PaymentPlanFactory(
+    pp_no_access = PaymentListFactory(
         business_area=business_area,
         program_cycle=cycle_no_access,
-        status=PaymentPlan.Status.ACCEPTED,
+        status=PaymentList.Status.ACCEPTED,
     )
     PaymentFactory(
         parent=pp_no_access,
@@ -299,10 +299,10 @@ def office_search_setup(api_client: Any, business_area, global_urls):
     user = UserFactory(partner=partner)
     client = api_client(user)
 
-    payment_plan1 = PaymentPlanFactory(
+    payment_list1 = PaymentListFactory(
         business_area=business_area,
         program_cycle=cycle,
-        status=PaymentPlan.Status.ACCEPTED,
+        status=PaymentList.Status.ACCEPTED,
     )
     household1 = HouseholdFactory(business_area=business_area, program=program)
     individuals1 = [household1.head_of_household]
@@ -318,10 +318,10 @@ def office_search_setup(api_client: Any, business_area, global_urls):
     household1_2 = HouseholdFactory(business_area=business_area, program=program)
     individuals1_2 = [household1_2.head_of_household]
 
-    payment_plan2 = PaymentPlanFactory(
+    payment_list2 = PaymentListFactory(
         business_area=business_area,
         program_cycle=cycle,
-        status=PaymentPlan.Status.ACCEPTED,
+        status=PaymentList.Status.ACCEPTED,
     )
     household2 = HouseholdFactory(business_area=business_area, program=program)
     individuals2 = [household2.head_of_household]
@@ -334,10 +334,10 @@ def office_search_setup(api_client: Any, business_area, global_urls):
         )
     )
 
-    payment_plan3 = PaymentPlanFactory(
+    payment_list3 = PaymentListFactory(
         business_area=business_area,
         program_cycle=cycle,
-        status=PaymentPlan.Status.ACCEPTED,
+        status=PaymentList.Status.ACCEPTED,
     )
     household3 = HouseholdFactory(business_area=business_area, program=program)
     individuals3 = [household3.head_of_household]
@@ -351,7 +351,7 @@ def office_search_setup(api_client: Any, business_area, global_urls):
     )
 
     payment1 = PaymentFactory(
-        parent=payment_plan1,
+        parent=payment_list1,
         household=household1,
         head_of_household=individuals1[0],
         collector=individuals1[0],
@@ -359,7 +359,7 @@ def office_search_setup(api_client: Any, business_area, global_urls):
         status=Payment.STATUS_SUCCESS,
     )
     payment1_second = PaymentFactory(
-        parent=payment_plan1,
+        parent=payment_list1,
         household=household1_2,
         head_of_household=individuals1_2[0],
         collector=individuals1_2[0],
@@ -367,7 +367,7 @@ def office_search_setup(api_client: Any, business_area, global_urls):
         status=Payment.STATUS_SUCCESS,
     )
     payment2 = PaymentFactory(
-        parent=payment_plan2,
+        parent=payment_list2,
         household=household2,
         head_of_household=individuals2[0],
         collector=individuals2[0],
@@ -375,7 +375,7 @@ def office_search_setup(api_client: Any, business_area, global_urls):
         status=Payment.STATUS_PENDING,
     )
     payment3 = PaymentFactory(
-        parent=payment_plan3,
+        parent=payment_list3,
         household=household3,
         head_of_household=individuals3[0],
         collector=individuals3[0],
@@ -390,9 +390,9 @@ def office_search_setup(api_client: Any, business_area, global_urls):
         "cycle": cycle,
         "user": user,
         "client": client,
-        "payment_plan1": payment_plan1,
-        "payment_plan2": payment_plan2,
-        "payment_plan3": payment_plan3,
+        "payment_list1": payment_list1,
+        "payment_list2": payment_list2,
+        "payment_list3": payment_list3,
         "household1": household1,
         "household1_2": household1_2,
         "household2": household2,
@@ -468,7 +468,7 @@ def test_search_by_individual_unicef_id(
     assert response.data["results"][0]["id"] == str(office_search_setup["payment3"].id)
 
 
-def test_search_by_payment_plan_unicef_id(
+def test_search_by_payment_list_unicef_id(
     create_user_role_with_permissions: Any,
     office_search_setup: dict,
 ) -> None:
@@ -481,7 +481,7 @@ def test_search_by_payment_plan_unicef_id(
 
     response = office_search_setup["client"].get(
         office_search_setup["global_url"],
-        {"office_search": office_search_setup["payment_plan1"].unicef_id},
+        {"office_search": office_search_setup["payment_list1"].unicef_id},
     )
     assert response.status_code == status.HTTP_200_OK
     assert len(response.data["results"]) == 2
@@ -627,10 +627,10 @@ def test_search_with_active_programs_filter(
 
     finished_program = ProgramFactory(business_area=office_search_setup["business_area"], status=Program.FINISHED)
     finished_cycle = finished_program.cycles.first()
-    finished_payment_plan = PaymentPlanFactory(
+    finished_payment_list = PaymentListFactory(
         business_area=office_search_setup["business_area"],
         program_cycle=finished_cycle,
-        status=PaymentPlan.Status.ACCEPTED,
+        status=PaymentList.Status.ACCEPTED,
     )
     finished_household = HouseholdFactory(
         business_area=office_search_setup["business_area"],
@@ -638,7 +638,7 @@ def test_search_with_active_programs_filter(
     )
     finished_individuals = [finished_household.head_of_household]
     payment_finished = PaymentFactory(
-        parent=finished_payment_plan,
+        parent=finished_payment_list,
         household=finished_household,
         head_of_household=finished_individuals[0],
         collector=finished_individuals[0],

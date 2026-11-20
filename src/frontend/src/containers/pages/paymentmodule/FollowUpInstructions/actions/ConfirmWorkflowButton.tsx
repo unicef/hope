@@ -93,6 +93,7 @@ export function ConfirmWorkflowButton({
           {confirmMessage && <p>{t(confirmMessage)}</p>}
           {withComment && (
             <TextField
+              name="comment"
               label={t('Comment')}
               multiline
               rows={3}

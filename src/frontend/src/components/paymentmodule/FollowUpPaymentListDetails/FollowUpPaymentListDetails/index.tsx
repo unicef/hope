@@ -1,0 +1,1 @@
+export { FollowUpPaymentListDetails } from './FollowUpPaymentListDetails';

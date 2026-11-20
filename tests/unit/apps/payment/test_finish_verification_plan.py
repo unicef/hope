@@ -10,7 +10,7 @@ from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory, Countr
 from extras.test_utils.factories.household import EntitlementCardFactory, HouseholdFactory
 from extras.test_utils.factories.payment import (
     PaymentFactory,
-    PaymentPlanFactory,
+    PaymentListFactory,
     PaymentVerificationFactory,
     PaymentVerificationPlanFactory,
     PaymentVerificationSummaryFactory,
@@ -73,8 +73,8 @@ def program_cycle(program):
 
 
 @pytest.fixture
-def payment_plan(program_cycle, business_area, user):
-    return PaymentPlanFactory(
+def payment_list(program_cycle, business_area, user):
+    return PaymentListFactory(
         program_cycle=program_cycle,
         business_area=business_area,
         created_by=user,
@@ -82,12 +82,12 @@ def payment_plan(program_cycle, business_area, user):
 
 
 @pytest.fixture
-def payment_verification_plan(payment_plan):
-    PaymentVerificationSummaryFactory(payment_plan=payment_plan)
+def payment_verification_plan(payment_list):
+    PaymentVerificationSummaryFactory(payment_list=payment_list)
     return PaymentVerificationPlanFactory(
         status=PaymentVerificationPlan.STATUS_PENDING,
         verification_channel=PaymentVerificationPlan.VERIFICATION_CHANNEL_RAPIDPRO,
-        payment_plan=payment_plan,
+        payment_list=payment_list,
     )
 
 
@@ -117,7 +117,7 @@ def payment_verification_records(payment_verification_plan, household):
             record_household.admin2 = household.admin2
             record_household.set_admin_areas()
         payment = PaymentFactory(
-            parent=payment_verification_plan.payment_plan,
+            parent=payment_verification_plan.payment_list,
             household=record_household,
             head_of_household=record_household.head_of_household,
             collector=record_household.head_of_household,
@@ -166,7 +166,7 @@ def test_create_tickets_with_admin2_same_as_in_household(
 
 def test_finish_verification_if_pp_not_finished_yet(payment_verification_plan, payment_verification_records):
     Payment.objects.all().update(status=Payment.STATUS_PENDING)
-    assert not payment_verification_plan.payment_plan.is_reconciled
+    assert not payment_verification_plan.payment_list.is_reconciled
     with pytest.raises(ValidationError, match="You can finish only if reconciliation is finalized"):
         VerificationPlanStatusChangeServices(payment_verification_plan).finish()
 

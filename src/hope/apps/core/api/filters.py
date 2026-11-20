@@ -37,7 +37,7 @@ class OfficeSearchFilterMixin(FilterSet):
         handlers = [
             ("HH-", "filter_by_household_for_office_search"),
             ("IND-", "filter_by_individual_for_office_search"),
-            ("PP-", "filter_by_payment_plan_for_office_search"),
+            ("PP-", "filter_by_payment_list_for_office_search"),
             ("RCPT-", "filter_by_payment_for_office_search"),
             ("GRV-", "filter_by_grievance_for_office_search"),
         ]

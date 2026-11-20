@@ -21,7 +21,12 @@ class XlsxPaymentPlanFspExtraFieldsExportService(XlsxExportBaseService):
         self.headers = [self.PAYMENT_ID_COLUMN, *self._fsp_extra_fields_headers()]
 
     def _payments(self) -> QuerySet[Payment]:
-        return self.payment_plan.eligible_payments.order_by("unicef_id").only("unicef_id", "extras")
+        return (
+            Payment.objects.filter(parent__payment_plan=self.payment_plan)
+            .eligible()
+            .order_by("unicef_id")
+            .only("unicef_id", "extras")
+        )
 
     def _fsp_extra_fields_headers(self) -> list[str]:
         headers: set[str] = set()

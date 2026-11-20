@@ -12,7 +12,7 @@ from extras.test_utils.factories import (
     AreaFactory,
     HouseholdFactory,
     PaymentFactory,
-    PaymentPlanFactory,
+    PaymentListFactory,
     ProgramFactory,
 )
 from hope.apps.dashboard.services import DashboardDataCache
@@ -25,7 +25,7 @@ class ModifiedPaymentFactory(PaymentFactory):
     in DashboardDataCache.refresh_data.
     """
 
-    parent = factory.SubFactory(PaymentPlanFactory, status=factory.Iterator(["ACCEPTED", "FINISHED"]))
+    parent = factory.SubFactory(PaymentListFactory, status=factory.Iterator(["ACCEPTED", "FINISHED"]))
     status = factory.Iterator(
         [
             "Transaction Successful",

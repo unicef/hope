@@ -147,15 +147,15 @@ function prepareMutationData(
 }
 
 export interface Props {
-  paymentPlanId: string;
+  paymentListId: string;
   canCreatePaymentVerificationPlan: boolean;
-  isPaymentPlan: boolean;
+  isPaymentList: boolean;
 }
 
 export const CreateVerificationPlan = ({
-  paymentPlanId,
+  paymentListId,
   canCreatePaymentVerificationPlan,
-  isPaymentPlan,
+  isPaymentList,
 }: Props): ReactElement => {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -185,7 +185,7 @@ export const CreateVerificationPlan = ({
       RestService.restBusinessAreasProgramsPaymentVerificationsCreateVerificationPlanCreate(
         {
           businessAreaSlug: businessArea,
-          id: paymentPlanId,
+          id: paymentListId,
           programCode: programCode,
           requestBody: data,
         },
@@ -248,7 +248,7 @@ export const CreateVerificationPlan = ({
         await RestService.restBusinessAreasProgramsPaymentVerificationsSampleSizeCreate(
           {
             businessAreaSlug: businessArea,
-            id: paymentPlanId,
+            id: paymentListId,
             programCode: programCode,
             requestBody,
           },
@@ -268,7 +268,7 @@ export const CreateVerificationPlan = ({
     programCode,
     selectedTab,
     formValues,
-    paymentPlanId,
+    paymentListId,
     showMessage,
   ]);
 
@@ -338,7 +338,7 @@ export const CreateVerificationPlan = ({
               errorMessage: t(
                 'RapidPro is not set up in your country, please contact your Roll Out Focal Point',
               ),
-              lastSuccessfulPage: `/${baseUrl}/payment-verification/${isPaymentPlan ? 'payment-plan' : 'cash-plan'}/${paymentPlanId}`,
+              lastSuccessfulPage: `/${baseUrl}/payment-verification/${isPaymentList ? 'payment-list' : 'cash-plan'}/${paymentListId}`,
             },
           });
         }

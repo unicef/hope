@@ -74,7 +74,7 @@ class PaymentVerification(TimeStampedUUIDModel, ConcurrencyModel, AdminUrlMixin)
 
     @property
     def business_area(self) -> BusinessArea:
-        return self.payment_verification_plan.payment_plan.business_area
+        return self.payment_verification_plan.payment_list.business_area
 
     def set_pending(self) -> None:
         self.status_date = timezone.now()

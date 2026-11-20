@@ -98,6 +98,15 @@ class HeadOfHouseholdSerializer(serializers.ModelSerializer):
         )
 
 
+class IndividualSmallSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Individual
+        fields = (
+            "id",
+            "unicef_id",
+        )
+
+
 class IndividualListHouseholdSerializer(serializers.ModelSerializer):
     admin2 = AreaSimpleSerializer()
 
@@ -216,8 +225,6 @@ class LinkedGrievanceTicketSerializer(serializers.ModelSerializer):
 
 
 class IndividualRoleInHouseholdForHouseholdSerializer(serializers.ModelSerializer):
-    from hope.apps.household.api.serializers.individual import IndividualSmallSerializer
-
     individual = IndividualSmallSerializer()
 
     class Meta:

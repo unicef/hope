@@ -66,7 +66,7 @@
                 }
             },
             {
-                "model": "payment.paymentplan",
+                "model": "payment.paymentlist",
                 "pk": "cb35a199-c561-4206-a989-065b41e8f319",
                 "fields": {
                     "is_removed": false,
@@ -77,26 +77,20 @@
                     "internal_data": {},
                     "business_area": "7dedb4da-fee1-4b5a-b06a-b2d123a89990",
                     "program_cycle": "bc857d24-a581-406b-8031-cd93ded0513f",
-                    "payment_plan_group": "f45bdafc-e7b7-49fd-b386-62c27f335260",
+                    "payment_plan": "f45bdafc-e7b7-49fd-b386-62c27f335260",
                     "delivery_mechanism": null,
-                    "financial_service_provider": null,
                     "imported_file": null,
                     "export_file_entitlement": null,
-                    "export_file_delivery": null,
-                    "export_pdf_file_summary": null,
                     "reconciliation_import_file": null,
                     "steficon_rule": null,
                     "steficon_rule_targeting": null,
                     "created_by": "cb1d9191-462f-4c17-b837-591e45d5c141",
-                    "source_payment_plan": null,
+                    "source_payment_list": null,
                     "follow_up_instruction": null,
                     "storage_file": null,
                     "name": null,
                     "start_date": null,
                     "end_date": null,
-                    "currency": null,
-                    "dispersion_start_date": "2025-01-01",
-                    "dispersion_end_date": "2025-01-31",
                     "excluded_ids": null,
                     "exclusion_reason": null,
                     "vulnerability_score_min": null,
@@ -107,10 +101,6 @@
                     "background_action_status": null,
                     "build_status": null,
                     "built_at": null,
-                    "exchange_rate": null,
-                    "custom_exchange_rate": false,
-                    "use_payment_gateway": false,
-                    "custom_exchange_rate_set_by": null,
                     "female_children_count": 0,
                     "male_children_count": 0,
                     "female_adults_count": 0,
@@ -301,7 +291,7 @@
                 }
             },
             {
-                "model": "payment.paymentplangroup",
+                "model": "payment.paymentplan",
                 "pk": "f45bdafc-e7b7-49fd-b386-62c27f335260",
                 "fields": {
                     "created_at": "2025-01-01T00:00:00Z",
@@ -309,7 +299,9 @@
                     "unicef_id": "PPG-2",
                     "cycle": "bc857d24-a581-406b-8031-cd93ded0513f",
                     "name": "Default Group",
-                    "background_action_status": null
+                    "background_action_status": null,
+                    "dispersion_start_date": "2025-01-01",
+                    "dispersion_end_date": "2025-01-31"
                 }
             },
             {
@@ -630,7 +622,7 @@
                     "updated_at": "2025-01-01T00:00:00Z",
                     "version": 1735688653315200,
                     "unicef_id": "PVP-1",
-                    "payment_plan": "cb35a199-c561-4206-a989-065b41e8f319",
+                    "payment_list": "cb35a199-c561-4206-a989-065b41e8f319",
                     "status": "PENDING",
                     "verification_channel": "MANUAL",
                     "sampling": "FULL_LIST",

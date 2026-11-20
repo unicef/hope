@@ -7,7 +7,7 @@ import { RestService } from '@restgenerated/services/RestService';
 import { restQueryKey } from '@utils/queryKeys';
 import type { CurrencyChoice } from '@restgenerated/models/CurrencyChoice';
 
-const getCurrencyLabel = (option: CurrencyChoice): string => {
+export const getCurrencyLabel = (option: CurrencyChoice): string => {
   if (option.visionCode && option.visionCode !== option.value) {
     return `${option.name} (${option.value} / Vision: ${option.visionCode})`;
   }

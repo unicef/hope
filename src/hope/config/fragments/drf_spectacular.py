@@ -8,8 +8,12 @@ SPECTACULAR_SETTINGS = {
     "REDOC_DIST": "SIDECAR",
     "ENUM_ADD_EXPLICIT_BLANK_NULL_CHOICE": False,
     "ENUM_NAME_OVERRIDES": {
+        "PaymentListStatusEnum": "hope.models.payment_list.PaymentList.Status",
+        "PlanTypeEnum": "hope.models.payment_list.PaymentList.PlanType",
         "PaymentPlanStatusEnum": "hope.models.payment_plan.PaymentPlan.Status",
-        "PlanTypeEnum": "hope.models.payment_plan.PaymentPlan.PlanType",
+        "FollowUpInstructionBackgroundActionStatusEnum": (
+            "hope.models.follow_up_instruction.FollowUpInstruction.BackgroundActionStatus"
+        ),
         "PaymentStatusEnum": "hope.models.payment.Payment.STATUS_CHOICE",
         "ProgramStatusEnum": "hope.models.program.Program.STATUS_CHOICE",
         "GrievanceTicketStatusEnum": "hope.apps.grievance.models.GrievanceTicket.STATUS_CHOICES",

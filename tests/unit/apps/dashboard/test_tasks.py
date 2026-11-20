@@ -20,7 +20,7 @@ from hope.apps.dashboard.celery_tasks import (
     update_recent_dashboard_figures,
 )
 from hope.apps.dashboard.services import DashboardDataCache
-from hope.models import BusinessArea, Payment, PaymentPlan
+from hope.models import BusinessArea, Payment, PaymentList
 
 
 @pytest.fixture
@@ -99,7 +99,7 @@ def populate_dashboard_cache(area_kabul):
                 household=household,
                 program=program,
                 business_area=ba,
-                parent__status=PaymentPlan.Status.ACCEPTED,
+                parent__status=PaymentList.Status.ACCEPTED,
                 status=status,
             )
         return household

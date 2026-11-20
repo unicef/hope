@@ -3,9 +3,9 @@ import pytest
 from e2e.helpers.fixtures import get_program_with_dct_type_and_name
 from e2e.page_object.accountability.surveys import AccountabilitySurveys
 from e2e.page_object.accountability.surveys_details import AccountabilitySurveysDetails
-from extras.test_utils.factories import HouseholdFactory, IndividualFactory, PaymentPlanFactory, SurveyFactory
+from extras.test_utils.factories import HouseholdFactory, IndividualFactory, PaymentListFactory, SurveyFactory
 from hope.apps.household.const import REFUGEE
-from hope.models import DataCollectingType, Household, PaymentPlan, Program, Survey, User
+from hope.models import DataCollectingType, Household, PaymentList, Program, Survey, User
 
 pytestmark = pytest.mark.django_db()
 
@@ -41,8 +41,8 @@ def add_household(test_program: Program) -> Household:
 def add_accountability_surveys_message(test_program: Program, add_household: Household) -> Survey:
     ba = test_program.business_area
     user = User.objects.filter(email="test@example.com").first()
-    payment_plan = PaymentPlanFactory(
-        status=PaymentPlan.Status.TP_LOCKED,
+    payment_list = PaymentListFactory(
+        status=PaymentList.Status.TP_LOCKED,
         created_by=user,
         business_area=ba,
         program_cycle=test_program.cycles.first(),
@@ -50,7 +50,7 @@ def add_accountability_surveys_message(test_program: Program, add_household: Hou
     survey = SurveyFactory(
         title="Test survey",
         category="MANUAL",
-        payment_plan=payment_plan,
+        payment_list=payment_list,
         created_by=user,
         business_area=ba,
         program=test_program,

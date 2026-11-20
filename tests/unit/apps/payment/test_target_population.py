@@ -6,22 +6,22 @@ from django.test import RequestFactory
 import pytest
 
 from extras.test_utils.factories import (
-    PaymentPlanFactory,
+    PaymentListFactory,
     PaymentPlanPurposeFactory,
     ProgramFactory,
     TargetPopulationFactory,
     UserFactory,
 )
-from hope.admin.payment_plan import BasePaymentPlanAdmin, PaymentPlanAdmin
+from hope.admin.payment_plan import BasePaymentListAdmin, PaymentListAdmin
 from hope.admin.target_population import HIDDEN_FIELDS, TargetPopulationAdmin
-from hope.models import PaymentPlan, TargetPopulation
+from hope.models import PaymentList, TargetPopulation
 
 pytestmark = pytest.mark.django_db
 
 
 def test_objects_exclude_soft_deleted() -> None:
-    plan = PaymentPlanFactory(status=PaymentPlan.Status.TP_OPEN)
-    deleted = PaymentPlanFactory(status=PaymentPlan.Status.TP_OPEN)
+    plan = PaymentListFactory(status=PaymentList.Status.TP_OPEN)
+    deleted = PaymentListFactory(status=PaymentList.Status.TP_OPEN)
     deleted.delete()
 
     assert list(TargetPopulation.objects.values_list("pk", flat=True)) == [plan.pk]
@@ -32,19 +32,19 @@ def test_admin_registered() -> None:
     assert type(admin.site._registry[TargetPopulation]) is TargetPopulationAdmin
 
 
-def test_admin_queryset_scoped_to_pre_payment_plan_statuses() -> None:
-    PaymentPlanFactory(status=PaymentPlan.Status.TP_OPEN)
-    PaymentPlanFactory(status=PaymentPlan.Status.DRAFT)
-    PaymentPlanFactory(status=PaymentPlan.Status.OPEN)
-    PaymentPlanFactory(status=PaymentPlan.Status.ACCEPTED)
+def test_admin_queryset_scoped_to_pre_payment_list_statuses() -> None:
+    PaymentListFactory(status=PaymentList.Status.TP_OPEN)
+    PaymentListFactory(status=PaymentList.Status.DRAFT)
+    PaymentListFactory(status=PaymentList.Status.OPEN)
+    PaymentListFactory(status=PaymentList.Status.ACCEPTED)
 
     request = RequestFactory().get("/")
     request.user = UserFactory()
     model_admin = TargetPopulationAdmin(TargetPopulation, admin.site)
 
     assert set(model_admin.get_queryset(request).values_list("status", flat=True)) == {
-        PaymentPlan.Status.TP_OPEN.value,
-        PaymentPlan.Status.DRAFT.value,
+        PaymentList.Status.TP_OPEN.value,
+        PaymentList.Status.DRAFT.value,
     }
 
 
@@ -58,10 +58,10 @@ def test_admin_has_no_add_permission() -> None:
 
 def test_base_admin_frontend_url_is_not_implemented() -> None:
     with pytest.raises(NotImplementedError):
-        BasePaymentPlanAdmin(PaymentPlan, admin.site).frontend_url(PaymentPlanFactory())
+        BasePaymentListAdmin(PaymentList, admin.site).frontend_url(PaymentListFactory())
 
 
-def test_admin_form_hides_payment_plan_only_fields() -> None:
+def test_admin_form_hides_payment_list_only_fields() -> None:
     target_population = TargetPopulationFactory()
     request = RequestFactory().get("/")
     request.user = UserFactory(is_superuser=True)
@@ -82,7 +82,7 @@ def test_admin_form_limits_status_choices() -> None:
     form = model_admin.get_form(request, target_population, change=True)()
 
     assert {value for value, _ in form.fields["status"].choices} == {
-        status.value for status in PaymentPlan.PRE_PAYMENT_PLAN_STATUSES
+        status.value for status in PaymentList.PRE_PAYMENT_LIST_STATUSES
     }
 
 
@@ -90,8 +90,8 @@ def test_admin_hides_background_action_status() -> None:
     assert "background_action_status" in HIDDEN_FIELDS
     assert "background_action_status" not in TargetPopulationAdmin.list_display
     assert ("background_action_status", ChoicesFieldComboFilter) not in TargetPopulationAdmin.list_filter
-    assert "background_action_status" in PaymentPlanAdmin.list_display
-    assert ("background_action_status", ChoicesFieldComboFilter) in PaymentPlanAdmin.list_filter
+    assert "background_action_status" in PaymentListAdmin.list_display
+    assert ("background_action_status", ChoicesFieldComboFilter) in PaymentListAdmin.list_filter
 
 
 def test_admin_form_scopes_payment_plan_purposes_to_program() -> None:

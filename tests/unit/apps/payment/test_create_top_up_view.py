@@ -8,14 +8,14 @@ from extras.test_utils.factories import (
     BusinessAreaFactory,
     CurrencyFactory,
     PaymentFactory,
-    PaymentPlanFactory,
+    PaymentListFactory,
     PaymentPlanPurposeFactory,
     ProgramCycleFactory,
     ProgramFactory,
     UserFactory,
 )
 from hope.apps.account.permissions import Permissions
-from hope.models import Payment, PaymentPlan, Program
+from hope.models import Payment, PaymentList, PaymentPlan, Program
 
 pytestmark = pytest.mark.django_db
 
@@ -31,23 +31,27 @@ def top_up_view_context(api_client: Callable, business_area: Any) -> dict[str, A
     program = ProgramFactory(business_area=business_area, status=Program.ACTIVE)
     cycle = ProgramCycleFactory(program=program)
     currency = CurrencyFactory(code="PLN", name="Polish Zloty")
-    regular_pp = PaymentPlanFactory(
+    regular_pp = PaymentListFactory(
         name="Standard PP",
         business_area=business_area,
         program_cycle=cycle,
-        plan_type=PaymentPlan.PlanType.REGULAR,
-        status=PaymentPlan.Status.ACCEPTED,
+        plan_type=PaymentList.PlanType.REGULAR,
+        status=PaymentList.Status.ACCEPTED,
         currency=currency,
     )
     purpose = PaymentPlanPurposeFactory()
+    program.payment_plan_purposes.add(purpose)
     regular_pp.payment_plan_purposes.add(purpose)
     PaymentFactory(parent=regular_pp, status=Payment.STATUS_DISTRIBUTION_SUCCESS)
+    regular_group = regular_pp.payment_plan
+    regular_group.status = PaymentPlan.Status.ACCEPTED
+    regular_group.save(update_fields=["status"])
     url = reverse(
         "api:payments:payment-plans-create-top-up",
         kwargs={
             "business_area_slug": business_area.slug,
             "program_code": program.code,
-            "pk": regular_pp.pk,
+            "pk": regular_group.pk,
         },
     )
     return {
@@ -55,6 +59,7 @@ def top_up_view_context(api_client: Callable, business_area: Any) -> dict[str, A
         "user": user,
         "program": program,
         "regular_pp": regular_pp,
+        "regular_group": regular_group,
         "client": api_client(user),
         "url": url,
     }
@@ -89,7 +94,7 @@ def test_create_top_up_view_arrange_permissions_act_post_assert_status(
     assert response.status_code == expected_status
 
 
-def test_create_top_up_view_arrange_eligible_pp_act_post_assert_top_up_payload(
+def test_create_top_up_view_arrange_eligible_group_act_post_assert_linked_group_payload(
     top_up_view_context: dict[str, Any],
     create_user_role_with_permissions: Any,
 ) -> None:
@@ -108,10 +113,14 @@ def test_create_top_up_view_arrange_eligible_pp_act_post_assert_top_up_payload(
 
     assert response.status_code == status.HTTP_201_CREATED
     data = response.json()
-    assert data["plan_type"] == PaymentPlan.PlanType.TOP_UP
-    assert data["name"] == "Standard PP Top Up"
+    regular_group = top_up_view_context["regular_group"]
+    assert data["plan_type"] == PaymentList.PlanType.TOP_UP
+    assert data["name"] == f"{regular_group.name} Top Up 1"
     assert data["currency"] == "PLN"
-    assert "id" in data["source_payment_plan"]
+    assert data["source_payment_plan"]["id"] == str(regular_group.id)
+    top_up_pp = PaymentList.objects.get(payment_plan_id=data["id"])
+    assert top_up_pp.name == "Standard PP Top Up"
+    assert top_up_pp.source_payment_list == top_up_view_context["regular_pp"]
 
 
 def test_create_top_up_view_arrange_missing_dispersion_dates_act_post_assert_400(

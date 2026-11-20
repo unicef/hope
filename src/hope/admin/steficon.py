@@ -16,7 +16,7 @@ from django.utils.translation import get_language
 
 from hope.apps.steficon.exception import RuleError
 from hope.apps.steficon.forms import RuleTestForm
-from hope.models import PaymentPlan, Rule, RuleCommit
+from hope.models import PaymentList, Rule, RuleCommit
 
 logger = logging.getLogger(__name__)
 
@@ -138,7 +138,7 @@ class TestRuleMixin:
         else:
             context["form"] = RuleTestForm(initial={"raw_data": '{"a": 1, "b":2}', "opt": "optData"})
         if "form" in context:
-            context["form"].fields["target_population"].widget = AutocompleteWidget(PaymentPlan, self.admin_site)
+            context["form"].fields["target_population"].widget = AutocompleteWidget(PaymentList, self.admin_site)
             context["form"].fields["content_type"].widget = AutocompleteWidget(ContentType, self.admin_site)
         return TemplateResponse(request, "admin/steficon/rule/test.html", context)
 

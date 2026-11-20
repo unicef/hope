@@ -43,9 +43,8 @@ def role_assignment(request, db, superuser, business_area, role):
 
 
 @frozenfixture()
-def payment_plan(request, db, business_area, program, superuser):
-    cycle = program.cycles.first()
-    return PaymentPlanFactory(business_area=business_area, program_cycle=cycle, created_by=superuser)
+def payment_plan(request, db, program, superuser):
+    return PaymentPlanFactory(cycle=program.cycles.first(), created_by=superuser)
 
 
 def test_create_supporting_document(superuser, business_area, program, role_assignment, payment_plan):

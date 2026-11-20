@@ -254,7 +254,7 @@ def test_payment_plan_callback_request_serializer_ack_payload_includes_message()
     }
 
 
-def test_payment_plan_callback_ack_serializer_to_representation() -> None:
+def test_payment_list_callback_ack_serializer_to_representation() -> None:
     serializer = PaymentPlanCallbackAckSerializer(
         {
             "status": "OK",
@@ -271,7 +271,7 @@ def test_payment_plan_callback_ack_serializer_to_representation() -> None:
     }
 
 
-def test_payment_plan_callback_ack_serializer_to_representation_includes_message() -> None:
+def test_payment_list_callback_ack_serializer_to_representation_includes_message() -> None:
     serializer = PaymentPlanCallbackAckSerializer(
         {
             "status": "KO",

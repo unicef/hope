@@ -21,7 +21,7 @@ from extras.test_utils.factories import (
 )
 from hope.apps.dashboard.serializers import DashboardBaseSerializer
 from hope.apps.dashboard.services import GLOBAL_SLUG, DashboardDataCache, DashboardGlobalDataCache
-from hope.models import BusinessArea, Payment, PaymentPlan
+from hope.models import BusinessArea, Payment, PaymentList
 
 
 @pytest.fixture
@@ -96,7 +96,7 @@ def populate_dashboard_cache(area_kabul):
                 household=household,
                 program=program,
                 business_area=ba,
-                parent__status=PaymentPlan.Status.ACCEPTED,
+                parent__status=PaymentList.Status.ACCEPTED,
                 status=status,
             )
         return household
@@ -303,7 +303,7 @@ def partial_refresh_data_for_ba(afghanistan):
     household = HouseholdFactory(program=prog, business_area=afghanistan)
 
     PaymentFactory(
-        parent__status=PaymentPlan.Status.ACCEPTED,
+        parent__status=PaymentList.Status.ACCEPTED,
         household=household,
         program=prog,
         business_area=afghanistan,
@@ -311,7 +311,7 @@ def partial_refresh_data_for_ba(afghanistan):
         delivered_quantity_usd=Decimal("100.00"),
     )
     PaymentFactory(
-        parent__status=PaymentPlan.Status.ACCEPTED,
+        parent__status=PaymentList.Status.ACCEPTED,
         household=household,
         program=prog,
         business_area=afghanistan,
@@ -361,7 +361,7 @@ def partial_refresh_combines_data_global(afghanistan, fsp_common, delivery_mecha
     year_new = CURRENT_YEAR
 
     PaymentFactory(
-        parent__status=PaymentPlan.Status.ACCEPTED,
+        parent__status=PaymentList.Status.ACCEPTED,
         household=household,
         program=prog,
         business_area=payment_ba,
@@ -373,7 +373,7 @@ def partial_refresh_combines_data_global(afghanistan, fsp_common, delivery_mecha
         currency=common_currency,
     )
     PaymentFactory(
-        parent__status=PaymentPlan.Status.ACCEPTED,
+        parent__status=PaymentList.Status.ACCEPTED,
         household=household,
         program=prog,
         business_area=payment_ba,
@@ -385,7 +385,7 @@ def partial_refresh_combines_data_global(afghanistan, fsp_common, delivery_mecha
         currency=common_currency,
     )
     PaymentFactory(
-        parent__status=PaymentPlan.Status.ACCEPTED,
+        parent__status=PaymentList.Status.ACCEPTED,
         household=household,
         program=prog,
         business_area=payment_ba,
@@ -419,7 +419,7 @@ def partial_refresh_combines_data_ba(fsp_common, delivery_mechanism_common):
     year_new = CURRENT_YEAR
 
     PaymentFactory(
-        parent__status=PaymentPlan.Status.ACCEPTED,
+        parent__status=PaymentList.Status.ACCEPTED,
         household=household,
         program=prog,
         business_area=payment_ba,
@@ -431,7 +431,7 @@ def partial_refresh_combines_data_ba(fsp_common, delivery_mechanism_common):
         currency=common_currency,
     )
     PaymentFactory(
-        parent__status=PaymentPlan.Status.ACCEPTED,
+        parent__status=PaymentList.Status.ACCEPTED,
         household=household,
         program=prog,
         business_area=payment_ba,
@@ -443,7 +443,7 @@ def partial_refresh_combines_data_ba(fsp_common, delivery_mechanism_common):
         currency=common_currency,
     )
     PaymentFactory(
-        parent__status=PaymentPlan.Status.ACCEPTED,
+        parent__status=PaymentList.Status.ACCEPTED,
         household=household,
         program=prog,
         business_area=payment_ba,
@@ -530,7 +530,7 @@ def partial_refresh_global_no_new_payments_data(afghanistan):
 
     year_cached = CURRENT_YEAR - 2
     PaymentFactory(
-        parent__status=PaymentPlan.Status.ACCEPTED,
+        parent__status=PaymentList.Status.ACCEPTED,
         household=household,
         program=prog,
         business_area=afghanistan,
@@ -571,7 +571,7 @@ def partial_refresh_ba_no_new_payments_data(afghanistan):
 
     year_cached = CURRENT_YEAR - 2
     PaymentFactory(
-        parent__status=PaymentPlan.Status.ACCEPTED,
+        parent__status=PaymentList.Status.ACCEPTED,
         household=household,
         program=prog,
         business_area=afghanistan,
@@ -627,8 +627,8 @@ def existing_global_cache_data():
         "children_counts": 2,
         "pwd_counts": 0,
         "reconciled": 0,
-        "finished_payment_plans": 1,
-        "total_payment_plans": 1,
+        "finished_payment_lists": 1,
+        "total_payment_lists": 1,
         "total_planned_usd": "100.00",
     }
 
@@ -654,8 +654,8 @@ def existing_ba_cache_data():
         "children_counts": 2,
         "pwd_counts": 0,
         "reconciled": 0,
-        "finished_payment_plans": 1,
-        "total_payment_plans": 1,
+        "finished_payment_lists": 1,
+        "total_payment_lists": 1,
         "total_planned_usd": "100.00",
     }
 

@@ -6,8 +6,8 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import CheckCircleOutlineRoundedIcon from '@mui/icons-material/CheckCircleOutlineRounded';
 import ErrorOutlineRoundedIcon from '@mui/icons-material/ErrorOutlineRounded';
 import { Box, Chip, TableCell } from '@mui/material';
-import type { PaymentList } from '@restgenerated/models/PaymentList';
-import type { NotEligiblePaymentList } from '@restgenerated/models/NotEligiblePaymentList';
+import type { PaymentRow } from '@restgenerated/models/PaymentRow';
+import type { NotEligiblePaymentRow } from '@restgenerated/models/NotEligiblePaymentRow';
 import {
   displayNameWithLatin,
   formatCurrencyWithSymbol,
@@ -51,9 +51,9 @@ const RoutedBox = styled.div`
 `;
 
 interface PaymentsTableRowProps {
-  payment: PaymentList | NotEligiblePaymentList;
+  payment: PaymentRow | NotEligiblePaymentRow;
   canViewDetails: boolean;
-  onWarningClick?: (payment: PaymentList) => void;
+  onWarningClick?: (payment: PaymentRow) => void;
   permissions;
   showIneligibilityCauses?: boolean;
 }
@@ -117,16 +117,16 @@ export function PaymentsTableRow({
   return (
     <ClickableTableRow hover role="checkbox" key={payment.id}>
       <TableCell align="left">
-        {(payment.paymentPlanHardConflicted ||
-          payment.paymentPlanSoftConflicted) && (
+        {(payment.paymentListHardConflicted ||
+          payment.paymentListSoftConflicted) && (
           <WarningTooltip
             handleClick={(e) => handleDialogWarningOpen(e)}
             message={t(
               isSocialDctType
-                ? 'This individual is also included in other Payment Plans. Click this icon to view details.'
-                : 'This household is also included in other Payment Plans. Click this icon to view details.',
+                ? 'This individual is also included in other Payment Lists. Click this icon to view details.'
+                : 'This household is also included in other Payment Lists. Click this icon to view details.',
             )}
-            confirmed={payment.paymentPlanHardConflicted}
+            confirmed={payment.paymentListHardConflicted}
           />
         )}
       </TableCell>

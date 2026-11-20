@@ -1,0 +1,45 @@
+from selenium.webdriver.common.by import By
+from selenium.webdriver.remote.webelement import WebElement
+
+from e2e.page_object.base_components import BaseComponents
+
+
+class NewPaymentList(BaseComponents):
+    page_header_container = 'div[data-cy="page-header-container"]'
+    button_save_payment_list = 'button[data-cy="button-save-payment-list"]'
+    input_target_population = 'div[data-cy="input-target-population"]'
+    select_targeting_id = 'div[data-cy="select-targetingId"]'
+    input_start_date = 'div[data-cy="input-start-date"]'
+    input_end_date = 'div[data-cy="input-end-date"]'
+    label_group_currency = 'div[data-cy="labelized-field-container-group-currency"]'
+    label_group_dispersion_start_date = 'div[data-cy="labelized-field-container-group-dispersion-start-date"]'
+    label_group_dispersion_end_date = 'div[data-cy="labelized-field-container-group-dispersion-end-date"]'
+
+    def get_page_header_container(self) -> WebElement:
+        return self.wait_for(self.page_header_container)
+
+    def get_button_save_payment_list(self) -> WebElement:
+        return self.wait_for(self.button_save_payment_list)
+
+    def get_input_target_population(self) -> WebElement:
+        return self.wait_for(self.input_target_population)
+
+    def get_select_targeting_id(self) -> WebElement:
+        return self.wait_for(self.select_targeting_id)
+
+    def get_input_start_date(self) -> WebElement:
+        self.wait_for(self.input_start_date)
+        return self.wait_for(self.input_start_date).find_elements(By.TAG_NAME, "input")[0]
+
+    def get_input_end_date(self) -> WebElement:
+        self.wait_for(self.input_end_date)
+        return self.wait_for(self.input_end_date).find_elements(By.TAG_NAME, "input")[0]
+
+    def get_label_group_currency(self) -> WebElement:
+        return self.wait_for(self.label_group_currency)
+
+    def get_label_group_dispersion_start_date(self) -> WebElement:
+        return self.wait_for(self.label_group_dispersion_start_date)
+
+    def get_label_group_dispersion_end_date(self) -> WebElement:
+        return self.wait_for(self.label_group_dispersion_end_date)

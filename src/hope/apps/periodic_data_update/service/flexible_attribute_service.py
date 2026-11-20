@@ -6,7 +6,7 @@ from hope.apps.periodic_data_update.signals import (
     increment_periodic_field_version_cache,
 )
 from hope.apps.periodic_data_update.utils import field_label_to_field_name
-from hope.models import FlexibleAttribute, PaymentPlan, PeriodicFieldData, Program
+from hope.models import FlexibleAttribute, PaymentList, PeriodicFieldData, Program
 
 
 class FlexibleAttributeForPDUService:
@@ -74,7 +74,7 @@ class FlexibleAttributeForPDUService:
     def update_pdu_flex_attributes_in_program_update(self) -> None:
         if (
             self.program.registration_imports.exists()
-            or PaymentPlan.objects.filter(program_cycle__program=self.program).exists()
+            or PaymentList.objects.filter(program_cycle__program=self.program).exists()
         ):
             self.increase_pdu_rounds_for_program_with_rdi()
         else:

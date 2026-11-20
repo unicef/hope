@@ -172,7 +172,7 @@ def test_file_temp_fk_is_autocomplete():
     assert "file" in fields
 
 
-def test_payment_plan_split_fk_is_autocomplete():
+def test_payment_list_split_fk_is_autocomplete():
     model_admin = PaymentAdmin(Payment, admin.site)
     request = HttpRequest()
     request.user = type("User", (), {"is_superuser": True, "has_perm": lambda *a: True})()

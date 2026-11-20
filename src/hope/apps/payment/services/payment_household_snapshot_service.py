@@ -24,7 +24,7 @@ from hope.models import (
     Payment,
     PaymentDataCollector,
     PaymentHouseholdSnapshot,
-    PaymentPlan,
+    PaymentList,
 )
 from hope.models.payment_data_collector import DeliveryDataByCollector
 
@@ -58,9 +58,9 @@ def handle_type_mapping(value: Any) -> Any:
     return value
 
 
-def create_payment_plan_snapshot_data(payment_plan: PaymentPlan) -> None:
+def create_payment_list_snapshot_data(payment_list: PaymentList) -> None:
     payments_ids = list(
-        payment_plan.eligible_payments.filter(household_snapshot__isnull=True)
+        payment_list.eligible_payments.filter(household_snapshot__isnull=True)
         .values_list("id", flat=True)
         .order_by("id")
     )

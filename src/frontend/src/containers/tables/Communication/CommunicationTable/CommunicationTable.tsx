@@ -38,7 +38,7 @@ function CommunicationTable({
         min: dateToIsoString(filter.createdAtRangeMin, 'startOfDay'),
         max: dateToIsoString(filter.createdAtRangeMax, 'endOfDay'),
       }),
-      paymentPlan: filter.targetPopulation,
+      paymentList: filter.targetPopulation,
       createdBy: filter.createdBy || undefined,
     };
   }, [

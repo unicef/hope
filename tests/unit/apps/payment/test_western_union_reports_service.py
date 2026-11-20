@@ -15,9 +15,9 @@ import pytest
 from extras.test_utils.factories import (
     FileTempFactory,
     PaymentFactory,
-    PaymentPlanFactory,
+    PaymentListFactory,
     UserFactory,
-    WesternUnionPaymentPlanReportFactory,
+    WesternUnionPaymentListReportFactory,
 )
 from hope.apps.payment.services.western_union_reports_service import (
     DataParseResult,
@@ -145,7 +145,7 @@ def test_reconcile_invoice_completes_with_matching_data_file(
         amount=Decimal("100.00"),
         status=WesternUnionData.STATUS_PENDING,
     )
-    payment_map = {"payment-plan-id": [build_payment_row()]}
+    payment_map = {"payment-list-id": [build_payment_row()]}
 
     with (
         patch.object(
@@ -196,7 +196,7 @@ def test_reconcile_invoice_passes_send_notifications_flag_to_report_generation(
         amount=Decimal("150.00"),
         status=WesternUnionData.STATUS_PENDING,
     )
-    payment_map = {"payment-plan-id": [build_payment_row()]}
+    payment_map = {"payment-list-id": [build_payment_row()]}
 
     with (
         patch.object(service, "extract_data_payment_rows", return_value=payment_map),
@@ -372,7 +372,7 @@ def test_reconcile_invoice_marks_only_invoice_error_when_report_generation_fails
         amount=Decimal("100.00"),
         status=WesternUnionData.STATUS_PENDING,
     )
-    payment_map = {"payment-plan-id": [build_payment_row()]}
+    payment_map = {"payment-list-id": [build_payment_row()]}
 
     with (
         patch.object(service, "extract_data_payment_rows", return_value=payment_map),
@@ -863,7 +863,7 @@ def test_extract_data_payment_rows_skips_missing_payments(
     assert payment_map == {str(existing_payment.parent_id): [existing_row]}
 
 
-def test_extract_data_payment_rows_groups_aggregated_rows_by_payment_plan(
+def test_extract_data_payment_rows_groups_aggregated_rows_by_payment_list(
     service: QCFReportsService,
     one_day: timedelta,
     sample_file: Callable[[str], io.BytesIO],
@@ -1592,7 +1592,7 @@ def test_parse_charges_amount_from_pdf_text(
         service.parse_charges_amount_from_pdf_text("missing", "ad.zip")
 
 
-def test_payment_plan_data_post_init_tracks_principal_charges_refunds_and_fees(
+def test_payment_list_data_post_init_tracks_principal_charges_refunds_and_fees(
     service: QCFReportsService,
     one_day: timedelta,
     sample_file: Callable[[str], io.BytesIO],
@@ -1600,14 +1600,14 @@ def test_payment_plan_data_post_init_tracks_principal_charges_refunds_and_fees(
     build_payment_row: Callable[[], MatchedDataPaymentRow],
 ) -> None:
     report_data = QCFReportPaymentPlanData(
-        payment_plan_unicef_id="PP-1",
+        payment_list_unicef_id="PP-1",
         payments_data=[
             QCFReportPaymentRowData(
                 payment_unicef_id="RCPT-1",
                 mtcn="MTCN-1",
                 mtcns_match=True,
                 hope_mtcn="MTCN-1",
-                payment_plan_unicef_id="PP-1",
+                payment_list_unicef_id="PP-1",
                 programme="Programme",
                 fc="FC-1",
                 principal_amount=100.0,
@@ -1620,7 +1620,7 @@ def test_payment_plan_data_post_init_tracks_principal_charges_refunds_and_fees(
                 mtcn="MTCN-2",
                 mtcns_match=False,
                 hope_mtcn="MTCN-X",
-                payment_plan_unicef_id="PP-1",
+                payment_list_unicef_id="PP-1",
                 programme="Programme",
                 fc="FC-1",
                 principal_amount=-50.0,
@@ -1645,14 +1645,14 @@ def test_generate_report_xlsx_contains_headers_and_totals(
     build_payment_row: Callable[[], MatchedDataPaymentRow],
 ) -> None:
     report_data = QCFReportPaymentPlanData(
-        payment_plan_unicef_id="PP-1",
+        payment_list_unicef_id="PP-1",
         payments_data=[
             QCFReportPaymentRowData(
                 payment_unicef_id="RCPT-1",
                 mtcn="MTCN-1",
                 mtcns_match=True,
                 hope_mtcn="MTCN-1",
-                payment_plan_unicef_id="PP-1",
+                payment_list_unicef_id="PP-1",
                 programme="Programme",
                 fc="FC1/001",
                 principal_amount=100.0,
@@ -1672,7 +1672,7 @@ def test_generate_report_xlsx_contains_headers_and_totals(
         "MTCN",
         "MTCNs match",
         "HOPE MTCN",
-        "Payment Plan ID",
+        "Payment List ID",
         "Programme",
         "FC",
         "Principal Amount",
@@ -1727,7 +1727,7 @@ def test_generate_reports_for_invoice_creates_report_and_registers_notification_
         callback()
         task_mock.assert_called_once_with(str(report.id))
 
-    assert report.payment_plan_id == payment.parent_id
+    assert report.payment_list_id == payment.parent_id
     assert report.report_file is not None
 
 
@@ -1764,7 +1764,7 @@ def test_generate_reports_for_invoice_skips_notification_callback_when_disabled(
     on_commit_mock.assert_not_called()
 
 
-def test_generate_report_uses_payment_plan_data(
+def test_generate_report_uses_payment_list_data(
     service: QCFReportsService,
     one_day: timedelta,
     sample_file: Callable[[str], io.BytesIO],
@@ -1820,8 +1820,8 @@ def test_send_notification_emails_sends_to_users_with_permission(
     build_zip_file: Callable[[str, str | bytes], io.BytesIO],
     build_payment_row: Callable[[], MatchedDataPaymentRow],
 ) -> None:
-    report = WesternUnionPaymentPlanReportFactory(
-        payment_plan=PaymentPlanFactory(),
+    report = WesternUnionPaymentListReportFactory(
+        payment_list=PaymentListFactory(),
     )
     user = UserFactory()
     report.report_file = FileTempFactory(file=SimpleUploadedFile("qcf.xlsx", b"test"))
@@ -1850,9 +1850,9 @@ def test_send_notification_emails_sends_to_users_with_permission(
             "first_name": user.first_name or user.username,
             "last_name": user.last_name,
             "email": user.email,
-            "message": f"Payment Plan: https://example.com/{report.payment_plan.business_area.slug}/programs/"
-            f"{report.payment_plan.program.code}/payment-module/payment-plans/{report.payment_plan.id}",
-            "title": "Payment Plan qcf.xlsx Western Union report",
+            "message": f"Payment List: https://example.com/{report.payment_list.business_area.slug}/programs/"
+            f"{report.payment_list.program.code}/payment-module/payment-lists/{report.payment_list.id}",
+            "title": "Payment List qcf.xlsx Western Union report",
             "link": "https://example.com/download/report",
         },
     )
@@ -1865,8 +1865,8 @@ def test_send_notification_emails_skips_when_no_users_have_permission(
     build_zip_file: Callable[[str, str | bytes], io.BytesIO],
     build_payment_row: Callable[[], MatchedDataPaymentRow],
 ) -> None:
-    report = WesternUnionPaymentPlanReportFactory(
-        payment_plan=PaymentPlanFactory(),
+    report = WesternUnionPaymentListReportFactory(
+        payment_list=PaymentListFactory(),
     )
     user = UserFactory()
 

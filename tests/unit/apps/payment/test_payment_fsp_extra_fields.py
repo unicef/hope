@@ -11,15 +11,14 @@ from extras.test_utils.factories.payment import (
     FinancialServiceProviderXlsxTemplateFactory,
     PaymentFactory,
     PaymentHouseholdSnapshotFactory,
-    PaymentPlanFactory,
+    PaymentListFactory,
 )
 from hope.apps.payment.api.serializers import PaymentDetailSerializer
-from hope.apps.payment.flows import PaymentPlanFlow
-from hope.apps.payment.xlsx.xlsx_payment_plan_delivery_export_service import (
-    XlsxPaymentPlanDeliveryExportService,
+from hope.apps.payment.xlsx.xlsx_payment_list_delivery_export_service import (
+    XlsxPaymentListDeliveryExportService,
 )
-from hope.apps.payment.xlsx.xlsx_payment_plan_delivery_import_service import (
-    XlsxPaymentPlanDeliveryImportService,
+from hope.apps.payment.xlsx.xlsx_payment_list_delivery_import_service import (
+    XlsxPaymentListDeliveryImportService,
 )
 from hope.apps.payment.xlsx.xlsx_payment_plan_fsp_extra_fields_export_service import (
     XlsxPaymentPlanFspExtraFieldsExportService,
@@ -27,22 +26,44 @@ from hope.apps.payment.xlsx.xlsx_payment_plan_fsp_extra_fields_export_service im
 from hope.apps.payment.xlsx.xlsx_payment_plan_fsp_extra_fields_import_service import (
     XlsxPaymentPlanFspExtraFieldsImportService,
 )
-from hope.models import LogEntry, Payment, PaymentPlan
+from hope.models import LogEntry, Payment, PaymentList
 from hope.one_time_scripts.migrate_payment_extras import migrate_payment_extras
 
 pytestmark = pytest.mark.django_db
 
 
 @pytest.fixture
-def payment_plan():
-    return PaymentPlanFactory(status=PaymentPlan.Status.LOCKED_FSP)
+def payment_list():
+    return PaymentListFactory(status=PaymentList.Status.LOCKED_FSP)
 
 
 @pytest.fixture
-def payments(payment_plan):
+def payment_plan(payment_list):
+    return payment_list.payment_plan
+
+
+@pytest.fixture
+def payment_in_second_plan_of_group(payment_list):
+    second_payment_list = PaymentListFactory(
+        program_cycle=payment_list.program_cycle,
+        payment_plan=payment_list.payment_plan,
+        status=PaymentList.Status.LOCKED_FSP,
+    )
+    payment = PaymentFactory(
+        parent=second_payment_list,
+        program=second_payment_list.program,
+        unicef_id="PAYMENT-003",
+        extras={"fsp_extra_fields": {"reference": "third-reference"}},
+    )
+    payment.save(update_fields=["unicef_id"])
+    return payment
+
+
+@pytest.fixture
+def payments(payment_list):
     first_payment = PaymentFactory(
-        parent=payment_plan,
-        program=payment_plan.program,
+        parent=payment_list,
+        program=payment_list.program,
         unicef_id="PAYMENT-001",
         extras={
             "extra_fields": {"reconciliation_code": "REC-001"},
@@ -54,8 +75,8 @@ def payments(payment_plan):
         },
     )
     second_payment = PaymentFactory(
-        parent=payment_plan,
-        program=payment_plan.program,
+        parent=payment_list,
+        program=payment_list.program,
         unicef_id="PAYMENT-002",
         extras={
             "extra_fields": {"reconciliation_code": "REC-002"},
@@ -75,6 +96,19 @@ def fsp_extra_fields_import_file(payments):
     worksheet = workbook.active
     worksheet.append(["payment_id", "reference", "empty_field", "date_field"])
     worksheet.append([payments[0].unicef_id, "new-reference", None, date(2026, 7, 23)])
+    stream = BytesIO()
+    workbook.save(stream)
+    stream.seek(0)
+    return stream
+
+
+@pytest.fixture
+def fsp_extra_fields_import_file_for_two_plans(payments, payment_in_second_plan_of_group):
+    workbook = openpyxl.Workbook()
+    worksheet = workbook.active
+    worksheet.append(["payment_id", "reference"])
+    worksheet.append([payments[0].unicef_id, "first-plan"])
+    worksheet.append([payment_in_second_plan_of_group.unicef_id, "second-plan"])
     stream = BytesIO()
     workbook.save(stream)
     stream.seek(0)
@@ -195,41 +229,41 @@ def no_change_import_file(payments):
 
 
 @pytest.fixture
-def migration_payments(payment_plan):
+def migration_payments(payment_list):
     flat_payment = PaymentFactory(
-        parent=payment_plan,
-        program=payment_plan.program,
+        parent=payment_list,
+        program=payment_list.program,
         extras={"legacy": "value"},
     )
     empty_payment = PaymentFactory(
-        parent=payment_plan,
-        program=payment_plan.program,
+        parent=payment_list,
+        program=payment_list.program,
         extras={},
     )
     namespaced_payment = PaymentFactory(
-        parent=payment_plan,
-        program=payment_plan.program,
+        parent=payment_list,
+        program=payment_list.program,
         extras={"fsp_extra_fields": {"already": "namespaced"}},
     )
     mixed_fsp_payment = PaymentFactory(
-        parent=payment_plan,
-        program=payment_plan.program,
+        parent=payment_list,
+        program=payment_list.program,
         extras={
             "legacy": "value",
             "fsp_extra_fields": {"bank": "existing"},
         },
     )
     mixed_extra_fields_payment = PaymentFactory(
-        parent=payment_plan,
-        program=payment_plan.program,
+        parent=payment_list,
+        program=payment_list.program,
         extras={
             "legacy": "value",
             "extra_fields": {"existing": "reconciliation"},
         },
     )
     mixed_namespaces_payment = PaymentFactory(
-        parent=payment_plan,
-        program=payment_plan.program,
+        parent=payment_list,
+        program=payment_list.program,
         extras={
             "legacy": "value",
             "conflict": "legacy",
@@ -298,7 +332,7 @@ def test_fsp_extra_fields_template_contains_only_fsp_fields(
     payments,
     django_assert_num_queries,
 ):
-    with django_assert_num_queries(6):
+    with django_assert_num_queries(2):
         workbook = XlsxPaymentPlanFspExtraFieldsExportService(payment_plan).generate_workbook()
 
     rows = list(workbook.active.values)
@@ -310,18 +344,44 @@ def test_fsp_extra_fields_template_contains_only_fsp_fields(
     assert "reconciliation_code" not in rows[0]
 
 
-def test_fsp_extra_fields_import_background_action_starts_at_locked_fsp(payment_plan):
-    PaymentPlanFlow(payment_plan).background_action_status_xlsx_importing_fsp_extra_fields()
+def test_fsp_extra_fields_template_lists_payments_of_every_plan_in_the_group(
+    payment_plan,
+    payments,
+    payment_in_second_plan_of_group,
+):
+    workbook = XlsxPaymentPlanFspExtraFieldsExportService(payment_plan).generate_workbook()
 
-    assert payment_plan.background_action_status == PaymentPlan.BackgroundActionStatus.XLSX_IMPORTING_FSP_EXTRA_FIELDS
+    rows = list(workbook.active.values)
+    assert [row[0] for row in rows] == ["payment_id", "PAYMENT-001", "PAYMENT-002", "PAYMENT-003"]
+    assert rows[3] == ("PAYMENT-003", "", "", "", "third-reference")
+
+
+def test_fsp_extra_fields_import_updates_payments_of_every_plan_in_the_group(
+    payment_plan,
+    payments,
+    payment_in_second_plan_of_group,
+    fsp_extra_fields_import_file_for_two_plans,
+):
+    service = XlsxPaymentPlanFspExtraFieldsImportService(payment_plan, fsp_extra_fields_import_file_for_two_plans)
+    service.open_workbook()
+    service.validate()
+
+    updated_count = service.import_payment_list()
+
+    payments[0].refresh_from_db(fields=["extras"])
+    payment_in_second_plan_of_group.refresh_from_db(fields=["extras"])
+    assert service.errors == []
+    assert updated_count == 2
+    assert payments[0].fsp_extra_fields["reference"] == "first-plan"
+    assert payment_in_second_plan_of_group.fsp_extra_fields["reference"] == "second-plan"
 
 
 def test_manual_fsp_export_appends_fsp_extra_fields(
-    payment_plan,
+    payment_list,
     payments,
     fsp_xlsx_template,
 ):
-    service = XlsxPaymentPlanDeliveryExportService(payment_plan)
+    service = XlsxPaymentListDeliveryExportService(payment_list)
     headers = service.prepare_headers(fsp_xlsx_template)
 
     row = service.get_payment_row(payments[0])
@@ -331,6 +391,7 @@ def test_manual_fsp_export_appends_fsp_extra_fields(
 
 
 def test_fsp_extra_fields_import_merges_non_empty_values(
+    payment_list,
     payment_plan,
     payments,
     fsp_extra_fields_import_file,
@@ -343,7 +404,7 @@ def test_fsp_extra_fields_import_merges_non_empty_values(
     service.open_workbook()
     service.validate()
 
-    updated_count = service.import_payment_list(str(payment_plan.created_by_id))
+    updated_count = service.import_payment_list(str(payment_list.created_by_id))
 
     payments[0].refresh_from_db()
     payments[1].refresh_from_db()
@@ -365,6 +426,7 @@ def test_fsp_extra_fields_import_merges_non_empty_values(
 
 @pytest.mark.enable_activity_log
 def test_fsp_extra_fields_import_logs_previous_and_updated_values(
+    payment_list,
     payment_plan,
     payments,
     fsp_extra_fields_import_file,
@@ -382,18 +444,18 @@ def test_fsp_extra_fields_import_logs_previous_and_updated_values(
     }
 
     with django_assert_num_queries(5):
-        updated_count = service.import_payment_list(str(payment_plan.created_by_id))
+        updated_count = service.import_payment_list(str(payment_list.created_by_id))
 
     log = LogEntry.objects.get(content_type=content_type, object_id=payments[0].pk)
     assert updated_count == 1
-    assert log.user_id == payment_plan.created_by_id
+    assert log.user_id == payment_list.created_by_id
     assert log.changes == {
         "fsp_extra_fields": {
             "from": str(previous_fields),
             "to": str(expected_fields),
         }
     }
-    assert list(log.programs.values_list("pk", flat=True)) == [payment_plan.program.pk]
+    assert list(log.programs.values_list("pk", flat=True)) == [payment_list.program.pk]
 
 
 def test_fsp_extra_fields_import_allows_payment_gateway_payload_header(
@@ -405,7 +467,7 @@ def test_fsp_extra_fields_import_allows_payment_gateway_payload_header(
     service = XlsxPaymentPlanFspExtraFieldsImportService(payment_plan, payment_gateway_header_import_file)
     service.open_workbook()
 
-    with django_assert_num_queries(2):
+    with django_assert_num_queries(3):
         service.validate()
     updated_count = service.import_payment_list()
 
@@ -539,7 +601,7 @@ def test_fsp_extra_fields_import_rejects_dynamic_template_header(
     service = XlsxPaymentPlanFspExtraFieldsImportService(payment_plan, import_file)
     service.open_workbook()
 
-    with django_assert_num_queries(2):
+    with django_assert_num_queries(3):
         service.validate()
 
     assert len(service.errors) == 1
@@ -554,7 +616,7 @@ def test_fsp_extra_fields_import_rejects_expanded_account_header(
     service = XlsxPaymentPlanFspExtraFieldsImportService(payment_plan, account_system_header_import_file)
     service.open_workbook()
 
-    with django_assert_num_queries(2):
+    with django_assert_num_queries(3):
         service.validate()
 
     assert len(service.errors) == 1
@@ -562,10 +624,10 @@ def test_fsp_extra_fields_import_rejects_expanded_account_header(
 
 
 def test_reconciliation_import_ignores_fsp_extra_field_columns(
-    payment_plan,
+    payment_list,
     reconciliation_file,
 ):
-    service = XlsxPaymentPlanDeliveryImportService(payment_plan, reconciliation_file)
+    service = XlsxPaymentListDeliveryImportService(payment_list, reconciliation_file)
     service.open_workbook()
     row = next(service.ws_payments.iter_rows(min_row=2))
 
@@ -575,10 +637,10 @@ def test_reconciliation_import_ignores_fsp_extra_field_columns(
 
 
 def test_reconciliation_import_uses_plan_wide_fsp_header_ownership(
-    payment_plan,
+    payment_list,
     sparse_reconciliation_file,
 ):
-    service = XlsxPaymentPlanDeliveryImportService(payment_plan, sparse_reconciliation_file)
+    service = XlsxPaymentListDeliveryImportService(payment_list, sparse_reconciliation_file)
     service.open_workbook()
     row = next(service.ws_payments.iter_rows(min_row=2))
 

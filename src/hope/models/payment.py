@@ -94,7 +94,7 @@ class Payment(
 
     # Only scalar fields: keeping FKs out avoids per-row related-object fetches (N+1) when
     # diffing thousands of payments in bulk. FK/config changes (FSP, delivery mechanism) are
-    # audited at the PaymentPlan level instead.
+    # audited at the PaymentList level instead.
     ACTIVITY_LOG_MAPPING = create_mapping_dict(
         [
             "status",
@@ -118,12 +118,12 @@ class Payment(
     )
 
     parent = models.ForeignKey(
-        "payment.PaymentPlan",
+        "payment.PaymentList",
         on_delete=models.PROTECT,
         related_name="payment_items",
     )
     parent_split = models.ForeignKey(
-        "payment.PaymentPlanSplit",
+        "payment.PaymentListSplit",
         on_delete=models.SET_NULL,
         related_name="split_payment_items",
         null=True,

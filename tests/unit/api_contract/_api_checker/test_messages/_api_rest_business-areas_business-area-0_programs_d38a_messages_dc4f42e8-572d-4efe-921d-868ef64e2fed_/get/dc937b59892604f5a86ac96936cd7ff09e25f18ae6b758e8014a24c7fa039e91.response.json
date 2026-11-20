@@ -19,7 +19,7 @@
         "created_at": "2025-01-01T00:00:00Z",
         "body": "Message body 0",
         "households": [],
-        "payment_plan": null,
+        "payment_list": null,
         "registration_data_import": null,
         "sampling_type": "FULL_LIST",
         "full_list_arguments": {

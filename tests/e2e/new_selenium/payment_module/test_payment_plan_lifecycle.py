@@ -1,6 +1,4 @@
 import datetime as dt
-from decimal import Decimal
-from unittest import mock
 
 import pytest
 
@@ -8,64 +6,47 @@ from e2e.new_selenium.conftest import grant_permission
 from extras.test_utils.factories import CurrencyFactory
 from extras.test_utils.selenium import HopeTestBrowser
 from hope.apps.account.permissions import Permissions
-from hope.apps.payment.celery_tasks import payment_plan_refresh_payees_async_task
-from hope.models import Approval, BusinessArea, Currency, PaymentPlan, PaymentPlanSplit, User
-
-from .conftest import PM_VIEW_PERMISSIONS, _lifecycle_payment_plan, payment_plan_url
+from hope.models import Approval, BusinessArea, PaymentList, PaymentListSplit, PaymentPlan, User
 
 pytestmark = pytest.mark.django_db()
 
-STATUS = 'div[data-cy="status-container"]'
+PAYMENT_PLAN_STATUS = 'div[data-cy="group-status"]'
 COMMENT_INPUT = 'textarea[data-cy="input-comment"]'
+DIALOG_SUBMIT = '[role="dialog"] button[data-cy="button-submit"]'
 REJECT = 'button[data-cy="button-reject"]'
-REJECT_SUBMIT = 'button[data-cy="button-reject-submit"]'
 ABORT = 'button[data-cy="button-abort"]'
 ABORT_SUBMIT = 'button[data-cy="button-submit-abort"]'
 REACTIVATE = 'button[data-cy="button-reactivate-payment-plan"]'
-SPLIT = 'button[data-cy="button-split-payment-plan"]'
+SPLIT = 'button[data-cy="button-split-group"]'
 SPLIT_TYPE = 'div[data-cy="select-splitType"]'
-SPLIT_PAYMENTS_NO = 'input[data-cy="input-paymentsNo"]'
+SPLIT_PAYMENTS_NO = 'input[name="paymentsNo"]'
 SPLIT_SUBMIT = 'button[data-cy="button-split"]'
-EDIT = 'a[data-cy="button-edit-payment-plan"]'
-EDIT_SAVE = 'button[data-cy="button-save"]'
-CURRENCY_INPUT = 'div[data-cy="input-currency"] input'
-DELETE = 'button[data-cy="button-delete-pp"]'
-DELETE_SUBMIT = 'button[data-cy="button-submit"]'
+EDIT = 'button[data-cy="button-edit-group-name"]'
+CURRENCY_INPUT = 'div[data-cy="input-group-currency"] input'
+PAYMENT_PLAN_VIEW_PERMISSIONS = (
+    Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS,
+    Permissions.PM_VIEW_LIST,
+    Permissions.PM_PAYMENT_PLAN_VIEW_DETAIL,
+)
 REJECT_COMMENT = "Wrong entitlements, please recheck"
 ABORT_COMMENT = "Funds are no longer available"
 
 
-def open_payment_plan_as(
-    browser: HopeTestBrowser,
-    payment_plan: PaymentPlan,
-    status: str,
-) -> None:
+def open_payment_plan_as(browser: HopeTestBrowser, payment_plan: PaymentPlan, status: str) -> None:
+    program = payment_plan.cycle.program
     browser.login(username="noperm_user")
-    browser.open(payment_plan_url(payment_plan))
-    browser.wait_for_text(status, STATUS)
-
-
-@pytest.fixture
-def pln_currency() -> Currency:
-    return CurrencyFactory(code="PLN", name="Polish Zloty")
-
-
-@pytest.fixture
-def aborted_payment_plan(business_area: BusinessArea) -> PaymentPlan:
-    payment_plan = _lifecycle_payment_plan(business_area, PaymentPlan.Status.ABORTED)
-    payment_plan.abort_comment = "Aborted before the e2e run"
-    payment_plan.save(update_fields=["abort_comment"])
-    return payment_plan
+    browser.open(
+        f"/{program.business_area.slug}/programs/{program.code}/payment-module/payment-plans/{payment_plan.id}"
+    )
+    browser.wait_for_text(status, PAYMENT_PLAN_STATUS)
 
 
 @pytest.mark.parametrize(
     ("payment_plan_fixture", "status", "permission"),
     [
+        pytest.param("in_approval_group", "IN APPROVAL", Permissions.PM_ACCEPTANCE_PROCESS_APPROVE, id="approval"),
         pytest.param(
-            "in_approval_payment_plan", "IN APPROVAL", Permissions.PM_ACCEPTANCE_PROCESS_APPROVE, id="approval"
-        ),
-        pytest.param(
-            "in_authorization_payment_plan",
+            "in_authorization_group",
             "IN AUTHORIZATION",
             Permissions.PM_ACCEPTANCE_PROCESS_AUTHORIZE,
             id="authorization",
@@ -81,18 +62,19 @@ def test_reject_payment_plan(
     status: str,
     permission: Permissions,
 ) -> None:
-    payment_plan = request.getfixturevalue(payment_plan_fixture)
-    with grant_permission(user_with_no_permissions, business_area, *PM_VIEW_PERMISSIONS, permission):
-        open_payment_plan_as(browser, payment_plan, status)
+    group = request.getfixturevalue(payment_plan_fixture)
+    with grant_permission(user_with_no_permissions, business_area, *PAYMENT_PLAN_VIEW_PERMISSIONS, permission):
+        open_payment_plan_as(browser, group, status)
         browser.wait_for_element_clickable(REJECT).click()
         browser.set_value(COMMENT_INPUT, REJECT_COMMENT)
-        browser.wait_for_element_clickable(REJECT_SUBMIT).click()
+        browser.wait_for_element_clickable(DIALOG_SUBMIT).click()
         browser.wait_for_text("Payment Plan has been rejected.")
-        browser.wait_for_text("LOCKED FSP", STATUS)
+        browser.wait_for_text("LOCKED", PAYMENT_PLAN_STATUS)
 
-    payment_plan.refresh_from_db()
-    assert payment_plan.status == PaymentPlan.Status.LOCKED_FSP
-    approvals = Approval.objects.filter(approval_process__payment_plan=payment_plan)
+    group.refresh_from_db()
+    assert group.status == PaymentPlan.Status.LOCKED
+    assert group.payment_lists.get().status == PaymentList.Status.LOCKED_FSP
+    approvals = Approval.objects.filter(approval_process__payment_plan=group)
     assert list(approvals.values_list("type", "comment", "created_by")) == [
         (Approval.REJECT, REJECT_COMMENT, user_with_no_permissions.pk)
     ]
@@ -102,74 +84,66 @@ def test_abort_payment_plan(
     browser: HopeTestBrowser,
     user_with_no_permissions: User,
     business_area: BusinessArea,
-    locked_fsp_payment_plan: PaymentPlan,
+    locked_lifecycle_group: PaymentPlan,
 ) -> None:
-    payment_plan = locked_fsp_payment_plan
-    with grant_permission(user_with_no_permissions, business_area, *PM_VIEW_PERMISSIONS, Permissions.PM_ABORT):
-        open_payment_plan_as(browser, payment_plan, "LOCKED FSP")
+    group = locked_lifecycle_group
+    with grant_permission(
+        user_with_no_permissions, business_area, *PAYMENT_PLAN_VIEW_PERMISSIONS, Permissions.PM_ABORT
+    ):
+        open_payment_plan_as(browser, group, "LOCKED")
         browser.wait_for_element_clickable(ABORT).click()
         browser.set_value(COMMENT_INPUT, ABORT_COMMENT)
         browser.wait_for_element_clickable(ABORT_SUBMIT).click()
         browser.wait_for_text("Payment Plan has been aborted.")
-        browser.wait_for_text("ABORTED", STATUS)
+        browser.wait_for_text("ABORTED", PAYMENT_PLAN_STATUS)
 
-    payment_plan.refresh_from_db()
-    assert payment_plan.status == PaymentPlan.Status.ABORTED
-    assert payment_plan.abort_comment == ABORT_COMMENT
+    group.refresh_from_db()
+    payment_list = group.payment_lists.get()
+    assert group.status == PaymentPlan.Status.ABORTED
+    assert group.abort_comment == ABORT_COMMENT
+    assert payment_list.status == PaymentList.Status.ABORTED
+    assert payment_list.abort_comment == ABORT_COMMENT
 
 
-def test_abort_and_reactivate_payment_plan(
+def test_reactivate_aborted_payment_plan(
     browser: HopeTestBrowser,
     user_with_no_permissions: User,
     business_area: BusinessArea,
-    locked_fsp_payment_plan: PaymentPlan,
+    aborted_targeted_group: PaymentPlan,
 ) -> None:
-    payment_plan = locked_fsp_payment_plan
-    payment_ids = set(payment_plan.payment_items.values_list("id", flat=True))
+    group = aborted_targeted_group
+    payment_list = group.payment_lists.get()
+    payment_ids = set(payment_list.payment_items.values_list("id", flat=True))
     with grant_permission(
-        user_with_no_permissions,
-        business_area,
-        *PM_VIEW_PERMISSIONS,
-        Permissions.PM_ABORT,
-        Permissions.PM_REACTIVATE_ABORT,
+        user_with_no_permissions, business_area, *PAYMENT_PLAN_VIEW_PERMISSIONS, Permissions.PM_REACTIVATE_ABORT
     ):
-        open_payment_plan_as(browser, payment_plan, "LOCKED FSP")
-        browser.wait_for_element_clickable(ABORT).click()
-        browser.set_value(COMMENT_INPUT, ABORT_COMMENT)
-        browser.wait_for_element_clickable(ABORT_SUBMIT).click()
-        browser.wait_for_text("Payment Plan has been aborted.")
-        browser.wait_for_text("ABORTED", STATUS)
-        # Celery runs eagerly here, so the rebuild is held back to keep the plan in the rebuilding state.
-        with mock.patch("hope.apps.payment.services.payment_plan_services.payment_plan_refresh_payees_async_task"):
-            browser.wait_for_element_clickable(REACTIVATE).click()
-            browser.wait_for_text("Payment Plan rebuild has started.")
-            browser.wait_for_text("REBUILDING")
-            browser.wait_for_element_present(f"{REACTIVATE}:disabled")
-        payment_plan.refresh_from_db()
-        assert payment_plan.status == PaymentPlan.Status.ABORTED
-        assert payment_plan.background_action_status == PaymentPlan.BackgroundActionStatus.REBUILDING
-        payment_plan_refresh_payees_async_task(payment_plan)
-        browser.wait_for_text("OPEN", STATUS)
+        open_payment_plan_as(browser, group, "ABORTED")
+        browser.wait_for_element_clickable(REACTIVATE).click()
+        browser.wait_for_text("Payment Plan has been reactivated.")
+        browser.wait_for_text("OPEN", PAYMENT_PLAN_STATUS)
 
-    payment_plan.refresh_from_db()
-    assert payment_plan.status == PaymentPlan.Status.OPEN
-    assert payment_plan.background_action_status is None
-    assert payment_plan.build_status == PaymentPlan.BuildStatus.BUILD_STATUS_OK
-    assert payment_plan.total_entitled_quantity == Decimal("0.00")
-    assert set(payment_plan.payment_items.values_list("id", flat=True)) == payment_ids
+    group.refresh_from_db()
+    payment_list.refresh_from_db()
+    assert group.status == PaymentPlan.Status.OPEN
+    assert payment_list.status == PaymentList.Status.OPEN
+    assert payment_list.build_status == PaymentList.BuildStatus.BUILD_STATUS_OK
+    assert payment_list.background_action_status is None
+    assert set(payment_list.payment_items.values_list("id", flat=True)) == payment_ids
     assert len(payment_ids) == 3
-    assert not payment_plan.payment_items.filter(entitlement_quantity__isnull=False).exists()
+    assert not payment_list.payment_items.filter(entitlement_quantity__isnull=False).exists()
 
 
 def test_split_payment_plan_by_records(
     browser: HopeTestBrowser,
     user_with_no_permissions: User,
     business_area: BusinessArea,
-    accepted_payment_plan: PaymentPlan,
+    accepted_lifecycle_group: PaymentPlan,
 ) -> None:
-    payment_plan = accepted_payment_plan
-    with grant_permission(user_with_no_permissions, business_area, *PM_VIEW_PERMISSIONS, Permissions.PM_SPLIT):
-        open_payment_plan_as(browser, payment_plan, "ACCEPTED")
+    group = accepted_lifecycle_group
+    with grant_permission(
+        user_with_no_permissions, business_area, *PAYMENT_PLAN_VIEW_PERMISSIONS, Permissions.PM_SPLIT
+    ):
+        open_payment_plan_as(browser, group, "ACCEPTED")
         browser.wait_for_element_clickable(SPLIT).click()
         browser.wait_for_element_clickable(SPLIT_TYPE).click()
         browser.select_listbox_element("By Records")
@@ -177,112 +151,99 @@ def test_split_payment_plan_by_records(
         browser.wait_for_element_clickable(SPLIT_SUBMIT).click()
         browser.wait_for_text("Split was successful!")
 
-    splits = payment_plan.splits.order_by("order")
+    payment_list = group.payment_lists.get()
+    splits = payment_list.splits.order_by("order")
     assert [split.split_payment_items.count() for split in splits] == [10, 10, 5]
-    assert {split.split_type for split in splits} == {PaymentPlanSplit.SplitType.BY_RECORDS}
-    assert not payment_plan.eligible_payments.filter(parent_split__isnull=True).exists()
+    assert {split.split_type for split in splits} == {PaymentListSplit.SplitType.BY_RECORDS}
+    assert not payment_list.eligible_payments.filter(parent_split__isnull=True).exists()
 
 
 def test_split_payment_plan_by_collector(
     browser: HopeTestBrowser,
     user_with_no_permissions: User,
     business_area: BusinessArea,
-    accepted_shared_collectors_payment_plan: PaymentPlan,
+    accepted_shared_collectors_group: PaymentPlan,
 ) -> None:
-    payment_plan = accepted_shared_collectors_payment_plan
-    with grant_permission(user_with_no_permissions, business_area, *PM_VIEW_PERMISSIONS, Permissions.PM_SPLIT):
-        open_payment_plan_as(browser, payment_plan, "ACCEPTED")
+    group = accepted_shared_collectors_group
+    with grant_permission(
+        user_with_no_permissions, business_area, *PAYMENT_PLAN_VIEW_PERMISSIONS, Permissions.PM_SPLIT
+    ):
+        open_payment_plan_as(browser, group, "ACCEPTED")
         browser.wait_for_element_clickable(SPLIT).click()
         browser.wait_for_element_clickable(SPLIT_TYPE).click()
         browser.select_listbox_element("By Collector")
         browser.wait_for_element_clickable(SPLIT_SUBMIT).click()
         browser.wait_for_text("Split was successful!")
 
-    splits = [
-        (
-            split.split_type,
-            split.split_payment_items.values("collector").distinct().count(),
-            split.split_payment_items.count(),
-        )
-        for split in payment_plan.splits.all()
-    ]
-    assert splits == [(PaymentPlanSplit.SplitType.BY_COLLECTOR, 1, 4)] * 3
+    splits = group.payment_lists.get().splits.all()
+    assert splits.count() == 3
+    for split in splits:
+        assert split.split_type == PaymentListSplit.SplitType.BY_COLLECTOR
+        assert split.split_payment_items.values("collector").distinct().count() == 1
+        assert split.split_payment_items.count() == 4
 
 
-def test_edit_payment_plan(
+def test_edit_payment_plan_settings(
     browser: HopeTestBrowser,
     user_with_no_permissions: User,
     business_area: BusinessArea,
-    open_payment_plan: PaymentPlan,
-    pln_currency: Currency,
+    open_lifecycle_group: PaymentPlan,
 ) -> None:
-    payment_plan = open_payment_plan
+    group = open_lifecycle_group
+    CurrencyFactory(code="PLN", name="Polish Zloty")
     start_date = dt.date.today() + dt.timedelta(days=10)
     end_date = start_date + dt.timedelta(days=20)
-    # No target population or cycle list permission: the edit page must not need them.
-    with grant_permission(user_with_no_permissions, business_area, *PM_VIEW_PERMISSIONS, Permissions.PM_CREATE):
-        open_payment_plan_as(browser, payment_plan, "OPEN")
+    with grant_permission(
+        user_with_no_permissions,
+        business_area,
+        *PAYMENT_PLAN_VIEW_PERMISSIONS,
+        Permissions.PM_PAYMENT_PLAN_UPDATE,
+    ):
+        open_payment_plan_as(browser, group, "OPEN")
         browser.wait_for_element_clickable(EDIT).click()
-        browser.wait_for_text(payment_plan.name, '[data-cy="select-paymentPlanId"]')
-        browser.wait_for_text(payment_plan.program_cycle.title, '[data-cy="select-programCycle"]')
         browser.fill_date('input[name="dispersionStartDate"]', start_date.isoformat())
         browser.fill_date('input[name="dispersionEndDate"]', end_date.isoformat())
         browser.set_value(CURRENCY_INPUT, "Polish")
         browser.select_listbox_element("Polish złoty")
-        browser.wait_for_element_clickable(EDIT_SAVE).click()
-        browser.wait_for_text("Payment Plan Edited")
-        browser.wait_for_text("OPEN", STATUS)
+        browser.wait_for_element_clickable(DIALOG_SUBMIT).click()
+        browser.wait_for_text("Payment Plan updated")
 
-    payment_plan.refresh_from_db()
-    assert payment_plan.dispersion_start_date == start_date
-    assert payment_plan.dispersion_end_date == end_date
-    assert payment_plan.currency.code == "PLN"
-
-
-def test_delete_payment_plan(
-    browser: HopeTestBrowser,
-    user_with_no_permissions: User,
-    business_area: BusinessArea,
-    open_payment_plan: PaymentPlan,
-) -> None:
-    payment_plan = open_payment_plan
-    with grant_permission(user_with_no_permissions, business_area, *PM_VIEW_PERMISSIONS, Permissions.PM_CREATE):
-        open_payment_plan_as(browser, payment_plan, "OPEN")
-        browser.wait_for_element_clickable(DELETE).click()
-        browser.wait_for_element_clickable(DELETE_SUBMIT).click()
-        browser.wait_for_text("Payment Plan Deleted")
-        browser.wait_for_text("No results", 'tr[data-cy="table-row"]')
-
-    payment_plan.refresh_from_db()
-    assert payment_plan.status == PaymentPlan.Status.DRAFT
-    assert payment_plan.payment_items.count() == 3
+    group.refresh_from_db()
+    assert group.dispersion_start_date == start_date
+    assert group.dispersion_end_date == end_date
+    assert group.currency.code == "PLN"
 
 
 @pytest.mark.parametrize(
     ("payment_plan_fixture", "status", "permission", "button"),
     [
         pytest.param(
-            "in_approval_payment_plan",
+            "in_approval_group",
             "IN APPROVAL",
             Permissions.PM_ACCEPTANCE_PROCESS_APPROVE,
             REJECT,
             id="reject-at-approval",
         ),
         pytest.param(
-            "in_authorization_payment_plan",
+            "in_authorization_group",
             "IN AUTHORIZATION",
             Permissions.PM_ACCEPTANCE_PROCESS_AUTHORIZE,
             REJECT,
             id="reject-at-authorization",
         ),
-        pytest.param("locked_fsp_payment_plan", "LOCKED FSP", Permissions.PM_ABORT, ABORT, id="abort"),
-        pytest.param("aborted_payment_plan", "ABORTED", Permissions.PM_REACTIVATE_ABORT, REACTIVATE, id="reactivate"),
-        pytest.param("accepted_payment_plan", "ACCEPTED", Permissions.PM_SPLIT, f"{SPLIT}:enabled", id="split"),
-        pytest.param("open_payment_plan", "OPEN", Permissions.PM_CREATE, EDIT, id="edit"),
-        pytest.param("open_payment_plan", "OPEN", Permissions.PM_CREATE, DELETE, id="delete"),
+        pytest.param("locked_lifecycle_group", "LOCKED", Permissions.PM_ABORT, ABORT, id="abort"),
+        pytest.param(
+            "aborted_targeted_group",
+            "ABORTED",
+            Permissions.PM_REACTIVATE_ABORT,
+            REACTIVATE,
+            id="reactivate",
+        ),
+        pytest.param("accepted_lifecycle_group", "ACCEPTED", Permissions.PM_SPLIT, SPLIT, id="split"),
+        pytest.param("open_lifecycle_group", "OPEN", Permissions.PM_PAYMENT_PLAN_UPDATE, EDIT, id="edit"),
     ],
 )
-def test_lifecycle_action_shown_with_permission(
+def test_payment_plan_lifecycle_action_shown_with_permission(
     request: pytest.FixtureRequest,
     browser: HopeTestBrowser,
     user_with_no_permissions: User,
@@ -292,24 +253,24 @@ def test_lifecycle_action_shown_with_permission(
     permission: Permissions,
     button: str,
 ) -> None:
-    payment_plan = request.getfixturevalue(payment_plan_fixture)
-    with grant_permission(user_with_no_permissions, business_area, *PM_VIEW_PERMISSIONS, permission):
-        open_payment_plan_as(browser, payment_plan, status)
+    group = request.getfixturevalue(payment_plan_fixture)
+    with grant_permission(user_with_no_permissions, business_area, *PAYMENT_PLAN_VIEW_PERMISSIONS, permission):
+        open_payment_plan_as(browser, group, status)
         browser.wait_for_element_present(button)
 
 
 @pytest.mark.parametrize(
     ("payment_plan_fixture", "status", "button"),
     [
-        pytest.param("in_approval_payment_plan", "IN APPROVAL", REJECT, id="reject-at-approval"),
-        pytest.param("in_authorization_payment_plan", "IN AUTHORIZATION", REJECT, id="reject-at-authorization"),
-        pytest.param("locked_fsp_payment_plan", "LOCKED FSP", ABORT, id="abort"),
-        pytest.param("aborted_payment_plan", "ABORTED", REACTIVATE, id="reactivate"),
-        pytest.param("open_payment_plan", "OPEN", EDIT, id="edit"),
-        pytest.param("open_payment_plan", "OPEN", DELETE, id="delete"),
+        pytest.param("in_approval_group", "IN APPROVAL", REJECT, id="reject-at-approval"),
+        pytest.param("in_authorization_group", "IN AUTHORIZATION", REJECT, id="reject-at-authorization"),
+        pytest.param("locked_lifecycle_group", "LOCKED", ABORT, id="abort"),
+        pytest.param("aborted_targeted_group", "ABORTED", REACTIVATE, id="reactivate"),
+        pytest.param("accepted_lifecycle_group", "ACCEPTED", SPLIT, id="split"),
+        pytest.param("open_lifecycle_group", "OPEN", EDIT, id="edit"),
     ],
 )
-def test_lifecycle_action_hidden_without_permission(
+def test_payment_plan_lifecycle_action_hidden_without_permission(
     request: pytest.FixtureRequest,
     browser: HopeTestBrowser,
     user_with_no_permissions: User,
@@ -318,18 +279,7 @@ def test_lifecycle_action_hidden_without_permission(
     status: str,
     button: str,
 ) -> None:
-    payment_plan = request.getfixturevalue(payment_plan_fixture)
-    with grant_permission(user_with_no_permissions, business_area, *PM_VIEW_PERMISSIONS):
-        open_payment_plan_as(browser, payment_plan, status)
-        browser.assert_element_absent(button)
-
-
-def test_split_disabled_without_permission(
-    browser: HopeTestBrowser,
-    user_with_no_permissions: User,
-    business_area: BusinessArea,
-    accepted_payment_plan: PaymentPlan,
-) -> None:
-    with grant_permission(user_with_no_permissions, business_area, *PM_VIEW_PERMISSIONS):
-        open_payment_plan_as(browser, accepted_payment_plan, "ACCEPTED")
-        browser.wait_for_element_present(f"{SPLIT}:disabled")
+    group = request.getfixturevalue(payment_plan_fixture)
+    with grant_permission(user_with_no_permissions, business_area, *PAYMENT_PLAN_VIEW_PERMISSIONS):
+        open_payment_plan_as(browser, group, status)
+        browser.assert_elements_absent(button)
