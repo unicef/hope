@@ -1,3 +1,5 @@
+from datetime import date
+
 from django.core.cache import cache
 from django.test import TestCase
 from freezegun import freeze_time
@@ -138,6 +140,39 @@ def test_payment_list_save_does_not_affect_other_program(
     with TestCase.captureOnCommitCallbacks(execute=True):
         payment_list.name = "Updated Payment Plan"
         payment_list.save()
+
+    assert get_or_create_cache_key(version_key, 0) == initial_version
+
+
+@pytest.mark.parametrize("update_fields", [None, ["dispersion_start_date"]])
+def test_payment_plan_date_save_invalidates_cached_payment_list_views(
+    payment_plan: PaymentPlan, program: Program, update_fields: list[str] | None
+) -> None:
+    cache.clear()
+    slug = program.business_area.slug
+    payment_lists_key = _version_key(slug, program.code, "payment_lists_list")
+    target_populations_key = _version_key(slug, program.code, "target_populations_list")
+    payment_verifications_key = _version_key(slug, program.code, "payment_verifications_list")
+    payment_lists_version = get_or_create_cache_key(payment_lists_key, 0)
+    target_populations_version = get_or_create_cache_key(target_populations_key, 0)
+    payment_verifications_version = get_or_create_cache_key(payment_verifications_key, 0)
+
+    with TestCase.captureOnCommitCallbacks(execute=True):
+        payment_plan.dispersion_start_date = date(2030, 1, 1)
+        payment_plan.save(update_fields=update_fields)
+
+    assert get_or_create_cache_key(payment_lists_key, 0) > payment_lists_version
+    assert get_or_create_cache_key(target_populations_key, 0) > target_populations_version
+    assert get_or_create_cache_key(payment_verifications_key, 0) > payment_verifications_version
+
+
+def test_payment_plan_background_save_keeps_payment_list_cache(payment_plan: PaymentPlan, program: Program) -> None:
+    cache.clear()
+    version_key = _version_key(program.business_area.slug, program.code, "payment_lists_list")
+    initial_version = get_or_create_cache_key(version_key, 0)
+
+    with TestCase.captureOnCommitCallbacks(execute=True):
+        payment_plan.save(update_fields=["background_action_status"])
 
     assert get_or_create_cache_key(version_key, 0) == initial_version
 

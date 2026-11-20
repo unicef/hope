@@ -38,6 +38,9 @@ MANAGERIAL_EXIT_PAYMENT_PLAN_STATUSES = (
     PaymentPlan.Status.FINISHED,
     PaymentPlan.Status.ABORTED,
 )
+PAYMENT_PLAN_FIELDS_SHOWN_ON_PAYMENT_LISTS = frozenset(
+    {"name", "unicef_id", "currency", "currency_id", "dispersion_start_date", "dispersion_end_date"}
+)
 
 
 def _program_scope_by_cycle(program_cycle_id: Any) -> tuple[str, str] | None:
@@ -98,6 +101,10 @@ def increment_payment_plan_list_cache(sender: Any, instance: PaymentPlan, **kwar
         increment_cache_key(version_key)
 
     transaction.on_commit(_increment)
+
+    update_fields = kwargs.get("update_fields")
+    if update_fields is None or PAYMENT_PLAN_FIELDS_SHOWN_ON_PAYMENT_LISTS.intersection(update_fields):
+        invalidate_payment_list_list_cache(business_area_slug, program_code)
 
     if _affects_managerial_list(instance, kwargs.get("update_fields")):
         invalidate_managerial_payment_plan_list_cache(business_area_slug)
