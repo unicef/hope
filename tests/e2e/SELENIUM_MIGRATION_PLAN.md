@@ -282,8 +282,3 @@ Already in new suite: `test_grievance_tickets.py` (referral), `test_my_tasks.py`
 - [ ] Remove the "Existing raw Selenium tests…" note from `SELENIUM_E2E_PATTERNS.md`, update `tests/e2e/README.md`
 - [ ] Check CI / tox / compose files (`compose.selenium.yml`, `.github/workflows`) for paths to old dirs
 - [ ] Final: `tox -e tests -- pytest --no-migrations --create-db --headless tests/e2e`, `tox -e lint`, `tox -e mypy` green; the recount command prints 0
-
-## Verification (per PR)
-- `tox -e tests -- pytest --no-migrations --create-db --headless tests/e2e/new_selenium/<module>/` green, plus one `-n auto` run for xdist isolation
-- `tox -e lint`, `tox -e mypy`
-- Old test file removed and the counter table updated
