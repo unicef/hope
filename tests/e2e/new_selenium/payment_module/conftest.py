@@ -243,6 +243,11 @@ def fi_source_plans(
         status=PaymentList.Status.FINISHED,
     )
 
+    group_one.status = PaymentPlan.Status.FINISHED
+    group_one.save(update_fields=["status"])
+    group_two.status = PaymentPlan.Status.FINISHED
+    group_two.save(update_fields=["status"])
+
     hh_a = HouseholdFactory(business_area=ba, program=fi_program)
     hh_b = HouseholdFactory(business_area=ba, program=fi_program)
     hh_c = HouseholdFactory(business_area=ba, program=fi_program)

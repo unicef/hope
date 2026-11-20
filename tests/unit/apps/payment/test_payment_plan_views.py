@@ -3441,6 +3441,114 @@ def group_in_approval_with_plan(locked_group_with_plan: Any, user: Any) -> Any:
     return locked_group_with_plan
 
 
+@pytest.fixture
+def group_in_authorization_with_plan(group_in_approval_with_plan: Any, user: Any) -> Any:
+    with patch("hope.apps.payment.services.payment_plan_services.send_payment_plan_notification_emails_async_task"):
+        PaymentPlanService(group_in_approval_with_plan).acceptance_process(PaymentList.Action.APPROVE.value, user)
+    group_in_approval_with_plan.refresh_from_db()
+    return group_in_approval_with_plan
+
+
+@pytest.fixture
+def group_in_review_with_plan(group_in_authorization_with_plan: Any, user: Any) -> Any:
+    with patch("hope.apps.payment.services.payment_plan_services.send_payment_plan_notification_emails_async_task"):
+        PaymentPlanService(group_in_authorization_with_plan).acceptance_process(
+            PaymentList.Action.AUTHORIZE.value, user
+        )
+    group_in_authorization_with_plan.refresh_from_db()
+    return group_in_authorization_with_plan
+
+
+@pytest.fixture
+def view_only_user(user: Any, business_area: Any, program: Any, create_user_role_with_permissions: Any) -> Any:
+    create_user_role_with_permissions(user, [Permissions.PM_PAYMENT_PLAN_VIEW_DETAIL], business_area, program=program)
+    return user
+
+
+@pytest.fixture
+def approval_only_user(user: Any, business_area: Any, program: Any, create_user_role_with_permissions: Any) -> Any:
+    create_user_role_with_permissions(user, [Permissions.PM_ACCEPTANCE_PROCESS_APPROVE], business_area, program=program)
+    return user
+
+
+@pytest.fixture
+def authorization_only_user(user: Any, business_area: Any, program: Any, create_user_role_with_permissions: Any) -> Any:
+    create_user_role_with_permissions(
+        user, [Permissions.PM_ACCEPTANCE_PROCESS_AUTHORIZE], business_area, program=program
+    )
+    return user
+
+
+@pytest.mark.parametrize(
+    ("group_fixture", "action", "required_permission", "initial_status", "payload"),
+    [
+        ("locked_group_with_plan", "unlock", Permissions.PM_LOCK_AND_UNLOCK_FSP, PaymentPlan.Status.LOCKED, {}),
+        (
+            "group_in_approval_with_plan",
+            "approve",
+            Permissions.PM_ACCEPTANCE_PROCESS_APPROVE,
+            PaymentPlan.Status.IN_APPROVAL,
+            {},
+        ),
+        (
+            "group_in_authorization_with_plan",
+            "authorize",
+            Permissions.PM_ACCEPTANCE_PROCESS_AUTHORIZE,
+            PaymentPlan.Status.IN_AUTHORIZATION,
+            {},
+        ),
+        (
+            "finished_group_with_plan",
+            "ready-for-closure",
+            Permissions.PM_MARK_READY_FOR_CLOSURE,
+            PaymentPlan.Status.FINISHED,
+            {},
+        ),
+        (
+            "ready_group_with_plan",
+            "send-back-to-finished",
+            Permissions.PM_MARK_READY_FOR_CLOSURE,
+            PaymentPlan.Status.READY_FOR_CLOSURE,
+            {},
+        ),
+        (
+            "group_in_approval_with_plan",
+            "abort",
+            Permissions.PM_ABORT,
+            PaymentPlan.Status.IN_APPROVAL,
+            {"abort_comment": "stop"},
+        ),
+        (
+            "aborted_group_with_plan",
+            "reactivate-abort",
+            Permissions.PM_REACTIVATE_ABORT,
+            PaymentPlan.Status.ABORTED,
+            {},
+        ),
+    ],
+)
+def test_group_workflow_actions_without_permission_return_403(
+    request: pytest.FixtureRequest,
+    client: Any,
+    business_area: Any,
+    program: Any,
+    view_only_user: Any,
+    group_fixture: str,
+    action: str,
+    required_permission: Permissions,
+    initial_status: PaymentPlan.Status,
+    payload: dict[str, str],
+) -> None:
+    group = request.getfixturevalue(group_fixture)
+
+    response = client.post(_group_action_url(business_area.slug, program.code, group.id, action), payload)
+
+    group.refresh_from_db()
+    assert response.status_code == status.HTTP_403_FORBIDDEN
+    assert response.json()["required_permissions"] == [required_permission.value]
+    assert group.status == initial_status
+
+
 def test_send_group_for_approval_with_permission_returns_200(
     client: Any,
     user: Any,
@@ -3495,6 +3603,26 @@ def test_approve_group_with_permission_returns_200(
     assert response.status_code == status.HTTP_200_OK
     assert response.json()["status"] == PaymentPlan.Status.IN_AUTHORIZATION
     assert response.json()["approval_process"][0]["actions"]["approval"][0]["comment"] == "looks right"
+
+
+def test_authorize_group_with_permission_returns_200(
+    client: Any,
+    business_area: Any,
+    program: Any,
+    group_in_authorization_with_plan: Any,
+    authorization_only_user: Any,
+) -> None:
+    response = client.post(
+        _group_action_url(business_area.slug, program.code, group_in_authorization_with_plan.id, "authorize"),
+        {"comment": "authorized"},
+    )
+
+    group_in_authorization_with_plan.refresh_from_db()
+    payment_list = group_in_authorization_with_plan.payment_lists.get()
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json()["status"] == PaymentPlan.Status.IN_REVIEW
+    assert group_in_authorization_with_plan.status == PaymentPlan.Status.IN_REVIEW
+    assert payment_list.status == PaymentList.Status.IN_REVIEW
 
 
 def test_approve_group_with_2000_character_comment_keeps_the_comment(
@@ -3594,6 +3722,38 @@ def test_reject_group_in_approval_with_only_authorize_permission_returns_403(
     assert response.status_code == status.HTTP_403_FORBIDDEN
     assert response.json()["required_permissions"] == [Permissions.PM_ACCEPTANCE_PROCESS_APPROVE.value]
     assert group_in_approval_with_plan.status == PaymentPlan.Status.IN_APPROVAL
+
+
+def test_reject_group_in_authorization_with_only_approve_permission_returns_403(
+    client: Any,
+    business_area: Any,
+    program: Any,
+    group_in_authorization_with_plan: Any,
+    approval_only_user: Any,
+) -> None:
+    response = client.post(
+        _group_action_url(business_area.slug, program.code, group_in_authorization_with_plan.id, "reject")
+    )
+
+    group_in_authorization_with_plan.refresh_from_db()
+    assert response.status_code == status.HTTP_403_FORBIDDEN
+    assert response.json()["required_permissions"] == [Permissions.PM_ACCEPTANCE_PROCESS_AUTHORIZE.value]
+    assert group_in_authorization_with_plan.status == PaymentPlan.Status.IN_AUTHORIZATION
+
+
+def test_reject_group_in_review_with_only_authorize_permission_returns_403(
+    client: Any,
+    business_area: Any,
+    program: Any,
+    group_in_review_with_plan: Any,
+    authorization_only_user: Any,
+) -> None:
+    response = client.post(_group_action_url(business_area.slug, program.code, group_in_review_with_plan.id, "reject"))
+
+    group_in_review_with_plan.refresh_from_db()
+    assert response.status_code == status.HTTP_403_FORBIDDEN
+    assert response.json()["required_permissions"] == [Permissions.PM_ACCEPTANCE_PROCESS_FINANCIAL_REVIEW.value]
+    assert group_in_review_with_plan.status == PaymentPlan.Status.IN_REVIEW
 
 
 def test_mark_group_as_released_without_permission_returns_403(
