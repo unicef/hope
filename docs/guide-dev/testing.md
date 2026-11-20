@@ -34,6 +34,24 @@ tox -e tests -- tests/unit -k "test_create"
 E2E tests require Postgres, Redis, and Elasticsearch to be running locally — see
 `development_tools/compose.yml`.
 
+### E2E sharding in CI
+
+The Selenium CI job is split across several runners (`matrix.group` in
+`.github/workflows/tests.yml`) with [pytest-split](https://github.com/jerry-git/pytest-split),
+which balances the shards using per-test durations stored in `tests/e2e/test_durations.json`.
+
+The file doesn't need updating on every PR — tests missing from it still run and are
+assigned the average duration. Regenerate it when the e2e suite changes noticeably
+(many tests added, removed or moved) or when the shards' run times in CI drift apart:
+
+```bash
+tox -e tests -- tests/e2e -m selenium --headless -n auto \
+    --store-durations --clean-durations --durations-path tests/e2e/test_durations.json
+```
+
+`--clean-durations` drops entries for tests that no longer exist; without it new
+timings are merged into the existing file.
+
 ## Coverage
 
 Pull requests must maintain **100% patch coverage** on lines changed vs.
