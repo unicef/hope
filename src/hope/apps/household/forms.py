@@ -12,6 +12,7 @@ from hope.models import (
     BusinessArea,
     Household,
     Individual,
+    PaymentList,
     PaymentPlan,
     PendingDocument,
     PendingHousehold,
@@ -170,7 +171,11 @@ class CreateTargetPopulationTextForm(forms.Form):
         )
 
         self.fields["payment_plan"] = forms.ModelChoiceField(
-            queryset=PaymentPlan.objects.filter(cycle__program=self.program),
+            queryset=PaymentPlan.objects.filter(
+                cycle__program=self.program,
+                status=PaymentPlan.Status.OPEN,
+                plan_type=PaymentList.PlanType.REGULAR,
+            ),
             label="Payment Plan",
         )
 
@@ -192,6 +197,14 @@ class CreateTargetPopulationTextForm(forms.Form):
             )
         except (KeyError, Error) as e:
             raise ValidationError(str(e))
+
+    def clean(self) -> dict[str, Any]:
+        cleaned_data = super().clean() or {}
+        program_cycle = cleaned_data.get("program_cycle")
+        payment_plan = cleaned_data.get("payment_plan")
+        if program_cycle and payment_plan and payment_plan.cycle_id != program_cycle.pk:
+            self.add_error("payment_plan", "Payment Plan must belong to the selected Programme Cycle.")
+        return cleaned_data
 
 
 class MassEnrollForm(forms.Form):

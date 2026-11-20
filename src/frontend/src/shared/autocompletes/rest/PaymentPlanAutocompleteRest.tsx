@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { BaseAutocompleteRest } from './BaseAutocompleteRest';
 import { RestService } from '@restgenerated/services/RestService';
+import { PlanTypeEnum } from '@restgenerated/models/PlanTypeEnum';
 
 export const PaymentPlanAutocompleteRest = ({
   value,
@@ -28,6 +29,7 @@ export const PaymentPlanAutocompleteRest = ({
     ordering: 'name',
     cycle: cycleId,
     status: ['OPEN'],
+    planType: PlanTypeEnum.REGULAR,
   });
   const { businessArea, programId } = useBaseUrl();
 

@@ -9,7 +9,7 @@ from hope.apps.household.forms import CreateTargetPopulationTextForm
 from hope.apps.payment.flows import PaymentListFlow
 from hope.apps.payment.services.payment_list_services import PaymentListService
 from hope.apps.utils.sentry import set_sentry_business_area_tag
-from hope.models import AsyncJob, PaymentList, Program
+from hope.models import AsyncJob, PaymentList, PaymentPlan, Program
 
 logger = logging.getLogger(__name__)
 
@@ -31,12 +31,16 @@ def create_tp_from_list_async_task_action(job: AsyncJob) -> None:
         set_sentry_business_area_tag(program.business_area.name)
         program_cycle = form.cleaned_data["program_cycle"]
         with atomic():
+            payment_plan = PaymentPlan.objects.select_for_update().get(
+                pk=form.cleaned_data["payment_plan"].pk, cycle=program_cycle
+            )
+            PaymentListService._validate_payment_plan_accepts_new_payment_lists(payment_plan)
             payment_list = PaymentList.objects.create(
                 created_by_id=job.config["user_id"],
                 name=form.cleaned_data["name"],
                 business_area=program_cycle.program.business_area,
                 program_cycle=program_cycle,
-                payment_plan=form.cleaned_data["payment_plan"],
+                payment_plan=payment_plan,
                 status_date=timezone.now(),
                 start_date=program_cycle.start_date,
                 end_date=program_cycle.end_date,

@@ -49,6 +49,7 @@ from hope.models import (
     FileTemp,
     Individual,
     Partner,
+    PaymentList,
     PaymentPlan,
     PaymentPlanPurpose,
     Program,
@@ -308,7 +309,11 @@ class ProgramAdmin(
         business_area = program.business_area
 
         payment_plans_by_cycle: dict[str, list[dict]] = {}
-        for payment_plan in PaymentPlan.objects.filter(cycle__program=program).values("pk", "name", "cycle_id"):
+        for payment_plan in PaymentPlan.objects.filter(
+            cycle__program=program,
+            status=PaymentPlan.Status.OPEN,
+            plan_type=PaymentList.PlanType.REGULAR,
+        ).values("pk", "name", "cycle_id"):
             payment_plans_by_cycle.setdefault(str(payment_plan["cycle_id"]), []).append(
                 {"id": str(payment_plan["pk"]), "name": payment_plan["name"]}
             )

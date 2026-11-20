@@ -5,6 +5,7 @@ import pytest
 
 from extras.test_utils.factories import (
     BusinessAreaFactory,
+    HouseholdFactory,
     PaymentPlanFactory,
     ProgramFactory,
     UserFactory,
@@ -16,7 +17,7 @@ from hope.apps.targeting.celery_tasks import (
     create_tp_from_list_async_task,
     create_tp_from_list_async_task_action,
 )
-from hope.models import AsyncJob, PaymentList
+from hope.models import AsyncJob, PaymentList, PaymentPlan
 
 pytestmark = pytest.mark.django_db
 
@@ -129,6 +130,33 @@ def test_create_tp_from_list_action_raises_task_error_when_form_is_invalid(
 
     mock_form_class.assert_called_once_with(form_data, program=program)
     mock_warning.assert_called_once()
+
+
+@pytest.fixture
+def queued_tp_job_with_locked_plan(form_data, payment_plan, program_cycle, program, user):
+    household = HouseholdFactory(program=program, business_area=program.business_area)
+    submitted_data = {
+        **form_data,
+        "criteria": household.unicef_id,
+        "payment_plan": str(payment_plan.pk),
+    }
+    assert CreateTargetPopulationTextForm(submitted_data, program=program).is_valid()
+    payment_plan.status = PaymentPlan.Status.LOCKED
+    payment_plan.save(update_fields=["status"])
+    return AsyncJob(
+        config={
+            "form_data": submitted_data,
+            "user_id": str(user.pk),
+            "program_pk": str(program.pk),
+        }
+    )
+
+
+def test_create_tp_from_list_rejects_plan_locked_after_submission(queued_tp_job_with_locked_plan) -> None:
+    with pytest.raises(TaskError, match="Form validation failed"):
+        create_tp_from_list_async_task_action(queued_tp_job_with_locked_plan)
+
+    assert not PaymentList.objects.filter(name="Test TP").exists()
 
 
 def test_serialize_form_data_serializes_nested_lists_with_uuids(program, user) -> None:
