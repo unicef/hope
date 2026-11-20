@@ -23,7 +23,7 @@ export const headCells: HeadCell<PaymentRow>[] = [
   },
   {
     disablePadding: false,
-    label: 'Group',
+    label: 'Payment Plan',
     id: 'paymentPlan',
     numeric: false,
   },
@@ -82,7 +82,7 @@ export const headCellsPeople: HeadCell<any>[] = [
   },
   {
     disablePadding: false,
-    label: 'Group',
+    label: 'Payment Plan',
     id: 'paymentPlan',
     numeric: false,
   },
