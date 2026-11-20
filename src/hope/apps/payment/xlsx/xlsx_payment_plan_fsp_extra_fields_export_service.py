@@ -40,7 +40,10 @@ class XlsxPaymentPlanFspExtraFieldsExportService(XlsxExportBaseService):
             worksheet.append(
                 [
                     str(payment.unicef_id),
-                    *(payment.fsp_extra_fields.get(header, "") for header in custom_headers),
+                    *(
+                        self.right_format_for_xlsx(payment.fsp_extra_fields.get(header, ""))
+                        for header in custom_headers
+                    ),
                 ]
             )
 

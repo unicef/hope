@@ -38,11 +38,14 @@ class XlsxPaymentPlanExportService(XlsxPaymentPlanBaseService, XlsxExportBaseSer
 
     def _payment_row(self, payment: Payment) -> list:
         return [
-            FinancialServiceProviderXlsxTemplate.get_column_value_from_payment(
-                payment,
+            self.right_format_for_xlsx(
+                FinancialServiceProviderXlsxTemplate.get_column_value_from_payment(
+                    payment,
+                    column_name,
+                    self.admin_areas_dict,
+                    self.all_document_types,
+                ),
                 column_name,
-                self.admin_areas_dict,
-                self.all_document_types,
             )
             for column_name in self.headers
         ]

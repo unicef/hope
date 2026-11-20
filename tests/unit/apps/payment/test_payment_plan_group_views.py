@@ -386,7 +386,7 @@ def e2e_import_setup(business_area: Any, cycle: Any) -> dict:
         delivery_type=dm_one,
         program=plan_one.program,
         entitlement_quantity=Decimal("100.00"),
-        entitlement_quantity_usd=Decimal("10.00"),
+        entitlement_quantity_usd=Decimal("100.00"),
         delivered_quantity=None,
         status=Payment.STATUS_SENT_TO_FSP,
     )
@@ -397,7 +397,7 @@ def e2e_import_setup(business_area: Any, cycle: Any) -> dict:
         delivery_type=dm_two,
         program=plan_two.program,
         entitlement_quantity=Decimal("200.00"),
-        entitlement_quantity_usd=Decimal("20.00"),
+        entitlement_quantity_usd=Decimal("200.00"),
         delivered_quantity=None,
         status=Payment.STATUS_SENT_TO_FSP,
     )

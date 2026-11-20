@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from decimal import Decimal
+from decimal import Decimal, localcontext
 from tempfile import NamedTemporaryFile
 from typing import TYPE_CHECKING, Any
 
@@ -23,6 +23,7 @@ class XlsxFollowUpInstructionBaseExportService(XlsxExportBaseService, ABC):
         "entitlement_quantity",
         "entitlement_quantity_usd",
         "delivered_quantity",
+        "delivered_quantity_usd",
     }
 
     def __init__(self, instruction: FollowUpInstruction):
@@ -78,6 +79,11 @@ class XlsxFollowUpInstructionBaseExportService(XlsxExportBaseService, ABC):
             if header in self.SUMMABLE_HEADERS:
                 if self._is_empty(existing_row.get(header)) and self._is_empty(payment_row.get(header)):
                     merged[header] = ""
+                elif header.endswith("_usd"):
+                    with localcontext(prec=50):
+                        merged[header] = self._as_decimal(existing_row.get(header)) + self._as_decimal(
+                            payment_row.get(header)
+                        )
                 else:
                     merged[header] = self._as_decimal(existing_row.get(header)) + self._as_decimal(
                         payment_row.get(header)
@@ -115,7 +121,9 @@ class XlsxFollowUpInstructionBaseExportService(XlsxExportBaseService, ABC):
         self._create_workbook()
         self.ws_export_list.append(self.headers)
         for payment_row in self._iter_aggregated_rows():
-            self.ws_export_list.append([self.right_format_for_xlsx(payment_row.get(header)) for header in self.headers])
+            self.ws_export_list.append(
+                [self.right_format_for_xlsx(payment_row.get(header), header) for header in self.headers]
+            )
         self._adjust_column_width_from_col(self.ws_export_list)
         highlighted_columns = [
             self.headers.index(header) + 1

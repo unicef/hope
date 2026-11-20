@@ -108,14 +108,6 @@
             "imported_file_date": null,
             "payments_conflicts_count": 0,
             "delivery_mechanism": null,
-            "volume_by_delivery_mechanism": [
-                {
-                    "id": "911e9fb2-a41a-4d07-97c2-29722c9d749a",
-                    "delivery_mechanism": null,
-                    "volume": null,
-                    "volume_usd": null
-                }
-            ],
             "split_choices": [
                 {
                     "name": "By Admin Area 1",

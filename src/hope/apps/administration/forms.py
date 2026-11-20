@@ -28,9 +28,6 @@ class ClearCacheForm(forms.Form):
     )
     # Payment
     exchange_rates = forms.BooleanField(label="Payment: exchange rates", required=False)
-    resolve_chart_volume_by_delivery_mechanism = forms.BooleanField(
-        label="Payment: chart_volume_by_delivery_mechanism", required=False
-    )
     resolve_chart_payment_verification = forms.BooleanField(label="Payment: chart_payment_verification", required=False)
     resolve_chart_payment = forms.BooleanField(label="Payment: chart_payment", required=False)
     resolve_section_total_transferred = forms.BooleanField(label="Payment: section_total_transferred", required=False)

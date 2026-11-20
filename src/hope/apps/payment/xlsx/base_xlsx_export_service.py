@@ -22,6 +22,7 @@ logger = logging.getLogger(__name__)
 class XlsxExportBaseService:
     text_template = "payment/xlsx_file_generated_email.txt"
     html_template = "payment/xlsx_file_generated_email.html"
+    high_precision_monetary_headers = frozenset({"entitlement_quantity_usd", "delivered_quantity_usd"})
 
     def _create_workbook(self) -> openpyxl.Workbook:
         wb = openpyxl.Workbook()
@@ -81,10 +82,19 @@ class XlsxExportBaseService:
             "title": "Payment Plan Payment List files generated",
         }
 
-    def right_format_for_xlsx(self, value: Any) -> Any:
+    def right_format_for_xlsx(self, value: Any, column_name: str | None = None) -> Any:
         # this function will return something that excel will accept
         if value is None:
             return ""
-        if isinstance(value, str | int | float | decimal.Decimal | datetime):
+        if isinstance(value, decimal.Decimal):
+            if column_name in self.high_precision_monetary_headers:
+                formatted_value = format(value, "f")
+                if not value.is_finite():
+                    return formatted_value
+                integer, _, fraction = formatted_value.partition(".")
+                fraction = fraction.rstrip("0").ljust(2, "0")
+                return f"{integer}.{fraction}"
+            return value
+        if isinstance(value, str | int | float | datetime):
             return value
         return str(value)
