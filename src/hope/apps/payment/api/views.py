@@ -1745,8 +1745,13 @@ class TargetPopulationViewSet(
                 raise ValidationError(
                     f"Target Population with name: {name} and program cycle: {program_cycle.title} already exists."
                 )
-            if not (payment_plan := PaymentPlan.objects.filter(pk=payment_plan_id, cycle=program_cycle).first()):
+            if not (
+                payment_plan := PaymentPlan.objects.select_for_update()
+                .filter(pk=payment_plan_id, cycle=program_cycle)
+                .first()
+            ):
                 raise ValidationError("Payment Plan does not exist in the given Programme Cycle.")
+            PaymentListService._validate_payment_plan_accepts_new_payment_lists(payment_plan)
 
             payment_list_copy = PaymentList(
                 name=name,

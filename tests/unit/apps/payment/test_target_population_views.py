@@ -30,7 +30,7 @@ from extras.test_utils.factories import (
 )
 from hope.apps.account.permissions import Permissions
 from hope.apps.payment.api.views import TargetPopulationViewSet
-from hope.models import Payment, PaymentList, Program, ProgramCycle, Rule
+from hope.models import Payment, PaymentList, PaymentPlan, Program, ProgramCycle, Rule
 
 pytestmark = pytest.mark.django_db
 
@@ -1111,6 +1111,60 @@ def test_copy_tp(
         copied = PaymentList.objects.get(name="Copied TP test 123")
         assert copied.payment_plan == tp.payment_plan
         assert list(copied.payment_plan_purposes.values_list("pk", flat=True)) == [purpose.pk]
+
+
+@pytest.fixture(
+    params=[
+        PaymentPlan.Status.LOCKED,
+        PaymentList.PlanType.FOLLOW_UP,
+        PaymentList.PlanType.TOP_UP,
+        PaymentList.PlanType.TOP_UP_AMENDMENT,
+    ],
+    ids=["locked", "follow-up", "top-up", "top-up-amendment"],
+)
+def invalid_copy_destination(
+    request: Any, target_population_actions_context: dict[str, Any]
+) -> tuple[PaymentPlan, str]:
+    source_plan = target_population_actions_context["target_population"].payment_plan
+    if request.param == PaymentPlan.Status.LOCKED:
+        source_plan.status = PaymentPlan.Status.LOCKED
+        source_plan.save(update_fields=["status"])
+        return source_plan, "Adding Target Population to Payment Plan is possible only within Status OPEN"
+    return (
+        PaymentPlanFactory(
+            cycle=target_population_actions_context["cycle"],
+            plan_type=request.param,
+            source_payment_plan=source_plan,
+        ),
+        "Adding Target Population to a Follow-Up / Top-Up / Amendment Payment Plan is not possible",
+    )
+
+
+def test_copy_tp_rejects_a_locked_or_linked_payment_plan(
+    target_population_actions_context: dict[str, Any],
+    invalid_copy_destination: tuple[PaymentPlan, str],
+    create_user_role_with_permissions: Any,
+) -> None:
+    context = target_population_actions_context
+    destination, expected_error = invalid_copy_destination
+    create_user_role_with_permissions(
+        context["user"], [Permissions.TARGETING_DUPLICATE], context["business_area"], context["program_active"]
+    )
+
+    response = context["client"].post(
+        context["url_copy"],
+        {
+            "name": "Copy into unavailable plan",
+            "program_cycle_id": context["cycle"].pk,
+            "payment_plan_id": destination.pk,
+            "payment_plan_purposes": [str(context["purpose"].id)],
+        },
+        format="json",
+    )
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert expected_error in response.data
+    assert not PaymentList.objects.filter(name="Copy into unavailable plan").exists()
 
 
 def test_copy_tp_validation_errors(
