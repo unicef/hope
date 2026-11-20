@@ -21,7 +21,6 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ("household", "0055_migration"),
-        ("payment", "0086_migration"),
     ]
 
     operations = [

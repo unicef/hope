@@ -22,16 +22,7 @@ logger = logging.getLogger(__name__)
 class XlsxExportBaseService:
     text_template = "payment/xlsx_file_generated_email.txt"
     html_template = "payment/xlsx_file_generated_email.html"
-    monetary_headers = frozenset(
-        {
-            "entitlement_quantity",
-            "entitlement_quantity_usd",
-            "delivered_quantity",
-            "delivered_quantity_usd",
-            "delivered_amount",
-            "received_amount",
-        }
-    )
+    high_precision_monetary_headers = frozenset({"entitlement_quantity_usd", "delivered_quantity_usd"})
 
     def _create_workbook(self) -> openpyxl.Workbook:
         wb = openpyxl.Workbook()
@@ -96,12 +87,14 @@ class XlsxExportBaseService:
         if value is None:
             return ""
         if isinstance(value, decimal.Decimal):
-            formatted_value = format(value, "f")
-            if column_name not in self.monetary_headers or not value.is_finite():
-                return formatted_value
-            integer, _, fraction = formatted_value.partition(".")
-            fraction = fraction.rstrip("0").ljust(2, "0")
-            return f"{integer}.{fraction}"
+            if column_name in self.high_precision_monetary_headers:
+                formatted_value = format(value, "f")
+                if not value.is_finite():
+                    return formatted_value
+                integer, _, fraction = formatted_value.partition(".")
+                fraction = fraction.rstrip("0").ljust(2, "0")
+                return f"{integer}.{fraction}"
+            return value
         if isinstance(value, str | int | float | datetime):
             return value
         return str(value)

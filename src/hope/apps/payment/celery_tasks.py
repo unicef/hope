@@ -1,5 +1,5 @@
 import datetime as dt
-from decimal import Decimal
+from decimal import ROUND_HALF_UP, Decimal
 from functools import partial
 import logging
 from typing import Any, cast
@@ -849,9 +849,14 @@ def payment_plan_apply_engine_rule_async_task_action(job: AsyncRetryJob) -> None
                 old_payment = cast("Payment", copy_model_object(payment))
                 result = rule.execute({"household": payment.household, "payment_plan": payment_plan})
 
-                payment.entitlement_quantity = result.value
+                entitlement_quantity = (
+                    Decimal(str(result.value)).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+                    if result.value is not None
+                    else None
+                )
+                payment.entitlement_quantity = entitlement_quantity
                 payment.entitlement_quantity_usd = get_quantity_in_usd(
-                    amount=result.value,
+                    amount=entitlement_quantity,
                     currency=pp_currency,
                     exchange_rate=pp_exchange_rate,
                     currency_exchange_date=pp_currency_exchange_date,

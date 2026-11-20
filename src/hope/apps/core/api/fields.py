@@ -37,7 +37,7 @@ class HopeCurrencyDecimalField(serializers.DecimalField):
         return super().to_internal_value(value)
 
     def to_representation(self, value: Any) -> str:
-        amount = normalize_currency_decimal(value).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+        amount = Decimal(str(value)).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
         return format(amount, ".2f")
 
 
