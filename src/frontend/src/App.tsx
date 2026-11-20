@@ -1,6 +1,7 @@
 import { DefaultRoute } from '@containers/DefaultRoute';
 import { PageNotFound } from '@containers/pages/404/PageNotFound';
 import { AccessDenied } from '@containers/pages/accessDenied/AccessDenied';
+import { CORE_PATH, CorePage } from '@containers/pages/core/CorePage';
 import { LoginPage } from '@containers/pages/core/LoginPage';
 import { LandingPage } from '@containers/pages/landing/LandingPage';
 import { MaintenancePage } from '@containers/pages/maintenance/MaintenancePage';
@@ -61,6 +62,7 @@ const Root: FC = () => (
       <Route path="/access-denied/*" element={<AccessDenied />} />
       <Route path="/error/*" element={<SomethingWentWrong />} />
       <Route path="/surprise" element={<SurprisePage />} />
+      <Route path={`/${CORE_PATH}`} element={<CorePage />} />
       <Route path="/landing-page" element={<LandingPage />} />
       <Route
         path="/sentry-check"
