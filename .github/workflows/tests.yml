@@ -33,11 +33,10 @@ jobs:
             libcairo2 \
             libcairo2-dev \
             libffi-dev \
-            libgdk-pixbuf2.0-0 \
+            libgdk-pixbuf-2.0-0 \
             libpango-1.0-0 \
             libpangocairo-1.0-0 \
-            shared-mime-info \
-            wkhtmltopdf
+            shared-mime-info
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v4
@@ -164,11 +163,10 @@ jobs:
             libcairo2 \
             libcairo2-dev \
             libffi-dev \
-            libgdk-pixbuf2.0-0 \
+            libgdk-pixbuf-2.0-0 \
             libpango-1.0-0 \
             libpangocairo-1.0-0 \
-            shared-mime-info \
-            wkhtmltopdf
+            shared-mime-info
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v4
