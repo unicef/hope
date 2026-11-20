@@ -750,9 +750,9 @@ def test_payment_row_contains_entitlement_quantities(group_with_payment_and_full
     entitlement_col = headers.index("entitlement_quantity") + 1
     entitlement_usd_col = headers.index("entitlement_quantity_usd") + 1
 
-    assert ws.cell(row=2, column=entitlement_col).value == "123.45"
+    assert ws.cell(row=2, column=entitlement_col).value == Decimal("123.45")
     assert ws.cell(row=2, column=entitlement_usd_col).value == "12.34"
-    assert ws.cell(row=2, column=entitlement_col).data_type == "s"
+    assert ws.cell(row=2, column=entitlement_col).data_type == "n"
     assert ws.cell(row=2, column=entitlement_usd_col).data_type == "s"
 
 

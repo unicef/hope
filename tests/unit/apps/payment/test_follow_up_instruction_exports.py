@@ -270,9 +270,9 @@ def test_delivery_export_happy_path_aggregates_households(
         "delivered_quantity",
     ]
     shared_household_id = instruction_payments[0].household.unicef_id
-    assert rows[shared_household_id]["entitlement_quantity"] == "140.00"
+    assert rows[shared_household_id]["entitlement_quantity"] == 140
     assert rows[shared_household_id]["entitlement_quantity_usd"] == "140.00"
-    assert rows[shared_household_id]["delivered_quantity"] == "0.00"
+    assert rows[shared_household_id]["delivered_quantity"] == 0
 
 
 def test_delivery_export_includes_fsp_extra_field_from_later_child_plan(

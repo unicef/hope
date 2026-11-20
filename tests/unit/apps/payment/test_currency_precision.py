@@ -207,7 +207,9 @@ def test_payment_gateway_payload_keeps_base_currency_precision():
 
 def test_xlsx_money_cell_is_exact_text():
     workbook = openpyxl.Workbook()
-    workbook.active["A1"] = XlsxExportBaseService().right_format_for_xlsx(Decimal("123456789.1234567891"))
+    workbook.active["A1"] = XlsxExportBaseService().right_format_for_xlsx(
+        Decimal("123456789.1234567891"), "entitlement_quantity_usd"
+    )
     output = BytesIO()
     workbook.save(output)
     output.seek(0)
