@@ -64,11 +64,7 @@ from e2e.page_object.programme_management.programme_management import (
 from e2e.page_object.programme_population.households import Households
 from e2e.page_object.programme_population.households_details import HouseholdsDetails
 from e2e.page_object.programme_population.individuals import Individuals
-from e2e.page_object.programme_population.individuals_details import IndividualsDetails
-from e2e.page_object.programme_population.periodic_data_update_templates import (
-    PDUXlsxTemplates,
-    PDUXlsxTemplatesDetails,
-)
+from e2e.page_object.programme_population.periodic_data_update_templates import PDUXlsxTemplates
 from e2e.page_object.programme_population.periodic_data_update_uploads import (
     PDUXlsxUploads,
 )
@@ -474,21 +470,8 @@ def page_individuals(request: FixtureRequest, browser: Chrome) -> Individuals:
 
 
 @pytest.fixture
-def page_individuals_details(request: FixtureRequest, browser: Chrome) -> IndividualsDetails:
-    return IndividualsDetails(browser)
-
-
-@pytest.fixture
 def page_pdu_xlsx_templates(request: FixtureRequest, browser: Chrome) -> PDUXlsxTemplates:
     return PDUXlsxTemplates(browser)
-
-
-@pytest.fixture
-def page_pdu_xlsx_templates_details(
-    request: FixtureRequest,
-    browser: Chrome,
-) -> PDUXlsxTemplatesDetails:
-    return PDUXlsxTemplatesDetails(browser)
 
 
 @pytest.fixture

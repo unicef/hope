@@ -34,7 +34,7 @@ grep -rcE '^\s*def test_' tests/e2e --include='test_*.py' --exclude-dir=new_sele
 | 7 | `managerial_console` | 2 | 0 | ⬜ |
 | 8 | `drawer` | 4 | 0 | ⬜ |
 | 9 | `accountability` | 4 | 0 | ⬜ |
-| 10 | `programme_population` (hh/ind/PDU) | 12 | 0 | ⬜ |
+| 10 | `programme_population` (hh/ind/PDU) | 12 | 12 | ✅ |
 | 11 | `people` | 7 | 0 | ⬜ |
 | 12 | `programme_management` | 8 | 0 | ⬜ |
 | 13 | `generic_import` | 15 | 0 | ⬜ |
@@ -46,9 +46,9 @@ grep -rcE '^\s*def test_' tests/e2e --include='test_*.py' --exclude-dir=new_sele
 | 19 | `grievance/grievance_dashboard` | 2 | 0 | ⬜ |
 | 20 | `grievance/grievance_tickets` | 25 | 0 | ⬜ |
 | 21 | Old infra cleanup | – | – | ⬜ |
-| | **Total** | **155** | **16** | **10 %** |
+| | **Total** | **155** | **28** | **18 %** |
 
-`[██░░░░░░░░░░░░░░░░░░] 16 / 155`. Update it after each PR: 1 block per ~8 tests.
+`[████░░░░░░░░░░░░░░░░] 28 / 155`. Update it after each PR: 1 block per ~8 tests.
 
 The new suite already has 46 test files and ~250 test functions. These do not count toward the 155.
 
@@ -114,19 +114,20 @@ Legend: `NEW <new_selenium/...>` · `COVERED <existing new test>` (verify assert
 - [ ] Delete `page_object/accountability/`
 
 ### 10. `programme_population/` (12) → `new_selenium/programme_population/`
-- [ ] test_smoke_page_households → NEW `test_households.py`
-- [ ] test_smoke_page_households_details → NEW `test_households.py`
-- [ ] test_smoke_page_individuals → NEW `test_individuals.py`
-- [ ] test_smoke_page_individuals_details → NEW `test_individuals.py`
-- [ ] test_periodic_data_template_export_and_download → NEW `test_periodic_data_templates.py`
-- [ ] test_periodic_data_template_list → NEW `test_periodic_data_templates.py`
-- [ ] test_periodic_data_template_details → NEW `test_periodic_data_templates.py`
-- [ ] test_periodic_data_template_create_and_download → NEW `test_periodic_data_templates.py`
-- [ ] test_periodic_data_update_upload_success → NEW `test_periodic_data_xlsx_upload.py`
-- [ ] test_periodic_data_update_upload_form_error → NEW `test_periodic_data_xlsx_upload.py`, parametrize form error / upload error
-- [ ] test_periodic_data_update_upload_error → NEW (param)
-- [ ] test_periodic_data_uploads_list → NEW `test_periodic_data_xlsx_upload.py`
-- [ ] Delete `page_object/programme_population/`
+- [x] test_smoke_page_households → NEW `test_households.py::test_households_list_shows_household`
+- [x] test_smoke_page_households_details → NEW `test_households.py::test_household_details_shows_household`
+- [x] test_smoke_page_individuals → NEW `test_individuals.py::test_individuals_list_shows_individual`
+- [x] test_smoke_page_individuals_details → NEW `test_individuals.py::test_individual_details_shows_individual` (birth date relative to today instead of `freeze_time`)
+- [x] test_periodic_data_template_export_and_download → NEW `test_periodic_data_templates.py::test_export_and_download_template`
+- [x] test_periodic_data_template_list → NEW `test_periodic_data_templates.py::test_template_list_shows_template`
+- [x] test_periodic_data_template_details → NEW `test_periodic_data_templates.py::test_template_details_shows_rounds`
+- [x] test_periodic_data_template_create_and_download → NEW `test_periodic_data_templates.py::test_create_and_download_template`
+- [x] test_periodic_data_update_upload_success → NEW `test_periodic_data_xlsx_upload.py::test_upload_xlsx_updates_individual`
+- [x] test_periodic_data_update_upload_form_error → NEW `test_periodic_data_xlsx_upload.py::test_upload_xlsx_with_invalid_value_shows_form_errors` (not parametrized with the upload error: the two flows assert different elements after different steps)
+- [x] test_periodic_data_update_upload_error → NEW `test_periodic_data_xlsx_upload.py::test_upload_xlsx_for_unknown_template_shows_error`
+- [x] test_periodic_data_uploads_list → NEW `test_periodic_data_xlsx_upload.py::test_uploads_list_shows_upload`
+- [x] Delete `page_object/programme_population/individuals_details.py`, `PDUXlsxTemplatesDetails` and the `page_individuals_details` / `page_pdu_xlsx_templates_details` fixtures. The rest of `page_object/programme_population/` is still used by `people/test_people_periodic_data_update.py` and `grievance_tickets/test_e2e_grievance_tickets.py`; delete it in modules 11 and 20.
+- [x] `prepare_xlsx_file` moved to `new_selenium/programme_population/conftest.py` (the old people PDU test imports it from there)
 
 ### 11. `people/` (7) → `new_selenium/people/`
 - [ ] test_smoke_page_people → NEW `test_people.py`
@@ -136,7 +137,7 @@ Legend: `NEW <new_selenium/...>` · `COVERED <existing new test>` (verify assert
 - [ ] test_people_periodic_data_update_upload_success → NEW `test_people_periodic_data_update.py` (share fixtures with module 10)
 - [ ] test_people_periodic_data_update_upload_form_error → NEW `test_people_periodic_data_update.py`
 - [ ] test_people_periodic_data_uploads_list → NEW `test_people_periodic_data_update.py`
-- [ ] Delete `page_object/people/`
+- [ ] Delete `page_object/people/`; delete the PDU page objects in `page_object/programme_population/` (`individuals.py` is still used by module 20)
 
 ### 12. `programme_management/test_programme_management.py` (8) → `new_selenium/program_details/`
 Already in new suite: `test_create_program.py`, `test_edit_program.py`, `test_duplicate_program.py`.
@@ -273,7 +274,7 @@ Already in new suite: `test_grievance_tickets.py` (referral), `test_my_tasks.py`
 - [ ] test_grievance_tickets_create_new_error → NEW `test_grievance_tickets.py`
 - [ ] test_grievance_tickets_individual_data_update_with_photo → NEW `test_data_change_tickets.py`, parametrize update / add (uses `helpers/document_example.png`)
 - [ ] test_grievance_tickets_add_individual_with_photo → NEW (param)
-- [ ] Delete `page_object/grievance/`
+- [ ] Delete `page_object/grievance/` and what is left of `page_object/programme_population/` with the `page_households*` / `page_individuals` fixtures
 
 ### 21. Old infrastructure cleanup (after the counter reaches 155/155)
 - [ ] Delete `tests/e2e/page_object/` (incl. `base_components.py`), `tests/e2e/helpers/helper.py`, `helpers/fixtures.py`, `helpers/date_time_format.py` if unused, `tools/tag_name_finder.py`

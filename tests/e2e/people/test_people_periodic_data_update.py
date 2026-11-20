@@ -1,10 +1,12 @@
 from datetime import datetime
 import os
+from pathlib import Path
 from time import sleep
 
 from dateutil.relativedelta import relativedelta
 import pytest
 
+from e2e.new_selenium.programme_population.conftest import prepare_xlsx_file
 from e2e.page_object.people.people import People
 from e2e.page_object.people.people_details import PeopleDetails
 from e2e.page_object.programme_population.individuals import Individuals
@@ -14,7 +16,6 @@ from e2e.page_object.programme_population.periodic_data_update_templates import 
 from e2e.page_object.programme_population.periodic_data_update_uploads import (
     PDUXlsxUploads,
 )
-from e2e.programme_population.test_periodic_data_update_upload import prepare_xlsx_file
 from extras.test_utils.factories import (
     HouseholdFactory,
     IndividualFactory,
@@ -167,6 +168,7 @@ class TestPeoplePDUXlsxUpload:
     def test_people_periodic_data_update_upload_success(
         self,
         clear_downloaded_files: None,
+        tmp_path: Path,
         page_people: People,
         page_people_details: PeopleDetails,
         individual: Individual,
@@ -178,18 +180,7 @@ class TestPeoplePDUXlsxUpload:
         populate_pdu_with_null_values(program, individual.flex_fields)
         individual.save()
         flexible_attribute = string_attribute
-        tmp_file = prepare_xlsx_file(
-            [
-                {
-                    "field": flexible_attribute.name,
-                    "round": 1,
-                    "round_name": flexible_attribute.pdu_data.rounds_names[0],
-                    "number_of_records": 0,
-                }
-            ],
-            [["Test Value", "2021-05-02"]],
-            program,
-        )
+        xlsx_path = prepare_xlsx_file(flexible_attribute, [["Test Value", "2021-05-02"]], tmp_path / "pdu.xlsx")
         page_people.select_global_program_filter(program.name)
         page_people.get_nav_people().click()
         page_individuals.get_tab_periodic_data_updates().click()
@@ -197,7 +188,7 @@ class TestPeoplePDUXlsxUpload:
         page_individuals.get_button_import().click()
         page_individuals.get_dialog_import()
         assert "IMPORT" in page_individuals.get_button_import_submit().text
-        page_individuals.upload_file(tmp_file.name)
+        page_individuals.upload_file(str(xlsx_path))
         page_individuals.get_button_import_submit().click()
         page_individuals.get_status_container()
         for i in range(5):
@@ -217,6 +208,7 @@ class TestPeoplePDUXlsxUpload:
     def test_people_periodic_data_update_upload_form_error(
         self,
         clear_downloaded_files: None,
+        tmp_path: Path,
         program: Program,
         individual: Individual,
         date_attribute: FlexibleAttribute,
@@ -227,25 +219,14 @@ class TestPeoplePDUXlsxUpload:
         populate_pdu_with_null_values(program, individual.flex_fields)
         individual.save()
         flexible_attribute = date_attribute
-        tmp_file = prepare_xlsx_file(
-            [
-                {
-                    "field": flexible_attribute.name,
-                    "round": 1,
-                    "round_name": flexible_attribute.pdu_data.rounds_names[0],
-                    "number_of_records": 0,
-                }
-            ],
-            [["Test Value", "2021-05-02"]],
-            program,
-        )
+        xlsx_path = prepare_xlsx_file(flexible_attribute, [["Test Value", "2021-05-02"]], tmp_path / "pdu.xlsx")
         page_people.select_global_program_filter(program.name)
         page_people.get_nav_people().click()
         page_individuals.get_tab_periodic_data_updates().click()
         page_individuals.get_tab_offline_edits().click()
         page_individuals.get_button_import().click()
         page_individuals.get_dialog_import()
-        page_individuals.upload_file(tmp_file.name)
+        page_individuals.upload_file(str(xlsx_path))
         page_individuals.get_button_import_submit().click()
         page_individuals.get_status_container()
         periodic_data_update_upload = PDUXlsxUpload.objects.first()
