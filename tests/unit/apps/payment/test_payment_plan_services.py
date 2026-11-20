@@ -1305,6 +1305,34 @@ def test_create_follow_up_takes_the_next_number_when_its_name_is_taken_in_the_cy
     assert follow_up_group.name == f"{accepted_group.name} Follow Up 2"
 
 
+@pytest.fixture(
+    params=(
+        PaymentList.PlanType.FOLLOW_UP,
+        PaymentList.PlanType.TOP_UP,
+        PaymentList.PlanType.TOP_UP_AMENDMENT,
+    ),
+    ids=("follow-up", "top-up", "top-up-amendment"),
+)
+def long_named_source_with_collision(request, cycle):
+    source = PaymentPlanFactory(cycle=cycle, name="X" * 255)
+    suffix = f" {request.param.label} 1"
+    PaymentPlanFactory(cycle=cycle, name=f"{source.name[: 255 - len(suffix)]}{suffix}")
+    return source, request.param
+
+
+def test_linked_payment_plan_name_fits_the_column_and_skips_a_collision(
+    long_named_source_with_collision, django_assert_num_queries
+):
+    source, plan_type = long_named_source_with_collision
+
+    with django_assert_num_queries(3):
+        name = PaymentPlanService._linked_payment_plan_name(source, plan_type)
+
+    suffix = f" {plan_type.label} 2"
+    assert name == f"{source.name[: 255 - len(suffix)]}{suffix}"
+    assert len(name) == 255
+
+
 @pytest.fixture
 def second_follow_up_left_after_the_first_was_deleted(cycle, accepted_group):
     return PaymentPlanFactory(
