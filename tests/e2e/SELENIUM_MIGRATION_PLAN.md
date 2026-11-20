@@ -15,7 +15,7 @@ Goal: re-cover every scenario from the old `tests/e2e` suite as a new-style Sele
    - **COVERED** – an existing `new_selenium` test already exercises the same scenario (name it in the PR description). Before deleting the old test, compare it step by step with the new one and add any missing assertions to the new test.
 4. Delete the old test file **and** any page object / old conftest fixture that becomes unused in the same PR.
 5. Update the counter below in the same PR.
-6. Verify: `tox -e tests -- pytest --no-migrations --create-db tests/e2e/new_selenium/<module>/` (plus one `-n auto` run to check xdist isolation), `tox -e lint`, `tox -e mypy`.
+6. Verify: `tox -e tests -- pytest --no-migrations --create-db --headless tests/e2e/new_selenium/<module>/` (plus one `-n auto` run to check xdist isolation), `tox -e lint`, `tox -e mypy`. Always pass `--headless`: SeleniumBase opens visible Chrome windows without it (CI passes it too). The old suite is headless already.
 
 ## Progress counter
 Units = old `def test_*` functions (parametrize cases count once). Recount the remaining ones with:
@@ -281,9 +281,9 @@ Already in new suite: `test_grievance_tickets.py` (referral), `test_my_tasks.py`
 - [ ] Strip `tests/e2e/conftest.py` of `driver`, the autouse `browser`, `login`, `page_*`/`filters` fixtures, `create_session`, and `screenshot_path`/`download_path` if unused. Keep the DB/cache autouse fixtures and `live_server_with_static`.
 - [ ] Remove the "Existing raw Selenium tests…" note from `SELENIUM_E2E_PATTERNS.md`, update `tests/e2e/README.md`
 - [ ] Check CI / tox / compose files (`compose.selenium.yml`, `.github/workflows`) for paths to old dirs
-- [ ] Final: `tox -e tests -- pytest --no-migrations --create-db tests/e2e`, `tox -e lint`, `tox -e mypy` green; the recount command prints 0
+- [ ] Final: `tox -e tests -- pytest --no-migrations --create-db --headless tests/e2e`, `tox -e lint`, `tox -e mypy` green; the recount command prints 0
 
 ## Verification (per PR)
-- `tox -e tests -- pytest --no-migrations --create-db tests/e2e/new_selenium/<module>/` green, plus one `-n auto` run for xdist isolation
+- `tox -e tests -- pytest --no-migrations --create-db --headless tests/e2e/new_selenium/<module>/` green, plus one `-n auto` run for xdist isolation
 - `tox -e lint`, `tox -e mypy`
 - Old test file removed and the counter table updated
