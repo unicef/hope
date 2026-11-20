@@ -7,13 +7,15 @@ from extras.test_utils.factories import (
     BusinessAreaFactory,
     IndividualFactory,
     ProgramFactory,
+    RegistrationDataImportFactory,
     UserFactory,
 )
+from hope.apps.grievance.models import GrievanceTicket
 from hope.apps.registration_data.api.deduplication_engine import (
     SimilarityPair,
 )
 from hope.apps.registration_data.services.deduplication_engine import DeduplicationEngineService
-from hope.models import BiometricDedupeSimilarityPair, BusinessArea
+from hope.models import BiometricDedupeSimilarityPair, BusinessArea, RegistrationDataImport
 
 pytestmark = pytest.mark.django_db
 
@@ -197,3 +199,72 @@ def test_bulk_add_pairs_empty_input_short_circuits(
     BiometricDedupeSimilarityPair.bulk_add_pairs(program, [], id_field_name="country_workspace_id")
 
     assert program.deduplication_engine_similarity_pairs.count() == 0
+
+
+@pytest.fixture
+def merged_rdi_with_withdrawn_population_biometric_match(
+    biometric_deduplication_context: dict[str, object],
+) -> RegistrationDataImport:
+    program = biometric_deduplication_context["program"]
+    rdi = RegistrationDataImportFactory(
+        program=program,
+        business_area=program.business_area,
+        status=RegistrationDataImport.MERGED,
+    )
+    rdi_individual = IndividualFactory(
+        id=uuid.UUID("00000000-0000-4000-8000-000000000001"),
+        program=program,
+        business_area=program.business_area,
+        registration_data_import=rdi,
+    )
+    withdrawn_population_individual = IndividualFactory(
+        id=uuid.UUID("ffffffff-ffff-4fff-8fff-ffffffffffff"),
+        program=program,
+        business_area=program.business_area,
+        withdrawn=True,
+    )
+    BiometricDedupeSimilarityPair.objects.create(
+        program=program,
+        individual1=rdi_individual,
+        individual2=withdrawn_population_individual,
+        similarity_score=Decimal("95.00"),
+        status_code=BiometricDedupeSimilarityPair.StatusCode.STATUS_200,
+    )
+    return rdi
+
+
+@pytest.fixture
+def ignore_withdraw_enabled(biometric_deduplication_context: dict[str, object]) -> None:
+    business_area = biometric_deduplication_context["business_area"]
+    business_area.deduplication_ignore_withdraw = True
+    business_area.save(update_fields=["deduplication_ignore_withdraw"])
+
+
+def test_create_grievance_tickets_for_biometric_duplicates_creates_ticket_for_withdrawn_match_by_default(
+    merged_rdi_with_withdrawn_population_biometric_match: RegistrationDataImport,
+) -> None:
+    rdi = merged_rdi_with_withdrawn_population_biometric_match
+
+    DeduplicationEngineService().create_grievance_tickets_for_biometric_duplicates(rdi)
+
+    assert (
+        GrievanceTicket.objects.filter(
+            registration_data_import=rdi,
+            issue_type=GrievanceTicket.ISSUE_TYPE_BIOMETRICS_SIMILARITY,
+        ).count()
+        == 1
+    )
+
+
+def test_create_grievance_tickets_for_biometric_duplicates_skips_withdrawn_match_when_ignore_withdraw(
+    merged_rdi_with_withdrawn_population_biometric_match: RegistrationDataImport,
+    ignore_withdraw_enabled: None,
+) -> None:
+    rdi = merged_rdi_with_withdrawn_population_biometric_match
+
+    DeduplicationEngineService().create_grievance_tickets_for_biometric_duplicates(rdi)
+
+    assert not GrievanceTicket.objects.filter(
+        registration_data_import=rdi,
+        issue_type=GrievanceTicket.ISSUE_TYPE_BIOMETRICS_SIMILARITY,
+    ).exists()
