@@ -29,7 +29,6 @@ from e2e.page_object.accountability.comunication_details import (
 from e2e.page_object.accountability.surveys import AccountabilitySurveys
 from e2e.page_object.accountability.surveys_details import AccountabilitySurveysDetails
 from e2e.page_object.admin_panel.admin_panel import AdminPanel
-from e2e.page_object.country_dashboard.country_dashboard import CountryDashboard
 from e2e.page_object.error_page.access_denied import AccessDenied
 from e2e.page_object.error_page.error_page import ErrorPage
 from e2e.page_object.filters import Filters
@@ -601,11 +600,6 @@ def page_accountability_communication_details(
 @pytest.fixture
 def page_program_log(request: FixtureRequest, browser: Chrome) -> ProgramLog:
     return ProgramLog(browser)
-
-
-@pytest.fixture
-def page_country_dashboard(request: FixtureRequest, browser: Chrome) -> CountryDashboard:
-    return CountryDashboard(browser)
 
 
 @pytest.fixture
