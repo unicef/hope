@@ -2533,6 +2533,51 @@ def test_send_back_to_finished_rejects_stale_status(user: User, business_area: A
     assert "Send Back is possible only within Status READY_FOR_CLOSURE" in str(error.value)
 
 
+@patch("hope.contrib.vision.tasks.notify_payment_plan_closure_to_vision_async_task")
+def test_close_queues_vision_closure_notification_when_sent_to_vision(
+    mock_notify_vision_closure,
+    user: User,
+    business_area: Any,
+    cycle: ProgramCycle,
+    django_capture_on_commit_callbacks,
+) -> None:
+    payment_plan = PaymentPlanFactory(
+        program_cycle=cycle,
+        business_area=business_area,
+        status=PaymentPlan.Status.READY_FOR_CLOSURE,
+        internal_data={"vision": {"sent": True, "vision_id": "V12345"}},
+    )
+
+    with django_capture_on_commit_callbacks(execute=True):
+        PaymentPlanService(payment_plan).close(closure_comment="Comment", user_id=str(user.pk))
+
+    payment_plan.refresh_from_db()
+    assert payment_plan.status == PaymentPlan.Status.CLOSED
+    mock_notify_vision_closure.assert_called_once_with(payment_plan, str(user.pk))
+
+
+@patch("hope.contrib.vision.tasks.notify_payment_plan_closure_to_vision_async_task")
+def test_close_does_not_queue_vision_closure_notification_when_not_sent_to_vision(
+    mock_notify_vision_closure,
+    user: User,
+    business_area: Any,
+    cycle: ProgramCycle,
+    django_capture_on_commit_callbacks,
+) -> None:
+    payment_plan = PaymentPlanFactory(
+        program_cycle=cycle,
+        business_area=business_area,
+        status=PaymentPlan.Status.READY_FOR_CLOSURE,
+    )
+
+    with django_capture_on_commit_callbacks(execute=True):
+        PaymentPlanService(payment_plan).close(closure_comment="Comment", user_id=str(user.pk))
+
+    payment_plan.refresh_from_db()
+    assert payment_plan.status == PaymentPlan.Status.CLOSED
+    mock_notify_vision_closure.assert_not_called()
+
+
 def test_close_rejects_stale_status(user: User, business_area: Any, cycle: ProgramCycle) -> None:
     payment_plan = PaymentPlanFactory(
         program_cycle=cycle,

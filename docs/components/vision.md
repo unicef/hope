@@ -159,6 +159,22 @@ A notification failure is logged but does not block or roll back the local statu
 reset, allowing a later authorization to start a new attempt. A callback received while the plan is outside
 `IN_REVIEW` is logged and ignored.
 
+## Closure
+
+Closing a Payment Plan that was sent to Vision queues a reconciliation notification to Vision through
+`POST /ps/ezcash/PaymentPlanClosure` once the local closure has committed. The payload carries the Payment Plan
+code (`payplanSno`, the plan's `unicef_id`), the Vision Payment Plan code (`visionPayplanSno`, the `vision_id`
+stored from the Vision callback), the total amount reconciled (`totalAmountReconciled`, the plan's
+`total_delivered_quantity`), and the closure date (`closureDate`, the plan's `status_date` set when the plan was
+closed). The notification is non-blocking: a failure is logged under the plan's Vision log but does not roll back
+the closure, and it is only sent for plans that were actually sent to Vision.
+
+Every closure notification attempt, including its request payload and response, is stored as a
+`closure-notification` entry in `payment_plan.internal_data["vision"]["log"]`. When the latest attempt failed (or
+was never made), Django admin exposes a "Send Closure to Vision" action on the Payment Plan that re-queues the
+same notification. The action stays hidden once a closure notification has succeeded, and it never reopens or
+otherwise changes the closed plan.
+
 ## Payment Gateway and XLSX Delivery
 
 ### Payment Gateway Plans

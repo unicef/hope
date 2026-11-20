@@ -1,4 +1,5 @@
 from datetime import datetime
+from decimal import Decimal
 from unittest.mock import MagicMock, PropertyMock, patch
 
 from flags.models import FlagState
@@ -18,6 +19,8 @@ from hope.contrib.vision.api import VisionAPI, VisionAPIError, VisionAPIMissingC
 from hope.contrib.vision.choices import VisionErrorCode, VisionLogEntryType, VisionStatus
 from hope.contrib.vision.services import FundsCommitmentAssignmentError, VisionService
 from hope.contrib.vision.tasks import (
+    notify_payment_plan_closure_to_vision_async_task,
+    notify_payment_plan_closure_to_vision_async_task_action,
     notify_payment_plan_status_to_vision_async_task,
     notify_payment_plan_status_to_vision_async_task_action,
     send_payment_plan_to_vision_async_task,
@@ -999,6 +1002,193 @@ def test_notify_payment_plan_status_to_vision_queues_non_blocking_job(
         group_key="payment",
         description=f"Notify Vision that payment plan {vision_enabled_payment_plan.pk} is REJECTED",
     )
+
+
+@patch("hope.contrib.vision.tasks.VisionAPI")
+def test_notify_payment_plan_closure_to_vision_task_calls_api(
+    mock_vision_api,
+    vision_enabled_payment_plan: PaymentPlan,
+    django_assert_num_queries,
+) -> None:
+    vision_enabled_payment_plan.status = PaymentPlan.Status.CLOSED
+    vision_enabled_payment_plan.total_delivered_quantity = Decimal("8500.50")
+    vision_enabled_payment_plan.internal_data = {
+        "vision": {"sent": True, "vision_id": "V12345", "status": VisionStatus.RELEASED.value}
+    }
+    vision_enabled_payment_plan.save(update_fields=["status", "total_delivered_quantity", "internal_data"])
+    job = MagicMock(config={"payment_plan_id": str(vision_enabled_payment_plan.pk)})
+
+    with django_assert_num_queries(1):
+        notify_payment_plan_closure_to_vision_async_task_action(job)
+
+    notified_payment_plan = mock_vision_api.return_value.notify_payment_plan_closure.call_args.args[0]
+    kwargs = mock_vision_api.return_value.notify_payment_plan_closure.call_args.kwargs
+    assert notified_payment_plan.pk == vision_enabled_payment_plan.pk
+    assert kwargs["total_amount_reconciled"] == vision_enabled_payment_plan.total_delivered_quantity
+    assert kwargs["closure_date"] == vision_enabled_payment_plan.status_date
+
+
+@patch("hope.contrib.vision.tasks.VisionAPI")
+def test_notify_payment_plan_closure_to_vision_task_skips_non_closed_plan(
+    mock_vision_api,
+    vision_enabled_payment_plan: PaymentPlan,
+    django_assert_num_queries,
+) -> None:
+    vision_enabled_payment_plan.internal_data = {"vision": {"sent": True}}
+    vision_enabled_payment_plan.save(update_fields=["internal_data"])
+    job = MagicMock(config={"payment_plan_id": str(vision_enabled_payment_plan.pk)})
+
+    with django_assert_num_queries(1):
+        notify_payment_plan_closure_to_vision_async_task_action(job)
+
+    mock_vision_api.assert_not_called()
+
+
+@patch("hope.models.AsyncJob.requeue")
+def test_notify_payment_plan_closure_to_vision_queues_non_blocking_job(
+    mock_requeue,
+    vision_enabled_payment_plan: PaymentPlan,
+) -> None:
+    notify_payment_plan_closure_to_vision_async_task(
+        vision_enabled_payment_plan,
+        str(vision_enabled_payment_plan.created_by_id),
+    )
+
+    mock_requeue.assert_called_once_with(
+        instance=vision_enabled_payment_plan,
+        owner_id=str(vision_enabled_payment_plan.created_by_id),
+        job_name="notify_payment_plan_closure_to_vision",
+        action="hope.contrib.vision.tasks.notify_payment_plan_closure_to_vision_async_task_action",
+        config={"payment_plan_id": str(vision_enabled_payment_plan.pk)},
+        group_key="payment",
+        description=f"Notify Vision that payment plan {vision_enabled_payment_plan.pk} was closed",
+    )
+
+
+@pytest.mark.parametrize(
+    ("status", "sent", "log", "expected"),
+    [
+        (PaymentPlan.Status.CLOSED, True, [], True),
+        (
+            PaymentPlan.Status.CLOSED,
+            True,
+            [
+                {
+                    "type": VisionLogEntryType.CLOSURE_NOTIFICATION.value,
+                    "payload": {},
+                    "response": {"error": "Vision request failed"},
+                }
+            ],
+            True,
+        ),
+        (
+            PaymentPlan.Status.CLOSED,
+            True,
+            [
+                {
+                    "type": VisionLogEntryType.CLOSURE_NOTIFICATION.value,
+                    "payload": {},
+                    "response": {"status": "ok"},
+                }
+            ],
+            False,
+        ),
+        (
+            PaymentPlan.Status.CLOSED,
+            True,
+            [
+                {
+                    "type": VisionLogEntryType.CLOSURE_NOTIFICATION.value,
+                    "payload": {},
+                    "response": {"error": "first attempt failed"},
+                },
+                {
+                    "type": VisionLogEntryType.CLOSURE_NOTIFICATION.value,
+                    "payload": {},
+                    "response": {"status": "ok"},
+                },
+            ],
+            False,
+        ),
+        (
+            PaymentPlan.Status.CLOSED,
+            True,
+            [
+                {
+                    "type": VisionLogEntryType.STATUS_NOTIFICATION.value,
+                    "payload": {"totalAmountReconciled": "1.00", "closureDate": "2026-11-09"},
+                    "response": {"error": "legacy closure failed"},
+                }
+            ],
+            True,
+        ),
+        (
+            PaymentPlan.Status.CLOSED,
+            True,
+            [
+                {
+                    "type": VisionLogEntryType.STATUS_NOTIFICATION.value,
+                    "payload": {"status": "ABORTED"},
+                    "response": {"error": "abort notification failed"},
+                }
+            ],
+            True,
+        ),
+        (PaymentPlan.Status.FINISHED, True, [], False),
+        (PaymentPlan.Status.CLOSED, False, [], False),
+    ],
+)
+def test_can_notify_vision_of_closure(
+    vision_enabled_payment_plan: PaymentPlan,
+    status: PaymentPlan.Status,
+    sent: bool,
+    log: list,
+    expected: bool,
+) -> None:
+    vision_enabled_payment_plan.status = status
+    vision_enabled_payment_plan.internal_data = {"vision": {"sent": sent, "log": log}}
+    vision_enabled_payment_plan.save(update_fields=["status", "internal_data"])
+
+    assert VisionService.can_notify_vision_of_closure(vision_enabled_payment_plan) is expected
+
+
+def test_closure_notification_entries_non_dict_vision_data_returns_empty(
+    vision_enabled_payment_plan: PaymentPlan,
+) -> None:
+    vision_enabled_payment_plan.internal_data = {"vision": "not-a-dict"}
+    assert VisionService.closure_notification_entries(vision_enabled_payment_plan) == []
+
+
+def test_closure_notification_entries_skips_non_dict_log_entries(
+    vision_enabled_payment_plan: PaymentPlan,
+) -> None:
+    entry = {
+        "type": VisionLogEntryType.CLOSURE_NOTIFICATION.value,
+        "payload": {},
+        "response": {"status": "ok"},
+    }
+    vision_enabled_payment_plan.internal_data = {"vision": {"sent": True, "log": ["oops", entry]}}
+    assert VisionService.closure_notification_entries(vision_enabled_payment_plan) == [entry]
+
+
+def test_can_notify_vision_of_closure_ignores_non_closure_log_entries(
+    vision_enabled_payment_plan: PaymentPlan,
+) -> None:
+    vision_enabled_payment_plan.status = PaymentPlan.Status.CLOSED
+    vision_enabled_payment_plan.internal_data = {
+        "vision": {
+            "sent": True,
+            "log": [
+                {
+                    "type": VisionLogEntryType.API_CALL.value,
+                    "payload": {},
+                    "response": {"error": "api call failed"},
+                }
+            ],
+        }
+    }
+    vision_enabled_payment_plan.save(update_fields=["status", "internal_data"])
+    assert VisionService.can_notify_vision_of_closure(vision_enabled_payment_plan) is True
 
 
 @patch("hope.contrib.vision.tasks.VisionAPI")
