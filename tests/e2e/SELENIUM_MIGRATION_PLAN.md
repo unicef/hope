@@ -13,7 +13,7 @@ Goal: re-cover every scenario from the old `tests/e2e` suite as a new-style Sele
 3. Each old test gets one of two outcomes:
    - **NEW** – port the scenario as a new-style Selenium test (file named in the checklist). Several old tests may merge into one parametrized test when they are the same flow with different data.
    - **COVERED** – an existing `new_selenium` test already exercises the same scenario (name it in the PR description). Before deleting the old test, compare it step by step with the new one and add any missing assertions to the new test.
-4. Delete the old test file **and** any page object / old conftest fixture that becomes unused in the same PR.
+4. Delete the old test file **and** any page object / old conftest fixture that becomes unused in the same PR. Some old test files import helpers from each other (`grep -rn 'from e2e\.[a-z_]*\.test_' tests/e2e`); move such a helper into the importing file before deleting its source, and check `pytest --collect-only tests/e2e`.
 5. Update the counter below in the same PR.
 6. Verify: `tox -e tests -- pytest --no-migrations --create-db tests/e2e/new_selenium/<module>/` (plus one `-n auto` run to check xdist isolation), `tox -e lint`, `tox -e mypy`.
 
@@ -32,7 +32,7 @@ grep -rcE '^\s*def test_' tests/e2e --include='test_*.py' --exclude-dir=new_sele
 | 5 | `country_search` | 3 | 3 | ✅ |
 | 6 | `country_dashboard` | 1 | 0 | ⬜ |
 | 7 | `managerial_console` | 2 | 0 | ⬜ |
-| 8 | `drawer` | 4 | 0 | ⬜ |
+| 8 | `drawer` | 4 | 4 | ✅ |
 | 9 | `accountability` | 4 | 0 | ⬜ |
 | 10 | `programme_population` (hh/ind/PDU) | 12 | 0 | ⬜ |
 | 11 | `people` | 7 | 0 | ⬜ |
@@ -46,9 +46,9 @@ grep -rcE '^\s*def test_' tests/e2e --include='test_*.py' --exclude-dir=new_sele
 | 19 | `grievance/grievance_dashboard` | 2 | 0 | ⬜ |
 | 20 | `grievance/grievance_tickets` | 25 | 0 | ⬜ |
 | 21 | Old infra cleanup | – | – | ⬜ |
-| | **Total** | **155** | **16** | **10 %** |
+| | **Total** | **155** | **20** | **13 %** |
 
-`[██░░░░░░░░░░░░░░░░░░] 16 / 155`. Update it after each PR: 1 block per ~8 tests.
+`[███░░░░░░░░░░░░░░░░░] 20 / 155`. Update it after each PR: 1 block per ~8 tests.
 
 The new suite already has 46 test files and ~250 test functions. These do not count toward the 155.
 
@@ -101,10 +101,10 @@ Legend: `NEW <new_selenium/...>` · `COVERED <existing new test>` (verify assert
 - [ ] Delete `page_object/managerial_console/`
 
 ### 8. `drawer/test_drawer.py` (4) → `new_selenium/navigation/test_drawer.py`
-- [ ] test_social_worker_program_drawer_order → NEW, parametrize social worker / normal / all programmes
-- [ ] test_normal_program_drawer_order → NEW (param)
-- [ ] test_all_program_drawer_order → NEW (param)
-- [ ] test_inactive_draft_subheader → NEW
+- [x] test_social_worker_program_drawer_order → NEW `test_programme_drawer_order[social-worker]`
+- [x] test_normal_program_drawer_order → NEW `test_programme_drawer_order[normal]`
+- [x] test_all_program_drawer_order → NEW `test_all_programmes_drawer_order` (no programme to parametrize over, so a separate test)
+- [x] test_inactive_draft_subheader → NEW `test_inactive_programme_shows_inactive_subheader[draft_program|finished_program]` + `test_active_programme_has_no_inactive_subheader` (programmes opened by URL; switching through the global filter is not what this test covers)
 
 ### 9. `accountability/` (4) → `new_selenium/accountability/`
 - [ ] test_smoke_accountability_communication → NEW `test_communication.py`
