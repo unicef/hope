@@ -28,15 +28,20 @@ def test_migrate_check_passes_when_no_migration_modules_are_visible(db: Any) -> 
     call_command("migrate", check_unapplied=True)
 
 
-def test_migrate_refuses_database_ahead_of_code_before_recording_anything(stray_core_row: int) -> None:
-    with pytest.raises(CommandError, match=r"core\.9999_migration"):
+def test_migrate_refuses_database_ahead_of_code_before_recording_anything(
+    stray_core_row: int, django_assert_num_queries: Any
+) -> None:
+    # Two reads of django_migrations (does the table exist, which rows are applied) and nothing else.
+    with django_assert_num_queries(2), pytest.raises(CommandError, match=r"core\.9999_migration"):
         call_command("migrate")
 
     assert MigrationRecorder(connection).migration_qs.count() == stray_core_row
 
 
-def test_migrate_refuses_partly_applied_old_chain_before_recording_anything(partly_applied_core_chain: int) -> None:
-    with pytest.raises(CommandError, match=r"core\.0002_migration"):
+def test_migrate_refuses_partly_applied_old_chain_before_recording_anything(
+    partly_applied_core_chain: int, django_assert_num_queries: Any
+) -> None:
+    with django_assert_num_queries(2), pytest.raises(CommandError, match=r"core\.0002_migration"):
         call_command("migrate")
 
     assert MigrationRecorder(connection).migration_qs.count() == partly_applied_core_chain
