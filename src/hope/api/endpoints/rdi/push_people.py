@@ -16,12 +16,15 @@ from hope.api.endpoints.rdi.common import (
     NullableChoiceField,
 )
 from hope.api.endpoints.rdi.cw_ids import duplicated_cw_ids, existing_cw_ids
-from hope.api.endpoints.rdi.mixin import AccountMixin, DocumentMixin, PhotoMixin
-from hope.api.endpoints.rdi.upload import (
-    AccountSerializerUpload,
-    BirthDateValidator,
-    DocumentSerializerUpload,
+from hope.api.endpoints.rdi.lax import AccountLaxSerializer, DocumentSerializerLax
+from hope.api.endpoints.rdi.mixin import AccountMixin, DocumentMixin
+from hope.api.endpoints.rdi.stored_images import (
+    STORED_IMAGE_DIRECTORY_CONTEXT_KEY,
+    ImageFlexFieldsValidationMixin,
+    StoredImageField,
+    get_stored_image_directory,
 )
+from hope.api.endpoints.rdi.upload import BirthDateValidator
 from hope.api.utils import CurrencySlugRelatedField, OnUnchangedCode
 from hope.apps.household.const import (
     BLANK,
@@ -39,6 +42,7 @@ from hope.apps.periodic_data_update.utils import populate_pdu_with_null_values
 from hope.models import (
     Area,
     Country,
+    FlexibleAttribute,
     Grant,
     PendingHousehold,
     PendingIndividual,
@@ -47,6 +51,8 @@ from hope.models import (
 
 if TYPE_CHECKING:
     from rest_framework.request import Request
+
+INDIVIDUAL_FLEX_FIELD_SUFFIX = "_i_f"
 
 PEOPLE_TYPE_CHOICES = (
     (BLANK, "None"),
@@ -87,7 +93,7 @@ class PushPeopleListSerializer(serializers.ListSerializer):
         return attrs
 
 
-class PushPeopleSerializer(serializers.ModelSerializer):
+class PushPeopleSerializer(ImageFlexFieldsValidationMixin, serializers.ModelSerializer):
     first_registration_date = serializers.DateTimeField(default=timezone.now)
     last_registration_date = serializers.DateTimeField(default=timezone.now)
     observed_disability = serializers.MultipleChoiceField(
@@ -96,11 +102,16 @@ class PushPeopleSerializer(serializers.ModelSerializer):
         required=False,
     )
     marital_status = serializers.ChoiceField(choices=MARITAL_STATUS_CHOICE, allow_blank=True, required=False)
-    documents = DocumentSerializerUpload(many=True, required=False)
-    accounts = AccountSerializerUpload(many=True, required=False)
+    documents = DocumentSerializerLax(many=True, required=False)
+    accounts = AccountLaxSerializer(many=True, required=False)
     birth_date = serializers.DateField(validators=[BirthDateValidator()])
-    photo = serializers.CharField(allow_blank=True, required=False)
-    disability_certificate_picture = serializers.CharField(allow_null=True, allow_blank=True, required=False)
+    photo = StoredImageField(model_field=(PendingIndividual, "photo"), allow_blank=True, required=False)
+    disability_certificate_picture = StoredImageField(
+        model_field=(PendingIndividual, "disability_certificate_picture"),
+        allow_null=True,
+        allow_blank=True,
+        required=False,
+    )
 
     type = serializers.ChoiceField(choices=PEOPLE_TYPE_CHOICES, required=True)
 
@@ -156,7 +167,7 @@ class PushPeopleSerializer(serializers.ModelSerializer):
         ]
 
 
-class PeopleUploadMixin(DocumentMixin, AccountMixin, PhotoMixin):
+class PeopleUploadMixin(DocumentMixin, AccountMixin):
     def save_people(self, rdi: RegistrationDataImport, people_data: list[dict]) -> list[int]:
         people_ids = []
         for person_data in people_data:
@@ -211,13 +222,6 @@ class PeopleUploadMixin(DocumentMixin, AccountMixin, PhotoMixin):
     ) -> PendingIndividual:
         individual_fields = [field.name for field in PendingIndividual._meta.get_fields()]
         individual_data = {field: value for field, value in person_data.items() if field in individual_fields}
-        photo_file = self.get_photo(individual_data.pop("photo", None), self.selected_rdi.program.code)
-
-        disability_certificate_picture_file = self.get_photo(
-            individual_data.pop("disability_certificate_picture", None),
-            self.selected_rdi.program.code,
-        )
-
         person_type = person_data.get("type")
         individual_data.pop("relationship", None)
         relationship = NON_BENEFICIARY if person_type is NON_BENEFICIARY else HEAD
@@ -231,8 +235,6 @@ class PeopleUploadMixin(DocumentMixin, AccountMixin, PhotoMixin):
             registration_data_import=rdi,
             program=rdi.program,
             relationship=relationship,
-            photo=photo_file,
-            disability_certificate_picture=disability_certificate_picture_file,
             **individual_data,
         )
         ind.validate_phone_numbers()
@@ -244,7 +246,7 @@ class PeopleUploadMixin(DocumentMixin, AccountMixin, PhotoMixin):
             hh.save()
 
         for doc in documents:
-            doc["photo"] = self.get_photo(doc.pop("image", None), self.selected_rdi.program.code)
+            doc["photo"] = doc.pop("image", None) or ""
             self.save_document(ind, doc)
 
         for account in accounts:
@@ -267,13 +269,29 @@ class PushPeopleToRDIView(HOPEAPIBusinessAreaView, PeopleUploadMixin, HOPEAPIVie
         except RegistrationDataImport.DoesNotExist:
             raise Http404
 
+    @cached_property
+    def image_flex_field_names(self) -> set[str]:
+        """Names of the IMAGE flex fields of individuals, both as registered and without the ``_i_f`` suffix."""
+        names = FlexibleAttribute.objects.filter(
+            associated_with=FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL,
+            type=FlexibleAttribute.IMAGE,
+            is_removed=False,
+        ).values_list("name", flat=True)
+        return {key for name in names for key in (name, name.removesuffix(INDIVIDUAL_FLEX_FIELD_SUFFIX))}
+
     @extend_schema(request=PushPeopleSerializer)
     @atomic()
     def post(self, request: "Request", business_area: str, rdi: UUID) -> Response:
         serializer = PushPeopleSerializer(
             data=request.data,
             many=True,
-            context={"business_area": self.selected_business_area},
+            context={
+                "business_area": self.selected_business_area,
+                "get_image_flex_fields": lambda: self.image_flex_field_names,
+                STORED_IMAGE_DIRECTORY_CONTEXT_KEY: get_stored_image_directory(
+                    self.selected_business_area.slug, self.selected_rdi.program.code
+                ),
+            },
         )
         if serializer.is_valid():
             people_ids = self.save_people(self.selected_rdi, serializer.validated_data)

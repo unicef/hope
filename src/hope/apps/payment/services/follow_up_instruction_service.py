@@ -17,7 +17,7 @@ from hope.apps.payment.utils import inactive_currency_reason
 from hope.models import FollowUpInstruction, Payment, PaymentPlan, PaymentPlanGroup, log_create
 
 if TYPE_CHECKING:
-    import datetime
+    import datetime as dt
 
     from hope.models import Program, User
 
@@ -95,8 +95,8 @@ class FollowUpInstructionService:
         self,
         user: "User",
         payment_plan_group_ids: list[str],
-        dispersion_start_date: datetime.date,
-        dispersion_end_date: datetime.date,
+        dispersion_start_date: dt.date,
+        dispersion_end_date: dt.date,
     ) -> FollowUpInstruction:
         source_plans = self._get_applicable_source_payment_plans(payment_plan_group_ids)
         instruction = FollowUpInstruction.objects.create(

@@ -1,4 +1,4 @@
-import datetime
+import datetime as dt
 from decimal import Decimal
 
 from django.utils import timezone
@@ -132,8 +132,8 @@ def test_create_follow_up_from_force_failed_payment(
 ) -> None:
     source = payment_plan_with_force_failed_payment
     failed_payment = first_payment(source)
-    start_date = datetime.date.today() + datetime.timedelta(days=10)
-    end_date = start_date + datetime.timedelta(days=20)
+    start_date = dt.date.today() + dt.timedelta(days=10)
+    end_date = start_date + dt.timedelta(days=20)
     with grant_permission(user_with_no_permissions, business_area, *PM_VIEW_PERMISSIONS, Permissions.PM_CREATE):
         browser.login(username="noperm_user")
         browser.open(payment_plan_url(source))

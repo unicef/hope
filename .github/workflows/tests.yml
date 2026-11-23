@@ -6,7 +6,7 @@ on:
 jobs:
   unit:
     name: Unit tests
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     env:
       DOCKER_DEFAULT_PLATFORM: linux/amd64
       DATABASE_URL: postgres://postgres:postgres@localhost:5432/aurora
@@ -131,8 +131,12 @@ jobs:
         if: always()
         run: docker compose -f development_tools/compose.yml down --volumes
   selenium:
-    name: Selenium tests
-    runs-on: ubuntu-latest
+    name: Selenium tests (${{ matrix.group }}/${{ strategy.job-total }})
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        group: [1, 2, 3]
     env:
       DOCKER_DEFAULT_PLATFORM: linux/amd64
       DATABASE_URL: postgres://postgres:postgres@localhost:5432/aurora
@@ -168,7 +172,7 @@ jobs:
 
       - name: Launch services with Docker Compose
         run: |
-          docker compose -f development_tools/compose.yml up -d
+          docker compose -f development_tools/compose.yml -f development_tools/compose.ci.yml up -d
 
       - name: Wait for Postgres to be ready
         run: |
@@ -249,12 +253,12 @@ jobs:
           key: ${{ runner.os }}-venv
 
       - name: Run Selenium suite
-        run: uv run tox -e tests -- pytest ./tests -m selenium -q -rfE --no-header --tb=short --no-migrations --randomly-seed=42 --dist=loadgroup --create-db -n auto --headless --cov-report xml:test-coverage/coverage.xml --junit-xml=test-results.xml --cov-config=.coveragerc --cov=hope
+        run: uv run tox -e tests -- pytest ./tests -m selenium -q -rfE --no-header --tb=short --no-migrations --randomly-seed=42 --dist=loadgroup --create-db -n auto --headless --durations=40 --splits ${{ strategy.job-total }} --group ${{ matrix.group }} --splitting-algorithm least_duration --durations-path tests/e2e/test_durations.json --cov-report xml:test-coverage/coverage.xml --junit-xml=test-results.xml --cov-config=.coveragerc --cov=hope
       - name: Test Report
         uses: dorny/test-reporter@v2
         if: success() || failure()
         with:
-          name: JEST Tests
+          name: JEST Tests (${{ matrix.group }}/${{ strategy.job-total }})
           path: test-results.xml
           reporter: jest-junit
 
@@ -263,7 +267,7 @@ jobs:
         if: always()
         continue-on-error: true
         with:
-          name: report
+          name: report-${{ matrix.group }}
           path: ./tests/e2e/output_data/
           retention-days: 5
       - name: Upload coverage to Codecov
@@ -278,4 +282,13 @@ jobs:
 
       - name: Tear down Docker Compose
         if: always()
-        run: docker compose -f development_tools/compose.yml down --volumes
+        run: dockercompose -f development_tools/compose.yml down --volumes
+  selenium-result:
+    # Keeps a single "Selenium tests" check for branch protection, whatever the number of shards.
+    name: Selenium tests
+    needs: selenium
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check shard results
+        run: test "${{ needs.selenium.result }}" = "success"

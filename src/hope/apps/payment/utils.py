@@ -1,4 +1,4 @@
-import datetime
+import datetime as dt
 from decimal import ROUND_HALF_UP, Decimal
 import hashlib
 import json
@@ -288,7 +288,7 @@ def get_quantity_in_usd(
     amount: Decimal | None,
     currency: "Currency | None",
     exchange_rate: None | Decimal | float,
-    currency_exchange_date: datetime.date,
+    currency_exchange_date: dt.date,
     exchange_rates_client: "ExchangeRates | ExchangeRateClient | None" = None,
 ) -> Decimal | None:
     if amount is None:

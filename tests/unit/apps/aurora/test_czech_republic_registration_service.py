@@ -1,5 +1,5 @@
 import copy
-import datetime
+import datetime as dt
 import json
 
 from django.core.exceptions import ValidationError
@@ -190,7 +190,7 @@ def czech_context(czech_record_fields: dict) -> dict:
     user = UserFactory()
     record = RecordFactory(
         registration=registration.source_id,
-        timestamp=timezone.make_aware(datetime.datetime(2023, 5, 1)),
+        timestamp=timezone.make_aware(dt.datetime(2023, 5, 1)),
         source_id=1,
         fields=czech_record_fields,
         files=None,
@@ -216,7 +216,7 @@ def record_with_humanitarian_consent(czech_context: dict, czech_record_fields: d
     fields["consent"][0]["consent_sharing_h_c_2"] = "y"
     return RecordFactory(
         registration=czech_context["registration"].source_id,
-        timestamp=timezone.make_aware(datetime.datetime(2023, 5, 1)),
+        timestamp=timezone.make_aware(dt.datetime(2023, 5, 1)),
         source_id=2,
         fields=fields,
         files=None,
@@ -230,7 +230,7 @@ def record_with_latin_names(czech_context: dict, czech_record_fields: dict):
     fields["primary-carer-info"][0]["family_name_latin_i_c"] = "Symkanych"
     return RecordFactory(
         registration=czech_context["registration"].source_id,
-        timestamp=timezone.make_aware(datetime.datetime(2023, 5, 1)),
+        timestamp=timezone.make_aware(dt.datetime(2023, 5, 1)),
         source_id=4,
         fields=fields,
         files=None,
@@ -241,7 +241,7 @@ def record_with_latin_names(czech_context: dict, czech_record_fields: dict):
 def record_with_string_storage(czech_context: dict, czech_record_fields: dict):
     record = RecordFactory(
         registration=czech_context["registration"].source_id,
-        timestamp=timezone.make_aware(datetime.datetime(2023, 5, 1)),
+        timestamp=timezone.make_aware(dt.datetime(2023, 5, 1)),
         source_id=3,
         fields=None,
         files=None,
@@ -258,7 +258,7 @@ def record_without_head(czech_context: dict, czech_record_fields: dict):
     fields["primary-carer-info"][0]["role_i_c"] = "y"
     return RecordFactory(
         registration=czech_context["registration"].source_id,
-        timestamp=timezone.make_aware(datetime.datetime(2023, 5, 1)),
+        timestamp=timezone.make_aware(dt.datetime(2023, 5, 1)),
         source_id=4,
         fields=fields,
         files=None,
@@ -271,7 +271,7 @@ def record_with_invalid_document_date(czech_context: dict, czech_record_fields: 
     fields["primary-carer-info"][0]["national_passport_issuance_i_c"] = "not-a-date"
     return RecordFactory(
         registration=czech_context["registration"].source_id,
-        timestamp=timezone.make_aware(datetime.datetime(2023, 5, 1)),
+        timestamp=timezone.make_aware(dt.datetime(2023, 5, 1)),
         source_id=5,
         fields=fields,
         files=None,
@@ -292,7 +292,7 @@ def test_import_data_to_datahub(czech_context: dict) -> None:
     program = czech_context["program"]
 
     service = CzechRepublicFlexRegistration(registration)
-    rdi = service.create_rdi(user, f"czech_republic rdi {datetime.datetime.now()}")
+    rdi = service.create_rdi(user, f"czech_republic rdi {dt.datetime.now()}")
     service.process_records(rdi.id, [record.id])
 
     record.refresh_from_db()
@@ -365,8 +365,8 @@ def test_import_data_to_datahub(czech_context: dict) -> None:
     medical_certificate = PendingDocument.objects.filter(type__key="medical_certificate").first()
     assert medical_certificate.document_number == "2321"
     assert medical_certificate.individual == second_child
-    assert medical_certificate.expiry_date == datetime.datetime(2023, 5, 17, tzinfo=datetime.timezone.utc)
-    assert medical_certificate.issuance_date == datetime.datetime(2023, 5, 1, tzinfo=datetime.timezone.utc)
+    assert medical_certificate.expiry_date == dt.datetime(2023, 5, 17, tzinfo=dt.timezone.utc)
+    assert medical_certificate.issuance_date == dt.datetime(2023, 5, 1, tzinfo=dt.timezone.utc)
     assert medical_certificate.rdi_merge_status == "PENDING"
 
     temporary_protection_visa = PendingDocument.objects.filter(type__key="temporary_protection_visa").first()
@@ -478,7 +478,7 @@ def test_phone_number_validity_reflects_number(czech_context: dict) -> None:
     user = czech_context["user"]
 
     service = CzechRepublicFlexRegistration(registration)
-    rdi = service.create_rdi(user, f"czech_republic rdi {datetime.datetime.now()}")
+    rdi = service.create_rdi(user, f"czech_republic rdi {dt.datetime.now()}")
     service.process_records(rdi.id, [record.id])
 
     assert PendingIndividual.objects.get(full_name="Tetiana Symkanych").phone_no_valid is True
