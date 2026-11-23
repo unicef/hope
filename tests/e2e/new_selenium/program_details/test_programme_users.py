@@ -10,7 +10,9 @@ pytestmark = pytest.mark.django_db()
 
 NAV_PROGRAMME_USERS = 'a[data-cy="nav-Programme Users"]'
 TABLE_TITLE = 'h6[data-cy="table-title"]'
-TABLE_HEAD = "thead"
+TABLE_LABELS = 'span[data-cy="table-label"]'
+# The first column, with the expand arrow, has no label.
+COLUMNS = ["Name", "Status", "Partner", "Email", "Last Login"]
 TABLE_BODY = "tbody"
 STATUS = 'div[data-cy="status-container"]'
 SORTED_DESC_HEADER = 'th[aria-sort="descending"]'
@@ -31,11 +33,7 @@ def test_programme_users_lists_user_with_roles(program: Program, login: HopeTest
     login.wait_for_element_clickable(NAV_PROGRAMME_USERS, timeout=60).click()
 
     login.assert_text("Users List", TABLE_TITLE)
-    login.assert_text("Name", TABLE_HEAD)
-    login.assert_text("Status", TABLE_HEAD)
-    login.assert_text("Partner", TABLE_HEAD)
-    login.assert_text("Email", TABLE_HEAD)
-    login.assert_text("Last Login", TABLE_HEAD)
+    assert [header.text.split("\n")[0] for header in login.find_elements(TABLE_LABELS)][1:] == COLUMNS
     # The only user in the business area is the superuser from create_super_user
     login.assert_text("Test Selenium", TABLE_BODY)
     login.assert_text("INVITED", STATUS)
