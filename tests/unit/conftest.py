@@ -97,13 +97,12 @@ def currency_retired(db: Any) -> Currency:
 
 @pytest.fixture
 def all_currencies(db: Any) -> None:
-    import importlib
+    from hope.apps.core.currencies import CURRENCIES
 
-    mod = importlib.import_module("hope.apps.core.migrations.0020_migration")
     Currency.objects.bulk_create(
         [
             Currency(code=code, name=name, is_crypto=is_crypto, active=True, vision_code=code)
-            for code, name, is_crypto in mod.CURRENCIES
+            for code, name, is_crypto in CURRENCIES
         ],
         ignore_conflicts=True,
     )
