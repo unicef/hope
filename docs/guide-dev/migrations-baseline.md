@@ -47,7 +47,8 @@ Each of these fails silently or destroys data when broken.
 Numbers continue from the last old migration of each app, for example `payment/0084_baseline_models.py`
 follows the old `payment/0083_migration.py`.
 
-Objects Django does not generate are created with top-level `RunSQL` at the end of the app's last file:
+Objects Django does not generate are created with top-level `RunSQL` at the end of the app's last file
+(for `program` that is `0027_baseline_models.py`; `0028_baseline_seed.py` holds only seed rows):
 
 | Object | App |
 |---|---|

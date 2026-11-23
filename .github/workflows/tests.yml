@@ -196,7 +196,8 @@ jobs:
       - name: Install dependencies
         run: uv sync --cache-dir ./uv-cache --frozen
 
-      # Nothing else runs the migrations: the test suites build their database with --no-migrations.
+      # The test suites build their database with --no-migrations, and generate-types.yml runs
+      # migrate only when its database cache misses, so this is the job that checks them every time.
       - name: Migrate an empty database
         run: uv run python manage.py migrate
 
