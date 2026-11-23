@@ -136,6 +136,76 @@ jobs:
       - name: Tear down Docker Compose
         if: always()
         run: docker-compose -f development_tools/compose.yml down --volumes
+  migrations:
+    name: Migrations on an empty database
+    runs-on: ubuntu-24.04
+    env:
+      DATABASE_URL: postgres://postgres:postgres@localhost:5432/hope
+      REP_DATABASE_URL: postgres://postgres:postgres@localhost:5432/hope
+      SECRET_KEY: ci-secret-key-for-migrations
+      DEBUG: "True"
+      ALLOWED_HOSTS: "*"
+      CACHE_ENABLED: "False"
+      PYTHONPATH: ./src
+      ELASTICSEARCH_SYNONYMS_FILE: ${{ github.workspace }}/src/data/synonyms.txt
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: hope
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            build-essential \
+            libjpeg-dev \
+            zlib1g-dev \
+            libpq-dev \
+            libcairo2 \
+            libcairo2-dev \
+            libffi-dev \
+            libgdk-pixbuf-2.0-0 \
+            libpango-1.0-0 \
+            libpangocairo-1.0-0 \
+            shared-mime-info
+
+      - name: Install Python & UV
+        uses: astral-sh/setup-uv@v7
+        with:
+          version: latest
+          enable-cache: true
+          prune-cache: false
+          cache-local-path: ./uv-cache
+          cache-dependency-glob: |
+            **/pyproject.toml
+            **/uv.lock
+          python-version: 3.14
+
+      - name: Install dependencies
+        run: uv sync --cache-dir ./uv-cache --frozen
+
+      # Nothing else runs the migrations: the test suites build their database with --no-migrations.
+      - name: Migrate an empty database
+        run: uv run python manage.py migrate
+
+      - name: Check that models and migrations agree
+        run: uv run python manage.py check_missing_migrations
+
+      - name: Check that no migration name is replaced by the baseline
+        run: uv run tox -e tests -- pytest -q -rfE --no-header --tb=short --no-migrations --randomly-seed=42 --create-db -n auto --no-cov tests/unit/apps/core/test_migration_baseline.py
+
   selenium:
     name: Selenium tests (${{ matrix.group }}/${{ strategy.job-total }})
     runs-on: ubuntu-24.04
