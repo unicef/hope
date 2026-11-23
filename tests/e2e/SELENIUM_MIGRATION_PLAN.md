@@ -28,15 +28,15 @@ grep -rhE '^\s*def test_' tests/e2e --include='test_*.py' --exclude-dir=new_sele
 | 1 | `login_via_admin_panel` | 7 | 7 | ✅ |
 | 2 | `error_page` + `access_denied` | 3 | 3 | ✅ |
 | 3 | `program_log` | 2 | 2 | ✅ |
-| 4 | `programme_user` | 1 | 1 | ✅ |
+| 4 | `programme_user` | 1 | 1 | ✅ in review #6556 |
 | 5 | `country_search` | 3 | 3 | ✅ |
-| 6 | `country_dashboard` | 1 | 0 | ⬜ |
-| 7 | `managerial_console` | 2 | 0 | ⬜ |
-| 8 | `drawer` | 4 | 0 | ⬜ |
-| 9 | `accountability` | 4 | 0 | ⬜ |
-| 10 | `programme_population` (hh/ind/PDU) | 12 | 0 | ⬜ |
-| 11 | `people` | 7 | 0 | ⬜ |
-| 12 | `programme_management` | 8 | 8 | ✅ |
+| 6 | `country_dashboard` | 1 | 0 | ⬜ in review #6562 |
+| 7 | `managerial_console` | 2 | 0 | ⬜ in review #6563 |
+| 8 | `drawer` | 4 | 0 | ⬜ in review #6564 |
+| 9 | `accountability` | 4 | 0 | ⬜ in review #6565 |
+| 10 | `programme_population` (hh/ind/PDU) | 12 | 0 | ⬜ in review #6570 |
+| 11 | `people` | 7 | 0 | ⬜ in review #6571 |
+| 12 | `programme_management` | 8 | 8 | ✅ in review #6574 |
 | 13 | `generic_import` | 15 | 0 | ⬜ |
 | 14 | `filters` | 4 | 0 | ⬜ |
 | 15 | `payment_verification` | 10 | 0 | ⬜ |
@@ -48,7 +48,7 @@ grep -rhE '^\s*def test_' tests/e2e --include='test_*.py' --exclude-dir=new_sele
 | 21 | Old infra cleanup | – | – | ⬜ |
 | | **Total** | **152** | **24** | **16 %** |
 
-`[███░░░░░░░░░░░░░░░░░] 24 / 152`. Update it after each PR: 1 block per ~8 tests.
+`[███░░░░░░░░░░░░░░░░░] 24 / 152`. Update it after each PR: 1 block per ~8 tests. An "in review" module counts as migrated only on its own branch; drop the mark when its PR merges.
 
 The new suite already has 46 test files and ~250 test functions. These do not count toward the 152.
 
