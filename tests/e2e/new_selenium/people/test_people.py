@@ -11,6 +11,7 @@ pytestmark = pytest.mark.django_db()
 PAGE_TITLE = 'h5[data-cy="page-header-title"]'
 TABLE_TITLE = 'h6[data-cy="table-title"]'
 TABLE_PAGINATION = 'div[data-cy="table-pagination"]'
+ROWS_PER_PAGE = f"{TABLE_PAGINATION} .MuiTablePagination-select"
 PERSON_ROW = 'tr[data-cy="individual-table-row"]'
 PAYMENT_ROW = 'tr[role="checkbox"]'
 BUTTON_SUBMIT = 'button[data-cy="button-submit"]'
@@ -84,6 +85,8 @@ def test_people_list_is_empty_without_people(program: Program, login: HopeTestBr
     login.open(people_url(program))
 
     login.assert_text("People", TABLE_TITLE)
+    login.assert_text("Rows per page:", TABLE_PAGINATION)
+    login.assert_exact_text("10", ROWS_PER_PAGE)
     login.assert_text("0–0 of 0", TABLE_PAGINATION)
     assert_texts(login, LIST_COLUMNS)
 
@@ -99,6 +102,8 @@ def test_person_details_shows_person(person: Individual, program: Program, login
     assert_texts(login, DETAILS)
     rdi = person.registration_data_import
     login.assert_text(program.data_collecting_type.label, label("Data Collecting Type"))
+    login.assert_text("Rows per page:", TABLE_PAGINATION)
+    login.assert_exact_text("5", ROWS_PER_PAGE)
     login.assert_text("0–0 of 0", TABLE_PAGINATION)
     login.assert_text(rdi.name, label("Import name"))
     login.assert_text(rdi.imported_by.email, label("User name"))
@@ -126,9 +131,12 @@ def test_person_data_updated_after_grievance_ticket_processed(
     category: str, issue_type: str, person: Individual, program: Program, login: HopeTestBrowser
 ) -> None:
     login.open(f"/{program.business_area.slug}/programs/all/grievance/tickets/user-generated")
+    login.assert_text("Grievance Tickets", PAGE_TITLE)
     login.click('a[data-cy="button-new-ticket"]')
     login.select_dropdown_option("category", category)
     login.select_dropdown_option("issueType", issue_type)
+    login.assert_text(category, 'div[data-cy="select-category"]')
+    login.assert_text(issue_type, 'div[data-cy="select-issueType"]')
     login.click(BUTTON_SUBMIT)
     login.click('button[data-cy="look-up-individual"]')
     login.click(PERSON_ROW)
@@ -167,6 +175,7 @@ def test_person_data_updated_after_grievance_ticket_processed(
     js_click(login, 'button[data-cy="button-close-ticket"]')
     js_click(login, BUTTON_CONFIRM)
     login.wait_for_text("Closed", label("Status"), timeout=60)
+    login.assert_text("Ticket ID", PAGE_TITLE)
 
     login.open(people_url(program))
     login.click(PERSON_ROW)
