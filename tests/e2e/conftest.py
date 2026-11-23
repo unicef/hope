@@ -24,7 +24,6 @@ from selenium.webdriver.chrome.options import Options
 
 from e2e.page_object.admin_panel.admin_panel import AdminPanel
 from e2e.page_object.filters import Filters
-from e2e.page_object.generic_import.generic_import import GenericImport
 from e2e.page_object.grievance.details_feedback_page import FeedbackDetailsPage
 from e2e.page_object.grievance.details_grievance_page import GrievanceDetailsPage
 from e2e.page_object.grievance.feedback import Feedback
@@ -501,11 +500,6 @@ def page_program_cycle(request: FixtureRequest, browser: Chrome) -> ProgramCycle
 @pytest.fixture
 def page_program_cycle_details(request: FixtureRequest, browser: Chrome) -> ProgramCycleDetailsPage:
     return ProgramCycleDetailsPage(browser)
-
-
-@pytest.fixture
-def page_generic_import(request: FixtureRequest, browser: Chrome) -> GenericImport:
-    return GenericImport(browser)
 
 
 @pytest.fixture

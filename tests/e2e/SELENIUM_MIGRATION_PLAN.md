@@ -38,7 +38,7 @@ grep -rhE '^\s*def test_' tests/e2e --include='test_*.py' --exclude-dir=new_sele
 | 10 | `programme_population` (hh/ind/PDU) | 12 | 12 | ✅ |
 | 11 | `people` | 7 | 7 | ✅ |
 | 12 | `programme_management` | 8 | 8 | ✅ |
-| 13 | `generic_import` | 15 | 0 | ⬜ |
+| 13 | `generic_import` | 15 | 15 | ✅ |
 | 14 | `filters` | 4 | 0 | ⬜ |
 | 15 | `payment_verification` | 10 | 0 | ⬜ |
 | 16 | `payment_module` | 9 | 0 | ⬜ |
@@ -47,9 +47,9 @@ grep -rhE '^\s*def test_' tests/e2e --include='test_*.py' --exclude-dir=new_sele
 | 19 | `grievance/grievance_dashboard` | 2 | 0 | ⬜ |
 | 20 | `grievance/grievance_tickets` | 25 | 0 | ⬜ |
 | 21 | Old infra cleanup | – | – | ⬜ |
-| | **Total** | **152** | **54** | **36 %** |
+| | **Total** | **152** | **69** | **45 %** |
 
-`[███████░░░░░░░░░░░░░] 54 / 152`. Update it after each PR: 1 block per ~8 tests. An "in review" module counts as migrated only on its own branch; drop the mark when its PR merges.
+`[█████████░░░░░░░░░░░] 69 / 152`. Update it after each PR: 1 block per ~8 tests. An "in review" module counts as migrated only on its own branch; drop the mark when its PR merges.
 
 The new suite already has 46 test files and ~250 test functions. These do not count toward the 152.
 
@@ -154,22 +154,22 @@ Legend: `NEW <new_selenium/...>` · `COVERED <existing new test>` (verify assert
 
 ### 13. `generic_import/test_generic_import.py` (15) → `new_selenium/generic_import/test_generic_import_form.py`
 Already in new suite: `test_generic_import_data.py`.
-- [ ] test_xlsx_file_path → NEW (fixture file is valid and loads; fold into the happy-path setup if it's only a sanity check)
-- [ ] test_happy_path_full_import → COVERED `test_generic_import_creates_rdi_with_household_individual_document_and_account`
-- [ ] test_business_area_is_required_field → NEW
-- [ ] test_program_select_disabled_until_ba_selected → NEW
-- [ ] test_file_upload_field_exists → NEW (merge into the form-render test)
-- [ ] test_validation_invalid_file_extension → NEW
-- [ ] test_dynamic_program_loading → NEW
-- [ ] test_business_area_change_resets_program → NEW
-- [ ] test_drag_and_drop_file_upload → NEW
-- [ ] test_autoselect_single_business_area → NEW, parametrize business area / program
-- [ ] test_autoselect_single_program → NEW (param)
-- [ ] test_no_permission_access_denied → NEW (uses `user_with_no_permissions`)
-- [ ] test_import_with_validation_errors → NEW (uses `helpers/e2e_generic_import_invalid.xlsx`)
-- [ ] test_file_size_display → NEW
-- [ ] test_submit_button_state_during_upload → NEW
-- [ ] Delete `page_object/generic_import/`
+- [x] test_xlsx_file_path → fixture, not a test; the file is uploaded by the tests below
+- [x] test_happy_path_full_import → COVERED `test_generic_import_creates_rdi_with_household_individual_document_and_account` (extended with the title and the alert text)
+- [x] test_business_area_is_required_field → NEW `test_business_area_is_required`
+- [x] test_program_select_disabled_until_ba_selected → NEW `test_program_select_disabled_until_business_area_selected`
+- [x] test_file_upload_field_exists → NEW `test_file_upload_field`
+- [x] test_validation_invalid_file_extension → NEW `test_invalid_file_extension_is_rejected`
+- [x] test_dynamic_program_loading → NEW `test_programs_load_after_selecting_business_area`
+- [x] test_business_area_change_resets_program → NEW `test_business_area_change_resets_program`
+- [x] test_drag_and_drop_file_upload → NEW `test_drag_and_drop_file_upload` (dispatches a real drop event)
+- [x] test_autoselect_single_business_area → NEW `test_single_option_is_preselected[business-area]`
+- [x] test_autoselect_single_program → NEW `test_single_option_is_preselected[program]`
+- [x] test_no_permission_access_denied → NEW `test_user_without_generic_import_permission_is_denied`
+- [x] test_import_with_validation_errors → NEW `test_import_with_missing_columns_imports_nothing` (the RDI ends as IN_REVIEW: the parser errors are not reported)
+- [x] test_file_size_display → NEW `test_file_size_is_displayed`
+- [x] test_submit_button_state_during_upload → NEW `test_submit_button_state_during_upload` (holds the request to check the uploading state)
+- [x] Delete `page_object/generic_import/` and the `page_generic_import` fixture
 
 ### 14. `filters/test_filters.py` (4) → filter tests go in each domain module (pattern: `targeting/test_tp_list.py::test_tp_list_filter`)
 - [ ] test_filters_selected_program → NEW `new_selenium/filters/test_list_filters.py` (keep the parametrize over pages), or split per domain module
