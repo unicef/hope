@@ -3,6 +3,7 @@
 from admin_cursor_paginator.cursor import Cursor, encode_cursor
 from django.contrib.admin.sites import AdminSite
 from django.contrib.auth.models import Permission
+from django.contrib.messages import get_messages
 from django.db import connection
 from django.test import RequestFactory
 from django.test.utils import CaptureQueriesContext
@@ -64,11 +65,11 @@ def test_individual_search_by_unicef_id_finds_individual_regardless_of_case(popu
     assert list(queryset) == [population["individual"]]
 
 
-@pytest.mark.parametrize("term", ["IND-24-0000.0001", "IND-2", "IND-24", "IND-24-00", "IND-24-0000."])
-def test_individual_search_by_unicef_id_emits_prefix_like_without_upper(population, staff_request, term):
+@pytest.mark.parametrize("term", ["IND-24-0000.0001", "IND-", "IND-2", "IND-24", "IND-24-00", "IND-24-0000."])
+def test_individual_search_by_unicef_id_emits_prefix_like_without_upper(population, request_without_perms, term):
     model_admin = IndividualAdmin(Individual, AdminSite())
 
-    sql = search_sql(model_admin, staff_request, term)
+    sql = search_sql(model_admin, request_without_perms, term)
 
     assert f"LIKE {term}%" in sql
     assert "UPPER" not in sql
@@ -87,12 +88,12 @@ def test_individual_search_by_household_unicef_id_returns_household_members(popu
 
 @pytest.mark.parametrize(
     "term",
-    ["Kowalski", "IND", "XYZ-24-0000.0001", "IND-24-0000.0002 Kowalski", "IND-24-0000.00012", "IND-2-34"],
+    ["Kowalski", "IND", "XYZ-24-0000.0001", "IND-24-0000.0002 Kowalski", "IND-X1"],
 )
-def test_individual_search_by_non_unicef_id_term_falls_back_to_default_search(population, staff_request, term):
+def test_individual_search_by_non_unicef_id_term_falls_back_to_default_search(population, request_without_perms, term):
     model_admin = IndividualAdmin(Individual, AdminSite())
 
-    sql = search_sql(model_admin, staff_request, term)
+    sql = search_sql(model_admin, request_without_perms, term)
 
     assert "UPPER" in sql
 
@@ -382,6 +383,43 @@ def test_linked_admin_search_by_number_falls_back_to_default_search(
     assert [obj.individual.unicef_id for obj in queryset] == ["IND-24-0000.0001"]
 
 
+# Numbers that start like a unicef_id next to plain ones, so a hit visibly leaves the other individual's rows out.
+@pytest.fixture
+def id_like_numbers():
+    ba = BusinessAreaFactory(slug="unicef-id-like-numbers-ba")
+    program = ProgramFactory(business_area=ba, status="ACTIVE")
+    individual = IndividualFactory(household=None, business_area=ba, program=program, unicef_id="IND-24-0000.0001")
+    other = IndividualFactory(household=None, business_area=ba, program=program, unicef_id="IND-24-0000.0002")
+    DocumentFactory(individual=individual, document_number="HH1234567")
+    DocumentFactory(individual=other, document_number="DOC-2")
+    IndividualIdentityFactory(individual=individual, number="IND-000123")
+    IndividualIdentityFactory(individual=other, number="IDN-2")
+    AccountFactory(individual=individual, number="HH-24-0000.0001")
+    AccountFactory(individual=other, number="ACC-2")
+
+
+ID_LIKE_NUMBER_ADMINS = [
+    (Document, DocumentAdmin, "hh1234567"),
+    (IndividualIdentity, IndividualIdentityAdmin, "IND-000123"),
+    (Account, AccountAdmin, "HH-24"),
+]
+ID_LIKE_NUMBER_IDS = ["document-malformed-id", "identity-malformed-own-prefix", "account-other-prefix"]
+
+
+@pytest.mark.parametrize(("model", "model_admin_class", "term"), ID_LIKE_NUMBER_ADMINS, ids=ID_LIKE_NUMBER_IDS)
+def test_linked_admin_search_by_id_like_number_finds_it_by_number(
+    id_like_numbers, request_without_perms, model, model_admin_class, term
+):
+    model_admin = model_admin_class(model, AdminSite())
+
+    queryset, may_have_duplicates = model_admin.get_search_results(
+        request_without_perms, model_admin.get_queryset(request_without_perms), term
+    )
+
+    assert [obj.individual.unicef_id for obj in queryset] == ["IND-24-0000.0001"]
+    assert may_have_duplicates is False
+
+
 @pytest.fixture
 def linked_staff_client(client):
     user = UserFactory(is_staff=True)
@@ -411,6 +449,24 @@ def test_linked_admin_changelist_search_by_unicef_id_lists_rows_of_that_individu
     response = linked_staff_client.get(reverse(url_name), {"q": "IND-24-0000.0001"})
 
     assert [obj.individual.unicef_id for obj in response.context["cl"].result_list] == ["IND-24-0000.0001"]
+
+
+@pytest.mark.parametrize(
+    ("url_name", "term"),
+    [
+        ("admin:household_document_changelist", "HH1234567"),
+        ("admin:household_individualidentity_changelist", "IND-000123"),
+        ("admin:payment_account_changelist", "HH-24"),
+    ],
+    ids=ID_LIKE_NUMBER_IDS,
+)
+def test_linked_admin_changelist_search_by_id_like_number_lists_it_without_a_warning(
+    id_like_numbers, linked_staff_client, url_name, term
+):
+    response = linked_staff_client.get(reverse(url_name), {"q": term})
+
+    assert [obj.individual.unicef_id for obj in response.context["cl"].result_list] == ["IND-24-0000.0001"]
+    assert list(get_messages(response.wsgi_request)) == []
 
 
 @pytest.mark.parametrize(
@@ -454,3 +510,134 @@ def test_linked_admin_changelist_keeps_model_ordering(
 
     expected = list(model.all_objects.order_by(*ordering).values_list("pk", flat=True))
     assert [obj.pk for obj in response.context["cl"].result_list] == expected
+
+
+@pytest.fixture
+def request_without_perms():
+    request = RequestFactory().get("/admin/")
+    request.user = UserFactory(is_staff=True)
+    return request
+
+
+# A term that looks like an id, malformed or with a prefix this admin does not map, would otherwise fall back
+# to the default search and scan the table.
+@pytest.mark.parametrize(
+    ("model", "model_admin_class", "term"),
+    [
+        (Individual, IndividualAdmin, "IND-23-0003.34889"),
+        (Individual, IndividualAdmin, "IND23-0003"),
+        (Individual, IndividualAdmin, "IND-2023"),
+        (Individual, IndividualAdmin, "ind-24-0000.00012"),
+        (Individual, IndividualAdmin, "IND-2-34"),
+        (Household, HouseholdAdmin, "HH-24-0000.00012"),
+        (Household, HouseholdAdmin, "IND-24-0000.0001"),
+        (Household, HouseholdAdmin, "IND-2023"),
+        (IndividualRoleInHousehold, IndividualRoleInHouseholdAdmin, "HH-2024"),
+    ],
+    ids=[
+        "five-digit-suffix",
+        "no-dash",
+        "four-digit-year",
+        "lowercase",
+        "one-digit-year",
+        "household-malformed",
+        "household-individual-id",
+        "household-malformed-individual-id",
+        "role-malformed",
+    ],
+)
+def test_search_by_unusable_unicef_id_returns_nothing_without_a_query(
+    population, request_without_perms, django_assert_num_queries, model, model_admin_class, term
+):
+    model_admin = model_admin_class(model, AdminSite())
+
+    queryset, may_have_duplicates = model_admin.get_search_results(
+        request_without_perms, model_admin.get_queryset(request_without_perms), term
+    )
+
+    with django_assert_num_queries(0):
+        assert list(queryset) == []
+    assert may_have_duplicates is False
+
+
+@pytest.mark.parametrize(
+    ("url_name", "term", "message"),
+    [
+        (
+            "admin:household_individual_changelist",
+            "IND-23-0003.34889",
+            "Invalid UNICEF ID format. Expected IND-yy-NNNN.NNNN or its beginning, e.g. IND-23-0003.",
+        ),
+        (
+            "admin:household_household_changelist",
+            "ind-24-0000.0001",
+            "IND IDs cannot be searched here, only HH IDs. Search IND IDs in Individuals.",
+        ),
+        (
+            "admin:household_individual_changelist",
+            "HH24",
+            "Invalid UNICEF ID format. Expected HH-yy-NNNN.NNNN or its beginning, e.g. HH-23-0003.",
+        ),
+        (
+            "admin:household_household_changelist",
+            "IND-2023",
+            "IND IDs cannot be searched here, only HH IDs. Search IND IDs in Individuals.",
+        ),
+    ],
+    ids=["malformed", "other-admin", "malformed-joined", "other-admin-malformed"],
+)
+def test_changelist_search_by_unusable_unicef_id_warns_and_lists_nothing(
+    population, staff_client, url_name, term, message
+):
+    response = staff_client.get(reverse(url_name), {"q": term})
+
+    assert list(response.context["cl"].result_list) == []
+    assert [str(warning) for warning in get_messages(response.wsgi_request)] == [message]
+    assert message in response.content.decode()
+
+
+# An unknown lookup parameter makes the changelist redirect to ?e=1, which drops the search term.
+def test_changelist_redirect_with_unusable_unicef_id_does_not_warn(population, staff_client):
+    response = staff_client.get(
+        reverse("admin:household_individual_changelist"), {"q": "IND-2023", "no_such_field": "1"}
+    )
+
+    assert response.status_code == 302
+    assert list(get_messages(response.wsgi_request)) == []
+
+
+@pytest.mark.parametrize("term", ["", "IND-24-0000.0001", "Kowalski"], ids=["no-search", "unicef-id", "name"])
+def test_changelist_search_by_usable_term_does_not_warn(population, staff_client, term):
+    response = staff_client.get(reverse("admin:household_individual_changelist"), {"q": term})
+
+    assert list(get_messages(response.wsgi_request)) == []
+
+
+@pytest.fixture
+def staff_client_without_perms(client):
+    user = UserFactory(is_staff=True)
+    client.force_login(user, backend="django.contrib.auth.backends.ModelBackend")
+    return client
+
+
+def test_changelist_search_by_unusable_unicef_id_without_permission_is_denied_without_a_warning(
+    population, staff_client_without_perms
+):
+    response = staff_client_without_perms.get(
+        reverse("admin:household_individual_changelist"), {"q": "IND-23-0003.34889"}
+    )
+
+    assert response.status_code == 403
+    assert list(get_messages(response.wsgi_request)) == []
+
+
+# The Document form's individual widget searches through IndividualAdmin.get_search_results; a warning queued
+# there would surface on the next page the user opens.
+def test_autocomplete_search_by_unusable_unicef_id_returns_nothing_without_a_warning(population, staff_client):
+    response = staff_client.get(
+        reverse("admin:autocomplete"),
+        {"app_label": "household", "model_name": "document", "field_name": "individual", "term": "IND-23-0003.34889"},
+    )
+
+    assert response.json()["results"] == []
+    assert list(get_messages(response.wsgi_request)) == []
