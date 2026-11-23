@@ -55,11 +55,13 @@ DETAILS_LABELS = {
     "Seeing disability severity": "None",
     "Hearing disability severity": "None",
     "Physical disability severity": "None",
+    "Remembering or concentrating disability severity": "None",
     "Communicating disability severity": "None",
     "Disability": "Not Disabled",
     "Email": "fake111test@email.com",
     "Phone Number": "Invalid Phone Number",
     "Alternative Phone Number": "-",
+    "Date of last screening against sanctions list": "-",
 }
 DETAILS = {label(name): value for name, value in DETAILS_LABELS.items()}
 

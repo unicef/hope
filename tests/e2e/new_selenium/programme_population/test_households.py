@@ -57,6 +57,7 @@ DETAILS_LABELS = {
 }
 DETAILS = {label(name): value for name, value in DETAILS_LABELS.items()}
 STATUS_CONTAINER = 'div[data-cy="status-container"]'
+TABLE_ROW = 'tr[data-cy="table-row"]'
 TABLE_LABEL = 'span[data-cy="table-label"]'
 KNOWN_AFFECTED_BENEFICIARIES = '[data-cy="known-affected-beneficiaries"]'
 ROW_0_5 = '[data-cy="row05"]'
@@ -127,6 +128,7 @@ def test_household_details_shows_household(household: Household, program: Progra
     login.assert_text("ACTIVE", STATUS_CONTAINER)
     login.assert_text("Items Group Members", TABLE_TITLE)
     login.assert_text("Item ID", TABLE_LABEL)
+    login.assert_text("No results", TABLE_ROW)
     login.assert_text(rdi.data_source, label("Source"))
     login.assert_text(rdi.name, label("Import name"))
     login.assert_text(household.last_registration_date.strftime("%-d %b %Y"), label("Registration Date"))
