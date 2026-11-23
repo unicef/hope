@@ -2,7 +2,7 @@ from pathlib import Path
 
 import pytest
 
-from e2e.new_selenium.people.conftest import people_url
+from e2e.new_selenium.people.conftest import PEOPLE_MENU
 from e2e.new_selenium.programme_population.conftest import (
     PDU_FORM_ERRORS,
     STATUS_CONTAINER,
@@ -52,7 +52,7 @@ def test_upload_xlsx_updates_person(
     program: Program,
     login: HopeTestBrowser,
 ) -> None:
-    upload_xlsx(login, people_url(program), valid_xlsx)
+    upload_xlsx(login, program, valid_xlsx, PEOPLE_MENU)
 
     login.wait_for_element_visible('td[data-cy^="update-status-"]')
     upload = PDUXlsxUpload.objects.get()
@@ -70,7 +70,7 @@ def test_upload_xlsx_updates_person(
 def test_upload_xlsx_with_invalid_value_shows_form_errors(
     invalid_date_xlsx: Path, program: Program, login: HopeTestBrowser
 ) -> None:
-    upload_xlsx(login, people_url(program), invalid_date_xlsx)
+    upload_xlsx(login, program, invalid_date_xlsx, PEOPLE_MENU)
 
     login.assert_text("Failed", STATUS_CONTAINER)
     upload = PDUXlsxUpload.objects.get()
@@ -81,7 +81,7 @@ def test_upload_xlsx_with_invalid_value_shows_form_errors(
 
 
 def test_uploads_list_shows_upload(successful_upload: PDUXlsxUpload, program: Program, login: HopeTestBrowser) -> None:
-    open_pdu_tab(login, people_url(program), "offline-edits")
+    open_pdu_tab(login, program, "offline-edits", PEOPLE_MENU)
 
     login.assert_text(str(successful_upload.pk), update_cell("id", successful_upload))
     login.assert_text(str(successful_upload.template.pk), update_cell("template", successful_upload))

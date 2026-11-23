@@ -2,7 +2,7 @@ from pathlib import Path
 
 import pytest
 
-from e2e.new_selenium.programme_population.conftest import individuals_url, open_pdu_tab, rounds_data
+from e2e.new_selenium.programme_population.conftest import open_pdu_tab, rounds_data
 from extras.test_utils.factories import PDUXlsxTemplateFactory
 from extras.test_utils.selenium import HopeTestBrowser
 from hope.models import FlexibleAttribute, Individual, PDUXlsxTemplate, Program
@@ -64,7 +64,7 @@ def exported_template(program: Program, string_attribute: FlexibleAttribute) -> 
 def test_export_and_download_template(
     template_to_export: PDUXlsxTemplate, program: Program, login: HopeTestBrowser
 ) -> None:
-    open_pdu_tab(login, individuals_url(program), "offline-templates")
+    open_pdu_tab(login, program, "offline-templates")
     login.assert_text("To export", template_cell("status", template_to_export))
 
     login.click(export_button(template_to_export))
@@ -75,7 +75,7 @@ def test_export_and_download_template(
 def test_template_list_shows_template(
     exported_template: PDUXlsxTemplate, program: Program, login: HopeTestBrowser
 ) -> None:
-    open_pdu_tab(login, individuals_url(program), "offline-templates")
+    open_pdu_tab(login, program, "offline-templates")
 
     login.assert_text(str(exported_template.pk), template_cell("id", exported_template))
     login.assert_text("10", template_cell("records", exported_template))
@@ -91,7 +91,7 @@ def test_template_details_shows_rounds(
     program: Program,
     login: HopeTestBrowser,
 ) -> None:
-    open_pdu_tab(login, individuals_url(program), "offline-templates")
+    open_pdu_tab(login, program, "offline-templates")
 
     login.click(f"{template_cell('details-btn', template_to_export)} button")
 
@@ -108,7 +108,7 @@ def test_create_and_download_template(
     program: Program,
     login: HopeTestBrowser,
 ) -> None:
-    open_pdu_tab(login, individuals_url(program), "offline-templates")
+    open_pdu_tab(login, program, "offline-templates")
 
     login.click(NEW_TEMPLATE)
     login.click(RDI_FILTER)

@@ -7,7 +7,6 @@ from e2e.new_selenium.programme_population.conftest import (
     PDU_FORM_ERRORS,
     STATUS_CONTAINER,
     exported_template,
-    individuals_url,
     open_pdu_tab,
     prepare_xlsx_file,
     rounds_data,
@@ -67,7 +66,7 @@ def test_upload_xlsx_updates_individual(
     program: Program,
     login: HopeTestBrowser,
 ) -> None:
-    upload_xlsx(login, individuals_url(program), valid_xlsx)
+    upload_xlsx(login, program, valid_xlsx)
 
     login.wait_for_element_visible('td[data-cy^="update-status-"]')
     upload = PDUXlsxUpload.objects.get()
@@ -84,7 +83,7 @@ def test_upload_xlsx_updates_individual(
 def test_upload_xlsx_with_invalid_value_shows_form_errors(
     invalid_date_xlsx: Path, program: Program, login: HopeTestBrowser
 ) -> None:
-    upload_xlsx(login, individuals_url(program), invalid_date_xlsx)
+    upload_xlsx(login, program, invalid_date_xlsx)
 
     login.assert_text("Failed", STATUS_CONTAINER)
     upload = PDUXlsxUpload.objects.get()
@@ -97,7 +96,7 @@ def test_upload_xlsx_with_invalid_value_shows_form_errors(
 def test_upload_xlsx_for_unknown_template_shows_error(
     unknown_template_xlsx: Path, program: Program, login: HopeTestBrowser
 ) -> None:
-    upload_xlsx(login, individuals_url(program), unknown_template_xlsx)
+    upload_xlsx(login, program, unknown_template_xlsx)
 
     login.assert_exact_text(
         "Error uploading file: Periodic Data Update Template with ID -1 not found", PDU_UPLOAD_ERROR
@@ -106,7 +105,7 @@ def test_upload_xlsx_for_unknown_template_shows_error(
 
 
 def test_uploads_list_shows_upload(successful_upload: PDUXlsxUpload, program: Program, login: HopeTestBrowser) -> None:
-    open_pdu_tab(login, individuals_url(program), "offline-edits")
+    open_pdu_tab(login, program, "offline-edits")
 
     login.assert_text(str(successful_upload.pk), update_cell("id", successful_upload))
     login.assert_text(str(successful_upload.template.pk), update_cell("template", successful_upload))

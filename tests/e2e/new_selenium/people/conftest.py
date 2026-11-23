@@ -26,6 +26,8 @@ from hope.models import (
     RegistrationDataImport,
 )
 
+PEOPLE_MENU = ("People",)
+
 # Born a day past the 40th birthday, so the age shown is 40 whatever day the test runs.
 BIRTH_DATE = date.today() - relativedelta(years=40, days=1)
 
@@ -104,7 +106,3 @@ def string_attribute(program: Program) -> FlexibleAttribute:
 @pytest.fixture
 def date_attribute(program: Program) -> FlexibleAttribute:
     return create_pdu_attribute(program, "Test Date Attribute", FlexibleAttribute.DATE)
-
-
-def people_url(program: Program) -> str:
-    return f"/{program.business_area.slug}/programs/{program.code}/population/people"

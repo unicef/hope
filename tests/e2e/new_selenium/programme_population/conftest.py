@@ -30,6 +30,7 @@ from hope.models import (
     RegistrationDataImport,
 )
 
+INDIVIDUALS_MENU = ("Main Menu", "Items")
 BUTTON_IMPORT = 'button[data-cy="button-import"]'
 DIALOG_IMPORT = 'div[data-cy="dialog-import"]'
 FILE_INPUT = 'input[data-cy="file-input"]'
@@ -140,9 +141,23 @@ def individuals_url(program: Program) -> str:
     return f"/{program.business_area.slug}/programs/{program.code}/population/individuals"
 
 
-def open_pdu_tab(browser: HopeTestBrowser, list_url: str, subtab: str) -> None:
-    """Open the periodic data updates tab of the `list_url` page on `subtab` (offline-templates, offline-edits, ...)."""
-    browser.open(f"{list_url}?tab=periodic-data-updates&subtab={subtab}")
+def open_from_menu(browser: HopeTestBrowser, program: Program, *path: str) -> None:
+    """Open the programme and follow the side menu: the last item of `path` is a link, the others are sections."""
+    *sections, link = path
+    browser.open(f"/{program.business_area.slug}/programs/{program.code}/details/{program.code}")
+    browser.assert_text(program.name, 'h5[data-cy="page-header-title"]')
+    for section in sections:
+        browser.open_nav_section(section)
+    browser.click(f'a[data-cy="nav-{link}"]')
+
+
+def open_pdu_tab(
+    browser: HopeTestBrowser, program: Program, subtab: str, menu: tuple[str, ...] = INDIVIDUALS_MENU
+) -> None:
+    """Open the periodic data updates tab of the `menu` page on `subtab` (offline-templates, offline-edits, ...)."""
+    open_from_menu(browser, program, *menu)
+    browser.click('button[data-cy="tab-periodic-data-updates"]')
+    browser.click(f'button[data-cy="pdu-{subtab}"]')
     browser.wait_for_element_visible(f'button[data-cy="pdu-{subtab}"][aria-selected="true"]')
 
 
@@ -150,8 +165,10 @@ def update_cell(column: str, upload: PDUXlsxUpload) -> str:
     return f'td[data-cy="update-{column}-{upload.pk}"]'
 
 
-def upload_xlsx(browser: HopeTestBrowser, list_url: str, path: Path) -> None:
-    open_pdu_tab(browser, list_url, "offline-edits")
+def upload_xlsx(
+    browser: HopeTestBrowser, program: Program, path: Path, menu: tuple[str, ...] = INDIVIDUALS_MENU
+) -> None:
+    open_pdu_tab(browser, program, "offline-edits", menu)
     browser.click(BUTTON_IMPORT)
     browser.wait_for_element_visible(DIALOG_IMPORT)
     browser.assert_text("IMPORT", BUTTON_IMPORT_SUBMIT)

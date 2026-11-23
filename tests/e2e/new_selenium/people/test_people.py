@@ -1,7 +1,7 @@
 import pytest
 
-from e2e.new_selenium.people.conftest import BIRTH_DATE, people_url
-from e2e.new_selenium.programme_population.conftest import assert_texts
+from e2e.new_selenium.people.conftest import BIRTH_DATE, PEOPLE_MENU
+from e2e.new_selenium.programme_population.conftest import assert_texts, open_from_menu
 from extras.test_utils.selenium import HopeTestBrowser, ui_date
 from hope.apps.household.const import FEMALE
 from hope.models import Individual, Payment, Program
@@ -82,7 +82,7 @@ def js_click(browser: HopeTestBrowser, selector: str) -> None:
 
 
 def test_people_list_is_empty_without_people(program: Program, login: HopeTestBrowser) -> None:
-    login.open(people_url(program))
+    open_from_menu(login, program, *PEOPLE_MENU)
 
     login.assert_text("People", TABLE_TITLE)
     login.assert_text("Rows per page:", TABLE_PAGINATION)
@@ -92,7 +92,7 @@ def test_people_list_is_empty_without_people(program: Program, login: HopeTestBr
 
 
 def test_person_details_shows_person(person: Individual, program: Program, login: HopeTestBrowser) -> None:
-    login.open(people_url(program))
+    open_from_menu(login, program, *PEOPLE_MENU)
     login.assert_text("1–1 of 1", TABLE_PAGINATION)
     login.assert_text("Stacey Freeman", PERSON_ROW)
 
@@ -112,7 +112,7 @@ def test_person_details_shows_person(person: Individual, program: Program, login
 
 
 def test_person_details_shows_payment(payment: Payment, program: Program, login: HopeTestBrowser) -> None:
-    login.open(people_url(program))
+    open_from_menu(login, program, *PEOPLE_MENU)
 
     login.click(PERSON_ROW)
 
@@ -130,7 +130,8 @@ def test_person_details_shows_payment(payment: Payment, program: Program, login:
 def test_person_data_updated_after_grievance_ticket_processed(
     category: str, issue_type: str, person: Individual, program: Program, login: HopeTestBrowser
 ) -> None:
-    login.open(f"/{program.business_area.slug}/programs/all/grievance/tickets/user-generated")
+    login.open(f"/{program.business_area.slug}/programs/all/list")
+    login.click('a[data-cy="nav-Grievance"]')
     login.assert_text("Grievance Tickets", PAGE_TITLE)
     login.click('a[data-cy="button-new-ticket"]')
     login.select_dropdown_option("category", category)
@@ -177,7 +178,7 @@ def test_person_data_updated_after_grievance_ticket_processed(
     login.wait_for_text("Closed", label("Status"), timeout=60)
     login.assert_text("Ticket ID", PAGE_TITLE)
 
-    login.open(people_url(program))
+    open_from_menu(login, program, *PEOPLE_MENU)
     login.click(PERSON_ROW)
     login.assert_text("Female", label("Gender"))
     login.assert_text("en-us", label("Preferred language"))

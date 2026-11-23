@@ -2,7 +2,7 @@ from datetime import UTC, datetime
 
 import pytest
 
-from e2e.new_selenium.programme_population.conftest import assert_texts
+from e2e.new_selenium.programme_population.conftest import assert_texts, open_from_menu
 from extras.test_utils.factories import (
     HouseholdFactory,
     IndividualFactory,
@@ -101,12 +101,8 @@ def household(program: Program, business_area: BusinessArea) -> Household:
     )
 
 
-def households_url(program: Program) -> str:
-    return f"/{program.business_area.slug}/programs/{program.code}/population/household"
-
-
 def test_households_list_shows_household(household: Household, program: Program, login: HopeTestBrowser) -> None:
-    login.open(households_url(program))
+    open_from_menu(login, program, "Main Menu", "Items Groups")
 
     login.assert_text("Items Groups", TABLE_TITLE)
     login.assert_text("1–1 of 1", TABLE_PAGINATION)
@@ -119,7 +115,7 @@ def test_households_list_shows_household(household: Household, program: Program,
 
 def test_household_details_shows_household(household: Household, program: Program, login: HopeTestBrowser) -> None:
     rdi = household.registration_data_import
-    login.open(households_url(program))
+    open_from_menu(login, program, "Main Menu", "Items Groups")
 
     login.click(HOUSEHOLD_ROW)
 
