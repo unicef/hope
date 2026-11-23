@@ -7,9 +7,10 @@ import {
   MenuItem,
   Select,
 } from '@mui/material';
-import moment from 'moment';
 import type { FC } from 'react';
 import { useState } from 'react';
+import { useTimezone } from 'src/timezoneContext';
+import { formatInstant, parseInstant } from '@utils/timezone';
 
 interface UseSortAndFilterProps {
   initialSortField: string | null;
@@ -83,6 +84,7 @@ export const useSortAndFilter = ({
   initialSortField,
   initialSortDirection,
 }: UseSortAndFilterProps) => {
+  const timezone = useTimezone();
   const [sortField, setSortField] = useState(initialSortField);
   const [sortDirection, setSortDirection] = useState(initialSortDirection);
   const [selectedProgram, setSelectedProgram] = useState('');
@@ -120,26 +122,31 @@ export const useSortAndFilter = ({
     searchText: string,
     columns: any[],
   ) => {
-    return rows.filter((row: any) =>
-      columns.some((column) => {
-        if (selectedProgram !== '' && row.program !== selectedProgram) {
+    const query = searchText.toLowerCase();
+
+    return rows.filter((row: any) => {
+      if (selectedProgram !== '' && row.program !== selectedProgram) {
+        return false;
+      }
+      if (query === '') {
+        return true;
+      }
+      return columns.some((column) => {
+        const value = row[column.field];
+        if (value === null || value === undefined) {
           return false;
         }
-        if (column.field === 'program') {
+        if (column.field === filterByDate) {
+          // Search the date exactly as the table displays it.
+          const date = parseInstant(value);
           return (
-            row[column.field] === selectedProgram || selectedProgram === ''
+            date !== null &&
+            formatInstant(date, timezone, 'date').toLowerCase().includes(query)
           );
         }
-        if (column.field === filterByDate) {
-          const date = moment(row[column.field]).format('D MMMM YYYY');
-          return date.toLowerCase().includes(searchText.toLowerCase());
-        }
-        return row[column.field]
-          ?.toString()
-          .toLowerCase()
-          .includes(searchText.toLowerCase());
-      }),
-    );
+        return value.toString().toLowerCase().includes(query);
+      });
+    });
   };
   return {
     sortField,

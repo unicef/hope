@@ -29,6 +29,7 @@ PROGRAM_SELECT_RELEASE = 'div[data-cy="program-select-release"]'
 COLUMN_FIELD_RELEASE = 'td[data-cy="column-field-release"]'
 SELECT_ALL_RELEASE = 'span[data-cy="select-all-release"]'
 RELEASE_BUTTON = 'button[data-cy="release-button"]'
+SEARCH_RELEASED = 'div[data-cy="search-released"] input'
 COLUMN_FIELD_RELEASED = 'td[data-cy="column-field-released"]'
 PLANS_IDS = 'span[data-cy="plans-ids"]'
 BUTTON_SAVE = 'button[data-cy="button-save"]'
@@ -62,6 +63,17 @@ def payment_plan(business_area: BusinessArea) -> PaymentPlan:
 def plan_in_authorization(business_area: BusinessArea) -> PaymentPlan:
     program = ProgramFactory(name=PROGRAM_NAME, status=Program.ACTIVE, business_area=business_area)
     return _payment_plan(program, PaymentPlan.Status.IN_AUTHORIZATION)
+
+
+@pytest.fixture
+def released_plan(business_area: BusinessArea) -> PaymentPlan:
+    program = ProgramFactory(name=PROGRAM_NAME, status=Program.ACTIVE, business_area=business_area)
+    return _payment_plan(program, PaymentPlan.Status.ACCEPTED)
+
+
+@pytest.fixture
+def other_released_plan(other_program: Program) -> PaymentPlan:
+    return _payment_plan(other_program, PaymentPlan.Status.ACCEPTED)
 
 
 @pytest.fixture
@@ -178,3 +190,17 @@ def test_managerial_console_filter_change_clears_selection(
     login.assert_text(plan_in_authorization.unicef_id, COLUMN_FIELD_AUTHORIZATION)
     login.assert_element_not_present(f"{SELECT_AUTHORIZATION} input:checked")
     login.assert_element(f"{AUTHORIZE_BUTTON}:disabled")
+
+
+def test_managerial_console_search_filters_released_plans(
+    released_plan: PaymentPlan,
+    other_released_plan: PaymentPlan,
+    login: HopeTestBrowser,
+) -> None:
+    open_managerial_console(login)
+    login.assert_element(f'{COLUMN_FIELD_RELEASED}:contains("{released_plan.unicef_id}")')
+    login.assert_element(f'{COLUMN_FIELD_RELEASED}:contains("{other_released_plan.unicef_id}")')
+
+    login.type(SEARCH_RELEASED, released_plan.unicef_id)
+    login.assert_element_not_present(f'{COLUMN_FIELD_RELEASED}:contains("{other_released_plan.unicef_id}")')
+    login.assert_text(released_plan.unicef_id, COLUMN_FIELD_RELEASED)
