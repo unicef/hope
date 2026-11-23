@@ -15,6 +15,17 @@ from hope.models import BeneficiaryGroup, BusinessArea, Household, PaymentPlan, 
 PROGRAM_NAME = "Accountability Programme"
 TARGET_POPULATION_NAME = "Accountability Target Population"
 
+TABLE_PAGINATION = 'div[data-cy="table-pagination"]'
+RECIPIENT_COLUMNS = {
+    'th[data-cy="household-id"]': "Items Group ID",
+    'th[data-cy="status"]': "Status",
+    'th[data-cy="household-head-name"]': "Head of Items Group",
+    'th[data-cy="household-size"]': "Items Group Size",
+    'th[data-cy="household-location"]': "Administrative Level 2",
+    'th[data-cy="household-residence-status"]': "Residence Status",
+    'th[data-cy="household-registration-date"]': "Registration Date",
+}
+
 
 @pytest.fixture
 def program(business_area: BusinessArea) -> Program:
@@ -69,3 +80,15 @@ def open_accountability_page(browser: HopeTestBrowser, program: Program, page: s
     browser.open_nav_section("Accountability")
     browser.click(f'a[data-cy="nav-{page}"]')
     browser.assert_text(page, 'h5[data-cy="page-header-title"]')
+
+
+def assert_texts(browser: HopeTestBrowser, expected: dict[str, str]) -> None:
+    """Assert each selector in `expected` contains its text."""
+    for selector, text in expected.items():
+        browser.assert_text(text, selector)
+
+
+def assert_single_page(browser: HopeTestBrowser, displayed_rows: str) -> None:
+    browser.assert_text("Rows per page:", TABLE_PAGINATION)
+    browser.assert_exact_text("10", f"{TABLE_PAGINATION} .MuiTablePagination-select")
+    browser.assert_text(displayed_rows, TABLE_PAGINATION)
