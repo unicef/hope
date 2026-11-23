@@ -9,7 +9,7 @@ Goal: re-cover every scenario from the old `tests/e2e` suite as a new-style Sele
 
 ## Rules for every migration PR (one module = one PR)
 1. Write new tests in `tests/e2e/new_selenium/<module>/` following `SELENIUM_E2E_PATTERNS.md`: plain `def test_*`, no classes, no `sleep`, no autouse data fixtures, no `if/for` in test bodies, factories from `extras.test_utils.factories` (not `old_factories`), `data-cy` CSS selectors, `pytest.mark.parametrize` instead of loops, `grant_permission` for permission scenarios.
-2. Domain data fixtures go in the module `conftest.py`; reuse existing ones (`new_selenium/payment_module/conftest.py`, `targeting/conftest.py`, `grievance/conftest.py`, `program_details/conftest.py`, `programme_population/conftest.py`) before writing new ones.
+2. Domain data fixtures go in the module `conftest.py`; reuse existing ones (`new_selenium/payment_module/conftest.py`, `targeting/conftest.py`, `grievance/conftest.py`, `program_details/conftest.py`, `programme_population/conftest.py`, `people/conftest.py`) before writing new ones.
 3. Each old test gets one of two outcomes:
    - **NEW** – port the scenario as a new-style Selenium test (file named in the checklist). Several old tests may merge into one parametrized test when they are the same flow with different data.
    - **COVERED** – an existing `new_selenium` test already exercises the same scenario (name it in the PR description). Before deleting the old test, compare it step by step with the new one and add any missing assertions to the new test.
@@ -35,7 +35,7 @@ grep -rcE '^\s*def test_' tests/e2e --include='test_*.py' --exclude-dir=new_sele
 | 8 | `drawer` | 4 | 0 | ⬜ |
 | 9 | `accountability` | 4 | 0 | ⬜ |
 | 10 | `programme_population` (hh/ind/PDU) | 12 | 12 | ✅ |
-| 11 | `people` | 7 | 0 | ⬜ |
+| 11 | `people` | 7 | 7 | ✅ |
 | 12 | `programme_management` | 8 | 0 | ⬜ |
 | 13 | `generic_import` | 15 | 0 | ⬜ |
 | 14 | `filters` | 4 | 0 | ⬜ |
@@ -46,9 +46,9 @@ grep -rcE '^\s*def test_' tests/e2e --include='test_*.py' --exclude-dir=new_sele
 | 19 | `grievance/grievance_dashboard` | 2 | 0 | ⬜ |
 | 20 | `grievance/grievance_tickets` | 25 | 0 | ⬜ |
 | 21 | Old infra cleanup | – | – | ⬜ |
-| | **Total** | **155** | **28** | **18 %** |
+| | **Total** | **155** | **35** | **23 %** |
 
-`[████░░░░░░░░░░░░░░░░] 28 / 155`. Update it after each PR: 1 block per ~8 tests.
+`[█████░░░░░░░░░░░░░░░] 35 / 155`. Update it after each PR: 1 block per ~8 tests.
 
 The new suite already has 46 test files and ~250 test functions. These do not count toward the 155.
 
@@ -126,18 +126,18 @@ Legend: `NEW <new_selenium/...>` · `COVERED <existing new test>` (verify assert
 - [x] test_periodic_data_update_upload_form_error → NEW `test_periodic_data_xlsx_upload.py::test_upload_xlsx_with_invalid_value_shows_form_errors` (not parametrized with the upload error: the two flows assert different elements after different steps)
 - [x] test_periodic_data_update_upload_error → NEW `test_periodic_data_xlsx_upload.py::test_upload_xlsx_for_unknown_template_shows_error`
 - [x] test_periodic_data_uploads_list → NEW `test_periodic_data_xlsx_upload.py::test_uploads_list_shows_upload`
-- [x] Delete `page_object/programme_population/individuals_details.py`, `PDUXlsxTemplatesDetails` and the `page_individuals_details` / `page_pdu_xlsx_templates_details` fixtures. The rest of `page_object/programme_population/` is still used by `people/test_people_periodic_data_update.py` and `grievance_tickets/test_e2e_grievance_tickets.py`; delete it in modules 11 and 20.
-- [x] `prepare_xlsx_file` moved to `new_selenium/programme_population/conftest.py` (the old people PDU test imports it from there)
+- [x] Delete `page_object/programme_population/individuals_details.py`, `PDUXlsxTemplatesDetails` and the `page_individuals_details` / `page_pdu_xlsx_templates_details` fixtures. The rest of `page_object/programme_population/` is still used by `grievance_tickets/test_e2e_grievance_tickets.py`; delete it in module 20.
+- [x] `prepare_xlsx_file` moved to `new_selenium/programme_population/conftest.py`
 
 ### 11. `people/` (7) → `new_selenium/people/`
-- [ ] test_smoke_page_people → NEW `test_people.py`
-- [ ] test_smoke_page_details_people → NEW `test_people.py`
-- [ ] test_people_happy_path → NEW `test_people.py`
-- [ ] test_check_people_data_after_grievance_ticket_processed → NEW `test_people.py` (keep the parametrize)
-- [ ] test_people_periodic_data_update_upload_success → NEW `test_people_periodic_data_update.py` (share fixtures with module 10)
-- [ ] test_people_periodic_data_update_upload_form_error → NEW `test_people_periodic_data_update.py`
-- [ ] test_people_periodic_data_uploads_list → NEW `test_people_periodic_data_update.py`
-- [ ] Delete `page_object/people/`; delete the PDU page objects in `page_object/programme_population/` (`individuals.py` is still used by module 20)
+- [x] test_smoke_page_people → NEW `test_people.py::test_people_list_is_empty_without_people`
+- [x] test_smoke_page_details_people → NEW `test_people.py::test_person_details_shows_person`
+- [x] test_people_happy_path → NEW `test_people.py::test_person_details_shows_payment`
+- [x] test_check_people_data_after_grievance_ticket_processed → NEW `test_people.py::test_person_data_updated_after_grievance_ticket_processed` (now also asserts the updated data)
+- [x] test_people_periodic_data_update_upload_success → NEW `test_people_periodic_data_update.py::test_upload_xlsx_updates_person`
+- [x] test_people_periodic_data_update_upload_form_error → NEW `test_people_periodic_data_update.py::test_upload_xlsx_with_invalid_value_shows_form_errors`
+- [x] test_people_periodic_data_uploads_list → NEW `test_people_periodic_data_update.py::test_uploads_list_shows_upload`
+- [x] Delete `page_object/people/`, the PDU page objects in `page_object/programme_population/` and their fixtures (`individuals.py` is still used by module 20). `upload_xlsx` and `update_cell` moved to `new_selenium/programme_population/conftest.py`, shared by both modules.
 
 ### 12. `programme_management/test_programme_management.py` (8) → `new_selenium/program_details/`
 Already in new suite: `test_create_program.py`, `test_edit_program.py`, `test_duplicate_program.py`.

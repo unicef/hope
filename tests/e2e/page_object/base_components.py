@@ -24,7 +24,6 @@ class BaseComponents(Common):
     nav_household_members = 'a[data-cy="nav-{}"]'
     nav_households = 'a[data-cy="nav-{}"]'
     nav_individuals = 'a[data-cy="nav-{}"]'
-    nav_people = 'a[data-cy="nav-People"]'
     nav_programme_management = 'a[data-cy="nav-Programmes"]'
     nav_managerial_console = 'a[data-cy="nav-Managerial Console"]'
     nav_programme_details = 'a[data-cy="nav-Programme Details"]'
@@ -124,9 +123,6 @@ class BaseComponents(Common):
 
     def get_nav_individuals(self, name: str = "Items") -> WebElement:
         return self.wait_for(self.nav_individuals.format(name))
-
-    def get_nav_people(self) -> WebElement:
-        return self.wait_for(self.nav_people)
 
     def get_nav_programme_management(self) -> WebElement:
         return self.wait_for(self.nav_programme_management)

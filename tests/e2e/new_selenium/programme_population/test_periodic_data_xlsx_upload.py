@@ -4,10 +4,15 @@ import openpyxl
 import pytest
 
 from e2e.new_selenium.programme_population.conftest import (
+    PDU_FORM_ERRORS,
+    STATUS_CONTAINER,
     exported_template,
+    individuals_url,
     open_pdu_tab,
     prepare_xlsx_file,
     rounds_data,
+    update_cell,
+    upload_xlsx,
 )
 from extras.test_utils.factories import PDUXlsxTemplateFactory, PDUXlsxUploadFactory
 from extras.test_utils.selenium import HopeTestBrowser
@@ -18,26 +23,7 @@ from hope.models import FlexibleAttribute, Individual, PDUXlsxUpload, Program
 
 pytestmark = pytest.mark.django_db()
 
-BUTTON_IMPORT = 'button[data-cy="button-import"]'
-DIALOG_IMPORT = 'div[data-cy="dialog-import"]'
-FILE_INPUT = 'input[data-cy="file-input"]'
-BUTTON_IMPORT_SUBMIT = 'button[data-cy="button-import-submit"]'
-STATUS_CONTAINER = '[data-cy="status-container"]'
-PDU_FORM_ERRORS = 'div[data-cy="pdu-form-errors"]'
 PDU_UPLOAD_ERROR = 'div[data-cy="pdu-upload-error"]'
-
-
-def update_cell(column: str, upload: PDUXlsxUpload) -> str:
-    return f'td[data-cy="update-{column}-{upload.pk}"]'
-
-
-def upload_xlsx(browser: HopeTestBrowser, program: Program, path: Path) -> None:
-    open_pdu_tab(browser, program, "offline-edits")
-    browser.click(BUTTON_IMPORT)
-    browser.wait_for_element_visible(DIALOG_IMPORT)
-    browser.assert_text("IMPORT", BUTTON_IMPORT_SUBMIT)
-    browser.choose_file(FILE_INPUT, str(path))
-    browser.click(BUTTON_IMPORT_SUBMIT)
 
 
 @pytest.fixture
@@ -81,7 +67,7 @@ def test_upload_xlsx_updates_individual(
     program: Program,
     login: HopeTestBrowser,
 ) -> None:
-    upload_xlsx(login, program, valid_xlsx)
+    upload_xlsx(login, individuals_url(program), valid_xlsx)
 
     login.wait_for_element_visible('td[data-cy^="update-status-"]')
     upload = PDUXlsxUpload.objects.get()
@@ -98,7 +84,7 @@ def test_upload_xlsx_updates_individual(
 def test_upload_xlsx_with_invalid_value_shows_form_errors(
     invalid_date_xlsx: Path, program: Program, login: HopeTestBrowser
 ) -> None:
-    upload_xlsx(login, program, invalid_date_xlsx)
+    upload_xlsx(login, individuals_url(program), invalid_date_xlsx)
 
     login.assert_text("Failed", STATUS_CONTAINER)
     upload = PDUXlsxUpload.objects.get()
@@ -111,7 +97,7 @@ def test_upload_xlsx_with_invalid_value_shows_form_errors(
 def test_upload_xlsx_for_unknown_template_shows_error(
     unknown_template_xlsx: Path, program: Program, login: HopeTestBrowser
 ) -> None:
-    upload_xlsx(login, program, unknown_template_xlsx)
+    upload_xlsx(login, individuals_url(program), unknown_template_xlsx)
 
     login.assert_exact_text(
         "Error uploading file: Periodic Data Update Template with ID -1 not found", PDU_UPLOAD_ERROR
@@ -120,7 +106,7 @@ def test_upload_xlsx_for_unknown_template_shows_error(
 
 
 def test_uploads_list_shows_upload(successful_upload: PDUXlsxUpload, program: Program, login: HopeTestBrowser) -> None:
-    open_pdu_tab(login, program, "offline-edits")
+    open_pdu_tab(login, individuals_url(program), "offline-edits")
 
     login.assert_text(str(successful_upload.pk), update_cell("id", successful_upload))
     login.assert_text(str(successful_upload.template.pk), update_cell("template", successful_upload))

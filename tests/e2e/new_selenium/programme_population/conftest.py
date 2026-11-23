@@ -24,10 +24,18 @@ from hope.models import (
     FlexibleAttribute,
     Individual,
     PDUXlsxTemplate,
+    PDUXlsxUpload,
     PeriodicFieldData,
     Program,
     RegistrationDataImport,
 )
+
+BUTTON_IMPORT = 'button[data-cy="button-import"]'
+DIALOG_IMPORT = 'div[data-cy="dialog-import"]'
+FILE_INPUT = 'input[data-cy="file-input"]'
+BUTTON_IMPORT_SUBMIT = 'button[data-cy="button-import-submit"]'
+STATUS_CONTAINER = '[data-cy="status-container"]'
+PDU_FORM_ERRORS = 'div[data-cy="pdu-form-errors"]'
 
 
 @pytest.fixture
@@ -132,10 +140,23 @@ def individuals_url(program: Program) -> str:
     return f"/{program.business_area.slug}/programs/{program.code}/population/individuals"
 
 
-def open_pdu_tab(browser: HopeTestBrowser, program: Program, subtab: str) -> None:
-    """Open the individuals' periodic data updates tab on `subtab` (offline-templates, offline-edits, ...)."""
-    browser.open(f"{individuals_url(program)}?tab=periodic-data-updates&subtab={subtab}")
+def open_pdu_tab(browser: HopeTestBrowser, list_url: str, subtab: str) -> None:
+    """Open the periodic data updates tab of the `list_url` page on `subtab` (offline-templates, offline-edits, ...)."""
+    browser.open(f"{list_url}?tab=periodic-data-updates&subtab={subtab}")
     browser.wait_for_element_visible(f'button[data-cy="pdu-{subtab}"][aria-selected="true"]')
+
+
+def update_cell(column: str, upload: PDUXlsxUpload) -> str:
+    return f'td[data-cy="update-{column}-{upload.pk}"]'
+
+
+def upload_xlsx(browser: HopeTestBrowser, list_url: str, path: Path) -> None:
+    open_pdu_tab(browser, list_url, "offline-edits")
+    browser.click(BUTTON_IMPORT)
+    browser.wait_for_element_visible(DIALOG_IMPORT)
+    browser.assert_text("IMPORT", BUTTON_IMPORT_SUBMIT)
+    browser.choose_file(FILE_INPUT, str(path))
+    browser.click(BUTTON_IMPORT_SUBMIT)
 
 
 def assert_texts(browser: HopeTestBrowser, expected: dict[str, str]) -> None:
