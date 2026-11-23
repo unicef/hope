@@ -187,6 +187,7 @@ def pytest_configure(config: Config) -> None:
         },
     }
     settings.ELASTICSEARCH_DSL_AUTOSYNC = False
+    settings.PASSWORD_HASHERS = ["django.contrib.auth.hashers.MD5PasswordHasher"]
     logging.disable(logging.CRITICAL)
 
     constance_config._setup()
