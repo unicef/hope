@@ -29,8 +29,6 @@ from e2e.page_object.accountability.comunication_details import (
 from e2e.page_object.accountability.surveys import AccountabilitySurveys
 from e2e.page_object.accountability.surveys_details import AccountabilitySurveysDetails
 from e2e.page_object.admin_panel.admin_panel import AdminPanel
-from e2e.page_object.error_page.access_denied import AccessDenied
-from e2e.page_object.error_page.error_page import ErrorPage
 from e2e.page_object.filters import Filters
 from e2e.page_object.generic_import.generic_import import GenericImport
 from e2e.page_object.grievance.details_feedback_page import FeedbackDetailsPage
@@ -55,7 +53,6 @@ from e2e.page_object.payment_verification.payment_verification_details import (
 )
 from e2e.page_object.people.people import People
 from e2e.page_object.people.people_details import PeopleDetails
-from e2e.page_object.program_log.payment_log import ProgramLog
 from e2e.page_object.programme_details.programme_details import ProgrammeDetails
 from e2e.page_object.programme_management.programme_management import (
     ProgrammeManagement,
@@ -595,21 +592,6 @@ def page_accountability_communication_details(
     request: FixtureRequest, browser: Chrome
 ) -> AccountabilityCommunicationDetails:
     return AccountabilityCommunicationDetails(browser)
-
-
-@pytest.fixture
-def page_program_log(request: FixtureRequest, browser: Chrome) -> ProgramLog:
-    return ProgramLog(browser)
-
-
-@pytest.fixture
-def page_error(request: FixtureRequest, browser: Chrome) -> ErrorPage:
-    return ErrorPage(browser)
-
-
-@pytest.fixture
-def page_access_denied(request: FixtureRequest, browser: Chrome) -> AccessDenied:
-    return AccessDenied(browser)
 
 
 @pytest.fixture
