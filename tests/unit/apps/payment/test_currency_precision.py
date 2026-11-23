@@ -219,6 +219,13 @@ def test_xlsx_money_cell_is_exact_text():
     assert cell.value == "123456789.1234567891"
 
 
+@pytest.mark.parametrize(("value", "expected"), [(Decimal("NaN"), "NaN"), (Decimal("Infinity"), "Infinity")])
+def test_xlsx_non_finite_usd_is_exported_as_text(value, expected):
+    result = XlsxExportBaseService().right_format_for_xlsx(value, "entitlement_quantity_usd")
+
+    assert result == expected
+
+
 @pytest.mark.parametrize("value", [10, 10.5])
 def test_xlsx_monetary_number_remains_numeric(value):
     result = XlsxExportBaseService().right_format_for_xlsx(value, "entitlement_quantity")
