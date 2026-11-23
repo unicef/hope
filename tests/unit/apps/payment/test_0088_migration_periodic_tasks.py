@@ -8,7 +8,7 @@ from django.utils.module_loading import import_string
 from django_celery_beat.models import CrontabSchedule, PeriodicTask
 import pytest
 
-from extras.test_utils.factories import AsyncJobFactory, PeriodicAsyncJobFactory
+from extras.test_utils.factories import AsyncJobFactory, PaymentListFactory, PeriodicAsyncJobFactory
 from hope.apps.core.tasks_schedules import TASKS_SCHEDULES
 
 pytestmark = pytest.mark.django_db
@@ -38,7 +38,7 @@ def queued_old_action(request, job_factory):
             "payment_list_id",
         ),
         (
-            "hope.contrib.vision.tasks.send_payment_plan_group_to_vision_async_task_action",
+            "hope.apps.payment.celery_tasks.export_payment_plan_group_delivery_xlsx_async_task_action",
             "payment_plan_group_id",
             "payment_plan_id",
         ),
@@ -78,6 +78,27 @@ def queued_old_failure_job(request, job_factory):
         config={old_key: OWNER_ID, "on_failure_action": f"{prefix}{old_failure}"},
     )
     return job, new_key, f"{prefix}{new_failure}"
+
+
+@pytest.fixture(
+    params=migration.DROPPED_DEVELOP_ACTIONS,
+    ids=[action.rsplit(".", 1)[-1] for action in migration.DROPPED_DEVELOP_ACTIONS],
+)
+def queued_develop_list_job(request, job_factory):
+    return job_factory(action=request.param, config={"payment_plan_id": OWNER_ID})
+
+
+@pytest.fixture
+def queued_tp_from_list_job():
+    return AsyncJobFactory(
+        action="hope.apps.targeting.celery_tasks.create_tp_from_list_async_task_action",
+        config={"form_data": {"name": "TP", "payment_plan_group": OWNER_ID}, "program_pk": OWNER_ID},
+    )
+
+
+@pytest.fixture
+def payment_list_importing_fsp_extra_fields():
+    return PaymentListFactory(background_action_status="XLSX_IMPORTING_FSP_EXTRA_FIELDS")
 
 
 @pytest.fixture(params=("REJECTED", "ABORTED"))
@@ -188,6 +209,33 @@ def test_forwards_rewrites_both_owner_id_keys(queued_old_owner_job) -> None:
     job.refresh_from_db()
     assert callable(import_string(job.action))
     assert job.config == {new_key: OWNER_ID}
+
+
+def test_forwards_drops_develop_jobs_that_hold_a_payment_list_id(queued_develop_list_job) -> None:
+    job_model = type(queued_develop_list_job)
+
+    migration.forwards(django_apps, connection.schema_editor())
+
+    assert not job_model.objects.filter(pk=queued_develop_list_job.pk).exists()
+
+
+def test_forwards_renames_the_payment_plan_field_in_queued_tp_from_list_jobs(queued_tp_from_list_job) -> None:
+    migration.forwards(django_apps, connection.schema_editor())
+
+    queued_tp_from_list_job.refresh_from_db()
+    assert queued_tp_from_list_job.config == {
+        "form_data": {"name": "TP", "payment_plan": OWNER_ID},
+        "program_pk": OWNER_ID,
+    }
+
+
+def test_forwards_clears_the_fsp_extra_fields_import_status_of_payment_lists(
+    payment_list_importing_fsp_extra_fields,
+) -> None:
+    migration.forwards(django_apps, connection.schema_editor())
+
+    payment_list_importing_fsp_extra_fields.refresh_from_db()
+    assert payment_list_importing_fsp_extra_fields.background_action_status is None
 
 
 def test_forwards_rewrites_failure_handler_paths(queued_old_failure_job) -> None:

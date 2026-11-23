@@ -78,6 +78,18 @@ FAILURE_ACTION_SQL = (
         "WHERE config ->> 'on_failure_action' = %s"
     ),
 )
+# Develop jobs whose config holds a payment list id under "payment_plan_id": the action either keeps its name but now
+# takes a payment plan id, or no longer exists. Renaming cannot make them right, so they are dropped.
+DROPPED_DEVELOP_ACTIONS = (
+    "hope.apps.payment.celery_tasks.export_pdf_payment_plan_summary_async_task_action",
+    "hope.apps.payment.celery_tasks.import_payment_plan_fsp_extra_fields_from_xlsx_async_task_action",
+    "hope.apps.payment.celery_tasks.payment_plan_apply_custom_exchange_rate_async_task_action",
+    "hope.apps.payment.celery_tasks.update_exchange_rate_on_release_payments_async_task_action",
+    "hope.apps.payment.celery_tasks.send_payment_notification_emails_async_task_action",
+    "hope.contrib.vision.tasks.send_payment_plan_to_vision_async_task_action",
+    "hope.contrib.vision.tasks.notify_payment_plan_status_to_vision_async_task_action",
+)
+CREATE_TP_FROM_LIST_ACTION = "hope.apps.targeting.celery_tasks.create_tp_from_list_async_task_action"
 VISION_NOTIFICATION_JOB_NAME_PREFIXES = ("notify_payment_plan_group_", "notify_payment_plan_")
 DEFAULT_ACTIONS = ("add", "change", "delete", "view")
 MODEL_PERMISSION_RENAMES = (
@@ -166,12 +178,32 @@ def _rename_job_metadata(apps, schema_editor, failure_action_renames, notificati
             schema_editor.execute(sql, [new_action, old_action])
 
 
+def _drop_develop_jobs(apps) -> None:
+    for job_model_name in ("AsyncJob", "PeriodicAsyncJob"):
+        apps.get_model("core", job_model_name).objects.filter(action__in=DROPPED_DEVELOP_ACTIONS).delete()
+    # The dropped FSP extra fields import was the only thing that would take its payment list out of this status.
+    apps.get_model("payment", "PaymentList")._base_manager.filter(
+        background_action_status="XLSX_IMPORTING_FSP_EXTRA_FIELDS"
+    ).update(background_action_status=None)
+
+
+def _rename_tp_form_data_key(apps, old_key: str, new_key: str) -> None:
+    jobs = apps.get_model("core", "AsyncJob").objects.filter(
+        action=CREATE_TP_FROM_LIST_ACTION, config__form_data__has_key=old_key
+    )
+    for job in jobs:
+        job.config["form_data"][new_key] = job.config["form_data"].pop(old_key)
+        job.save(update_fields=["config"])
+
+
 def _mapped(field: str, renames: dict[str, str]) -> Case:
     return Case(*(When(**{field: old}, then=Value(new)) for old, new in renames.items()), default=F(field))
 
 
 def forwards(apps, schema_editor) -> None:
     _rename_permissions(apps, forward=True)
+    _drop_develop_jobs(apps)
+    _rename_tp_form_data_key(apps, "payment_plan_group", "payment_plan")
     _rename_tasks(apps, schema_editor, TASK_RENAMES, CONFIG_KEY_RENAMES)
     _rename_job_metadata(apps, schema_editor, FAILURE_ACTION_RENAMES, VISION_NOTIFICATION_JOB_NAME_PREFIXES)
 
@@ -180,6 +212,7 @@ def backwards(apps, schema_editor) -> None:
     _rename_permissions(apps, forward=False)
     reverse_keys = tuple((new, old) for old, new in reversed(CONFIG_KEY_RENAMES))
     _rename_tasks(apps, schema_editor, {new: old for old, new in TASK_RENAMES.items()}, reverse_keys)
+    _rename_tp_form_data_key(apps, "payment_plan", "payment_plan_group")
     _rename_job_metadata(
         apps,
         schema_editor,
