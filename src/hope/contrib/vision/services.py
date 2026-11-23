@@ -57,20 +57,17 @@ class VisionService:
         fc_numbers: list[str],
     ) -> list[FundsCommitmentHeader]:
         requested_numbers = set(fc_numbers)
-        eligible_header_ids = FundsCommitmentItem.objects.filter(
-            office_id=payment_plan.business_area_id,
-        ).values("funds_commitment_header_id")
-        matching_headers = list(
-            FundsCommitmentHeader.objects.select_for_update().filter(
-                funds_commitment_number__in=requested_numbers,
-                pk__in=eligible_header_ids,
-            )
-        )
-        matched_numbers = {header.funds_commitment_number for header in matching_headers}
-        if not requested_numbers or matched_numbers != requested_numbers:
+        if not requested_numbers:
             raise FundsCommitmentAssignmentError(VisionStatus.FC_NOT_FOUND)
-        payment_plan.funds_commitment_headers.set(matching_headers)
-        return matching_headers
+        headers = list(
+            FundsCommitmentHeader.objects.select_for_update().filter(funds_commitment_number__in=requested_numbers)
+        )
+        found_numbers = {header.funds_commitment_number for header in headers}
+        for number in requested_numbers - found_numbers:
+            header, _ = FundsCommitmentHeader.objects.get_or_create(funds_commitment_number=number)
+            headers.append(header)
+        payment_plan.funds_commitment_headers.set(headers)
+        return headers
 
     @classmethod
     def assign_selected_funds_commitment_headers(

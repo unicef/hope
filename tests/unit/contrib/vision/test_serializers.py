@@ -208,6 +208,19 @@ def test_payment_plan_callback_request_serializer_rejects_nonempty_string_fc_num
     assert "fc_numbers" in serializer.errors
 
 
+def test_payment_plan_callback_request_serializer_rejects_fc_number_longer_than_header_field(
+    django_assert_num_queries,
+) -> None:
+    serializer = PaymentPlanCallbackRequestSerializer(
+        data={"payplanSno": "PP001", "status": "SUCCESS", "fc_numbers": ["FC123456789"]}
+    )
+
+    with django_assert_num_queries(0):
+        assert serializer.is_valid() is False
+
+    assert "fc_numbers" in serializer.errors
+
+
 def test_payment_plan_callback_request_serializer_external_payload() -> None:
     serializer = PaymentPlanCallbackRequestSerializer(
         data={

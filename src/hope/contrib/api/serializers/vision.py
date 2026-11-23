@@ -66,7 +66,7 @@ class PaymentPlanCallbackRequestSerializer(serializers.Serializer):
     vision_payplan_sno = serializers.CharField(required=False, allow_blank=True)
     status = serializers.CharField(required=False, allow_blank=True)
     fc_numbers = serializers.ListField(
-        child=serializers.CharField(),
+        child=serializers.CharField(max_length=10),
         required=False,
         default=list,
     )

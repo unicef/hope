@@ -1,4 +1,5 @@
-from datetime import datetime
+from datetime import date, datetime
+from decimal import Decimal
 from unittest.mock import MagicMock, PropertyMock, patch
 
 from flags.models import FlagState
@@ -9,6 +10,7 @@ from extras.test_utils.factories import (
     ApprovalProcessFactory,
     BusinessAreaFactory,
     FollowUpInstructionFactory,
+    FundsCommitmentFactory,
     FundsCommitmentHeaderFactory,
     FundsCommitmentItemFactory,
     PaymentPlanFactory,
@@ -16,6 +18,7 @@ from extras.test_utils.factories import (
 from hope.apps.payment.services.payment_plan_services import PaymentPlanService
 from hope.contrib.vision.api import VisionAPI, VisionAPIError, VisionAPIMissingCredentialsError
 from hope.contrib.vision.choices import VisionErrorCode, VisionLogEntryType, VisionStatus
+from hope.contrib.vision.models import FundsCommitmentHeader
 from hope.contrib.vision.services import FundsCommitmentAssignmentError, VisionService
 from hope.contrib.vision.tasks import (
     notify_payment_plan_status_to_vision_async_task,
@@ -181,33 +184,36 @@ def test_assign_funds_commitment_headers_from_callback_assigns_multiple_headers_
     assert set(vision_payment_plan.funds_commitment_headers.all()) == {first_header, second_header}
 
 
-def test_assign_funds_commitment_headers_from_callback_is_atomic_when_a_header_is_missing(
+def test_assign_funds_commitment_headers_from_callback_creates_missing_placeholder(
     vision_payment_plan: PaymentPlan,
     matching_fc_items: list,
     django_assert_num_queries,
 ) -> None:
-    with django_assert_num_queries(1), pytest.raises(FundsCommitmentAssignmentError) as error:
+    with django_assert_num_queries(8):
         VisionService.assign_funds_commitment_headers_from_callback(
             vision_payment_plan,
             ["FC123", "UNKNOWN"],
         )
 
-    assert error.value.status == VisionStatus.FC_NOT_FOUND
-    assert error.value.error_code is None
-    assert not vision_payment_plan.funds_commitment_headers.exists()
+    placeholder = FundsCommitmentHeader.objects.get(funds_commitment_number="UNKNOWN")
+    assert not placeholder.funds_commitment_items.exists()
+    assert set(vision_payment_plan.funds_commitment_headers.all()) == {
+        matching_fc_items[0].funds_commitment_header,
+        placeholder,
+    }
 
 
-def test_assign_funds_commitment_headers_from_callback_rejects_header_without_matching_business_area(
+def test_assign_funds_commitment_headers_from_callback_reuses_header_without_matching_business_area(
     vision_payment_plan: PaymentPlan,
     django_assert_num_queries,
 ) -> None:
     header = FundsCommitmentHeaderFactory(funds_commitment_number="FC123")
     FundsCommitmentItemFactory(funds_commitment_header=header, office=None)
 
-    with django_assert_num_queries(1), pytest.raises(FundsCommitmentAssignmentError) as error:
+    with django_assert_num_queries(4):
         VisionService.assign_funds_commitment_headers_from_callback(vision_payment_plan, ["FC123"])
 
-    assert error.value.status == VisionStatus.FC_NOT_FOUND
+    assert list(vision_payment_plan.funds_commitment_headers.all()) == [header]
 
 
 def test_assign_funds_commitment_headers_from_callback_allows_header_assigned_to_another_plan(
@@ -303,14 +309,20 @@ def test_process_callback_creation_acknowledgement_preserves_later_fc_failure(
 
 
 @pytest.mark.parametrize("vision_result", ["SUCCESS", "FC CREATE"])
-def test_process_callback_records_fc_assignment_failure(
+def test_process_callback_creates_placeholder_and_releases_plan(
     vision_payment_plan: PaymentPlan,
     django_assert_num_queries,
     vision_result: str,
 ) -> None:
     VisionService.set_status(vision_payment_plan, VisionStatus.WAITING_FOR_CALLBACK)
 
-    with django_assert_num_queries(2):
+    with (
+        patch(
+            "hope.apps.payment.services.payment_plan_services.PaymentPlanService.release_from_vision"
+        ) as mock_release,
+        patch.object(PaymentPlan, "can_send_to_payment_gateway", new_callable=PropertyMock, return_value=False),
+        django_assert_num_queries(10),
+    ):
         fc_assignment_failed = VisionService.process_callback(
             vision_payment_plan,
             vision_payment_plan_id="VISION-1",
@@ -318,15 +330,77 @@ def test_process_callback_records_fc_assignment_failure(
             fc_numbers=["UNKNOWN"],
         )
 
-    assert fc_assignment_failed is True
-    assert vision_payment_plan.status == PaymentPlan.Status.IN_REVIEW
+    assert fc_assignment_failed is False
     assert vision_payment_plan.vision_data == {
         "sent": True,
         "vision_id": "VISION-1",
         "fc_numbers": ["UNKNOWN"],
-        "status": VisionStatus.FC_NOT_FOUND.value,
+        "status": VisionStatus.RELEASED.value,
     }
+    placeholder = FundsCommitmentHeader.objects.get(funds_commitment_number="UNKNOWN")
+    assert list(vision_payment_plan.funds_commitment_headers.all()) == [placeholder]
+    assert not placeholder.funds_commitment_items.exists()
+    mock_release.assert_called_once_with()
     assert vision_payment_plan.sent_to_vision is True
+
+
+@pytest.fixture
+def callback_placeholder_with_synced_fc(
+    vision_payment_plan: PaymentPlan,
+    django_assert_num_queries,
+) -> tuple[PaymentPlan, FundsCommitmentHeader, int, int]:
+    VisionService.set_status(vision_payment_plan, VisionStatus.WAITING_FOR_CALLBACK)
+    with patch("hope.apps.payment.services.payment_plan_services.send_payment_notification_emails_async_task"):
+        fc_assignment_failed = VisionService.process_callback(
+            vision_payment_plan,
+            vision_payment_plan_id="VISION-1",
+            vision_result="SUCCESS",
+            fc_numbers=["FC123"],
+        )
+
+    assert fc_assignment_failed is False
+    placeholder = FundsCommitmentHeader.objects.get(funds_commitment_number="FC123")
+    linked_header_id_before_sync = vision_payment_plan.funds_commitment_headers.values_list("pk", flat=True).get()
+
+    with django_assert_num_queries(1):
+        fc = FundsCommitmentFactory(
+            funds_commitment_number="FC123",
+            funds_commitment_item="001",
+            business_area=vision_payment_plan.business_area.code,
+            vendor_id="VENDOR-1",
+            posting_date=date(2026, 9, 1),
+            document_reference="REFERENCE-1",
+            fc_status="O",
+            currency_code="USD",
+            commitment_amount_usd=Decimal("100.50"),
+            commitment_amount_local=Decimal("100.25"),
+        )
+
+    return vision_payment_plan, placeholder, linked_header_id_before_sync, fc.pk
+
+
+def test_callback_placeholder_keeps_header_and_payment_plan_link_after_vision_sync(
+    callback_placeholder_with_synced_fc: tuple[PaymentPlan, FundsCommitmentHeader, int, int],
+    django_assert_num_queries,
+) -> None:
+    payment_plan, placeholder, linked_header_id_before_sync, rec_serial_number = callback_placeholder_with_synced_fc
+    assert placeholder.vendor_id is None
+    assert payment_plan.vision_status == VisionStatus.RELEASED.value
+
+    with django_assert_num_queries(3):
+        synced_header = FundsCommitmentHeader.objects.get(funds_commitment_number="FC123")
+        linked_headers = list(payment_plan.funds_commitment_headers.all())
+        item = synced_header.funds_commitment_items.get()
+
+    assert linked_header_id_before_sync == placeholder.pk == synced_header.pk
+    assert linked_headers == [synced_header]
+    assert synced_header.vendor_id == "VENDOR-1"
+    assert synced_header.posting_date == date(2026, 9, 1)
+    assert synced_header.document_reference == "REFERENCE-1"
+    assert synced_header.fc_status == "O"
+    assert synced_header.currency == "USD"
+    assert item.rec_serial_number == rec_serial_number
+    assert item.funds_commitment_header_id == synced_header.pk
 
 
 def test_process_callback_failure_stores_returned_fc_numbers(
@@ -407,7 +481,13 @@ def test_process_callback_reprocesses_existing_fc_assignment_failure(
 ) -> None:
     payment_plan = payment_plan_with_fc_assignment_failure
 
-    with django_assert_num_queries(2):
+    with (
+        patch(
+            "hope.apps.payment.services.payment_plan_services.PaymentPlanService.release_from_vision"
+        ) as mock_release,
+        patch.object(PaymentPlan, "can_send_to_payment_gateway", new_callable=PropertyMock, return_value=False),
+        django_assert_num_queries(10),
+    ):
         fc_assignment_failed = VisionService.process_callback(
             payment_plan,
             vision_payment_plan_id="VISION-RETRY",
@@ -415,13 +495,15 @@ def test_process_callback_reprocesses_existing_fc_assignment_failure(
             fc_numbers=["FC123"],
         )
 
-    assert fc_assignment_failed is True
+    assert fc_assignment_failed is False
     assert payment_plan.vision_data == {
         "sent": True,
         "vision_id": "VISION-RETRY",
         "fc_numbers": ["FC123"],
-        "status": VisionStatus.FC_NOT_FOUND.value,
+        "status": VisionStatus.RELEASED.value,
     }
+    assert list(payment_plan.funds_commitment_headers.values_list("funds_commitment_number", flat=True)) == ["FC123"]
+    mock_release.assert_called_once_with()
 
 
 @pytest.mark.parametrize(
