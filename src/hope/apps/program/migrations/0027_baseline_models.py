@@ -54,6 +54,7 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
+        # Collation of the db_collation fields below.
         migrations.RunSQL(
             sql="CREATE COLLATION IF NOT EXISTS \"und-ci-det\" (provider = icu, locale = 'und-u-ks-level2', deterministic = true);",
             reverse_sql=migrations.RunSQL.noop,

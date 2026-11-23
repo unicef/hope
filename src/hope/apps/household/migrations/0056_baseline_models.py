@@ -90,10 +90,12 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
+        # Collation of the db_collation fields below.
         migrations.RunSQL(
             sql="CREATE COLLATION IF NOT EXISTS \"und-ci-det\" (provider = icu, locale = 'und-u-ks-level2', deterministic = true);",
             reverse_sql=migrations.RunSQL.noop,
         ),
+        # Called by a check constraint on Document.
         migrations.RunSQL(
             sql="""CREATE OR REPLACE FUNCTION check_unique_document_for_individual(uuid, boolean)
  RETURNS boolean

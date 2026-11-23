@@ -58,7 +58,9 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
+        # No model uses citext any more, but every existing database has the extension.
         migrations.RunSQL(sql="CREATE EXTENSION IF NOT EXISTS citext;", reverse_sql=migrations.RunSQL.noop),
+        # Collation of the db_collation fields below.
         migrations.RunSQL(
             sql="CREATE COLLATION IF NOT EXISTS \"und-ci-det\" (provider = icu, locale = 'und-u-ks-level2', deterministic = true);",
             reverse_sql=migrations.RunSQL.noop,
