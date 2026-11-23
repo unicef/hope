@@ -13,6 +13,7 @@ Goal: re-cover every scenario from the old `tests/e2e` suite as a new-style Sele
 3. Each old test gets one of two outcomes:
    - **NEW** – port the scenario as a new-style Selenium test (file named in the checklist). Several old tests may merge into one parametrized test when they are the same flow with different data.
    - **COVERED** – an existing `new_selenium` test already exercises the same scenario (name it in the PR description). Before deleting the old test, compare it step by step with the new one and add any missing assertions to the new test.
+   For both, compare every old assertion and step with the new test, and keep label texts, column headers and their order, pagination (`Rows per page` and the row count), empty-table texts and navigation through the side menu and tabs. Name anything left out, and why, in the PR description.
 4. Delete the old test file **and** any page object / old conftest fixture that becomes unused in the same PR.
 5. Update the counter below in the same PR.
 6. Verify: `tox -e tests -- pytest --no-migrations --create-db tests/e2e/new_selenium/<module>/` (plus one `-n auto` run to check xdist isolation), `tox -e lint`, `tox -e mypy`.
