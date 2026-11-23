@@ -1177,8 +1177,9 @@ def test_follow_up_instruction_export_pdf_outside_review_returns_400(
     response = ctx["client"].get(url)
 
     assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert "Export PDF is possible only within Status IN_REVIEW, ACCEPTED or FINISHED, got LOCKED" in str(
-        response.json()
+    assert (
+        "Export PDF is possible only within Status IN_REVIEW, ACCEPTED, FINISHED, READY_FOR_CLOSURE or CLOSED, "
+        "got LOCKED" in str(response.json())
     )
 
 

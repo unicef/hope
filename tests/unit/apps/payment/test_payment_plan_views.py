@@ -4252,6 +4252,30 @@ def test_export_pdf_group_summary_with_permission_queues_task(
     mocked_task.assert_called_once_with(accepted_group_with_failed_payment, str(user.pk))
 
 
+@pytest.fixture
+def closed_group(cycle: Any) -> Any:
+    return PaymentPlanFactory(cycle=cycle, status=PaymentPlan.Status.CLOSED)
+
+
+def test_export_pdf_group_summary_on_closed_group_queues_task(
+    client: Any,
+    user: Any,
+    business_area: Any,
+    program: Any,
+    closed_group: Any,
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(user, [Permissions.PM_EXPORT_PDF_SUMMARY], business_area, program=program)
+
+    with patch("hope.apps.payment.api.views.export_pdf_payment_plan_summary_async_task") as mocked_task:
+        response = client.get(
+            _group_action_url(business_area.slug, program.code, closed_group.id, "export-pdf-payment-plan-summary")
+        )
+
+    assert response.status_code == status.HTTP_200_OK
+    mocked_task.assert_called_once_with(closed_group, str(user.pk))
+
+
 def test_export_pdf_group_summary_without_permission_returns_403(
     client: Any,
     user: Any,
@@ -4289,7 +4313,10 @@ def test_export_pdf_group_summary_on_locked_group_returns_400(
         )
 
     assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert "Export PDF is possible only within Status IN_REVIEW, ACCEPTED or FINISHED" in response.json()[0]
+    assert (
+        "Export PDF is possible only within Status IN_REVIEW, ACCEPTED, FINISHED, READY_FOR_CLOSURE or CLOSED"
+        in response.json()[0]
+    )
     mocked_task.assert_not_called()
 
 

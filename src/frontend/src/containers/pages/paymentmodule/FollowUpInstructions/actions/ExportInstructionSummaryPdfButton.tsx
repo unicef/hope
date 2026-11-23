@@ -14,7 +14,13 @@ import { hasPermissions, PERMISSIONS } from '../../../../../config/permissions';
 import { useProgramContext } from '../../../../../programContext';
 
 // Mirrors FollowUpInstruction.SUMMARY_PDF_STATUSES on the backend.
-const SUMMARY_PDF_STATUSES = ['IN_REVIEW', 'ACCEPTED', 'FINISHED'];
+const SUMMARY_PDF_STATUSES = [
+  'IN_REVIEW',
+  'ACCEPTED',
+  'FINISHED',
+  'READY_FOR_CLOSURE',
+  'CLOSED',
+];
 
 interface ExportInstructionSummaryPdfButtonProps {
   instruction: FollowUpInstructionDetail;

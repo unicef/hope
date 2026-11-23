@@ -1516,7 +1516,8 @@ class FollowUpInstructionViewSet(
         instruction = self.get_object()
         if instruction.status not in FollowUpInstruction.SUMMARY_PDF_STATUSES:
             raise ValidationError(
-                f"Export PDF is possible only within Status IN_REVIEW, ACCEPTED or FINISHED, got {instruction.status}"
+                "Export PDF is possible only within Status IN_REVIEW, ACCEPTED, FINISHED, READY_FOR_CLOSURE or CLOSED, "
+                f"got {instruction.status}"
             )
         export_pdf_follow_up_instruction_summary_async_task(instruction, str(request.user.pk))
         return self._detail_response(instruction)
@@ -2509,7 +2510,8 @@ class PaymentPlanViewSet(
         payment_plan = self.get_object()
         if payment_plan.status not in PaymentPlan.SUMMARY_PDF_STATUSES:
             raise ValidationError(
-                f"Export PDF is possible only within Status IN_REVIEW, ACCEPTED or FINISHED, got {payment_plan.status}"
+                "Export PDF is possible only within Status IN_REVIEW, ACCEPTED, FINISHED, READY_FOR_CLOSURE or CLOSED, "
+                f"got {payment_plan.status}"
             )
         export_pdf_payment_plan_summary_async_task(payment_plan, str(request.user.pk))
         return Response(

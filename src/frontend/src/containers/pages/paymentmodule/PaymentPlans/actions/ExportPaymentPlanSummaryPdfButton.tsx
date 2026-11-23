@@ -19,6 +19,8 @@ const SUMMARY_PDF_STATUSES: string[] = [
   PaymentPlanStatusEnum.IN_REVIEW,
   PaymentPlanStatusEnum.ACCEPTED,
   PaymentPlanStatusEnum.FINISHED,
+  PaymentPlanStatusEnum.READY_FOR_CLOSURE,
+  PaymentPlanStatusEnum.CLOSED,
 ];
 
 interface ExportPaymentPlanSummaryPdfButtonProps {

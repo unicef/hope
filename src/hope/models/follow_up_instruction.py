@@ -63,7 +63,13 @@ class FollowUpInstruction(TimeStampedUUIDModel, UnicefIdentifiedModel, Concurren
         Status.CLOSED,
         Status.ABORTED,
     )
-    SUMMARY_PDF_STATUSES = (Status.IN_REVIEW, Status.ACCEPTED, Status.FINISHED)
+    SUMMARY_PDF_STATUSES = (
+        Status.IN_REVIEW,
+        Status.ACCEPTED,
+        Status.FINISHED,
+        Status.READY_FOR_CLOSURE,
+        Status.CLOSED,
+    )
     BACKGROUND_ACTION_ERROR_STATES = (
         BackgroundActionStatus.RECALCULATING_ERROR,
         BackgroundActionStatus.XLSX_EXPORT_ERROR,

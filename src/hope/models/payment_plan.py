@@ -100,7 +100,13 @@ class PaymentPlan(TimeStampedUUIDModel, UnicefIdentifiedModel, InternalDataField
     CHILD_GROUP_SOURCE_STATUSES = (Status.ACCEPTED, Status.FINISHED)
     # Statuses in which payments go out and come back: delivery export, send to Payment Gateway, reconciliation import.
     DELIVERY_STATUSES = (Status.ACCEPTED, Status.FINISHED)
-    SUMMARY_PDF_STATUSES = (Status.IN_REVIEW, Status.ACCEPTED, Status.FINISHED)
+    SUMMARY_PDF_STATUSES = (
+        Status.IN_REVIEW,
+        Status.ACCEPTED,
+        Status.FINISHED,
+        Status.READY_FOR_CLOSURE,
+        Status.CLOSED,
+    )
     LINKED_GROUP_SOURCE_PLAN_TYPES = {
         PaymentList.PlanType.FOLLOW_UP: (
             PaymentList.PlanType.REGULAR,
