@@ -382,6 +382,27 @@ def test_manual_recovery_releases_group(group_with_failed_fc: PaymentPlan, match
     assert group_with_failed_fc.vision_status == VisionStatus.RELEASED.value
 
 
+@pytest.fixture
+def group_with_failed_fc_and_stale_header(group_with_failed_fc: PaymentPlan, matching_headers: list) -> PaymentPlan:
+    group_with_failed_fc.funds_commitment_headers.add(matching_headers[1])
+    return group_with_failed_fc
+
+
+def test_manual_recovery_replaces_header_of_rejected_attempt(
+    group_with_failed_fc_and_stale_header: PaymentPlan, matching_headers: list, monkeypatch
+) -> None:
+    monkeypatch.setattr(
+        "hope.apps.payment.services.payment_plan_services.send_payment_plan_notification_emails_async_task",
+        lambda *args: None,
+    )
+
+    VisionService.recover_payment_plan_with_funds_commitment_headers(
+        group_with_failed_fc_and_stale_header, [matching_headers[0]]
+    )
+
+    assert list(group_with_failed_fc_and_stale_header.funds_commitment_headers.all()) == [matching_headers[0]]
+
+
 @patch("hope.contrib.vision.tasks.VisionAPI")
 def test_group_send_task_calls_api(mock_vision_api, vision_group: PaymentPlan) -> None:
     job = MagicMock(config={"payment_plan_id": str(vision_group.pk)})

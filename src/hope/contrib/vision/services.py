@@ -80,8 +80,6 @@ class VisionService:
         cls,
         payment_plan: PaymentPlan,
         funds_commitment_headers: Iterable[FundsCommitmentHeader],
-        *,
-        replace: bool = True,
     ) -> None:
         header_ids = {header.pk for header in funds_commitment_headers}
         if not header_ids:
@@ -101,10 +99,7 @@ class VisionService:
         )
         if len(headers) != len(header_ids):
             raise FundsCommitmentAssignmentError(VisionStatus.FC_NOT_FOUND)
-        if replace:
-            locked_payment_plan.funds_commitment_headers.set(headers)
-        else:
-            locked_payment_plan.funds_commitment_headers.add(*headers)
+        locked_payment_plan.funds_commitment_headers.set(headers)
 
     @classmethod
     def process_callback(
@@ -185,7 +180,7 @@ class VisionService:
                 VisionStatus.CALLBACK_FAILED,
                 VisionErrorCode.FC_CONFLICT,
             )
-        cls.assign_selected_funds_commitment_headers(locked_payment_plan, funds_commitment_headers, replace=False)
+        cls.assign_selected_funds_commitment_headers(locked_payment_plan, funds_commitment_headers)
         cls.complete_funds_commitment_assignment(locked_payment_plan)
 
     @classmethod
