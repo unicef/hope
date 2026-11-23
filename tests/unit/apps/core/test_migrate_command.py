@@ -24,7 +24,16 @@ def partly_applied_core_chain(db: Any, settings: Any) -> int:
     return recorder.migration_qs.count()
 
 
-def test_migrate_check_passes_when_no_migration_modules_are_visible(db: Any) -> None:
+@pytest.fixture
+def stray_core_row_with_hidden_migrations(db: Any) -> None:
+    """The same stray core row while the migration modules stay hidden, the way --no-migrations hides them."""
+    MigrationRecorder(connection).record_applied("core", "9999_migration")
+
+
+def test_migrate_skips_the_guard_for_apps_without_visible_migrations(
+    stray_core_row_with_hidden_migrations: None,
+) -> None:
+    # Raises CommandError as soon as the guard looks at an app whose migration modules it cannot see.
     call_command("migrate", check_unapplied=True)
 
 
