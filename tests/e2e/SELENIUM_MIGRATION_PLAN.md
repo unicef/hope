@@ -104,7 +104,7 @@ Legend: `NEW <new_selenium/...>` · `COVERED <existing new test>` (verify assert
 - [x] test_social_worker_program_drawer_order → NEW `test_programme_drawer_order[social-worker]`
 - [x] test_normal_program_drawer_order → NEW `test_programme_drawer_order[normal]`
 - [x] test_all_program_drawer_order → NEW `test_all_programmes_drawer_order` (no programme to parametrize over, so a separate test)
-- [x] test_inactive_draft_subheader → NEW `test_inactive_programme_shows_inactive_subheader[draft_program|finished_program]` + `test_active_programme_has_no_inactive_subheader` (programmes opened by URL; switching through the global filter is not what this test covers)
+- [x] test_inactive_draft_subheader → NEW `test_inactive_programme_shows_inactive_subheader[draft_program|finished_program]` + `test_active_programme_has_no_inactive_subheader` (programmes opened by URL; switching through the global filter is covered by `test_global_program_filter_*`)
 
 ### 9. `accountability/` (4) → `new_selenium/accountability/`
 - [ ] test_smoke_accountability_communication → NEW `test_communication.py`

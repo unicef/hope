@@ -9,6 +9,7 @@ pytestmark = pytest.mark.django_db()
 PAGE_HEADER_TITLE = 'h5[data-cy="page-header-title"]'
 DRAWER_ITEMS = 'div[data-cy="drawer-items"]'
 INACTIVE_SUBHEADER = 'div[data-cy="program-inactive-subheader"]'
+GLOBAL_PROGRAM_FILTER = 'button[data-cy="global-program-filter"]'
 
 PROGRAMME_MENU_ITEMS = [
     "Country Dashboard",
@@ -124,3 +125,30 @@ def test_active_programme_has_no_inactive_subheader(normal_program: Program, log
     login.assert_text(normal_program.name, PAGE_HEADER_TITLE)
     login.assert_exact_text("\n".join(PROGRAMME_MENU_ITEMS).format(beneficiary_group="Main Menu"), DRAWER_ITEMS)
     login.assert_element_absent(INACTIVE_SUBHEADER)
+
+
+@pytest.mark.parametrize("program_fixture", ["draft_program", "finished_program"])
+def test_global_program_filter_switches_to_inactive_programme(
+    request: pytest.FixtureRequest, login: HopeTestBrowser, program_fixture: str
+) -> None:
+    program = request.getfixturevalue(program_fixture)
+
+    login.select_global_program(program.name)
+
+    login.assert_text(program.name, PAGE_HEADER_TITLE)
+    login.assert_text(program.name, GLOBAL_PROGRAM_FILTER)
+    login.assert_exact_text("Programme Inactive", INACTIVE_SUBHEADER)
+
+
+def test_global_program_filter_switches_between_active_and_all_programmes(
+    normal_program: Program, login: HopeTestBrowser
+) -> None:
+    login.select_global_program(normal_program.name)
+    login.assert_text(normal_program.name, PAGE_HEADER_TITLE)
+    login.assert_exact_text("\n".join(PROGRAMME_MENU_ITEMS).format(beneficiary_group="Main Menu"), DRAWER_ITEMS)
+    login.assert_element_absent(INACTIVE_SUBHEADER)
+
+    login.select_global_program("All Programmes")
+
+    login.assert_text("Programme Management", PAGE_HEADER_TITLE)
+    login.assert_exact_text("\n".join(ALL_PROGRAMMES_MENU_ITEMS), DRAWER_ITEMS)
