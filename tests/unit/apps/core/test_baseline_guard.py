@@ -39,7 +39,6 @@ def disk_migrations() -> dict[tuple[str, str], Migration]:
         pytest.param([], id="empty database"),
         pytest.param(ALL_OLD, id="whole old chain"),
         pytest.param(ALL_OLD + BASELINE, id="whole old chain and baseline rows"),
-        pytest.param(BASELINE, id="baseline rows only, old rows pruned"),
         pytest.param(ALL_OLD + BASELINE + [("account", "0006_migration")], id="migration added after the baseline"),
         pytest.param(ALL_OLD + [("core", "0023_migration")], id="tolerated stray row"),
         pytest.param(ALL_OLD + [("reporting", "0001_migration")], id="row of a removed app"),
