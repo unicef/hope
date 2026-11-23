@@ -203,6 +203,30 @@ class HopeTestBrowser(BaseCase):
         field_element = self.wait_for_element_present(selector, timeout=timeout)
         fill_mui_date(self.driver, field_element, value)
 
+    def pick_calendar_day(self, field_name: str, day: int, *, next_month: bool = False, timeout: int = 10) -> None:
+        """Pick a day of the current (or next) month in the calendar popup of the date field `field_name`."""
+        calendar = "[data-popper-placement]"
+        month_label = ".MuiPickersCalendarHeader-label"
+        self.click(
+            f"//input[@name='{field_name}']/ancestor::*[contains(@class, 'MuiPickersInputBase-root')][1]//button",
+            by="xpath",
+        )
+        self.wait_for_element_visible(month_label)
+        if next_month:
+            month = self.get_text(month_label)
+            self.click('button[title="Next month"]')
+            self.wait_for_text_not_visible(month, month_label)
+        # While the month slides, both months are in the DOM, so wait until only one day matches.
+        # The day is clicked in JS: the popup animates open, so a native click can land on its neighbour.
+        days_xpath = f"//*[@data-timestamp][not(contains(@class, 'dayOutsideMonth'))][normalize-space()='{day}']"
+        deadline = time.monotonic() + timeout
+        while len(days := self.find_elements(days_xpath, by="xpath")) != 1:
+            if time.monotonic() >= deadline:
+                raise AssertionError(f"Expected one day {day} in the calendar, found {len(days)}")
+            time.sleep(0.1)
+        self.execute_script("arguments[0].click()", days[0])
+        self.wait_for_element_absent(calendar)
+
     def assert_value(self, selector: str, expected: str, timeout: int = 10):
         actual = self.get_value(selector, timeout=timeout)
         assert actual == expected, f"Expected value '{expected}' for {selector}, got '{actual}'"

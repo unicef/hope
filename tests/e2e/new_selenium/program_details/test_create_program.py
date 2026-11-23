@@ -1,7 +1,9 @@
+from dateutil.relativedelta import relativedelta
+from django.utils import timezone
 import pytest
 
 from e2e.new_selenium.conftest import grant_permission
-from extras.test_utils.selenium import HopeTestBrowser
+from extras.test_utils.selenium import HopeTestBrowser, ui_date
 from hope.apps.account.permissions import Permissions
 from hope.models import BusinessArea, PaymentPlanPurpose, User
 
@@ -9,56 +11,13 @@ from .conftest import (
     BA_PURPOSE_NAME,
     OTHER_BA_PURPOSE_NAME,
     TEN_PURPOSE_NAMES,
+    add_time_series_field,
+    choose_partner,
+    fill_programme_create_required_fields,
+    navigate_to_programme_management,
 )
 
 pytestmark = pytest.mark.django_db()
-
-
-def _navigate_to_programme_management(browser: HopeTestBrowser) -> None:
-    browser.click('a[data-cy="nav-Programmes"]')
-    browser.wait_for_text("Programme Management", 'h5[data-cy="page-header-title"]')
-
-
-def _fill_programme_create_required_fields(
-    browser: HopeTestBrowser,
-    *,
-    name: str = "Test Programme",
-    start_date: str = "2023-05-01",
-    end_date: str = "2033-12-12",
-    sector: str = "Child Protection",
-    payee_type: str = "Household",
-    dct: str = "Full",
-    beneficiary_group: str = "Main Menu",
-    purpose_name: str = BA_PURPOSE_NAME,
-) -> None:
-    browser.type('input[name="name"]', name)
-    browser.fill_date('input[name="startDate"]', start_date)
-    browser.click('input[name="name"]')
-    browser.fill_date('input[name="endDate"]', end_date)
-    browser.click('input[name="name"]')
-    browser.select_dropdown_option("sector", sector)
-    browser.select_dropdown_option("payeeType", payee_type)
-    browser.select_dropdown_option("dataCollectingTypeCode", dct)
-    browser.select_dropdown_option("beneficiaryGroup", beneficiary_group)
-    browser.select_chip_option(purpose_name, '[data-cy="input-payment-plan-purposes"]')
-
-
-def _add_time_series_field(
-    browser: HopeTestBrowser,
-    index: int,
-    *,
-    label: str,
-    subtype: str = "Text",
-    num_rounds: str = "1",
-    round_names: list[str] = (),
-) -> None:
-    browser.click('button[data-cy="button-add-time-series-field"]')
-    browser.type(f'input[name="pduFields.{index}.label"]', label)
-    browser.select_dropdown_option(f"pduFields.{index}.pduData.subtype", subtype)
-    browser.click(f'[data-cy="select-pduFields.{index}.pduData.numberOfRounds"]')
-    browser.select_listbox_element(num_rounds)
-    for ri, rname in enumerate(round_names):
-        browser.type(f'input[name="pduFields.{index}.pduData.roundsNames.{ri}"]', rname)
 
 
 def test_create_programme_mandatory_fields_only(
@@ -77,11 +36,11 @@ def test_create_programme_mandatory_fields_only(
         Permissions.PM_PAYMENT_PLAN_PURPOSE_VIEW_LIST,
     ):
         browser.login(username="noperm_user")
-        _navigate_to_programme_management(browser)
+        navigate_to_programme_management(browser)
 
         browser.click('a[data-cy="button-new-program"]')
 
-        _fill_programme_create_required_fields(browser)
+        fill_programme_create_required_fields(browser)
         browser.click('button[data-cy="button-next"]')
 
         browser.wait_for_element_visible('button[data-cy="button-add-time-series-field"]')
@@ -110,11 +69,11 @@ def test_create_programme_all_fields(
     purpose: PaymentPlanPurpose,
 ) -> None:
     browser.login()
-    _navigate_to_programme_management(browser)
+    navigate_to_programme_management(browser)
 
     browser.click('a[data-cy="button-new-program"]')
 
-    _fill_programme_create_required_fields(
+    fill_programme_create_required_fields(
         browser,
         name="Full Programme",
         start_date="2022-01-01",
@@ -137,7 +96,7 @@ def test_create_programme_all_fields(
     browser.type('input[name="populationGoal"]', "250")
     browser.click('button[data-cy="button-next"]')
 
-    _add_time_series_field(
+    add_time_series_field(
         browser,
         index=0,
         label="Monthly Income",
@@ -183,20 +142,26 @@ def test_create_programme_all_fields(
     browser.assert_value('input[data-cy="input-pduFields.0.pdu_data.rounds_names.0"]', "Jan")
     browser.assert_value('input[data-cy="input-pduFields.0.pdu_data.rounds_names.1"]', "Feb")
 
+    # The new programme can be found in the programmes list
+    navigate_to_programme_management(browser)
+    browser.type('[data-cy="filters-search"] input', "Full Programme\n")
+    browser.assert_text("DRAFT", 'tr[data-cy="table-row-Full Programme"]')
+    browser.assert_text("Health", 'tr[data-cy="table-row-Full Programme"]')
+
 
 def test_create_programme_time_series_fields(
     browser: HopeTestBrowser,
     purpose: PaymentPlanPurpose,
 ) -> None:
     browser.login()
-    _navigate_to_programme_management(browser)
+    navigate_to_programme_management(browser)
 
     browser.click('a[data-cy="button-new-program"]')
 
-    _fill_programme_create_required_fields(browser, name="TSF Programme")
+    fill_programme_create_required_fields(browser, name="TSF Programme")
     browser.click('button[data-cy="button-next"]')
 
-    _add_time_series_field(
+    add_time_series_field(
         browser,
         index=0,
         label="Text Field",
@@ -204,7 +169,7 @@ def test_create_programme_time_series_fields(
         num_rounds="1",
         round_names=["Round A"],
     )
-    _add_time_series_field(
+    add_time_series_field(
         browser,
         index=1,
         label="Number Field",
@@ -212,7 +177,7 @@ def test_create_programme_time_series_fields(
         num_rounds="2",
         round_names=["Qtr1", "Qtr2"],
     )
-    _add_time_series_field(
+    add_time_series_field(
         browser,
         index=2,
         label="Date Field",
@@ -221,7 +186,7 @@ def test_create_programme_time_series_fields(
         round_names=["Period 1"],
     )
     browser.scroll_main_content(600)
-    _add_time_series_field(
+    add_time_series_field(
         browser,
         index=3,
         label="Bool Field",
@@ -281,7 +246,7 @@ def test_create_programme_time_series_fields(
 
 def test_create_programme_validation_empty_fields(browser: HopeTestBrowser) -> None:
     browser.login()
-    _navigate_to_programme_management(browser)
+    navigate_to_programme_management(browser)
 
     browser.click('a[data-cy="button-new-program"]')
 
@@ -296,7 +261,7 @@ def test_create_programme_validation_empty_fields(browser: HopeTestBrowser) -> N
 
 def test_create_programme_cancel(browser: HopeTestBrowser) -> None:
     browser.login()
-    _navigate_to_programme_management(browser)
+    navigate_to_programme_management(browser)
 
     browser.click('a[data-cy="button-new-program"]')
 
@@ -324,7 +289,7 @@ def test_create_programme_purposes_scoped_to_ba(
         Permissions.PM_PAYMENT_PLAN_PURPOSE_VIEW_LIST,
     ):
         browser.login(username="noperm_user")
-        _navigate_to_programme_management(browser)
+        navigate_to_programme_management(browser)
 
         browser.click('a[data-cy="button-new-program"]')
 
@@ -350,7 +315,7 @@ def test_create_programme_max_ten_purposes_enforced(
         Permissions.PM_PAYMENT_PLAN_PURPOSE_VIEW_LIST,
     ):
         browser.login(username="noperm_user")
-        _navigate_to_programme_management(browser)
+        navigate_to_programme_management(browser)
 
         browser.click('a[data-cy="button-new-program"]')
 
@@ -361,3 +326,76 @@ def test_create_programme_max_ten_purposes_enforced(
         # With 10 purposes selected, the input is disabled — clicking it does not open the listbox
         browser.click('[data-cy="input-payment-plan-purposes"]')
         browser.assert_element_absent('ul[role="listbox"]')
+
+
+def test_create_programme_keeps_values_when_going_back(
+    browser: HopeTestBrowser,
+    superuser_of_unhcr: User,
+    purpose: PaymentPlanPurpose,
+) -> None:
+    browser.login()
+    navigate_to_programme_management(browser)
+    browser.click('a[data-cy="button-new-program"]')
+    fill_programme_create_required_fields(
+        browser,
+        name="Test Name",
+        start_date="2022-01-01",
+        end_date="2032-02-01",
+        sector="Health",
+        dct="Partial",
+        beneficiary_group="People",
+    )
+    browser.click('[data-cy="input-cashPlus"]')
+    browser.click('button[data-cy="button-next"]')
+    browser.wait_for_element_visible('button[data-cy="button-add-time-series-field"]')
+    browser.click('button[data-cy="button-next"]')
+    browser.select_dropdown_option("partnerAccess", "Only Selected Partners within the business area")
+    choose_partner(browser, "UNHCR")
+
+    browser.click('button[data-cy="button-back"]')
+    browser.wait_for_element_visible('button[data-cy="button-add-time-series-field"]')
+    browser.click('button[data-cy="button-back"]')
+
+    browser.assert_value('input[name="name"]', "Test Name")
+    browser.clear('input[name="name"]')
+    browser.assert_text("Programme Name is required", 'div[data-cy="input-programme-name"]')
+    browser.type('input[name="name"]', "New Programme")
+    browser.click('button[data-cy="button-next"]')
+    browser.wait_for_element_visible('button[data-cy="button-add-time-series-field"]')
+    browser.click('button[data-cy="button-next"]')
+    browser.assert_text("UNHCR", 'div[data-cy="select-partners[0].id"]')
+    browser.click('button[data-cy="button-save"]')
+
+    browser.wait_for_text("New Programme", 'h5[data-cy="page-header-title"]')
+    browser.assert_text("DRAFT", 'div[data-cy="status-container"]')
+    browser.assert_text("1 Jan 2022", 'div[data-cy="label-START DATE"]')
+    browser.assert_text("1 Feb 2032", 'div[data-cy="label-END DATE"]')
+    browser.assert_text("Health", 'div[data-cy="label-Sector"]')
+    browser.assert_text("Partial", 'div[data-cy="label-Data Collecting Type"]')
+    browser.assert_text("Regular", 'div[data-cy="label-Frequency of Payment"]')
+    browser.assert_text("-", 'div[data-cy="label-Administrative Areas of implementation"]')
+    browser.assert_text("Yes", 'div[data-cy="label-CASH+"]')
+    browser.assert_text("0", 'div[data-cy="label-Programme size"]')
+    browser.assert_element('h6[data-cy="label-partner-name"]:contains("UNHCR")')
+
+
+def test_create_programme_dates_chosen_in_calendar(browser: HopeTestBrowser, purpose: PaymentPlanPurpose) -> None:
+    start_date = timezone.now().date().replace(day=15)
+    end_date = start_date + relativedelta(months=1, day=25)
+    browser.login()
+    navigate_to_programme_management(browser)
+    browser.click('a[data-cy="button-new-program"]')
+    fill_programme_create_required_fields(
+        browser, sector="Health", dct="Partial", beneficiary_group="People", fill_dates=False
+    )
+
+    browser.pick_calendar_day("startDate", start_date.day)
+    browser.pick_calendar_day("endDate", end_date.day, next_month=True)
+    browser.click('button[data-cy="button-next"]')
+    browser.wait_for_element_visible('button[data-cy="button-add-time-series-field"]')
+    browser.click('button[data-cy="button-next"]')
+    browser.click('button[data-cy="button-save"]')
+
+    browser.wait_for_text("Test Programme", 'h5[data-cy="page-header-title"]')
+    browser.assert_text(ui_date(start_date), 'div[data-cy="label-START DATE"]')
+    browser.assert_text(ui_date(end_date), 'div[data-cy="label-END DATE"]')

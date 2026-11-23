@@ -18,9 +18,9 @@ Goal: re-cover every scenario from the old `tests/e2e` suite as a new-style Sele
 6. Verify: `tox -e tests -- pytest --no-migrations --create-db tests/e2e/new_selenium/<module>/` (plus one `-n auto` run to check xdist isolation), `tox -e lint`, `tox -e mypy`.
 
 ## Progress counter
-Units = old `def test_*` functions (parametrize cases count once). Recount the remaining ones with:
+Units = old `def test_*` functions (parametrize cases count once; `test_program` is a fixture). Recount the remaining ones with:
 ```bash
-grep -rcE '^\s*def test_' tests/e2e --include='test_*.py' --exclude-dir=new_selenium | awk -F: '{s+=$2} END {print s}'
+grep -rhE '^\s*def test_' tests/e2e --include='test_*.py' --exclude-dir=new_selenium | grep -vc 'def test_program('
 ```
 
 | # | Module (old path) | Old tests | Migrated | Status |
@@ -36,7 +36,7 @@ grep -rcE '^\s*def test_' tests/e2e --include='test_*.py' --exclude-dir=new_sele
 | 9 | `accountability` | 4 | 0 | ⬜ |
 | 10 | `programme_population` (hh/ind/PDU) | 12 | 0 | ⬜ |
 | 11 | `people` | 7 | 0 | ⬜ |
-| 12 | `programme_management` | 8 | 0 | ⬜ |
+| 12 | `programme_management` | 8 | 8 | ✅ |
 | 13 | `generic_import` | 15 | 0 | ⬜ |
 | 14 | `filters` | 4 | 0 | ⬜ |
 | 15 | `payment_verification` | 10 | 0 | ⬜ |
@@ -46,11 +46,11 @@ grep -rcE '^\s*def test_' tests/e2e --include='test_*.py' --exclude-dir=new_sele
 | 19 | `grievance/grievance_dashboard` | 2 | 0 | ⬜ |
 | 20 | `grievance/grievance_tickets` | 25 | 0 | ⬜ |
 | 21 | Old infra cleanup | – | – | ⬜ |
-| | **Total** | **155** | **16** | **10 %** |
+| | **Total** | **152** | **24** | **16 %** |
 
-`[██░░░░░░░░░░░░░░░░░░] 16 / 155`. Update it after each PR: 1 block per ~8 tests.
+`[███░░░░░░░░░░░░░░░░░] 24 / 152`. Update it after each PR: 1 block per ~8 tests.
 
-The new suite already has 46 test files and ~250 test functions. These do not count toward the 155.
+The new suite already has 46 test files and ~250 test functions. These do not count toward the 152.
 
 Order: small, isolated modules first (1–9) to settle shared fixtures, then population/programme (10–14), then payments/targeting/grievance (15–20), which overlap most with tests already in the new suite.
 
@@ -139,16 +139,15 @@ Legend: `NEW <new_selenium/...>` · `COVERED <existing new test>` (verify assert
 - [ ] Delete `page_object/people/`
 
 ### 12. `programme_management/test_programme_management.py` (8) → `new_selenium/program_details/`
-Already in new suite: `test_create_program.py`, `test_edit_program.py`, `test_duplicate_program.py`.
-- [ ] test_create_programme_check → COVERED `test_create_programme_mandatory_fields_only` / `_all_fields` (add any parametrize case that is missing)
-- [ ] test_create_programme_delete_partners → NEW `test_programme_partners.py`
-- [ ] test_create_programme_add_partners_business_area → NEW `test_programme_partners.py`
-- [ ] test_create_programme_back_scenarios → NEW `test_create_program.py`
-- [ ] test_create_programme_chose_dates_via_calendar → NEW `test_create_program.py` (use `helpers/date_picker`)
-- [ ] test_create_programme_accesses → NEW `test_programme_partners.py` (keep the parametrize)
-- [ ] test_programme_partners → NEW `test_programme_partners.py`
-- [ ] test_edit_programme_with_rdi → NEW `test_edit_program.py`
-- [ ] Delete `page_object/programme_management/`, `page_object/programme_details/`
+- [x] test_create_programme_check → COVERED `test_create_programme_all_fields` (extended with the programmes list search) + `test_create_programme_mandatory_fields_only` (Regular payments, no administrative areas)
+- [x] test_create_programme_delete_partners → NEW `test_programme_partners.py::test_delete_partner_while_creating_programme` (checks the saved access: the details page lists every partner with a business area wide role, and only those can be selected)
+- [x] test_create_programme_add_partners_business_area → NEW `test_programme_partners.py::test_partner_with_admin_area_access`
+- [x] test_create_programme_back_scenarios → NEW `test_create_program.py::test_create_programme_keeps_values_when_going_back`
+- [x] test_create_programme_chose_dates_via_calendar → NEW `test_create_program.py::test_create_programme_dates_chosen_in_calendar`
+- [x] test_create_programme_accesses → NEW `test_programme_partners.py::test_partner_access_is_saved`
+- [x] test_programme_partners → NEW `test_programme_partners.py::test_only_partners_with_role_in_business_area_can_be_selected` + `test_edit_partner_access`
+- [x] test_edit_programme_with_rdi → NEW `test_edit_program.py::test_edit_programme_with_rdi_locks_time_series_fields` (also checks the new name and the third round are saved)
+- [ ] `page_object/programme_management/` is still used by the old `drawer` test; delete it once module 8 is merged. `page_object/programme_details/` is still used by `drawer`, `filters` and `grievance/feedback`; delete it in module 18.
 
 ### 13. `generic_import/test_generic_import.py` (15) → `new_selenium/generic_import/test_generic_import_form.py`
 Already in new suite: `test_generic_import_data.py`.
@@ -275,7 +274,7 @@ Already in new suite: `test_grievance_tickets.py` (referral), `test_my_tasks.py`
 - [ ] test_grievance_tickets_add_individual_with_photo → NEW (param)
 - [ ] Delete `page_object/grievance/`
 
-### 21. Old infrastructure cleanup (after the counter reaches 155/155)
+### 21. Old infrastructure cleanup (after the counter reaches 152/152)
 - [ ] Delete `tests/e2e/page_object/` (incl. `base_components.py`), `tests/e2e/helpers/helper.py`, `helpers/fixtures.py`, `helpers/date_time_format.py` if unused, `tools/tag_name_finder.py`
 - [ ] Strip `tests/e2e/conftest.py` of `driver`, the autouse `browser`, `login`, `page_*`/`filters` fixtures, `create_session`, and `screenshot_path`/`download_path` if unused. Keep the DB/cache autouse fixtures and `live_server_with_static`.
 - [ ] Remove the "Existing raw Selenium tests…" note from `SELENIUM_E2E_PATTERNS.md`, update `tests/e2e/README.md`
