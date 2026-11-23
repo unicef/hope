@@ -5,6 +5,7 @@ import django.db.models.deletion
 import model_utils.fields
 import mptt.fields
 
+from hope.apps.core.migration_operations import RunSQLAfterDeferred
 import hope.models.utils
 
 
@@ -290,5 +291,15 @@ class Migration(migrations.Migration):
         migrations.AlterUniqueTogether(
             name="areatype",
             unique_together={("country", "area_level", "name")},
+        ),
+        # django-mptt declares a (tree_id, lft) index on the models, but no existing database has it:
+        # the replaced history added it to the migration state only.
+        RunSQLAfterDeferred(
+            sql=[
+                "DROP INDEX IF EXISTS geo_area_tree_id_lft_idx",
+                "DROP INDEX IF EXISTS geo_areatype_tree_id_lft_idx",
+                "DROP INDEX IF EXISTS geo_country_tree_id_lft_idx",
+            ],
+            reverse_sql=migrations.RunSQL.noop,
         ),
     ]

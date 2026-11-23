@@ -3,6 +3,7 @@ import django.core.validators
 from django.db import migrations, models
 import django.db.models.deletion
 
+from hope.apps.core.migration_operations import RunSQLAfterDeferred
 import hope.apps.core.upload_paths
 import hope.models.pdu_online_edit
 import hope.models.pdu_xlsx_template
@@ -389,5 +390,42 @@ class Migration(migrations.Migration):
                 fields=["updated_at"],
                 name="periodic_data_update_pduxlsxupload_updated_at_fa057243",
             ),
+        ),
+        # Names that RenameModel and RenameField left behind in the replaced history. Every existing database
+        # has them, so a new one gets them too. Renaming the index of a primary key or unique constraint
+        # renames the constraint with it.
+        RunSQLAfterDeferred(
+            sql=[
+                "ALTER INDEX IF EXISTS periodic_data_update_pduxlsxtemplate_business_area_id_25593c85 RENAME TO periodic_data_update_perio_business_area_id_ccda80bf",
+                "ALTER INDEX IF EXISTS periodic_data_update_pduxlsxtemplate_created_by_id_2cde297e RENAME TO periodic_data_update_perio_created_by_id_360ef3f7",
+                "ALTER INDEX IF EXISTS periodic_data_update_pduxlsxtemplate_file_id_1b3abf73 RENAME TO periodic_data_update_perio_file_id_70fe3415",
+                "ALTER INDEX IF EXISTS periodic_data_update_pduxlsxtemplate_program_id_19ea146d RENAME TO periodic_data_update_perio_program_id_d15b2da4",
+                "ALTER INDEX IF EXISTS periodic_data_update_pduxlsxtemplate_pkey RENAME TO periodic_data_update_periodicdataupdatetemplate_pkey",
+                "ALTER INDEX IF EXISTS periodic_data_update_pduxlsxupload_created_by_id_f9f96a30 RENAME TO periodic_data_update_perio_created_by_id_89a3156e",
+                "ALTER INDEX IF EXISTS periodic_data_update_pduxlsxupload_template_id_00f772ca RENAME TO periodic_data_update_perio_template_id_92fb000d",
+                "ALTER INDEX IF EXISTS periodic_data_update_pduxlsxupload_pkey RENAME TO periodic_data_update_periodicdataupdateupload_pkey",
+                "ALTER SEQUENCE IF EXISTS periodic_data_update_pduxlsxtemplate_id_seq RENAME TO periodic_data_update_periodicdataupdatetemplate_id_seq",
+                "ALTER SEQUENCE IF EXISTS periodic_data_update_pduxlsxupload_id_seq RENAME TO periodic_data_update_periodicdataupdateupload_id_seq",
+                """DO $$
+DECLARE
+    renames text[][] := ARRAY[
+        ['periodic_data_update_pduxlsxtemplate', 'periodic_data_update_pduxlsxtemplate_number_of_records_check', 'periodic_data_update_periodicdataupdate_number_of_records_check'],
+        ['periodic_data_update_pduxlsxtemplate', 'periodic_data_update_business_area_id_25593c85_fk_core_busi', 'periodic_data_update_business_area_id_ccda80bf_fk_core_busi'],
+        ['periodic_data_update_pduxlsxtemplate', 'periodic_data_update_created_by_id_2cde297e_fk_account_u', 'periodic_data_update_created_by_id_360ef3f7_fk_account_u'],
+        ['periodic_data_update_pduxlsxtemplate', 'periodic_data_update_file_id_1b3abf73_fk_core_file', 'periodic_data_update_file_id_70fe3415_fk_core_file'],
+        ['periodic_data_update_pduxlsxtemplate', 'periodic_data_update_program_id_19ea146d_fk_program_p', 'periodic_data_update_program_id_d15b2da4_fk_program_p'],
+        ['periodic_data_update_pduxlsxupload', 'periodic_data_update_created_by_id_f9f96a30_fk_account_u', 'periodic_data_update_created_by_id_89a3156e_fk_account_u'],
+        ['periodic_data_update_pduxlsxupload', 'periodic_data_update_template_id_00f772ca_fk_periodic_', 'periodic_data_update_template_id_92fb000d_fk_periodic_']
+    ];
+    r text[];
+BEGIN
+    FOREACH r SLICE 1 IN ARRAY renames LOOP
+        IF EXISTS (SELECT 1 FROM pg_constraint WHERE conrelid = r[1]::regclass AND conname = r[2]) THEN
+            EXECUTE format('ALTER TABLE %I RENAME CONSTRAINT %I TO %I', r[1], r[2], r[3]);
+        END IF;
+    END LOOP;
+END $$""",
+            ],
+            reverse_sql=migrations.RunSQL.noop,
         ),
     ]

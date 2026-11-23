@@ -1287,4 +1287,126 @@ class Migration(migrations.Migration):
                 name="household_xlsxupdatefile_updated_at_018bdcb9",
             ),
         ),
+        # household_household.unicef_id comes from a serial column that is not on the model and a trigger that formats it.
+        migrations.RunSQL(
+            sql=[
+                "ALTER TABLE household_household ADD unicef_id_index SERIAL",
+                """CREATE OR REPLACE FUNCTION create_hh_unicef_id()
+ RETURNS trigger
+ LANGUAGE plpgsql
+AS $function$
+            begin
+                IF NEW.unicef_id IS NULL THEN
+                    NEW.unicef_id := format('HH-%s-%s',TO_CHAR(NEW.first_registration_date, 'yy'), trim(replace(to_char(NEW.unicef_id_index,'0000,0000'),',','.')));
+                END IF;
+                return NEW;
+            end
+            $function$""",
+                "CREATE TRIGGER create_hh_unicef_id BEFORE INSERT ON household_household FOR EACH ROW EXECUTE FUNCTION create_hh_unicef_id()",
+            ],
+            reverse_sql=migrations.RunSQL.noop,
+        ),
+        # household_householdcollection.unicef_id comes from a serial column that is not on the model and a trigger that formats it.
+        migrations.RunSQL(
+            sql=[
+                "ALTER TABLE household_householdcollection ADD unicef_id_index SERIAL",
+                """CREATE OR REPLACE FUNCTION create_hhc_unicef_id()
+ RETURNS trigger
+ LANGUAGE plpgsql
+AS $function$
+                begin
+                    IF NEW.unicef_id IS NULL THEN
+                        NEW.unicef_id := format('HHC-%s', trim(replace(to_char(NEW.unicef_id_index,'0000,0000'),',','.')));
+                    END IF;
+                    return NEW;
+                end
+                $function$""",
+                "CREATE TRIGGER create_hhc_unicef_id BEFORE INSERT ON household_householdcollection FOR EACH ROW EXECUTE FUNCTION create_hhc_unicef_id()",
+            ],
+            reverse_sql=migrations.RunSQL.noop,
+        ),
+        # household_individual.unicef_id comes from a serial column that is not on the model and a trigger that formats it.
+        migrations.RunSQL(
+            sql=[
+                "ALTER TABLE household_individual ADD unicef_id_index SERIAL",
+                """CREATE OR REPLACE FUNCTION create_ii_unicef_id()
+ RETURNS trigger
+ LANGUAGE plpgsql
+AS $function$
+            begin
+                IF NEW.unicef_id IS NULL THEN
+                    NEW.unicef_id := format('IND-%s-%s',TO_CHAR(NEW.first_registration_date, 'yy'), trim(replace(to_char(NEW.unicef_id_index,'0000,0000'),',','.')));
+                END IF;
+                return NEW;
+            end
+            $function$""",
+                "CREATE TRIGGER create_ii_unicef_id BEFORE INSERT ON household_individual FOR EACH ROW EXECUTE FUNCTION create_ii_unicef_id()",
+            ],
+            reverse_sql=migrations.RunSQL.noop,
+        ),
+        # household_individualcollection.unicef_id comes from a serial column that is not on the model and a trigger that formats it.
+        migrations.RunSQL(
+            sql=[
+                "ALTER TABLE household_individualcollection ADD unicef_id_index SERIAL",
+                """CREATE OR REPLACE FUNCTION create_indc_unicef_id()
+ RETURNS trigger
+ LANGUAGE plpgsql
+AS $function$
+                begin
+                    IF NEW.unicef_id IS NULL THEN
+                        NEW.unicef_id := format('INDC-%s', trim(replace(to_char(NEW.unicef_id_index,'0000,0000'),',','.')));
+                    END IF;
+                    return NEW;
+                end
+                $function$""",
+                "CREATE TRIGGER create_indc_unicef_id BEFORE INSERT ON household_individualcollection FOR EACH ROW EXECUTE FUNCTION create_indc_unicef_id()",
+            ],
+            reverse_sql=migrations.RunSQL.noop,
+        ),
+        # Full-text search vector of an individual.
+        migrations.RunSQL(
+            sql=[
+                "CREATE TRIGGER vector_column_trigger BEFORE INSERT OR UPDATE OF observed_disability, full_name, vector_column ON household_individual FOR EACH ROW EXECUTE FUNCTION tsvector_update_trigger('vector_column', 'pg_catalog.english', 'observed_disability', 'full_name')",
+            ],
+            reverse_sql=migrations.RunSQL.noop,
+        ),
+        # program_registration_id gets a #<n> suffix that makes it unique.
+        migrations.RunSQL(
+            sql=[
+                """CREATE OR REPLACE FUNCTION generate_unique_program_registration_id()
+ RETURNS trigger
+ LANGUAGE plpgsql
+AS $function$
+                DECLARE
+                    new_id TEXT;
+                    count INT := 0;
+                BEGIN
+                    -- Check if program_registration_id is empty
+                    IF NEW.program_registration_id IS NULL OR NEW.program_registration_id = '' THEN
+                        NEW.program_registration_id := NULL;  -- Convert empty string to NULL
+                        RETURN NEW;  -- Do not modify with increasing number
+                    END IF;
+                    new_id := NEW.program_registration_id || '#0';  -- Initial attempt with #0
+                    LOOP
+                        IF NOT EXISTS (SELECT 1 FROM household_household WHERE program_registration_id = new_id) THEN
+                            EXIT;
+                        END IF;
+                        count := count + 1;
+                        new_id := NEW.program_registration_id || '#' || count;
+                    END LOOP;
+                    NEW.program_registration_id := new_id;
+                    RETURN NEW;
+                END;
+                $function$""",
+                "CREATE TRIGGER unique_program_registration_id_trigger BEFORE INSERT OR UPDATE ON household_household FOR EACH ROW EXECUTE FUNCTION generate_unique_program_registration_id()",
+            ],
+            reverse_sql=migrations.RunSQL.noop,
+        ),
+        # Index that is not declared on the model.
+        migrations.RunSQL(
+            sql=[
+                "CREATE INDEX IF NOT EXISTS household_household_default_page_index ON household_household USING btree (created_at, business_area_id, is_removed) WHERE (NOT is_removed)",
+            ],
+            reverse_sql=migrations.RunSQL.noop,
+        ),
     ]

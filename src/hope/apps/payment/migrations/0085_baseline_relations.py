@@ -2,7 +2,21 @@ from django.conf import settings
 from django.db import migrations, models
 import django.db.models.deletion
 
+from hope.apps.core.migration_operations import RunSQLAfterDeferred
 import hope.models.utils
+
+
+def seed_reference_data(apps, schema_editor):
+    """Create the two account types and the default payment plan purpose of a new database."""
+    AccountType = apps.get_model("payment", "AccountType")
+    PaymentPlanPurpose = apps.get_model("payment", "PaymentPlanPurpose")
+
+    AccountType.objects.get_or_create(key="mobile", defaults={"label": "Mobile", "unique_fields": ["number"]})
+    AccountType.objects.get_or_create(key="bank", defaults={"label": "Bank", "unique_fields": ["number"]})
+    # unicef_id is filled by the create_ppp_unicef_id trigger created above.
+    PaymentPlanPurpose.objects.get_or_create(
+        name="Default Purpose", defaults={"description": "Default payment plan purpose"}
+    )
 
 
 class Migration(migrations.Migration):
@@ -1267,4 +1281,164 @@ class Migration(migrations.Migration):
                 opclasses=["varchar_pattern_ops"],
             ),
         ),
+        # payment_paymentplangroup.unicef_id comes from a serial column that is not on the model and a trigger that formats it.
+        migrations.RunSQL(
+            sql=[
+                "ALTER TABLE payment_paymentplangroup ADD unicef_id_index SERIAL",
+                """CREATE OR REPLACE FUNCTION create_ppg_unicef_id()
+ RETURNS trigger
+ LANGUAGE plpgsql
+AS $function$
+            BEGIN
+                NEW.unicef_id := format('PPG-%s', NEW.unicef_id_index);
+                return NEW;
+            END
+            $function$""",
+                "CREATE TRIGGER create_ppg_unicef_id BEFORE INSERT ON payment_paymentplangroup FOR EACH ROW EXECUTE FUNCTION create_ppg_unicef_id()",
+            ],
+            reverse_sql=migrations.RunSQL.noop,
+        ),
+        # payment_paymentplanpurpose.unicef_id comes from a serial column that is not on the model and a trigger that formats it.
+        migrations.RunSQL(
+            sql=[
+                "ALTER TABLE payment_paymentplanpurpose ADD unicef_id_index SERIAL",
+                """CREATE OR REPLACE FUNCTION create_ppp_unicef_id()
+ RETURNS trigger
+ LANGUAGE plpgsql
+AS $function$
+                BEGIN
+                    NEW.unicef_id := format('PPP-%s', NEW.unicef_id_index);
+                return NEW;
+                END
+                $function$""",
+                "CREATE TRIGGER create_ppp_unicef_id BEFORE INSERT ON payment_paymentplanpurpose FOR EACH ROW EXECUTE FUNCTION create_ppp_unicef_id()",
+            ],
+            reverse_sql=migrations.RunSQL.noop,
+        ),
+        # payment_paymentverificationplan.unicef_id comes from a serial column that is not on the model and a trigger that formats it.
+        migrations.RunSQL(
+            sql=[
+                "ALTER TABLE payment_paymentverificationplan ADD unicef_id_index SERIAL",
+                """CREATE OR REPLACE FUNCTION create_pvp_unicef_id()
+ RETURNS trigger
+ LANGUAGE plpgsql
+AS $function$
+        BEGIN
+            NEW.unicef_id := format('PVP-%s', NEW.unicef_id_index);
+            return NEW;
+        END
+        $function$""",
+                "CREATE TRIGGER create_pvp_unicef_id BEFORE INSERT ON payment_paymentverificationplan FOR EACH ROW EXECUTE FUNCTION create_pvp_unicef_id()",
+            ],
+            reverse_sql=migrations.RunSQL.noop,
+        ),
+        # Each new business area also gets a sequence for follow-up instructions.
+        migrations.RunSQL(
+            sql=[
+                """CREATE OR REPLACE FUNCTION follow_up_instruction_business_area_seq()
+ RETURNS trigger
+ LANGUAGE plpgsql
+AS $function$
+            begin
+                execute format(
+                    'create sequence if not exists follow_up_instruction_business_area_seq_%s',
+                    translate(NEW.id::text, '-','_')
+                );
+                return NEW;
+            end
+            $function$""",
+                "CREATE TRIGGER follow_up_instruction_business_area_seq AFTER INSERT ON core_businessarea FOR EACH ROW EXECUTE FUNCTION follow_up_instruction_business_area_seq()",
+            ],
+            reverse_sql=migrations.RunSQL.noop,
+        ),
+        # unicef_id of payment plans, payments and follow-up instructions, numbered per business area.
+        migrations.RunSQL(
+            sql=[
+                """CREATE OR REPLACE FUNCTION payment_plan_fill_unicef_id_per_business_area_seq()
+ RETURNS trigger
+ LANGUAGE plpgsql
+AS $function$
+                DECLARE businessAreaID varchar;
+                DECLARE businessAreaCode varchar;
+            begin
+                SELECT INTO businessAreaID translate(ba.id::text, '-','_') FROM core_businessarea ba WHERE ba.id=NEW.business_area_id;
+                SELECT INTO businessAreaCode ba.code FROM core_businessarea ba WHERE ba.id=NEW.business_area_id;
+
+                NEW.unicef_id := format('PP-%s-%s-%s', trim(businessAreaCode), to_char(NEW.created_at, 'yy'), trim(replace(to_char(nextval('payment_plan_business_area_seq_' || businessAreaID),'00000000'),',','.')));
+                RETURN NEW;
+            end
+            $function$""",
+                "CREATE TRIGGER payment_plan_fill_unicef_id_per_business_area_seq BEFORE INSERT ON payment_paymentplan FOR EACH ROW EXECUTE FUNCTION payment_plan_fill_unicef_id_per_business_area_seq()",
+                """CREATE OR REPLACE FUNCTION payment_fill_unicef_id_per_business_area_seq()
+ RETURNS trigger
+ LANGUAGE plpgsql
+AS $function$
+                DECLARE businessAreaID varchar;
+                DECLARE businessAreaCode varchar;
+            begin
+                SELECT INTO businessAreaID translate(ba.id::text, '-','_') FROM core_businessarea ba WHERE ba.id=NEW.business_area_id;
+                SELECT INTO businessAreaCode ba.code FROM core_businessarea ba WHERE ba.id=NEW.business_area_id;
+
+                NEW.unicef_id := format('RCPT-%s-%s-%s', trim(businessAreaCode), to_char(NEW.created_at, 'yy'), trim(replace(to_char(nextval('payment_business_area_seq_' || businessAreaID),'0,000,000'),',','.')));
+                RETURN NEW;
+            end
+            $function$""",
+                "CREATE TRIGGER payment_fill_unicef_id_per_business_area_seq BEFORE INSERT ON payment_payment FOR EACH ROW EXECUTE FUNCTION payment_fill_unicef_id_per_business_area_seq()",
+                """CREATE OR REPLACE FUNCTION follow_up_instruction_fill_unicef_id_per_business_area_seq()
+ RETURNS trigger
+ LANGUAGE plpgsql
+AS $function$
+                DECLARE businessAreaID varchar;
+                DECLARE businessAreaCode varchar;
+            begin
+                SELECT INTO businessAreaID translate(ba.id::text, '-','_') FROM core_businessarea ba WHERE ba.id=NEW.business_area_id;
+                SELECT INTO businessAreaCode ba.code FROM core_businessarea ba WHERE ba.id=NEW.business_area_id;
+
+                NEW.unicef_id := format(
+                    'FUI-%s-%s-%s',
+                    trim(businessAreaCode),
+                    to_char(NEW.created_at, 'yy'),
+                    trim(replace(to_char(nextval('follow_up_instruction_business_area_seq_' || businessAreaID), '00000000'), ',', '.'))
+                );
+                RETURN NEW;
+            end
+            $function$""",
+                "CREATE TRIGGER follow_up_instruction_fill_unicef_id_per_business_area_seq BEFORE INSERT ON payment_followupinstruction FOR EACH ROW EXECUTE FUNCTION follow_up_instruction_fill_unicef_id_per_business_area_seq()",
+            ],
+            reverse_sql=migrations.RunSQL.noop,
+        ),
+        # Left behind when unique_key stopped being unique; no model declares it, but every existing database has it.
+        migrations.RunSQL(
+            sql=[
+                "CREATE INDEX IF NOT EXISTS payment_deliverymechanismdata_unique_key_4132f7bb_like ON payment_account USING btree (unique_key varchar_pattern_ops)",
+            ],
+            reverse_sql=migrations.RunSQL.noop,
+        ),
+        # Names that RenameModel and RenameField left behind in the replaced history. Every existing database
+        # has them, so a new one gets them too. Renaming the index of a primary key or unique constraint
+        # renames the constraint with it.
+        RunSQLAfterDeferred(
+            sql=[
+                "ALTER INDEX IF EXISTS payment_account_account_type_id_cd162acd RENAME TO payment_deliverymechanismdata_account_type_id_d2bd1fea",
+                "ALTER INDEX IF EXISTS payment_account_individual_id_b000f72b RENAME TO payment_deliverymechanismdata_individual_id_34989bba",
+                "ALTER INDEX IF EXISTS payment_account_pkey RENAME TO payment_deliverymechanismdata_pkey",
+                "ALTER INDEX IF EXISTS payment_paymentplan_export_file_delivery_id_809d0f7f RENAME TO payment_paymentplan_export_file_per_fsp_id_32703ed1",
+                "ALTER INDEX IF EXISTS payment_westernunionpaymentplanreport_invoice_id_4ba96a99 RENAME TO payment_westernunionpaymentplanreport_qcf_file_id_dc17e149",
+                """DO $$
+DECLARE
+    renames text[][] := ARRAY[
+        ['payment_account', 'payment_account_individual_id_b000f72b_fk_household', 'payment_deliverymech_individual_id_34989bba_fk_household']
+    ];
+    r text[];
+BEGIN
+    FOREACH r SLICE 1 IN ARRAY renames LOOP
+        IF EXISTS (SELECT 1 FROM pg_constraint WHERE conrelid = r[1]::regclass AND conname = r[2]) THEN
+            EXECUTE format('ALTER TABLE %I RENAME CONSTRAINT %I TO %I', r[1], r[2], r[3]);
+        END IF;
+    END LOOP;
+END $$""",
+            ],
+            reverse_sql=migrations.RunSQL.noop,
+        ),
+        migrations.RunPython(seed_reference_data, migrations.RunPython.noop),
     ]

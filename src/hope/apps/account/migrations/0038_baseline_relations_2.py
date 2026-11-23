@@ -3,6 +3,7 @@ from django.db import migrations, models
 import django.db.models.deletion
 import mptt.fields
 
+from hope.apps.core.migration_operations import RunSQLAfterDeferred
 import hope.models.utils
 
 
@@ -314,5 +315,41 @@ class Migration(migrations.Migration):
         migrations.AlterUniqueTogether(
             name="usergroup",
             unique_together={("business_area", "user", "group")},
+        ),
+        # Partial indexes that are not declared on the model.
+        migrations.RunSQL(
+            sql=[
+                "CREATE INDEX IF NOT EXISTS idx_ra_user_no_expiry ON account_roleassignment USING btree (user_id) WHERE (expiry_date IS NULL)",
+                "CREATE INDEX IF NOT EXISTS idx_ra_partner_ba_no_exp ON account_roleassignment USING btree (partner_id, business_area_id) WHERE (expiry_date IS NULL)",
+                "CREATE INDEX IF NOT EXISTS idx_ra_ba_no_expiry ON account_roleassignment USING btree (business_area_id) WHERE (expiry_date IS NULL)",
+            ],
+            reverse_sql=migrations.RunSQL.noop,
+        ),
+        # Names that RenameModel and RenameField left behind in the replaced history. Every existing database
+        # has them, so a new one gets them too. Renaming the index of a primary key or unique constraint
+        # renames the constraint with it.
+        RunSQLAfterDeferred(
+            sql=[
+                "ALTER INDEX IF EXISTS account_role_name_key RENAME TO account_role_name_b01c316c_uniq",
+                "ALTER INDEX IF EXISTS account_roleassignment_business_area_id_c84a6fbc RENAME TO account_userrole_business_area_id_de1e640b",
+                "ALTER INDEX IF EXISTS account_roleassignment_role_id_8f1bb23a RENAME TO account_userrole_role_id_481b0b86",
+                "ALTER INDEX IF EXISTS account_roleassignment_user_id_fb9c5bee RENAME TO account_userrole_user_id_b4502069",
+                "ALTER INDEX IF EXISTS account_roleassignment_pkey RENAME TO account_userrole_pkey",
+                "ALTER INDEX IF EXISTS account_user_azure_id_key RENAME TO account_user_ad_uuid_key",
+                """DO $$
+DECLARE
+    renames text[][] := ARRAY[
+        ['account_roleassignment', 'account_roleassignme_business_area_id_c84a6fbc_fk_core_busi', 'account_userrole_business_area_id_de1e640b_fk_core_busi']
+    ];
+    r text[];
+BEGIN
+    FOREACH r SLICE 1 IN ARRAY renames LOOP
+        IF EXISTS (SELECT 1 FROM pg_constraint WHERE conrelid = r[1]::regclass AND conname = r[2]) THEN
+            EXECUTE format('ALTER TABLE %I RENAME CONSTRAINT %I TO %I', r[1], r[2], r[3]);
+        END IF;
+    END LOOP;
+END $$""",
+            ],
+            reverse_sql=migrations.RunSQL.noop,
         ),
     ]

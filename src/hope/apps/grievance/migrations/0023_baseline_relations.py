@@ -864,4 +864,21 @@ class Migration(migrations.Migration):
                 name="grievance_ticketsystemflaggingdetails_updated_at_a7735dc7",
             ),
         ),
+        # grievance_grievanceticket.unicef_id comes from a serial column that is not on the model and a trigger that formats it.
+        migrations.RunSQL(
+            sql=[
+                "ALTER TABLE grievance_grievanceticket ADD unicef_id_index SERIAL",
+                """CREATE OR REPLACE FUNCTION create_gt_unicef_id()
+ RETURNS trigger
+ LANGUAGE plpgsql
+AS $function$
+            begin
+              NEW.unicef_id := format('GRV-%s', trim(to_char(NEW.unicef_id_index,'0000000')));
+              return NEW;
+            end
+            $function$""",
+                "CREATE TRIGGER create_gt_unicef_id BEFORE INSERT ON grievance_grievanceticket FOR EACH ROW EXECUTE FUNCTION create_gt_unicef_id()",
+            ],
+            reverse_sql=migrations.RunSQL.noop,
+        ),
     ]

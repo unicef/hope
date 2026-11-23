@@ -9,6 +9,19 @@ import hope.apps.core.upload_paths
 import hope.models.utils
 
 
+def seed_reference_data(apps, schema_editor):
+    """Create the UN list every new database starts with; code refers to it by pk=1."""
+    SanctionList = apps.get_model("sanction_list", "SanctionList")
+    SanctionList.objects.get_or_create(
+        pk=1,
+        defaults={
+            "name": "UN Sanction List",
+            "strategy": "hope.apps.sanction_list.strategies.un.UNSanctionList",
+            "config": {"url": "https://scsanctions.un.org/resources/xml/en/consolidated.xml"},
+        },
+    )
+
+
 class Migration(migrations.Migration):
     initial = True
 
@@ -463,4 +476,5 @@ class Migration(migrations.Migration):
                 name="sanction_list_uploadedxlsxfile_updated_at_6c0e45cf",
             ),
         ),
+        migrations.RunPython(seed_reference_data, migrations.RunPython.noop),
     ]

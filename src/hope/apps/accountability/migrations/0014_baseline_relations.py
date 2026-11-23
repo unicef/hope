@@ -332,4 +332,55 @@ class Migration(migrations.Migration):
                 opclasses=["varchar_pattern_ops"],
             ),
         ),
+        # accountability_feedback.unicef_id comes from a serial column that is not on the model and a trigger that formats it.
+        migrations.RunSQL(
+            sql=[
+                "ALTER TABLE accountability_feedback ADD unicef_id_index SERIAL",
+                """CREATE OR REPLACE FUNCTION create_accountability_communication_feedback_unicef_id()
+ RETURNS trigger
+ LANGUAGE plpgsql
+AS $function$
+        BEGIN
+            NEW.unicef_id := format('FED-%s-%s', to_char(NEW.created_at, 'yy'), TRIM(CASE WHEN NEW.unicef_id_index > 9999 THEN NEW.unicef_id_index::varchar(64) ELSE to_char(NEW.unicef_id_index, '0000') END));
+            return NEW;
+        END
+        $function$""",
+                "CREATE TRIGGER create_accountability_communication_feedback_unicef_id BEFORE INSERT ON accountability_feedback FOR EACH ROW EXECUTE FUNCTION create_accountability_communication_feedback_unicef_id()",
+            ],
+            reverse_sql=migrations.RunSQL.noop,
+        ),
+        # accountability_message.unicef_id comes from a serial column that is not on the model and a trigger that formats it.
+        migrations.RunSQL(
+            sql=[
+                "ALTER TABLE accountability_message ADD unicef_id_index SERIAL",
+                """CREATE OR REPLACE FUNCTION create_accountability_communication_message_unicef_id()
+ RETURNS trigger
+ LANGUAGE plpgsql
+AS $function$
+        BEGIN
+            NEW.unicef_id := format('MSG-%s-%s', to_char(NEW.created_at, 'yy'), TRIM(CASE WHEN NEW.unicef_id_index > 9999 THEN NEW.unicef_id_index::varchar(64) ELSE to_char(NEW.unicef_id_index, '0000') END));
+            return NEW;
+        END
+        $function$""",
+                "CREATE TRIGGER create_accountability_communication_message_unicef_id BEFORE INSERT ON accountability_message FOR EACH ROW EXECUTE FUNCTION create_accountability_communication_message_unicef_id()",
+            ],
+            reverse_sql=migrations.RunSQL.noop,
+        ),
+        # accountability_survey.unicef_id comes from a serial column that is not on the model and a trigger that formats it.
+        migrations.RunSQL(
+            sql=[
+                "ALTER TABLE accountability_survey ADD unicef_id_index SERIAL",
+                """CREATE OR REPLACE FUNCTION create_accountability_survey_unicef_id()
+ RETURNS trigger
+ LANGUAGE plpgsql
+AS $function$
+            BEGIN
+                NEW.unicef_id := format('SUR-%s-%s', to_char(NEW.created_at, 'yy'), TRIM(CASE WHEN NEW.unicef_id_index > 9999 THEN NEW.unicef_id_index::varchar(64) ELSE to_char(NEW.unicef_id_index, '0000') END));
+                return NEW;
+            END
+            $function$""",
+                "CREATE TRIGGER create_accountability_survey_unicef_id BEFORE INSERT ON accountability_survey FOR EACH ROW EXECUTE FUNCTION create_accountability_survey_unicef_id()",
+            ],
+            reverse_sql=migrations.RunSQL.noop,
+        ),
     ]

@@ -18,7 +18,6 @@ class Migration(migrations.Migration):
     initial = True
 
     replaces = [
-        ("program", "0001_migration"),
         ("program", "0002_migration"),
         ("program", "0003_migration"),
         ("program", "0004_migration"),
@@ -555,5 +554,26 @@ class Migration(migrations.Migration):
                 fields=("title", "program"),
                 name="program_cycle_title_unique_per_program",
             ),
+        ),
+        # unicef_id of programme cycles, numbered per business area from a sequence created by a core trigger.
+        migrations.RunSQL(
+            sql=[
+                """CREATE OR REPLACE FUNCTION program_cycle_fill_unicef_id_per_business_area_seq()
+ RETURNS trigger
+ LANGUAGE plpgsql
+AS $function$
+                DECLARE
+                    businessAreaID varchar;
+                    businessAreaCode varchar;
+                BEGIN
+                    SELECT INTO businessAreaID p.business_area_id FROM program_program p WHERE p.id = NEW.program_id;
+                    SELECT INTO businessAreaCode ba.code FROM core_businessarea ba WHERE ba.id = businessAreaID::uuid;
+                    NEW.unicef_id := format('PC-%s-%s-%s', trim(businessAreaCode), to_char(NEW.created_at, 'yy'), trim(replace(to_char(nextval('program_cycle_business_area_seq_' || translate(businessAreaID::text, '-','_')),'000000'),',','.')));
+                    RETURN NEW;
+                END;
+                $function$""",
+                "CREATE TRIGGER program_cycle_fill_unicef_id_per_business_area_seq BEFORE INSERT ON program_programcycle FOR EACH ROW EXECUTE FUNCTION program_cycle_fill_unicef_id_per_business_area_seq()",
+            ],
+            reverse_sql=migrations.RunSQL.noop,
         ),
     ]

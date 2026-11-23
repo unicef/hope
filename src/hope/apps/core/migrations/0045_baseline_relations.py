@@ -4,7 +4,42 @@ import django.db.models.deletion
 import django.db.models.functions.text
 import mptt.fields
 
+from hope.apps.core.currencies import CURRENCIES
+from hope.apps.core.migration_operations import RunSQLAfterDeferred
 import hope.models.utils
+
+
+def seed_reference_data(apps, schema_editor):
+    """Create the currencies, payee types and head of facility collecting type of a new database."""
+    Currency = apps.get_model("core", "Currency")
+    PayeeType = apps.get_model("core", "PayeeType")
+    DataCollectingType = apps.get_model("core", "DataCollectingType")
+
+    Currency.objects.bulk_create(
+        [Currency(code=code, name=name, is_crypto=is_crypto, vision_code=code) for code, name, is_crypto in CURRENCIES],
+        ignore_conflicts=True,
+    )
+
+    PayeeType.objects.get_or_create(name="Household", defaults={"gl_code": "7700410", "weight": 30})
+    PayeeType.objects.get_or_create(name="Incentive Payee", defaults={"gl_code": "7700430", "weight": 20})
+    organization, _ = PayeeType.objects.get_or_create(
+        name="Organization", defaults={"gl_code": "7700430", "weight": 10}
+    )
+    head_of_facility, _ = DataCollectingType.objects.get_or_create(
+        code="head_of_facility",
+        defaults={
+            "label": "Head of Facility",
+            "description": "Head of Facility / Authorized Representative",
+            "type": "STANDARD",
+            "active": True,
+            "payee_type": organization,
+        },
+    )
+    # The post_save receiver that makes a collecting type compatible with itself does not run in migrations.
+    head_of_facility.compatible_types.add(head_of_facility)
+    PayeeType.objects.filter(pk=organization.pk, default_data_collecting_type__isnull=True).update(
+        default_data_collecting_type=head_of_facility
+    )
 
 
 class Migration(migrations.Migration):
@@ -450,4 +485,50 @@ class Migration(migrations.Migration):
                 fields=["updated_at"], name="core_xlsxkobotemplate_updated_at_403ef208"
             ),
         ),
+        # Each new business area gets its own sequences; the unicef_id triggers on payment plans, payments
+        # and programme cycles draw from them.
+        migrations.RunSQL(
+            sql=[
+                """CREATE OR REPLACE FUNCTION payment_plan_business_area_seq()
+ RETURNS trigger
+ LANGUAGE plpgsql
+AS $function$
+            begin
+                execute format('create sequence if not exists payment_plan_business_area_seq_%s', translate(NEW.id::text, '-','_'));
+                return NEW;
+            end
+            $function$""",
+                "CREATE TRIGGER payment_plan_business_area_seq AFTER INSERT ON core_businessarea FOR EACH ROW EXECUTE FUNCTION payment_plan_business_area_seq()",
+                """CREATE OR REPLACE FUNCTION payment_business_area_seq()
+ RETURNS trigger
+ LANGUAGE plpgsql
+AS $function$
+            begin
+                execute format('create sequence if not exists payment_business_area_seq_%s', translate(NEW.id::text, '-','_'));
+                return NEW;
+            end
+            $function$""",
+                "CREATE TRIGGER payment_business_area_seq AFTER INSERT ON core_businessarea FOR EACH ROW EXECUTE FUNCTION payment_business_area_seq()",
+                """CREATE OR REPLACE FUNCTION program_cycle_business_area_seq()
+ RETURNS trigger
+ LANGUAGE plpgsql
+AS $function$
+                BEGIN
+                    EXECUTE format('CREATE SEQUENCE IF NOT EXISTS program_cycle_business_area_seq_%s', translate(NEW.id::text, '-', '_'));
+                    RETURN NEW;
+                END
+                $function$""",
+                "CREATE TRIGGER program_cycle_business_area_seq AFTER INSERT ON core_businessarea FOR EACH ROW EXECUTE FUNCTION program_cycle_business_area_seq()",
+            ],
+            reverse_sql=migrations.RunSQL.noop,
+        ),
+        # django-mptt declares a (tree_id, lft) index on the models, but no existing database has it:
+        # the replaced history added it to the migration state only.
+        RunSQLAfterDeferred(
+            sql=[
+                "DROP INDEX IF EXISTS core_flexibleattributegroudd5f",
+            ],
+            reverse_sql=migrations.RunSQL.noop,
+        ),
+        migrations.RunPython(seed_reference_data, migrations.RunPython.noop),
     ]

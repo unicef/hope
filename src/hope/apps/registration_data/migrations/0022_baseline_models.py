@@ -7,6 +7,7 @@ from django.db import migrations, models
 import django.db.models.deletion
 import model_utils.fields
 
+from hope.apps.core.migration_operations import RunSQLAfterDeferred
 import hope.apps.core.upload_paths
 import hope.models.deduplication_engine_similarity_pair
 import hope.models.import_data
@@ -477,5 +478,34 @@ class Migration(migrations.Migration):
                 fields=["created_at"],
                 name="registration_data_koboimportedsubmission_created_at_b80e8453",
             ),
+        ),
+        # Names that RenameModel and RenameField left behind in the replaced history. Every existing database
+        # has them, so a new one gets them too. Renaming the index of a primary key or unique constraint
+        # renames the constraint with it.
+        RunSQLAfterDeferred(
+            sql=[
+                "ALTER INDEX IF EXISTS registration_data_biometri_individual1_id_4eff8bdd RENAME TO registration_data_deduplic_individual1_id_b2974985",
+                "ALTER INDEX IF EXISTS registration_data_biometri_individual2_id_bde35c9d RENAME TO registration_data_deduplic_individual2_id_f8a2cfbf",
+                "ALTER INDEX IF EXISTS registration_data_biometri_program_id_984ceadf RENAME TO registration_data_deduplic_program_id_62661470",
+                "ALTER INDEX IF EXISTS registration_data_biometricdedupesimilaritypair_pkey RENAME TO registration_data_deduplicationenginesimilaritypair_pkey",
+                "ALTER INDEX IF EXISTS registration_data_biomet_individual1_id_individua_b628a04d_uniq RENAME TO registration_data_dedupl_individual1_id_individua_ec363966_uniq",
+                "ALTER SEQUENCE IF EXISTS registration_data_biometricdedupesimilaritypair_id_seq RENAME TO registration_data_deduplicationenginesimilaritypair_id_seq",
+                """DO $$
+DECLARE
+    renames text[][] := ARRAY[
+        ['registration_data_biometricdedupesimilaritypair', 'registration_data_bi_individual1_id_4eff8bdd_fk_household', 'registration_data_de_individual1_id_b2974985_fk_household'],
+        ['registration_data_biometricdedupesimilaritypair', 'registration_data_bi_individual2_id_bde35c9d_fk_household', 'registration_data_de_individual2_id_f8a2cfbf_fk_household'],
+        ['registration_data_biometricdedupesimilaritypair', 'registration_data_bi_program_id_984ceadf_fk_program_p', 'registration_data_de_program_id_62661470_fk_program_p']
+    ];
+    r text[];
+BEGIN
+    FOREACH r SLICE 1 IN ARRAY renames LOOP
+        IF EXISTS (SELECT 1 FROM pg_constraint WHERE conrelid = r[1]::regclass AND conname = r[2]) THEN
+            EXECUTE format('ALTER TABLE %I RENAME CONSTRAINT %I TO %I', r[1], r[2], r[3]);
+        END IF;
+    END LOOP;
+END $$""",
+            ],
+            reverse_sql=migrations.RunSQL.noop,
         ),
     ]
