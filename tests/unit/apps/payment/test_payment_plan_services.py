@@ -30,6 +30,7 @@ from hope.models import (
     AcceptanceProcessThreshold,
     Approval,
     DeliveryMechanism,
+    FinancialServiceProvider,
     LogEntry,
     Payment,
     PaymentList,
@@ -194,6 +195,40 @@ def test_lock_rejects_payment_list_without_delivery_template(
         f"Every Payment List needs an FSP XLSX Template for its Financial Service Provider and "
         f"Delivery Mechanism. Missing for: {payment_list_without_template.unicef_id}."
     )
+
+
+@pytest.fixture
+def api_fsp_without_template():
+    return FinancialServiceProviderFactory(communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API)
+
+
+@pytest.fixture
+def open_api_plan(cycle, api_fsp_without_template, currency):
+    return PaymentPlanFactory(
+        cycle=cycle,
+        status=PaymentPlan.Status.OPEN,
+        financial_service_provider=api_fsp_without_template,
+        currency=currency,
+    )
+
+
+@pytest.fixture
+def locked_api_payment_list(cycle, open_api_plan, api_fsp_without_template, delivery_mechanism, currency):
+    return PaymentListFactory(
+        program_cycle=cycle,
+        payment_plan=open_api_plan,
+        status=PaymentList.Status.LOCKED,
+        financial_service_provider=api_fsp_without_template,
+        delivery_mechanism=delivery_mechanism,
+        currency=currency,
+    )
+
+
+def test_lock_accepts_payment_gateway_plan_without_delivery_template(open_api_plan, locked_api_payment_list):
+    PaymentPlanService(open_api_plan).lock()
+
+    open_api_plan.refresh_from_db()
+    assert open_api_plan.status == PaymentPlan.Status.LOCKED
 
 
 def test_unlock_sets_group_open(open_group, locked_payment_list):

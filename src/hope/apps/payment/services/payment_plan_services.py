@@ -682,6 +682,12 @@ class PaymentPlanService:
     @staticmethod
     def _validate_delivery_templates(payment_plan: PaymentPlan, payment_lists: list[PaymentList]) -> None:
         """Reject up front what the payment plan export would otherwise drop with only a warning."""
+        if (
+            payment_plan.use_payment_gateway
+            or payment_plan.financial_service_provider.communication_channel
+            == FinancialServiceProvider.COMMUNICATION_CHANNEL_API
+        ):
+            return
         mapped_delivery_mechanism_ids = set(
             FspXlsxTemplatePerDeliveryMechanism.objects.filter(
                 financial_service_provider_id=payment_plan.financial_service_provider_id,
