@@ -320,7 +320,8 @@ def set_group_statuses_from_plans(apps, schema_editor):
 def move_approval_processes_to_groups(apps, schema_editor):
     """Attach every approval process of a grouped plan to the plan's group, then size the open ones from the group total.
 
-    Instruction children keep their own processes. A group with several moved processes shows them all; the newest
+    Instruction children keep their own processes. Removed plans keep theirs too, so a rejected process of a deleted
+    plan cannot become the newest one of its group. A group with several moved processes shows them all; the newest
     is the active one and gets the required numbers for the group's summed USD total.
     """
     ApprovalProcess = apps.get_model("payment", "ApprovalProcess")
@@ -329,9 +330,9 @@ def move_approval_processes_to_groups(apps, schema_editor):
     AcceptanceProcessThreshold = apps.get_model("payment", "AcceptanceProcessThreshold")
 
     plan_group = PaymentPlan.objects.filter(pk=OuterRef("payment_plan_id")).values("payment_plan_group_id")[:1]
-    ApprovalProcess.objects.filter(payment_plan__isnull=False, payment_plan__payment_plan_group__isnull=False).update(
-        payment_plan_group_id=Subquery(plan_group), payment_plan=None
-    )
+    ApprovalProcess.objects.filter(
+        payment_plan__isnull=False, payment_plan__payment_plan_group__isnull=False, payment_plan__is_removed=False
+    ).update(payment_plan_group_id=Subquery(plan_group), payment_plan=None)
 
     for group in PaymentPlanGroup.objects.filter(status__in=MID_APPROVAL_STATUSES).select_related(
         "cycle__program__business_area"
@@ -478,7 +479,8 @@ def copy_flag_from_payment_plans(apps, schema_editor):
 def move_approval_processes_to_instructions(apps, schema_editor):
     """Move the approval processes of instruction child plans to the instruction.
 
-    The children were approved together, each in its own process with the same approvals. For an instruction still in
+    The children were approved together, each in its own process with the same approvals. Removed children keep theirs,
+    so a rejected process of a deleted child cannot become the newest one of its instruction. For an instruction still in
     approval, the newest process becomes the active one and its required approval, authorization and finance release
     numbers are set from the threshold for the summed USD total of the children.
     """
@@ -488,9 +490,9 @@ def move_approval_processes_to_instructions(apps, schema_editor):
     AcceptanceProcessThreshold = apps.get_model("payment", "AcceptanceProcessThreshold")
 
     plan_instruction = PaymentPlan.objects.filter(pk=OuterRef("payment_plan_id")).values("follow_up_instruction_id")[:1]
-    ApprovalProcess.objects.filter(payment_plan__follow_up_instruction__isnull=False).update(
-        follow_up_instruction_id=Subquery(plan_instruction), payment_plan=None
-    )
+    ApprovalProcess.objects.filter(
+        payment_plan__follow_up_instruction__isnull=False, payment_plan__is_removed=False
+    ).update(follow_up_instruction_id=Subquery(plan_instruction), payment_plan=None)
 
     mid_approval_child = PaymentPlan.objects.filter(
         follow_up_instruction_id=OuterRef("pk"), is_removed=False, status__in=MID_APPROVAL_STATUSES

@@ -195,6 +195,24 @@ def test_newest_open_approval_process_is_sized_from_the_group_total(
     assert older_process.approval_number_required == 1
 
 
+@pytest.fixture
+def removed_plan_approval_process(cycle: Any, group: PaymentPlan) -> ApprovalProcess:
+    removed_plan = PaymentListFactory(program_cycle=cycle, payment_plan=group, is_removed=True)
+    return ApprovalProcessFactory(payment_list=removed_plan)
+
+
+def test_removed_plan_approval_process_stays_on_the_removed_plan(
+    historical_apps: SimpleNamespace, removed_plan_approval_process: ApprovalProcess
+) -> None:
+    removed_plan = removed_plan_approval_process.payment_list
+
+    migration_module.move_approval_processes_to_groups(historical_apps, schema_editor=None)
+
+    removed_plan_approval_process.refresh_from_db()
+    assert removed_plan_approval_process.payment_list == removed_plan
+    assert removed_plan_approval_process.payment_plan is None
+
+
 def test_instruction_child_approval_process_is_untouched(historical_apps: SimpleNamespace, cycle: Any) -> None:
     instruction_child = PaymentListFactory(
         program_cycle=cycle,

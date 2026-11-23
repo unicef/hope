@@ -213,3 +213,26 @@ def test_instruction_takes_the_closing_user_but_not_the_placeholder_comment(
     instruction.refresh_from_db()
     assert instruction.closed_by == closing_user
     assert instruction.closure_comment is None
+
+
+@pytest.fixture
+def removed_child_approval_process(cycle: Any, instruction: FollowUpInstruction) -> ApprovalProcess:
+    removed_child = PaymentListFactory(
+        program_cycle=cycle,
+        follow_up_instruction=instruction,
+        plan_type=PaymentList.PlanType.FOLLOW_UP,
+        is_removed=True,
+    )
+    return ApprovalProcessFactory(payment_list=removed_child)
+
+
+def test_removed_child_approval_process_stays_on_the_removed_child(
+    historical_apps: SimpleNamespace, removed_child_approval_process: ApprovalProcess
+) -> None:
+    removed_child = removed_child_approval_process.payment_list
+
+    migration_module.move_approval_processes_to_instructions(historical_apps, schema_editor=None)
+
+    removed_child_approval_process.refresh_from_db()
+    assert removed_child_approval_process.payment_list == removed_child
+    assert removed_child_approval_process.follow_up_instruction is None
