@@ -282,13 +282,13 @@ jobs:
 
       - name: Tear down Docker Compose
         if: always()
-        run: dockercompose -f development_tools/compose.yml down --volumes
+        run: docker compose -f development_tools/compose.yml down --volumes
   selenium-result:
     # Keeps a single "Selenium tests" check for branch protection, whatever the number of shards.
     name: Selenium tests
     needs: selenium
     if: always()
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Check shard results
         run: test "${{ needs.selenium.result }}" = "success"
