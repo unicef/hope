@@ -5,12 +5,15 @@ import pytest
 
 from extras.test_utils.factories import (
     AreaFactory,
+    CurrencyFactory,
     HouseholdFactory,
+    IndividualFactory,
     PaymentFactory,
     ProgramFactory,
 )
 from extras.test_utils.selenium import HopeTestBrowser
 from hope.apps.dashboard.services import DashboardDataCache
+from hope.apps.household.const import DISABLED
 from hope.models import BeneficiaryGroup, BusinessArea, Household, Payment, PaymentPlan, Program
 
 pytestmark = pytest.mark.django_db(databases=["default", "read_only"])
@@ -39,17 +42,46 @@ def program(business_area: BusinessArea) -> Program:
 
 @pytest.fixture
 def household(business_area: BusinessArea, program: Program) -> Household:
-    return HouseholdFactory(
+    household = HouseholdFactory(
         business_area=business_area,
         program=program,
         size=5,
         children_count=2,
         admin1=AreaFactory(name="Kabul", area_type__name="Province", area_type__area_level=1),
     )
+    IndividualFactory(
+        business_area=business_area,
+        program=program,
+        household=household,
+        registration_data_import=household.registration_data_import,
+        disability=DISABLED,
+    )
+    return household
 
 
 @pytest.fixture
-def payments(business_area: BusinessArea, program: Program, household: Household) -> list[Payment]:
+def pending_payment(business_area: BusinessArea, program: Program) -> Payment:
+    # A household of its own: the dashboard sums households per payment status.
+    household = HouseholdFactory(business_area=business_area, program=program, size=3, children_count=1)
+    return PaymentFactory(
+        parent__business_area=business_area,
+        parent__program_cycle__program=program,
+        parent__status=PaymentPlan.Status.ACCEPTED,
+        business_area=business_area,
+        program=program,
+        household=household,
+        status=Payment.STATUS_PENDING,
+        currency=CurrencyFactory(code="PLN"),
+        entitlement_quantity=140,
+        entitlement_quantity_usd=70,
+        entitlement_date=timezone.now() - timedelta(days=30),
+    )
+
+
+@pytest.fixture
+def payments(
+    business_area: BusinessArea, program: Program, household: Household, pending_payment: Payment
+) -> list[Payment]:
     payments = PaymentFactory.create_batch(
         2,
         parent__business_area=business_area,
@@ -73,11 +105,11 @@ def test_country_dashboard_shows_metrics_from_payments(payments: list[Payment], 
     login.switch_to_frame(DASHBOARD_IFRAME)
 
     login.assert_exact_text("200.00 USD", TOTAL_AMOUNT_PAID)
-    login.assert_exact_text("460.00 PLN", TOTAL_DISBURSED_PAYMENTS)
-    login.assert_exact_text("2", NUMBER_OF_PAYMENTS)
-    login.assert_exact_text("0.00 USD", OUTSTANDING_PAYMENTS)
-    login.assert_exact_text("1", HOUSEHOLDS_REACHED)
-    login.assert_exact_text("0", PWD_REACHED)
-    login.assert_exact_text("2", CHILDREN_REACHED)
-    login.assert_exact_text("5", INDIVIDUALS_REACHED)
+    login.assert_exact_text("600.00 PLN", TOTAL_DISBURSED_PAYMENTS)
+    login.assert_exact_text("3", NUMBER_OF_PAYMENTS)
+    login.assert_exact_text("70.00 USD", OUTSTANDING_PAYMENTS)
+    login.assert_exact_text("2", HOUSEHOLDS_REACHED)
+    login.assert_exact_text("1", PWD_REACHED)
+    login.assert_exact_text("3", CHILDREN_REACHED)
+    login.assert_exact_text("8", INDIVIDUALS_REACHED)
     login.assert_elements_visible(*CHARTS)
