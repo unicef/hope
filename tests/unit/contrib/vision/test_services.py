@@ -349,6 +349,8 @@ def callback_placeholder_with_synced_fc(
     vision_payment_plan: PaymentPlan,
     django_assert_num_queries,
 ) -> tuple[PaymentPlan, FundsCommitmentHeader, int, int]:
+    vision_payment_plan.business_area.code = "V001"
+    vision_payment_plan.business_area.save(update_fields=["code"])
     VisionService.set_status(vision_payment_plan, VisionStatus.WAITING_FOR_CALLBACK)
     with patch("hope.apps.payment.services.payment_plan_services.send_payment_notification_emails_async_task"):
         fc_assignment_failed = VisionService.process_callback(
