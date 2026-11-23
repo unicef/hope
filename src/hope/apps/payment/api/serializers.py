@@ -1938,7 +1938,12 @@ class ApplyEngineFormulaSerializer(serializers.Serializer):
 
 
 class ApplyFlatAmountEntitlementSerializer(serializers.Serializer):
-    flat_amount_value = serializers.DecimalField(max_digits=15, decimal_places=2, required=True)
+    flat_amount_value = serializers.DecimalField(
+        max_digits=15,
+        decimal_places=2,
+        min_value=Decimal("0.00"),
+        required=True,
+    )
     version = serializers.IntegerField(required=False)
 
 
