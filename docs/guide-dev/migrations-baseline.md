@@ -60,7 +60,9 @@ Objects Django does not generate are created with top-level `RunSQL` at the end 
 
 Seed rows come from one `RunPython` per app, written with literals: currencies, payee types and the
 `head_of_facility` data collecting type (`core`), beneficiary groups (`program`), account types and
-the default payment plan purpose (`payment`), the UN sanction list (`sanction_list`).
+the default payment plan purpose (`payment`), the UN sanction list (`sanction_list`). `program` also
+writes the `DEFAULT_BENEFICIARY_GROUP_NAME` row of `constance_constance`, which the old chain stored
+as a side effect of reading the setting.
 
 ### Legacy names
 
@@ -105,8 +107,9 @@ covers `upgrade`, the `dev` entrypoint and direct calls.
 - **Neither on disk nor replaced**: the database is ahead of the code. It ran a migration this code
   does not have: a newer release, a hotfix branch, or a feature branch you switched away from.
 - Only first-party apps in `INSTALLED_APPS` are checked. Rows of removed apps are ignored.
-- `core.0023_migration` is tolerated by exact name. It was on `develop` for a few days before it was
-  renumbered, so the dev database may hold the row.
+- `core.0023_migration` is tolerated by exact name. It was on `develop` for five days (PR #5914 to
+  PR #5941) before it was renumbered and never reached `staging` or `master`, so of the three
+  environments only dev can hold the row.
 
 `python manage.py migrate --plan` runs the guard and changes nothing, so it tells whether a database
 is ready for the baseline.
@@ -144,6 +147,10 @@ A branch cut before the baseline has migrations that depend on deleted files.
 | Baseline | The baseline is merged and deployed to dev, staging, production. New migrations are allowed again. | Each environment has the baseline names in `django_migrations`; its schema did not change. |
 | Cleanup | A separate, later release removes `replaces`, the guard and the `migrate` override, and runs `migrate <app> --prune` for the 19 apps. | No old first-party names are left in `django_migrations`. |
 
+- Each environment deploys one branch (production `master`, staging `staging`, dev `develop`), so the
+  migrations it has applied are the migration files of that branch. An environment can reach the
+  checkpoint only after its branch contains all 377 replaced migrations; `migrate --plan` then
+  confirms it on the database itself.
 - Rolling back the baseline release means redeploying the previous image. No database work is needed:
   the baseline changed no schema, and the old code ignores the baseline names.
 - The cleanup must wait until **all three** environments have recorded the baseline. Until then the old

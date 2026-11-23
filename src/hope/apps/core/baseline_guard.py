@@ -10,7 +10,9 @@ from collections.abc import Collection, Iterable, Mapping
 from django.db.migrations import Migration
 
 # Was on develop under this name for five days (PR #5914 to PR #5941) before it was renumbered,
-# so the dev database may still hold the row.
+# so the dev database may still hold the row. It never reached staging or master, and it is the
+# only first-party name outside the replaced chain that any of the three branches carried since
+# the 2024-11 migration reset.
 TOLERATED_STRAY_ROWS = {("core", "0023_migration")}
 
 PARTIAL_REMEDY = (
