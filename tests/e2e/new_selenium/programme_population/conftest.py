@@ -132,9 +132,21 @@ def individuals_url(program: Program) -> str:
     return f"/{program.business_area.slug}/programs/{program.code}/population/individuals"
 
 
+def open_from_menu(browser: HopeTestBrowser, program: Program, *path: str) -> None:
+    """Open the programme and follow the side menu: the last item of `path` is a link, the others are sections."""
+    *sections, link = path
+    browser.open(f"/{program.business_area.slug}/programs/{program.code}/details/{program.code}")
+    browser.assert_text(program.name, 'h5[data-cy="page-header-title"]')
+    for section in sections:
+        browser.open_nav_section(section)
+    browser.click(f'a[data-cy="nav-{link}"]')
+
+
 def open_pdu_tab(browser: HopeTestBrowser, program: Program, subtab: str) -> None:
     """Open the individuals' periodic data updates tab on `subtab` (offline-templates, offline-edits, ...)."""
-    browser.open(f"{individuals_url(program)}?tab=periodic-data-updates&subtab={subtab}")
+    open_from_menu(browser, program, "Main Menu", "Items")
+    browser.click('button[data-cy="tab-periodic-data-updates"]')
+    browser.click(f'button[data-cy="pdu-{subtab}"]')
     browser.wait_for_element_visible(f'button[data-cy="pdu-{subtab}"][aria-selected="true"]')
 
 

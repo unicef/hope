@@ -3,7 +3,7 @@ from datetime import date
 from dateutil.relativedelta import relativedelta
 import pytest
 
-from e2e.new_selenium.programme_population.conftest import assert_texts, individuals_url
+from e2e.new_selenium.programme_population.conftest import assert_texts, open_from_menu
 from extras.test_utils.factories import (
     HouseholdFactory,
     IndividualFactory,
@@ -98,7 +98,7 @@ def household(program: Program, business_area: BusinessArea) -> Household:
 
 def test_individuals_list_shows_individual(household: Household, program: Program, login: HopeTestBrowser) -> None:
     head = household.head_of_household
-    login.open(individuals_url(program))
+    open_from_menu(login, program, "Main Menu", "Items")
 
     login.assert_text("Items", TABLE_TITLE)
     login.assert_text("1–1 of 1", TABLE_PAGINATION)
@@ -112,7 +112,7 @@ def test_individuals_list_shows_individual(household: Household, program: Progra
 
 def test_individual_details_shows_individual(household: Household, program: Program, login: HopeTestBrowser) -> None:
     head = household.head_of_household
-    login.open(individuals_url(program))
+    open_from_menu(login, program, "Main Menu", "Items")
 
     login.click(INDIVIDUAL_ROW)
 
