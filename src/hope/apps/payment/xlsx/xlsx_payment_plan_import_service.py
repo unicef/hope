@@ -159,7 +159,7 @@ class XlsxPaymentPlanImportService(XlsxPaymentPlanBaseService, XlsxImportBaseSer
         entitlement_amount = self._get_cell(row, self.COLUMN_ENTITLEMENT_QUANTITY).value
         if entitlement_amount is not None and entitlement_amount != "":
             converted_entitlement_amount = to_decimal(str(entitlement_amount))
-            if converted_entitlement_amount is None:
+            if converted_entitlement_amount is None or converted_entitlement_amount < 0:
                 self.errors.append(
                     XlsxError(
                         self.TITLE,

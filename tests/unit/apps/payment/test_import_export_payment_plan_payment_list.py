@@ -288,6 +288,16 @@ def test_import_invalid_entitlement_amount(invalid_entitlement_import_case, djan
     assert import_service.is_updated is False
 
 
+def test_import_negative_entitlement_amount(invalid_entitlement_import_case):
+    import_service, row, coordinate = invalid_entitlement_import_case
+    row[import_service.header_to_index[import_service.COLUMN_ENTITLEMENT_QUANTITY]].value = Decimal("-1.00")
+
+    import_service._validate_entitlement(row)
+
+    assert import_service.errors == [XlsxError(import_service.TITLE, coordinate, "Invalid amount")]
+    assert import_service.is_updated is False
+
+
 def test_import_invalid_file_without_required_columns(payment_plan):
     error_msg_1 = XlsxError(
         sheet="Payment Plan - Payment List",
