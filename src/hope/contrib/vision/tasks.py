@@ -99,7 +99,7 @@ def notify_payment_plan_closure_to_vision_async_task_action(job: AsyncJob) -> No
     quantity as the total amount reconciled and its status date as the closure date.
     """
     payment_plan = PaymentPlan.objects.get(pk=job.config["payment_plan_id"])
-    if payment_plan.status != PaymentPlan.Status.CLOSED or not payment_plan.sent_to_vision:
+    if not VisionService.can_notify_vision_of_closure(payment_plan):
         return
     VisionAPI().notify_payment_plan_closure(
         payment_plan,

@@ -502,6 +502,9 @@ class PaymentPlanAdmin(BasePaymentPlanAdmin, PaymentPlanCeleryTasksMixin):
         """
         if request.method == "POST":
             payment_plan = PaymentPlan.objects.get(pk=pk)
+            if not can_send_closure_to_vision(payment_plan):
+                self.message_user(request, "Closure notification is no longer available for this plan", level="warning")
+                return redirect(reverse("admin:payment_paymentplan_change", args=[pk]))
             notify_payment_plan_closure_to_vision_async_task(payment_plan, str(request.user.pk))
             self.message_user(request, "Sending closure notification to Vision started", level="success")
             return redirect(reverse("admin:payment_paymentplan_change", args=[pk]))

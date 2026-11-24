@@ -78,6 +78,13 @@ def closed_payment_plan_without_vision_id(vision_api_payment_plan_factory) -> Pa
     return payment_plan
 
 
+@pytest.fixture(params=[403, 500])
+def non_json_oauth_error_response(request: pytest.FixtureRequest) -> MagicMock:
+    response = MagicMock(status_code=request.param, ok=False, reason="Upstream error", text="<html>error page</html>")
+    response.json.side_effect = ValueError("No JSON")
+    return response
+
+
 def test_missing_vision_url_raises_error(settings) -> None:
     settings.VISION_API_URL = ""
     with pytest.raises(VisionAPIMissingCredentialsError):
@@ -151,8 +158,9 @@ def test_acquire_token_401_raises_error() -> None:
         ok=False,
         json=lambda: {"ErrorCode": "401", "Error": "Unauthorized"},
     )
-    with patch.object(api._client, "post", return_value=token_response), pytest.raises(VisionAPIError):
+    with patch.object(api._client, "post", return_value=token_response), pytest.raises(VisionAPIError) as error:
         api._acquire_token()
+    assert "HTTP 401" in str(error.value)
 
 
 def test_acquire_token_missing_access_token_raises_error() -> None:
@@ -185,8 +193,10 @@ def test_acquire_token_non_json_response_raises_error() -> None:
     api = VisionAPI()
     token_response = MagicMock(status_code=200, ok=True, text="<html>not json</html>")
     token_response.json.side_effect = ValueError("No JSON")
-    with patch.object(api._client, "post", return_value=token_response), pytest.raises(VisionAPIError):
+    with patch.object(api._client, "post", return_value=token_response), pytest.raises(VisionAPIError) as error:
         api._acquire_token()
+    assert "HTTP 200" in str(error.value)
+    assert "<html>" not in str(error.value)
 
 
 def test_acquire_token_missing_credentials_raises_error(settings) -> None:
@@ -460,7 +470,7 @@ def test_notify_payment_plan_status_logs_api_error(
 
 @patch("hope.contrib.vision.api.VisionAPI._acquire_token")
 @patch("hope.contrib.vision.api.VisionAPI._post")
-def test_notify_payment_plan_closure_posts_reconciliation_to_closure_endpoint(
+def test_notify_payment_plan_closure_posts_reconciliation_to_payment_plan_endpoint(
     mock_post,
     mock_acquire_token,
     vision_api_payment_plan_factory,
@@ -488,7 +498,7 @@ def test_notify_payment_plan_closure_posts_reconciliation_to_closure_endpoint(
 
     payment_plan.refresh_from_db(fields=["internal_data"])
     assert response == {"status": "ok"}
-    assert mock_post.call_args.args[0] == "https://test.example.com/ps/ezcash/PaymentPlanClosure"
+    assert mock_post.call_args.args[0] == "https://test.example.com/ps/ezcash/PaymentPlan"
     assert mock_post.call_args.args[1] == {
         "payplanSno": "PP-CLOSURE",
         "visionPayplanSno": "V12345",
@@ -558,6 +568,33 @@ def test_notify_payment_plan_closure_without_vision_id_sends_empty_value(
     closed_payment_plan_without_vision_id.refresh_from_db(fields=["internal_data"])
     entry = closed_payment_plan_without_vision_id.vision_data["log"][0]
     assert entry["type"] == VisionLogEntryType.CLOSURE_NOTIFICATION.value
+
+
+def test_notify_payment_plan_closure_logs_non_json_oauth_error(
+    non_json_oauth_error_response: MagicMock,
+    closed_payment_plan_without_vision_id: PaymentPlan,
+    django_assert_num_queries,
+) -> None:
+    api = VisionAPI()
+    with (
+        patch.object(api._client, "post", return_value=non_json_oauth_error_response) as mock_post,
+        django_assert_num_queries(4),
+        pytest.raises(VisionAPIError) as error,
+    ):
+        api.notify_payment_plan_closure(
+            closed_payment_plan_without_vision_id,
+            total_amount_reconciled=Decimal("8500.50"),
+            closure_date=datetime(2026, 11, 9, 10, 30, tzinfo=timezone.utc),
+        )
+
+    mock_post.assert_called_once()
+    assert mock_post.call_args.args[0] == api.token_url
+    closed_payment_plan_without_vision_id.refresh_from_db(fields=["internal_data"])
+    entry = closed_payment_plan_without_vision_id.vision_data["log"][0]
+    assert entry["type"] == VisionLogEntryType.CLOSURE_NOTIFICATION.value
+    assert f"HTTP {non_json_oauth_error_response.status_code}" in entry["response"]["error"]
+    assert "<html>" not in entry["response"]["error"]
+    assert entry["response"]["error"] == str(error.value)
 
 
 @patch("hope.contrib.vision.api.VisionAPI._acquire_token")

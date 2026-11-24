@@ -40,17 +40,14 @@ class VisionAPI(BaseAPI):
         super().__init__()
         self.token_url = build_url(self.api_url, "v1/OAuthService/GenerateToken")
         self.payment_plan_creation_url = build_url(self.api_url, "ps/ezcash/PaymentPlan")
-        # TODO: confirm the exact closure endpoint name with the Vision team
-        # (currently assumed to be ps/ezcash/PaymentPlanClosure, mirroring PaymentPlan).
-        self.payment_plan_closure_url = build_url(self.api_url, "ps/ezcash/PaymentPlanClosure")
         self._token_expiry: datetime | None = None
 
     def _acquire_token(self) -> None:
         """Exchange the client credentials for an OAuth bearer token and cache it on the session.
 
-        Post only to the OAuth token endpoint (``token_url``), never to the Payment Plan or
-        Payment Plan closure endpoints. Store the token on the shared HTTP session, together with
-        its (timezone-aware) expiry, so subsequent calls reuse it until shortly before it lapses.
+        Post only to the OAuth token endpoint (``token_url``), never to the Payment Plan endpoint.
+        Store the token on the shared HTTP session with its (timezone-aware) expiry, so subsequent
+        calls reuse it until shortly before it lapses.
         Raise ``VisionAPIMissingCredentialsError`` when credentials are not configured and
         ``VisionAPIError`` when Vision rejects the request or returns a malformed token response.
         """
@@ -73,14 +70,24 @@ class VisionAPI(BaseAPI):
             timeout=settings.VISION_DEFAULT_TIMEOUT,
         )
 
+        if not response.ok:
+            try:
+                error_detail = response.json()
+            except ValueError:
+                error_detail = response.reason or "non-JSON response"
+            error_message = (
+                "Vision OAuth authentication failed"
+                if response.status_code == 401
+                else "Vision OAuth token request failed"
+            )
+            raise VisionAPIError(f"{error_message} (HTTP {response.status_code}): {str(error_detail)[:200]}")
+
         try:
             data = response.json()
         except ValueError as error:
-            raise VisionAPIError(f"Vision OAuth token response was not valid JSON: {response.text!r}") from error
-
-        if response.status_code == 401:
-            raise VisionAPIError(f"Vision OAuth authentication failed: {data}")
-        self.validate_response(response)
+            raise VisionAPIError(
+                f"Vision OAuth token response was not valid JSON (HTTP {response.status_code})"
+            ) from error
 
         access_token = data.get("access_token") if isinstance(data, dict) else None
         if not access_token:
@@ -154,8 +161,6 @@ class VisionAPI(BaseAPI):
         payment_plan: PaymentPlan,
         payload: dict,
         log_entry_type: VisionLogEntryType,
-        *,
-        url: str | None = None,
     ) -> dict:
         is_initial_send = log_entry_type == VisionLogEntryType.API_CALL
         success_status = VisionStatus.WAITING_FOR_CALLBACK if is_initial_send else None
@@ -168,7 +173,7 @@ class VisionAPI(BaseAPI):
         }
         try:
             self._ensure_token()
-            response, _ = self._post(url or self.payment_plan_creation_url, payload)
+            response, _ = self._post(self.payment_plan_creation_url, payload)
             entry["response"] = response
         except VisionAPIMissingCredentialsError:
             entry["response"] = {"error": "Vision API credentials are not configured"}
@@ -209,7 +214,7 @@ class VisionAPI(BaseAPI):
         total_amount_reconciled: Decimal,
         closure_date: datetime,
     ) -> dict:
-        """Post the closure reconciliation to Vision's PaymentPlanClosure endpoint.
+        """Post the closure reconciliation to Vision's PaymentPlan endpoint.
 
         Send the Payment Plan code (``payplanSno``), the Vision Payment Plan code
         (``visionPayplanSno``), the total amount reconciled (``totalAmountReconciled``), and the
@@ -225,9 +230,9 @@ class VisionAPI(BaseAPI):
             "totalAmountReconciled": str(total_amount_reconciled),
             "closureDate": closure_date.isoformat(),
         }
+        # TODO: Add any further closure payload fields once Vision defines them.
         return self._post_payment_plan(
             payment_plan,
             payload,
             VisionLogEntryType.CLOSURE_NOTIFICATION,
-            url=self.payment_plan_closure_url,
         )

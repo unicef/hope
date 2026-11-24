@@ -58,6 +58,25 @@ def vision_enabled_payment_plan(vision_payment_plan: PaymentPlan) -> PaymentPlan
     return vision_payment_plan
 
 
+@pytest.fixture
+def closure_notified_payment_plan(vision_enabled_payment_plan: PaymentPlan) -> PaymentPlan:
+    vision_enabled_payment_plan.status = PaymentPlan.Status.CLOSED
+    vision_enabled_payment_plan.internal_data = {
+        "vision": {
+            "sent": True,
+            "log": [
+                {
+                    "type": VisionLogEntryType.CLOSURE_NOTIFICATION.value,
+                    "payload": {},
+                    "response": {"status": "ok"},
+                }
+            ],
+        }
+    }
+    vision_enabled_payment_plan.save(update_fields=["status", "internal_data"])
+    return vision_enabled_payment_plan
+
+
 @pytest.fixture(params=["global", "business-area"])
 def vision_disabled_payment_plan(request, vision_payment_plan: PaymentPlan) -> PaymentPlan:
     if request.param == "global":
@@ -1044,6 +1063,20 @@ def test_notify_payment_plan_closure_to_vision_task_skips_non_closed_plan(
     mock_vision_api.assert_not_called()
 
 
+@patch("hope.contrib.vision.tasks.VisionAPI")
+def test_notify_payment_plan_closure_to_vision_task_skips_successful_notification(
+    mock_vision_api,
+    closure_notified_payment_plan: PaymentPlan,
+    django_assert_num_queries,
+) -> None:
+    job = MagicMock(config={"payment_plan_id": str(closure_notified_payment_plan.pk)})
+
+    with django_assert_num_queries(1):
+        notify_payment_plan_closure_to_vision_async_task_action(job)
+
+    mock_vision_api.assert_not_called()
+
+
 @patch("hope.models.AsyncJob.requeue")
 def test_notify_payment_plan_closure_to_vision_queues_non_blocking_job(
     mock_requeue,
@@ -1092,6 +1125,29 @@ def test_notify_payment_plan_closure_to_vision_queues_non_blocking_job(
                 }
             ],
             False,
+        ),
+        (
+            PaymentPlan.Status.CLOSED,
+            True,
+            [
+                {
+                    "type": VisionLogEntryType.CLOSURE_NOTIFICATION.value,
+                    "payload": {},
+                    "response": {"status": "ok"},
+                },
+                {
+                    "type": VisionLogEntryType.CLOSURE_NOTIFICATION.value,
+                    "payload": {},
+                    "response": {"error": "later duplicate failed"},
+                },
+            ],
+            False,
+        ),
+        (
+            PaymentPlan.Status.CLOSED,
+            True,
+            [{"type": VisionLogEntryType.CLOSURE_NOTIFICATION.value, "payload": {}}],
+            True,
         ),
         (
             PaymentPlan.Status.CLOSED,

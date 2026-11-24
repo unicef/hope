@@ -214,17 +214,16 @@ class VisionService:
     def can_notify_vision_of_closure(cls, payment_plan: PaymentPlan) -> bool:
         """Return whether the plan may (re)send its closure notification to Vision.
 
-        Allow retrying until one attempt succeeds. The latest closure notification's response is stored
-        in the Vision log under ``internal_data["vision"]["log"]``; a missing entry means it was never
-        attempted (e.g. closed before this flow existed) and an ``error`` response means it failed.
+        Allow retrying until one attempt succeeds. A missing response or an ``error`` response
+        means that attempt did not succeed.
         """
         if payment_plan.status != PaymentPlan.Status.CLOSED or not payment_plan.sent_to_vision:
             return False
-        entries = cls.closure_notification_entries(payment_plan)
-        if not entries:
-            return True
-        response = entries[-1].get("response") or {}
-        return bool(response.get("error"))
+        for entry in cls.closure_notification_entries(payment_plan):
+            response = entry.get("response")
+            if isinstance(response, dict) and not response.get("error"):
+                return False
+        return True
 
     @classmethod
     def can_recover_with_funds_commitment_headers(cls, payment_plan: PaymentPlan) -> bool:

@@ -200,6 +200,22 @@ def _create_closed_payment_plan(afghanistan, admin_user, program_cycle, log=None
     return pp
 
 
+@pytest.fixture
+def closure_notified_payment_plan(vision_admin_context) -> PaymentPlan:
+    return _create_closed_payment_plan(
+        vision_admin_context["business_area"],
+        vision_admin_context["user"],
+        vision_admin_context["program_cycle"],
+        log=[
+            {
+                "type": VisionLogEntryType.CLOSURE_NOTIFICATION.value,
+                "payload": {},
+                "response": {"status": "ok"},
+            }
+        ],
+    )
+
+
 def test_send_closure_to_vision_button_visible_when_closure_never_sent(
     afghanistan, admin_user, program_cycle, admin_client
 ) -> None:
@@ -232,22 +248,9 @@ def test_send_closure_to_vision_button_visible_when_closure_failed(
 
 
 def test_send_closure_to_vision_button_hidden_when_closure_succeeded(
-    afghanistan, admin_user, program_cycle, admin_client
+    closure_notified_payment_plan: PaymentPlan, admin_client
 ) -> None:
-    FlagState.objects.get_or_create(name="VISION_INTEGRATION_ACTIVE", condition="boolean", value="True")
-    pp = _create_closed_payment_plan(
-        afghanistan,
-        admin_user,
-        program_cycle,
-        log=[
-            {
-                "type": VisionLogEntryType.CLOSURE_NOTIFICATION.value,
-                "payload": {},
-                "response": {"status": "ok"},
-            }
-        ],
-    )
-    response = admin_client.get(reverse("admin:payment_paymentplan_change", args=[pp.pk]))
+    response = admin_client.get(reverse("admin:payment_paymentplan_change", args=[closure_notified_payment_plan.pk]))
     assert response.status_code == 200
     assert 'id="btn-send_closure_to_vision"' not in response.content.decode()
 
@@ -281,6 +284,20 @@ def test_send_closure_to_vision_queues_task(
     response = admin_client.post(url)
     assert response.status_code == 302, response.content[:500]
     mock_notify_closure.assert_called_once_with(pp, str(admin_user.pk))
+
+
+@patch("hope.admin.payment_plan.notify_payment_plan_closure_to_vision_async_task")
+def test_send_closure_to_vision_post_skips_successful_notification(
+    mock_notify_closure, closure_notified_payment_plan: PaymentPlan, admin_client
+) -> None:
+    response = admin_client.post(
+        reverse("admin:payment_paymentplan_send_closure_to_vision", args=[closure_notified_payment_plan.pk])
+    )
+
+    assert response.status_code == 302
+    mock_notify_closure.assert_not_called()
+    closure_notified_payment_plan.refresh_from_db(fields=["status"])
+    assert closure_notified_payment_plan.status == PaymentPlan.Status.CLOSED
 
 
 def test_manual_fc_header_recovery_shows_warning_and_available_header(
