@@ -148,7 +148,7 @@ class PaymentPlanPayloadSerializer(serializers.Serializer):
 
     def get_gl_code(self, instance: Any) -> str:
         payee_type = instance.program_cycle.program.data_collecting_type.payee_type
-        gl_code = payee_type.gl_code if payee_type is not None else None
+        gl_code: str = payee_type.gl_code if payee_type is not None else ""
         return {"7700410": "FAM", "7700430": "INC"}.get(gl_code, "")
 
     def to_representation(self, instance: Any) -> dict[str, Any]:
