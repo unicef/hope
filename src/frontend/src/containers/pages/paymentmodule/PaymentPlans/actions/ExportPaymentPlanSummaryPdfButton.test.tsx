@@ -94,12 +94,16 @@ describe('ExportGroupSummaryPdfButton', () => {
     ).toBe('Regenerate Payment Plan Summary');
   });
 
-  it('keeps only the download for a closed payment plan', () => {
+  it('offers download and regenerate for a closed payment plan', () => {
     renderButton(PaymentPlanStatusEnum.CLOSED, '/media/summary.pdf');
     expect(
-      screen.getByTestId('button-download-group-summary-pdf'),
-    ).not.toBeNull();
-    expect(screen.queryByTestId('button-export-group-summary-pdf')).toBeNull();
+      screen
+        .getByTestId('button-download-group-summary-pdf')
+        .getAttribute('href'),
+    ).toBe('/media/summary.pdf');
+    expect(
+      screen.getByTestId('button-export-group-summary-pdf').textContent,
+    ).toBe('Regenerate Payment Plan Summary');
   });
 
   it('starts generating the summary', async () => {
