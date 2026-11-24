@@ -954,3 +954,17 @@ def test_changelist_sorts_by_payee_type(
 
     assert response.status_code == status.HTTP_200_OK
     assert list(response.context["cl"].result_list) == [program, incentive_program]
+
+
+def test_changelist_queryset_loads_payee_type_without_extra_query(
+    user: User, incentive_program: Program, django_assert_num_queries: Any
+) -> None:
+    request = RequestFactory().get(reverse("admin:program_program_changelist"))
+    request.user = user
+    admin_instance = ProgramAdmin(Program, AdminSite())
+    loaded_program = admin_instance.get_queryset(request).get(pk=incentive_program.pk)
+
+    with django_assert_num_queries(0):
+        payee_type = admin_instance.payee_type(loaded_program)
+
+    assert payee_type.name == "Incentive Payee"
