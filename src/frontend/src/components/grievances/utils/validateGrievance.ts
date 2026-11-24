@@ -10,13 +10,12 @@ import {
   LATIN_NAME_REGEX,
 } from './latinNames';
 import {
+  BIRTH_DATE_FIELDS,
   EMAIL_FIELDS,
   PHONE_NUMBER_FIELDS,
   getFieldFormatError,
+  isEmpty,
 } from './fieldFormats';
-export function isEmpty(value): boolean {
-  return value === undefined || value === null || value === '';
-}
 
 // Mirrors normalize_latin_name on the backend: whitespace is collapsed before validation
 const isInvalidLatin = (value): boolean =>
@@ -67,7 +66,11 @@ function validateFormatRows(rows, fieldsDict): string | undefined {
 function validateFormatData(values): { [key: string]: string } {
   const individualData = values.individualData || {};
   const formatErrors: { [key: string]: string } = {};
-  for (const fieldName of [...PHONE_NUMBER_FIELDS, ...EMAIL_FIELDS]) {
+  for (const fieldName of [
+    ...PHONE_NUMBER_FIELDS,
+    ...EMAIL_FIELDS,
+    ...BIRTH_DATE_FIELDS,
+  ]) {
     const key = camelCase(fieldName);
     const formatError = getFieldFormatError(fieldName, individualData[key]);
     if (formatError) {

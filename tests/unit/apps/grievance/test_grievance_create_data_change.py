@@ -947,6 +947,7 @@ def test_people_update_fields_offered_in_the_picker_are_accepted_by_the_serializ
         pytest.param(
             "village", "a" * 251, "Ensure this field has no more than 250 characters.", id="people-village-too-long"
         ),
+        pytest.param("birth_date", "2999-01-01", "Birth date cannot be in the future", id="birth_date-in-future"),
     ],
 )
 def test_create_individual_data_update_with_invalid_value_returns_field_error_and_creates_no_ticket(
@@ -1024,6 +1025,74 @@ def test_create_individual_data_update_with_valid_phone_numbers_and_email_stores
     assert individual_data["email"]["value"] == "john@example.com"
 
 
+@freeze_time("2026-11-24 23:30:00")
+def test_create_individual_data_update_with_birth_date_tomorrow_in_utc_stores_requested_value(
+    authenticated_client: Any,
+    grant_create_permission: None,
+    user: User,
+    grievance_context: dict[str, Any],
+    list_url: str,
+) -> None:
+    input_data = {
+        "description": "Test",
+        "assigned_to": str(user.id),
+        "issue_type": GrievanceTicket.ISSUE_TYPE_INDIVIDUAL_DATA_CHANGE_DATA_UPDATE,
+        "category": GrievanceTicket.CATEGORY_DATA_CHANGE,
+        "consent": True,
+        "language": "PL",
+        "extras": {
+            "issue_type": {
+                "individual_data_update_issue_type_extras": {
+                    "individual": str(grievance_context["individual"].id),
+                    "individual_data": {"birth_date": "2026-11-25"},
+                }
+            }
+        },
+    }
+
+    response = authenticated_client.post(list_url, input_data, format="json")
+
+    assert response.status_code == status.HTTP_201_CREATED
+    ticket = GrievanceTicket.objects.get(id=response.data[0]["id"])
+    individual_data = ticket.individual_data_update_ticket_details.individual_data
+    assert individual_data["birth_date"]["value"] == "2026-11-25"
+
+
+@freeze_time("2026-11-24 23:30:00")
+def test_create_individual_data_update_with_birth_date_two_days_ahead_in_utc_returns_field_error(
+    authenticated_client: Any,
+    grant_create_permission: None,
+    user: User,
+    grievance_context: dict[str, Any],
+    list_url: str,
+) -> None:
+    input_data = {
+        "description": "Test",
+        "assigned_to": str(user.id),
+        "issue_type": GrievanceTicket.ISSUE_TYPE_INDIVIDUAL_DATA_CHANGE_DATA_UPDATE,
+        "category": GrievanceTicket.CATEGORY_DATA_CHANGE,
+        "consent": True,
+        "language": "PL",
+        "extras": {
+            "issue_type": {
+                "individual_data_update_issue_type_extras": {
+                    "individual": str(grievance_context["individual"].id),
+                    "individual_data": {"birth_date": "2026-11-26"},
+                }
+            }
+        },
+    }
+
+    response = authenticated_client.post(list_url, input_data, format="json")
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    individual_data_errors = response.json()["extras"]["issue_type"]["individual_data_update_issue_type_extras"][
+        "individual_data"
+    ]
+    assert individual_data_errors == {"birth_date": ["Birth date cannot be in the future"]}
+    assert GrievanceTicket.objects.count() == 0
+
+
 @pytest.mark.parametrize(
     ("field", "value", "expected_error"),
     [
@@ -1090,6 +1159,7 @@ def test_create_household_data_update_with_invalid_value_returns_field_error_and
             id="invalid-phone_no",
         ),
         pytest.param("email", "john.example.com", "Enter a valid email address.", id="invalid-email"),
+        pytest.param("birth_date", "2999-01-01", "Birth date cannot be in the future", id="birth_date-in-future"),
     ],
 )
 def test_create_add_individual_with_invalid_value_returns_field_error_and_creates_no_ticket(

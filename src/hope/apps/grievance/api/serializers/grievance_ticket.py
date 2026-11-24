@@ -1,5 +1,7 @@
+from datetime import date, timedelta
 from typing import Any
 
+from django.utils import timezone
 from rest_framework import serializers
 
 from hope.apps.account.api.serializers import PartnerSerializer, UserSerializer
@@ -455,6 +457,12 @@ def validate_phone_number(value: str) -> None:
         )
 
 
+def validate_birth_date_not_in_future(value: date) -> None:
+    # No local calendar date is later than tomorrow in UTC
+    if value > timezone.now().date() + timedelta(days=1):
+        raise serializers.ValidationError("Birth date cannot be in the future", code="birth_date_in_future")
+
+
 class PhoneNumberField(serializers.CharField):
     def __init__(self, **kwargs: Any) -> None:
         kwargs.setdefault("validators", [validate_phone_number])
@@ -471,7 +479,7 @@ class AddIndividualDataSerializer(serializers.Serializer):
     middle_name_latin = LatinNameField(required=False, max_length=150)
     family_name_latin = LatinNameField(required=False, max_length=150)
     sex = serializers.CharField()
-    birth_date = serializers.DateField()
+    birth_date = serializers.DateField(validators=[validate_birth_date_not_in_future])
     estimated_birth_date = serializers.BooleanField()
     marital_status = serializers.CharField(required=False)
     phone_no = PhoneNumberField(required=False)
@@ -512,7 +520,7 @@ class IndividualUpdateDataSerializer(serializers.Serializer):
     middle_name_latin = LatinNameField(required=False, max_length=150)
     family_name_latin = LatinNameField(required=False, max_length=150)
     sex = serializers.CharField(required=False)
-    birth_date = serializers.DateField(required=False)
+    birth_date = serializers.DateField(required=False, validators=[validate_birth_date_not_in_future])
     estimated_birth_date = serializers.BooleanField(required=False)
     marital_status = serializers.CharField(required=False, allow_null=True)
     phone_no = PhoneNumberField(required=False)

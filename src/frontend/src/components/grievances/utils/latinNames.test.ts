@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, onTestFinished, vi } from 'vitest';
 import {
   GRIEVANCE_CATEGORIES,
   GRIEVANCE_ISSUE_TYPES,
@@ -125,6 +125,7 @@ describe('validate - phone number, email and count formats', () => {
       type: 'STRING',
     },
     email: { labelEn: 'Individual email', type: 'STRING' },
+    birth_date: { labelEn: 'Birth date', type: 'DATE' },
   };
   const householdFieldsDict = {
     size: { labelEn: 'Household size', type: 'INTEGER' },
@@ -198,6 +199,32 @@ describe('validate - phone number, email and count formats', () => {
     expect(errors.individualDataUpdateFields).toBeUndefined();
   });
 
+  it('rejects a birth date in the future with the field label', () => {
+    const errors = runEditIndividual([
+      { fieldName: 'birth_date', fieldValue: '2999-01-01' },
+    ]);
+
+    expect(errors.individualDataUpdateFields).toBe(
+      'Birth date: Birth date cannot be in the future',
+    );
+  });
+
+  it.each(['1990-05-17', '2026-11-24'])(
+    'accepts birth date %j on or before today',
+    (value) => {
+      const dateNow = vi
+        .spyOn(Date, 'now')
+        .mockReturnValue(new Date('2026-11-24T12:00:00Z').getTime());
+      onTestFinished(() => dateNow.mockRestore());
+
+      const errors = runEditIndividual([
+        { fieldName: 'birth_date', fieldValue: value },
+      ]);
+
+      expect(errors.individualDataUpdateFields).toBeUndefined();
+    },
+  );
+
   it('rejects a negative household count with the field label', () => {
     const errors = runEditHousehold([{ fieldName: 'size', fieldValue: -1 }]);
 
@@ -212,11 +239,15 @@ describe('validate - phone number, email and count formats', () => {
     expect(errors.householdDataUpdateFields).toBeUndefined();
   });
 
-  it('flags an invalid phone number and email under their own inputs when adding an individual', () => {
+  it('flags an invalid phone number, email and birth date under their own inputs when adding an individual', () => {
     const errors = validateUsingSteps(
       {
         ...addIndividualBase,
-        individualData: { phoneNo: '12345', email: 'john.example.com' },
+        individualData: {
+          phoneNo: '12345',
+          email: 'john.example.com',
+          birthDate: '2999-01-01',
+        },
       },
       [],
       {},
@@ -229,6 +260,7 @@ describe('validate - phone number, email and count formats', () => {
     expect(errors.individualData).toEqual({
       phoneNo: 'Enter a valid phone number with the country code',
       email: 'Enter a valid email address',
+      birthDate: 'Birth date cannot be in the future',
     });
   });
 });
