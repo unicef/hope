@@ -226,10 +226,12 @@ export function CreateLinkedPaymentPlanButton({
                 color="primary"
                 onClick={() => setDialogOpen(true)}
                 data-cy={`button-create-${variant}`}
-                data-perm={PERMISSIONS.PM_CREATE}
+                data-perm={PERMISSIONS.PM_PAYMENT_PLAN_CREATE}
                 disabled={
-                  !hasPermissions(PERMISSIONS.PM_CREATE, permissions) ||
-                  !isActiveProgram
+                  !hasPermissions(
+                    PERMISSIONS.PM_PAYMENT_PLAN_CREATE,
+                    permissions,
+                  ) || !isActiveProgram
                 }
               >
                 {labels.button}

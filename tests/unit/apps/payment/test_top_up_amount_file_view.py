@@ -52,7 +52,7 @@ def top_up_context(api_client: Callable, create_user_role_with_permissions: Any)
             payment=payment,
             snapshot_data={"unicef_id": payment.household.unicef_id, "size": payment.household.size},
         )
-    create_user_role_with_permissions(user, [Permissions.PM_CREATE], business_area, program)
+    create_user_role_with_permissions(user, [Permissions.PM_PAYMENT_PLAN_CREATE], business_area, program)
     source_payment_plan = source_pp.payment_plan
     source_payment_plan.status = PaymentPlan.Status.ACCEPTED
     source_payment_plan.save(update_fields=["status"])

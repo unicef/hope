@@ -75,7 +75,7 @@ def amendment_context(api_client: Callable, create_user_role_with_permissions: A
             payment=payment,
             snapshot_data={"unicef_id": payment.household.unicef_id, "size": payment.household.size},
         )
-    create_user_role_with_permissions(user, [Permissions.PM_CREATE], business_area, program)
+    create_user_role_with_permissions(user, [Permissions.PM_PAYMENT_PLAN_CREATE], business_area, program)
     url_kwargs = {
         "business_area_slug": business_area.slug,
         "program_code": program.code,

@@ -577,7 +577,7 @@ describe('PaymentPlanDetailsHeader', () => {
   });
 
   it('shows a create button for each linked payment plan the backend allows', () => {
-    mockUsePermissions.mockReturnValue([PERMISSIONS.PM_CREATE]);
+    mockUsePermissions.mockReturnValue([PERMISSIONS.PM_PAYMENT_PLAN_CREATE]);
     renderHeader(null, PaymentPlanStatusEnum.FINISHED, [], {
       canCreateFollowUp: true,
       canCreateTopUp: false,
@@ -590,7 +590,7 @@ describe('PaymentPlanDetailsHeader', () => {
   });
 
   it('shows no create buttons when the backend allows none', () => {
-    mockUsePermissions.mockReturnValue([PERMISSIONS.PM_CREATE]);
+    mockUsePermissions.mockReturnValue([PERMISSIONS.PM_PAYMENT_PLAN_CREATE]);
     renderHeader(null, PaymentPlanStatusEnum.ACCEPTED, [], {
       canCreateFollowUp: false,
       canCreateTopUp: false,

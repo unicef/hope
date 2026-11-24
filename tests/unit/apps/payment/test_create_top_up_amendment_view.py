@@ -82,7 +82,7 @@ def amendment_view_context(api_client: Callable, business_area: Any) -> dict[str
 @pytest.mark.parametrize(
     ("permissions", "expected_status"),
     [
-        ([Permissions.PM_CREATE], status.HTTP_201_CREATED),
+        ([Permissions.PM_PAYMENT_PLAN_CREATE], status.HTTP_201_CREATED),
         ([], status.HTTP_403_FORBIDDEN),
     ],
 )
@@ -114,7 +114,7 @@ def test_create_top_up_amendment_view_arrange_eligible_top_up_group_act_post_ass
 ) -> None:
     create_user_role_with_permissions(
         amendment_view_context["user"],
-        [Permissions.PM_CREATE],
+        [Permissions.PM_PAYMENT_PLAN_CREATE],
         amendment_view_context["business_area"],
         amendment_view_context["program"],
     )
@@ -141,7 +141,7 @@ def test_create_top_up_amendment_view_arrange_missing_dispersion_dates_act_post_
 ) -> None:
     create_user_role_with_permissions(
         amendment_view_context["user"],
-        [Permissions.PM_CREATE],
+        [Permissions.PM_PAYMENT_PLAN_CREATE],
         amendment_view_context["business_area"],
         amendment_view_context["program"],
     )
@@ -157,7 +157,7 @@ def test_create_top_up_amendment_view_arrange_end_date_before_start_act_post_ass
 ) -> None:
     create_user_role_with_permissions(
         amendment_view_context["user"],
-        [Permissions.PM_CREATE],
+        [Permissions.PM_PAYMENT_PLAN_CREATE],
         amendment_view_context["business_area"],
         amendment_view_context["program"],
     )
@@ -177,7 +177,7 @@ def test_create_top_up_amendment_view_arrange_end_date_in_past_act_post_assert_4
 ) -> None:
     create_user_role_with_permissions(
         amendment_view_context["user"],
-        [Permissions.PM_CREATE],
+        [Permissions.PM_PAYMENT_PLAN_CREATE],
         amendment_view_context["business_area"],
         amendment_view_context["program"],
     )

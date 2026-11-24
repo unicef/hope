@@ -4014,7 +4014,10 @@ def test_create_follow_up_rejects_in_approval_group_with_failed_payment(
     create_user_role_with_permissions: Any,
 ) -> None:
     create_user_role_with_permissions(
-        user, [Permissions.PM_CREATE, Permissions.PM_PAYMENT_PLAN_VIEW_DETAIL], business_area, program=program
+        user,
+        [Permissions.PM_PAYMENT_PLAN_CREATE, Permissions.PM_PAYMENT_PLAN_VIEW_DETAIL],
+        business_area,
+        program=program,
     )
     group = in_approval_group_with_failed_payment
 
@@ -4039,7 +4042,7 @@ def test_create_follow_up_on_group_with_permission_returns_linked_group(
     accepted_group_with_failed_payment: Any,
     create_user_role_with_permissions: Any,
 ) -> None:
-    create_user_role_with_permissions(user, [Permissions.PM_CREATE], business_area, program=program)
+    create_user_role_with_permissions(user, [Permissions.PM_PAYMENT_PLAN_CREATE], business_area, program=program)
 
     response = client.post(
         _group_action_url(business_area.slug, program.code, accepted_group_with_failed_payment.id, "create-follow-up"),
@@ -4074,7 +4077,7 @@ def test_create_follow_up_on_payment_gateway_group_keeps_use_payment_gateway(
     accepted_payment_gateway_group_with_failed_payment: Any,
     create_user_role_with_permissions: Any,
 ) -> None:
-    create_user_role_with_permissions(user, [Permissions.PM_CREATE], business_area, program=program)
+    create_user_role_with_permissions(user, [Permissions.PM_PAYMENT_PLAN_CREATE], business_area, program=program)
 
     response = client.post(
         _group_action_url(
