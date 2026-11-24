@@ -379,13 +379,13 @@ def test_filter_by_area(
 def test_filter_by_last_registration_date(
     client: Any, list_url: str, afghanistan: BusinessArea, program: Program
 ) -> None:
-    import datetime
+    import datetime as dt
 
     individual1, individual2 = _create_test_individuals(
         program,
         afghanistan,
-        individual1_data={"last_registration_date": timezone.make_aware(datetime.datetime(2021, 1, 1))},
-        individual2_data={"last_registration_date": timezone.make_aware(datetime.datetime(2023, 1, 1))},
+        individual1_data={"last_registration_date": timezone.make_aware(dt.datetime(2021, 1, 1))},
+        individual2_data={"last_registration_date": timezone.make_aware(dt.datetime(2023, 1, 1))},
     )
     response_after = client.get(list_url, {"last_registration_date_after": "2022-12-31"})
     assert response_after.status_code == status.HTTP_200_OK

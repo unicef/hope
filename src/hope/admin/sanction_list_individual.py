@@ -1,4 +1,4 @@
-import datetime
+import datetime as dt
 
 from adminfilters.autocomplete import AutoCompleteFilter
 from django.contrib import admin
@@ -44,5 +44,5 @@ class SanctionListIndividualAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
     readonly_fields = ("sanction_list", "reference_number", "data_id")
 
     @admin.display(description="Listed on", ordering="listed_on")
-    def listed_on_date(self, obj: SanctionListIndividual) -> datetime.date | None:
+    def listed_on_date(self, obj: SanctionListIndividual) -> dt.date | None:
         return utc_date(obj.listed_on) if obj.listed_on else None

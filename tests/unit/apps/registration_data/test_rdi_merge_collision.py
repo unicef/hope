@@ -1,4 +1,4 @@
-import datetime
+import datetime as dt
 from unittest.mock import patch
 
 import pytest
@@ -89,7 +89,7 @@ def pending_household(
         identification_key="IND-KEY-002",
         registration_data_import=in_review_rdi,
         household=None,
-        birth_date=datetime.date(2000, 1, 1),
+        birth_date=dt.date(2000, 1, 1),
     )
     household = PendingHouseholdFactory(
         unicef_id="HH-20-0000.0002",
@@ -131,7 +131,7 @@ def merged_household(
         identification_key="IND-KEY-001",
         registration_data_import=merged_rdi,
         household=None,
-        birth_date=datetime.date(1990, 1, 1),
+        birth_date=dt.date(1990, 1, 1),
     )
     ind2 = IndividualFactory(
         unicef_id="IND-00-0000.00134",
@@ -143,7 +143,7 @@ def merged_household(
         identification_key="IND-KEY-002",
         registration_data_import=merged_rdi,
         household=None,
-        birth_date=datetime.date(1995, 1, 1),
+        birth_date=dt.date(1995, 1, 1),
     )
     household = HouseholdFactory(
         unicef_id="HH-20-0000.2002",
@@ -180,7 +180,7 @@ def pending_household_one(program: Program, in_review_rdi: RegistrationDataImpor
         identification_key="MULTI-IND-KEY-001",
         registration_data_import=in_review_rdi,
         household=None,
-        birth_date=datetime.date(2000, 1, 1),
+        birth_date=dt.date(2000, 1, 1),
     )
     household = PendingHouseholdFactory(
         rdi_merge_status=MergeStatusModel.PENDING,
@@ -207,7 +207,7 @@ def pending_household_two(program: Program, in_review_rdi: RegistrationDataImpor
         identification_key="MULTI-IND-KEY-002",
         registration_data_import=in_review_rdi,
         household=None,
-        birth_date=datetime.date(2000, 1, 1),
+        birth_date=dt.date(2000, 1, 1),
     )
     household = PendingHouseholdFactory(
         rdi_merge_status=MergeStatusModel.PENDING,
@@ -234,7 +234,7 @@ def pending_household_three(program: Program, in_review_rdi: RegistrationDataImp
         identification_key="MULTI-IND-KEY-003",
         registration_data_import=in_review_rdi,
         household=None,
-        birth_date=datetime.date(2000, 1, 1),
+        birth_date=dt.date(2000, 1, 1),
     )
     household = PendingHouseholdFactory(
         rdi_merge_status=MergeStatusModel.PENDING,
@@ -261,7 +261,7 @@ def merged_target_one(program: Program, merged_rdi: RegistrationDataImport) -> H
         identification_key="MULTI-IND-KEY-001",
         registration_data_import=merged_rdi,
         household=None,
-        birth_date=datetime.date(1990, 1, 1),
+        birth_date=dt.date(1990, 1, 1),
     )
     return HouseholdFactory(
         rdi_merge_status=MergeStatusModel.MERGED,
@@ -285,7 +285,7 @@ def merged_target_two(program: Program, merged_rdi: RegistrationDataImport) -> H
         identification_key="MULTI-IND-KEY-002",
         registration_data_import=merged_rdi,
         household=None,
-        birth_date=datetime.date(1990, 1, 1),
+        birth_date=dt.date(1990, 1, 1),
     )
     return HouseholdFactory(
         rdi_merge_status=MergeStatusModel.MERGED,

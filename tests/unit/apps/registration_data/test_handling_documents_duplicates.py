@@ -1,4 +1,4 @@
-import datetime
+import datetime as dt
 
 from django.db import DEFAULT_DB_ALIAS, connections
 from django.test.utils import CaptureQueriesContext
@@ -72,7 +72,7 @@ def head_individual(business_area: object, program: object, registration_data_im
         phone_no_alternative="",
         relationship=HEAD,
         sex=MALE,
-        birth_date=datetime.date(1955, 9, 7),
+        birth_date=dt.date(1955, 9, 7),
     )
 
 
@@ -113,7 +113,7 @@ def individuals(
             phone_no_alternative="",
             relationship=WIFE_HUSBAND,
             sex=FEMALE,
-            birth_date=datetime.date(1955, 9, 5),
+            birth_date=dt.date(1955, 9, 5),
         ),
         IndividualFactory(
             household=household,
@@ -128,7 +128,7 @@ def individuals(
             phone_no_alternative="",
             relationship=SON_DAUGHTER,
             sex=MALE,
-            birth_date=datetime.date(1985, 8, 12),
+            birth_date=dt.date(1985, 8, 12),
         ),
         IndividualFactory(
             household=household,
@@ -143,7 +143,7 @@ def individuals(
             phone_no_alternative="",
             relationship=SON_DAUGHTER,
             sex=MALE,
-            birth_date=datetime.date(1985, 8, 12),
+            birth_date=dt.date(1985, 8, 12),
         ),
         IndividualFactory(
             household=household,
@@ -158,7 +158,7 @@ def individuals(
             phone_no_alternative="",
             relationship=SON_DAUGHTER,
             sex=MALE,
-            birth_date=datetime.date(1985, 8, 12),
+            birth_date=dt.date(1985, 8, 12),
         ),
         IndividualFactory(
             household=household,
@@ -173,7 +173,7 @@ def individuals(
             phone_no_alternative="",
             relationship=SON_DAUGHTER,
             sex=MALE,
-            birth_date=datetime.date(1985, 8, 12),
+            birth_date=dt.date(1985, 8, 12),
         ),
     ]
     household.head_of_household = head_individual
