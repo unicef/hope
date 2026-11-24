@@ -201,6 +201,31 @@ def _create_closed_payment_plan(afghanistan, admin_user, program_cycle, log=None
 
 
 @pytest.fixture
+def closed_vision_payment_plan(vision_admin_context) -> PaymentPlan:
+    return _create_closed_payment_plan(
+        vision_admin_context["business_area"],
+        vision_admin_context["user"],
+        vision_admin_context["program_cycle"],
+    )
+
+
+@pytest.fixture
+def failed_closure_payment_plan(vision_admin_context) -> PaymentPlan:
+    return _create_closed_payment_plan(
+        vision_admin_context["business_area"],
+        vision_admin_context["user"],
+        vision_admin_context["program_cycle"],
+        log=[
+            {
+                "type": VisionLogEntryType.CLOSURE_NOTIFICATION.value,
+                "payload": {},
+                "response": {"error": "Vision request failed"},
+            }
+        ],
+    )
+
+
+@pytest.fixture
 def closure_notified_payment_plan(vision_admin_context) -> PaymentPlan:
     return _create_closed_payment_plan(
         vision_admin_context["business_area"],
@@ -217,82 +242,67 @@ def closure_notified_payment_plan(vision_admin_context) -> PaymentPlan:
 
 
 def test_send_closure_to_vision_button_visible_when_closure_never_sent(
-    afghanistan, admin_user, program_cycle, admin_client
+    closed_vision_payment_plan: PaymentPlan, admin_client, django_assert_num_queries
 ) -> None:
-    FlagState.objects.get_or_create(name="VISION_INTEGRATION_ACTIVE", condition="boolean", value="True")
-    pp = _create_closed_payment_plan(afghanistan, admin_user, program_cycle)
-    response = admin_client.get(reverse("admin:payment_paymentplan_change", args=[pp.pk]))
+    with django_assert_num_queries(14):
+        response = admin_client.get(reverse("admin:payment_paymentplan_change", args=[closed_vision_payment_plan.pk]))
     assert response.status_code == 200
     assert 'id="btn-send_closure_to_vision"' in response.content.decode()
 
 
 def test_send_closure_to_vision_button_visible_when_closure_failed(
-    afghanistan, admin_user, program_cycle, admin_client
+    failed_closure_payment_plan: PaymentPlan, admin_client, django_assert_num_queries
 ) -> None:
-    FlagState.objects.get_or_create(name="VISION_INTEGRATION_ACTIVE", condition="boolean", value="True")
-    pp = _create_closed_payment_plan(
-        afghanistan,
-        admin_user,
-        program_cycle,
-        log=[
-            {
-                "type": VisionLogEntryType.CLOSURE_NOTIFICATION.value,
-                "payload": {},
-                "response": {"error": "Vision request failed"},
-            }
-        ],
-    )
-    response = admin_client.get(reverse("admin:payment_paymentplan_change", args=[pp.pk]))
+    with django_assert_num_queries(15):
+        response = admin_client.get(reverse("admin:payment_paymentplan_change", args=[failed_closure_payment_plan.pk]))
     assert response.status_code == 200
     assert 'id="btn-send_closure_to_vision"' in response.content.decode()
 
 
 def test_send_closure_to_vision_button_hidden_when_closure_succeeded(
-    closure_notified_payment_plan: PaymentPlan, admin_client
+    closure_notified_payment_plan: PaymentPlan, admin_client, django_assert_num_queries
 ) -> None:
-    response = admin_client.get(reverse("admin:payment_paymentplan_change", args=[closure_notified_payment_plan.pk]))
+    with django_assert_num_queries(14):
+        response = admin_client.get(
+            reverse("admin:payment_paymentplan_change", args=[closure_notified_payment_plan.pk])
+        )
     assert response.status_code == 200
     assert 'id="btn-send_closure_to_vision"' not in response.content.decode()
 
 
-def test_send_closure_to_vision_get_returns_confirmation(afghanistan, admin_user, program_cycle, admin_client) -> None:
-    FlagState.objects.get_or_create(name="VISION_INTEGRATION_ACTIVE", condition="boolean", value="True")
-    pp = _create_closed_payment_plan(afghanistan, admin_user, program_cycle)
-    url = reverse("admin:payment_paymentplan_send_closure_to_vision", args=[pp.pk])
-    response = admin_client.get(url)
+def test_send_closure_to_vision_get_returns_confirmation(
+    closed_vision_payment_plan: PaymentPlan, admin_client, django_assert_num_queries
+) -> None:
+    url = reverse("admin:payment_paymentplan_send_closure_to_vision", args=[closed_vision_payment_plan.pk])
+    with django_assert_num_queries(4):
+        response = admin_client.get(url)
     assert response.status_code == 200
     assert "Do you confirm to send this payment plan closure to Vision?" in response.content.decode()
 
 
 @patch("hope.admin.payment_plan.notify_payment_plan_closure_to_vision_async_task")
 def test_send_closure_to_vision_queues_task(
-    mock_notify_closure, afghanistan, admin_user, program_cycle, admin_client
+    mock_notify_closure,
+    failed_closure_payment_plan: PaymentPlan,
+    admin_user,
+    admin_client,
+    django_assert_num_queries,
 ) -> None:
-    pp = _create_closed_payment_plan(
-        afghanistan,
-        admin_user,
-        program_cycle,
-        log=[
-            {
-                "type": VisionLogEntryType.CLOSURE_NOTIFICATION.value,
-                "payload": {},
-                "response": {"error": "Vision request failed"},
-            }
-        ],
-    )
-    url = reverse("admin:payment_paymentplan_send_closure_to_vision", args=[pp.pk])
-    response = admin_client.post(url)
+    url = reverse("admin:payment_paymentplan_send_closure_to_vision", args=[failed_closure_payment_plan.pk])
+    with django_assert_num_queries(3):
+        response = admin_client.post(url)
     assert response.status_code == 302, response.content[:500]
-    mock_notify_closure.assert_called_once_with(pp, str(admin_user.pk))
+    mock_notify_closure.assert_called_once_with(failed_closure_payment_plan, str(admin_user.pk))
 
 
 @patch("hope.admin.payment_plan.notify_payment_plan_closure_to_vision_async_task")
 def test_send_closure_to_vision_post_skips_successful_notification(
-    mock_notify_closure, closure_notified_payment_plan: PaymentPlan, admin_client
+    mock_notify_closure, closure_notified_payment_plan: PaymentPlan, admin_client, django_assert_num_queries
 ) -> None:
-    response = admin_client.post(
-        reverse("admin:payment_paymentplan_send_closure_to_vision", args=[closure_notified_payment_plan.pk])
-    )
+    with django_assert_num_queries(3):
+        response = admin_client.post(
+            reverse("admin:payment_paymentplan_send_closure_to_vision", args=[closure_notified_payment_plan.pk])
+        )
 
     assert response.status_code == 302
     mock_notify_closure.assert_not_called()

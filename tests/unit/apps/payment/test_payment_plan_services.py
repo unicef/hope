@@ -2540,6 +2540,7 @@ def test_close_queues_vision_closure_notification_when_sent_to_vision(
     business_area: Any,
     cycle: ProgramCycle,
     django_capture_on_commit_callbacks,
+    django_assert_num_queries: Any,
 ) -> None:
     payment_plan = PaymentPlanFactory(
         program_cycle=cycle,
@@ -2548,7 +2549,7 @@ def test_close_queues_vision_closure_notification_when_sent_to_vision(
         internal_data={"vision": {"sent": True, "vision_id": "V12345"}},
     )
 
-    with django_capture_on_commit_callbacks(execute=True):
+    with django_assert_num_queries(13), django_capture_on_commit_callbacks(execute=True):
         PaymentPlanService(payment_plan).close(closure_comment="Comment", user_id=str(user.pk))
 
     payment_plan.refresh_from_db()
@@ -2563,6 +2564,7 @@ def test_close_does_not_queue_vision_closure_notification_when_not_sent_to_visio
     business_area: Any,
     cycle: ProgramCycle,
     django_capture_on_commit_callbacks,
+    django_assert_num_queries: Any,
 ) -> None:
     payment_plan = PaymentPlanFactory(
         program_cycle=cycle,
@@ -2570,7 +2572,7 @@ def test_close_does_not_queue_vision_closure_notification_when_not_sent_to_visio
         status=PaymentPlan.Status.READY_FOR_CLOSURE,
     )
 
-    with django_capture_on_commit_callbacks(execute=True):
+    with django_assert_num_queries(13), django_capture_on_commit_callbacks(execute=True):
         PaymentPlanService(payment_plan).close(closure_comment="Comment", user_id=str(user.pk))
 
     payment_plan.refresh_from_db()
