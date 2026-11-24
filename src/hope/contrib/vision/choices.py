@@ -18,6 +18,14 @@ class VisionStatus(StrEnum):
     RELEASED = "RELEASED"
 
 
+class VisionCallbackResult(StrEnum):
+    SUCCESS = "SUCCESS"
+    FC_CREATE = "FC CREATE"
+
+
+VISION_SUCCESSFUL_CALLBACK_RESULTS = frozenset({VisionCallbackResult.SUCCESS, VisionCallbackResult.FC_CREATE})
+
+
 VISION_RECOVERABLE_STATUSES = frozenset(
     {
         VisionStatus.SEND_FAILED.value,

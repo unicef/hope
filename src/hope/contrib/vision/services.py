@@ -5,6 +5,8 @@ from hope.apps.activity_log.utils import copy_model_object
 from hope.contrib.vision.choices import (
     VISION_CREATION_ACKNOWLEDGEMENT_MUTABLE_STATUSES,
     VISION_RECOVERABLE_STATUSES,
+    VISION_SUCCESSFUL_CALLBACK_RESULTS,
+    VisionCallbackResult,
     VisionErrorCode,
     VisionStatus,
 )
@@ -117,43 +119,42 @@ class VisionService:
         if payment_plan.vision_status not in VISION_RECOVERABLE_STATUSES:
             return False
 
-        normalized_fc_numbers = list(dict.fromkeys(fc_numbers))
         # Any callback for the active request confirms that Vision received the Payment Plan.
         vision_data["sent"] = True
-        is_payment_plan_created_acknowledgement = vision_result == "SUCCESS" and not normalized_fc_numbers
-        is_successful_fc_callback = vision_result == "SUCCESS" or (
-            vision_result == "FC CREATE" and bool(normalized_fc_numbers)
-        )
-        fc_assignment_failed = False
-        if is_payment_plan_created_acknowledgement:
-            # A repeated creation acknowledgement must not replace a later FC result or failure.
-            if payment_plan.vision_status in VISION_CREATION_ACKNOWLEDGEMENT_MUTABLE_STATUSES:
-                vision_data["vision_id"] = vision_payment_plan_id
-                vision_data.pop("fc_numbers", None)
-                cls.set_status(payment_plan, VisionStatus.PP_CREATED)
+        if vision_result not in VISION_SUCCESSFUL_CALLBACK_RESULTS or (
+            vision_result == VisionCallbackResult.FC_CREATE and not fc_numbers
+        ):
+            cls.set_status(
+                payment_plan,
+                VisionStatus.CALLBACK_FAILED,
+                error_code=VisionErrorCode.VISION_STATUS_FAILED,
+            )
+            return False
+
+        normalized_fc_numbers = list(dict.fromkeys(fc_numbers))
+        is_pp_creation_acknowledgement = vision_result == VisionCallbackResult.SUCCESS and not normalized_fc_numbers
+        # A repeated creation acknowledgement must not replace a later FC result or failure.
+        if (
+            is_pp_creation_acknowledgement
+            and payment_plan.vision_status not in VISION_CREATION_ACKNOWLEDGEMENT_MUTABLE_STATUSES
+        ):
+            return False
+
+        vision_data["vision_id"] = vision_payment_plan_id
+        if is_pp_creation_acknowledgement:
+            vision_data.pop("fc_numbers", None)
+            cls.set_status(payment_plan, VisionStatus.PP_CREATED)
         else:
-            vision_data["vision_id"] = vision_payment_plan_id
-            if normalized_fc_numbers:
-                vision_data["fc_numbers"] = normalized_fc_numbers
-            else:
-                # Do not display FC numbers from an earlier callback when the latest callback did not provide any.
-                vision_data.pop("fc_numbers", None)
-            if not is_successful_fc_callback:
-                cls.set_status(
-                    payment_plan,
-                    VisionStatus.CALLBACK_FAILED,
-                    error_code=VisionErrorCode.VISION_STATUS_FAILED,
-                )
-            else:
-                try:
-                    cls.assign_funds_commitment_headers_from_callback(payment_plan, normalized_fc_numbers)
-                except FundsCommitmentAssignmentError as error:
-                    cls.set_status(payment_plan, error.status, error_code=error.error_code)
-                    fc_assignment_failed = True
-                else:
-                    # Successful assignment completes release and continues to PG or XLSX delivery.
-                    cls.complete_funds_commitment_assignment(payment_plan)
-        return fc_assignment_failed
+            vision_data["fc_numbers"] = normalized_fc_numbers
+            try:
+                cls.assign_funds_commitment_headers_from_callback(payment_plan, normalized_fc_numbers)
+            except FundsCommitmentAssignmentError as error:
+                cls.set_status(payment_plan, error.status, error_code=error.error_code)
+                return True
+
+            # Successful assignment completes release and continues to PG or XLSX delivery.
+            cls.complete_funds_commitment_assignment(payment_plan)
+        return False
 
     @classmethod
     def complete_funds_commitment_assignment(cls, payment_plan: PaymentPlan) -> None:

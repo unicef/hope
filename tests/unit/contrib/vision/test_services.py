@@ -284,7 +284,6 @@ def test_process_callback_empty_status_does_not_confirm_plan_creation(
     assert vision_payment_plan.status == PaymentPlan.Status.IN_REVIEW
     assert vision_payment_plan.vision_data == {
         "sent": True,
-        "vision_id": "00000110",
         "status": VisionStatus.CALLBACK_FAILED.value,
         "error_code": VisionErrorCode.VISION_STATUS_FAILED.value,
     }
@@ -416,25 +415,30 @@ def test_callback_placeholder_keeps_header_and_payment_plan_link_after_vision_sy
     assert item.funds_commitment_header_id == synced_header.pk
 
 
-def test_process_callback_failure_stores_returned_fc_numbers(
+@pytest.mark.parametrize("fc_numbers", [[], ["FC123"]])
+def test_process_callback_failure_preserves_existing_fc_metadata(
     vision_payment_plan: PaymentPlan,
     django_assert_num_queries,
+    fc_numbers: list[str],
 ) -> None:
     VisionService.set_status(vision_payment_plan, VisionStatus.WAITING_FOR_CALLBACK)
+    vision_data = VisionService.vision_data(vision_payment_plan)
+    vision_data["vision_id"] = "VISION-OLD"
+    vision_data["fc_numbers"] = ["FC-OLD"]
     with django_assert_num_queries(1):
         fc_assignment_failed = VisionService.process_callback(
             vision_payment_plan,
             vision_payment_plan_id="VISION-1",
             vision_result="ERROR",
-            fc_numbers=["FC123"],
+            fc_numbers=fc_numbers,
         )
 
     assert fc_assignment_failed is False
     assert vision_payment_plan.status == PaymentPlan.Status.IN_REVIEW
     assert vision_payment_plan.vision_data == {
         "sent": True,
-        "vision_id": "VISION-1",
-        "fc_numbers": ["FC123"],
+        "vision_id": "VISION-OLD",
+        "fc_numbers": ["FC-OLD"],
         "status": VisionStatus.CALLBACK_FAILED.value,
         "error_code": VisionErrorCode.VISION_STATUS_FAILED.value,
     }
@@ -458,7 +462,6 @@ def test_process_callback_fc_create_without_numbers_records_failure(
     assert vision_payment_plan.status == PaymentPlan.Status.IN_REVIEW
     assert vision_payment_plan.vision_data == {
         "sent": True,
-        "vision_id": "VISION-1",
         "status": VisionStatus.CALLBACK_FAILED.value,
         "error_code": VisionErrorCode.VISION_STATUS_FAILED.value,
     }
@@ -481,8 +484,6 @@ def test_process_callback_records_failure_when_fc_callback_has_no_success_status
     assert fc_assignment_failed is False
     assert vision_payment_plan.vision_data == {
         "sent": True,
-        "vision_id": "VISION-1",
-        "fc_numbers": ["FC123"],
         "status": VisionStatus.CALLBACK_FAILED.value,
         "error_code": VisionErrorCode.VISION_STATUS_FAILED.value,
     }

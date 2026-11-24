@@ -597,7 +597,7 @@ def test_callback_view_empty_status_does_not_confirm_plan_creation(mock_get, moc
     }
     vision_data = mock_pp.internal_data["vision"]
     assert vision_data["sent"] is True
-    assert vision_data["vision_id"] == "00000110"
+    assert "vision_id" not in vision_data
     assert vision_data["status"] == VisionStatus.CALLBACK_FAILED.value
     assert vision_data["error_code"] == VisionErrorCode.VISION_STATUS_FAILED.value
     entry = vision_data["log"][0]
@@ -860,7 +860,7 @@ def test_callback_view_non_success_status(mock_get, mock_log_entry) -> None:
     assert entry["payload"]["payplanSno"] == "PP043"
     assert entry["payload"]["error_message"] == "something went wrong"
     assert entry["response"]["status"] == "OK"
-    assert mock_pp.internal_data["vision"]["vision_id"] == "00000062"
+    assert "vision_id" not in mock_pp.internal_data["vision"]
     assert mock_pp.internal_data["vision"]["sent"] is True
     assert mock_pp.internal_data["vision"]["status"] == "CALLBACK_FAILED"
     assert mock_pp.internal_data["vision"]["error_code"] == "VISION_STATUS_FAILED"
