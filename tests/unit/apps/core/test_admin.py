@@ -11,7 +11,7 @@ from django.urls import reverse
 from django.utils import timezone
 import pytest
 
-from extras.test_utils.factories import BusinessAreaFactory, ProgramFactory
+from extras.test_utils.factories import BusinessAreaFactory, PayeeTypeFactory, ProgramFactory
 from hope.admin.async_job import (
     AsyncJobAdmin,
     UsedContentTypeListFilter,
@@ -32,6 +32,7 @@ from hope.contrib.vision.models import FundsCommitmentItem
 from hope.models import (
     AsyncJob,
     Household,
+    PayeeType,
     Payment,
     PeriodicAsyncJob,
     Program,
@@ -94,6 +95,16 @@ def program(business_area) -> Program:
         status=Program.ACTIVE,
         business_area=business_area,
     )
+
+
+@pytest.fixture
+def household_payee_type() -> PayeeType:
+    return PayeeTypeFactory(name="Household", gl_code="7700410", description="")
+
+
+@pytest.fixture
+def incentive_payee_type() -> PayeeType:
+    return PayeeTypeFactory(name="Incentive Payee", gl_code="7700430", description="a" * 100)
 
 
 def test_async_job_admin_changelist_loads(client_logged, program) -> None:
@@ -840,3 +851,19 @@ def test_periodic_async_job_admin_requires_own_permissions(
     response = staff_client_without_recover_permission.get(url)
 
     assert response.status_code == 403
+
+
+def test_payee_type_admin_changelist_truncates_description(client_logged, incentive_payee_type) -> None:
+    response = client_logged.get(reverse("admin:core_payeetype_changelist"))
+
+    assert response.status_code == 200
+    content = response.content.decode()
+    assert "a" * 79 + "…" in content
+    assert "a" * 80 not in content
+
+
+def test_payee_type_admin_searches_by_description(client_logged, household_payee_type, incentive_payee_type) -> None:
+    response = client_logged.get(reverse("admin:core_payeetype_changelist"), {"q": "aaaaa"})
+
+    assert response.status_code == 200
+    assert list(response.context["cl"].result_list) == [incentive_payee_type]

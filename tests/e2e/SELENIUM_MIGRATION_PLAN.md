@@ -77,8 +77,8 @@ Legend: `NEW <new_selenium/...>` · `COVERED <existing new test>` (verify assert
 - [x] Delete `page_object/error_page/` and the `page_error` / `page_access_denied` fixtures
 
 ### 3. `program_log/test_program_log.py` (2) → `new_selenium/activity_log/test_activity_log.py`
-- [x] test_smoke_program_log → NEW `test_activity_log_lists_entry[programme-log]` (entry created by `LogEntryFactory`; the finish flow itself is covered by `program_details/test_programme_status.py::test_finish_programme`)
-- [x] test_smoke_activity_log → NEW `test_activity_log_lists_entry[activity-log]`
+- [x] test_smoke_program_log → NEW `test_activity_log_lists_entry[programme-log]` (entry created by `LogEntryFactory`) + `test_finishing_programme_is_logged[programme-log]` (entry created by finishing the programme in the UI)
+- [x] test_smoke_activity_log → NEW `test_activity_log_lists_entry[activity-log]` + `test_finishing_programme_is_logged[activity-log]`
 - [x] Delete `page_object/program_log/` and the `page_program_log` fixture
 
 ### 4. `programme_user/test_programme_user.py` (1) → `new_selenium/program_details/test_programme_users.py`
@@ -281,8 +281,3 @@ Already in new suite: `test_grievance_tickets.py` (referral), `test_my_tasks.py`
 - [ ] Remove the "Existing raw Selenium tests…" note from `SELENIUM_E2E_PATTERNS.md`, update `tests/e2e/README.md`
 - [ ] Check CI / tox / compose files (`compose.selenium.yml`, `.github/workflows`) for paths to old dirs
 - [ ] Final: `tox -e tests -- pytest --no-migrations --create-db tests/e2e`, `tox -e lint`, `tox -e mypy` green; the recount command prints 0
-
-## Verification (per PR)
-- `tox -e tests -- pytest --no-migrations --create-db tests/e2e/new_selenium/<module>/` green, plus one `-n auto` run for xdist isolation
-- `tox -e lint`, `tox -e mypy`
-- Old test file removed and the counter table updated

@@ -16,7 +16,7 @@ from extras.test_utils.factories import (
     UserFactory,
 )
 from hope.apps.account.permissions import Permissions
-from hope.models import BusinessArea, Partner, PaymentList, Program, ProgramCycle, User
+from hope.models import BusinessArea, LogEntry, Partner, PaymentList, Program, ProgramCycle, User
 
 pytestmark = pytest.mark.django_db
 
@@ -68,6 +68,7 @@ def authenticated_client(api_client: Callable, user: User) -> Any:
     return api_client(user)
 
 
+@pytest.mark.enable_activity_log
 def test_finish_program_with_permission(
     authenticated_client: Any,
     user: User,
@@ -90,6 +91,13 @@ def test_finish_program_with_permission(
     program.refresh_from_db()
     assert program.status == Program.FINISHED
     assert response.json() == {"message": "Program Finished."}
+
+    log_entry = LogEntry.objects.get(object_id=program.id)
+    assert log_entry.action == LogEntry.UPDATE
+    assert log_entry.user == user
+    assert log_entry.business_area == afghanistan
+    assert list(log_entry.programs.all()) == [program]
+    assert log_entry.changes["status"] == {"from": Program.ACTIVE, "to": Program.FINISHED}
 
 
 @pytest.mark.parametrize(

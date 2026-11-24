@@ -1,6 +1,7 @@
 from typing import TYPE_CHECKING, Any
 
 from django import forms
+from django.contrib.admin.widgets import FilteredSelectMultiple
 from django.contrib.postgres.forms import DecimalRangeField
 
 from hope.contrib.vision.models import FundsCommitmentHeader
@@ -14,6 +15,7 @@ class VisionFundsCommitmentHeaderAssignmentForm(forms.Form):
     funds_commitment_headers = forms.ModelMultipleChoiceField(
         queryset=FundsCommitmentHeader.objects.none(),
         label="Funds Commitment Headers",
+        widget=FilteredSelectMultiple("Funds Commitment Headers", is_stacked=False),
     )
 
     def __init__(self, *args: Any, payment_plan: "PaymentPlan", **kwargs: Any) -> None:
