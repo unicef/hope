@@ -331,7 +331,7 @@ def prepare_previous_documents(
             "document_number": document.document_number,
             "individual": str(document.individual.id),
             "key": document.type.key,
-            "country": document.country.iso_code3,
+            "country": document.country.iso_code3 if document.country else None,
         }
 
     return previous_documents
@@ -366,7 +366,7 @@ def prepare_edit_documents(documents_to_edit: list[Document]) -> list[dict]:
                 "previous_value": {
                     "id": document_id,
                     "key": document.type.key,
-                    "country": document.country.iso_code3,
+                    "country": document.country.iso_code3 if document.country else None,
                     "number": document.document_number,
                     "photo": document.photo.url if document.photo else None,
                     "photoraw": document.photo.name if document.photo else None,
@@ -389,7 +389,7 @@ def prepare_previous_identities(
             "number": identity.number,
             "individual": str(identity.individual.id),
             "partner": identity.partner.name,
-            "country": identity.country.iso_code3,
+            "country": identity.country.iso_code3 if identity.country else None,
         }
 
     return previous_identities
@@ -417,7 +417,7 @@ def prepare_edit_identities(identities: list[dict]) -> list[dict]:
                 },
                 "previous_value": {
                     "id": identity_id,
-                    "country": identity.country.iso_code3,
+                    "country": identity.country.iso_code3 if identity.country else None,
                     "partner": identity.partner.name,
                     "individual": str(identity.individual.id),
                     "number": identity.number,

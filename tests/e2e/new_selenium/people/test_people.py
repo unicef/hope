@@ -1,6 +1,9 @@
+from datetime import date
+
+from dateutil.relativedelta import relativedelta
 import pytest
 
-from e2e.new_selenium.people.conftest import BIRTH_DATE, PEOPLE_MENU
+from e2e.new_selenium.people.conftest import PEOPLE_MENU
 from e2e.new_selenium.programme_population.conftest import assert_texts, open_from_menu
 from extras.test_utils.selenium import HopeTestBrowser, ui_date
 from hope.apps.household.const import FEMALE
@@ -38,8 +41,7 @@ DETAILS_LABELS = {
     "Middle Name": "-",
     "Family Name": "Freeman",
     "Gender": "Male",
-    "Age": "40",
-    "Date of Birth": ui_date(BIRTH_DATE),
+    "Date of Birth": "15 Jan 1986",
     "Estimated Date of Birth": "No",
     "Marital Status": "Married",
     "Work Status": "Not provided",
@@ -100,6 +102,8 @@ def test_person_details_shows_person(person: Individual, program: Program, login
 
     login.assert_text(f"Individual ID: {person.unicef_id}", PAGE_TITLE)
     assert_texts(login, DETAILS)
+    age = relativedelta(date.today(), person.birth_date).years
+    login.assert_exact_text(str(age), label("Age"))
     rdi = person.registration_data_import
     login.assert_text(program.data_collecting_type.label, label("Data Collecting Type"))
     login.assert_text("Rows per page:", TABLE_PAGINATION)

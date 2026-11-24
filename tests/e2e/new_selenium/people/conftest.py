@@ -1,6 +1,5 @@
 from datetime import date
 
-from dateutil.relativedelta import relativedelta
 import pytest
 
 from e2e.new_selenium.programme_population.conftest import create_pdu_attribute
@@ -27,9 +26,6 @@ from hope.models import (
 )
 
 PEOPLE_MENU = ("People",)
-
-# Born a day past the 40th birthday, so the age shown is 40 whatever day the test runs.
-BIRTH_DATE = date.today() - relativedelta(years=40, days=1)
 
 
 @pytest.fixture
@@ -59,7 +55,7 @@ def person(program: Program, business_area: BusinessArea) -> Individual:
         middle_name="",
         family_name="Freeman",
         sex=MALE,
-        birth_date=BIRTH_DATE,
+        birth_date=date(1986, 1, 15),
         marital_status=MARRIED,
         pregnant=False,
         relationship=HEAD,
@@ -75,7 +71,7 @@ def person(program: Program, business_area: BusinessArea) -> Individual:
         village="Test Village",
         size=1,
     )
-    # No country on purpose: the grievance edit form used to crash on document.country.name.
+    # Document.country is nullable; a document without one must not break the person page or the grievance form.
     DocumentFactory(individual=person)
     person.refresh_from_db()
     return person
