@@ -112,7 +112,7 @@ def rounds_data(attribute: FlexibleAttribute) -> list[dict[str, Any]]:
     ]
 
 
-def exported_template(program: Program, attribute: FlexibleAttribute) -> PDUXlsxTemplate:
+def create_template_with_xlsx(program: Program, attribute: FlexibleAttribute) -> PDUXlsxTemplate:
     template = PDUXlsxTemplate.objects.create(
         program=program,
         business_area=program.business_area,
@@ -125,14 +125,13 @@ def exported_template(program: Program, attribute: FlexibleAttribute) -> PDUXlsx
     return template
 
 
-def prepare_xlsx_file(attribute: FlexibleAttribute, rows: list[list[Any]], path: Path) -> Path:
-    """Export a template for `attribute` and fill its PDU sheet with `rows` (value, collection date)."""
-    template = exported_template(attribute.program, attribute)
+def prepare_xlsx_file(attribute: FlexibleAttribute, value: str, collection_date: str, path: Path) -> Path:
+    """Export a template for `attribute` and fill its first PDU row with `value` and `collection_date`."""
+    template = create_template_with_xlsx(attribute.program, attribute)
     workbook = openpyxl.load_workbook(template.file.file)
     sheet = workbook[PDUXlsxExportTemplateService.PDU_SHEET]
-    for row_index, row in enumerate(rows, start=2):
-        for col_index, value in enumerate(row, start=7):
-            sheet.cell(row=row_index, column=col_index, value=value)
+    sheet["G2"] = value
+    sheet["H2"] = collection_date
     workbook.save(path)
     return path
 
@@ -176,7 +175,7 @@ def upload_xlsx(
     browser.click(BUTTON_IMPORT_SUBMIT)
 
 
-def assert_texts(browser: HopeTestBrowser, expected: dict[str, str]) -> None:
-    """Assert each selector in `expected` contains its text."""
+def assert_exact_texts(browser: HopeTestBrowser, expected: dict[str, str]) -> None:
+    """Assert each selector in `expected` shows exactly its text."""
     for selector, text in expected.items():
-        browser.assert_text(text, selector)
+        browser.assert_exact_text(text, selector)

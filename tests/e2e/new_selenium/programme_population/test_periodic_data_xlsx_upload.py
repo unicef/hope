@@ -6,7 +6,7 @@ import pytest
 from e2e.new_selenium.programme_population.conftest import (
     PDU_FORM_ERRORS,
     STATUS_CONTAINER,
-    exported_template,
+    create_template_with_xlsx,
     open_pdu_tab,
     prepare_xlsx_file,
     rounds_data,
@@ -27,19 +27,19 @@ PDU_UPLOAD_ERROR = 'div[data-cy="pdu-upload-error"]'
 
 @pytest.fixture
 def valid_xlsx(individual: Individual, string_attribute: FlexibleAttribute, tmp_path: Path) -> Path:
-    return prepare_xlsx_file(string_attribute, [["Test Value", "2021-05-02"]], tmp_path / "valid.xlsx")
+    return prepare_xlsx_file(string_attribute, "Test Value", "2021-05-02", tmp_path / "valid.xlsx")
 
 
 @pytest.fixture
 def invalid_date_xlsx(individual: Individual, date_attribute: FlexibleAttribute, tmp_path: Path) -> Path:
-    return prepare_xlsx_file(date_attribute, [["Test Value", "2021-05-02"]], tmp_path / "invalid_date.xlsx")
+    return prepare_xlsx_file(date_attribute, "Test Value", "2021-05-02", tmp_path / "invalid_date.xlsx")
 
 
 @pytest.fixture
 def unknown_template_xlsx(
     individual: Individual, string_attribute: FlexibleAttribute, program: Program, tmp_path: Path
 ) -> Path:
-    template = exported_template(program, string_attribute)
+    template = create_template_with_xlsx(program, string_attribute)
     workbook = openpyxl.load_workbook(template.file.file)
     del workbook.custom_doc_props[PDUXlsxExportTemplateService.PROPERTY_ID_NAME]
     workbook[PDUXlsxExportTemplateService.META_SHEET][PDUXlsxExportTemplateService.META_ID_ADDRESS] = "-1"
@@ -107,8 +107,8 @@ def test_upload_xlsx_for_unknown_template_shows_error(
 def test_uploads_list_shows_upload(successful_upload: PDUXlsxUpload, program: Program, login: HopeTestBrowser) -> None:
     open_pdu_tab(login, program, "offline-edits")
 
-    login.assert_text(str(successful_upload.pk), update_cell("id", successful_upload))
-    login.assert_text(str(successful_upload.template.pk), update_cell("template", successful_upload))
+    login.assert_exact_text(str(successful_upload.pk), update_cell("id", successful_upload))
+    login.assert_exact_text(str(successful_upload.template.pk), update_cell("template", successful_upload))
     login.assert_text(f"{successful_upload.created_at:%-d %b %Y}", update_cell("created-at", successful_upload))
     login.assert_text(successful_upload.created_by.get_full_name(), update_cell("created-by", successful_upload))
     login.assert_text("Successful", update_cell("status", successful_upload))

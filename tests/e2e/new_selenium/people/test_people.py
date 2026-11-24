@@ -4,7 +4,7 @@ from dateutil.relativedelta import relativedelta
 import pytest
 
 from e2e.new_selenium.people.conftest import PEOPLE_MENU
-from e2e.new_selenium.programme_population.conftest import assert_texts, open_from_menu
+from e2e.new_selenium.programme_population.conftest import assert_exact_texts, open_from_menu
 from extras.test_utils.selenium import HopeTestBrowser, ui_date
 from hope.apps.household.const import FEMALE
 from hope.models import Individual, Payment, Program
@@ -90,7 +90,7 @@ def test_people_list_is_empty_without_people(program: Program, login: HopeTestBr
     login.assert_text("Rows per page:", TABLE_PAGINATION)
     login.assert_exact_text("10", ROWS_PER_PAGE)
     login.assert_text("0–0 of 0", TABLE_PAGINATION)
-    assert_texts(login, LIST_COLUMNS)
+    assert_exact_texts(login, LIST_COLUMNS)
 
 
 def test_person_details_shows_person(person: Individual, program: Program, login: HopeTestBrowser) -> None:
@@ -101,7 +101,7 @@ def test_person_details_shows_person(person: Individual, program: Program, login
     login.click(PERSON_ROW)
 
     login.assert_text(f"Individual ID: {person.unicef_id}", PAGE_TITLE)
-    assert_texts(login, DETAILS)
+    assert_exact_texts(login, DETAILS)
     age = relativedelta(date.today(), person.birth_date).years
     login.assert_exact_text(str(age), label("Age"))
     rdi = person.registration_data_import
@@ -164,8 +164,10 @@ def test_person_data_updated_after_grievance_ticket_processed(
     login.wait_for_element_visible(REQUESTED_CHANGE, timeout=60)
     gender_row = 'tr[role="checkbox"]:nth-child(1)'
     language_row = 'tr[role="checkbox"]:nth-child(2)'
-    assert_texts(login, {gender_row: "Gender", language_row: "Preferred Language"})
-    assert_texts(login, {gender_row: "Female", language_row: "English"})
+    login.assert_text("Gender", gender_row)
+    login.assert_text("Female", gender_row)
+    login.assert_text("Preferred Language", language_row)
+    login.assert_text("English", language_row)
 
     js_click(login, 'button[data-cy="button-assign"]')
     js_click(login, 'button[data-cy="button-confirm-assign"]')

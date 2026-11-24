@@ -2,7 +2,7 @@ from datetime import UTC, datetime
 
 import pytest
 
-from e2e.new_selenium.programme_population.conftest import assert_texts, open_from_menu
+from e2e.new_selenium.programme_population.conftest import assert_exact_texts, open_from_menu
 from extras.test_utils.factories import (
     HouseholdFactory,
     IndividualFactory,
@@ -18,6 +18,10 @@ pytestmark = pytest.mark.django_db()
 TABLE_TITLE = 'h6[data-cy="table-title"]'
 TABLE_PAGINATION = 'div[data-cy="table-pagination"]'
 HOUSEHOLD_ROW = 'tr[data-cy="household-table-row"]'
+ID_CELL = f"{HOUSEHOLD_ROW} td:nth-child(2)"
+HEAD_CELL = f"{HOUSEHOLD_ROW} td:nth-child(4)"
+SIZE_CELL = f"{HOUSEHOLD_ROW} td:nth-child(5)"
+RESIDENCE_STATUS_CELL = f"{HOUSEHOLD_ROW} td:nth-child(7)"
 LIST_COLUMNS = {
     'th[data-cy="household-id"]': "Items Group ID",
     'th[data-cy="status"]': "Status",
@@ -57,11 +61,14 @@ DETAILS_LABELS = {
 }
 DETAILS = {label(name): value for name, value in DETAILS_LABELS.items()}
 STATUS_CONTAINER = 'div[data-cy="status-container"]'
-TABLE_ROW = 'tr[data-cy="table-row"]'
+MEMBERS_ROW = 'tr[data-cy="household-members-row"]'
+MEMBER_ID_CELL = f"{MEMBERS_ROW} td:nth-child(1)"
+MEMBER_NAME_CELL = f"{MEMBERS_ROW} td:nth-child(2)"
+PAYMENTS_TABLE_BODY = '//h6[@data-cy="table-title"][text()="Payments"]/following::tbody[1]'
 TABLE_LABEL = 'span[data-cy="table-label"]'
 KNOWN_AFFECTED_BENEFICIARIES = '[data-cy="known-affected-beneficiaries"]'
 ROW_0_5 = '[data-cy="row05"]'
-KAB_SIZE = '[data-cy="kab-size"]'
+KAB_SIZE = '[data-cy="kab-size"] div[data-cy="label-Size"]'
 KAB_INFO = '[data-cy="kab-info"]'
 
 
@@ -106,11 +113,11 @@ def test_households_list_shows_household(household: Household, program: Program,
 
     login.assert_text("Items Groups", TABLE_TITLE)
     login.assert_text("1–1 of 1", TABLE_PAGINATION)
-    login.assert_text(household.unicef_id, HOUSEHOLD_ROW)
-    login.assert_text("Agata Kowalska", HOUSEHOLD_ROW)
-    login.assert_text("7", HOUSEHOLD_ROW)
-    login.assert_text("Displaced | Refugee / Asylum Seeker", HOUSEHOLD_ROW)
-    assert_texts(login, LIST_COLUMNS)
+    login.assert_exact_text(household.unicef_id, ID_CELL)
+    login.assert_exact_text("Agata Kowalska", HEAD_CELL)
+    login.assert_exact_text("7", SIZE_CELL)
+    login.assert_exact_text("Displaced | Refugee / Asylum Seeker", RESIDENCE_STATUS_CELL)
+    assert_exact_texts(login, LIST_COLUMNS)
 
 
 def test_household_details_shows_household(household: Household, program: Program, login: HopeTestBrowser) -> None:
@@ -119,20 +126,22 @@ def test_household_details_shows_household(household: Household, program: Progra
 
     login.click(HOUSEHOLD_ROW)
 
-    login.assert_text(household.unicef_id, 'h5[data-cy="page-header-title"]')
-    assert_texts(login, DETAILS)
+    login.assert_exact_text(f"Items Group: {household.unicef_id}", 'h5[data-cy="page-header-title"]')
+    assert_exact_texts(login, DETAILS)
     login.assert_text("ACTIVE", STATUS_CONTAINER)
     login.assert_text("Items Group Members", TABLE_TITLE)
     login.assert_text("Item ID", TABLE_LABEL)
-    login.assert_text("No results", TABLE_ROW)
-    login.assert_text(rdi.data_source, label("Source"))
-    login.assert_text(rdi.name, label("Import name"))
-    login.assert_text(household.last_registration_date.strftime("%-d %b %Y"), label("Registration Date"))
-    login.assert_text("importer@example.com", label("User name"))
+    login.assert_exact_text(household.head_of_household.unicef_id, MEMBER_ID_CELL)
+    login.assert_exact_text("Agata Kowalska", MEMBER_NAME_CELL)
+    login.assert_text("No results", PAYMENTS_TABLE_BODY)
+    login.assert_exact_text(rdi.data_source, label("Source"))
+    login.assert_exact_text(rdi.name, label("Import name"))
+    login.assert_exact_text(household.last_registration_date.strftime("%-d %b %Y"), label("Registration Date"))
+    login.assert_exact_text("importer@example.com", label("User name"))
     # The "Main Menu" beneficiary group labels members as "Items".
     login.assert_text("Items Reported by Data Subjects", KNOWN_AFFECTED_BENEFICIARIES)
     # age group, females, with disability, pregnant, (spacer), males, with disability;
     # both the unset male disabled counter and the zero male counter render as "-"
     assert login.get_text(ROW_0_5).split() == ["0", "-", "5", "2", "1", "-", "-", "-"]
-    login.assert_text("3", KAB_SIZE)
+    login.assert_exact_text("3", KAB_SIZE)
     login.assert_element_visible(KAB_INFO)

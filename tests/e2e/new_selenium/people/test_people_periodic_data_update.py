@@ -24,14 +24,14 @@ pytestmark = pytest.mark.django_db()
 def valid_xlsx(person: Individual, string_attribute: FlexibleAttribute, program: Program, tmp_path: Path) -> Path:
     populate_pdu_with_null_values(program, person.flex_fields)
     person.save()
-    return prepare_xlsx_file(string_attribute, [["Test Value", "2021-05-02"]], tmp_path / "valid.xlsx")
+    return prepare_xlsx_file(string_attribute, "Test Value", "2021-05-02", tmp_path / "valid.xlsx")
 
 
 @pytest.fixture
 def invalid_date_xlsx(person: Individual, date_attribute: FlexibleAttribute, program: Program, tmp_path: Path) -> Path:
     populate_pdu_with_null_values(program, person.flex_fields)
     person.save()
-    return prepare_xlsx_file(date_attribute, [["Test Value", "2021-05-02"]], tmp_path / "invalid_date.xlsx")
+    return prepare_xlsx_file(date_attribute, "Test Value", "2021-05-02", tmp_path / "invalid_date.xlsx")
 
 
 @pytest.fixture
@@ -83,8 +83,8 @@ def test_upload_xlsx_with_invalid_value_shows_form_errors(
 def test_uploads_list_shows_upload(successful_upload: PDUXlsxUpload, program: Program, login: HopeTestBrowser) -> None:
     open_pdu_tab(login, program, "offline-edits", PEOPLE_MENU)
 
-    login.assert_text(str(successful_upload.pk), update_cell("id", successful_upload))
-    login.assert_text(str(successful_upload.template.pk), update_cell("template", successful_upload))
+    login.assert_exact_text(str(successful_upload.pk), update_cell("id", successful_upload))
+    login.assert_exact_text(str(successful_upload.template.pk), update_cell("template", successful_upload))
     login.assert_text(f"{successful_upload.created_at:%-d %b %Y}", update_cell("created-at", successful_upload))
     login.assert_text(successful_upload.created_by.get_full_name(), update_cell("created-by", successful_upload))
     login.assert_text("Successful", update_cell("status", successful_upload))
