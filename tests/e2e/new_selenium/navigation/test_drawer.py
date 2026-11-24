@@ -6,33 +6,6 @@ from hope.models import BeneficiaryGroup, BusinessArea, DataCollectingType, Prog
 
 pytestmark = pytest.mark.django_db()
 
-PAGE_HEADER_TITLE = 'h5[data-cy="page-header-title"]'
-DRAWER_ITEMS = 'div[data-cy="drawer-items"]'
-INACTIVE_SUBHEADER = 'div[data-cy="program-inactive-subheader"]'
-GLOBAL_PROGRAM_FILTER = 'button[data-cy="global-program-filter"]'
-
-PROGRAMME_MENU_ITEMS = [
-    "Country Dashboard",
-    "Registration Data Import",
-    "{beneficiary_group}",
-    "Programme Details",
-    "Targeting",
-    "Payment Module",
-    "Payment Verification",
-    "Grievance",
-    "Accountability",
-    "Programme Users",
-    "Programme Log",
-]
-ALL_PROGRAMMES_MENU_ITEMS = [
-    "Country Dashboard",
-    "Programmes",
-    "Managerial Console",
-    "Grievance",
-    "Activity Log",
-    "Country Search",
-]
-
 
 def create_program(
     business_area: BusinessArea,
@@ -93,16 +66,36 @@ def test_programme_drawer_order(
 
     login.open(programme_url(program))
 
-    login.assert_text(program.name, PAGE_HEADER_TITLE)
-    expected = "\n".join(PROGRAMME_MENU_ITEMS).format(beneficiary_group=beneficiary_group)
-    login.assert_exact_text(expected, DRAWER_ITEMS)
+    login.assert_text(program.name, 'h5[data-cy="page-header-title"]')
+    expected_menu_items = [
+        "Country Dashboard",
+        "Registration Data Import",
+        beneficiary_group,
+        "Programme Details",
+        "Targeting",
+        "Payment Module",
+        "Payment Verification",
+        "Grievance",
+        "Accountability",
+        "Programme Users",
+        "Programme Log",
+    ]
+    login.assert_exact_text("\n".join(expected_menu_items), 'div[data-cy="drawer-items"]')
 
 
 def test_all_programmes_drawer_order(business_area: BusinessArea, login: HopeTestBrowser) -> None:
     login.open(f"/{business_area.slug}/programs/all/list")
 
-    login.assert_text("Programme Management", PAGE_HEADER_TITLE)
-    login.assert_exact_text("\n".join(ALL_PROGRAMMES_MENU_ITEMS), DRAWER_ITEMS)
+    login.assert_text("Programme Management", 'h5[data-cy="page-header-title"]')
+    expected_menu_items = [
+        "Country Dashboard",
+        "Programmes",
+        "Managerial Console",
+        "Grievance",
+        "Activity Log",
+        "Country Search",
+    ]
+    login.assert_exact_text("\n".join(expected_menu_items), 'div[data-cy="drawer-items"]')
 
 
 @pytest.mark.parametrize("program_fixture", ["draft_program", "finished_program"])
@@ -113,16 +106,29 @@ def test_inactive_programme_shows_inactive_subheader(
 
     login.open(programme_url(program))
 
-    login.assert_text(program.name, PAGE_HEADER_TITLE)
-    login.assert_exact_text("Programme Inactive", INACTIVE_SUBHEADER)
+    login.assert_text(program.name, 'h5[data-cy="page-header-title"]')
+    login.assert_exact_text("Programme Inactive", 'div[data-cy="program-inactive-subheader"]')
 
 
 def test_active_programme_has_no_inactive_subheader(normal_program: Program, login: HopeTestBrowser) -> None:
     login.open(programme_url(normal_program))
 
-    login.assert_text(normal_program.name, PAGE_HEADER_TITLE)
-    login.assert_exact_text("\n".join(PROGRAMME_MENU_ITEMS).format(beneficiary_group="Main Menu"), DRAWER_ITEMS)
-    login.assert_element_absent(INACTIVE_SUBHEADER)
+    login.assert_text(normal_program.name, 'h5[data-cy="page-header-title"]')
+    expected_menu_items = [
+        "Country Dashboard",
+        "Registration Data Import",
+        "Main Menu",
+        "Programme Details",
+        "Targeting",
+        "Payment Module",
+        "Payment Verification",
+        "Grievance",
+        "Accountability",
+        "Programme Users",
+        "Programme Log",
+    ]
+    login.assert_exact_text("\n".join(expected_menu_items), 'div[data-cy="drawer-items"]')
+    login.assert_element_absent('div[data-cy="program-inactive-subheader"]')
 
 
 @pytest.mark.parametrize("program_fixture", ["draft_program", "finished_program"])
@@ -133,20 +139,41 @@ def test_global_program_filter_switches_to_inactive_programme(
 
     login.select_global_program(program.name)
 
-    login.assert_text(program.name, PAGE_HEADER_TITLE)
-    login.assert_text(program.name, GLOBAL_PROGRAM_FILTER)
-    login.assert_exact_text("Programme Inactive", INACTIVE_SUBHEADER)
+    login.assert_text(program.name, 'h5[data-cy="page-header-title"]')
+    login.assert_text(program.name, 'button[data-cy="global-program-filter"]')
+    login.assert_exact_text("Programme Inactive", 'div[data-cy="program-inactive-subheader"]')
 
 
 def test_global_program_filter_switches_between_active_and_all_programmes(
     normal_program: Program, login: HopeTestBrowser
 ) -> None:
     login.select_global_program(normal_program.name)
-    login.assert_text(normal_program.name, PAGE_HEADER_TITLE)
-    login.assert_exact_text("\n".join(PROGRAMME_MENU_ITEMS).format(beneficiary_group="Main Menu"), DRAWER_ITEMS)
-    login.assert_element_absent(INACTIVE_SUBHEADER)
+    login.assert_text(normal_program.name, 'h5[data-cy="page-header-title"]')
+    programme_menu_items = [
+        "Country Dashboard",
+        "Registration Data Import",
+        "Main Menu",
+        "Programme Details",
+        "Targeting",
+        "Payment Module",
+        "Payment Verification",
+        "Grievance",
+        "Accountability",
+        "Programme Users",
+        "Programme Log",
+    ]
+    login.assert_exact_text("\n".join(programme_menu_items), 'div[data-cy="drawer-items"]')
+    login.assert_element_absent('div[data-cy="program-inactive-subheader"]')
 
     login.select_global_program("All Programmes")
 
-    login.assert_text("Programme Management", PAGE_HEADER_TITLE)
-    login.assert_exact_text("\n".join(ALL_PROGRAMMES_MENU_ITEMS), DRAWER_ITEMS)
+    login.assert_text("Programme Management", 'h5[data-cy="page-header-title"]')
+    all_programmes_menu_items = [
+        "Country Dashboard",
+        "Programmes",
+        "Managerial Console",
+        "Grievance",
+        "Activity Log",
+        "Country Search",
+    ]
+    login.assert_exact_text("\n".join(all_programmes_menu_items), 'div[data-cy="drawer-items"]')

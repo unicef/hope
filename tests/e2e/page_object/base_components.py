@@ -50,8 +50,6 @@ class BaseComponents(Common):
     nav_program_log = 'a[data-cy="nav-Programme Log"]'
     main_content = 'div[data-cy="main-content"]'
     page_header_title = 'h5[data-cy="page-header-title"]'
-    drawer_items = 'div[data-cy="drawer-items"]'
-    drawer_inactive_subheader = 'div[data-cy="program-inactive-subheader"]'
     menu_item_clear_cache = 'li[data-cy="menu-item-clear-cache"]'
     global_program_filter_search_input = 'input[data-cy="search-input-gpf"]'
     global_program_filter_search_button = 'button[data-cy="search-icon"]'
@@ -194,9 +192,6 @@ class BaseComponents(Common):
     def get_nav_resources_release_note(self) -> WebElement:
         return self.wait_for(self.nav_resources_release_note)
 
-    def get_drawer_items(self) -> WebElement:
-        return self.wait_for(self.drawer_items)
-
     def select_global_program_filter(self, name: str) -> None:
         self.get_global_program_filter().click()
         self.get_global_program_filter_search_input().clear()
@@ -212,9 +207,6 @@ class BaseComponents(Common):
         self.select_listbox_element(name)
         # Switching programmes navigates away; wait for the new page so callers don't act on the old one.
         self.assert_page_header_title("Programme Management" if name == "All Programmes" else name)
-
-    def get_drawer_inactive_subheader(self, timeout: int = Common.DEFAULT_TIMEOUT) -> WebElement:
-        return self.wait_for(self.drawer_inactive_subheader, timeout=timeout)
 
     def get_menu_item_clear_cache(self) -> WebElement:
         return self.wait_for(self.menu_item_clear_cache)
