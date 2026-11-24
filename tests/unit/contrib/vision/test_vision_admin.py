@@ -253,7 +253,7 @@ def test_send_closure_to_vision_button_visible_when_closure_never_sent(
 def test_send_closure_to_vision_button_visible_when_closure_failed(
     failed_closure_payment_plan: PaymentPlan, admin_client, django_assert_num_queries
 ) -> None:
-    with django_assert_num_queries(15):
+    with django_assert_num_queries(14):
         response = admin_client.get(reverse("admin:payment_paymentplan_change", args=[failed_closure_payment_plan.pk]))
     assert response.status_code == 200
     assert 'id="btn-send_closure_to_vision"' in response.content.decode()
