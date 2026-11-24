@@ -603,7 +603,7 @@ class PaymentPlanAdmin(ViewOnUiMixin, HOPEModelAdminBase):
                 fsp_xlsx_template_id = str(template_obj.id) if template_obj else None
                 old_payment_plan = copy_model_object(payment_plan)
                 payment_plan.background_action_status = PaymentPlan.BackgroundActionStatus.XLSX_EXPORTING
-                payment_plan.save(update_fields=["background_action_status"])
+                payment_plan.save(update_fields=["background_action_status", "version"])
                 log_create(
                     mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
                     business_area_field="cycle.program.business_area",
@@ -708,7 +708,7 @@ class PaymentPlanAdmin(ViewOnUiMixin, HOPEModelAdminBase):
                     job.terminate()
                 import_options = payment_plan.delivery_import_file.extras
                 payment_plan.background_action_status = PaymentPlan.BackgroundActionStatus.XLSX_IMPORTING_RECONCILIATION
-                payment_plan.save(update_fields=["background_action_status", "updated_at"])
+                payment_plan.save(update_fields=["background_action_status", "updated_at", "version"])
                 original_uploader_id = payment_plan.delivery_import_file.created_by_id
                 import_payment_plan_delivery_from_xlsx_async_task(
                     payment_plan,

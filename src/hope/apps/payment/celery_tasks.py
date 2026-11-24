@@ -223,12 +223,12 @@ def create_follow_up_instruction_delivery_xlsx_async_task_action(job: AsyncRetry
             service.save_xlsx_file(user)
             flow = FollowUpInstructionFlow(instruction)
             flow.background_action_status_none()
-            instruction.save(update_fields=["background_action_status", "updated_at"])
+            instruction.save(update_fields=["background_action_status", "updated_at", "version"])
     except Exception:
         logger.exception("Create Follow Up Instruction Delivery XLSX Error")
         flow = FollowUpInstructionFlow(instruction)
         flow.background_action_status_xlsx_export_error()
-        instruction.save(update_fields=["background_action_status", "updated_at"])
+        instruction.save(update_fields=["background_action_status", "updated_at", "version"])
         raise
 
 
@@ -546,7 +546,7 @@ def import_follow_up_instruction_reconciliation_from_xlsx_async_task_action(job:
             service.import_payment_list(job.config.get("user_id"))
             flow = FollowUpInstructionFlow(instruction)
             flow.background_action_status_none()
-            instruction.save(update_fields=["background_action_status", "updated_at"])
+            instruction.save(update_fields=["background_action_status", "updated_at", "version"])
             for payment_list in service.payment_lists_to_update.values():
                 PaymentListService(payment_list).recalculate_signatures_in_batch()
             transaction.on_commit(lambda: _remove_stale_export_file(str(instruction.id), export_file_id))
@@ -554,7 +554,7 @@ def import_follow_up_instruction_reconciliation_from_xlsx_async_task_action(job:
         logger.exception("Unexpected error during Follow Up Instruction reconciliation import")
         flow = FollowUpInstructionFlow(instruction)
         flow.background_action_status_xlsx_import_error()
-        instruction.save(update_fields=["background_action_status", "updated_at"])
+        instruction.save(update_fields=["background_action_status", "updated_at", "version"])
         raise
 
     return True

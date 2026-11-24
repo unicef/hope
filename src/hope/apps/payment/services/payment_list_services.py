@@ -313,7 +313,7 @@ class PaymentListService:
                         "Failed to fetch UNORE exchange rate for PaymentList %s: %s", self.payment_list.pk, e
                     )
                 payment_plan.exchange_rate = None
-            payment_plan.save(update_fields=("exchange_rate", "updated_at"))
+            payment_plan.save(update_fields=("exchange_rate", "updated_at", "version"))
 
         self.payment_list.save(update_fields=("status_date", "status", "updated_at"))
         self.payment_list.program_cycle.set_active()
