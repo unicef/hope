@@ -4,7 +4,6 @@ from extras.test_utils.factories import (
     HouseholdFactory,
     IndividualFactory,
     PaymentPlanFactory,
-    ProgramCycleFactory,
     ProgramFactory,
     UserFactory,
 )
@@ -49,7 +48,7 @@ def target_population(program: Program, author: User) -> PaymentPlan:
         status=PaymentPlan.Status.TP_LOCKED,
         created_by=author,
         business_area=program.business_area,
-        program_cycle=ProgramCycleFactory(program=program),
+        program_cycle=program.cycles.first(),
     )
 
 
