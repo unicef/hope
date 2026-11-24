@@ -63,6 +63,29 @@ def vision_api_payment_plan_factory(db) -> Callable[..., PaymentPlan]:
     return create_payment_plan
 
 
+@pytest.fixture(
+    params=[
+        ("7700410", "FAM"),
+        ("7700430", "INC"),
+        ("7700999", ""),
+        ("", ""),
+        (None, ""),
+    ]
+)
+def payment_plan_with_gl_code(request, vision_api_payment_plan_factory) -> tuple[PaymentPlan, str]:
+    gl_code, expected_code = request.param
+    payment_plan = vision_api_payment_plan_factory()
+    data_collecting_type = payment_plan.program_cycle.program.data_collecting_type
+    if gl_code is None:
+        data_collecting_type.payee_type = None
+        data_collecting_type.save(update_fields=["payee_type"])
+    else:
+        payee_type = data_collecting_type.payee_type
+        payee_type.gl_code = gl_code
+        payee_type.save(update_fields=["gl_code"])
+    return payment_plan, expected_code
+
+
 @pytest.fixture
 def payment_plan_without_exchange_rate(vision_api_payment_plan_factory) -> PaymentPlan:
     return vision_api_payment_plan_factory(exchange_rate=None)
@@ -185,7 +208,7 @@ def test_send_payment_plan(mock_post, mock_acquire_token, vision_api_payment_pla
             "authAmtUsd": "10000.00",
             "exchangeRate": "1.25000000",
             "headVendor": "Head Vendor Name",
-            "glCode": "7700410",
+            "glCode": "FAM",
         },
     )
 
@@ -238,6 +261,18 @@ def test_payment_plan_payload_includes_null_exchange_rate(
     assert payload["exchangeRate"] is None
 
 
+def test_payment_plan_payload_maps_gl_code(
+    payment_plan_with_gl_code: tuple[PaymentPlan, str],
+    django_assert_num_queries,
+) -> None:
+    payment_plan, expected_code = payment_plan_with_gl_code
+
+    with django_assert_num_queries(0):
+        payload = PaymentPlanPayloadSerializer(payment_plan).data
+
+    assert payload["glCode"] == expected_code
+
+
 @patch("hope.contrib.vision.api.VisionAPI._acquire_token")
 @patch("hope.contrib.vision.api.VisionAPI._post")
 def test_send_payment_plan_with_different_currency(
@@ -265,7 +300,7 @@ def test_send_payment_plan_with_different_currency(
             "authAmtUsd": "10000.00",
             "exchangeRate": "1.25000000",
             "headVendor": "Head Vendor Name",
-            "glCode": "7700410",
+            "glCode": "FAM",
         },
     )
 
