@@ -4,7 +4,6 @@ import django.contrib.postgres.fields
 from django.db import migrations, models
 import model_utils.fields
 
-import hope.apps.core.upload_paths
 import hope.models.feedback
 import hope.models.message
 import hope.models.survey
@@ -25,7 +24,6 @@ class Migration(migrations.Migration):
         ("accountability", "0009_migration"),
         ("accountability", "0010_migration"),
         ("accountability", "0011_migration"),
-        ("accountability", "0012_migration"),
     ]
 
     dependencies = []
@@ -165,9 +163,8 @@ class Migration(migrations.Migration):
                     "sample_file",
                     models.FileField(
                         blank=True,
-                        max_length=255,
                         null=True,
-                        upload_to=hope.apps.core.upload_paths.upload_path,
+                        upload_to="",
                     ),
                 ),
                 (

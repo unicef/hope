@@ -14,7 +14,6 @@ import model_utils.fields
 import multiselectfield.db.fields
 import psycopg.types.range
 
-import hope.apps.core.upload_paths
 import hope.apps.household.const
 import hope.apps.payment.fields
 import hope.apps.payment.validators
@@ -122,14 +121,12 @@ class Migration(migrations.Migration):
         ("payment", "0079_migration"),
         ("payment", "0080_migration"),
         ("payment", "0081_migration"),
-        ("payment", "0082_migration"),
-        ("payment", "0083_migration"),
     ]
 
     dependencies = [
-        ("core", "0044_baseline_models"),
+        ("core", "0041_baseline_models"),
         ("geo", "0010_baseline_models"),
-        ("household", "0056_baseline_models"),
+        ("household", "0052_baseline_models"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
@@ -517,7 +514,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "abort_comment",
-                    models.CharField(blank=True, help_text="Reason for aborting", max_length=2000),
+                    models.CharField(blank=True, help_text="Reason for aborting", max_length=255),
                 ),
                 (
                     "flat_amount_value",
@@ -944,8 +941,7 @@ class Migration(migrations.Migration):
                 (
                     "file",
                     models.FileField(
-                        max_length=255,
-                        upload_to=hope.apps.core.upload_paths.upload_path,
+                        upload_to="",
                     ),
                 ),
                 ("uploaded_at", models.DateTimeField(auto_now_add=True)),
@@ -1506,7 +1502,7 @@ class Migration(migrations.Migration):
                         verbose_name="Approval type",
                     ),
                 ),
-                ("comment", models.CharField(blank=True, max_length=2000, null=True)),
+                ("comment", models.CharField(blank=True, max_length=500, null=True)),
                 (
                     "created_by",
                     models.ForeignKey(

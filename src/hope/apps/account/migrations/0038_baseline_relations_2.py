@@ -17,8 +17,8 @@ class Migration(migrations.Migration):
     dependencies = [
         ("account", "0037_baseline_relations"),
         ("auth", "0012_alter_user_first_name_max_length"),
-        ("core", "0044_baseline_models"),
-        ("program", "0027_baseline_models"),
+        ("core", "0041_baseline_models"),
+        ("program", "0023_baseline_models"),
     ]
 
     operations = [

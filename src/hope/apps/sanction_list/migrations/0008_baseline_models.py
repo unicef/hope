@@ -5,7 +5,6 @@ import django.db.models.deletion
 import model_utils.fields
 import strategy_field.fields
 
-import hope.apps.core.upload_paths
 import hope.models.utils
 
 
@@ -34,7 +33,6 @@ class Migration(migrations.Migration):
         ("sanction_list", "0006_migration"),
         ("sanction_list", "0007_migration"),
         ("sanction_list", "0008_migration"),
-        ("sanction_list", "0009_migration"),
     ]
 
     dependencies = [
@@ -351,8 +349,7 @@ class Migration(migrations.Migration):
                 (
                     "file",
                     models.FileField(
-                        max_length=255,
-                        upload_to=hope.apps.core.upload_paths.upload_path,
+                        upload_to="",
                     ),
                 ),
                 ("associated_email", models.EmailField(max_length=254)),

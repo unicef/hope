@@ -8,7 +8,6 @@ import django.db.models.deletion
 import model_utils.fields
 
 from hope.apps.core.migration_operations import RunSQLAfterDeferred
-import hope.apps.core.upload_paths
 import hope.models.deduplication_engine_similarity_pair
 import hope.models.import_data
 import hope.models.registration_data_import
@@ -39,13 +38,12 @@ class Migration(migrations.Migration):
         ("registration_data", "0018_migration"),
         ("registration_data", "0019_migration"),
         ("registration_data", "0020_migration"),
-        ("registration_data", "0021_migration"),
     ]
 
     dependencies = [
-        ("core", "0044_baseline_models"),
-        ("household", "0056_baseline_models"),
-        ("program", "0027_baseline_models"),
+        ("core", "0041_baseline_models"),
+        ("household", "0052_baseline_models"),
+        ("program", "0023_baseline_models"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
@@ -90,9 +88,8 @@ class Migration(migrations.Migration):
                     "file",
                     models.FileField(
                         blank=True,
-                        max_length=255,
                         null=True,
-                        upload_to=hope.apps.core.upload_paths.upload_path,
+                        upload_to="",
                     ),
                 ),
                 (

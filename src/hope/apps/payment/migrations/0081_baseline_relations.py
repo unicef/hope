@@ -27,10 +27,10 @@ class Migration(migrations.Migration):
     ]
 
     dependencies = [
-        ("core", "0044_baseline_models"),
-        ("household", "0057_baseline_relations"),
-        ("payment", "0084_baseline_models"),
-        ("program", "0027_baseline_models"),
+        ("core", "0041_baseline_models"),
+        ("household", "0052_baseline_relations"),
+        ("payment", "0081_baseline_models"),
+        ("program", "0023_baseline_models"),
         ("steficon", "0008_baseline_models"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]

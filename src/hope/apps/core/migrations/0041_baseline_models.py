@@ -11,7 +11,6 @@ import encrypted_fields.fields
 import model_utils.fields
 import timezone_field.fields
 
-import hope.apps.core.upload_paths
 import hope.models.data_collecting_type
 import hope.models.flexible_attribute
 import hope.models.storage_file
@@ -62,8 +61,6 @@ class Migration(migrations.Migration):
         ("core", "0039_migration"),
         ("core", "0040_migration"),
         ("core", "0041_migration"),
-        ("core", "0042_migration"),
-        ("core", "0043_migration"),
     ]
 
     dependencies = [
@@ -391,8 +388,7 @@ class Migration(migrations.Migration):
                 (
                     "file",
                     models.FileField(
-                        max_length=255,
-                        upload_to=hope.apps.core.upload_paths.upload_path,
+                        upload_to="",
                     ),
                 ),
                 ("was_downloaded", models.BooleanField(default=False)),
@@ -501,51 +497,6 @@ class Migration(migrations.Migration):
             ],
             options={
                 "ordering": ("name",),
-            },
-        ),
-        migrations.CreateModel(
-            name="PayeeType",
-            fields=[
-                (
-                    "id",
-                    model_utils.fields.UUIDField(
-                        default=uuid.uuid4,
-                        editable=False,
-                        primary_key=True,
-                        serialize=False,
-                    ),
-                ),
-                ("created_at", models.DateTimeField(auto_now_add=True)),
-                ("updated_at", models.DateTimeField(auto_now=True)),
-                ("name", models.CharField(max_length=255, unique=True)),
-                (
-                    "gl_code",
-                    models.CharField(
-                        blank=True,
-                        help_text="General Ledger code shown on the Program",
-                        max_length=32,
-                    ),
-                ),
-                ("description", models.TextField(blank=True)),
-                (
-                    "active",
-                    models.BooleanField(
-                        default=True,
-                        help_text="Inactive Payee Types cannot be used in new programs",
-                    ),
-                ),
-                (
-                    "weight",
-                    models.PositiveSmallIntegerField(
-                        default=0,
-                        help_text="Ordering weight: types with a higher weight are listed first",
-                    ),
-                ),
-            ],
-            options={
-                "verbose_name": "Payee Type",
-                "verbose_name_plural": "Payee Types",
-                "ordering": ("-weight", "name"),
             },
         ),
         migrations.CreateModel(
@@ -706,8 +657,7 @@ class Migration(migrations.Migration):
                 (
                     "file",
                     models.FileField(
-                        max_length=255,
-                        upload_to=hope.apps.core.upload_paths.upload_path,
+                        upload_to="files",
                     ),
                 ),
                 (
@@ -742,8 +692,7 @@ class Migration(migrations.Migration):
                 (
                     "file",
                     models.FileField(
-                        max_length=255,
-                        upload_to=hope.apps.core.upload_paths.upload_path,
+                        upload_to="",
                     ),
                 ),
                 ("error_description", models.TextField(blank=True)),

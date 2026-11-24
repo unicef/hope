@@ -16,11 +16,11 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ("account", "0037_baseline_relations"),
-        ("core", "0044_baseline_models"),
+        ("core", "0041_baseline_models"),
         ("geo", "0010_baseline_models"),
-        ("household", "0056_baseline_models"),
-        ("program", "0027_baseline_models"),
-        ("registration_data", "0022_baseline_models"),
+        ("household", "0052_baseline_models"),
+        ("program", "0023_baseline_models"),
+        ("registration_data", "0020_baseline_models"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
@@ -778,13 +778,6 @@ class Migration(migrations.Migration):
         ),
         migrations.AddIndex(
             model_name="individual",
-            index=models.Index(
-                django.db.models.functions.comparison.Collate("unicef_id", "C"),
-                name="hi_unicef_id_c_idx",
-            ),
-        ),
-        migrations.AddIndex(
-            model_name="individual",
             index=hope.models.utils.LongNameIndex(fields=["full_name"], name="household_individual_full_name_8fa0162b"),
         ),
         migrations.AddIndex(
@@ -1195,13 +1188,6 @@ class Migration(migrations.Migration):
         migrations.AddIndex(
             model_name="household",
             index=hope.models.utils.LongNameIndex(fields=["unicef_id"], name="household_household_unicef_id_6f025c4d"),
-        ),
-        migrations.AddIndex(
-            model_name="household",
-            index=models.Index(
-                django.db.models.functions.comparison.Collate("unicef_id", "C"),
-                name="hh_unicef_id_c_idx",
-            ),
         ),
         migrations.AddIndex(
             model_name="household",

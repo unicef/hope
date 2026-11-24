@@ -2,7 +2,6 @@ import django.contrib.postgres.fields
 from django.db import migrations, models
 import django.db.models.deletion
 
-import hope.apps.core.upload_paths
 import hope.models.utils
 
 
@@ -17,13 +16,12 @@ class Migration(migrations.Migration):
         ("universal_update_script", "0005_migration"),
         ("universal_update_script", "0006_migration"),
         ("universal_update_script", "0007_migration"),
-        ("universal_update_script", "0008_migration"),
     ]
 
     dependencies = [
-        ("household", "0056_baseline_models"),
-        ("payment", "0084_baseline_models"),
-        ("program", "0027_baseline_models"),
+        ("household", "0052_baseline_models"),
+        ("payment", "0081_baseline_models"),
+        ("program", "0023_baseline_models"),
     ]
 
     operations = [
@@ -82,9 +80,8 @@ class Migration(migrations.Migration):
                     models.FileField(
                         blank=True,
                         help_text="Generated Template XLSX File, contains columns for data to be updated. Contains also rows for unicef_ids to be updated",
-                        max_length=255,
                         null=True,
-                        upload_to=hope.apps.core.upload_paths.upload_path,
+                        upload_to="",
                     ),
                 ),
                 (
@@ -92,9 +89,8 @@ class Migration(migrations.Migration):
                     models.FileField(
                         blank=True,
                         help_text="Uploaded File, contains data to be updated. After clicking a button to update, data will be updated",
-                        max_length=255,
                         null=True,
-                        upload_to=hope.apps.core.upload_paths.upload_path,
+                        upload_to="",
                     ),
                 ),
                 (
@@ -102,9 +98,8 @@ class Migration(migrations.Migration):
                     models.FileField(
                         blank=True,
                         help_text="Backup Snapshot File, contains data before update. File updated on each start of update process.",
-                        max_length=255,
                         null=True,
-                        upload_to=hope.apps.core.upload_paths.upload_path,
+                        upload_to="",
                     ),
                 ),
                 (

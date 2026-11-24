@@ -10,35 +10,12 @@ import hope.models.utils
 
 
 def seed_reference_data(apps, schema_editor):
-    """Create the currencies, payee types and head of facility collecting type of a new database."""
+    """Create the currencies of a new database."""
     Currency = apps.get_model("core", "Currency")
-    PayeeType = apps.get_model("core", "PayeeType")
-    DataCollectingType = apps.get_model("core", "DataCollectingType")
 
     Currency.objects.bulk_create(
         [Currency(code=code, name=name, is_crypto=is_crypto, vision_code=code) for code, name, is_crypto in CURRENCIES],
         ignore_conflicts=True,
-    )
-
-    PayeeType.objects.get_or_create(name="Household", defaults={"gl_code": "7700410", "weight": 30})
-    PayeeType.objects.get_or_create(name="Incentive Payee", defaults={"gl_code": "7700430", "weight": 20})
-    organization, _ = PayeeType.objects.get_or_create(
-        name="Organization", defaults={"gl_code": "7700430", "weight": 10}
-    )
-    head_of_facility, _ = DataCollectingType.objects.get_or_create(
-        code="head_of_facility",
-        defaults={
-            "label": "Head of Facility",
-            "description": "Head of Facility / Authorized Representative",
-            "type": "STANDARD",
-            "active": True,
-            "payee_type": organization,
-        },
-    )
-    # The post_save receiver that makes a collecting type compatible with itself does not run in migrations.
-    head_of_facility.compatible_types.add(head_of_facility)
-    PayeeType.objects.filter(pk=organization.pk, default_data_collecting_type__isnull=True).update(
-        default_data_collecting_type=head_of_facility
     )
 
 
@@ -51,9 +28,9 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ("contenttypes", "0002_remove_content_type_name"),
-        ("core", "0044_baseline_models"),
+        ("core", "0041_baseline_models"),
         ("geo", "0010_baseline_models"),
-        ("program", "0027_baseline_models"),
+        ("program", "0023_baseline_models"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
@@ -218,29 +195,6 @@ class Migration(migrations.Migration):
                 on_delete=django.db.models.deletion.CASCADE,
                 related_name="flex_attributes",
                 to="core.flexibleattributegroup",
-            ),
-        ),
-        migrations.AddField(
-            model_name="payeetype",
-            name="default_data_collecting_type",
-            field=models.ForeignKey(
-                blank=True,
-                help_text="Data Collecting Type preselected when this Payee Type is chosen",
-                null=True,
-                on_delete=django.db.models.deletion.SET_NULL,
-                related_name="+",
-                to="core.datacollectingtype",
-            ),
-        ),
-        migrations.AddField(
-            model_name="datacollectingtype",
-            name="payee_type",
-            field=models.ForeignKey(
-                blank=True,
-                null=True,
-                on_delete=django.db.models.deletion.PROTECT,
-                related_name="data_collecting_types",
-                to="core.payeetype",
             ),
         ),
         migrations.AddField(

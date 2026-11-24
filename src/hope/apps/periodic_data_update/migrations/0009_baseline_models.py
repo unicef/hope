@@ -4,7 +4,6 @@ from django.db import migrations, models
 import django.db.models.deletion
 
 from hope.apps.core.migration_operations import RunSQLAfterDeferred
-import hope.apps.core.upload_paths
 import hope.models.pdu_online_edit
 import hope.models.pdu_xlsx_template
 import hope.models.pdu_xlsx_upload
@@ -24,12 +23,11 @@ class Migration(migrations.Migration):
         ("periodic_data_update", "0007_migration"),
         ("periodic_data_update", "0008_migration"),
         ("periodic_data_update", "0009_migration"),
-        ("periodic_data_update", "0010_migration"),
     ]
 
     dependencies = [
-        ("core", "0044_baseline_models"),
-        ("program", "0027_baseline_models"),
+        ("core", "0041_baseline_models"),
+        ("program", "0023_baseline_models"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
@@ -296,8 +294,7 @@ class Migration(migrations.Migration):
                 (
                     "file",
                     models.FileField(
-                        max_length=255,
-                        upload_to=hope.apps.core.upload_paths.upload_path,
+                        upload_to="",
                     ),
                 ),
                 ("error_message", models.TextField(blank=True, null=True)),

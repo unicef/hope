@@ -16,7 +16,7 @@ from django.db.migrations import Migration
 TOLERATED_STRAY_ROWS = {("core", "0023_migration")}
 
 PARTIAL_REMEDY = (
-    "Check out the commit right before the baseline (the migrations-checkpoint tag, or the parent of "
+    "Check out the commit right before the baseline (the parent of "
     "the baseline merge commit), run migrate there and come back. A new database whose first migrate "
     "was interrupted or targeted at a single migration has to be dropped and rebuilt."
 )

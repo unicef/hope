@@ -8,7 +8,6 @@ from django.db import migrations, models
 import django.db.models.deletion
 import model_utils.fields
 
-import hope.apps.core.upload_paths
 import hope.apps.grievance.constants
 import hope.apps.grievance.models
 import hope.models.payment_verification
@@ -38,12 +37,11 @@ class Migration(migrations.Migration):
         ("grievance", "0018_migration"),
         ("grievance", "0019_migration"),
         ("grievance", "0020_migration"),
-        ("grievance", "0021_migration"),
     ]
 
     dependencies = [
         ("account", "0037_baseline_relations"),
-        ("core", "0044_baseline_models"),
+        ("core", "0041_baseline_models"),
         ("geo", "0010_baseline_models"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
@@ -443,9 +441,8 @@ class Migration(migrations.Migration):
                     "file",
                     models.FileField(
                         blank=True,
-                        max_length=255,
                         null=True,
-                        upload_to=hope.apps.core.upload_paths.upload_path,
+                        upload_to="",
                     ),
                 ),
                 ("content_type", models.CharField(max_length=100)),

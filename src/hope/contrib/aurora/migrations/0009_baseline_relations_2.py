@@ -13,7 +13,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ("aurora", "0008_baseline_relations"),
-        ("program", "0027_baseline_models"),
+        ("program", "0023_baseline_models"),
         ("steficon", "0008_baseline_models"),
     ]
 

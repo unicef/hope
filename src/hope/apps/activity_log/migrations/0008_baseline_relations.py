@@ -12,7 +12,7 @@ class Migration(migrations.Migration):
     dependencies = [
         ("activity_log", "0007_baseline_models"),
         ("contenttypes", "0002_remove_content_type_name"),
-        ("core", "0044_baseline_models"),
+        ("core", "0041_baseline_models"),
     ]
 
     operations = [

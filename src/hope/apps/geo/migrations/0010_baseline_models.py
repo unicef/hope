@@ -25,7 +25,7 @@ class Migration(migrations.Migration):
     ]
 
     dependencies = [
-        ("core", "0044_baseline_models"),
+        ("core", "0041_baseline_models"),
     ]
 
     operations = [

@@ -29,7 +29,7 @@ class Migration(migrations.Migration):
     ]
 
     dependencies = [
-        ("payment", "0084_baseline_models"),
+        ("payment", "0081_baseline_models"),
     ]
 
     operations = [

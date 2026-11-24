@@ -14,10 +14,33 @@ import hope.models.program_cycle
 import hope.models.utils
 
 
+def seed_reference_data(apps, schema_editor):
+    """Create the beneficiary groups of a new database."""
+    BeneficiaryGroup = apps.get_model("program", "BeneficiaryGroup")
+    Constance = apps.get_model("constance", "Constance")
+
+    for name, master_detail in (("Household", True), ("Social Workers", False)):
+        BeneficiaryGroup.objects.get_or_create(
+            name=name,
+            defaults={
+                "group_label": "Household",
+                "group_label_plural": "Households",
+                "member_label": "Individual",
+                "member_label_plural": "Individuals",
+                "master_detail": master_detail,
+            },
+        )
+    # The replaced history read this setting through constance, which stores the default on first read.
+    Constance.objects.get_or_create(
+        key="DEFAULT_BENEFICIARY_GROUP_NAME", defaults={"value": '{"__type__": "default", "__value__": "Household"}'}
+    )
+
+
 class Migration(migrations.Migration):
     initial = True
 
     replaces = [
+        ("program", "0001_migration"),
         ("program", "0002_migration"),
         ("program", "0003_migration"),
         ("program", "0004_migration"),
@@ -40,16 +63,14 @@ class Migration(migrations.Migration):
         ("program", "0021_disable_biometric_dedup_for_non_cw"),
         ("program", "0022_migration"),
         ("program", "0023_migration"),
-        ("program", "0024_migration"),
-        ("program", "0025_migration"),
-        ("program", "0026_migration"),
     ]
 
     dependencies = [
-        ("core", "0044_baseline_models"),
+        ("constance", "0003_drop_pickle"),
+        ("core", "0041_baseline_models"),
         ("geo", "0010_baseline_models"),
-        ("payment", "0084_baseline_models"),
-        ("sanction_list", "0010_baseline_models"),
+        ("payment", "0081_baseline_models"),
+        ("sanction_list", "0008_baseline_models"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
@@ -78,35 +99,11 @@ class Migration(migrations.Migration):
                 ("group_label_plural", models.CharField(max_length=255)),
                 ("member_label", models.CharField(max_length=255)),
                 ("member_label_plural", models.CharField(max_length=255)),
-                (
-                    "active",
-                    models.BooleanField(
-                        default=True,
-                        help_text="Inactive Payee Labels cannot be used in new programs",
-                    ),
-                ),
-                (
-                    "data_collecting_types",
-                    models.ManyToManyField(
-                        blank=True,
-                        help_text="Leave empty to allow every Data Collecting Type of the Payee Type",
-                        related_name="payee_labels",
-                        to="core.datacollectingtype",
-                    ),
-                ),
-                (
-                    "payee_type",
-                    models.ForeignKey(
-                        null=True,
-                        on_delete=django.db.models.deletion.PROTECT,
-                        related_name="payee_labels",
-                        to="core.payeetype",
-                    ),
-                ),
+                ("master_detail", models.BooleanField(default=True)),
             ],
             options={
-                "verbose_name": "Payee Label",
-                "verbose_name_plural": "Payee Labels",
+                "verbose_name": "Beneficiary Group",
+                "verbose_name_plural": "Beneficiary Groups",
                 "ordering": ("name",),
                 "permissions": (("reset_sync_date", "Can reset sync date"),),
             },
@@ -301,7 +298,7 @@ class Migration(migrations.Migration):
                 (
                     "beneficiary_group",
                     models.ForeignKey(
-                        help_text="Program payee label",
+                        help_text="Program beneficiary group",
                         on_delete=django.db.models.deletion.PROTECT,
                         related_name="programs",
                         to="program.beneficiarygroup",
@@ -577,4 +574,5 @@ AS $function$
             ],
             reverse_sql=migrations.RunSQL.noop,
         ),
+        migrations.RunPython(seed_reference_data, migrations.RunPython.noop),
     ]

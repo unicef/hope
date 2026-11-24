@@ -14,7 +14,6 @@ import phonenumber_field.modelfields
 import sorl.thumbnail.fields
 
 import hope.apps.core.languages
-import hope.apps.core.upload_paths
 import hope.apps.core.utils
 import hope.apps.household.const
 import hope.apps.household.mixins
@@ -79,9 +78,6 @@ class Migration(migrations.Migration):
         ("household", "0050_migration"),
         ("household", "0051_migration"),
         ("household", "0052_migration"),
-        ("household", "0053_migration"),
-        ("household", "0054_migration"),
-        ("household", "0055_migration"),
     ]
 
     dependencies = [
@@ -245,8 +241,7 @@ AS $function$
                     sorl.thumbnail.fields.ImageField(
                         blank=True,
                         help_text="Household consent sign image",
-                        max_length=255,
-                        upload_to=hope.apps.core.upload_paths.upload_path,
+                        upload_to="",
                         validators=[django.core.validators.validate_image_file_extension],
                     ),
                 ),
@@ -1130,8 +1125,7 @@ AS $function$
                     models.ImageField(
                         blank=True,
                         help_text="Photo",
-                        max_length=255,
-                        upload_to=hope.apps.core.upload_paths.upload_path,
+                        upload_to="",
                     ),
                 ),
                 (
@@ -1355,9 +1349,8 @@ AS $function$
                     models.ImageField(
                         blank=True,
                         help_text="Disability certificate picture",
-                        max_length=255,
                         null=True,
-                        upload_to=hope.apps.core.upload_paths.upload_path,
+                        upload_to="",
                     ),
                 ),
                 (
@@ -1795,8 +1788,7 @@ AS $function$
                 (
                     "file",
                     models.FileField(
-                        max_length=255,
-                        upload_to=hope.apps.core.upload_paths.upload_path,
+                        upload_to="",
                     ),
                 ),
                 (
@@ -1853,8 +1845,7 @@ AS $function$
                     "photo",
                     models.ImageField(
                         blank=True,
-                        max_length=255,
-                        upload_to=hope.apps.core.upload_paths.upload_path,
+                        upload_to="",
                     ),
                 ),
                 (

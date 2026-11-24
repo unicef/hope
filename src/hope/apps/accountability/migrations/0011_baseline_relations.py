@@ -13,15 +13,15 @@ class Migration(migrations.Migration):
     ]
 
     dependencies = [
-        ("accountability", "0013_baseline_models"),
-        ("core", "0044_baseline_models"),
+        ("accountability", "0011_baseline_models"),
+        ("core", "0041_baseline_models"),
         ("geo", "0010_baseline_models"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ("grievance", "0022_baseline_models"),
-        ("household", "0056_baseline_models"),
-        ("payment", "0084_baseline_models"),
-        ("program", "0027_baseline_models"),
-        ("registration_data", "0022_baseline_models"),
+        ("grievance", "0020_baseline_models"),
+        ("household", "0052_baseline_models"),
+        ("payment", "0081_baseline_models"),
+        ("program", "0023_baseline_models"),
+        ("registration_data", "0020_baseline_models"),
     ]
 
     operations = [

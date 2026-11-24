@@ -14,7 +14,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ("activity_log", "0008_baseline_relations"),
-        ("program", "0027_baseline_models"),
+        ("program", "0023_baseline_models"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 

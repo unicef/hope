@@ -23,7 +23,7 @@ class Migration(migrations.Migration):
     ]
 
     dependencies = [
-        ("core", "0044_baseline_models"),
+        ("core", "0041_baseline_models"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
