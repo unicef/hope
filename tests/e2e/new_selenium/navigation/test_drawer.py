@@ -98,9 +98,7 @@ def test_programme_drawer_order(
     login.assert_exact_text(expected, DRAWER_ITEMS)
 
 
-def test_all_programmes_drawer_order(
-    social_worker_program: Program, business_area: BusinessArea, login: HopeTestBrowser
-) -> None:
+def test_all_programmes_drawer_order(business_area: BusinessArea, login: HopeTestBrowser) -> None:
     login.open(f"/{business_area.slug}/programs/all/list")
 
     login.assert_text("Programme Management", PAGE_HEADER_TITLE)
