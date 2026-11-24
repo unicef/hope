@@ -184,6 +184,17 @@ def test_assign_funds_commitment_headers_from_callback_assigns_multiple_headers_
     assert set(vision_payment_plan.funds_commitment_headers.all()) == {first_header, second_header}
 
 
+def test_assign_funds_commitment_headers_from_callback_rejects_empty_numbers(
+    vision_payment_plan: PaymentPlan,
+    django_assert_num_queries,
+) -> None:
+    with django_assert_num_queries(0), pytest.raises(FundsCommitmentAssignmentError) as error:
+        VisionService.assign_funds_commitment_headers_from_callback(vision_payment_plan, [])
+
+    assert error.value.status == VisionStatus.FC_NOT_FOUND
+    assert not vision_payment_plan.funds_commitment_headers.exists()
+
+
 def test_assign_funds_commitment_headers_from_callback_creates_missing_placeholder(
     vision_payment_plan: PaymentPlan,
     matching_fc_items: list,
