@@ -1,7 +1,7 @@
 import pytest
 
 from extras.test_utils.selenium import HopeTestBrowser
-from hope.models import Partner, PaymentPlanPurpose, Program, User
+from hope.models import Area, Partner, PaymentPlanPurpose, Program, User
 
 from .conftest import choose_partner, open_create_programme_partners_step
 
@@ -50,18 +50,18 @@ def test_delete_partner_while_creating_programme(purpose: PaymentPlanPurpose, lo
 def test_partner_with_admin_area_access(
     superuser_of_unhcr: User, purpose: PaymentPlanPurpose, login: HopeTestBrowser
 ) -> None:
+    kabul = Area.objects.get(p_code="AF01")
     open_create_programme_partners_step(login)
     login.select_dropdown_option("partnerAccess", SELECTED_PARTNERS)
     choose_partner(login, "UNHCR")
     login.js_click('input[type="radio"][value="ADMIN_AREA"]')
-    login.wait_for_element_visible("//div[text()='Kabul']/span", by="xpath")
-    login.click("//div[text()='Kabul']/span", by="xpath")
+    login.js_click(f'input[id="{kabul.id}"]')
     login.click(BUTTON_SAVE)
 
     login.wait_for_text("Test Programme", PAGE_HEADER_TITLE)
     assert partner_names(login) == ["TEST", "UNHCR"]
-    login.assert_text("1", 'div[data-cy="labelized-field-container-admin-area-1-total-count"]')
-    login.assert_text("15", 'div[data-cy="label-Admin Area 2"]')
+    login.assert_exact_text("1", 'div[data-cy="label-Admin Area 1"]')
+    login.assert_exact_text("15", 'div[data-cy="label-Admin Area 2"]')
 
 
 @pytest.mark.parametrize(

@@ -1,7 +1,6 @@
 import pytest
 
 from e2e.new_selenium.conftest import grant_permission
-from extras.test_utils.factories import RegistrationDataImportFactory
 from extras.test_utils.selenium import HopeTestBrowser
 from hope.apps.account.permissions import Permissions
 from hope.models import BusinessArea, PaymentPlanPurpose, Program, User
@@ -9,11 +8,8 @@ from hope.models import BusinessArea, PaymentPlanPurpose, Program, User
 from .conftest import (
     BA_PURPOSE_NAME,
     SECOND_BA_PURPOSE_NAME,
-    add_time_series_field,
     days_from_today,
     details_url,
-    fill_programme_create_required_fields,
-    navigate_to_programme_management,
 )
 
 pytestmark = pytest.mark.django_db()
@@ -184,26 +180,11 @@ def test_edit_programme_end_date_before_latest_cycle_fails(
 
 
 def test_edit_programme_with_rdi_locks_time_series_fields(
-    browser: HopeTestBrowser, ba_purpose: PaymentPlanPurpose
+    browser: HopeTestBrowser, programme_with_time_series_field_and_rdi: Program
 ) -> None:
+    program = programme_with_time_series_field_and_rdi
     browser.login()
-    navigate_to_programme_management(browser)
-    browser.click('a[data-cy="button-new-program"]')
-    fill_programme_create_required_fields(browser, sector="Health", dct="Partial", beneficiary_group="People")
-    browser.click('[data-cy="input-cashPlus"]')
-    browser.click('button[data-cy="button-next"]')
-    add_time_series_field(
-        browser, 0, label="Time Series Field Name 1", num_rounds="2", round_names=["Round 1", "Round 2"]
-    )
-    browser.click('button[data-cy="button-next"]')
-    browser.select_dropdown_option("partnerAccess", "All Current Partners within the business area")
-    browser.click('button[data-cy="button-save"]')
-    browser.wait_for_element_visible('button[data-cy="button-edit-program"]')
-    program = Program.objects.get(name="Test Programme")
-    RegistrationDataImportFactory(program=program, business_area=program.business_area)
-    # The RDI was created behind the app's back, so reload to drop the cached programme.
-    browser.refresh()
-
+    browser.open(details_url(program))
     browser.wait_for_element_clickable('button[data-cy="button-edit-program"]').click()
     browser.wait_for_element_clickable('li[data-cy="menu-item-edit-details"]').click()
     browser.wait_for_element_visible('input[name="name"]')

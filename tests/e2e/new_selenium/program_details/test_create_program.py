@@ -5,7 +5,7 @@ import pytest
 from e2e.new_selenium.conftest import grant_permission
 from extras.test_utils.selenium import HopeTestBrowser, ui_date
 from hope.apps.account.permissions import Permissions
-from hope.models import BusinessArea, PaymentPlanPurpose, User
+from hope.models import BusinessArea, PaymentPlanPurpose, Program, User
 
 from .conftest import (
     BA_PURPOSE_NAME,
@@ -376,7 +376,9 @@ def test_create_programme_keeps_values_when_going_back(
     browser.assert_text("-", 'div[data-cy="label-Administrative Areas of implementation"]')
     browser.assert_text("Yes", 'div[data-cy="label-CASH+"]')
     browser.assert_text("0", 'div[data-cy="label-Programme size"]')
-    browser.assert_element('h6[data-cy="label-partner-name"]:contains("UNHCR")')
+    # The details page always lists UNHCR, so check that it got access to the programme itself.
+    program = Program.objects.get(name="New Programme")
+    assert list(program.role_assignments.values_list("partner__name", flat=True)) == ["UNHCR"]
 
 
 def test_create_programme_dates_chosen_in_calendar(browser: HopeTestBrowser, purpose: PaymentPlanPurpose) -> None:

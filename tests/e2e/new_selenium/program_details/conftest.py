@@ -6,8 +6,10 @@ import pytest
 
 from extras.test_utils.factories import (
     BusinessAreaFactory,
+    FlexibleAttributeForPDUFactory,
     PartnerFactory,
     PaymentPlanPurposeFactory,
+    RegistrationDataImportFactory,
     RoleAssignmentFactory,
     RoleFactory,
 )
@@ -166,6 +168,14 @@ def programme_with_mixed_cycles(business_area: BusinessArea) -> Program:
 
 
 @pytest.fixture
+def programme_with_time_series_field_and_rdi(business_area: BusinessArea) -> Program:
+    program = ProgramFactory(business_area=business_area, status=Program.DRAFT)
+    FlexibleAttributeForPDUFactory(program=program, label="Time Series Field Name 1", pdu_data__number_of_rounds=2)
+    RegistrationDataImportFactory(program=program, business_area=business_area)
+    return program
+
+
+@pytest.fixture
 def superuser_of_unhcr(create_super_user: User) -> User:
     create_super_user.partner = Partner.objects.get(name="UNHCR")
     create_super_user.save()
@@ -173,7 +183,7 @@ def superuser_of_unhcr(create_super_user: User) -> User:
 
 
 @pytest.fixture
-def partner_in_business_area(create_super_user: User, business_area: BusinessArea) -> Partner:
+def partner_in_business_area(business_area: BusinessArea) -> Partner:
     partner = PartnerFactory(name="Test Partner 1")
     partner.allowed_business_areas.add(business_area)
     RoleAssignmentFactory(
