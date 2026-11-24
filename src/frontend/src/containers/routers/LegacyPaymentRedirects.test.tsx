@@ -43,6 +43,21 @@ describe('legacy payment module links', () => {
     );
   });
 
+  it('sends an old top-up payment plan link to the top-up payment list page', () => {
+    render(
+      <MemoryRouter
+        initialEntries={['/payment-module/top-up-payment-plans/P1']}
+      >
+        <PaymentModuleRoutes />
+        <CurrentPath />
+      </MemoryRouter>,
+    );
+
+    expect(screen.getByTestId('current-path').textContent).toBe(
+      '/afghanistan/programs/PRG1/payment-module/top-up-payment-lists/P1',
+    );
+  });
+
   it('sends an old cycle payment plan link to the cycle payment list page', () => {
     render(
       <MemoryRouter
