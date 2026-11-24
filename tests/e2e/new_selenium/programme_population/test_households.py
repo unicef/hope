@@ -61,7 +61,10 @@ DETAILS_LABELS = {
 }
 DETAILS = {label(name): value for name, value in DETAILS_LABELS.items()}
 STATUS_CONTAINER = 'div[data-cy="status-container"]'
-TABLE_ROW = 'tr[data-cy="table-row"]'
+MEMBERS_ROW = 'tr[data-cy="household-members-row"]'
+MEMBER_ID_CELL = f"{MEMBERS_ROW} td:nth-child(1)"
+MEMBER_NAME_CELL = f"{MEMBERS_ROW} td:nth-child(2)"
+PAYMENTS_TABLE_BODY = '//h6[@data-cy="table-title"][text()="Payments"]/following::tbody[1]'
 TABLE_LABEL = 'span[data-cy="table-label"]'
 KNOWN_AFFECTED_BENEFICIARIES = '[data-cy="known-affected-beneficiaries"]'
 ROW_0_5 = '[data-cy="row05"]'
@@ -128,7 +131,9 @@ def test_household_details_shows_household(household: Household, program: Progra
     login.assert_text("ACTIVE", STATUS_CONTAINER)
     login.assert_text("Items Group Members", TABLE_TITLE)
     login.assert_text("Item ID", TABLE_LABEL)
-    login.assert_text("No results", TABLE_ROW)
+    login.assert_exact_text(household.head_of_household.unicef_id, MEMBER_ID_CELL)
+    login.assert_exact_text("Agata Kowalska", MEMBER_NAME_CELL)
+    login.assert_text("No results", PAYMENTS_TABLE_BODY)
     login.assert_exact_text(rdi.data_source, label("Source"))
     login.assert_exact_text(rdi.name, label("Import name"))
     login.assert_exact_text(household.last_registration_date.strftime("%-d %b %Y"), label("Registration Date"))
