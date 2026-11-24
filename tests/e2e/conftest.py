@@ -63,7 +63,6 @@ from e2e.page_object.programme_population.periodic_data_update_templates import 
 from e2e.page_object.programme_population.periodic_data_update_uploads import (
     PDUXlsxUploads,
 )
-from e2e.page_object.programme_users.programme_users import ProgrammeUsers
 from e2e.page_object.targeting.targeting import Targeting
 from e2e.page_object.targeting.targeting_create import TargetingCreate
 from e2e.page_object.targeting.targeting_details import TargetingDetails
@@ -560,11 +559,6 @@ def page_program_cycle(request: FixtureRequest, browser: Chrome) -> ProgramCycle
 @pytest.fixture
 def page_program_cycle_details(request: FixtureRequest, browser: Chrome) -> ProgramCycleDetailsPage:
     return ProgramCycleDetailsPage(browser)
-
-
-@pytest.fixture
-def page_programme_users(request: FixtureRequest, browser: Chrome) -> ProgrammeUsers:
-    return ProgrammeUsers(browser)
 
 
 @pytest.fixture

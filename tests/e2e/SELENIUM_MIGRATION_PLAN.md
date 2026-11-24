@@ -77,8 +77,8 @@ Legend: `NEW <new_selenium/...>` · `COVERED <existing new test>` (verify assert
 - [x] Delete `page_object/error_page/` and the `page_error` / `page_access_denied` fixtures
 
 ### 3. `program_log/test_program_log.py` (2) → `new_selenium/activity_log/test_activity_log.py`
-- [x] test_smoke_program_log → NEW `test_activity_log_lists_entry[programme-log]` (entry created by `LogEntryFactory`; the finish flow itself is covered by `program_details/test_programme_status.py::test_finish_programme`)
-- [x] test_smoke_activity_log → NEW `test_activity_log_lists_entry[activity-log]`
+- [x] test_smoke_program_log → NEW `test_activity_log_lists_entry[programme-log]` (entry created by `LogEntryFactory`) + `test_finishing_programme_is_logged[programme-log]` (entry created by finishing the programme in the UI)
+- [x] test_smoke_activity_log → NEW `test_activity_log_lists_entry[activity-log]` + `test_finishing_programme_is_logged[activity-log]`
 - [x] Delete `page_object/program_log/` and the `page_program_log` fixture
 
 ### 4. `programme_user/test_programme_user.py` (1) → `new_selenium/program_details/test_programme_users.py`
