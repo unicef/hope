@@ -190,6 +190,44 @@ def test_send_payment_plan(mock_post, mock_acquire_token, vision_api_payment_pla
     )
 
 
+@pytest.fixture
+def office_payment_plan(vision_api_payment_plan_factory) -> PaymentPlan:
+    payment_plan = vision_api_payment_plan_factory()
+    parent_business_area = BusinessAreaFactory(code="FI00")
+    office = payment_plan.business_area
+    office.parent = parent_business_area
+    office.save(update_fields=["parent"])
+    return payment_plan
+
+
+@patch("hope.contrib.vision.api.VisionAPI._acquire_token")
+@patch("hope.contrib.vision.api.VisionAPI._post")
+def test_send_payment_plan_from_office_uses_parent_business_area(
+    mock_post,
+    mock_acquire_token,
+    office_payment_plan,
+) -> None:
+    mock_post.return_value = ({"status": "ok"}, 200)
+
+    VisionAPI().send_payment_plan(office_payment_plan)
+
+    assert mock_post.call_args.args[1]["businessArea"] == "FI00"
+
+
+@patch("hope.contrib.vision.api.VisionAPI._acquire_token")
+@patch("hope.contrib.vision.api.VisionAPI._post")
+def test_notify_payment_plan_status_from_office_uses_parent_business_area(
+    mock_post,
+    mock_acquire_token,
+    office_payment_plan,
+) -> None:
+    mock_post.return_value = ({"status": "ok"}, 200)
+
+    VisionAPI().notify_payment_plan_status(office_payment_plan, "REJECTED")
+
+    assert mock_post.call_args.args[1]["businessArea"] == "FI00"
+
+
 def test_payment_plan_payload_includes_null_exchange_rate(
     payment_plan_without_exchange_rate,
     django_assert_num_queries,

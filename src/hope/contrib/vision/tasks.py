@@ -12,7 +12,7 @@ def send_payment_plan_to_vision_async_task_action(job: AsyncJob) -> None:
         payment_plan = (
             PaymentPlan.objects.select_for_update(of=("self",))
             .select_related(
-                "business_area",
+                "business_area__parent",
                 "program_cycle__program__data_collecting_type__payee_type",
             )
             .get(pk=job.config["payment_plan_id"])
@@ -63,7 +63,7 @@ def send_payment_plan_to_vision_async_task(payment_plan: PaymentPlan, user_id: s
 
 def notify_payment_plan_status_to_vision_async_task_action(job: AsyncJob) -> None:
     payment_plan = PaymentPlan.objects.select_related(
-        "business_area",
+        "business_area__parent",
         "currency",
         "financial_service_provider",
         "program_cycle__program__data_collecting_type__payee_type",

@@ -130,7 +130,7 @@ class PaymentPlanCallbackAckSerializer(serializers.Serializer):
 
 
 class PaymentPlanPayloadSerializer(serializers.Serializer):
-    business_area = serializers.CharField(source="business_area.code")
+    business_area = serializers.SerializerMethodField()
     vendor_number = serializers.CharField(source="financial_service_provider.vision_vendor_number")
     payplan_sno = serializers.CharField(source="unicef_id")
     payplan_desc = serializers.CharField(source="name")
@@ -140,6 +140,11 @@ class PaymentPlanPayloadSerializer(serializers.Serializer):
     exchange_rate = serializers.DecimalField(max_digits=15, decimal_places=8, allow_null=True)
     head_vendor = serializers.CharField(source="financial_service_provider.name")
     gl_code = serializers.CharField(source="program_cycle.program.data_collecting_type.payee_type.gl_code")
+
+    def get_business_area(self, instance: Any) -> str:
+        business_area = instance.business_area
+        parent_business_area = business_area.parent
+        return parent_business_area.code if parent_business_area is not None else business_area.code
 
     def to_representation(self, instance: Any) -> dict[str, Any]:
         data = super().to_representation(instance)
