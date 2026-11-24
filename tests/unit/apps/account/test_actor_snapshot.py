@@ -1,4 +1,5 @@
 from collections.abc import Generator
+import logging
 from typing import Any
 from urllib.parse import unquote
 
@@ -164,6 +165,33 @@ def test_build_actor_snapshot_arrange_token_request_fails_act_build_assert_store
     assert snapshot == ActorSnapshot(name="Jan Kowalski", job_title="Stored Title", job_title_source="USER_RECORD")
 
 
+def test_build_actor_snapshot_arrange_token_request_fails_act_build_assert_error_logged(
+    user: User, ad_token_failure: responses.RequestsMock, caplog: pytest.LogCaptureFixture
+) -> None:
+    caplog.set_level(logging.ERROR)
+
+    build_actor_snapshot(user)
+
+    assert caplog.record_tuples == [
+        (
+            "hope.apps.account.actor_snapshot",
+            logging.ERROR,
+            f"AD job title lookup failed for user {user.pk}, using the stored job title",
+        )
+    ]
+
+
+def test_build_actor_snapshot_arrange_user_unknown_to_ad_act_build_assert_no_error_logged(
+    user: User, ad: responses.RequestsMock, caplog: pytest.LogCaptureFixture
+) -> None:
+    ad.add(responses.GET, USERS_URL, json={"value": []})
+    caplog.set_level(logging.ERROR)
+
+    build_actor_snapshot(user)
+
+    assert caplog.record_tuples == []
+
+
 @pytest.mark.parametrize(
     ("status", "body"),
     [
@@ -232,6 +260,28 @@ def test_actor_display_arrange_snapshot_act_display_assert_snapshot_name_and_tit
     snapshot_approval: Approval,
 ) -> None:
     assert actor_display(snapshot_approval, "created_by") == "Old Name (Old Title)"
+
+
+def test_actor_display_arrange_snapshot_row_reloaded_act_display_assert_no_queries(
+    snapshot_approval: Approval, django_assert_num_queries: Any
+) -> None:
+    snapshot_approval.refresh_from_db()
+
+    with django_assert_num_queries(0):
+        display = actor_display(snapshot_approval, "created_by")
+
+    assert display == "Old Name (Old Title)"
+
+
+def test_actor_display_arrange_legacy_row_reloaded_act_display_assert_one_user_query(
+    legacy_approval: Approval, django_assert_num_queries: Any
+) -> None:
+    legacy_approval.refresh_from_db()
+
+    with django_assert_num_queries(1):
+        display = actor_display(legacy_approval, "created_by")
+
+    assert display == "Jan Kowalski (Stored Title)"
 
 
 def test_actor_display_arrange_snapshot_without_title_act_display_assert_name_only(

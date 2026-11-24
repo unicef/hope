@@ -546,6 +546,28 @@ def test_bulk_finance_release_skips_vision_managed_plan(
     assert payment_plan.status == PaymentPlan.Status.IN_REVIEW
 
 
+@patch("hope.apps.account.actor_snapshot.MicrosoftGraphAPI")
+def test_bulk_action_arrange_only_vision_managed_plan_act_review_assert_no_ad_lookup(
+    mock_graph: Any,
+    vision_managerial_context: dict[str, Any],
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(
+        vision_managerial_context["user"],
+        [Permissions.PAYMENT_VIEW_LIST_MANAGERIAL],
+        vision_managerial_context["business_area"],
+        vision_managerial_context["program1"],
+    )
+
+    response = vision_managerial_context["client"].post(
+        vision_managerial_context["bulk_url"],
+        data={"ids": [vision_managerial_context["payment_plan1"].id], "action": PaymentPlan.Action.REVIEW.value},
+    )
+
+    assert response.status_code == status.HTTP_204_NO_CONTENT
+    mock_graph.assert_not_called()
+
+
 def test_bulk_action_rejects_unsupported_action(
     managerial_context: dict[str, Any],
     create_user_role_with_permissions: Any,
@@ -664,6 +686,28 @@ def test_bulk_action_no_approve_permissions(
     managerial_context["payment_plan2"].refresh_from_db()
     assert managerial_context["payment_plan1"].status == PaymentPlan.Status.IN_APPROVAL
     assert managerial_context["payment_plan2"].status == PaymentPlan.Status.IN_APPROVAL
+
+
+@patch("hope.apps.account.actor_snapshot.MicrosoftGraphAPI")
+def test_bulk_action_arrange_no_approve_permission_act_approve_assert_no_ad_lookup(
+    mock_graph: Any,
+    managerial_context: dict[str, Any],
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(
+        managerial_context["user"],
+        [Permissions.PAYMENT_VIEW_LIST_MANAGERIAL],
+        managerial_context["business_area"],
+        managerial_context["program1"],
+    )
+
+    response = managerial_context["client"].post(
+        managerial_context["bulk_url"],
+        data={"ids": [managerial_context["payment_plan1"].id], "action": PaymentPlan.Action.APPROVE.value},
+    )
+
+    assert response.status_code == status.HTTP_403_FORBIDDEN
+    mock_graph.assert_not_called()
 
 
 @pytest.mark.parametrize(
