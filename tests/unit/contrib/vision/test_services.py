@@ -1116,18 +1116,6 @@ def test_notify_payment_plan_closure_to_vision_queues_non_blocking_job(
             [
                 {
                     "type": VisionLogEntryType.STATUS_NOTIFICATION.value,
-                    "payload": {"totalAmountReconciled": "1.00", "closureDate": "2026-11-09"},
-                    "response": {"error": "legacy closure failed"},
-                }
-            ],
-            True,
-        ),
-        (
-            PaymentPlan.Status.CLOSED,
-            True,
-            [
-                {
-                    "type": VisionLogEntryType.STATUS_NOTIFICATION.value,
                     "payload": {"status": "ABORTED"},
                     "response": {"error": "abort notification failed"},
                 }

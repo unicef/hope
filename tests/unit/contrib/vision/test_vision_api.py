@@ -69,6 +69,15 @@ def payment_plan_without_exchange_rate(vision_api_payment_plan_factory) -> Payme
     return vision_api_payment_plan_factory(exchange_rate=None)
 
 
+@pytest.fixture
+def closed_payment_plan_without_vision_id(vision_api_payment_plan_factory) -> PaymentPlan:
+    payment_plan = vision_api_payment_plan_factory(unicef_id="PP-NO-VISION-ID")
+    payment_plan.status = PaymentPlan.Status.CLOSED
+    payment_plan.internal_data = {"vision": {"sent": True, "status": VisionStatus.RELEASED.value, "log": []}}
+    payment_plan.save(update_fields=["status", "internal_data"])
+    return payment_plan
+
+
 def test_missing_vision_url_raises_error(settings) -> None:
     settings.VISION_API_URL = ""
     with pytest.raises(VisionAPIMissingCredentialsError):
@@ -530,17 +539,25 @@ def test_notify_payment_plan_closure_saves_error_response_in_internal_data(
     assert payment_plan.vision_status == VisionStatus.RELEASED.value
 
 
-def test_notify_payment_plan_closure_with_non_dict_vision_data() -> None:
-    payment_plan = MagicMock()
-    payment_plan.vision_data = "unexpected"
-    payment_plan.unicef_id = "PP-NONDICT"
-    with patch.object(VisionAPI, "_post_payment_plan", return_value={}) as mock_post_plan:
+@patch("hope.contrib.vision.api.VisionAPI._acquire_token")
+@patch("hope.contrib.vision.api.VisionAPI._post")
+def test_notify_payment_plan_closure_without_vision_id_sends_empty_value(
+    mock_post,
+    mock_acquire_token,
+    closed_payment_plan_without_vision_id: PaymentPlan,
+    django_assert_num_queries,
+) -> None:
+    mock_post.return_value = ({"status": "ok"}, 200)
+    with django_assert_num_queries(4):
         VisionAPI().notify_payment_plan_closure(
-            payment_plan,
+            closed_payment_plan_without_vision_id,
             total_amount_reconciled=Decimal("8500.50"),
             closure_date=datetime(2026, 11, 9, 10, 30, tzinfo=timezone.utc),
         )
-    assert mock_post_plan.call_args.args[1]["visionPayplanSno"] == ""
+    assert mock_post.call_args.args[1]["visionPayplanSno"] == ""
+    closed_payment_plan_without_vision_id.refresh_from_db(fields=["internal_data"])
+    entry = closed_payment_plan_without_vision_id.vision_data["log"][0]
+    assert entry["type"] == VisionLogEntryType.CLOSURE_NOTIFICATION.value
 
 
 @patch("hope.contrib.vision.api.VisionAPI._acquire_token")

@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta
-from typing import Any, cast
+from decimal import Decimal
+from typing import cast
 
 from django.conf import settings
 from django.db import transaction
@@ -7,7 +8,6 @@ from django.utils import timezone
 import requests
 
 from hope.apps.core.api.mixins import BaseAPI
-from hope.apps.utils.dates import normalize_date
 from hope.apps.utils.external_urls import build_url
 from hope.contrib.api.serializers.vision import PaymentPlanPayloadSerializer
 from hope.contrib.vision.choices import VISION_SEND_MUTABLE_STATUSES, VisionLogEntryType, VisionStatus
@@ -206,8 +206,8 @@ class VisionAPI(BaseAPI):
         self,
         payment_plan: PaymentPlan,
         *,
-        total_amount_reconciled: Any,
-        closure_date: Any,
+        total_amount_reconciled: Decimal,
+        closure_date: datetime,
     ) -> dict:
         """Post the closure reconciliation to Vision's PaymentPlanClosure endpoint.
 
@@ -216,18 +216,14 @@ class VisionAPI(BaseAPI):
         closure date (``closureDate``). The attempt, including its response, is logged under the
         plan's Vision log in ``internal_data``; a failure raises and never changes Vision status.
         """
-        vision_data = payment_plan.vision_data if hasattr(payment_plan, "vision_data") else {}
-        vision_payment_plan_id = ""
-        if isinstance(vision_data, dict):
-            vision_payment_plan_id = str(vision_data.get("vision_id") or "")
+        vision_payment_plan_id = str(payment_plan.vision_data.get("vision_id") or "")
         # Total delivered quantity is a Decimal, which is not JSON-serializable by the
         # underlying requests client; Vision expects it as a string, like authAmt.
-        normalized_total_amount_reconciled = "" if total_amount_reconciled is None else str(total_amount_reconciled)
         payload = {
             "payplanSno": payment_plan.unicef_id,
             "visionPayplanSno": vision_payment_plan_id,
-            "totalAmountReconciled": normalized_total_amount_reconciled,
-            "closureDate": normalize_date(closure_date),
+            "totalAmountReconciled": str(total_amount_reconciled),
+            "closureDate": closure_date.isoformat(),
         }
         return self._post_payment_plan(
             payment_plan,
