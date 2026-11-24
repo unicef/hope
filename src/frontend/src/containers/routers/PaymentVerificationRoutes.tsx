@@ -6,12 +6,16 @@ import PaymentVerificationPage from '@containers/pages/payments/PaymentVerificat
 import VerificationPaymentDetailsPage from '@containers/pages/payments/VerificationPaymentDetailsPage';
 
 const LegacyPaymentPlanVerificationRedirect = (): ReactElement => {
-  const { paymentPlanId } = useParams<{ paymentPlanId: string }>();
+  const { paymentPlanId, id } = useParams<{
+    paymentPlanId: string;
+    id: string;
+  }>();
   const { baseUrl } = useBaseUrl();
+  const paymentPath = id ? `/verification/payment/${id}` : '';
 
   return (
     <Navigate
-      to={`/${baseUrl}/payment-verification/payment-list/${paymentPlanId}`}
+      to={`/${baseUrl}/payment-verification/payment-list/${paymentPlanId}${paymentPath}`}
       replace
     />
   );
@@ -37,6 +41,10 @@ export const PaymentVerificationRoutes = (): ReactElement => {
         {
           path: 'payment-list/:paymentListId/verification/payment/:id',
           element: <VerificationPaymentDetailsPage />,
+        },
+        {
+          path: 'payment-plan/:paymentPlanId/verification/payment/:id',
+          element: <LegacyPaymentPlanVerificationRedirect />,
         },
         {
           path: '*',
