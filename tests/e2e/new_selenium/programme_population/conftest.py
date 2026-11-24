@@ -150,7 +150,7 @@ def open_pdu_tab(browser: HopeTestBrowser, program: Program, subtab: str) -> Non
     browser.wait_for_element_visible(f'button[data-cy="pdu-{subtab}"][aria-selected="true"]')
 
 
-def assert_texts(browser: HopeTestBrowser, expected: dict[str, str]) -> None:
-    """Assert each selector in `expected` contains its text."""
+def assert_exact_texts(browser: HopeTestBrowser, expected: dict[str, str]) -> None:
+    """Assert each selector in `expected` shows exactly its text."""
     for selector, text in expected.items():
-        browser.assert_text(text, selector)
+        browser.assert_exact_text(text, selector)

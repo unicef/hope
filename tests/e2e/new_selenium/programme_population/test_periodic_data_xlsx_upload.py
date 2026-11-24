@@ -122,8 +122,8 @@ def test_upload_xlsx_for_unknown_template_shows_error(
 def test_uploads_list_shows_upload(successful_upload: PDUXlsxUpload, program: Program, login: HopeTestBrowser) -> None:
     open_pdu_tab(login, program, "offline-edits")
 
-    login.assert_text(str(successful_upload.pk), update_cell("id", successful_upload))
-    login.assert_text(str(successful_upload.template.pk), update_cell("template", successful_upload))
+    login.assert_exact_text(str(successful_upload.pk), update_cell("id", successful_upload))
+    login.assert_exact_text(str(successful_upload.template.pk), update_cell("template", successful_upload))
     login.assert_text(f"{successful_upload.created_at:%-d %b %Y}", update_cell("created-at", successful_upload))
     login.assert_text(successful_upload.created_by.get_full_name(), update_cell("created-by", successful_upload))
     login.assert_text("Successful", update_cell("status", successful_upload))

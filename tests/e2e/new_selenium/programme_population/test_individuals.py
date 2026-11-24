@@ -3,7 +3,7 @@ from datetime import date
 from dateutil.relativedelta import relativedelta
 import pytest
 
-from e2e.new_selenium.programme_population.conftest import assert_texts, open_from_menu
+from e2e.new_selenium.programme_population.conftest import assert_exact_texts, open_from_menu
 from extras.test_utils.factories import (
     HouseholdFactory,
     IndividualFactory,
@@ -21,6 +21,11 @@ BIRTH_DATE = date.today() - relativedelta(years=83, days=1)
 TABLE_TITLE = 'h6[data-cy="table-title"]'
 TABLE_PAGINATION = 'div[data-cy="table-pagination"]'
 INDIVIDUAL_ROW = 'tr[data-cy="individual-table-row"]'
+ID_CELL = f"{INDIVIDUAL_ROW} td:nth-child(2)"
+NAME_CELL = f"{INDIVIDUAL_ROW} td:nth-child(3)"
+HOUSEHOLD_ID_CELL = f"{INDIVIDUAL_ROW} td:nth-child(4)"
+RELATIONSHIP_CELL = f"{INDIVIDUAL_ROW} td:nth-child(5)"
+GENDER_CELL = f"{INDIVIDUAL_ROW} td:nth-child(7)"
 LIST_COLUMNS = {
     'th[data-cy="individual-id"]': "Item ID",
     'th[data-cy="individual-name"]': "Item",
@@ -102,12 +107,12 @@ def test_individuals_list_shows_individual(household: Household, program: Progra
 
     login.assert_text("Items", TABLE_TITLE)
     login.assert_text("1–1 of 1", TABLE_PAGINATION)
-    login.assert_text(head.unicef_id, INDIVIDUAL_ROW)
-    login.assert_text("Alicja Kowalska", INDIVIDUAL_ROW)
-    login.assert_text(household.unicef_id, INDIVIDUAL_ROW)
-    login.assert_text("Head of household (self)", INDIVIDUAL_ROW)
-    login.assert_text("Female", INDIVIDUAL_ROW)
-    assert_texts(login, LIST_COLUMNS)
+    login.assert_exact_text(head.unicef_id, ID_CELL)
+    login.assert_exact_text("Alicja Kowalska", NAME_CELL)
+    login.assert_exact_text(household.unicef_id, HOUSEHOLD_ID_CELL)
+    login.assert_exact_text("Head of household (self)", RELATIONSHIP_CELL)
+    login.assert_exact_text("Female", GENDER_CELL)
+    assert_exact_texts(login, LIST_COLUMNS)
 
 
 def test_individual_details_shows_individual(household: Household, program: Program, login: HopeTestBrowser) -> None:
@@ -116,7 +121,7 @@ def test_individual_details_shows_individual(household: Household, program: Prog
 
     login.click(INDIVIDUAL_ROW)
 
-    login.assert_text(head.unicef_id, 'h5[data-cy="page-header-title"]')
-    assert_texts(login, DETAILS)
-    login.assert_text(household.unicef_id, label("Items Group ID"))
-    login.assert_text(f"{household.unicef_id} -Primary collector", label("Linked Items Groups"))
+    login.assert_exact_text(f"Item ID: {head.unicef_id}", 'h5[data-cy="page-header-title"]')
+    assert_exact_texts(login, DETAILS)
+    login.assert_exact_text(household.unicef_id, label("Items Group ID"))
+    login.assert_exact_text(f"{household.unicef_id} -Primary collector", label("Linked Items Groups"))

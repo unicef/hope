@@ -77,8 +77,8 @@ def test_template_list_shows_template(
 ) -> None:
     open_pdu_tab(login, program, "offline-templates")
 
-    login.assert_text(str(exported_template.pk), template_cell("id", exported_template))
-    login.assert_text("10", template_cell("records", exported_template))
+    login.assert_exact_text(str(exported_template.pk), template_cell("id", exported_template))
+    login.assert_exact_text("10", template_cell("records", exported_template))
     login.assert_text(f"{exported_template.created_at:%-d %b %Y}", template_cell("created-at", exported_template))
     login.assert_text(exported_template.created_by.get_full_name(), template_cell("created-by", exported_template))
     login.assert_text("Exported", template_cell("status", exported_template))
@@ -97,9 +97,9 @@ def test_template_details_shows_rounds(
 
     login.wait_for_element_visible(DETAIL_MODAL)
     login.assert_text("Test String Attribute", 'td[data-cy="template-field-0"]')
-    login.assert_text("1", 'td[data-cy="template-round-number-0"]')
+    login.assert_exact_text("1", 'td[data-cy="template-round-number-0"]')
     login.assert_text("Round 1", 'td[data-cy="template-round-name-0"]')
-    login.assert_text("0", 'td[data-cy="template-number-of-individuals-0"]')
+    login.assert_exact_text("0", 'td[data-cy="template-number-of-individuals-0"]')
 
 
 def test_create_and_download_template(
@@ -121,5 +121,5 @@ def test_create_and_download_template(
 
     login.wait_for_element_visible(NEW_TEMPLATE)
     template = PDUXlsxTemplate.objects.get(program=program)
-    login.assert_text(str(template.pk), template_cell("id", template))
+    login.assert_exact_text(str(template.pk), template_cell("id", template))
     download_template(login, template)
