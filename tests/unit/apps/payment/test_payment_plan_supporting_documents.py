@@ -300,7 +300,7 @@ def test_validate_file_limit_failure(full_group: PaymentPlan, serializer_context
     assert not serializer.is_valid()
     assert (
         serializer.errors["non_field_errors"][0]
-        == f"Payment list already has the maximum of {PaymentPlanSupportingDocument.FILE_LIMIT} supporting documents."
+        == f"The maximum of {PaymentPlanSupportingDocument.FILE_LIMIT} supporting documents is already reached."
     )
 
 

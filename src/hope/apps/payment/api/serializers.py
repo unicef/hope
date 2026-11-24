@@ -165,8 +165,7 @@ class PaymentPlanSupportingDocumentSerializer(serializers.ModelSerializer):
 
         if PaymentPlanSupportingDocument.objects.filter(**owner).count() >= PaymentPlanSupportingDocument.FILE_LIMIT:
             raise serializers.ValidationError(
-                f"Payment list already has the maximum of {PaymentPlanSupportingDocument.FILE_LIMIT} "
-                f"supporting documents."
+                f"The maximum of {PaymentPlanSupportingDocument.FILE_LIMIT} supporting documents is already reached."
             )
         return data
 
