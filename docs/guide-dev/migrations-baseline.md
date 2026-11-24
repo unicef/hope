@@ -125,6 +125,7 @@ is ready for the baseline.
 |---|---|
 | Database on the last old migration | Nothing. `python manage.py migrate` records the baseline names. |
 | Database behind (guard: *not applied*) | Check out the parent of the baseline merge commit, run `python manage.py migrate`, switch back, run it again. Or rebuild. |
+| Database behind, and `makemigrations` or the pre-commit hook that checks for missing migrations fails with `InconsistentMigrationHistory: ... applied before its dependency <app>.NNNN_baseline_models` | Same cause and same fix as the row above. These commands do not go through the guard, so Django's own error appears instead of the guard's. |
 | First `migrate` on a new database was interrupted or targeted | Rebuild. The database holds a part of the baseline that cannot be resumed. |
 | A migration from another branch is applied (guard: *neither on disk nor replaced*) | Switch back to that branch and unapply it (`python manage.py migrate <app> <previous migration>`), or rebuild. |
 
