@@ -4,7 +4,7 @@ import openpyxl
 import pytest
 
 from e2e.new_selenium.programme_population.conftest import (
-    exported_template,
+    create_template_with_xlsx,
     open_pdu_tab,
     prepare_xlsx_file,
     rounds_data,
@@ -42,19 +42,19 @@ def upload_xlsx(browser: HopeTestBrowser, program: Program, path: Path) -> None:
 
 @pytest.fixture
 def valid_xlsx(individual: Individual, string_attribute: FlexibleAttribute, tmp_path: Path) -> Path:
-    return prepare_xlsx_file(string_attribute, [["Test Value", "2021-05-02"]], tmp_path / "valid.xlsx")
+    return prepare_xlsx_file(string_attribute, "Test Value", "2021-05-02", tmp_path / "valid.xlsx")
 
 
 @pytest.fixture
 def invalid_date_xlsx(individual: Individual, date_attribute: FlexibleAttribute, tmp_path: Path) -> Path:
-    return prepare_xlsx_file(date_attribute, [["Test Value", "2021-05-02"]], tmp_path / "invalid_date.xlsx")
+    return prepare_xlsx_file(date_attribute, "Test Value", "2021-05-02", tmp_path / "invalid_date.xlsx")
 
 
 @pytest.fixture
 def unknown_template_xlsx(
     individual: Individual, string_attribute: FlexibleAttribute, program: Program, tmp_path: Path
 ) -> Path:
-    template = exported_template(program, string_attribute)
+    template = create_template_with_xlsx(program, string_attribute)
     workbook = openpyxl.load_workbook(template.file.file)
     del workbook.custom_doc_props[PDUXlsxExportTemplateService.PROPERTY_ID_NAME]
     workbook[PDUXlsxExportTemplateService.META_SHEET][PDUXlsxExportTemplateService.META_ID_ADDRESS] = "-1"

@@ -50,7 +50,7 @@ def template_to_export(
 
 
 @pytest.fixture
-def exported_template(program: Program, string_attribute: FlexibleAttribute) -> PDUXlsxTemplate:
+def exported_template_without_file(program: Program, string_attribute: FlexibleAttribute) -> PDUXlsxTemplate:
     return PDUXlsxTemplateFactory(
         program=program,
         business_area=program.business_area,
@@ -73,16 +73,22 @@ def test_export_and_download_template(
 
 
 def test_template_list_shows_template(
-    exported_template: PDUXlsxTemplate, program: Program, login: HopeTestBrowser
+    exported_template_without_file: PDUXlsxTemplate, program: Program, login: HopeTestBrowser
 ) -> None:
     open_pdu_tab(login, program, "offline-templates")
 
-    login.assert_exact_text(str(exported_template.pk), template_cell("id", exported_template))
-    login.assert_exact_text("10", template_cell("records", exported_template))
-    login.assert_text(f"{exported_template.created_at:%-d %b %Y}", template_cell("created-at", exported_template))
-    login.assert_text(exported_template.created_by.get_full_name(), template_cell("created-by", exported_template))
-    login.assert_text("Exported", template_cell("status", exported_template))
-    login.assert_element_visible(download_button(exported_template))
+    login.assert_exact_text(str(exported_template_without_file.pk), template_cell("id", exported_template_without_file))
+    login.assert_exact_text("10", template_cell("records", exported_template_without_file))
+    login.assert_text(
+        f"{exported_template_without_file.created_at:%-d %b %Y}",
+        template_cell("created-at", exported_template_without_file),
+    )
+    login.assert_text(
+        exported_template_without_file.created_by.get_full_name(),
+        template_cell("created-by", exported_template_without_file),
+    )
+    login.assert_text("Exported", template_cell("status", exported_template_without_file))
+    login.assert_element_visible(download_button(exported_template_without_file))
 
 
 def test_template_details_shows_rounds(

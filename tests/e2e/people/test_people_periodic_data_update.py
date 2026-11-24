@@ -180,7 +180,7 @@ class TestPeoplePDUXlsxUpload:
         populate_pdu_with_null_values(program, individual.flex_fields)
         individual.save()
         flexible_attribute = string_attribute
-        xlsx_path = prepare_xlsx_file(flexible_attribute, [["Test Value", "2021-05-02"]], tmp_path / "pdu.xlsx")
+        xlsx_path = prepare_xlsx_file(flexible_attribute, "Test Value", "2021-05-02", tmp_path / "pdu.xlsx")
         page_people.select_global_program_filter(program.name)
         page_people.get_nav_people().click()
         page_individuals.get_tab_periodic_data_updates().click()
@@ -219,7 +219,7 @@ class TestPeoplePDUXlsxUpload:
         populate_pdu_with_null_values(program, individual.flex_fields)
         individual.save()
         flexible_attribute = date_attribute
-        xlsx_path = prepare_xlsx_file(flexible_attribute, [["Test Value", "2021-05-02"]], tmp_path / "pdu.xlsx")
+        xlsx_path = prepare_xlsx_file(flexible_attribute, "Test Value", "2021-05-02", tmp_path / "pdu.xlsx")
         page_people.select_global_program_filter(program.name)
         page_people.get_nav_people().click()
         page_individuals.get_tab_periodic_data_updates().click()
