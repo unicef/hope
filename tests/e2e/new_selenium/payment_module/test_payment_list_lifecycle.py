@@ -34,7 +34,11 @@ def test_delete_payment_list_from_open_payment_plan(
 ) -> None:
     payment_list = open_payment_list
     with grant_permission(
-        user_with_no_permissions, business_area, *PAYMENT_LIST_VIEW_PERMISSIONS, Permissions.PM_CREATE
+        user_with_no_permissions,
+        business_area,
+        *PAYMENT_LIST_VIEW_PERMISSIONS,
+        Permissions.PM_CREATE,
+        Permissions.PM_PAYMENT_PLAN_VIEW_DETAIL,
     ):
         open_payment_list_as(browser, payment_list, "OPEN")
         browser.wait_for_element_clickable(DELETE).click()
