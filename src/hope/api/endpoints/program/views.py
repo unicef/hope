@@ -10,6 +10,6 @@ from hope.models import Program
 
 class ProgramGlobalListView(HOPEAPIView, ListAPIView):
     serializer_class = ProgramGlobalSerializer
-    queryset = Program.objects.all()
+    queryset = Program.objects.select_related("data_collecting_type__payee_type", "business_area")
     filter_backends = (OrderingFilter, DjangoFilterBackend)
     filterset_class = ProgramFilter
