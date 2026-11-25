@@ -116,6 +116,8 @@ e2e).
 - ES is disabled by default (`ELASTICSEARCH_DSL_AUTOSYNC = False`); use `django_elasticsearch_setup` fixture or `mock_elasticsearch` fixture.
 - `DJANGO_SETTINGS_MODULE=hope.config.settings`.
 - `CELERY_TASK_ALWAYS_EAGER=true` in tests.
-- Tests use `--no-migrations` with a custom `sync_apps` patch in `tests/unit/conftest.py` to handle the centralized models pattern (models live under `src/hope/models/`).
+- The unit and e2e suites build their database with `migrate` (the [baseline](migrations-baseline.md) plus the migrations above it), so a broken migration fails the run.
+- **Rows inserted by migrations are not there in tests.** `django_db_setup` in `tests/conftest.py` empties every table once per worker after `migrate`, because a transactional test (and every e2e test) flushes the database anyway. Create currencies, payee types, beneficiary groups and other reference rows in fixtures.
+- The same fixture sets `hope.models` as the models module of the `hope` apps that have none (models live under `src/hope/models/`), so the content types and permissions of their models exist before the first test.
 - Use the `db` fixture, not `transaction=True` / `transactional_db`.
 - Use `django_assert_num_queries` (or pytest-django's `assertNumQueries`) to assert query counts and catch N+1 regressions.

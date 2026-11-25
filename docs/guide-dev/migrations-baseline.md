@@ -87,16 +87,17 @@ baseline never runs on existing databases.
 
 ### Writing SQL in a baseline file
 
-- Keep every `RunSQL` at the top level of `operations` and its `sql` a string or a list of strings.
-  The test suites build their database from the models and then replay every top-level `RunSQL`
-  from disk (`register_custom_sql_signal` in `tests/unit/conftest.py` and `tests/e2e/conftest.py`).
-- A replayed statement may fail only with "already exists". Anything else has to be idempotent
-  (`IF EXISTS`, `IF NOT EXISTS`, `CREATE OR REPLACE`).
+- The unit and e2e suites build their database by running the migrations, baseline included. A
+  statement runs once, where it stands in `operations`, and whatever it needs has to be created
+  earlier in the migration graph.
+- Keep `IF NOT EXISTS` on the `und-ci-det` collation and the `citext` extension. Six apps create the
+  collation in their first baseline file, so whichever runs first creates it.
 - `CreateModel` and `AddField` create foreign keys and most indexes at the very end of the migration.
   A statement that touches them in the same migration goes into
-  `hope.apps.core.migration_operations.RunSQLAfterDeferred`.
-- `development_tools/db/premigrations.sql` creates the extension, the collation and the document
-  function before the test tables exist. Keep it in line with the baseline.
+  `hope.apps.core.migration_operations.RunSQLAfterDeferred`, with `sql` as a list of plain
+  statements.
+- Tests do not see the rows a migration inserts: `tests/conftest.py` empties every table once after
+  `migrate` (see [Testing](testing.md#test-infrastructure)).
 
 ## The guard
 
