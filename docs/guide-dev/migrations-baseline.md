@@ -90,7 +90,8 @@ baseline never runs on existing databases.
 - The unit and e2e suites build their database by running the migrations, baseline included. A
   statement runs once, where it stands in `operations`, and whatever it needs has to be created
   earlier in the migration graph.
-- Keep `IF NOT EXISTS` on the `und-ci-det` collation and the `citext` extension. Six apps create the
+- Keep `IF NOT EXISTS` on the `und-ci-det` collation and the `citext` extension. `dropalldb` drops
+  only tables, so both are still there when a rebuilt database is migrated. Six apps also create the
   collation in their first baseline file, so whichever runs first creates it.
 - `CreateModel` and `AddField` create foreign keys and most indexes at the very end of the migration.
   A statement that touches them in the same migration goes into
