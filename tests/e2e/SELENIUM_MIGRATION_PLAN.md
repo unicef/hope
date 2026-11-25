@@ -30,7 +30,7 @@ grep -rcE '^\s*def test_' tests/e2e --include='test_*.py' --exclude-dir=new_sele
 | 3 | `program_log` | 2 | 2 | ✅ |
 | 4 | `programme_user` | 1 | 1 | ✅ |
 | 5 | `country_search` | 3 | 3 | ✅ |
-| 6 | `country_dashboard` | 1 | 0 | ⬜ |
+| 6 | `country_dashboard` | 1 | 1 | ✅ |
 | 7 | `managerial_console` | 2 | 0 | ⬜ |
 | 8 | `drawer` | 4 | 0 | ⬜ |
 | 9 | `accountability` | 4 | 0 | ⬜ |
@@ -46,9 +46,9 @@ grep -rcE '^\s*def test_' tests/e2e --include='test_*.py' --exclude-dir=new_sele
 | 19 | `grievance/grievance_dashboard` | 2 | 0 | ⬜ |
 | 20 | `grievance/grievance_tickets` | 25 | 0 | ⬜ |
 | 21 | Old infra cleanup | – | – | ⬜ |
-| | **Total** | **155** | **16** | **10 %** |
+| | **Total** | **155** | **17** | **11 %** |
 
-`[██░░░░░░░░░░░░░░░░░░] 16 / 155`. Update it after each PR: 1 block per ~8 tests.
+`[██░░░░░░░░░░░░░░░░░░] 17 / 155`. Update it after each PR: 1 block per ~8 tests.
 
 The new suite already has 46 test files and ~250 test functions. These do not count toward the 155.
 
@@ -77,8 +77,8 @@ Legend: `NEW <new_selenium/...>` · `COVERED <existing new test>` (verify assert
 - [x] Delete `page_object/error_page/` and the `page_error` / `page_access_denied` fixtures
 
 ### 3. `program_log/test_program_log.py` (2) → `new_selenium/activity_log/test_activity_log.py`
-- [x] test_smoke_program_log → NEW `test_activity_log_lists_entry[programme-log]` (entry created by `LogEntryFactory`; the finish flow itself is covered by `program_details/test_programme_status.py::test_finish_programme`)
-- [x] test_smoke_activity_log → NEW `test_activity_log_lists_entry[activity-log]`
+- [x] test_smoke_program_log → NEW `test_activity_log_lists_entry[programme-log]` (entry created by `LogEntryFactory`) + `test_finishing_programme_is_logged[programme-log]` (entry created by finishing the programme in the UI)
+- [x] test_smoke_activity_log → NEW `test_activity_log_lists_entry[activity-log]` + `test_finishing_programme_is_logged[activity-log]`
 - [x] Delete `page_object/program_log/` and the `page_program_log` fixture
 
 ### 4. `programme_user/test_programme_user.py` (1) → `new_selenium/program_details/test_programme_users.py`
@@ -92,8 +92,8 @@ Legend: `NEW <new_selenium/...>` · `COVERED <existing new test>` (verify assert
 - [x] Delete `page_object/country_search/` and the `page_country_search` fixture
 
 ### 6. `country_dashboard/test_country_dashboard.py` (1) → `new_selenium/dashboard/test_country_dashboard.py`
-- [ ] test_smoke_country_dashboard → NEW (assert values from factory data, not only labels)
-- [ ] Delete `page_object/country_dashboard/`
+- [x] test_smoke_country_dashboard → NEW `test_country_dashboard_shows_metrics_from_payments` (exact metric values from factory payments)
+- [x] Delete `page_object/country_dashboard/`, the `page_country_dashboard` fixture and the unused `get_nav_country_dashboard` helpers
 
 ### 7. `managerial_console/test_managerial_console.py` (2) → `new_selenium/managerial_console/test_managerial_console.py`
 - [ ] test_managerial_console_renders_all_sections → NEW
