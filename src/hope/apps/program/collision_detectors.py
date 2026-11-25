@@ -177,20 +177,18 @@ class AbstractCollisionDetector:
         )
         pairs_destination = []
         for pair in pairs_source:
-            ids = [
+            individual1, individual2 = (
                 individual_destination.pk if individual_id == individual_source.pk else individual_id
                 for individual_id in (pair.individual1_id, pair.individual2_id)
-            ]
-            if ids[0] == ids[1]:
+            )
+            if individual1 == individual2:
                 continue
-            if None not in ids:
-                # same ordering as BiometricDedupeSimilarityPair.bulk_add_pairs (individual1_lt_individual2)
-                ids.sort(key=str)
+            individual1, individual2 = BiometricDedupeSimilarityPair.order_pair(individual1, individual2)
             pairs_destination.append(
                 BiometricDedupeSimilarityPair(
                     program_id=pair.program_id,
-                    individual1_id=ids[0],
-                    individual2_id=ids[1],
+                    individual1_id=individual1,
+                    individual2_id=individual2,
                     similarity_score=pair.similarity_score,
                     status_code=pair.status_code,
                 )

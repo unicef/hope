@@ -2,6 +2,7 @@
 
 import datetime
 from typing import Any
+import uuid
 
 from django.db import IntegrityError, transaction
 from freezegun import freeze_time
@@ -18,6 +19,7 @@ from extras.test_utils.factories import (
     RegistrationDataImportFactory,
 )
 from hope.models import (
+    BiometricDedupeSimilarityPair,
     BusinessArea,
     Household,
     Individual,
@@ -166,3 +168,22 @@ def test_country_workspace_id_allows_distinct_non_null_values() -> None:
     RegistrationDataImportFactory(country_workspace_id="cw-corr-2")
 
     assert RegistrationDataImport.objects.filter(country_workspace_id__in=["cw-corr-1", "cw-corr-2"]).count() == 2
+
+
+LOW_ID = uuid.UUID("10000000-0000-0000-0000-000000000000")
+HIGH_ID = uuid.UUID("f0000000-0000-0000-0000-000000000000")
+
+
+@pytest.mark.parametrize(
+    ("first", "second", "expected"),
+    [
+        (LOW_ID, HIGH_ID, (LOW_ID, HIGH_ID)),
+        (HIGH_ID, LOW_ID, (LOW_ID, HIGH_ID)),
+        (str(HIGH_ID), str(LOW_ID), (str(LOW_ID), str(HIGH_ID))),
+        (HIGH_ID, str(LOW_ID), (str(LOW_ID), HIGH_ID)),
+        (HIGH_ID, None, (HIGH_ID, None)),
+        (None, LOW_ID, (None, LOW_ID)),
+    ],
+)
+def test_order_pair_returns_ids_in_constraint_order(first: Any, second: Any, expected: tuple) -> None:
+    assert BiometricDedupeSimilarityPair.order_pair(first, second) == expected

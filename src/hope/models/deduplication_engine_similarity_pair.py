@@ -1,4 +1,5 @@
 from typing import TYPE_CHECKING, Any, Literal
+from uuid import UUID
 
 from django.db import models, transaction
 from django.db.models import QuerySet
@@ -12,6 +13,7 @@ if TYPE_CHECKING:
 
 
 IndividualIdField = Literal["country_workspace_id", "id"]
+PairId = UUID | str | None
 
 
 class BiometricDedupeSimilarityPair(models.Model):
@@ -75,6 +77,13 @@ class BiometricDedupeSimilarityPair(models.Model):
     def __str__(self) -> str:
         return f"{self.program} - {self.individual1} / {self.individual2}"
 
+    @staticmethod
+    def order_pair(first: PairId, second: PairId) -> tuple[PairId, PairId]:
+        """Order two Individual ids to satisfy the individual1_lt_individual2 constraint."""
+        if first is None or second is None or str(first) <= str(second):
+            return first, second
+        return second, first
+
     @classmethod
     def bulk_add_pairs(
         cls,
@@ -103,12 +112,7 @@ class BiometricDedupeSimilarityPair(models.Model):
                 )
                 continue
 
-            individual1: str | None
-            individual2: str | None
-            if first_pk and second_pk:
-                individual1, individual2 = sorted([first_pk, second_pk])
-            else:
-                individual1, individual2 = first_pk, second_pk
+            individual1, individual2 = cls.order_pair(first_pk, second_pk)
 
             if individual1 == individual2:
                 logger.warning(f"Dedup Engine Findings, skipping duplicate pair ({individual1}, {individual2})")
