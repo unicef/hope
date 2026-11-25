@@ -13,7 +13,7 @@ from hope.contrib.api.serializers.vision import (
     PaymentPlanCallbackAckSerializer,
     PaymentPlanCallbackRequestSerializer,
 )
-from hope.contrib.vision.choices import VisionErrorCode, VisionLogEntryType, VisionStatus
+from hope.contrib.vision.choices import VisionLogEntryType, VisionStatus
 from hope.contrib.vision.services import VisionService
 from hope.models import Grant, PaymentPlan
 
@@ -23,10 +23,6 @@ VISION_CALLBACK_RECEIVED_MESSAGE = "Callback received"
 VISION_INVALID_CALLBACK_MESSAGE = "Invalid callback payload"
 VISION_PAYMENT_PLAN_NOT_FOUND_MESSAGE = "Payment plan not found"
 VISION_PAYPLAN_ID_MISSING_MESSAGE = "vision_payplanSno is required"
-VISION_FC_NOT_FOUND_MESSAGE = "FC not found"
-VISION_FC_AMBIGUOUS_MESSAGE = "Multiple FC headers found"
-VISION_FC_CONFLICT_MESSAGE = "FC assignment conflict"
-VISION_FC_ASSIGNMENT_FAILED_MESSAGE = "FC assignment failed"
 
 
 class PaymentPlanCallbackView(HOPEAPIView, APIView):
@@ -53,17 +49,6 @@ class PaymentPlanCallbackView(HOPEAPIView, APIView):
             PaymentPlanCallbackView._build_response(VISION_RESPONSE_KO, serializer, message=message),
             status=http_status,
         )
-
-    @staticmethod
-    def _fc_failure_message(payment_plan: PaymentPlan) -> str:
-        vision_data = payment_plan.internal_data["vision"]
-        if vision_data.get("status") == VisionStatus.FC_NOT_FOUND.value:
-            return VISION_FC_NOT_FOUND_MESSAGE
-        if vision_data.get("error_code") == VisionErrorCode.FC_AMBIGUOUS.value:
-            return VISION_FC_AMBIGUOUS_MESSAGE
-        if vision_data.get("error_code") == VisionErrorCode.FC_CONFLICT.value:
-            return VISION_FC_CONFLICT_MESSAGE
-        return VISION_FC_ASSIGNMENT_FAILED_MESSAGE
 
     @staticmethod
     def _get_payment_plan(payplan_sno: str) -> PaymentPlan:
@@ -120,30 +105,20 @@ class PaymentPlanCallbackView(HOPEAPIView, APIView):
             payment_plan.save(update_fields=["internal_data"])
             return Response(response_data, status=status.HTTP_400_BAD_REQUEST)
 
-        fc_assignment_failed = VisionService.process_callback(
+        VisionService.process_callback(
             payment_plan,
             vision_payment_plan_id=serializer.validated_vision_payplan_sno,
             vision_result=serializer.validated_data.get("status", ""),
             fc_numbers=serializer.validated_data.get("fc_numbers", []),
         )
-        response_status: int
-        if fc_assignment_failed:
-            response_data = self._build_response(
-                VISION_RESPONSE_KO,
-                serializer,
-                message=self._fc_failure_message(payment_plan),
-            )
-            response_status = status.HTTP_400_BAD_REQUEST
-        else:
-            response_data = self._build_response(
-                VISION_RESPONSE_OK,
-                serializer,
-                message=VISION_CALLBACK_RECEIVED_MESSAGE,
-            )
-            response_status = status.HTTP_200_OK
+        response_data = self._build_response(
+            VISION_RESPONSE_OK,
+            serializer,
+            message=VISION_CALLBACK_RECEIVED_MESSAGE,
+        )
 
         self._append_log(payment_plan, serializer.external_payload, response_data)
 
         payment_plan.save(update_fields=["internal_data"])
 
-        return Response(response_data, status=response_status)
+        return Response(response_data, status=status.HTTP_200_OK)

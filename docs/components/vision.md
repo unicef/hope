@@ -105,7 +105,7 @@ numbers may come from an earlier callback. Duplicate callbacks do not repeat rel
 The callback response includes `status`, `messageId`, `payplanSno`, and `message`. An accepted callback returns HTTP
 `200`, status `OK`, and message `Callback received`, including when Vision reports a failed Payment Plan status.
 An invalid callback returns HTTP `400` with a reason in `message`; an unknown `payplanSno` returns HTTP `404` and
-`Payment plan not found`. An FC assignment failure returns HTTP `400`, status `KO`, and an `FC not found` message.
+`Payment plan not found`.
 A later callback retries processing from `SEND_FAILED`, `PP_CREATED`, `CALLBACK_FAILED`, or `FC_NOT_FOUND`. A successful
 callback with a valid FC can therefore recover the workflow without admin intervention.
 

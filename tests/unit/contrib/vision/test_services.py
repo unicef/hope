@@ -250,14 +250,13 @@ def test_process_callback_success_without_fc_records_creation_acknowledgement(
 ) -> None:
     VisionService.set_status(vision_payment_plan, current_status)
     with django_assert_num_queries(1):
-        fc_assignment_failed = VisionService.process_callback(
+        VisionService.process_callback(
             vision_payment_plan,
             vision_payment_plan_id="VISION-1",
             vision_result="SUCCESS",
             fc_numbers=[],
         )
 
-    assert fc_assignment_failed is False
     assert vision_payment_plan.status == PaymentPlan.Status.IN_REVIEW
     assert vision_payment_plan.vision_data == {
         "sent": True,
@@ -273,14 +272,13 @@ def test_process_callback_empty_status_does_not_confirm_plan_creation(
     VisionService.set_status(vision_payment_plan, VisionStatus.WAITING_FOR_CALLBACK)
 
     with django_assert_num_queries(1):
-        fc_assignment_failed = VisionService.process_callback(
+        VisionService.process_callback(
             vision_payment_plan,
             vision_payment_plan_id="00000110",
             vision_result="",
             fc_numbers=[],
         )
 
-    assert fc_assignment_failed is False
     assert vision_payment_plan.status == PaymentPlan.Status.IN_REVIEW
     assert vision_payment_plan.vision_data == {
         "sent": True,
@@ -302,14 +300,13 @@ def test_process_callback_creation_acknowledgement_preserves_later_fc_failure(
     }
 
     with django_assert_num_queries(1):
-        fc_assignment_failed = VisionService.process_callback(
+        VisionService.process_callback(
             vision_payment_plan,
             vision_payment_plan_id="VISION-1",
             vision_result="SUCCESS",
             fc_numbers=[],
         )
 
-    assert fc_assignment_failed is False
     assert vision_payment_plan.vision_data == {
         "sent": True,
         "vision_id": "VISION-1",
@@ -333,14 +330,13 @@ def test_process_callback_creates_placeholder_and_releases_plan(
         patch.object(PaymentPlan, "can_send_to_payment_gateway", new_callable=PropertyMock, return_value=False),
         django_assert_num_queries(10),
     ):
-        fc_assignment_failed = VisionService.process_callback(
+        VisionService.process_callback(
             vision_payment_plan,
             vision_payment_plan_id="VISION-1",
             vision_result=vision_result,
             fc_numbers=["UNKNOWN"],
         )
 
-    assert fc_assignment_failed is False
     assert vision_payment_plan.vision_data == {
         "sent": True,
         "vision_id": "VISION-1",
@@ -363,14 +359,13 @@ def callback_placeholder_with_synced_fc(
     vision_payment_plan.business_area.save(update_fields=["code"])
     VisionService.set_status(vision_payment_plan, VisionStatus.WAITING_FOR_CALLBACK)
     with patch("hope.apps.payment.services.payment_plan_services.send_payment_notification_emails_async_task"):
-        fc_assignment_failed = VisionService.process_callback(
+        VisionService.process_callback(
             vision_payment_plan,
             vision_payment_plan_id="VISION-1",
             vision_result="SUCCESS",
             fc_numbers=["FC123"],
         )
 
-    assert fc_assignment_failed is False
     placeholder = FundsCommitmentHeader.objects.get(funds_commitment_number="FC123")
     linked_header_id_before_sync = vision_payment_plan.funds_commitment_headers.values_list("pk", flat=True).get()
 
@@ -426,14 +421,13 @@ def test_process_callback_failure_preserves_existing_fc_metadata(
     vision_data["vision_id"] = "VISION-OLD"
     vision_data["fc_numbers"] = ["FC-OLD"]
     with django_assert_num_queries(1):
-        fc_assignment_failed = VisionService.process_callback(
+        VisionService.process_callback(
             vision_payment_plan,
             vision_payment_plan_id="VISION-1",
             vision_result="ERROR",
             fc_numbers=fc_numbers,
         )
 
-    assert fc_assignment_failed is False
     assert vision_payment_plan.status == PaymentPlan.Status.IN_REVIEW
     assert vision_payment_plan.vision_data == {
         "sent": True,
@@ -451,14 +445,13 @@ def test_process_callback_fc_create_without_numbers_records_failure(
     VisionService.set_status(vision_payment_plan, VisionStatus.PP_CREATED)
 
     with django_assert_num_queries(1):
-        fc_assignment_failed = VisionService.process_callback(
+        VisionService.process_callback(
             vision_payment_plan,
             vision_payment_plan_id="VISION-1",
             vision_result="FC CREATE",
             fc_numbers=[],
         )
 
-    assert fc_assignment_failed is False
     assert vision_payment_plan.status == PaymentPlan.Status.IN_REVIEW
     assert vision_payment_plan.vision_data == {
         "sent": True,
@@ -474,14 +467,13 @@ def test_process_callback_records_failure_when_fc_callback_has_no_success_status
     VisionService.set_status(vision_payment_plan, VisionStatus.PP_CREATED)
 
     with django_assert_num_queries(1):
-        fc_assignment_failed = VisionService.process_callback(
+        VisionService.process_callback(
             vision_payment_plan,
             vision_payment_plan_id="VISION-1",
             vision_result="",
             fc_numbers=["FC123"],
         )
 
-    assert fc_assignment_failed is False
     assert vision_payment_plan.vision_data == {
         "sent": True,
         "status": VisionStatus.CALLBACK_FAILED.value,
@@ -502,14 +494,13 @@ def test_process_callback_reprocesses_existing_fc_assignment_failure(
         patch.object(PaymentPlan, "can_send_to_payment_gateway", new_callable=PropertyMock, return_value=False),
         django_assert_num_queries(10),
     ):
-        fc_assignment_failed = VisionService.process_callback(
+        VisionService.process_callback(
             payment_plan,
             vision_payment_plan_id="VISION-RETRY",
             vision_result="SUCCESS",
             fc_numbers=["FC123"],
         )
 
-    assert fc_assignment_failed is False
     assert payment_plan.vision_data == {
         "sent": True,
         "vision_id": "VISION-RETRY",
@@ -548,14 +539,13 @@ def test_process_callback_recovers_failed_state_with_valid_fc(
         patch.object(PaymentPlan, "can_send_to_payment_gateway", new_callable=PropertyMock, return_value=False),
         django_assert_num_queries(6),
     ):
-        fc_assignment_failed = VisionService.process_callback(
+        VisionService.process_callback(
             vision_payment_plan,
             vision_payment_plan_id="VISION-RETRY",
             vision_result="SUCCESS",
             fc_numbers=["FC123"],
         )
 
-    assert fc_assignment_failed is False
     assert vision_payment_plan.vision_status == VisionStatus.RELEASED.value
     assert vision_payment_plan.sent_to_vision is True
     assert list(vision_payment_plan.funds_commitment_headers.all()) == [matching_fc_items[0].funds_commitment_header]
@@ -697,14 +687,12 @@ def test_disabled_vision_flag_keeps_stored_fc_failure_log_only(
     django_assert_num_queries,
 ) -> None:
     with django_assert_num_queries(1):
-        fc_assignment_failed = VisionService.process_callback(
+        VisionService.process_callback(
             vision_disabled_payment_plan_with_fc_failure,
             vision_payment_plan_id="VISION-1",
             vision_result="SUCCESS",
             fc_numbers=["FC123"],
         )
-
-    assert fc_assignment_failed is False
 
 
 def test_instruction_managed_plan_is_excluded_from_vision(

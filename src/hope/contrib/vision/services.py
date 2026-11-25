@@ -101,8 +101,8 @@ class VisionService:
         vision_payment_plan_id: str,
         vision_result: str,
         fc_numbers: list[str],
-    ) -> bool:
-        """Return whether the callback must be rejected because its FC could not be assigned."""
+    ) -> None:
+        """Process an active Vision callback for the Payment Plan."""
         vision_data = cls.vision_data(payment_plan)
         released = vision_data.get("status") == VisionStatus.RELEASED.value
         # Callbacks for completed, disabled, aborted, or rejected workflows are logged by the view but must not
@@ -112,12 +112,12 @@ class VisionService:
             or not payment_plan.vision_integration_enabled
             or payment_plan.status != PaymentPlan.Status.IN_REVIEW
         ):
-            return False
+            return
 
         # Failed attempts remain recoverable through a later corrected callback. NOT_SENT is excluded so an
         # unsolicited callback cannot start a Vision workflow.
         if payment_plan.vision_status not in VISION_RECOVERABLE_STATUSES:
-            return False
+            return
 
         # Any callback for the active request confirms that Vision received the Payment Plan.
         vision_data["sent"] = True
@@ -129,7 +129,7 @@ class VisionService:
                 VisionStatus.CALLBACK_FAILED,
                 error_code=VisionErrorCode.VISION_STATUS_FAILED,
             )
-            return False
+            return
 
         normalized_fc_numbers = list(dict.fromkeys(fc_numbers))
         is_pp_creation_acknowledgement = vision_result == VisionCallbackResult.SUCCESS and not normalized_fc_numbers
@@ -138,7 +138,7 @@ class VisionService:
             is_pp_creation_acknowledgement
             and payment_plan.vision_status not in VISION_CREATION_ACKNOWLEDGEMENT_MUTABLE_STATUSES
         ):
-            return False
+            return
 
         vision_data["vision_id"] = vision_payment_plan_id
         if is_pp_creation_acknowledgement:
@@ -146,15 +146,9 @@ class VisionService:
             cls.set_status(payment_plan, VisionStatus.PP_CREATED)
         else:
             vision_data["fc_numbers"] = normalized_fc_numbers
-            try:
-                cls.assign_funds_commitment_headers_from_callback(payment_plan, normalized_fc_numbers)
-            except FundsCommitmentAssignmentError as error:
-                cls.set_status(payment_plan, error.status, error_code=error.error_code)
-                return True
-
+            cls.assign_funds_commitment_headers_from_callback(payment_plan, normalized_fc_numbers)
             # Successful assignment completes release and continues to PG or XLSX delivery.
             cls.complete_funds_commitment_assignment(payment_plan)
-        return False
 
     @classmethod
     def complete_funds_commitment_assignment(cls, payment_plan: PaymentPlan) -> None:

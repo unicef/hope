@@ -645,7 +645,6 @@ def test_callback_view_success_with_fc_numbers(mock_get, mock_log_entry) -> None
 
     view = PaymentPlanCallbackView.as_view()
     with patch("hope.contrib.vision.views.VisionService.process_callback") as mock_process_callback:
-        mock_process_callback.return_value = False
         response = view(request)
 
     assert response.status_code == 200
@@ -918,23 +917,3 @@ def test_callback_view_missing_payplan_sno(mock_get, mock_log_entry) -> None:
         "message": "Invalid callback payload",
     }
     mock_get.assert_not_called()
-
-
-@pytest.mark.parametrize(
-    ("vision_data", "expected_message"),
-    [
-        ({"status": VisionStatus.FC_NOT_FOUND.value}, "FC not found"),
-        ({"error_code": "FC_AMBIGUOUS"}, "Multiple FC headers found"),
-        ({"error_code": "FC_CONFLICT"}, "FC assignment conflict"),
-        ({}, "FC assignment failed"),
-    ],
-)
-def test_callback_view_fc_failure_message(vision_data, expected_message, django_assert_num_queries) -> None:
-    from hope.contrib.vision.views import PaymentPlanCallbackView
-
-    payment_plan = PaymentPlan(internal_data={"vision": vision_data})
-
-    with django_assert_num_queries(0):
-        message = PaymentPlanCallbackView._fc_failure_message(payment_plan)
-
-    assert message == expected_message
