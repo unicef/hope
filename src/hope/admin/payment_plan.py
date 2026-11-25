@@ -25,6 +25,7 @@ from hope.admin.utils import (
     PaymentPlanCeleryTasksMixin,
     ViewOnUiMixin,
 )
+from hope.apps.account.actor_snapshot import build_actor_snapshot
 from hope.apps.activity_log.utils import copy_model_object, create_diff
 from hope.apps.payment.forms import BatchReexportForm, VisionFundsCommitmentHeaderAssignmentForm
 from hope.apps.payment.services.payment_gateway import PaymentGatewayAPI
@@ -488,6 +489,12 @@ class PaymentPlanAdmin(BasePaymentPlanAdmin, PaymentPlanCeleryTasksMixin):
             payment_plan=payment_plan,
         )
         if request.method == "POST" and form.is_valid():
+            # Take the release actor from AD before locking the payment plan, only while it can still be released.
+            actor_snapshot = (
+                build_actor_snapshot(payment_plan.created_by)
+                if can_recover_vision_funds_commitment(payment_plan)
+                else None
+            )
             try:
                 with transaction.atomic():
                     locked_payment_plan = (
@@ -496,6 +503,7 @@ class PaymentPlanAdmin(BasePaymentPlanAdmin, PaymentPlanCeleryTasksMixin):
                     VisionService.recover_with_funds_commitment_headers(
                         locked_payment_plan,
                         form.cleaned_data["funds_commitment_headers"],
+                        actor_snapshot,
                     )
             except FundsCommitmentAssignmentError:
                 form.add_error(

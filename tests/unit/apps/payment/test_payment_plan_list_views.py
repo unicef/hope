@@ -2,6 +2,7 @@ from datetime import date
 from decimal import Decimal
 import json
 from typing import Any, Callable
+from unittest.mock import patch
 
 from django.core.cache import cache
 from django.db import connection
@@ -12,6 +13,7 @@ from rest_framework import status
 from rest_framework.reverse import reverse
 
 from extras.test_utils.factories import (
+    ApprovalProcessFactory,
     BusinessAreaFactory,
     CurrencyFactory,
     FollowUpInstructionFactory,
@@ -25,6 +27,7 @@ from extras.test_utils.factories import (
     UserFactory,
 )
 from hope.apps.account.permissions import Permissions
+from hope.apps.payment.services.payment_plan_services import PaymentPlanService
 from hope.models import Payment, PaymentPlan, Program
 
 pytestmark = pytest.mark.django_db
@@ -142,6 +145,22 @@ def payment_plan_detail_context(
         "group": pp.payment_plan_group,
         "pp_detail_url": pp_detail_url,
     }
+
+
+@pytest.fixture
+def approved_payment_plan_detail_context(payment_plan_detail_context: dict[str, Any]) -> dict[str, Any]:
+    user = payment_plan_detail_context["user"]
+    user.first_name = "Jan"
+    user.last_name = "Kowalski"
+    user.job_title = "Stored Title"
+    user.save(update_fields=["first_name", "last_name", "job_title"])
+    ApprovalProcessFactory(payment_plan=payment_plan_detail_context["pp"])
+    with patch("hope.apps.account.actor_snapshot.MicrosoftGraphAPI") as mock_graph:
+        mock_graph.return_value.get_user_data.return_value = {"jobTitle": "Programme Officer"}
+        PaymentPlanService(payment_plan_detail_context["pp"]).execute_update_status_action(
+            {"action": PaymentPlan.Action.APPROVE.value, "comment": ""}, user
+        )
+    return payment_plan_detail_context
 
 
 @pytest.fixture
@@ -448,6 +467,30 @@ def test_payment_plan_detail(
         "unicef_id": group.unicef_id,
         "name": group.name,
     }
+
+
+def test_payment_plan_detail_arrange_user_renamed_after_approval_act_get_assert_history_unchanged(
+    approved_payment_plan_detail_context: dict[str, Any],
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(
+        approved_payment_plan_detail_context["user"],
+        [Permissions.PM_VIEW_DETAILS],
+        approved_payment_plan_detail_context["business_area"],
+        approved_payment_plan_detail_context["program_active"],
+    )
+    user = approved_payment_plan_detail_context["user"]
+    user.first_name = "Renamed"
+    user.last_name = "Person"
+    user.job_title = "New Title"
+    user.save(update_fields=["first_name", "last_name", "job_title"])
+
+    response = approved_payment_plan_detail_context["client"].get(approved_payment_plan_detail_context["pp_detail_url"])
+
+    assert response.status_code == status.HTTP_200_OK
+    approval_process = response.json()["approval_process"][0]
+    assert approval_process["sent_for_authorization_by"] == "Jan Kowalski (Programme Officer)"
+    assert approval_process["actions"]["approval"][0]["info"] == "Approved by Jan Kowalski (Programme Officer)"
 
 
 def test_follow_ups_and_top_ups_return_correct_children(

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import json
 import re
-from typing import TYPE_CHECKING, Any, TypeVar, override
+from typing import TYPE_CHECKING, Any, NamedTuple, TypeVar, override
 
 if TYPE_CHECKING:
     from uuid import UUID
@@ -24,7 +24,7 @@ from adminfilters.mixin import AdminFiltersMixin
 from django.conf import settings
 from django.contrib import admin, messages
 from django.contrib.admin.options import get_content_type_for_model
-from django.contrib.admin.views.main import PAGE_VAR
+from django.contrib.admin.views.main import PAGE_VAR, SEARCH_VAR
 from django.core.cache import cache
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Model, OneToOneRel, Q, QuerySet
@@ -597,6 +597,28 @@ class FieldPkCursorPaginatorAdmin(CursorPaginatorAdmin):
         return paginator
 
 
+# unicef_id prefixes the admin search knows -> the changelist that searches it, named when another admin gets the id
+UNICEF_ID_PREFIXES = {"IND": "Individuals", "HH": "Households"}
+
+# a known prefix followed by a digit, or the bare prefix and dash; a term with a space is several search words
+UNICEF_ID_LIKE_RE = re.compile(rf"({'|'.join(UNICEF_ID_PREFIXES)})(-?\d\S*|-)")
+
+# what follows the prefix in the trigger format PREFIX-yy-0000.0000, or any truncation of it down to "-"
+UNICEF_ID_SUFFIX_RE = re.compile(r"-(\d{0,2}|\d{2}-\d{0,4}|\d{2}-\d{4}\.\d{0,4})")
+
+
+class UnicefIdSearch(NamedTuple):
+    """An admin search term: prefix-match it on `field`, search `id_like_search_fields`, reject it with `error`.
+
+    None of these set means the default search.
+    """
+
+    term: str
+    field: str | None = None
+    fallback: bool = False
+    error: str | None = None
+
+
 class UnicefIdSearchMixin(admin.ModelAdmin):
     """Prefix-match a pasted unicef_id instead of OR-ing `icontains` over every search field.
 
@@ -612,20 +634,59 @@ class UnicefIdSearchMixin(admin.ModelAdmin):
     # unicef_id prefix a user may paste -> field to prefix-match on
     unicef_id_search_map: dict[str, str] = {}
 
-    # the trigger format PREFIX-yy-0000.0000, or any truncation of it (still a valid startswith)
-    unicef_id_re = re.compile(r"([A-Z]+)-(\d{1,2}|\d{2}-\d{0,4}|\d{2}-\d{4}\.\d{0,4})")
+    # fields of the model itself whose values may look like an id (e.g. a document number "HH1234567"); a term
+    # that looks like an id but is not one this admin prefix-matches is searched in these instead of rejected
+    id_like_search_fields: tuple[str, ...] = ()
+
+    def classify_unicef_id_search(self, search_term: str) -> UnicefIdSearch:
+        term = search_term.strip().upper()
+        looks_like_id = UNICEF_ID_LIKE_RE.fullmatch(term)
+        if not looks_like_id:
+            return UnicefIdSearch(term)
+        prefix, suffix = looks_like_id.groups()
+        field = self.unicef_id_search_map.get(prefix)
+        if field and UNICEF_ID_SUFFIX_RE.fullmatch(suffix):
+            return UnicefIdSearch(term, field=field)
+        if self.id_like_search_fields:
+            return UnicefIdSearch(term, fallback=True)
+        if field is None:
+            accepted = " or ".join(self.unicef_id_search_map)
+            return UnicefIdSearch(
+                term,
+                error=f"{prefix} IDs cannot be searched here, only {accepted} IDs. "
+                f"Search {prefix} IDs in {UNICEF_ID_PREFIXES[prefix]}.",
+            )
+        return UnicefIdSearch(
+            term,
+            error=f"Invalid UNICEF ID format. Expected {prefix}-yy-NNNN.NNNN or its beginning, e.g. {prefix}-23-0003.",
+        )
 
     def get_search_results(self, request: HttpRequest, queryset: QuerySet, search_term: str) -> tuple[QuerySet, bool]:
-        term = search_term.strip().upper()
-        match = self.unicef_id_re.fullmatch(term)
-        field = self.unicef_id_search_map.get(match[1]) if match else None
-        if field:
-            queryset = queryset.filter(**{f"{field}__startswith": term})
-            if field == "unicef_id":
+        search = self.classify_unicef_id_search(search_term)
+        if search.error:
+            # the default search would OR `icontains` over every search field and scan the table
+            return queryset.none(), False
+        if search.fallback:
+            # an id-like term matches no unicef_id this admin searches, so only the fallback fields can hold it
+            lookups = {f"{field}__icontains": search.term for field in self.id_like_search_fields}
+            return queryset.filter(Q(**lookups, _connector=Q.OR)), False
+        if search.field:
+            queryset = queryset.filter(**{f"{search.field}__startswith": search.term})
+            if search.field == "unicef_id":
                 # get_paginator orders and pages the cursor by this field
                 queryset = queryset.annotate(unicef_id_c=Collate("unicef_id", "C"))
             return queryset, False
         return super().get_search_results(request, queryset, search_term)
+
+    def changelist_view(self, request: HttpRequest, extra_context: dict[str, Any] | None = None) -> HttpResponse:
+        response = super().changelist_view(request, extra_context)
+        # Only on a changelist about to render: a message queued in get_search_results (the autocomplete view
+        # calls it too), on a redirect or on a denied request would show up on whatever page the user opens next.
+        if isinstance(response, TemplateResponse):
+            error = self.classify_unicef_id_search(request.GET.get(SEARCH_VAR, "")).error
+            if error:
+                self.message_user(request, error, messages.WARNING)
+        return response
 
     def get_paginator(
         self,

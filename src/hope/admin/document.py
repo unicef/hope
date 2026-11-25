@@ -35,6 +35,7 @@ class DocumentAdmin(
     cursor_ordering_field = "-created_at"
     search_fields = ("document_number", "country__name", "individual__unicef_id")
     unicef_id_search_map = {"IND": "individual__unicef_id"}
+    id_like_search_fields = ("document_number",)
     list_display = (
         "document_number",
         "type",

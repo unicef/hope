@@ -349,6 +349,7 @@ class IndividualIdentityAdmin(
     cursor_ordering_field = "pk"
     search_fields = ("number", "individual__unicef_id")
     unicef_id_search_map = {"IND": "individual__unicef_id"}
+    id_like_search_fields = ("number",)
     show_query_result_count = False
 
     def get_queryset(self, request: HttpRequest) -> QuerySet:
