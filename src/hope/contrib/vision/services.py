@@ -1,6 +1,7 @@
 from collections.abc import Iterable
 from dataclasses import dataclass
 
+from hope.apps.account.actor_snapshot import ActorSnapshot
 from hope.apps.activity_log.utils import copy_model_object
 from hope.contrib.vision.choices import (
     VISION_CREATION_ACKNOWLEDGEMENT_MUTABLE_STATUSES,
@@ -101,6 +102,7 @@ class VisionService:
         vision_payment_plan_id: str,
         vision_result: str,
         fc_numbers: list[str],
+        actor_snapshot: ActorSnapshot | None = None,
     ) -> None:
         """Process an active Vision callback for the Payment Plan."""
         vision_data = cls.vision_data(payment_plan)
@@ -148,14 +150,16 @@ class VisionService:
             vision_data["fc_numbers"] = normalized_fc_numbers
             cls.assign_funds_commitment_headers_from_callback(payment_plan, normalized_fc_numbers)
             # Successful assignment completes release and continues to PG or XLSX delivery.
-            cls.complete_funds_commitment_assignment(payment_plan)
+            cls.complete_funds_commitment_assignment(payment_plan, actor_snapshot)
 
     @classmethod
-    def complete_funds_commitment_assignment(cls, payment_plan: PaymentPlan) -> None:
+    def complete_funds_commitment_assignment(
+        cls, payment_plan: PaymentPlan, actor_snapshot: ActorSnapshot | None = None
+    ) -> None:
         from hope.apps.payment.services.payment_plan_services import PaymentPlanService
 
         cls.set_status(payment_plan, VisionStatus.FC_ASSOCIATED)
-        PaymentPlanService(payment_plan).release_from_vision()
+        PaymentPlanService(payment_plan).release_from_vision(actor_snapshot)
         cls.set_status(payment_plan, VisionStatus.RELEASED)
         PaymentPlan.objects.filter(pk=payment_plan.pk).update(internal_data=payment_plan.internal_data)
 
@@ -181,6 +185,7 @@ class VisionService:
         cls,
         payment_plan: PaymentPlan,
         funds_commitment_headers: Iterable[FundsCommitmentHeader],
+        actor_snapshot: ActorSnapshot | None = None,
     ) -> None:
         if not cls.can_recover_with_funds_commitment_headers(payment_plan):
             raise FundsCommitmentAssignmentError(
@@ -188,7 +193,7 @@ class VisionService:
                 VisionErrorCode.FC_CONFLICT,
             )
         cls.assign_selected_funds_commitment_headers(payment_plan, funds_commitment_headers)
-        cls.complete_funds_commitment_assignment(payment_plan)
+        cls.complete_funds_commitment_assignment(payment_plan, actor_snapshot)
 
     @classmethod
     def can_recover_with_funds_commitment_headers(cls, payment_plan: PaymentPlan) -> bool:
