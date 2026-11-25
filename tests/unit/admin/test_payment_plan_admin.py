@@ -54,7 +54,7 @@ def test_payment_plan_change_form_keeps_workflow_fields_read_only(
 ) -> None:
     form_class = admin_instance.get_form(admin_request, payment_plan)
 
-    assert sorted(form_class.base_fields) == ["background_action_status"]
+    assert sorted(form_class.base_fields) == ["background_action_status", "use_payment_gateway"]
 
 
 @pytest.mark.enable_activity_log

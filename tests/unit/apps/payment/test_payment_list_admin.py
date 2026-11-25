@@ -329,11 +329,27 @@ def test_instruction_post_retry_usd_recalculation_queues_owner_job(
     assert response.status_code == 302
 
 
-def test_payment_list_change_form_keeps_the_payment_plan_read_only(admin_client, payment_list) -> None:
+def test_instruction_change_form_keeps_workflow_fields_read_only(admin_user, instruction_recalculation_error) -> None:
+    request = RequestFactory().get("/")
+    request.user = admin_user
+
+    form_class = admin.site._registry[FollowUpInstruction].get_form(request, instruction_recalculation_error)
+
+    assert sorted(form_class.base_fields) == [
+        "background_action_status",
+        "export_file",
+        "reconciliation_import_file",
+        "use_payment_gateway",
+    ]
+
+
+def test_payment_list_change_form_keeps_the_payment_plan_and_status_read_only(admin_client, payment_list) -> None:
     response = admin_client.get(reverse("admin:payment_paymentlist_change", args=[payment_list.pk]))
 
     assert response.status_code == 200
-    assert 'name="payment_plan"' not in response.content.decode()
+    content = response.content.decode()
+    assert 'name="payment_plan"' not in content
+    assert 'name="status"' not in content
 
 
 def test_payment_list_related_configs_button(admin_client, payment_list) -> None:

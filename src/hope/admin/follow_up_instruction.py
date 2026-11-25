@@ -37,6 +37,13 @@ class FollowUpInstructionAdmin(ViewOnUiMixin, HOPEModelAdminBase):
         "custom_exchange_rate",
         "custom_exchange_rate_set_by",
         "status",
+        "version",
+        "dispersion_start_date",
+        "dispersion_end_date",
+        "abort_comment",
+        "closure_comment",
+        "closed_by",
+        "export_pdf_file_summary",
     )
 
     def frontend_url(self, obj: FollowUpInstruction) -> str | None:
