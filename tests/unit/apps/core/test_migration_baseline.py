@@ -1,8 +1,9 @@
 from typing import Any
 
-from django.apps import apps
 from django.db.migrations.loader import MigrationLoader
 import pytest
+
+from hope.apps.core.baseline_guard import first_party_labels
 
 
 @pytest.fixture
@@ -11,7 +12,7 @@ def names_on_disk_and_replaced(settings: Any) -> tuple[set[tuple[str, str]], lis
     settings.MIGRATION_MODULES = {}
     loader = MigrationLoader(None, load=False)
     loader.load_disk()
-    first_party = {cfg.label for cfg in apps.get_app_configs() if cfg.name == "hope" or cfg.name.startswith("hope.")}
+    first_party = first_party_labels()
     on_disk = {key: migration for key, migration in loader.disk_migrations.items() if key[0] in first_party}
     replaced = [replaced_key for migration in on_disk.values() for replaced_key in migration.replaces]
     return set(on_disk), replaced
@@ -41,7 +42,7 @@ def dependencies_and_replaced(settings: Any) -> tuple[set[tuple[str, str]], set[
     settings.MIGRATION_MODULES = {}
     loader = MigrationLoader(None, load=False)
     loader.load_disk()
-    first_party = {cfg.label for cfg in apps.get_app_configs() if cfg.name == "hope" or cfg.name.startswith("hope.")}
+    first_party = first_party_labels()
     on_disk = [migration for key, migration in loader.disk_migrations.items() if key[0] in first_party]
     dependencies = {tuple(dependency) for migration in on_disk for dependency in migration.dependencies}
     replaced = {replaced_key for migration in on_disk for replaced_key in migration.replaces}

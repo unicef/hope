@@ -7,6 +7,7 @@ from the graph and reports that there is nothing to do. See docs/guide-dev/migra
 
 from collections.abc import Collection, Iterable, Mapping
 
+from django.apps import apps
 from django.db.migrations import Migration
 
 # Was on develop under this name for five days (PR #5914 to PR #5941) before it was renumbered,
@@ -18,12 +19,18 @@ TOLERATED_STRAY_ROWS = {("core", "0023_migration")}
 PARTIAL_REMEDY = (
     "Check out the commit right before the baseline (the parent of "
     "the baseline merge commit), run migrate there and come back. A new database whose first migrate "
-    "was interrupted or targeted at a single migration has to be dropped and rebuilt."
+    "was interrupted or targeted at a single migration, and a database migrated backwards into the "
+    "baseline, has to be dropped and rebuilt."
 )
 STRAY_REMEDY = (
     "The database is ahead of this code: deploy or check out the code that contains these migrations, "
     "or rebuild a local database."
 )
+
+
+def first_party_labels() -> set[str]:
+    """Return the labels of the installed apps that live in the ``hope`` package."""
+    return {cfg.label for cfg in apps.get_app_configs() if cfg.name == "hope" or cfg.name.startswith("hope.")}
 
 
 def baseline_violations(

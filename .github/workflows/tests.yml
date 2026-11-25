@@ -198,9 +198,6 @@ jobs:
       - name: Check that models and migrations agree
         run: uv run python manage.py check_missing_migrations
 
-      - name: Check that no migration name is replaced by the baseline
-        run: uv run tox -e tests -- pytest -q -rfE --no-header --tb=short --no-migrations --randomly-seed=42 --create-db -n auto --no-cov tests/unit/apps/core/test_migration_baseline.py
-
   selenium:
     name: Selenium tests (${{ matrix.group }}/${{ strategy.job-total }})
     runs-on: ubuntu-24.04

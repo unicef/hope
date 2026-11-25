@@ -14,8 +14,8 @@ are deleted. The 16 newer migrations, which only dev and staging had applied at 
 ordinary files that depend on the baseline.
 
 - A database that has the replaced migrations applied runs **nothing of the baseline**: `migrate`
-  records the baseline names in `django_migrations` and then applies the ordinary migrations the
-  database lacks, as in any release. On production those include the 16 kept ones.
+  applies the ordinary migrations the database lacks, as in any release, and then records the
+  baseline names in `django_migrations`. On production those migrations include the 16 kept ones.
 - An empty database runs the baseline and the migrations above it, and ends up with the same schema
   and seed rows the old chain produced.
 
@@ -38,12 +38,15 @@ Each of these fails silently or destroys data when broken.
 - **Do not target `migrate` at a single app or migration on an empty database**, and do not reuse a
   database whose first `migrate` was interrupted. Rebuild it instead (see
   [Recovering a local database](#recovering-a-local-database)).
+- **Do not migrate backwards into the baseline** (`migrate <app> <a baseline file or zero>`). Django
+  forgets the old names the unapplied file replaces, so the guard refuses every later `migrate`, and
+  the baseline's SQL has no reverse. Rebuild instead.
 
 ## What the baseline contains
 
 | File | Content |
 |---|---|
-| `NNNN_baseline_models.py` | `CreateModel` with the fields as of the last replaced migration. Where the models need them, it starts with idempotent `RunSQL` for the `citext` extension, the `und-ci-det` collation and `check_unique_document_for_individual`. |
+| `NNNN_baseline_models.py` | `CreateModel` with the fields as of the last replaced migration. Where needed, it starts with idempotent `RunSQL` for the `citext` extension (no model uses it any more, but every existing database has it), the `und-ci-det` collation and `check_unique_document_for_individual`. |
 | `NNNN_baseline_relations.py`, `NNNN_baseline_relations_2.py` | Foreign keys, many-to-many fields, indexes and constraints that dependency cycles between apps keep out of the first file. The app's last file also holds the database objects and the seed rows below. |
 
 An app that keeps later migrations has its baseline files under the number of the last migration they
@@ -128,6 +131,7 @@ is ready for the baseline.
 | Database behind (guard: *not applied*) | Check out the parent of the baseline merge commit, run `python manage.py migrate`, switch back, run it again. Or rebuild. |
 | Database behind, and `makemigrations` or the pre-commit hook that checks for missing migrations fails with `InconsistentMigrationHistory: ... applied before its dependency <app>.NNNN_baseline_models` | Same cause and same fix as the row above. These commands do not go through the guard, so Django's own error appears instead of the guard's. |
 | First `migrate` on a new database was interrupted or targeted | Rebuild. The database holds a part of the baseline that cannot be resumed. |
+| Migrated backwards into a baseline file (guard: *not applied*, but the tables exist) | Rebuild. The old migrations cannot run on tables that are already there. |
 | A migration from another branch is applied (guard: *neither on disk nor replaced*) | Switch back to that branch and unapply it (`python manage.py migrate <app> <previous migration>`), or rebuild. |
 
 Rebuild:
