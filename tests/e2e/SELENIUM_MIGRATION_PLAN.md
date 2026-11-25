@@ -14,7 +14,7 @@ Goal: re-cover every scenario from the old `tests/e2e` suite as a new-style Sele
    - **NEW** – port the scenario as a new-style Selenium test (file named in the checklist). Several old tests may merge into one parametrized test when they are the same flow with different data.
    - **COVERED** – an existing `new_selenium` test already exercises the same scenario (name it in the PR description). Before deleting the old test, compare it step by step with the new one and add any missing assertions to the new test.
    For both, compare every old assertion and step with the new test, and keep label texts, column headers and their order, pagination (`Rows per page` and the row count), empty-table texts and navigation through the side menu and tabs. Name anything left out, and why, in the PR description.
-4. Delete the old test file **and** any page object / old conftest fixture that becomes unused in the same PR.
+4. Delete the old test file **and** any page object / old conftest fixture that becomes unused in the same PR. Some old test files import helpers from each other (`grep -rn 'from e2e\.[a-z_]*\.test_' tests/e2e`); move such a helper into the importing file before deleting its source, and check `pytest --collect-only tests/e2e`.
 5. Update the counter below in the same PR.
 6. Verify: `tox -e tests -- pytest --no-migrations --create-db tests/e2e/new_selenium/<module>/` (plus one `-n auto` run to check xdist isolation), `tox -e lint`, `tox -e mypy`.
 
@@ -33,11 +33,11 @@ grep -rhE '^\s*def test_' tests/e2e --include='test_*.py' --exclude-dir=new_sele
 | 5 | `country_search` | 3 | 3 | ✅ |
 | 6 | `country_dashboard` | 1 | 1 | ✅ |
 | 7 | `managerial_console` | 2 | 0 | ⬜ in review #6563 |
-| 8 | `drawer` | 4 | 0 | ⬜ in review #6564 |
-| 9 | `accountability` | 4 | 4 | ✅ in review #6565 |
+| 8 | `drawer` | 4 | 4 | ✅ in review #6564 |
+| 9 | `accountability` | 4 | 4 | ✅ |
 | 10 | `programme_population` (hh/ind/PDU) | 12 | 0 | ⬜ in review #6570 |
 | 11 | `people` | 7 | 0 | ⬜ in review #6571 |
-| 12 | `programme_management` | 8 | 8 | ✅ in review #6574 |
+| 12 | `programme_management` | 8 | 8 | ✅ |
 | 13 | `generic_import` | 15 | 0 | ⬜ |
 | 14 | `filters` | 4 | 0 | ⬜ |
 | 15 | `payment_verification` | 10 | 0 | ⬜ |
@@ -47,9 +47,9 @@ grep -rhE '^\s*def test_' tests/e2e --include='test_*.py' --exclude-dir=new_sele
 | 19 | `grievance/grievance_dashboard` | 2 | 0 | ⬜ |
 | 20 | `grievance/grievance_tickets` | 25 | 0 | ⬜ |
 | 21 | Old infra cleanup | – | – | ⬜ |
-| | **Total** | **152** | **29** | **19 %** |
+| | **Total** | **152** | **33** | **22 %** |
 
-`[████░░░░░░░░░░░░░░░░] 29 / 152`. Update it after each PR: 1 block per ~8 tests. An "in review" module counts as migrated only on its own branch; drop the mark when its PR merges.
+`[████░░░░░░░░░░░░░░░░] 33 / 152`. Update it after each PR: 1 block per ~8 tests. An "in review" module counts as migrated only on its own branch; drop the mark when its PR merges.
 
 The new suite already has 46 test files and ~250 test functions. These do not count toward the 152.
 
@@ -102,10 +102,10 @@ Legend: `NEW <new_selenium/...>` · `COVERED <existing new test>` (verify assert
 - [ ] Delete `page_object/managerial_console/`
 
 ### 8. `drawer/test_drawer.py` (4) → `new_selenium/navigation/test_drawer.py`
-- [ ] test_social_worker_program_drawer_order → NEW, parametrize social worker / normal / all programmes
-- [ ] test_normal_program_drawer_order → NEW (param)
-- [ ] test_all_program_drawer_order → NEW (param)
-- [ ] test_inactive_draft_subheader → NEW
+- [x] test_social_worker_program_drawer_order → NEW `test_programme_drawer_order[social-worker]`
+- [x] test_normal_program_drawer_order → NEW `test_programme_drawer_order[normal]`
+- [x] test_all_program_drawer_order → NEW `test_all_programmes_drawer_order` (no programme to parametrize over, so a separate test)
+- [x] test_inactive_draft_subheader → NEW `test_inactive_programme_shows_inactive_subheader[draft_program|finished_program]` + `test_active_programme_has_no_inactive_subheader` (programmes opened by URL; switching through the global filter is covered by `test_global_program_filter_*`)
 
 ### 9. `accountability/` (4) → `new_selenium/accountability/`
 - [x] test_smoke_accountability_communication → NEW `test_communication.py::test_communication_list_shows_message`
@@ -148,7 +148,8 @@ Legend: `NEW <new_selenium/...>` · `COVERED <existing new test>` (verify assert
 - [x] test_create_programme_accesses → NEW `test_programme_partners.py::test_partner_access_is_saved`
 - [x] test_programme_partners → NEW `test_programme_partners.py::test_only_partners_with_role_in_business_area_can_be_selected` + `test_edit_partner_access`
 - [x] test_edit_programme_with_rdi → NEW `test_edit_program.py::test_edit_programme_with_rdi_locks_time_series_fields` (also checks the new name and the third round are saved)
-- [ ] `page_object/programme_management/` is still used by the old `drawer` test; delete it once module 8 is merged. `page_object/programme_details/` is still used by `drawer`, `filters` and `grievance/feedback`; delete it in module 18.
+- [x] Delete `page_object/programme_management/` and the `page_programme_management` fixture
+- [ ] `page_object/programme_details/` is still used by `filters` and `grievance/feedback`; delete it in module 18.
 
 ### 13. `generic_import/test_generic_import.py` (15) → `new_selenium/generic_import/test_generic_import_form.py`
 Already in new suite: `test_generic_import_data.py`.

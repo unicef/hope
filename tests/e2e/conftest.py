@@ -48,9 +48,6 @@ from e2e.page_object.payment_verification.payment_verification_details import (
 from e2e.page_object.people.people import People
 from e2e.page_object.people.people_details import PeopleDetails
 from e2e.page_object.programme_details.programme_details import ProgrammeDetails
-from e2e.page_object.programme_management.programme_management import (
-    ProgrammeManagement,
-)
 from e2e.page_object.programme_population.households import Households
 from e2e.page_object.programme_population.households_details import HouseholdsDetails
 from e2e.page_object.programme_population.individuals import Individuals
@@ -400,11 +397,6 @@ def login(browser: Chrome) -> Chrome:
 @pytest.fixture
 def filters(request: FixtureRequest, browser: Chrome) -> Filters:
     return Filters(browser)
-
-
-@pytest.fixture
-def page_programme_management(request: FixtureRequest, browser: Chrome) -> ProgrammeManagement:
-    return ProgrammeManagement(browser)
 
 
 @pytest.fixture
