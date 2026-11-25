@@ -250,6 +250,8 @@ def test_create_programme_validation_empty_fields(browser: HopeTestBrowser) -> N
 
     browser.click('a[data-cy="button-new-program"]')
 
+    # The form renders only once its choices load, and pushes the Next button down, so an early click can miss.
+    browser.wait_for_element_visible('input[name="name"]')
     browser.click('button[data-cy="button-next"]')
 
     browser.assert_text("Programme Name is required", 'div[data-cy="input-programme-name"]')
