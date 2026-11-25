@@ -19,9 +19,11 @@ DJANGO_USER_MAP = {
 
 
 class MicrosoftGraphAPI:
-    def __init__(self) -> None:
+    def __init__(self, token_timeout: int = 60, request_timeout: int = 10) -> None:
         self.azure_client_id = settings.AZURE_CLIENT_ID
         self.azure_client_secret = settings.AZURE_CLIENT_SECRET
+        self.token_timeout = token_timeout
+        self.request_timeout = request_timeout
         self.access_token = self.get_token()
 
     def get_token(self) -> str:
@@ -37,7 +39,7 @@ class MicrosoftGraphAPI:
             "client_secret": self.azure_client_secret,
             "resource": settings.AZURE_GRAPH_API_BASE_URL,
         }
-        response = requests.post(settings.AZURE_TOKEN_URL, post_dict, timeout=60)
+        response = requests.post(settings.AZURE_TOKEN_URL, post_dict, timeout=self.token_timeout)
 
         if response.status_code != 200:
             log_and_raise(
@@ -50,7 +52,7 @@ class MicrosoftGraphAPI:
 
     def get_results(self, url: str) -> dict:
         headers = {"Authorization": f"Bearer {self.access_token}"}
-        response = requests.get(url, headers=headers, timeout=10)
+        response = requests.get(url, headers=headers, timeout=self.request_timeout)
         try:
             response.raise_for_status()
         except requests.exceptions.HTTPError as e:
@@ -64,9 +66,10 @@ class MicrosoftGraphAPI:
                 q = f"https://graph.microsoft.com/v1.0/users/{uuid}"
                 value = self.get_results(q)
             elif email:
+                escaped_email = email.replace("'", "''")
                 q = (
                     f"https://graph.microsoft.com/v1.0/users/?$filter=userType in "
-                    f"['Member','guest'] and mail eq '{email}'"
+                    f"['Member','guest'] and mail eq '{escaped_email}'"
                 )
                 data = self.get_results(q)
                 value = data["value"][0]

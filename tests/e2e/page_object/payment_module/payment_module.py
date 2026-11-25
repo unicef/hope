@@ -35,9 +35,6 @@ class PaymentModule(BaseComponents):
     def get_drawer_items(self) -> WebElement:
         return self.wait_for(self.drawer_items)
 
-    def get_nav_country_dashboard(self) -> WebElement:
-        return self.wait_for(self.nav_country_dashboard)
-
     def get_nav_registration_data_import(self) -> WebElement:
         return self.wait_for(self.nav_registration_data_import)
 
@@ -70,15 +67,6 @@ class PaymentModule(BaseComponents):
 
     def get_nav_feedback(self) -> WebElement:
         return self.wait_for(self.nav_feedback)
-
-    def get_nav_accountability(self) -> WebElement:
-        return self.wait_for(self.nav_accountability)
-
-    def get_nav_communication(self) -> WebElement:
-        return self.wait_for(self.nav_communication)
-
-    def get_nav_surveys(self) -> WebElement:
-        return self.wait_for(self.nav_surveys)
 
     def get_nav_programme_users(self) -> WebElement:
         return self.wait_for(self.nav_programme_users)
