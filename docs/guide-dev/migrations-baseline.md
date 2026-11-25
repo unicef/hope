@@ -54,8 +54,8 @@ replace: `payment/0081_baseline_models.py` and `payment/0081_baseline_relations.
 `0081`, and the kept `payment/0082_migration.py` depends on the last of them. In the other apps the
 baseline continues after the last old migration (`account/0036_baseline_models.py`).
 
-Objects Django does not generate are created with top-level `RunSQL` at the end of the app's last
-baseline file:
+Objects Django does not generate are created with `RunSQL` at the end of the app's last baseline
+file:
 
 | Object | App |
 |---|---|
