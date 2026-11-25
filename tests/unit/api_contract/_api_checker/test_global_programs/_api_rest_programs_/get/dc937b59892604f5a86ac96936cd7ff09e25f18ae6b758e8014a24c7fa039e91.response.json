@@ -29,6 +29,11 @@
                 "population_goal": 1000,
                 "business_area_code": "BA0000",
                 "beneficiary_group": "faa27904-7212-472a-b658-02485151f29a",
+                "payee_type": {
+                    "id": "8d1f5a4e-2c7b-4f0e-9b3a-6e1d2c4b5a70",
+                    "name": "Household",
+                    "gl_code": "7700410"
+                },
                 "biometric_deduplication_enabled": false
             }
         ]
