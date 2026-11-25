@@ -5,7 +5,6 @@ import pytest
 
 from extras.test_utils.factories import (
     AreaFactory,
-    CurrencyFactory,
     HouseholdFactory,
     IndividualFactory,
     PaymentFactory,
@@ -61,7 +60,7 @@ def household(business_area: BusinessArea, program: Program) -> Household:
 
 @pytest.fixture
 def pending_payment(business_area: BusinessArea, program: Program) -> Payment:
-    # A household of its own: the dashboard sums households per payment status.
+    # A household of its own: the dashboard counts each household once per year, across all payment statuses.
     household = HouseholdFactory(business_area=business_area, program=program, size=3, children_count=1)
     return PaymentFactory(
         parent__business_area=business_area,
@@ -71,7 +70,7 @@ def pending_payment(business_area: BusinessArea, program: Program) -> Payment:
         program=program,
         household=household,
         status=Payment.STATUS_PENDING,
-        currency=CurrencyFactory(code="PLN"),
+        currency__code="PLN",
         entitlement_quantity=140,
         entitlement_quantity_usd=70,
         entitlement_date=timezone.now() - timedelta(days=30),
