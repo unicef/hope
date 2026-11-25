@@ -63,9 +63,10 @@ baseline file:
 | Partial indexes `idx_ra_user_no_expiry`, `idx_ra_partner_ba_no_exp`, `idx_ra_ba_no_expiry` | `account` |
 | `funds_commitment_header_trigger_function`, `funds_commitment_insert_trigger` and the unused `funds_commitment_trigger_function` | `vision` |
 
-Seed rows come from one `RunPython` per app, written with literals: currencies (`core`), the two
-beneficiary groups production started with (`program`), account types and
-the default payment plan purpose (`payment`), the UN sanction list (`sanction_list`). `program` also
+Seed rows come from one `RunPython` per app: currencies (`core`, listed in
+`hope/apps/core/currencies.py`), the two beneficiary groups production started with (`program`),
+account types and the default payment plan purpose (`payment`), the UN sanction list
+(`sanction_list`). All but the currencies are written with literals in the migration. `program` also
 writes the `DEFAULT_BENEFICIARY_GROUP_NAME` row of `constance_constance`, which the old chain stored
 as a side effect of reading the setting.
 

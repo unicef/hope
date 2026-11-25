@@ -128,5 +128,5 @@ The card is only rendered for users holding `POPULATION_VIEW_INDIVIDUAL_DELIVERY
 
 ## Migrations
 
-- `payment/0084_baseline_models.py` — creates the table, together with the rest of the payment schema (see [Migrations Baseline](migrations-baseline.md)). The feature added a new model with two nullable-safe FKs and changed nothing in `Account` or `Individual`.
+- `payment/0081_baseline_models.py` — creates the table, together with the rest of the payment schema (see [Migrations Baseline](migrations-baseline.md)). The feature added a new model with two nullable-safe FKs and changed nothing in `Account` or `Individual`.
 - The flex-field cleanup is **not** a migration. It is the one-time script above, run deliberately after deploy.
