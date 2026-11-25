@@ -1,5 +1,6 @@
 from typing import Any
 
+from django.apps import apps
 from django.core.management import CommandError, call_command
 from django.db import connection
 from django.db.migrations.recorder import MigrationRecorder
@@ -7,26 +8,25 @@ import pytest
 
 
 @pytest.fixture
-def stray_core_row(db: Any, settings: Any) -> int:
-    """Migrations visible on disk again, plus one core row that no code on disk knows about."""
-    settings.MIGRATION_MODULES = {}
+def stray_core_row(db: Any) -> int:
+    """One core row that no code on disk knows about."""
     recorder = MigrationRecorder(connection)
     recorder.record_applied("core", "9999_migration")
     return recorder.migration_qs.count()
 
 
 @pytest.fixture
-def partly_applied_core_chain(db: Any, settings: Any) -> int:
-    """Migrations visible on disk again, with a single migration of the replaced core chain applied."""
-    settings.MIGRATION_MODULES = {}
+def partly_applied_core_chain(db: Any) -> int:
+    """The replaced core chain with a single migration missing from the applied rows."""
     recorder = MigrationRecorder(connection)
-    recorder.record_applied("core", "0001_migration")
+    recorder.record_unapplied("core", "0002_migration")
     return recorder.migration_qs.count()
 
 
 @pytest.fixture
-def stray_core_row_with_hidden_migrations(db: Any) -> None:
-    """The same stray core row while the migration modules stay hidden, the way --no-migrations hides them."""
+def stray_core_row_with_hidden_migrations(db: Any, settings: Any) -> None:
+    """The same stray core row while no app has a visible migration module."""
+    settings.MIGRATION_MODULES = dict.fromkeys((cfg.label for cfg in apps.get_app_configs()), None)
     MigrationRecorder(connection).record_applied("core", "9999_migration")
 
 

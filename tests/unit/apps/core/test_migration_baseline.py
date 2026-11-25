@@ -1,5 +1,3 @@
-from typing import Any
-
 from django.db.migrations.loader import MigrationLoader
 import pytest
 
@@ -7,9 +5,8 @@ from hope.apps.core.baseline_guard import first_party_labels
 
 
 @pytest.fixture
-def names_on_disk_and_replaced(settings: Any) -> tuple[set[tuple[str, str]], list[tuple[str, str]]]:
-    """First-party migrations read from disk; the suite itself runs with migrations disabled."""
-    settings.MIGRATION_MODULES = {}
+def names_on_disk_and_replaced() -> tuple[set[tuple[str, str]], list[tuple[str, str]]]:
+    """Names of the first-party migrations on disk and the names they replace."""
     loader = MigrationLoader(None, load=False)
     loader.load_disk()
     first_party = first_party_labels()
@@ -37,9 +34,8 @@ def test_no_old_migration_is_replaced_by_two_baseline_files(
 
 
 @pytest.fixture
-def dependencies_and_replaced(settings: Any) -> tuple[set[tuple[str, str]], set[tuple[str, str]]]:
+def dependencies_and_replaced() -> tuple[set[tuple[str, str]], set[tuple[str, str]]]:
     """Dependencies and replaced names of the first-party migrations on disk."""
-    settings.MIGRATION_MODULES = {}
     loader = MigrationLoader(None, load=False)
     loader.load_disk()
     first_party = first_party_labels()
