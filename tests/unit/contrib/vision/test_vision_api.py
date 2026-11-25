@@ -500,10 +500,9 @@ def test_notify_payment_plan_closure_posts_reconciliation_to_payment_plan_endpoi
     assert response == {"status": "ok"}
     assert mock_post.call_args.args[0] == "https://test.example.com/ps/ezcash/PaymentPlan"
     assert mock_post.call_args.args[1] == {
-        "payplanSno": "PP-CLOSURE",
-        "visionPayplanSno": "V12345",
-        "totalAmountReconciled": "8500.50",
-        "closureDate": closure_date.isoformat(),
+        "visionPp": "V12345",
+        "reconAmt": "8500.50",
+        "reconDate": "20261109",
     }
     assert payment_plan.vision_status == VisionStatus.RELEASED.value
     entry = payment_plan.vision_data["log"][0]
@@ -544,7 +543,11 @@ def test_notify_payment_plan_closure_saves_error_response_in_internal_data(
     entry = payment_plan.vision_data["log"][0]
     assert entry["type"] == VisionLogEntryType.CLOSURE_NOTIFICATION.value
     assert entry["response"] == {"error": "closure endpoint failed"}
-    assert entry["payload"]["payplanSno"] == "PP-CLOSURE-FAIL"
+    assert entry["payload"] == {
+        "visionPp": "V12345",
+        "reconAmt": "8500.50",
+        "reconDate": "20261109",
+    }
     # A failed closure notification must not change the Vision workflow status.
     assert payment_plan.vision_status == VisionStatus.RELEASED.value
 
@@ -564,7 +567,7 @@ def test_notify_payment_plan_closure_without_vision_id_sends_empty_value(
             total_amount_reconciled=Decimal("8500.50"),
             closure_date=datetime(2026, 11, 9, 10, 30, tzinfo=timezone.utc),
         )
-    assert mock_post.call_args.args[1]["visionPayplanSno"] == ""
+    assert mock_post.call_args.args[1]["visionPp"] == ""
     closed_payment_plan_without_vision_id.refresh_from_db(fields=["internal_data"])
     entry = closed_payment_plan_without_vision_id.vision_data["log"][0]
     assert entry["type"] == VisionLogEntryType.CLOSURE_NOTIFICATION.value

@@ -162,13 +162,12 @@ reset, allowing a later authorization to start a new attempt. A callback receive
 ## Closure
 
 Closing a Payment Plan that was sent to Vision queues a reconciliation notification to Vision through
-`POST /ps/ezcash/PaymentPlan` once the local closure has committed. The payload currently carries the Payment Plan
-code (`payplanSno`, the plan's `unicef_id`), the Vision Payment Plan code (`visionPayplanSno`, the `vision_id`
-stored from the Vision callback), the total amount reconciled (`totalAmountReconciled`, the plan's
-`total_delivered_quantity`), and the closure date (`closureDate`, the plan's `status_date` set when the plan was
-closed). Further closure payload fields are pending confirmation from Vision. The notification is non-blocking: a
-failure is logged under the plan's Vision log but does not roll back the closure, and it is only sent for plans that
-were actually sent to Vision.
+`POST /ps/ezcash/PaymentPlan` once the local closure has committed. The payload carries the Vision Payment Plan code
+(`visionPp`, the `vision_id` stored from the Vision callback), the amount reconciled (`reconAmt`, the plan's
+`total_delivered_quantity`), and the reconciliation date (`reconDate`, the plan's `status_date` set when the plan was
+closed, formatted as `YYYYMMDD`). Further closure payload fields are pending confirmation from Vision. The
+notification is non-blocking: a failure is logged under the plan's Vision log but does not roll back the closure,
+and it is only sent for plans that were actually sent to Vision.
 
 Every closure notification attempt, including its request payload and response, is stored as a
 `closure-notification` entry in `payment_plan.internal_data["vision"]["log"]`. While no attempt has succeeded,
