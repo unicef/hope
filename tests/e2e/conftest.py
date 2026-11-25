@@ -626,15 +626,6 @@ def clear_downloaded_files(download_path: str) -> None:
         os.remove(os.path.join(download_path, file))
 
 
-@pytest.fixture
-def change_super_user(business_area: BusinessArea) -> None:
-    user = User.objects.filter(email="test@example.com").first()
-    user.partner = Partner.objects.get(name="UNHCR")
-    user.partner.allowed_business_areas.add(business_area)
-    user.save()
-    return user
-
-
 @pytest.fixture(autouse=True)
 def create_super_user(business_area: BusinessArea) -> User:
     household_payee_type = PayeeTypeFactory(name="Household", gl_code="7700410", weight=30)
