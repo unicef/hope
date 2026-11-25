@@ -4,10 +4,14 @@ import openpyxl
 import pytest
 
 from e2e.new_selenium.programme_population.conftest import (
+    PDU_FORM_ERRORS,
+    STATUS_CONTAINER,
     create_template_with_xlsx,
     open_pdu_tab,
     prepare_xlsx_file,
     rounds_data,
+    update_cell,
+    upload_xlsx,
 )
 from extras.test_utils.factories import PDUXlsxTemplateFactory, PDUXlsxUploadFactory
 from extras.test_utils.selenium import HopeTestBrowser
@@ -18,26 +22,7 @@ from hope.models import FlexibleAttribute, Individual, PDUXlsxUpload, Program
 
 pytestmark = pytest.mark.django_db()
 
-BUTTON_IMPORT = 'button[data-cy="button-import"]'
-DIALOG_IMPORT = 'div[data-cy="dialog-import"]'
-FILE_INPUT = 'input[data-cy="file-input"]'
-BUTTON_IMPORT_SUBMIT = 'button[data-cy="button-import-submit"]'
-STATUS_CONTAINER = '[data-cy="status-container"]'
-PDU_FORM_ERRORS = 'div[data-cy="pdu-form-errors"]'
 PDU_UPLOAD_ERROR = 'div[data-cy="pdu-upload-error"]'
-
-
-def update_cell(column: str, upload: PDUXlsxUpload) -> str:
-    return f'td[data-cy="update-{column}-{upload.pk}"]'
-
-
-def upload_xlsx(browser: HopeTestBrowser, program: Program, path: Path) -> None:
-    open_pdu_tab(browser, program, "offline-edits")
-    browser.click(BUTTON_IMPORT)
-    browser.wait_for_element_visible(DIALOG_IMPORT)
-    browser.assert_text("IMPORT", BUTTON_IMPORT_SUBMIT)
-    browser.choose_file(FILE_INPUT, str(path))
-    browser.click(BUTTON_IMPORT_SUBMIT)
 
 
 @pytest.fixture

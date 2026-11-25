@@ -45,6 +45,8 @@ from hope.apps.grievance.services.data_change.utils import (
     handle_image_field,
     handle_photo,
     handle_role,
+    prepare_edit_documents,
+    prepare_edit_identities,
     prepare_previous_documents,
     prepare_previous_identities,
     save_images,
@@ -898,6 +900,48 @@ def test_prepare_previous_identities(program: Any) -> None:
             "country": "GRC",
         }
     }
+
+
+def test_prepare_previous_documents_without_country(program: Any) -> None:
+    individual = IndividualFactory(program=program, business_area=program.business_area)
+    document = DocumentFactory(individual=individual, program=program, country=None)
+
+    result = prepare_previous_documents([{"value": str(document.id)}])
+
+    assert result[str(document.id)]["country"] is None
+
+
+def test_prepare_edit_documents_without_country(program: Any) -> None:
+    individual = IndividualFactory(program=program, business_area=program.business_area)
+    document = DocumentFactory(individual=individual, program=program, country=None)
+
+    result = prepare_edit_documents([{"id": document, "key": document.type.key, "country": "FRA", "number": "NEW-NUM"}])
+
+    assert result[0]["value"]["country"] == "FRA"
+    assert result[0]["previous_value"]["country"] is None
+
+
+def test_prepare_previous_identities_without_country(program: Any) -> None:
+    individual = IndividualFactory(program=program, business_area=program.business_area)
+    identity = IndividualIdentityFactory(
+        individual=individual, partner=PartnerFactory(name="NO_COUNTRY"), country=None, number="ID-NC"
+    )
+
+    result = prepare_previous_identities([{"value": str(identity.id)}])
+
+    assert result[str(identity.id)]["country"] is None
+
+
+def test_prepare_edit_identities_without_country(program: Any) -> None:
+    individual = IndividualFactory(program=program, business_area=program.business_area)
+    identity = IndividualIdentityFactory(
+        individual=individual, partner=PartnerFactory(name="NO_COUNTRY"), country=None, number="ID-NC"
+    )
+
+    result = prepare_edit_identities([{"id": identity, "country": "FRA", "partner": "NO_COUNTRY", "number": "NEW-NUM"}])
+
+    assert result[0]["value"]["country"] == "FRA"
+    assert result[0]["previous_value"]["country"] is None
 
 
 def test_save_images_invalid_associated_with() -> None:

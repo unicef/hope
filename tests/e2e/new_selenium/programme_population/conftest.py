@@ -24,10 +24,19 @@ from hope.models import (
     FlexibleAttribute,
     Individual,
     PDUXlsxTemplate,
+    PDUXlsxUpload,
     PeriodicFieldData,
     Program,
     RegistrationDataImport,
 )
+
+INDIVIDUALS_MENU = ("Main Menu", "Items")
+BUTTON_IMPORT = 'button[data-cy="button-import"]'
+DIALOG_IMPORT = 'div[data-cy="dialog-import"]'
+FILE_INPUT = 'input[data-cy="file-input"]'
+BUTTON_IMPORT_SUBMIT = 'button[data-cy="button-import-submit"]'
+STATUS_CONTAINER = '[data-cy="status-container"]'
+PDU_FORM_ERRORS = 'div[data-cy="pdu-form-errors"]'
 
 
 @pytest.fixture
@@ -141,12 +150,29 @@ def open_from_menu(browser: HopeTestBrowser, program: Program, *path: str) -> No
     browser.click(f'a[data-cy="nav-{link}"]')
 
 
-def open_pdu_tab(browser: HopeTestBrowser, program: Program, subtab: str) -> None:
-    """Open the individuals' periodic data updates tab on `subtab` (offline-templates, offline-edits, ...)."""
-    open_from_menu(browser, program, "Main Menu", "Items")
+def open_pdu_tab(
+    browser: HopeTestBrowser, program: Program, subtab: str, menu: tuple[str, ...] = INDIVIDUALS_MENU
+) -> None:
+    """Open the periodic data updates tab of the `menu` page on `subtab` (offline-templates, offline-edits, ...)."""
+    open_from_menu(browser, program, *menu)
     browser.click('button[data-cy="tab-periodic-data-updates"]')
     browser.click(f'button[data-cy="pdu-{subtab}"]')
     browser.wait_for_element_visible(f'button[data-cy="pdu-{subtab}"][aria-selected="true"]')
+
+
+def update_cell(column: str, upload: PDUXlsxUpload) -> str:
+    return f'td[data-cy="update-{column}-{upload.pk}"]'
+
+
+def upload_xlsx(
+    browser: HopeTestBrowser, program: Program, path: Path, menu: tuple[str, ...] = INDIVIDUALS_MENU
+) -> None:
+    open_pdu_tab(browser, program, "offline-edits", menu)
+    browser.click(BUTTON_IMPORT)
+    browser.wait_for_element_visible(DIALOG_IMPORT)
+    browser.assert_text("IMPORT", BUTTON_IMPORT_SUBMIT)
+    browser.choose_file(FILE_INPUT, str(path))
+    browser.click(BUTTON_IMPORT_SUBMIT)
 
 
 def assert_exact_texts(browser: HopeTestBrowser, expected: dict[str, str]) -> None:
