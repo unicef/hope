@@ -2,7 +2,8 @@ from typing import Any
 
 from django.contrib.admin.sites import AdminSite
 from django.http import HttpRequest
-from django.test import RequestFactory
+from django.test import Client, RequestFactory
+from django.urls import reverse
 import pytest
 
 from extras.test_utils.factories import PaymentPlanFactory, UserFactory
@@ -27,6 +28,33 @@ def admin_request() -> HttpRequest:
     request = RequestFactory().post("/")
     request.user = UserFactory()
     return request
+
+
+@pytest.fixture
+def locked_payment_gateway_plan() -> PaymentPlan:
+    return PaymentPlanFactory(name="Locked gateway plan", status=PaymentPlan.Status.LOCKED, use_payment_gateway=True)
+
+
+def test_payment_plan_changelist_shows_the_plan_workflow_columns(
+    admin_client: Client, locked_payment_gateway_plan: PaymentPlan
+) -> None:
+    response = admin_client.get(reverse("admin:payment_paymentplan_changelist"))
+
+    assert response.status_code == 200
+    content = response.content.decode()
+    assert "column-status" in content
+    assert "column-background_action_status" in content
+    assert "column-plan_type" in content
+    assert "column-use_payment_gateway" in content
+    assert "Locked gateway plan" in content
+
+
+def test_payment_plan_change_form_keeps_workflow_fields_read_only(
+    payment_plan: PaymentPlan, admin_instance: PaymentPlanAdmin, admin_request: HttpRequest
+) -> None:
+    form_class = admin_instance.get_form(admin_request, payment_plan)
+
+    assert sorted(form_class.base_fields) == ["background_action_status"]
 
 
 @pytest.mark.enable_activity_log

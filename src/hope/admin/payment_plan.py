@@ -244,6 +244,7 @@ class BasePaymentListAdmin(ViewOnUiMixin, HOPEModelAdminBase):
         "internal_data",
         "business_area",
         "program_cycle",
+        "payment_plan",
         "steficon_rule",
         "steficon_rule_targeting",
         "created_by",
@@ -454,26 +455,55 @@ class PaymentListAdmin(BasePaymentListAdmin, PaymentListCeleryTasksMixin):
 
 @admin.register(PaymentPlan)
 class PaymentPlanAdmin(ViewOnUiMixin, HOPEModelAdminBase):
-    list_display = ("unicef_id", "name", "cycle")
+    list_display = (
+        "unicef_id",
+        "name",
+        "cycle",
+        "status",
+        "background_action_status",
+        "plan_type",
+        "use_payment_gateway",
+    )
     search_fields = ("name", "unicef_id")
-    list_filter = (("cycle__program__business_area", AutoCompleteFilter),)
+    list_filter = (
+        ("cycle__program__business_area", AutoCompleteFilter),
+        ("cycle__program", AutoCompleteFilter),
+        ("status", ChoicesFieldComboFilter),
+        ("background_action_status", ChoicesFieldComboFilter),
+        ("plan_type", ChoicesFieldComboFilter),
+        "use_payment_gateway",
+    )
+    list_select_related = ("cycle",)
     inlines = [FundsCommitmentHeaderInline]
 
     readonly_fields = (
         "id",
         "created_at",
         "updated_at",
+        "version",
         "unicef_id",
         "cycle",
         "name",
+        "status",
+        "status_date",
+        "plan_type",
+        "source_payment_plan",
         "financial_service_provider",
         "currency",
+        "use_payment_gateway",
         "internal_data",
         "dispersion_start_date",
         "dispersion_end_date",
         "exchange_rate",
         "custom_exchange_rate",
         "custom_exchange_rate_set_by",
+        "created_by",
+        "abort_comment",
+        "closure_comment",
+        "closed_by",
+        "export_file_delivery",
+        "delivery_import_file",
+        "export_pdf_file_summary",
     )
 
     def save_model(self, request: HttpRequest, obj: PaymentPlan, form: Any, change: bool) -> None:

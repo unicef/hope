@@ -329,6 +329,13 @@ def test_instruction_post_retry_usd_recalculation_queues_owner_job(
     assert response.status_code == 302
 
 
+def test_payment_list_change_form_keeps_the_payment_plan_read_only(admin_client, payment_list) -> None:
+    response = admin_client.get(reverse("admin:payment_paymentlist_change", args=[payment_list.pk]))
+
+    assert response.status_code == 200
+    assert 'name="payment_plan"' not in response.content.decode()
+
+
 def test_payment_list_related_configs_button(admin_client, payment_list) -> None:
     url = reverse("admin:payment_paymentlist_related_configs", args=[payment_list.pk])
     response = admin_client.get(url)
