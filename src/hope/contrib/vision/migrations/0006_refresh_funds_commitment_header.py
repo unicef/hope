@@ -25,7 +25,7 @@ BEGIN
         NEW.currency_code
     )
     ON CONFLICT (funds_commitment_number) DO UPDATE
-        SET vendor_id = EXCLUDED.vendor_id,
+        SET vendor_id = COALESCE(EXCLUDED.vendor_id, vision_fundscommitmentheader.vendor_id),
             posting_date = EXCLUDED.posting_date,
             document_reference = EXCLUDED.document_reference,
             fc_status = EXCLUDED.fc_status,
