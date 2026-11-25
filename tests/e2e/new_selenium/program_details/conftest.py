@@ -4,10 +4,19 @@ from decimal import Decimal
 from django.utils import timezone
 import pytest
 
-from extras.test_utils.factories import BusinessAreaFactory, PaymentPlanPurposeFactory
+from extras.test_utils.factories import (
+    BusinessAreaFactory,
+    FlexibleAttributeForPDUFactory,
+    PartnerFactory,
+    PaymentPlanPurposeFactory,
+    RegistrationDataImportFactory,
+    RoleAssignmentFactory,
+    RoleFactory,
+)
 from extras.test_utils.factories.payment import PaymentListFactory
 from extras.test_utils.factories.program import ProgramCycleFactory, ProgramFactory
-from hope.models import BusinessArea, PaymentPlanPurpose, Program, ProgramCycle
+from extras.test_utils.selenium import HopeTestBrowser
+from hope.models import BusinessArea, Partner, PaymentPlanPurpose, Program, ProgramCycle, User
 
 BA_PURPOSE_NAME = "BA Purpose"
 SECOND_BA_PURPOSE_NAME = "Second BA Purpose"
@@ -156,3 +165,104 @@ def programme_with_mixed_cycles(business_area: BusinessArea) -> Program:
         ("Active Cycle", ProgramCycle.ACTIVE, 11, 17),
         ("Finished Cycle", ProgramCycle.FINISHED, 18, 20),
     )
+
+
+@pytest.fixture
+def programme_with_time_series_field_and_rdi(business_area: BusinessArea) -> Program:
+    program = ProgramFactory(business_area=business_area, status=Program.DRAFT)
+    FlexibleAttributeForPDUFactory(program=program, label="Time Series Field Name 1", pdu_data__number_of_rounds=2)
+    RegistrationDataImportFactory(program=program, business_area=business_area)
+    return program
+
+
+@pytest.fixture
+def superuser_of_unhcr(create_super_user: User) -> User:
+    create_super_user.partner = Partner.objects.get(name="UNHCR")
+    create_super_user.save()
+    return create_super_user
+
+
+@pytest.fixture
+def partner_in_business_area(business_area: BusinessArea) -> Partner:
+    partner = PartnerFactory(name="Test Partner 1")
+    partner.allowed_business_areas.add(business_area)
+    RoleAssignmentFactory(
+        partner=partner,
+        user=None,
+        business_area=business_area,
+        program=None,
+        role=RoleFactory(name="Role in BA"),
+    )
+    return partner
+
+
+@pytest.fixture
+def partner_without_role() -> Partner:
+    return PartnerFactory(name="Test Partner 2")
+
+
+def navigate_to_programme_management(browser: HopeTestBrowser) -> None:
+    browser.click('a[data-cy="nav-Programmes"]')
+    browser.wait_for_text("Programme Management", 'h5[data-cy="page-header-title"]')
+
+
+def fill_programme_create_required_fields(
+    browser: HopeTestBrowser,
+    *,
+    name: str = "Test Programme",
+    start_date: str = "2023-05-01",
+    end_date: str = "2033-12-12",
+    sector: str = "Child Protection",
+    payee_type: str = "Household",
+    dct: str = "Full",
+    beneficiary_group: str = "Main Menu",
+    purpose_name: str = BA_PURPOSE_NAME,
+    fill_dates: bool = True,
+) -> None:
+    browser.type('input[name="name"]', name)
+    if fill_dates:
+        browser.fill_date('input[name="startDate"]', start_date)
+        browser.click('input[name="name"]')
+        browser.fill_date('input[name="endDate"]', end_date)
+        browser.click('input[name="name"]')
+    browser.select_dropdown_option("sector", sector)
+    browser.select_dropdown_option("payeeType", payee_type)
+    browser.select_dropdown_option("dataCollectingTypeCode", dct)
+    browser.select_dropdown_option("beneficiaryGroup", beneficiary_group)
+    browser.select_chip_option(purpose_name, '[data-cy="input-payment-plan-purposes"]')
+
+
+def add_time_series_field(
+    browser: HopeTestBrowser,
+    index: int,
+    *,
+    label: str,
+    subtype: str = "Text",
+    num_rounds: str = "1",
+    round_names: list[str] = (),
+) -> None:
+    browser.click('button[data-cy="button-add-time-series-field"]')
+    browser.type(f'input[name="pduFields.{index}.label"]', label)
+    browser.select_dropdown_option(f"pduFields.{index}.pduData.subtype", subtype)
+    browser.click(f'[data-cy="select-pduFields.{index}.pduData.numberOfRounds"]')
+    browser.select_listbox_element(num_rounds)
+    for ri, rname in enumerate(round_names):
+        browser.type(f'input[name="pduFields.{index}.pduData.roundsNames.{ri}"]', rname)
+
+
+def choose_partner(browser: HopeTestBrowser, name: str, index: int = 0) -> None:
+    browser.click(f'div[data-cy="select-partners[{index}].id"]')
+    browser.select_option_by_name(name)
+
+
+def open_create_programme_partners_step(browser: HopeTestBrowser, name: str = "Test Programme") -> None:
+    navigate_to_programme_management(browser)
+    browser.click('a[data-cy="button-new-program"]')
+    fill_programme_create_required_fields(
+        browser, name=name, sector="Health", dct="Partial", beneficiary_group="People"
+    )
+    browser.click('[data-cy="input-cashPlus"]')
+    browser.click('button[data-cy="button-next"]')
+    browser.wait_for_element_visible('button[data-cy="button-add-time-series-field"]')
+    browser.click('button[data-cy="button-next"]')
+    browser.wait_for_element_visible('button[data-cy="button-save"]')

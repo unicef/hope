@@ -29,6 +29,7 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.status import is_client_error
 from viewflow.fsm import NoTransition
 
+from hope.apps.account.actor_snapshot import ActorSnapshot
 from hope.apps.account.permissions import Permissions
 from hope.apps.core.exchange_rates import ExchangeRates
 from hope.apps.core.utils import chunks
@@ -131,13 +132,17 @@ def validate_approval_count(
         raise ValidationError(f"Can't create new {approval_type}. User have already created {approval_type}")
 
 
-def record_stage_reached(approval_process: ApprovalProcess, approval_type: str, user: "User | None") -> None:
+def record_stage_reached(
+    approval_process: ApprovalProcess, approval_type: str, user: "User | None", actor_snapshot: ActorSnapshot
+) -> None:
     if approval_type == Approval.APPROVAL:
         approval_process.sent_for_authorization_by = user
+        actor_snapshot.apply_to(approval_process, "sent_for_authorization_by")
         approval_process.sent_for_authorization_date = timezone.now()
         approval_process.save()
     if approval_type == Approval.AUTHORIZATION:
         approval_process.sent_for_finance_release_by = user
+        actor_snapshot.apply_to(approval_process, "sent_for_finance_release_by")
         approval_process.sent_for_finance_release_date = timezone.now()
         approval_process.save()
 

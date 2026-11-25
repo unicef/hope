@@ -6,6 +6,7 @@ from django.db import transaction
 from django.utils import timezone
 from rest_framework.exceptions import ValidationError
 
+from hope.apps.account.actor_snapshot import ActorSnapshot, build_actor_snapshot
 from hope.apps.activity_log.utils import copy_model_object
 from hope.apps.payment.celery_tasks import (
     recalculate_owner_exchange_rate_async_task,
@@ -274,9 +275,13 @@ class PaymentPlanService:
         self.payment_plan = payment_plan
         return payment_plan
 
-    @transaction.atomic
-    def send_for_approval(self, user: "User") -> PaymentPlan:
+    def send_for_approval(self, user: "User", actor_snapshot: ActorSnapshot | None = None) -> PaymentPlan:
         """Send the payment plan and every plan in it for approval; one approval process, on the payment plan."""
+        # The AD lookup runs before the transaction takes the row lock, so a slow lookup never blocks other actions.
+        return self._send_for_approval(user, actor_snapshot or build_actor_snapshot(user))
+
+    @transaction.atomic
+    def _send_for_approval(self, user: "User", actor_snapshot: ActorSnapshot) -> PaymentPlan:
         payment_plan = self._locked_for_update()
         if payment_plan.status != PaymentPlan.Status.LOCKED:
             raise ValidationError(f"Send for Approval is possible only within Status {PaymentPlan.Status.LOCKED}")
@@ -299,6 +304,7 @@ class PaymentPlanService:
             approval_number_required=payment_plan.approval_number_required,
             authorization_number_required=payment_plan.authorization_number_required,
             finance_release_number_required=payment_plan.finance_release_number_required,
+            **actor_snapshot.as_model_fields("sent_for_approval_by"),
         )
         send_payment_plan_notification_emails_async_task(
             payment_plan,
@@ -309,14 +315,22 @@ class PaymentPlanService:
         self.payment_plan = payment_plan
         return payment_plan
 
-    @transaction.atomic
-    def acceptance_process(self, action: str, user: "User", comment: str | None = None) -> PaymentPlan:
+    def acceptance_process(
+        self, action: str, user: "User", comment: str | None = None, actor_snapshot: ActorSnapshot | None = None
+    ) -> PaymentPlan:
         """Record one approve / authorize / release / reject on the payment plan.
 
         When the required count is reached the payment plan moves to the next stage and the new status is
         mirrored onto every payment list (its status is read by eligibility, conflicts, verification and
         exports).
         """
+        # The AD lookup runs before the transaction takes the row lock, so a slow lookup never blocks other actions.
+        return self._acceptance_process(action, user, comment, actor_snapshot or build_actor_snapshot(user))
+
+    @transaction.atomic
+    def _acceptance_process(
+        self, action: str, user: "User", comment: str | None, actor_snapshot: ActorSnapshot
+    ) -> PaymentPlan:
         approval_type = ACTION_TO_APPROVAL_TYPE[action]
         payment_plan = self._locked_for_update()
         if payment_plan.status not in ACTION_TO_STATUSES[action]:
@@ -335,11 +349,17 @@ class PaymentPlanService:
         required_number = required_number_for(approval_process, approval_type)
         validate_approval_count(approval_process, approval_type, required_number, payment_plan.status, user)
 
-        Approval.objects.create(approval_process=approval_process, created_by=user, type=approval_type, comment=comment)
+        Approval.objects.create(
+            approval_process=approval_process,
+            created_by=user,
+            type=approval_type,
+            comment=comment,
+            **actor_snapshot.as_model_fields("created_by"),
+        )
         log_payment_list_approval(payment_plan, user, approval_type, comment)
 
         if approval_process.approvals.filter(type=approval_type).count() >= required_number:
-            record_stage_reached(approval_process, approval_type, user)
+            record_stage_reached(approval_process, approval_type, user, actor_snapshot)
             notify_vision = approval_type == Approval.REJECT and payment_plan.sent_to_vision
             if approval_type in (Approval.REJECT, Approval.FINANCE_RELEASE) and (
                 payment_plan.sent_to_vision or payment_plan.vision_status != VisionStatus.NOT_SENT.value
@@ -371,8 +391,23 @@ class PaymentPlanService:
         self.payment_plan = payment_plan
         return payment_plan
 
+    @staticmethod
+    def vision_release_actor(payment_plan: PaymentPlan) -> "User":
+        """Return the finance-release actor of an automatic Vision release: the plan creator, else the first list's."""
+        if payment_plan.created_by:
+            return payment_plan.created_by
+        first_list = payment_plan.payment_lists.select_related("created_by").order_by("created_at").first()
+        if first_list is None:
+            raise ValidationError("Every Payment List must be in review for Vision release")
+        return first_list.created_by
+
+    def release_from_vision(self, actor_snapshot: ActorSnapshot | None = None) -> PaymentPlan:
+        user = self.vision_release_actor(self.payment_plan)
+        # The AD lookup runs before the transaction takes the row lock, so a slow lookup never blocks other actions.
+        return self._release_from_vision(user, actor_snapshot or build_actor_snapshot(user))
+
     @transaction.atomic
-    def release_from_vision(self) -> PaymentPlan:
+    def _release_from_vision(self, user: "User", actor_snapshot: ActorSnapshot) -> PaymentPlan:
         payment_plan = self._locked_for_update()
         if payment_plan.status != PaymentPlan.Status.IN_REVIEW:
             return payment_plan
@@ -384,11 +419,15 @@ class PaymentPlanService:
         approval_process = payment_plan.approval_process.first()
         if approval_process is None:
             raise ValidationError("Approval Process object not found for Payment Plan")
-        user = payment_plan.created_by or payment_lists[0].created_by
         old_payment_plan = cast("PaymentPlan", copy_model_object(payment_plan))
-        Approval.objects.create(approval_process=approval_process, created_by=user, type=Approval.FINANCE_RELEASE)
+        Approval.objects.create(
+            approval_process=approval_process,
+            created_by=user,
+            type=Approval.FINANCE_RELEASE,
+            **actor_snapshot.as_model_fields("created_by"),
+        )
         log_payment_list_approval(payment_plan, user, Approval.FINANCE_RELEASE, None)
-        record_stage_reached(approval_process, Approval.FINANCE_RELEASE, user)
+        record_stage_reached(approval_process, Approval.FINANCE_RELEASE, user, actor_snapshot)
         self._transition_stage(payment_plan, Approval.FINANCE_RELEASE)
         for payment_list in payment_lists:
             PaymentListService(payment_list).apply_acceptance_stage(Approval.FINANCE_RELEASE, user)

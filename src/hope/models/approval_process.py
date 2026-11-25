@@ -2,6 +2,7 @@ from django.conf import settings
 from django.db import models
 from django.db.models import Q
 
+from hope.apps.account.actor_snapshot import JobTitleSource
 from hope.models.utils import LongNameIndex, TimeStampedUUIDModel
 
 
@@ -18,6 +19,22 @@ class ApprovalProcess(TimeStampedUUIDModel):
         settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, related_name="+", null=True, blank=True
     )
     sent_for_finance_release_date = models.DateTimeField(null=True, blank=True)
+    # Who moved the plan to each stage, as recorded at that moment
+    sent_for_approval_by_name = models.CharField(max_length=301, blank=True, default="")
+    sent_for_approval_by_job_title = models.CharField(max_length=255, blank=True, default="")
+    sent_for_approval_by_job_title_source = models.CharField(
+        max_length=16, blank=True, default="", choices=JobTitleSource.choices
+    )
+    sent_for_authorization_by_name = models.CharField(max_length=301, blank=True, default="")
+    sent_for_authorization_by_job_title = models.CharField(max_length=255, blank=True, default="")
+    sent_for_authorization_by_job_title_source = models.CharField(
+        max_length=16, blank=True, default="", choices=JobTitleSource.choices
+    )
+    sent_for_finance_release_by_name = models.CharField(max_length=301, blank=True, default="")
+    sent_for_finance_release_by_job_title = models.CharField(max_length=255, blank=True, default="")
+    sent_for_finance_release_by_job_title_source = models.CharField(
+        max_length=16, blank=True, default="", choices=JobTitleSource.choices
+    )
     payment_list = models.ForeignKey(
         "payment.PaymentList",
         on_delete=models.CASCADE,

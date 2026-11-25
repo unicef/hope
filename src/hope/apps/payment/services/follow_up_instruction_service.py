@@ -7,6 +7,7 @@ from django.db.models import Exists, OuterRef
 from django.utils import timezone
 from rest_framework.exceptions import ValidationError
 
+from hope.apps.account.actor_snapshot import ActorSnapshot, build_actor_snapshot
 from hope.apps.activity_log.utils import copy_model_object
 from hope.apps.payment.celery_tasks import (
     create_follow_up_instruction_delivery_xlsx_async_task,
@@ -254,9 +255,13 @@ class FollowUpInstructionService:
             self._log_payment_list_change(updated_payment_list, user, old_payment_list)
         return instruction
 
-    @transaction.atomic
     def send_for_approval(self, user: "User") -> FollowUpInstruction:
         """Send every child plan for approval; one approval process, on the instruction, sized by its total."""
+        # The AD lookup runs before the transaction takes the row lock, so a slow lookup never blocks other actions.
+        return self._send_for_approval(user, build_actor_snapshot(user))
+
+    @transaction.atomic
+    def _send_for_approval(self, user: "User", actor_snapshot: ActorSnapshot) -> FollowUpInstruction:
         instruction = self._locked_for_update()
         self._validate_child_payment_lists_statuses({PaymentList.Status.LOCKED_FSP}, "Send for Approval")
         if instruction.background_action_status == FollowUpInstruction.BackgroundActionStatus.RECALCULATING_ERROR:
@@ -275,18 +280,25 @@ class FollowUpInstructionService:
             approval_number_required=instruction.approval_number_required,
             authorization_number_required=instruction.authorization_number_required,
             finance_release_number_required=instruction.finance_release_number_required,
+            **actor_snapshot.as_model_fields("sent_for_approval_by"),
         )
         send_follow_up_instruction_notification_emails_async_task(
             instruction, PaymentList.Action.SEND_FOR_APPROVAL.value, str(user.pk), timezone.now().isoformat()
         )
         return instruction
 
-    @transaction.atomic
     def acceptance_process(self, action: str, user: "User", comment: str | None = None) -> FollowUpInstruction:
         """Record one approve / authorize / release / reject on the instruction.
 
         When the required count is reached every child plan moves to the next stage together.
         """
+        # The AD lookup runs before the transaction takes the row lock, so a slow lookup never blocks other actions.
+        return self._acceptance_process(action, user, comment, build_actor_snapshot(user))
+
+    @transaction.atomic
+    def _acceptance_process(
+        self, action: str, user: "User", comment: str | None, actor_snapshot: ActorSnapshot
+    ) -> FollowUpInstruction:
         approval_type = ACTION_TO_APPROVAL_TYPE[action]
         instruction = self._locked_for_update()
         instruction_status = instruction.status
@@ -302,11 +314,17 @@ class FollowUpInstructionService:
         required_number = required_number_for(approval_process, approval_type)
         validate_approval_count(approval_process, approval_type, required_number, instruction_status, user)
 
-        Approval.objects.create(approval_process=approval_process, created_by=user, type=approval_type, comment=comment)
+        Approval.objects.create(
+            approval_process=approval_process,
+            created_by=user,
+            type=approval_type,
+            comment=comment,
+            **actor_snapshot.as_model_fields("created_by"),
+        )
         log_payment_list_approval(instruction, user, approval_type, comment)
 
         if approval_process.approvals.filter(type=approval_type).count() >= required_number:
-            record_stage_reached(approval_process, approval_type, user)
+            record_stage_reached(approval_process, approval_type, user, actor_snapshot)
             for payment_list in self._get_child_payment_lists():
                 old_payment_list = cast("PaymentList", copy_model_object(payment_list))
                 PaymentListService(payment_list).apply_acceptance_stage(approval_type, user)

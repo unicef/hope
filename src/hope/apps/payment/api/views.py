@@ -1,6 +1,6 @@
 from collections.abc import Callable
 from decimal import Decimal
-from functools import cached_property
+from functools import cache, cached_property, partial
 from io import BytesIO
 import logging
 import mimetypes
@@ -28,6 +28,7 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 
 from hope.api.caches import cached_response, etag_decorator
+from hope.apps.account.actor_snapshot import ActorSnapshot, build_actor_snapshot
 from hope.apps.account.permissions import Permissions
 from hope.apps.activity_log.utils import copy_model_object, create_diff
 from hope.apps.core.api.mixins import (
@@ -1912,15 +1913,23 @@ class PaymentPlanManagerialViewSet(
         serializer.is_valid(raise_exception=True)
         action_name = serializer.validated_data["action"]
         comment = serializer.validated_data.get("comment", "")
+        # One AD lookup for the whole batch, made by the first plan that passes its checks, before that plan locks
+        # any row; the rows locked by earlier plans stay locked until the loop ends.
+        get_actor_snapshot = cache(partial(build_actor_snapshot, cast("User", request.user)))
         payment_plans = PaymentPlan.objects.filter(
             id__in=serializer.validated_data["ids"], cycle__program__business_area=self.business_area
         ).select_related("cycle__program")
         for payment_plan in payment_plans:
-            self._perform_payment_plan_action(payment_plan, action_name, comment, request)
+            self._perform_payment_plan_action(payment_plan, action_name, comment, request, get_actor_snapshot)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     def _perform_payment_plan_action(
-        self, payment_plan: PaymentPlan, action_name: str, comment: str, request: Request
+        self,
+        payment_plan: PaymentPlan,
+        action_name: str,
+        comment: str,
+        request: Request,
+        get_actor_snapshot: Callable[[], ActorSnapshot],
     ) -> None:
         if action_name == PaymentList.Action.REVIEW.value and payment_plan.vision_managed:
             return
@@ -1930,7 +1939,7 @@ class PaymentPlanManagerialViewSet(
 
         old_payment_plan = copy_model_object(payment_plan)
         payment_plan = PaymentPlanService(payment_plan).acceptance_process(
-            action_name, cast("User", request.user), comment
+            action_name, cast("User", request.user), comment, get_actor_snapshot()
         )
         log_create(
             mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,

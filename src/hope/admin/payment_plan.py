@@ -24,11 +24,13 @@ from hope.admin.utils import (
     PaymentListCeleryTasksMixin,
     ViewOnUiMixin,
 )
+from hope.apps.account.actor_snapshot import build_actor_snapshot
 from hope.apps.activity_log.utils import copy_model_object, create_diff
 from hope.apps.payment.celery_tasks import recalculate_owner_exchange_rate_async_task
 from hope.apps.payment.forms import GroupReexportForm, VisionFundsCommitmentHeaderAssignmentForm
 from hope.apps.payment.services.payment_gateway import PaymentGatewayAPI
 from hope.apps.payment.services.payment_list_services import PaymentListService
+from hope.apps.payment.services.payment_plan_services import PaymentPlanService
 from hope.apps.payment.xlsx.xlsx_payment_list_delivery_import_service import (
     NULL_DELIVERY_POLICY_OPTION,
     NULL_DELIVERY_POLICY_RESET,
@@ -245,7 +247,6 @@ class BasePaymentListAdmin(ViewOnUiMixin, HOPEModelAdminBase):
         "business_area",
         "program_cycle",
         "payment_plan",
-        "status",
         "steficon_rule",
         "steficon_rule_targeting",
         "created_by",
@@ -340,7 +341,7 @@ class PaymentListAdmin(BasePaymentListAdmin, PaymentListCeleryTasksMixin):
         "payment_plan__use_payment_gateway",
         ("plan_type", ChoicesFieldComboFilter),
     )
-    readonly_fields = BasePaymentListAdmin.readonly_fields + ("plan_type", "use_payment_gateway")
+    readonly_fields = BasePaymentListAdmin.readonly_fields + ("status", "plan_type", "use_payment_gateway")
     list_select_related = ("business_area", "program_cycle", "payment_plan", "follow_up_instruction")
     inlines = [PaymentInstructionInline]
 
@@ -575,15 +576,21 @@ class PaymentPlanAdmin(ViewOnUiMixin, HOPEModelAdminBase):
         label="Assign Vision FC Headers",
     )
     def assign_vision_funds_commitment_headers(self, request: HttpRequest, pk: "UUID") -> HttpResponse:
-        payment_plan = PaymentPlan.objects.select_related("cycle__program__business_area").get(pk=pk)
+        payment_plan = PaymentPlan.objects.select_related("cycle__program__business_area", "created_by").get(pk=pk)
         form = VisionFundsCommitmentHeaderAssignmentForm(
             data=request.POST or None,
             payment_plan=payment_plan,
         )
         if request.method == "POST" and form.is_valid():
+            # Take the release actor from AD before locking the payment plan, only while it can still be released.
+            actor_snapshot = (
+                build_actor_snapshot(PaymentPlanService.vision_release_actor(payment_plan))
+                if VisionService.can_recover_payment_plan_with_funds_commitment_headers(payment_plan)
+                else None
+            )
             try:
                 VisionService.recover_payment_plan_with_funds_commitment_headers(
-                    payment_plan, form.cleaned_data["funds_commitment_headers"]
+                    payment_plan, form.cleaned_data["funds_commitment_headers"], actor_snapshot
                 )
             except FundsCommitmentAssignmentError as error:
                 if error.status == VisionStatus.FC_NOT_FOUND:

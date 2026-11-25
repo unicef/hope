@@ -5,7 +5,7 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
     dependencies = [
         ("accountability", "0012_migration"),
-        ("payment", "0088_migration"),
+        ("payment", "0090_migration"),
     ]
 
     operations = [

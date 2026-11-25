@@ -8,7 +8,7 @@ from extras.test_utils.factories import FlagStateFactory
 
 pytestmark = pytest.mark.django_db
 
-migration = import_module("hope.apps.payment.migrations.0089_migration")
+migration = import_module("hope.apps.payment.migrations.0091_migration")
 
 
 @pytest.fixture

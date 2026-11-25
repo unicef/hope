@@ -22,6 +22,7 @@ from django.utils.timezone import now
 from django.utils.translation import gettext_lazy as _
 from model_utils.models import SoftDeletableModel
 
+from hope.apps.account.actor_snapshot import actor_display
 from hope.apps.activity_log.utils import create_mapping_dict
 from hope.apps.core.exchange_rates import ExchangeRates
 from hope.apps.core.utils import map_unicef_ids_to_households_unicef_ids
@@ -59,7 +60,7 @@ if TYPE_CHECKING:
 @dataclass
 class ModifiedData:
     modified_date: datetime
-    modified_by: Optional["User"] = None
+    modified_by: str | None = None
 
 
 def last_approval_step(approval_process: "ApprovalProcess | None", status: str, fallback: datetime) -> ModifiedData:
@@ -68,7 +69,7 @@ def last_approval_step(approval_process: "ApprovalProcess | None", status: str, 
         if status == PaymentList.Status.IN_APPROVAL:
             return ModifiedData(
                 approval_process.sent_for_approval_date,  # type: ignore[arg-type]
-                approval_process.sent_for_approval_by,
+                actor_display(approval_process, "sent_for_approval_by"),
             )
         approval_type_by_status: dict[str, str] = {
             PaymentList.Status.IN_AUTHORIZATION: Approval.APPROVAL,
@@ -80,7 +81,7 @@ def last_approval_step(approval_process: "ApprovalProcess | None", status: str, 
         approvals = [approval for approval in approval_process.approvals.all() if approval.type == approval_type]
         if approvals:
             approval = max(approvals, key=lambda approval: approval.created_at)
-            return ModifiedData(approval.created_at, approval.created_by)
+            return ModifiedData(approval.created_at, actor_display(approval, "created_by"))
     return ModifiedData(fallback)
 
 

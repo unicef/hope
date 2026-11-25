@@ -23,14 +23,14 @@ from hope.models import AcceptanceProcessThreshold, ApprovalProcess, PaymentList
 
 pytestmark = pytest.mark.django_db
 
-migration_module = importlib.import_module("hope.apps.payment.migrations.0085_migration")
+migration_module = importlib.import_module("hope.apps.payment.migrations.0087_migration")
 
 
 @pytest.fixture
 def historical_apps(settings: Any) -> SimpleNamespace:
     """The models just before the payment list rename, under the names 0085 uses for them."""
     settings.MIGRATION_MODULES = {}
-    apps = MigrationLoader(connection).project_state(("payment", "0087_migration")).apps
+    apps = MigrationLoader(connection).project_state(("payment", "0089_migration")).apps
     names_in_0085 = {"PaymentPlan": "PaymentList", "PaymentPlanGroup": "PaymentPlan"}
     return SimpleNamespace(
         get_model=lambda app_label, model_name: apps.get_model(app_label, names_in_0085.get(model_name, model_name))
@@ -45,7 +45,7 @@ def historical_apps_with_plan_columns(settings: Any) -> Apps:
     exchange rate from the plan.
     """
     settings.MIGRATION_MODULES = {}
-    state = MigrationLoader(connection).project_state(("payment", "0084_migration"))
+    state = MigrationLoader(connection).project_state(("payment", "0086_migration"))
     with connection.cursor() as cursor:
         cursor.execute(
             'ALTER TABLE "payment_paymentplan" ADD COLUMN "financial_service_provider_id" uuid NULL, '

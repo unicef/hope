@@ -32,7 +32,7 @@ if TYPE_CHECKING:
 
     from django.db.models import QuerySet
 
-    from hope.models import AcceptanceProcessThreshold, BusinessArea, Program, User
+    from hope.models import AcceptanceProcessThreshold, BusinessArea, Program
 
 
 class PaymentPlan(TimeStampedUUIDModel, UnicefIdentifiedModel, InternalDataFieldModel, ConcurrencyModel, AdminUrlMixin):
@@ -418,7 +418,7 @@ class PaymentPlan(TimeStampedUUIDModel, UnicefIdentifiedModel, InternalDataField
         return last_approval_step(self.approval_process.first(), self.status, self.updated_at).modified_date
 
     @property
-    def last_approval_process_by(self) -> "User | None":
+    def last_approval_process_by(self) -> str | None:
         return last_approval_step(self.approval_process.first(), self.status, self.updated_at).modified_by
 
     @property

@@ -2,6 +2,7 @@ from decimal import Decimal
 from typing import Any
 from unittest.mock import MagicMock
 
+from django.template.loader import get_template
 import pytest
 
 from extras.test_utils.factories.payment import (
@@ -188,6 +189,58 @@ def test_group_generate_pdf_summary_aggregates_every_plan_in_the_group(
     assert pdf_context_data["reconciliation"]["reconciled_local"] == Decimal("25.00")
     assert pdf_context_data["reconciliation"]["failed_usd"] == Decimal("210.00")
     assert pdf_context_data["reconciliation"]["failed_local"] == Decimal("105.00")
+
+
+@pytest.fixture
+def renamed_group_approver(group_approval_process: Any) -> Any:
+    approval = group_approval_process.approvals.get(type=Approval.APPROVAL)
+    approval.created_by_name = "Jan Kowalski"
+    approval.created_by_job_title = "Programme Officer"
+    approval.created_by_job_title_source = "AD"
+    approval.save(update_fields=["created_by_name", "created_by_job_title", "created_by_job_title_source"])
+    user = approval.created_by
+    user.first_name = "Renamed"
+    user.last_name = "Person"
+    user.save(update_fields=["first_name", "last_name"])
+    return user
+
+
+@pytest.fixture
+def renamed_group_approver_without_snapshot(group_approval_process: Any) -> Any:
+    user = group_approval_process.approvals.get(type=Approval.APPROVAL).created_by
+    user.first_name = "Renamed"
+    user.last_name = "Person"
+    user.save(update_fields=["first_name", "last_name"])
+    return user
+
+
+def test_group_generate_pdf_summary_prints_the_approver_name_recorded_at_approval(
+    payment_plan: PaymentPlan, renamed_group_approver: Any, mocker: Any
+) -> None:
+    mocker.patch("hope.apps.payment.pdf.payment_plan_export_pdf_service.get_link", return_value="http://www_link")
+    generate_pdf = mocker.patch(
+        "hope.apps.payment.pdf.payment_plan_export_pdf_service.generate_pdf_from_html", return_value=b"pdf"
+    )
+
+    PaymentPlanPDFExportService(payment_plan).generate_pdf_summary()
+
+    html = get_template(generate_pdf.call_args.kwargs["template_name"]).render(generate_pdf.call_args.kwargs["data"])
+    assert "Jan Kowalski" in html
+    assert "Renamed Person" not in html
+
+
+def test_group_generate_pdf_summary_prints_the_current_name_for_an_approval_without_snapshot(
+    payment_plan: PaymentPlan, renamed_group_approver_without_snapshot: Any, mocker: Any
+) -> None:
+    mocker.patch("hope.apps.payment.pdf.payment_plan_export_pdf_service.get_link", return_value="http://www_link")
+    generate_pdf = mocker.patch(
+        "hope.apps.payment.pdf.payment_plan_export_pdf_service.generate_pdf_from_html", return_value=b"pdf"
+    )
+
+    PaymentPlanPDFExportService(payment_plan).generate_pdf_summary()
+
+    html = get_template(generate_pdf.call_args.kwargs["template_name"]).render(generate_pdf.call_args.kwargs["data"])
+    assert "Renamed Person" in html
 
 
 def test_group_get_email_context(payment_plan: PaymentPlan) -> None:

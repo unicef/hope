@@ -9,6 +9,8 @@ from rest_framework.views import APIView
 
 from hope.api.auth import HOPEAuthentication
 from hope.api.endpoints.base import HOPEAPIView
+from hope.apps.account.actor_snapshot import ActorSnapshot, build_actor_snapshot
+from hope.apps.payment.services.payment_plan_services import PaymentPlanService
 from hope.contrib.api.serializers.vision import (
     PaymentPlanCallbackAckSerializer,
     PaymentPlanCallbackRequestSerializer,
@@ -74,6 +76,29 @@ class PaymentPlanCallbackView(HOPEAPIView, APIView):
         )
 
     @staticmethod
+    def _release_actor_snapshot(serializer: PaymentPlanCallbackRequestSerializer) -> ActorSnapshot | None:
+        """Return the name and AD job title of the actor of the release this callback will trigger.
+
+        A SUCCESS callback with FC numbers releases the plan and records a FINANCE_RELEASE Approval for the
+        Vision release actor. The AD lookup for that record is done here, before `post` locks the Payment Plan
+        row. Any other callback, an unknown plan, or a plan the callback cannot release returns None.
+        """
+        if (
+            serializer.validated_data.get("status") != "SUCCESS"
+            or not serializer.validated_data.get("fc_numbers")
+            or not serializer.validated_vision_payplan_sno
+        ):
+            return None
+        payment_plan = (
+            PaymentPlan.objects.select_related("created_by").filter(unicef_id=serializer.validated_payplan_sno).first()
+        )
+        if payment_plan is None or not VisionService.can_recover_payment_plan_with_funds_commitment_headers(
+            payment_plan
+        ):
+            return None
+        return build_actor_snapshot(PaymentPlanService.vision_release_actor(payment_plan))
+
+    @staticmethod
     def _append_log(payment_plan: PaymentPlan, payload: dict, response_data: dict) -> None:
         vision_data = VisionService.vision_data(payment_plan)
         vision_data.setdefault("log", []).append(
@@ -91,6 +116,7 @@ class PaymentPlanCallbackView(HOPEAPIView, APIView):
         if not serializer.is_valid():
             return self._error_response(serializer, message=VISION_INVALID_CALLBACK_MESSAGE)
 
+        actor_snapshot = self._release_actor_snapshot(serializer)
         try:
             payment_plan = self._get_payment_plan(serializer.validated_payplan_sno)
         except PaymentPlan.DoesNotExist:
@@ -125,6 +151,7 @@ class PaymentPlanCallbackView(HOPEAPIView, APIView):
             vision_payment_plan_id=serializer.validated_vision_payplan_sno,
             vision_result=serializer.validated_data.get("status", ""),
             fc_numbers=serializer.validated_data.get("fc_numbers", []),
+            actor_snapshot=actor_snapshot,
         )
         response_status: int
         if fc_assignment_failed:

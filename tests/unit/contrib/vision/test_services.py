@@ -11,6 +11,7 @@ from extras.test_utils.factories import (
     PaymentListFactory,
     PaymentPlanFactory,
 )
+from hope.apps.account.actor_snapshot import ActorSnapshot
 from hope.contrib.vision.api import VisionAPIError, VisionAPIMissingCredentialsError
 from hope.contrib.vision.choices import VisionErrorCode, VisionStatus
 from hope.contrib.vision.services import FundsCommitmentAssignmentError, VisionService
@@ -20,7 +21,7 @@ from hope.contrib.vision.tasks import (
     send_payment_plan_to_vision_async_task,
     send_payment_plan_to_vision_async_task_action,
 )
-from hope.models import AsyncJob, PaymentList, PaymentPlan
+from hope.models import Approval, AsyncJob, PaymentList, PaymentPlan
 
 pytestmark = pytest.mark.django_db
 
@@ -380,6 +381,47 @@ def test_manual_recovery_releases_group(group_with_failed_fc: PaymentPlan, match
     group_with_failed_fc.refresh_from_db()
     assert group_with_failed_fc.status == PaymentPlan.Status.ACCEPTED
     assert group_with_failed_fc.vision_status == VisionStatus.RELEASED.value
+
+
+def test_manual_recovery_stores_the_given_release_actor_snapshot(
+    group_with_failed_fc: PaymentPlan, matching_headers: list, monkeypatch
+) -> None:
+    monkeypatch.setattr(
+        "hope.apps.payment.services.payment_plan_services.send_payment_plan_notification_emails_async_task",
+        lambda *args: None,
+    )
+    snapshot = ActorSnapshot(name="Anna Nowak", job_title="Finance Officer", job_title_source="AD")
+
+    VisionService.recover_payment_plan_with_funds_commitment_headers(
+        group_with_failed_fc, [matching_headers[0]], snapshot
+    )
+
+    release = group_with_failed_fc.approval_process.get().approvals.get(type=Approval.FINANCE_RELEASE)
+    assert release.created_by_name == "Anna Nowak"
+    assert release.created_by_job_title == "Finance Officer"
+    assert release.created_by_job_title_source == "AD"
+
+
+def test_callback_release_stores_the_given_release_actor_snapshot(
+    group_with_failed_fc: PaymentPlan, matching_headers: list, monkeypatch
+) -> None:
+    monkeypatch.setattr(
+        "hope.apps.payment.services.payment_plan_services.send_payment_plan_notification_emails_async_task",
+        lambda *args: None,
+    )
+    snapshot = ActorSnapshot(name="Anna Nowak", job_title="Finance Officer", job_title_source="AD")
+
+    VisionService.process_callback(
+        group_with_failed_fc,
+        vision_payment_plan_id="VISION-1",
+        vision_result="SUCCESS",
+        fc_numbers=["FC123"],
+        actor_snapshot=snapshot,
+    )
+
+    release = group_with_failed_fc.approval_process.get().approvals.get(type=Approval.FINANCE_RELEASE)
+    assert release.created_by_name == "Anna Nowak"
+    assert release.created_by_job_title_source == "AD"
 
 
 @pytest.fixture

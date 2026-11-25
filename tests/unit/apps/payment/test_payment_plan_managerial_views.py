@@ -2,6 +2,7 @@ from datetime import timedelta, timezone as dt_timezone
 from decimal import Decimal
 import json
 from typing import Any, Callable
+from unittest.mock import patch
 
 from django.core.cache import cache
 from django.db import connection
@@ -449,10 +450,31 @@ def test_list_groups_approval_process_data(
         payment_plan=managerial_context["group1"],
         sent_for_approval_date=timezone.datetime(2021, 1, 1, 0, 0, 0, tzinfo=dt_timezone.utc),
         sent_for_approval_by=managerial_context["user"],
+        sent_for_approval_by_name="Jan Kowalski",
+        sent_for_approval_by_job_title="Programme Officer",
+        sent_for_approval_by_job_title_source="AD",
     )
-    approval_approval = ApprovalFactory(approval_process=approval_process, type=Approval.APPROVAL)
-    approval_authorization = ApprovalFactory(approval_process=approval_process, type=Approval.AUTHORIZATION)
-    approval_release = ApprovalFactory(approval_process=approval_process, type=Approval.FINANCE_RELEASE)
+    approval_approval = ApprovalFactory(
+        approval_process=approval_process,
+        type=Approval.APPROVAL,
+        created_by_name="Anna Nowak",
+        created_by_job_title="Approver",
+        created_by_job_title_source="AD",
+    )
+    approval_authorization = ApprovalFactory(
+        approval_process=approval_process,
+        type=Approval.AUTHORIZATION,
+        created_by_name="Piotr Zielinski",
+        created_by_job_title="",
+        created_by_job_title_source="USER_RECORD",
+    )
+    approval_release = ApprovalFactory(
+        approval_process=approval_process,
+        type=Approval.FINANCE_RELEASE,
+        created_by_name="Maria Wisniewska",
+        created_by_job_title="Finance Officer",
+        created_by_job_title_source="AD",
+    )
     create_user_role_with_permissions(
         managerial_context["user"],
         [Permissions.PAYMENT_VIEW_LIST_MANAGERIAL],
@@ -466,28 +488,28 @@ def test_list_groups_approval_process_data(
     assert response.status_code == status.HTTP_200_OK
     row = response.json()["results"][0]
     assert row["last_approval_process_date"] == approval_process.sent_for_approval_date.strftime("%Y-%m-%dT%H:%M:%SZ")
-    assert row["last_approval_process_by"] == str(approval_process.sent_for_approval_by)
+    assert row["last_approval_process_by"] == "Jan Kowalski (Programme Officer)"
 
     with TestCase.captureOnCommitCallbacks(execute=True):
         group.status = PaymentPlan.Status.IN_AUTHORIZATION
         group.save(update_fields=["status"])
     row = managerial_context["client"].get(managerial_context["url"]).json()["results"][0]
     assert row["last_approval_process_date"] == approval_approval.created_at.strftime("%Y-%m-%dT%H:%M:%SZ")
-    assert row["last_approval_process_by"] == str(approval_approval.created_by)
+    assert row["last_approval_process_by"] == "Anna Nowak (Approver)"
 
     with TestCase.captureOnCommitCallbacks(execute=True):
         group.status = PaymentPlan.Status.IN_REVIEW
         group.save(update_fields=["status"])
     row = managerial_context["client"].get(managerial_context["url"]).json()["results"][0]
     assert row["last_approval_process_date"] == approval_authorization.created_at.strftime("%Y-%m-%dT%H:%M:%SZ")
-    assert row["last_approval_process_by"] == str(approval_authorization.created_by)
+    assert row["last_approval_process_by"] == "Piotr Zielinski"
 
     with TestCase.captureOnCommitCallbacks(execute=True):
         group.status = PaymentPlan.Status.ACCEPTED
         group.save(update_fields=["status"])
     row = managerial_context["client"].get(managerial_context["url"]).json()["results"][0]
     assert row["last_approval_process_date"] == approval_release.created_at.strftime("%Y-%m-%dT%H:%M:%SZ")
-    assert row["last_approval_process_by"] == str(approval_release.created_by)
+    assert row["last_approval_process_by"] == "Maria Wisniewska (Finance Officer)"
 
 
 def test_bulk_approve_moves_groups_and_their_plans(
@@ -662,3 +684,134 @@ def test_bulk_action_ignores_groups_of_another_business_area(
     assert response.status_code == status.HTTP_204_NO_CONTENT
     other_group.refresh_from_db()
     assert other_group.status == PaymentPlan.Status.IN_APPROVAL
+
+
+@pytest.fixture
+def snapshot_managerial_context(managerial_context: dict[str, Any]) -> dict[str, Any]:
+    ApprovalProcessFactory(
+        payment_plan=managerial_context["group1"],
+        sent_for_approval_by=managerial_context["user"],
+        sent_for_approval_by_name="Jan Kowalski",
+        sent_for_approval_by_job_title="Programme Officer",
+        sent_for_approval_by_job_title_source="AD",
+    )
+    user = managerial_context["user"]
+    user.first_name = "Renamed"
+    user.last_name = "Person"
+    user.job_title = "New Title"
+    user.save(update_fields=["first_name", "last_name", "job_title"])
+    return managerial_context
+
+
+def test_list_groups_keeps_the_sender_recorded_at_the_time_after_a_rename(
+    snapshot_managerial_context: dict[str, Any],
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(
+        snapshot_managerial_context["user"],
+        [Permissions.PAYMENT_VIEW_LIST_MANAGERIAL],
+        snapshot_managerial_context["business_area"],
+        snapshot_managerial_context["program1"],
+    )
+
+    response = snapshot_managerial_context["client"].get(snapshot_managerial_context["url"])
+
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json()["results"][0]["last_approval_process_by"] == "Jan Kowalski (Programme Officer)"
+
+
+@pytest.fixture
+def bulk_approval_context(managerial_context: dict[str, Any]) -> dict[str, Any]:
+    user = managerial_context["user"]
+    user.first_name = "Jan"
+    user.last_name = "Kowalski"
+    user.save(update_fields=["first_name", "last_name"])
+    ApprovalProcessFactory(payment_plan=managerial_context["group1"])
+    ApprovalProcessFactory(payment_plan=managerial_context["group2"])
+    return managerial_context
+
+
+@patch("hope.apps.account.actor_snapshot.MicrosoftGraphAPI")
+def test_bulk_approve_of_two_groups_shares_one_ad_lookup(
+    mock_graph: Any,
+    bulk_approval_context: dict[str, Any],
+    create_user_role_with_permissions: Any,
+) -> None:
+    mock_graph.return_value.get_user_data.return_value = {"jobTitle": "Programme Officer"}
+    create_user_role_with_permissions(
+        bulk_approval_context["user"],
+        [Permissions.PM_ACCEPTANCE_PROCESS_APPROVE, Permissions.PAYMENT_VIEW_LIST_MANAGERIAL],
+        bulk_approval_context["business_area"],
+        bulk_approval_context["program1"],
+    )
+    create_user_role_with_permissions(
+        bulk_approval_context["user"],
+        [Permissions.PM_ACCEPTANCE_PROCESS_APPROVE, Permissions.PAYMENT_VIEW_LIST_MANAGERIAL],
+        bulk_approval_context["business_area"],
+        bulk_approval_context["program2"],
+    )
+
+    response = bulk_approval_context["client"].post(
+        bulk_approval_context["bulk_url"],
+        data={
+            "ids": [bulk_approval_context["group1"].id, bulk_approval_context["group2"].id],
+            "action": PaymentList.Action.APPROVE.value,
+            "comment": "",
+        },
+    )
+
+    assert response.status_code == status.HTTP_204_NO_CONTENT
+    first_approval = bulk_approval_context["group1"].approval_process.first().approvals.get(type=Approval.APPROVAL)
+    second_approval = bulk_approval_context["group2"].approval_process.first().approvals.get(type=Approval.APPROVAL)
+    assert mock_graph.call_count == 1
+    assert mock_graph.return_value.get_user_data.call_count == 1
+    assert first_approval.created_by_name == "Jan Kowalski"
+    assert first_approval.created_by_job_title == "Programme Officer"
+    assert first_approval.created_by_job_title_source == "AD"
+    assert second_approval.created_by_name == "Jan Kowalski"
+    assert second_approval.created_by_job_title == "Programme Officer"
+    assert second_approval.created_by_job_title_source == "AD"
+
+
+@patch("hope.apps.account.actor_snapshot.MicrosoftGraphAPI")
+def test_bulk_release_of_only_vision_managed_groups_makes_no_ad_lookup(
+    mock_graph: Any,
+    vision_managerial_context: dict[str, Any],
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(
+        vision_managerial_context["user"],
+        [Permissions.PAYMENT_VIEW_LIST_MANAGERIAL],
+        vision_managerial_context["business_area"],
+        vision_managerial_context["program1"],
+    )
+
+    response = vision_managerial_context["client"].post(
+        vision_managerial_context["bulk_url"],
+        data={"ids": [vision_managerial_context["group1"].id], "action": PaymentList.Action.REVIEW.value},
+    )
+
+    assert response.status_code == status.HTTP_204_NO_CONTENT
+    mock_graph.assert_not_called()
+
+
+@patch("hope.apps.account.actor_snapshot.MicrosoftGraphAPI")
+def test_bulk_approve_without_permission_makes_no_ad_lookup(
+    mock_graph: Any,
+    managerial_context: dict[str, Any],
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(
+        managerial_context["user"],
+        [Permissions.PAYMENT_VIEW_LIST_MANAGERIAL],
+        managerial_context["business_area"],
+        managerial_context["program1"],
+    )
+
+    response = managerial_context["client"].post(
+        managerial_context["bulk_url"],
+        data={"ids": [managerial_context["group1"].id], "action": PaymentList.Action.APPROVE.value},
+    )
+
+    assert response.status_code == status.HTTP_403_FORBIDDEN
+    mock_graph.assert_not_called()

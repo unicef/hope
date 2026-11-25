@@ -1507,3 +1507,62 @@ def test_close_without_a_comment_raises_when_nothing_was_verified(
 ) -> None:
     with pytest.raises(ValidationError, match="Closure comment is required"):
         FollowUpInstructionService(instruction=approval_instruction).close(user=user, closure_comment=None)
+
+
+@pytest.fixture
+def approver() -> Any:
+    return UserFactory(
+        first_name="Jan", last_name="Kowalski", email="jan.kowalski@example.com", job_title="Stored Title"
+    )
+
+
+@patch("hope.apps.account.actor_snapshot.MicrosoftGraphAPI")
+@patch(
+    "hope.apps.payment.services.follow_up_instruction_service.send_follow_up_instruction_notification_emails_async_task"
+)
+def test_send_for_approval_stores_the_sender_name_and_ad_job_title_with_one_lookup(
+    mock_notify: Any,
+    mock_graph: Any,
+    approver: Any,
+    approval_instruction: FollowUpInstruction,
+    locked_fsp_children: list[PaymentList],
+) -> None:
+    mock_graph.return_value.get_user_data.return_value = {"jobTitle": "Programme Officer"}
+
+    FollowUpInstructionService(instruction=approval_instruction).send_for_approval(approver)
+
+    approval_process = approval_instruction.approval_process.get()
+    assert approval_process.sent_for_approval_by_name == "Jan Kowalski"
+    assert approval_process.sent_for_approval_by_job_title == "Programme Officer"
+    assert approval_process.sent_for_approval_by_job_title_source == "AD"
+    assert mock_graph.return_value.get_user_data.call_count == 1
+
+
+@patch("hope.apps.account.actor_snapshot.MicrosoftGraphAPI")
+@patch(
+    "hope.apps.payment.services.follow_up_instruction_service.send_follow_up_instruction_notification_emails_async_task"
+)
+def test_approve_reaching_the_required_count_stores_the_approver_and_authorization_sender_with_one_lookup(
+    mock_notify: Any,
+    mock_graph: Any,
+    approver: Any,
+    approval_instruction: FollowUpInstruction,
+    in_approval_children: list[PaymentList],
+    first_approval: Approval,
+) -> None:
+    mock_graph.return_value.get_user_data.return_value = {"jobTitle": "Programme Officer"}
+
+    FollowUpInstructionService(instruction=approval_instruction).acceptance_process(
+        PaymentList.Action.APPROVE.value, approver
+    )
+
+    approval_process = first_approval.approval_process
+    approval_process.refresh_from_db()
+    approval = approval_process.approvals.get(created_by=approver)
+    assert approval.created_by_name == "Jan Kowalski"
+    assert approval.created_by_job_title == "Programme Officer"
+    assert approval.created_by_job_title_source == "AD"
+    assert approval_process.sent_for_authorization_by_name == "Jan Kowalski"
+    assert approval_process.sent_for_authorization_by_job_title == "Programme Officer"
+    assert approval_process.sent_for_authorization_by_job_title_source == "AD"
+    assert mock_graph.return_value.get_user_data.call_count == 1

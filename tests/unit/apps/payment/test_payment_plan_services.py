@@ -1,11 +1,14 @@
+from collections.abc import Generator
 from datetime import date
 from decimal import Decimal
+from typing import Any
 from unittest.mock import patch
 
 from django.contrib.contenttypes.models import ContentType
 from django.db.backends.postgresql.psycopg_any import NumericRange
 from flags.models import FlagState
 import pytest
+import requests_mock as requests_mock_lib
 from rest_framework.exceptions import ValidationError
 
 from extras.test_utils.factories import (
@@ -23,6 +26,7 @@ from extras.test_utils.factories.payment import (
     PaymentListSplitFactory,
     PaymentVerificationPlanFactory,
 )
+from hope.apps.account.actor_snapshot import ActorSnapshot
 from hope.apps.payment.services.payment_list_services import PaymentListService
 from hope.apps.payment.services.payment_plan_services import PaymentPlanService
 from hope.contrib.vision.choices import VisionStatus
@@ -1585,3 +1589,156 @@ def test_can_split_is_false_once_a_split_was_sent_to_payment_gateway(accepted_gr
     PaymentListSplitFactory(payment_list=locked_payment_list, sent_to_payment_gateway=True)
 
     assert accepted_group.can_split is False
+
+
+@pytest.fixture
+def approver():
+    return UserFactory(
+        first_name="Jan", last_name="Kowalski", email="jan.kowalski@example.com", job_title="Stored Title"
+    )
+
+
+@pytest.fixture
+def ad_user_lookup(settings: Any) -> Generator[Any, None, None]:
+    settings.AZURE_CLIENT_ID = "client-id"
+    settings.AZURE_CLIENT_SECRET = "client-secret"
+    with requests_mock_lib.Mocker() as adapter:
+        adapter.post(settings.AZURE_TOKEN_URL, json={"access_token": "token"})
+        yield adapter.get(
+            "https://graph.microsoft.com/v1.0/users/", json={"value": [{"jobTitle": "Programme Officer"}]}
+        )
+
+
+@pytest.fixture
+def ad_token_failure(settings: Any) -> Generator[requests_mock_lib.Mocker, None, None]:
+    settings.AZURE_CLIENT_ID = "client-id"
+    settings.AZURE_CLIENT_SECRET = "client-secret"
+    with requests_mock_lib.Mocker() as adapter:
+        adapter.post(settings.AZURE_TOKEN_URL, status_code=500, text="fail")
+        yield adapter
+
+
+@patch("hope.apps.payment.services.payment_plan_services.send_payment_plan_notification_emails_async_task")
+def test_send_for_approval_stores_the_sender_name_and_ad_job_title(
+    mock_notify, locked_payment_plan, approver, ad_user_lookup
+):
+    PaymentPlanService(locked_payment_plan).send_for_approval(approver)
+
+    approval_process = locked_payment_plan.approval_process.get()
+    assert approval_process.sent_for_approval_by == approver
+    assert approval_process.sent_for_approval_by_name == "Jan Kowalski"
+    assert approval_process.sent_for_approval_by_job_title == "Programme Officer"
+    assert approval_process.sent_for_approval_by_job_title_source == "AD"
+    assert ad_user_lookup.call_count == 1
+
+
+@pytest.mark.parametrize(
+    ("plan_fixture", "action", "approval_type"),
+    [
+        pytest.param("group_in_approval", PaymentList.Action.APPROVE.value, Approval.APPROVAL, id="approve"),
+        pytest.param(
+            "group_in_authorization", PaymentList.Action.AUTHORIZE.value, Approval.AUTHORIZATION, id="authorize"
+        ),
+        pytest.param("group_in_review", PaymentList.Action.REVIEW.value, Approval.FINANCE_RELEASE, id="release"),
+        pytest.param("group_in_approval", PaymentList.Action.REJECT.value, Approval.REJECT, id="reject"),
+    ],
+)
+@patch("hope.apps.payment.services.payment_plan_services.send_payment_plan_notification_emails_async_task")
+def test_acceptance_process_stores_the_approver_name_and_ad_job_title(
+    mock_notify, request, plan_fixture, action, approval_type, locked_payment_list, approver
+):
+    payment_plan = request.getfixturevalue(plan_fixture)
+    request.getfixturevalue("ad_user_lookup")
+
+    PaymentPlanService(payment_plan).acceptance_process(action, approver)
+
+    approval = payment_plan.approval_process.get().approvals.get(type=approval_type, created_by=approver)
+    assert approval.created_by_name == "Jan Kowalski"
+    assert approval.created_by_job_title == "Programme Officer"
+    assert approval.created_by_job_title_source == "AD"
+
+
+@patch("hope.apps.payment.services.payment_plan_services.send_payment_plan_notification_emails_async_task")
+def test_approve_reaching_required_number_stores_the_authorization_sender_with_one_lookup(
+    mock_notify, group_in_approval, locked_payment_list, approver, ad_user_lookup
+):
+    PaymentPlanService(group_in_approval).acceptance_process(PaymentList.Action.APPROVE.value, approver)
+
+    approval_process = group_in_approval.approval_process.get()
+    assert approval_process.sent_for_authorization_by == approver
+    assert approval_process.sent_for_authorization_by_name == "Jan Kowalski"
+    assert approval_process.sent_for_authorization_by_job_title == "Programme Officer"
+    assert approval_process.sent_for_authorization_by_job_title_source == "AD"
+    assert ad_user_lookup.call_count == 1
+
+
+@patch("hope.apps.payment.services.payment_plan_services.send_payment_plan_notification_emails_async_task")
+def test_authorize_reaching_required_number_stores_the_release_sender_with_one_lookup(
+    mock_notify, group_in_authorization, locked_payment_list, approver, ad_user_lookup
+):
+    PaymentPlanService(group_in_authorization).acceptance_process(PaymentList.Action.AUTHORIZE.value, approver)
+
+    approval_process = group_in_authorization.approval_process.get()
+    assert approval_process.sent_for_finance_release_by == approver
+    assert approval_process.sent_for_finance_release_by_name == "Jan Kowalski"
+    assert approval_process.sent_for_finance_release_by_job_title == "Programme Officer"
+    assert approval_process.sent_for_finance_release_by_job_title_source == "AD"
+    assert ad_user_lookup.call_count == 1
+
+
+@patch("hope.apps.payment.services.payment_plan_services.send_payment_plan_notification_emails_async_task")
+def test_approve_with_ad_unavailable_succeeds_with_the_stored_job_title(
+    mock_notify, group_in_approval, locked_payment_list, approver, ad_token_failure
+):
+    PaymentPlanService(group_in_approval).acceptance_process(PaymentList.Action.APPROVE.value, approver)
+
+    group_in_approval.refresh_from_db()
+    approval_process = group_in_approval.approval_process.get()
+    approval = approval_process.approvals.get(type=Approval.APPROVAL)
+    assert group_in_approval.status == PaymentPlan.Status.IN_AUTHORIZATION
+    assert approval.created_by_name == "Jan Kowalski"
+    assert approval.created_by_job_title == "Stored Title"
+    assert approval.created_by_job_title_source == "USER_RECORD"
+    assert approval_process.sent_for_authorization_by_job_title == "Stored Title"
+    assert approval_process.sent_for_authorization_by_job_title_source == "USER_RECORD"
+
+
+@patch("hope.apps.payment.services.payment_plan_services.send_payment_plan_notification_emails_async_task")
+def test_vision_release_stores_the_given_release_actor_snapshot(mock_notify, group_with_review_vision_plans):
+    snapshot = ActorSnapshot(name="Vision Creator", job_title="Finance Officer", job_title_source="AD")
+
+    PaymentPlanService(group_with_review_vision_plans).release_from_vision(snapshot)
+
+    approval = group_with_review_vision_plans.approval_process.get().approvals.get(type=Approval.FINANCE_RELEASE)
+    assert approval.created_by_name == "Vision Creator"
+    assert approval.created_by_job_title == "Finance Officer"
+    assert approval.created_by_job_title_source == "AD"
+
+
+@patch("hope.apps.payment.services.payment_plan_services.send_payment_plan_notification_emails_async_task")
+def test_vision_release_without_a_snapshot_looks_up_the_first_list_creator(
+    mock_notify, group_with_review_vision_plans, locked_payment_list, ad_user_lookup
+):
+    PaymentPlanService(group_with_review_vision_plans).release_from_vision()
+
+    approval = group_with_review_vision_plans.approval_process.get().approvals.get(type=Approval.FINANCE_RELEASE)
+    assert approval.created_by == locked_payment_list.created_by
+    assert approval.created_by_job_title == "Programme Officer"
+    assert approval.created_by_job_title_source == "AD"
+    assert ad_user_lookup.call_count == 1
+
+
+@pytest.fixture
+def vision_group_created_by_approver(group_with_review_vision_plans, approver):
+    group_with_review_vision_plans.created_by = approver
+    group_with_review_vision_plans.save(update_fields=["created_by"])
+    return group_with_review_vision_plans
+
+
+def test_vision_release_actor_is_the_plan_creator_when_set(vision_group_created_by_approver, approver):
+    assert PaymentPlanService.vision_release_actor(vision_group_created_by_approver) == approver
+
+
+def test_vision_release_actor_refuses_a_plan_without_payment_lists(open_group):
+    with pytest.raises(ValidationError, match="Every Payment List must be in review"):
+        PaymentPlanService.vision_release_actor(open_group)

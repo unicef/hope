@@ -1,14 +1,18 @@
+import AccountTreeIcon from '@mui/icons-material/AccountTree';
 import AssessmentIcon from '@mui/icons-material/Assessment';
 import AssignmentIcon from '@mui/icons-material/Assignment';
+import CloudSyncIcon from '@mui/icons-material/CloudSync';
 import CompareArrowsIcon from '@mui/icons-material/CompareArrows';
+import FactCheckIcon from '@mui/icons-material/FactCheck';
 import FeedbackIcon from '@mui/icons-material/Feedback';
 import GpsFixedIcon from '@mui/icons-material/GpsFixed';
+import GroupsIcon from '@mui/icons-material/Groups';
 import HomeIcon from '@mui/icons-material/Home';
-import LinkIcon from '@mui/icons-material/Link';
-import ListAltIcon from '@mui/icons-material/ListAlt';
+import HubIcon from '@mui/icons-material/Hub';
+import ManageAccountsIcon from '@mui/icons-material/ManageAccounts';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
-import PersonAddIcon from '@mui/icons-material/PersonAdd';
-import SendIcon from '@mui/icons-material/Send';
+import PaymentsIcon from '@mui/icons-material/Payments';
+import PolicyIcon from '@mui/icons-material/Policy';
 import VerifiedUserIcon from '@mui/icons-material/VerifiedUser';
 import { Box, Typography } from '@mui/material';
 import type { FC, ReactElement } from 'react';
@@ -73,24 +77,25 @@ const Mission = styled.p`
 `;
 
 const capabilities: { icon: ReactElement; label: string }[] = [
-  { icon: <PersonAddIcon />, label: 'Collect beneficiary data' },
-  { icon: <LinkIcon />, label: 'Associate data with cash programmes' },
-  { icon: <GpsFixedIcon />, label: 'Create target population' },
-  { icon: <ListAltIcon />, label: 'Manage payment lists' },
   {
-    icon: <SendIcon />,
-    label: 'Send payment lists to Financial Service Providers (FSPs)',
+    icon: <ManageAccountsIcon />,
+    label: 'Role-Based Access and User Management',
   },
-  { icon: <CompareArrowsIcon />, label: 'Reconcile payments' },
+  { icon: <AccountTreeIcon />, label: 'Programme Management' },
+  { icon: <GroupsIcon />, label: 'Beneficiary Data Management' },
+  { icon: <CloudSyncIcon />, label: 'Online and Offline Data Collection' },
   {
-    icon: <VerifiedUserIcon />,
-    label:
-      'Triangulate payment verification information directly from beneficiaries',
+    icon: <FactCheckIcon />,
+    label: 'Data Validation, Quality Assurance, and Deduplication',
   },
-  {
-    icon: <FeedbackIcon />,
-    label: 'Handle grievances and feedback, as well as reporting',
-  },
+  { icon: <GpsFixedIcon />, label: 'Targeting and Eligibility Management' },
+  { icon: <PaymentsIcon />, label: 'Cash Transfer Management' },
+  { icon: <CompareArrowsIcon />, label: 'Payment Reconciliation' },
+  { icon: <VerifiedUserIcon />, label: 'Payment Verification' },
+  { icon: <FeedbackIcon />, label: 'Grievance and Feedback Management' },
+  { icon: <AssessmentIcon />, label: 'Reporting and Analytics' },
+  { icon: <HubIcon />, label: 'Interoperability and Integrations' },
+  { icon: <PolicyIcon />, label: 'Audit, Compliance, and Monitoring' },
 ];
 
 interface ComponentLink {
@@ -126,8 +131,8 @@ const componentGroups: ComponentGroup[] = [
     icon: <AssessmentIcon />,
     items: [
       { name: 'Report', host: 'reporting.hope.unicef.org' },
-      { name: 'Dashboard', host: 'dashboard.hope.unicef.org' },
-      { name: 'Cash Dashboard', host: 'cash.unicef.org' },
+      { name: 'Internal Dashboard', host: 'dashboard.hope.unicef.org' },
+      { name: 'Public Dashboard', host: 'cash.unicef.org' },
     ],
   },
 ];
@@ -191,7 +196,7 @@ export const LandingPage: FC = () => (
           component="h2"
           sx={{ color: NAVY_BLUE, fontWeight: 400, mb: 4 }}
         >
-          HOPE can
+          Key Capabilities of HOPE
         </Typography>
         <Box
           component="ul"

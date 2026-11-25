@@ -15,7 +15,7 @@ from hope.models import FollowUpInstruction, PaymentList, PaymentPlan, User
 
 pytestmark = pytest.mark.django_db
 
-migration_module = importlib.import_module("hope.apps.payment.migrations.0085_migration")
+migration_module = importlib.import_module("hope.apps.payment.migrations.0087_migration")
 
 
 @pytest.fixture
@@ -27,7 +27,7 @@ def schema_editor() -> BaseDatabaseSchemaEditor:
 def historical_apps(settings: Any) -> Apps:
     """The models the data step runs with: 0084 adds the owner fields, the plan columns are dropped only in 0086."""
     settings.MIGRATION_MODULES = {}
-    state = MigrationLoader(connection).project_state(("payment", "0084_migration"))
+    state = MigrationLoader(connection).project_state(("payment", "0086_migration"))
     with connection.cursor() as cursor:
         cursor.execute(
             'ALTER TABLE "payment_paymentplan" ADD COLUMN "dispersion_start_date" date NULL, '

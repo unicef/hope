@@ -13,7 +13,7 @@ from hope.apps.core.tasks_schedules import TASKS_SCHEDULES
 
 pytestmark = pytest.mark.django_db
 
-migration = import_module("hope.apps.payment.migrations.0088_migration")
+migration = import_module("hope.apps.payment.migrations.0090_migration")
 OWNER_ID = "00000000-0000-0000-0000-000000000001"
 ACTION_RENAMES = tuple((old, new) for old, new in migration.TASK_RENAMES.items() if old.endswith("_async_task_action"))
 

@@ -10,7 +10,7 @@ import pytest
 from extras.test_utils.factories import PaymentListFactory, PaymentPlanFactory, ProgramCycleFactory
 from hope.models import PaymentList, PaymentPlan
 
-migration_module = importlib.import_module("hope.apps.payment.migrations.0085_migration")
+migration_module = importlib.import_module("hope.apps.payment.migrations.0087_migration")
 
 
 PlanRow = Callable[..., dict[str, Any]]
@@ -227,7 +227,7 @@ def test_instruction_child_goes_with_its_source_plan_and_does_not_split_the_grou
 @pytest.fixture
 def historical_apps(settings: Any) -> Apps:
     settings.MIGRATION_MODULES = {}
-    state = MigrationLoader(connection).project_state(("payment", "0084_migration"))
+    state = MigrationLoader(connection).project_state(("payment", "0086_migration"))
     with connection.cursor() as cursor:
         cursor.execute(
             'ALTER TABLE "payment_paymentplan" ADD COLUMN "financial_service_provider_id" uuid NULL, '

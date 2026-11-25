@@ -3549,6 +3549,43 @@ def test_group_workflow_actions_without_permission_return_403(
     assert group.status == initial_status
 
 
+@pytest.fixture
+def group_approved_by_user_renamed_afterwards(group_in_approval_with_plan: Any, user: Any) -> Any:
+    user.first_name = "Jan"
+    user.last_name = "Kowalski"
+    user.job_title = "Stored Title"
+    user.save(update_fields=["first_name", "last_name", "job_title"])
+    with (
+        patch("hope.apps.account.actor_snapshot.MicrosoftGraphAPI") as mock_graph,
+        patch("hope.apps.payment.services.payment_plan_services.send_payment_plan_notification_emails_async_task"),
+    ):
+        mock_graph.return_value.get_user_data.return_value = {"jobTitle": "Programme Officer"}
+        PaymentPlanService(group_in_approval_with_plan).acceptance_process(PaymentList.Action.APPROVE.value, user)
+    user.first_name = "Renamed"
+    user.last_name = "Person"
+    user.job_title = "New Title"
+    user.save(update_fields=["first_name", "last_name", "job_title"])
+    return group_in_approval_with_plan
+
+
+def test_retrieve_detail_keeps_the_approval_history_recorded_at_the_time_after_a_rename(
+    client: Any,
+    user: Any,
+    business_area: Any,
+    program: Any,
+    group_approved_by_user_renamed_afterwards: Any,
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(user, [Permissions.PM_PAYMENT_PLAN_VIEW_DETAIL], business_area, program=program)
+
+    response = client.get(_detail_url(business_area.slug, program.code, group_approved_by_user_renamed_afterwards.id))
+
+    assert response.status_code == status.HTTP_200_OK
+    approval_process = response.json()["approval_process"][0]
+    assert approval_process["sent_for_authorization_by"] == "Jan Kowalski (Programme Officer)"
+    assert approval_process["actions"]["approval"][0]["info"] == "Approved by Jan Kowalski (Programme Officer)"
+
+
 def test_send_group_for_approval_with_permission_returns_200(
     client: Any,
     user: Any,
