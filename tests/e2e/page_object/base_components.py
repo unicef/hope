@@ -18,7 +18,6 @@ class BaseComponents(Common):
     global_program_filter = 'button[data-cy="global-program-filter"]'
     menu_user_profile = 'button[data-cy="menu-user-profile"]'
     side_nav = 'div[data-cy="side-nav"]'
-    nav_country_dashboard = 'a[data-cy="nav-Country Dashboard"]'
     nav_registration_data_import = 'a[data-cy="nav-Registration Data Import"]'
     nav_programme_population = 'a[data-cy="nav-{}"]'
     nav_household_members = 'a[data-cy="nav-{}"]'
@@ -38,9 +37,6 @@ class BaseComponents(Common):
     nav_grievance_tickets = 'a[data-cy="nav-Grievance Tickets"]'
     nav_grievance_dashboard = 'a[data-cy="nav-Grievance Dashboard"]'
     nav_feedback = 'a[data-cy="nav-Feedback"]'
-    nav_accountability = 'a[data-cy="nav-Accountability"]'
-    nav_communication = 'a[data-cy="nav-Communication"]'
-    nav_surveys = 'a[data-cy="nav-Surveys"]'
     nav_programme_users = 'a[data-cy="nav-Programme Users"]'
     nav_activity_log = 'a[data-cy="nav-Activity Log"]'
     nav_resources_knowledge_base = 'a[data-cy="nav-resources-Knowledge Base"]'
@@ -50,8 +46,6 @@ class BaseComponents(Common):
     nav_program_log = 'a[data-cy="nav-Programme Log"]'
     main_content = 'div[data-cy="main-content"]'
     page_header_title = 'h5[data-cy="page-header-title"]'
-    drawer_items = 'div[data-cy="drawer-items"]'
-    drawer_inactive_subheader = 'div[data-cy="program-inactive-subheader"]'
     menu_item_clear_cache = 'li[data-cy="menu-item-clear-cache"]'
     global_program_filter_search_input = 'input[data-cy="search-input-gpf"]'
     global_program_filter_search_button = 'button[data-cy="search-icon"]'
@@ -106,9 +100,6 @@ class BaseComponents(Common):
         parent = self.wait_for(f'a[data-cy="nav-{name}"]')
         if parent.get_attribute("aria-expanded") != "true":
             parent.click()
-
-    def get_nav_country_dashboard(self) -> WebElement:
-        return self.wait_for(self.nav_country_dashboard)
 
     def get_nav_registration_data_import(self) -> WebElement:
         return self.wait_for(self.nav_registration_data_import)
@@ -167,15 +158,6 @@ class BaseComponents(Common):
     def get_nav_feedback(self) -> WebElement:
         return self.wait_for(self.nav_feedback)
 
-    def get_nav_accountability(self) -> WebElement:
-        return self.wait_for(self.nav_accountability)
-
-    def get_nav_communication(self) -> WebElement:
-        return self.wait_for(self.nav_communication)
-
-    def get_nav_surveys(self) -> WebElement:
-        return self.wait_for(self.nav_surveys)
-
     def get_nav_programme_users(self) -> WebElement:
         return self.wait_for(self.nav_programme_users)
 
@@ -194,9 +176,6 @@ class BaseComponents(Common):
     def get_nav_resources_release_note(self) -> WebElement:
         return self.wait_for(self.nav_resources_release_note)
 
-    def get_drawer_items(self) -> WebElement:
-        return self.wait_for(self.drawer_items)
-
     def select_global_program_filter(self, name: str) -> None:
         self.get_global_program_filter().click()
         self.get_global_program_filter_search_input().clear()
@@ -212,9 +191,6 @@ class BaseComponents(Common):
         self.select_listbox_element(name)
         # Switching programmes navigates away; wait for the new page so callers don't act on the old one.
         self.assert_page_header_title("Programme Management" if name == "All Programmes" else name)
-
-    def get_drawer_inactive_subheader(self, timeout: int = Common.DEFAULT_TIMEOUT) -> WebElement:
-        return self.wait_for(self.drawer_inactive_subheader, timeout=timeout)
 
     def get_menu_item_clear_cache(self) -> WebElement:
         return self.wait_for(self.menu_item_clear_cache)

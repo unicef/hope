@@ -10,12 +10,12 @@ tags:
 The migrations production had applied when the baseline was written (361 files in 19 first-party
 apps) were replaced by baseline migrations: one to three files per app that create that schema
 directly. Each baseline file lists the old migrations it stands for in `replaces`, and the old files
-are deleted. The 16 newer migrations, which only dev and staging had applied, stay as ordinary files
-that depend on the baseline.
+are deleted. The 16 newer migrations, which only dev and staging had applied at that point, stay as
+ordinary files that depend on the baseline.
 
 - A database that has the replaced migrations applied runs **nothing of the baseline**: `migrate`
   records the baseline names in `django_migrations` and then applies the ordinary migrations the
-  database lacks. On production those are the 16 kept ones, on dev and staging none.
+  database lacks, as in any release. On production those include the 16 kept ones.
 - An empty database runs the baseline and the migrations above it, and ends up with the same schema
   and seed rows the old chain produced.
 
@@ -32,8 +32,8 @@ Each of these fails silently or destroys data when broken.
   cleanup is a separate, later release (see [Rollout](#rollout)).
 - **Do not give a migration a name listed in `replaces`.** Every existing database has that name
   recorded as applied, so the migration would never run. `makemigrations` continues above the highest
-  number on disk by itself (`payment/0084_migration.py` is the next one), and
-  `tests/unit/apps/core/test_migration_baseline.py` fails when a name collides.
+  number on disk by itself, and `tests/unit/apps/core/test_migration_baseline.py` fails when a name
+  collides.
 - **Do not add a baseline file without `replaces`.** It would execute on production.
 - **Do not target `migrate` at a single app or migration on an empty database**, and do not reuse a
   database whose first `migrate` was interrupted. Rebuild it instead (see
@@ -150,7 +150,7 @@ A branch cut before the baseline has migrations that depend on deleted files.
 
 | Phase | What happens | Done when |
 |---|---|---|
-| Baseline | The baseline is merged to `develop` and released to staging and production the usual way. No migration freeze and no separate release come first. | Each environment has the baseline names in `django_migrations`. Dev and staging ran nothing, production ran only the kept migrations. |
+| Baseline | The baseline is merged to `develop` and released to staging and production the usual way. No migration freeze and no separate release come first. | Each environment has the baseline names in `django_migrations`. Each one ran only the ordinary migrations it lacked. |
 | Cleanup | A separate, later release removes `replaces`, the guard and the `migrate` override, and runs `migrate <app> --prune` for the 19 apps. | No old first-party names are left in `django_migrations`. |
 
 - Each environment deploys one branch (production `master`, staging `staging`, dev `develop`), so the

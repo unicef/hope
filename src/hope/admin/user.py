@@ -111,6 +111,9 @@ class ADUSerMixin:
                 user_args = build_arg_dict_from_dict(user_data, DJANGO_USER_MAP)
                 for field, value in user_args.items():
                     setattr(user, field, value or "")
+                job_title = user_data.get("jobTitle")
+                if job_title is not None:
+                    user.job_title = job_title
                 user.save()
                 break
             except Http404:

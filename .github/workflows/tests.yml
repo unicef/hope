@@ -36,32 +36,26 @@ jobs:
             libgdk-pixbuf-2.0-0 \
             libpango-1.0-0 \
             libpangocairo-1.0-0 \
-            shared-mime-info \
-            wkhtmltopdf
+            shared-mime-info
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v4
 
-      - name: Install Docker Compose
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y docker-compose
-
       - name: Launch services with Docker Compose
         run: |
-          docker-compose -f development_tools/compose.yml down -v
-          docker-compose -f development_tools/compose.yml up --build -d
+          docker compose -f development_tools/compose.yml down -v
+          docker compose -f development_tools/compose.yml up --build -d
 
       - name: Wait for Postgres to be ready
         run: |
-          until docker exec $(docker-compose -f development_tools/compose.yml ps -q db) pg_isready -U postgres; do
+          until docker exec $(docker compose -f development_tools/compose.yml ps -q db) pg_isready -U postgres; do
             echo "Waiting for Postgres..."
             sleep 2
           done
 
       - name: Wait for Redis to be ready
         run: |
-          until docker exec $(docker-compose -f development_tools/compose.yml  ps -q redis) redis-cli ping | grep PONG; do
+          until docker exec $(docker compose -f development_tools/compose.yml  ps -q redis) redis-cli ping | grep PONG; do
             echo "Waiting for Redis..."
             sleep 2
           done
@@ -77,7 +71,7 @@ jobs:
             sleep 5
           done
           echo "Elasticsearch did not become ready" >&2
-          docker-compose -f development_tools/compose.yml logs elasticsearch || true
+          docker compose -f development_tools/compose.yml logs elasticsearch || true
           exit 1
 
       - name: Install Python & UV
@@ -135,7 +129,7 @@ jobs:
 
       - name: Tear down Docker Compose
         if: always()
-        run: docker-compose -f development_tools/compose.yml down --volumes
+        run: docker compose -f development_tools/compose.yml down --volumes
   migrations:
     name: Migrations on an empty database
     runs-on: ubuntu-24.04
@@ -242,31 +236,25 @@ jobs:
             libgdk-pixbuf-2.0-0 \
             libpango-1.0-0 \
             libpangocairo-1.0-0 \
-            shared-mime-info \
-            wkhtmltopdf
+            shared-mime-info
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v4
 
-      - name: Install Docker Compose
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y docker-compose
-
       - name: Launch services with Docker Compose
         run: |
-          docker-compose -f development_tools/compose.yml -f development_tools/compose.ci.yml up -d
+          docker compose -f development_tools/compose.yml -f development_tools/compose.ci.yml up -d
 
       - name: Wait for Postgres to be ready
         run: |
-          until docker exec $(docker-compose -f development_tools/compose.yml ps -q db) pg_isready -U postgres; do
+          until docker exec $(docker compose -f development_tools/compose.yml ps -q db) pg_isready -U postgres; do
             echo "Waiting for Postgres..."
             sleep 2
           done
 
       - name: Wait for Redis to be ready
         run: |
-          until docker exec $(docker-compose -f development_tools/compose.yml ps -q redis) redis-cli ping | grep PONG; do
+          until docker exec $(docker compose -f development_tools/compose.yml ps -q redis) redis-cli ping | grep PONG; do
             echo "Waiting for Redis..."
             sleep 2
           done
@@ -282,7 +270,7 @@ jobs:
             sleep 5
           done
           echo "Elasticsearch did not become ready" >&2
-          docker-compose -f development_tools/compose.yml logs elasticsearch || true
+          docker compose -f development_tools/compose.yml logs elasticsearch || true
           exit 1
 
       - name: Set up Bun
@@ -365,7 +353,7 @@ jobs:
 
       - name: Tear down Docker Compose
         if: always()
-        run: docker-compose -f development_tools/compose.yml down --volumes
+        run: docker compose -f development_tools/compose.yml down --volumes
   selenium-result:
     # Keeps a single "Selenium tests" check for branch protection, whatever the number of shards.
     name: Selenium tests
