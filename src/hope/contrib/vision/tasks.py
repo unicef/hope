@@ -98,7 +98,12 @@ def notify_payment_plan_closure_to_vision_async_task_action(job: AsyncJob) -> No
     Skip plans that are not closed or were never sent to Vision. Send the plan's total delivered
     quantity as the total amount reconciled and its status date as the closure date.
     """
-    payment_plan = PaymentPlan.objects.get(pk=job.config["payment_plan_id"])
+    payment_plan = PaymentPlan.objects.select_related(
+        "business_area",
+        "currency",
+        "financial_service_provider",
+        "program_cycle__program__data_collecting_type__payee_type",
+    ).get(pk=job.config["payment_plan_id"])
     if not VisionService.can_notify_vision_of_closure(payment_plan):
         return
     VisionAPI().notify_payment_plan_closure(

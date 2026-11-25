@@ -500,7 +500,17 @@ def test_notify_payment_plan_closure_posts_reconciliation_to_payment_plan_endpoi
     assert response == {"status": "ok"}
     assert mock_post.call_args.args[0] == "https://test.example.com/ps/ezcash/PaymentPlan"
     assert mock_post.call_args.args[1] == {
-        "visionPp": "V12345",
+        "businessArea": "FI01",
+        "vendorNumber": "V100004",
+        "payplanSno": "PP-CLOSURE",
+        "payplanDesc": "Monthly payment plan testing the content length",
+        "currency": "USD",
+        "authAmt": "10000.00",
+        "authAmtUsd": "10000.00",
+        "exchangeRate": "1.25000000",
+        "headVendor": "Head Vendor Name",
+        "glCode": "7700410",
+        "visionPayplanSno": "V12345",
         "reconAmt": "8500.50",
         "reconDate": "20261109",
     }
@@ -543,11 +553,8 @@ def test_notify_payment_plan_closure_saves_error_response_in_internal_data(
     entry = payment_plan.vision_data["log"][0]
     assert entry["type"] == VisionLogEntryType.CLOSURE_NOTIFICATION.value
     assert entry["response"] == {"error": "closure endpoint failed"}
-    assert entry["payload"] == {
-        "visionPp": "V12345",
-        "reconAmt": "8500.50",
-        "reconDate": "20261109",
-    }
+    assert entry["payload"] == mock_post.call_args.args[1]
+    assert entry["payload"]["payplanSno"] == "PP-CLOSURE-FAIL"
     # A failed closure notification must not change the Vision workflow status.
     assert payment_plan.vision_status == VisionStatus.RELEASED.value
 
@@ -567,7 +574,7 @@ def test_notify_payment_plan_closure_without_vision_id_sends_empty_value(
             total_amount_reconciled=Decimal("8500.50"),
             closure_date=datetime(2026, 11, 9, 10, 30, tzinfo=timezone.utc),
         )
-    assert mock_post.call_args.args[1]["visionPp"] == ""
+    assert mock_post.call_args.args[1]["visionPayplanSno"] == ""
     closed_payment_plan_without_vision_id.refresh_from_db(fields=["internal_data"])
     entry = closed_payment_plan_without_vision_id.vision_data["log"][0]
     assert entry["type"] == VisionLogEntryType.CLOSURE_NOTIFICATION.value

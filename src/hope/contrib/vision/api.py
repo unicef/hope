@@ -216,19 +216,23 @@ class VisionAPI(BaseAPI):
     ) -> dict:
         """Post the closure reconciliation to Vision's PaymentPlan endpoint.
 
-        Send the Vision Payment Plan code (``visionPp``), the total amount reconciled
-        (``reconAmt``), and the reconciliation date (``reconDate``) in YYYYMMDD format.
+        Extend the Payment Plan creation payload with the Vision Payment Plan code (``visionPayplanSno``),
+        the total amount reconciled (``reconAmt``), and the reconciliation date (``reconDate``)
+        in YYYYMMDD format.
         The attempt, including its response, is logged under the plan's Vision log in ``internal_data``;
         a failure raises and never changes Vision status.
         """
         vision_payment_plan_id = str(payment_plan.vision_data.get("vision_id") or "")
         # Total delivered quantity is a Decimal, which is not JSON-serializable by the
         # underlying requests client; Vision expects it as a string, like authAmt.
-        payload = {
-            "visionPp": vision_payment_plan_id,
-            "reconAmt": str(total_amount_reconciled),
-            "reconDate": closure_date.strftime("%Y%m%d"),
-        }
+        payload = dict(PaymentPlanPayloadSerializer(payment_plan).data)
+        payload.update(
+            {
+                "visionPayplanSno": vision_payment_plan_id,
+                "reconAmt": str(total_amount_reconciled),
+                "reconDate": closure_date.strftime("%Y%m%d"),
+            }
+        )
         # TODO: Add any further closure payload fields once Vision defines them.
         return self._post_payment_plan(
             payment_plan,
