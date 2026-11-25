@@ -55,6 +55,11 @@ def role() -> Role:
     return RoleFactory(name="Some Role")
 
 
+@pytest.fixture
+def user_with_stored_job_title() -> User:
+    return UserFactory(azure_id=AZURE_ID, email="old@example.com", job_title="Old Title")
+
+
 # LoadUsersForm
 def test_clean_emails_accepts_space_separated_valid_addresses() -> None:
     form = LoadUsersForm(data={"emails": "one@example.com two@example.com"})
@@ -103,6 +108,26 @@ def test_sync_ad_data_updates_user_fields_from_graph(admin: UserAdmin) -> None:
     assert user.email == "new@example.com"
     assert user.first_name == "New"
     assert str(user.azure_id) == AZURE_ID_NEW
+
+
+@pytest.mark.parametrize(
+    ("graph_data", "expected_job_title"),
+    [
+        pytest.param(
+            {"mail": "old@example.com", "id": AZURE_ID, "jobTitle": "New Title"}, "New Title", id="ad-has-job-title"
+        ),
+        pytest.param({"mail": "old@example.com", "id": AZURE_ID}, "Old Title", id="ad-without-job-title"),
+    ],
+)
+def test_sync_ad_data_arrange_ad_job_title_act_sync_assert_job_title_refreshed(
+    admin: UserAdmin, user_with_stored_job_title: User, graph_data: dict[str, str], expected_job_title: str
+) -> None:
+    with patch(GRAPH_PATH) as graph:
+        graph.return_value.get_user_data.return_value = graph_data
+        admin._sync_ad_data(user_with_stored_job_title)
+
+    user_with_stored_job_title.refresh_from_db()
+    assert user_with_stored_job_title.job_title == expected_job_title
 
 
 def test_sync_ad_data_raises_http404_when_user_missing_everywhere(admin: UserAdmin) -> None:

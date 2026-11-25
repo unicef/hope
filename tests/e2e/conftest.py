@@ -23,7 +23,6 @@ from selenium.webdriver import Chrome
 from selenium.webdriver.chrome.options import Options
 
 from e2e.page_object.admin_panel.admin_panel import AdminPanel
-from e2e.page_object.country_dashboard.country_dashboard import CountryDashboard
 from e2e.page_object.filters import Filters
 from e2e.page_object.generic_import.generic_import import GenericImport
 from e2e.page_object.grievance.details_feedback_page import FeedbackDetailsPage
@@ -562,11 +561,6 @@ def page_program_cycle_details(request: FixtureRequest, browser: Chrome) -> Prog
 
 
 @pytest.fixture
-def page_country_dashboard(request: FixtureRequest, browser: Chrome) -> CountryDashboard:
-    return CountryDashboard(browser)
-
-
-@pytest.fixture
 def page_generic_import(request: FixtureRequest, browser: Chrome) -> GenericImport:
     return GenericImport(browser)
 
@@ -602,15 +596,6 @@ def clear_downloaded_files(download_path: str) -> None:
     yield
     for file in os.listdir(download_path):
         os.remove(os.path.join(download_path, file))
-
-
-@pytest.fixture
-def change_super_user(business_area: BusinessArea) -> None:
-    user = User.objects.filter(email="test@example.com").first()
-    user.partner = Partner.objects.get(name="UNHCR")
-    user.partner.allowed_business_areas.add(business_area)
-    user.save()
-    return user
 
 
 @pytest.fixture(autouse=True)
