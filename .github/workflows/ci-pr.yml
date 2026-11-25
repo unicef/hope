@@ -18,26 +18,26 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  unit-tests:
-    # Required check is "tests / Unit tests"; the "tests" prefix comes from this name.
-    name: tests
-    uses: ./.github/workflows/unit-tests.yml
-    secrets: inherit
-  lint:
-    uses: ./.github/workflows/lint.yml
-  mypy:
-    uses: ./.github/workflows/mypy.yml
-  pragma:
-    uses: ./.github/workflows/pragma.yml
   generate-types:
     uses: ./.github/workflows/generate-types.yml
   frontend:
     needs: [generate-types]
     uses: ./.github/workflows/frontend-checks.yml
+  lint:
+    uses: ./.github/workflows/lint.yml
+  mypy:
+    uses: ./.github/workflows/mypy.yml
+  unit-tests:
+    # Required check is "tests / Unit tests"; the "tests" prefix comes from this name.
+    name: tests
+    uses: ./.github/workflows/unit-tests.yml
+    secrets: inherit
   tests:
     needs: [generate-types]
     uses: ./.github/workflows/tests.yml
     secrets: inherit
+  pragma:
+    uses: ./.github/workflows/pragma.yml
   build:
     needs: [generate-types]
     uses: ./.github/workflows/build-and-push.yml
