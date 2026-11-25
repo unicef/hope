@@ -8,6 +8,12 @@ tags:
 
 # Collision Detection Configuration
 
+Sources:
+[`collision_detectors.py`](https://github.com/unicef/hope/blob/develop/src/hope/apps/program/collision_detectors.py),
+[`models/program.py`](https://github.com/unicef/hope/blob/develop/src/hope/models/program.py),
+[`admin/program.py`](https://github.com/unicef/hope/blob/develop/src/hope/admin/program.py),
+[`IndividualBioData.tsx`](https://github.com/unicef/hope/blob/develop/src/frontend/src/components/population/IndividualBioData/IndividualBioData.tsx)
+
 Collision detection is configured per programme. This page is for HOPE administrators who
 have access to the Django Admin and need to enable, review, or disable the feature.
 
@@ -26,25 +32,15 @@ For the implementation, see [Collision Detection](../guide-dev/collision-detecti
    | `hope.apps.program.collision_detectors.NoopCollisionDetector` | Detection is off. This is the default. |
    | `hope.apps.program.collision_detectors.IdentificationKeyCollisionDetector` | Incoming households are matched against existing households by identification key. |
 
-5. In the **Identification key individual label** field, optionally enter the label that the
-   user interface should show for the individual identification key. Leave it blank to use
-   the default label, **Identification Key**.
+5. In the **Identification key individual label** field, optionally enter up to 255
+   characters. HOPE shows this label for the individual identification key in the **Bio
+   Data** section of the individual details page:
+   `https://<HOPE host>/<business area>/programs/<programme id>/population/individuals/<individual id>`.
+   Leave it blank to use the default label, **Identification Key**.
 6. Save the programme.
 
-The field is a strategy field: it stores the fully qualified class name of the selected
-detector. The choice list comes from the detector registry, so only registered detectors can
-be selected. Accessing the field on a programme returns a detector instance constructed with
-that programme as its context.
-
-## Settings reference
-
-| Field | Type | Default | Effect |
-|---|---|---|---|
-| `collision_detector` | Strategy field (registered class) | `hope.apps.program.collision_detectors.NoopCollisionDetector` | Selects the detector used for the programme. The default detector performs no matching, so existing behaviour is unchanged. |
-| `identification_key_individual_label` | Text, up to 255 characters, optional | Empty | Label shown for the individual identification key in the user interface. When empty, the interface shows **Identification Key**. |
-
-There is no environment variable or Constance setting for collision detection. The setting
-is stored on the programme record.
+There is no environment variable or Constance setting for collision detection. Both settings
+are stored on the programme record.
 
 ## Before you enable detection
 
@@ -90,7 +86,6 @@ imports are merged automatically once the push is completed.
 - In the **Household** section of the Django Admin, open the household and review the
   read-only **Extra RDIs** field. It lists the registration data imports that collided with
   the household.
-- In the population, check that only one household exists for the identification key.
 - Review the individuals that are no longer in the household. They should be withdrawn with
   the relationship **Removed by collision**.
 - The **Extra RDIs** household attribute is also available to targeting queries and XLSX
@@ -112,9 +107,15 @@ Cannot merge households with individuals with no identification key
 
 at least one member of the existing household or of the incoming household has no
 identification key. The merge transaction rolls back and the registration data import is not
-marked as merged. Populate the missing keys, then run the merge again. For a Country
-Workspace import this happens during the automatic merge: the import ends in **Merge error**
-and the programme's merge queue stops until that import is retried or reset.
+merged. Populate the missing keys, then run the merge again.
+
+What happens next depends on the source of the import:
+
+- **XLSX, Kobo, or ingestion API nested upload**: a user started the merge, so the import
+  ends in **Merge error** and nothing else is blocked.
+- **Country Workspace push**: the merge runs automatically, so the import ends in **Merge
+  error** and the programme's merge queue stops. Later Country Workspace imports of the
+  programme wait until that import is retried or reset.
 
 If a household has no identification key at all, it is accepted without collision
 processing. Correct the key in the source data and import the household again if matching is

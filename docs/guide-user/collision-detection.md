@@ -8,6 +8,10 @@ tags:
 
 # Collision Detection
 
+Sources:
+[`collision_detectors.py`](https://github.com/unicef/hope/blob/develop/src/hope/apps/program/collision_detectors.py),
+[`rdi_merge.py`](https://github.com/unicef/hope/blob/develop/src/hope/apps/registration_data/tasks/rdi_merge.py)
+
 Collision detection keeps one household record per real household when registration data
 contains a household that already exists in the programme population. HOPE matches the
 incoming household against existing households by **identification key**. When the keys
@@ -21,11 +25,14 @@ the detector separately for each programme; see
 
 - Matching is scoped to a single programme. A household in another programme never collides
   with the incoming record.
-- The match uses the household **identification key**. HOPE compares the key on the incoming
-  household with the keys of households already in the programme population.
+- The match uses the household **identification key**: the ID the household has in the
+  registration system it comes from, for example a social registry household number or a
+  family card number. HOPE compares the key on the incoming household with the keys of
+  households already in the programme population.
 - A household without an identification key never collides. The ingestion API rejects an
   empty key; leave the field out or send `null` when there is no key.
-- Individual members also carry an identification key. HOPE uses it to decide which members
+- Individual members also carry an identification key, for example a national ID number or
+  the person's ID in the source registration system. HOPE uses it to decide which members
   the incoming household keeps, adds, or removes during a merge.
 - Within a programme, an identification key must be unique among merged, non-removed
   households. HOPE enforces this with a database constraint.
@@ -49,7 +56,7 @@ full merge described below runs when the import is merged.
 |---|---|
 | XLSX or Kobo import | When a user merges the import |
 | Ingestion API nested upload | When a user merges the import; it waits in review until then |
-| Country Workspace push, including LAX pushes | Automatically after the push is completed; the imports of a programme are merged one at a time, oldest first |
+| Country Workspace push | Automatically after the push is completed; the imports of a programme are merged one at a time, oldest first |
 
 ## What happens during a full merge
 
@@ -61,9 +68,8 @@ destination and the incoming household as the source:
    The incoming data updates the existing member. Documents, identities, and accounts from
    the incoming member replace those on the existing member.
 3. Members that exist only in the incoming household are moved into the existing household.
-4. Members that exist only in the existing household are **withdrawn, not deleted**. Their
-   relationship is set to **Removed by collision**, their household roles are removed, their
-   documents are invalidated, and their accounts are deactivated.
+4. Members that exist only in the existing household are **withdrawn, not deleted**. See
+   [What happens to removed members](#what-happens-to-removed-members).
 5. The head of household and the primary and alternate collector roles are rebuilt from the
    incoming household.
 6. The incoming household's data replaces the existing household's data, except for the
@@ -88,7 +94,8 @@ A member removed by a collision is not deleted:
 
 - The individual remains in the programme population with the same identifiers.
 - The individual is marked as withdrawn.
-- The relationship is set to **Removed by collision**.
+- The relationship is set to **Removed by collision** and the household roles are removed.
+- The individual's documents are invalidated and accounts are deactivated.
 - The previous relationship, the previous household roles, and whether the individual was
   head of household are kept in the individual's internal data under
   `removed_by_collision_detector`.

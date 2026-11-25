@@ -10,8 +10,9 @@ tags:
 # Collision Detection
 
 Collision detection merges an incoming household into an existing household when both carry
-the same identification key. This page describes the detector contract, the merge algorithm,
-the entry points that invoke it, and the data model it relies on.
+the same identification key. This page describes the detector contract, how detection works,
+where the collision step runs, and the data model it relies on. The code is the reference for
+the step-by-step behaviour.
 
 User-facing behaviour: [Collision Detection](../guide-user/collision-detection.md).
 Programme configuration: [Collision Detection Configuration](../guide-adm/collision-detection.md).
@@ -20,13 +21,12 @@ Programme configuration: [Collision Detection Configuration](../guide-adm/collis
 
 | Component | Location |
 |---|---|
-| Detector base class, implementations, registry | `src/hope/apps/program/collision_detectors.py` |
-| Programme field and registry wiring | `src/hope/models/program.py` (`collision_detector`) |
-| Django Admin exposure | `src/hope/admin/program.py` (`ProgramAdminForm`) |
-| RDI merge entry point | `src/hope/apps/registration_data/tasks/rdi_merge.py` (`RdiMergeTask._process_collisions`) |
-| Country Workspace auto-merge | `src/hope/api/endpoints/rdi/base.py` (`CompleteRDIView`), `src/hope/apps/registration_data/tasks/rdi_merge_dispatcher.py` (`RdiMergeDispatcher`) |
-| Ingestion API uploads (pending rows only) | `src/hope/api/endpoints/rdi/mixin.py` (`HouseholdUploadMixin.save_households`), `src/hope/api/endpoints/rdi/lax.py` (`CreateLaxHouseholds`), `src/hope/api/endpoints/rdi/push_people.py` (`PushPeopleToRDIView`) |
-| Deduplication exclusion | `src/hope/apps/registration_data/tasks/deduplicate.py` (`collided_individuals_ids_to_exclude`) |
+| Detector base class, implementations, registry | [`src/hope/apps/program/collision_detectors.py`](https://github.com/unicef/hope/blob/develop/src/hope/apps/program/collision_detectors.py) |
+| Programme field and registry wiring | [`src/hope/models/program.py`](https://github.com/unicef/hope/blob/develop/src/hope/models/program.py) (`collision_detector`) |
+| Django Admin exposure | [`src/hope/admin/program.py`](https://github.com/unicef/hope/blob/develop/src/hope/admin/program.py) (`ProgramAdminForm`) |
+| Collision step of the RDI merge | [`src/hope/apps/registration_data/tasks/rdi_merge.py`](https://github.com/unicef/hope/blob/develop/src/hope/apps/registration_data/tasks/rdi_merge.py) (`RdiMergeTask._process_collisions`, called from `RdiMergeTask.execute`) |
+| Country Workspace auto-merge | [`src/hope/api/endpoints/rdi/base.py`](https://github.com/unicef/hope/blob/develop/src/hope/api/endpoints/rdi/base.py) (`CompleteRDIView`), [`src/hope/apps/registration_data/tasks/rdi_merge_dispatcher.py`](https://github.com/unicef/hope/blob/develop/src/hope/apps/registration_data/tasks/rdi_merge_dispatcher.py) (`RdiMergeDispatcher`) |
+| Deduplication exclusion | [`src/hope/apps/registration_data/tasks/deduplicate.py`](https://github.com/unicef/hope/blob/develop/src/hope/apps/registration_data/tasks/deduplicate.py) (`collided_individuals_ids_to_exclude`) |
 
 ## Configuration and wiring
 
@@ -53,10 +53,7 @@ collision_detectors_registry.append(IdentificationKeyCollisionDetector)
 collision_detectors_registry.append(NoopCollisionDetector)
 ```
 
-The default is the no-op detector. Migration
-`src/hope/apps/program/migrations/0012_migration.py` replaced the former
-`collision_detection_enabled` boolean and populated `NoopCollisionDetector` on existing
-programmes.
+The default is the no-op detector.
 
 ## Detector contract
 
@@ -97,132 +94,31 @@ guarantee comes from database constraints on `(identification_key, program)` for
 non-removed households on both `Household` and `Individual`
 (`identification_key_unique_constraint`, `identification_key_ind_unique_constraint`).
 
-## Merge algorithm
+## Collision-Merge algorithm
 
-`IdentificationKeyCollisionDetector.update_household` is wrapped in `transaction.atomic` and
-runs these steps:
-
-1. Return immediately when the incoming household has no identification key.
-2. Resolve the destination household through `detect_collision`; return when there is no
-   match.
-3. Validate that every individual in both households has an identification key. A missing key
-   raises `ValueError` with a message naming the household, which aborts the surrounding
-   merge transaction.
-4. Partition members by identification key into three sets: keys to update (present on both
-   sides), keys to add (only in the incoming household), and keys to remove (only in the
-   existing household).
-5. Store the incoming roles by individual identification key, because the role rows are
-   deleted when members are processed.
-6. Store the incoming head of household's identification key and clear
-   `head_of_household` on the destination household. The protected foreign key must be
-   cleared before the source household is deleted.
-7. For keys to update, apply the incoming member's data to the existing member:
-   - `_update_documents` replaces destination documents with source documents and keeps the
-     destination status when the `(document_number, type_id)` pair matches.
-   - `_update_individual_identities` deletes destination identities and reassigns source
-     identities.
-   - `_update_accounts` deletes destination accounts and reassigns source accounts.
-   - `_update_individual` copies scalar fields with `model_to_dict`. It keeps the
-     destination's identifiers, collection, programme, registration import, merge status,
-     household, `internal_data`, and system fields: withdrawal, first registration date and
-     age at registration, duplicate flag, deduplication and biometric deduplication statuses
-     and results, sanction list flags, and migration metadata. Before the copy it:
-       - appends the destination's current `country_workspace_id` and `originating_id` to
-         `internal_data["collision_replaced_ids"]` when the incoming values differ
-         (`_record_replaced_ids`, one entry per collision);
-       - removes the `removed_by_collision_detector` marker and lifts the withdrawal when an
-         earlier collision withdrew the member (`_restore_removed_by_collision`);
-       - recreates the source's biometric similarity pairs against the destination
-         (`_update_biometric_pairs`), because the pairs are cascade-deleted with the source;
-       - clears `country_workspace_id` and `originating_id` on the source with a queryset
-         `update()`. Both are unique among live rows, so the destination cannot take them
-         over while the source still holds them. The source row itself is left for the
-         household cascade in step 11; deleting it here would run the Django collector once
-         per member.
-8. For keys to remove, `_process_removed_individual` stores
-   `internal_data["removed_by_collision_detector"]` with the previous relationship, previous
-   roles, whether the member was head of household, and `withdrawn_by_collision` (whether the
-   member was still active at that point); sets the relationship to `REMOVED_BY_COLLISION`;
-   deletes the member's role rows; and calls `withdraw(notify=False)` unless the member is
-   already withdrawn. A member whose relationship is already `REMOVED_BY_COLLISION` is
-   skipped, so the marker keeps describing the state before the first removal.
-9. For keys to add, reassign the member's `household` to the destination and set
-   `rdi_merge_status` to `MERGED`.
-10. Re-read the destination members, rebuild roles with `_update_roles_in_household`, and set
-    the new head of household.
-11. Copy the incoming household's scalar fields onto the destination with
-    `_update_household`. That helper keeps the destination's identifiers, collection,
-    programme, registration import, merge status, `extra_rdis`, representatives, head of
-    household, `internal_data`, and system fields: withdrawal, first registration date, cash
-    received totals, storage object, Kobo submission data, and migration metadata. It appends
-    the destination's current `originating_id` to `internal_data["collision_replaced_ids"]`
-    when the incoming value differs, clears the source head, hard-deletes the source
-    household with `delete(soft=False)`, and only then applies the copy together with the
-    new `head_of_household`. The delete comes first because `originating_id` is unique among
-    live households; it also cascades the source members updated in step 7 in one pass.
-
-`_get_update_data` uses `model_to_dict` with the exclude set and removes many-to-many
-fields; the result is applied with a queryset `update()`.
+`IdentificationKeyCollisionDetector.update_household` takes a pending household that collides
+with a household already in the population. It keeps the existing household and its HOPE
+identifiers, updates members matched by individual identification key, moves new members in,
+withdraws members that are no longer present, rebuilds roles, copies the incoming data, and
+hard-deletes the incoming household. A member without an identification key raises
+`ValueError` and aborts the merge.
 
 ## Entry points
 
 ### RDI merge
 
-`RdiMergeTask._process_collisions` runs inside the merge transaction:
-
-1. Read `obj_hct.program.collision_detector`.
-2. Iterate pending households in chunks of 1000, requesting only `id` and
-   `identification_key`.
-3. Collect the pending household ids to exclude and the destination household ids.
-4. Lock every destination household in primary-key order with one
-   `select_for_update().order_by("pk")` statement, to avoid deadlocks.
-5. Call `update_household` for each colliding pending household.
-6. Add the destination ids to `obj_hct.extra_hh_rdis`.
-7. Return the ids to merge, the ids to exclude, and the destination ids.
-
-The caller then:
-
-- excludes individuals whose household is in the excluded set from the merge;
-- schedules `recalculate_population_fields_async_task` for the merged households **and**
-  the collided destination households, because withdrawing members changes their counters;
-- marks the import as merged and emits `rdi_merged`, which triggers `adjust_program_size`.
+`RdiMergeTask.execute` calls `_process_collisions` inside the merge transaction. It locks the
+destination households in primary-key order, calls `update_household` for each colliding
+pending household, and links the import to the destinations through `extra_hh_rdis`. The
+merge then skips the collided pending households and recalculates the population counters of
+the destinations as well.
 
 ### Ingestion API uploads
 
 The API endpoints do not resolve collisions. Every path stores the incoming household and
 its members as pending rows with their identification keys and leaves the match to
 `RdiMergeTask._process_collisions`, so an API import goes through the same merge as an XLSX
-or Kobo import:
-
-- `RDINestedSerializer` (`UploadRDIView`) in `src/hope/api/endpoints/rdi/upload.py` creates
-  the import and saves households through `HouseholdUploadMixin.save_households`;
-- `PushToRDIView` (Country Workspace household push) in `src/hope/api/endpoints/rdi/base.py`
-  uses the same mixin;
-- `CreateLaxHouseholds` in `src/hope/api/endpoints/rdi/lax.py` bulk-creates pending
-  households and attaches the previously pushed individuals;
-- `PushPeopleToRDIView` in `src/hope/api/endpoints/rdi/push_people.py` saves single-member
-  households.
-
-When the merge runs depends on the import:
-
-- Country Workspace imports are completed with `CompleteRDIView`, which sets
-  `MERGE_SCHEDULED` and calls `rdi_dispatcher_task`. `RdiMergeDispatcher` takes the oldest
-  queued import of the programme (ordered by `import_date`, then `id`) and enqueues
-  `fetch_findings_and_merge_rdi`, which runs `RdiMergeTask`. A head in `MERGE_ERROR` or
-  `IMPORT_ERROR` pauses the programme's queue until it is retried or reset.
-- Nested uploads create the import with the default `IN_REVIEW` status; the merge starts
-  when a user merges the import.
-
-`identification_key` is declared on the household, member, LAX, and people-push serializers
-as `CharField(required=False, allow_null=True, max_length=255)`. A missing or `null` key is
-accepted and never collides; an empty string is rejected with a validation error.
-
-In the LAX flow, individuals are pushed before households and carry their own
-`country_workspace_id` and `originating_id`. The individuals push rejects a
-`country_workspace_id` that a live individual of the business area already holds
-(`existing_cw_ids`), and `originating_id` is unique among non-removed individuals, so a
-member that updates an existing one through a collision arrives with new ids. The merge
-takes them over and records the previous ones in `collision_replaced_ids`.
+or Kobo import.
 
 ### Deduplication
 
@@ -243,7 +139,8 @@ against the population again.
 - Source members are not deleted one by one. `_update_individual` only clears their unique
   ids; the hard delete of the source household in `_update_household` cascades them, so the
   merge runs the Django collector once per household and sends no `individual_deleted` per
-  member.
+  member. The source household is deleted before its data is copied, because
+  `originating_id` is unique among live households.
 - `_process_collisions` requests only `id` and `identification_key` from pending households.
   The query-count test asserts that detection stays at a constant query count regardless of
   household count; adding a deferred field read would break it.
@@ -291,12 +188,4 @@ To add a detector:
 | `tests/unit/api/test_upload.py` | Nested upload saves a colliding household as pending; blank identification key rejected, null accepted. |
 | `tests/unit/api/test_lax_households.py`, `tests/unit/api/test_lax_individuals.py`, `tests/unit/api/test_push_people.py` | LAX household push saves a colliding household as pending; blank identification key rejected. |
 
-Run the relevant files with the `tests` tox environment. The `tests` environment replaces its
-whole default command when arguments follow `--`, so `pytest` and its flags must be repeated:
-
-```bash
-tox -e tests -- pytest -q --no-migrations --randomly-seed=42 --create-db -n auto --dist=loadgroup tests/unit/apps/program/test_collision_detector.py tests/unit/apps/program/test_collision_detectors.py tests/unit/apps/registration_data/test_rdi_merge_collision.py tests/unit/apps/registration_data/test_deduplicate_collisions.py tests/unit/api/test_lax_collision_integration.py tests/unit/api/test_upload.py tests/unit/api/test_lax_households.py
-```
-
-The LAX integration and RDI merge tests use Elasticsearch fixtures; start the local services
-described in [Testing](testing.md) before running them.
+For how to run them, see [Testing](testing.md).
