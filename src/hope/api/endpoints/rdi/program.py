@@ -12,6 +12,7 @@ from rest_framework.response import Response
 
 from hope.api.endpoints.base import HOPEAPIBusinessAreaViewSet
 from hope.apps.core.api.filters import UpdatedAtFilter
+from hope.apps.program.api.serializers import PayeeTypeSerializer
 from hope.apps.program.validators import get_payee_configuration_errors
 from hope.models import Grant, Program
 
@@ -21,6 +22,8 @@ if TYPE_CHECKING:
 
 
 class ProgramAPISerializer(serializers.ModelSerializer):
+    payee_type = PayeeTypeSerializer(source="data_collecting_type.payee_type", read_only=True)
+
     class Meta:
         model = Program
         fields = (
@@ -35,6 +38,7 @@ class ProgramAPISerializer(serializers.ModelSerializer):
             "population_goal",
             "data_collecting_type",
             "beneficiary_group",
+            "payee_type",
         )
 
     def validate(self, data: dict[str, Any]) -> dict[str, Any]:
@@ -46,7 +50,7 @@ class ProgramAPISerializer(serializers.ModelSerializer):
 class ProgramViewSet(CreateModelMixin, ListModelMixin, HOPEAPIBusinessAreaViewSet, GenericAPIView):
     serializer_class = ProgramAPISerializer
     permission = Grant.API_READ_ONLY
-    queryset = Program.objects.all()
+    queryset = Program.objects.select_related("data_collecting_type__payee_type")
     pagination_class = None
     filter_backends = (OrderingFilter, DjangoFilterBackend)
     filterset_class = UpdatedAtFilter

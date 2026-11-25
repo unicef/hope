@@ -4,7 +4,6 @@ from extras.test_utils.factories import (
     ApprovalProcessFactory,
     CurrencyFactory,
     PaymentPlanFactory,
-    ProgramCycleFactory,
     ProgramFactory,
 )
 from extras.test_utils.selenium import HopeTestBrowser
@@ -43,7 +42,7 @@ APPROVE_COMMENT = "Approved from the managerial console"
 def _payment_plan(program: Program, status: PaymentPlan.Status, **kwargs) -> PaymentPlan:
     payment_plan = PaymentPlanFactory(
         business_area=program.business_area,
-        program_cycle=ProgramCycleFactory(program=program),
+        program_cycle=program.cycles.first(),
         status=status,
         plan_type=PaymentPlan.PlanType.REGULAR,
         currency=CurrencyFactory(code="USD", name="United States Dollar"),
