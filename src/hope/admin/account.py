@@ -74,6 +74,7 @@ class AccountAdmin(UnicefIdSearchMixin, FieldPkCursorPaginatorAdmin, HOPEModelAd
         "individual__unicef_id",
     )
     unicef_id_search_map = {"IND": "individual__unicef_id"}
+    id_like_search_fields = ("number",)
     list_filter = (
         ("individual__program__business_area", AutoCompleteFilter),
         ("individual__program", AutoCompleteFilter),
