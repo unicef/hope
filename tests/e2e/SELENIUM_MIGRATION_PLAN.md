@@ -39,7 +39,7 @@ grep -rhE '^\s*def test_' tests/e2e --include='test_*.py' --exclude-dir=new_sele
 | 11 | `people` | 7 | 7 | ✅ |
 | 12 | `programme_management` | 8 | 8 | ✅ |
 | 13 | `generic_import` | 15 | 0 | ⬜ |
-| 14 | `filters` | 4 | 0 | ⬜ |
+| 14 | `filters` | 4 | 4 | ✅ |
 | 15 | `payment_verification` | 10 | 0 | ⬜ |
 | 16 | `payment_module` | 9 | 0 | ⬜ |
 | 17 | `targeting` | 21 | 0 | ⬜ |
@@ -47,9 +47,9 @@ grep -rhE '^\s*def test_' tests/e2e --include='test_*.py' --exclude-dir=new_sele
 | 19 | `grievance/grievance_dashboard` | 2 | 0 | ⬜ |
 | 20 | `grievance/grievance_tickets` | 25 | 0 | ⬜ |
 | 21 | Old infra cleanup | – | – | ⬜ |
-| | **Total** | **152** | **54** | **36 %** |
+| | **Total** | **152** | **58** | **38 %** |
 
-`[███████░░░░░░░░░░░░░] 54 / 152`. Update it after each PR: 1 block per ~8 tests. An "in review" module counts as migrated only on its own branch; drop the mark when its PR merges.
+`[████████░░░░░░░░░░░░] 58 / 152`. Update it after each PR: 1 block per ~8 tests. An "in review" module counts as migrated only on its own branch; drop the mark when its PR merges.
 
 The new suite already has 46 test files and ~250 test functions. These do not count toward the 152.
 
@@ -171,12 +171,12 @@ Already in new suite: `test_generic_import_data.py`.
 - [ ] test_submit_button_state_during_upload → NEW
 - [ ] Delete `page_object/generic_import/`
 
-### 14. `filters/test_filters.py` (4) → filter tests go in each domain module (pattern: `targeting/test_tp_list.py::test_tp_list_filter`)
-- [ ] test_filters_selected_program → NEW `new_selenium/filters/test_list_filters.py` (keep the parametrize over pages), or split per domain module
-- [ ] test_filters_happy_path_search_filter → NEW (same file)
-- [ ] test_grievance_tickets_filters_of_households_and_individuals → NEW `new_selenium/grievance/test_ticket_list.py`
-- [ ] test_payment_verification_list_filters → NEW `new_selenium/payment_verification/test_verification_list.py`
-- [ ] Delete `page_object/filters.py` and the `filters` fixture
+### 14. `filters/test_filters.py` (4) → `new_selenium/filters/test_list_filters.py`
+- [x] test_filters_selected_program → NEW `test_list_page_shows_filters[<page>]` (one case per list page; Programme Users had no filters to check)
+- [x] test_filters_happy_path_search_filter → NEW `test_search_filter[<page>]` (asserts which rows are shown/hidden instead of row counts)
+- [x] test_grievance_tickets_filters_of_households_and_individuals → COVERED `test_search_filter[grievance-tickets]` (same flow, also checks the page title)
+- [x] test_payment_verification_list_filters → COVERED `test_search_filter[payment-verification]` (same flow)
+- [x] Delete `page_object/filters.py` and the `filters` fixture (`create_grievance` moved into `grievance_tickets/test_e2e_grievance_tickets.py`, its only other user)
 
 ### 15. `payment_verification/test_payment_verification.py` (10) → `new_selenium/payment_verification/`
 Already in new suite: `test_activate_verification_plan.py`.
