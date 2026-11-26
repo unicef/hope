@@ -179,6 +179,8 @@ class PaymentPlanService:
                 "Financial Service Provider can be changed only while every Target Population "
                 "in the payment plan is Open."
             )
+        if financial_service_provider is not None:
+            self._validate_financial_service_provider_against_delivery_mechanisms(financial_service_provider)
         self.payment_plan.financial_service_provider = financial_service_provider
         for payment_list in payment_lists:
             transaction.on_commit(
@@ -248,9 +250,26 @@ class PaymentPlanService:
             )
 
     def _validate_currency_against_delivery_mechanisms(self, currency: Currency) -> None:
-        delivery_mechanisms = DeliveryMechanism.objects.filter(paymentlist__payment_plan=self.payment_plan).distinct()
+        delivery_mechanisms = DeliveryMechanism.objects.filter(
+            paymentlist__payment_plan=self.payment_plan, paymentlist__is_removed=False
+        ).distinct()
         for delivery_mechanism in delivery_mechanisms:
             PaymentListService.validate_currency_for_delivery_mechanism(currency, delivery_mechanism)
+
+    def _validate_financial_service_provider_against_delivery_mechanisms(
+        self, financial_service_provider: FinancialServiceProvider
+    ) -> None:
+        unsupported = sorted(
+            DeliveryMechanism.objects.filter(paymentlist__payment_plan=self.payment_plan, paymentlist__is_removed=False)
+            .exclude(pk__in=financial_service_provider.delivery_mechanisms.values("pk"))
+            .distinct()
+            .values_list("name", flat=True)
+        )
+        if unsupported:
+            raise ValidationError(
+                f"Financial Service Provider {financial_service_provider.name} does not support "
+                f"the delivery mechanisms used in the payment plan: {', '.join(unsupported)}."
+            )
 
     @transaction.atomic
     def lock(self) -> PaymentPlan:

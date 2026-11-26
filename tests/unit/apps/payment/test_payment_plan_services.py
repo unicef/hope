@@ -301,6 +301,53 @@ def test_assign_fsp_rejected_when_a_target_population_is_locked(cycle):
     )
 
 
+def test_assign_fsp_rejected_when_it_does_not_support_a_payment_list_delivery_mechanism(cycle):
+    group = PaymentPlanFactory(cycle=cycle)
+    PaymentListFactory(
+        program_cycle=cycle,
+        payment_plan=group,
+        status=PaymentList.Status.TP_OPEN,
+        delivery_mechanism=DeliveryMechanismFactory(name="Cash"),
+    )
+
+    with pytest.raises(ValidationError) as error:
+        PaymentPlanService(group).assign_financial_service_provider(FinancialServiceProviderFactory(name="Bank FSP"))
+    assert error.value.detail[0] == (
+        "Financial Service Provider Bank FSP does not support the delivery mechanisms used in the payment plan: Cash."
+    )
+
+
+def test_assign_fsp_ignores_delivery_mechanism_of_removed_payment_list(cycle):
+    group = PaymentPlanFactory(cycle=cycle)
+    PaymentListFactory(
+        program_cycle=cycle,
+        payment_plan=group,
+        status=PaymentList.Status.TP_OPEN,
+        delivery_mechanism=DeliveryMechanismFactory(),
+        is_removed=True,
+    )
+    fsp = FinancialServiceProviderFactory()
+
+    PaymentPlanService(group).assign_financial_service_provider(fsp)
+
+    assert group.financial_service_provider == fsp
+
+
+def test_assign_fsp_sets_it_when_it_supports_every_payment_list_delivery_mechanism(cycle, delivery_mechanism):
+    group = PaymentPlanFactory(cycle=cycle)
+    PaymentListFactory(
+        program_cycle=cycle,
+        payment_plan=group,
+        status=PaymentList.Status.TP_OPEN,
+        delivery_mechanism=delivery_mechanism,
+    )
+    fsp = FinancialServiceProviderFactory(delivery_mechanisms=[delivery_mechanism])
+
+    PaymentPlanService(group).assign_financial_service_provider(fsp)
+
+    assert group.financial_service_provider == fsp
+
+
 def test_assign_currency_rejected_when_a_payment_list_is_opened(cycle, currency):
     group = PaymentPlanFactory(cycle=cycle)
     PaymentListFactory(program_cycle=cycle, payment_plan=group, status=PaymentList.Status.OPEN)

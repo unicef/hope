@@ -683,8 +683,8 @@ class PaymentListService:
         payment_plan: PaymentPlan | None, delivery_mechanism_code: str
     ) -> DeliveryMechanism:
         delivery_mechanism = get_object_or_404(DeliveryMechanism, code=delivery_mechanism_code)
-        if payment_plan is not None and (currency := payment_plan.currency) is not None:
-            PaymentListService.validate_currency_for_delivery_mechanism(currency, delivery_mechanism)
+        if payment_plan is not None:
+            PaymentListService._validate_payment_plan_for_delivery_mechanism(payment_plan, delivery_mechanism)
         return delivery_mechanism
 
     def _set_vulnerability_scores(self, input_data: dict) -> bool:
@@ -803,10 +803,8 @@ class PaymentListService:
     def _move_to_payment_plan(self, payment_plan: PaymentPlan) -> None:
         """Put the plan in the payment plan; it takes the payment plan's FSP now and its currency when it is opened."""
         self._validate_payment_plan_accepts_new_payment_lists(payment_plan)
-        currency = payment_plan.currency
-        delivery_mechanism = self.payment_list.delivery_mechanism
-        if currency is not None and delivery_mechanism is not None:
-            self.validate_currency_for_delivery_mechanism(currency, delivery_mechanism)
+        if (delivery_mechanism := self.payment_list.delivery_mechanism) is not None:
+            self._validate_payment_plan_for_delivery_mechanism(payment_plan, delivery_mechanism)
         self.payment_list.payment_plan = payment_plan
 
     def _validate_pp_status(
@@ -825,6 +823,23 @@ class PaymentListService:
         if not self.payment_list.is_population_locked() and (vulnerability_score_min or vulnerability_score_max):
             raise ValidationError(
                 "You can only set vulnerability_score_min and vulnerability_score_max on Locked Population status"
+            )
+
+    @staticmethod
+    def _validate_payment_plan_for_delivery_mechanism(
+        payment_plan: PaymentPlan, delivery_mechanism: DeliveryMechanism
+    ) -> None:
+        if (currency := payment_plan.currency) is not None:
+            PaymentListService.validate_currency_for_delivery_mechanism(currency, delivery_mechanism)
+        if (
+            payment_plan.financial_service_provider_id is not None
+            and not DeliveryMechanism.objects.filter(
+                pk=delivery_mechanism.pk, financialserviceprovider=payment_plan.financial_service_provider_id
+            ).exists()
+        ):
+            raise ValidationError(
+                f"Financial Service Provider {payment_plan.financial_service_provider.name} does not support "
+                f"delivery mechanism {delivery_mechanism.name}."
             )
 
     @staticmethod

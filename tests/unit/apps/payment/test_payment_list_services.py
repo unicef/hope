@@ -553,7 +553,7 @@ def test_create(
     }
 
     with mock.patch("hope.apps.payment.services.payment_list_services.transaction") as mock_transaction:
-        with django_assert_num_queries(24):
+        with django_assert_num_queries(25):
             pp = PaymentListService.create(
                 input_data=input_data,
                 user=user,
@@ -1989,6 +1989,28 @@ def test_update_pp_delivery_mechanism_rejects_digital_wallet_without_usdc(
     )
 
 
+def test_update_pp_delivery_mechanism_rejects_one_unsupported_by_group_fsp(
+    user: User,
+    business_area: Any,
+    cycle: ProgramCycle,
+    fsp: FinancialServiceProvider,
+) -> None:
+    payment_list = PaymentListFactory(
+        program_cycle=cycle,
+        payment_plan=PaymentPlanFactory(cycle=cycle, financial_service_provider=fsp),
+        created_by=user,
+        business_area=business_area,
+        status=PaymentList.Status.TP_OPEN,
+        delivery_mechanism=None,
+        financial_service_provider=fsp,
+    )
+    cash = DeliveryMechanismFactory(name="Cash")
+
+    with pytest.raises(ValidationError) as error:
+        PaymentListService(payment_list).update({"delivery_mechanism_code": cash.code})
+    assert error.value.detail[0] == "Financial Service Provider Test FSP 1 does not support delivery mechanism Cash."
+
+
 def test_change_group_copies_group_fsp(
     user: User,
     business_area: Any,
@@ -2063,6 +2085,34 @@ def test_change_group_rejects_group_currency_not_matching_delivery_mechanism(
         PaymentListService(payment_list).update({"payment_plan_id": str(new_group.id)})
     assert (
         error.value.detail[0] == "For delivery mechanism Transfer to Digital Wallet only currency USDC can be assigned."
+    )
+
+
+def test_change_group_rejects_group_fsp_not_supporting_delivery_mechanism(
+    user: User,
+    business_area: Any,
+    cycle: ProgramCycle,
+    fsp: FinancialServiceProvider,
+    dm_transfer_to_account: Any,
+) -> None:
+    payment_list = PaymentListFactory(
+        program_cycle=cycle,
+        payment_plan=PaymentPlanFactory(cycle=cycle, financial_service_provider=fsp),
+        created_by=user,
+        business_area=business_area,
+        status=PaymentList.Status.TP_OPEN,
+        delivery_mechanism=dm_transfer_to_account,
+        financial_service_provider=fsp,
+    )
+    new_group = PaymentPlanFactory(
+        cycle=cycle,
+        financial_service_provider=FinancialServiceProviderFactory(name="Cash Only FSP"),
+    )
+
+    with pytest.raises(ValidationError) as error:
+        PaymentListService(payment_list).update({"payment_plan_id": str(new_group.id)})
+    assert error.value.detail[0] == (
+        "Financial Service Provider Cash Only FSP does not support delivery mechanism Transfer to Account."
     )
 
 

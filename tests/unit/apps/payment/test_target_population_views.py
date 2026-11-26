@@ -901,9 +901,9 @@ def test_create_tp_copies_group_fsp(
     )
     purpose = target_population_create_update_context["purpose"]
     cycle = target_population_create_update_context["cycle"]
-    fsp = FinancialServiceProviderFactory()
-    group = PaymentPlanFactory(cycle=cycle, financial_service_provider=fsp)
     dm = DeliveryMechanismFactory()
+    fsp = FinancialServiceProviderFactory(delivery_mechanisms=[dm])
+    group = PaymentPlanFactory(cycle=cycle, financial_service_provider=fsp)
 
     response = target_population_create_update_context["client"].post(
         target_population_create_update_context["create_url"],
