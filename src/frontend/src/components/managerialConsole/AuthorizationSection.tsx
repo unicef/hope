@@ -28,6 +28,7 @@ import { useSnackbar } from '@hooks/useSnackBar';
 import { BlackLink } from '@components/core/BlackLink';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { ProgramSelect, useSortAndFilter } from './useSortAndFilter';
+import { getVisibleSelection } from './visibleSelection';
 import { showApiErrorMessages } from '@utils/utils';
 import { responsiveValue } from 'src/responsive';
 
@@ -65,11 +66,6 @@ export const AuthorizationSection: FC<AuthorizationSectionProps> = ({
     filterRows,
   } = useSortAndFilter({ initialSortField: null, initialSortDirection: 'asc' });
 
-  const handleSelectAllAuthorized = () => {
-    const ids = inAuthorizationData.results.map((plan) => plan.id);
-    handleSelectAll(ids, selectedAuthorized, setSelectedAuthorized);
-  };
-
   const programs = inAuthorizationData?.results?.reduce<string[]>(
     (acc, row) => {
       if (!acc.includes(row.program)) {
@@ -79,14 +75,6 @@ export const AuthorizationSection: FC<AuthorizationSectionProps> = ({
     },
     [],
   );
-
-  const allSelected = inAuthorizationData?.results?.every((plan) =>
-    selectedAuthorized.includes(plan.id),
-  );
-
-  const selectedPlansUnicefIds = inAuthorizationData?.results
-    .filter((plan) => selectedAuthorized.includes(plan.id))
-    .map((plan) => plan.unicefId);
 
   const columns = [
     {
@@ -125,6 +113,28 @@ export const AuthorizationSection: FC<AuthorizationSectionProps> = ({
   );
   const sortedRows = sortRows(filteredRows);
 
+  const {
+    visibleIds,
+    visibleSelectedIds,
+    selectedPlansUnicefIds,
+    allSelected,
+  } = getVisibleSelection(sortedRows, selectedAuthorized);
+
+  const handleSelectAllAuthorized = () => {
+    handleSelectAll(visibleIds, visibleSelectedIds, setSelectedAuthorized);
+  };
+
+  // Drop the selection so plans hidden by the filter do not come back selected.
+  const handleProgramChange = (program: string) => {
+    setSelectedProgram(program);
+    setSelectedAuthorized([]);
+  };
+
+  const handleSearchChange = (text: string) => {
+    setSearchText(text);
+    setSelectedAuthorized([]);
+  };
+
   const title = t('Payment Plans pending for Authorization');
 
   const buttons = (
@@ -135,7 +145,7 @@ export const AuthorizationSection: FC<AuthorizationSectionProps> = ({
           value={searchText}
           size="small"
           data-cy="search-authorization"
-          onChange={(e) => setSearchText(e.target.value)}
+          onChange={(e) => handleSearchChange(e.target.value)}
           slotProps={{
             input: {
               startAdornment: (
@@ -148,12 +158,12 @@ export const AuthorizationSection: FC<AuthorizationSectionProps> = ({
         />
       )}
       <AuthorizePaymentPlansModal
-        selectedPlansIds={selectedAuthorized}
+        selectedPlansIds={visibleSelectedIds}
         selectedPlansUnicefIds={selectedPlansUnicefIds}
         onAuthorize={async (_, comment) => {
           try {
             await bulkAction.mutateAsync({
-              ids: selectedAuthorized,
+              ids: visibleSelectedIds,
               action: 'AUTHORIZE',
               comment: comment,
             });
@@ -176,7 +186,7 @@ export const AuthorizationSection: FC<AuthorizationSectionProps> = ({
               <TableCell padding="checkbox" style={{ width: '10%' }}>
                 <Box sx={{ flex: 1 }}>
                   <Checkbox
-                    checked={allSelected && selectedAuthorized.length > 0}
+                    checked={allSelected}
                     onClick={handleSelectAllAuthorized}
                     data-cy="select-all-authorization"
                   />
@@ -187,7 +197,7 @@ export const AuthorizationSection: FC<AuthorizationSectionProps> = ({
                   {column.field === 'program' ? (
                     <ProgramSelect
                       selectedProgram={selectedProgram}
-                      setSelectedProgram={setSelectedProgram}
+                      setSelectedProgram={handleProgramChange}
                       programs={programs}
                       dataCy="program-select-authorization"
                     />
@@ -209,10 +219,10 @@ export const AuthorizationSection: FC<AuthorizationSectionProps> = ({
               <TableRow key={row.id}>
                 <TableCell padding="checkbox">
                   <Checkbox
-                    checked={selectedAuthorized.includes(row.id)}
+                    checked={visibleSelectedIds.includes(row.id)}
                     onChange={() =>
                       handleSelect(
-                        selectedAuthorized,
+                        visibleSelectedIds,
                         setSelectedAuthorized,
                         row.id,
                       )

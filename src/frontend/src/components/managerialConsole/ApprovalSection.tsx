@@ -28,6 +28,7 @@ import { useSnackbar } from '@hooks/useSnackBar';
 import { BlackLink } from '@components/core/BlackLink';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { ProgramSelect, useSortAndFilter } from './useSortAndFilter';
+import { getVisibleSelection } from './visibleSelection';
 import { showApiErrorMessages } from '@utils/utils';
 import { responsiveValue } from 'src/responsive';
 
@@ -65,25 +66,12 @@ export const ApprovalSection: FC<ApprovalSectionProps> = ({
     filterRows,
   } = useSortAndFilter({ initialSortField: null, initialSortDirection: 'asc' });
 
-  const handleSelectAllApproved = () => {
-    const ids = inApprovalData.results.map((plan) => plan.id);
-    handleSelectAll(ids, selectedApproved, setSelectedApproved);
-  };
-
   const programs = inApprovalData?.results?.reduce<string[]>((acc, row) => {
     if (!acc.includes(row.program)) {
       acc.push(row.program);
     }
     return acc;
   }, []);
-
-  const allSelected = inApprovalData?.results?.every((plan) =>
-    selectedApproved.includes(plan.id),
-  );
-
-  const selectedPlansUnicefIds = inApprovalData?.results
-    .filter((plan) => selectedApproved.includes(plan.id))
-    .map((plan) => plan.unicefId);
 
   const columns = [
     {
@@ -122,6 +110,28 @@ export const ApprovalSection: FC<ApprovalSectionProps> = ({
   );
   const sortedRows = sortRows(filteredRows);
 
+  const {
+    visibleIds,
+    visibleSelectedIds,
+    selectedPlansUnicefIds,
+    allSelected,
+  } = getVisibleSelection(sortedRows, selectedApproved);
+
+  const handleSelectAllApproved = () => {
+    handleSelectAll(visibleIds, visibleSelectedIds, setSelectedApproved);
+  };
+
+  // Drop the selection so plans hidden by the filter do not come back selected.
+  const handleProgramChange = (program: string) => {
+    setSelectedProgram(program);
+    setSelectedApproved([]);
+  };
+
+  const handleSearchChange = (text: string) => {
+    setSearchText(text);
+    setSelectedApproved([]);
+  };
+
   const title = t('Payment Plans pending for Approval');
 
   const buttons = (
@@ -132,7 +142,7 @@ export const ApprovalSection: FC<ApprovalSectionProps> = ({
           value={searchText}
           data-cy="search-approval"
           size="small"
-          onChange={(e) => setSearchText(e.target.value)}
+          onChange={(e) => handleSearchChange(e.target.value)}
           slotProps={{
             input: {
               startAdornment: (
@@ -145,12 +155,12 @@ export const ApprovalSection: FC<ApprovalSectionProps> = ({
         />
       )}
       <ApprovePaymentPlansModal
-        selectedPlansIds={selectedApproved}
+        selectedPlansIds={visibleSelectedIds}
         selectedPlansUnicefIds={selectedPlansUnicefIds}
         onApprove={async (_, comment) => {
           try {
             await bulkAction.mutateAsync({
-              ids: selectedApproved,
+              ids: visibleSelectedIds,
               action: 'APPROVE',
               comment: comment,
             });
@@ -174,7 +184,7 @@ export const ApprovalSection: FC<ApprovalSectionProps> = ({
                 <Box sx={{ flex: 1 }}>
                   <Checkbox
                     data-cy="select-all-approval"
-                    checked={allSelected && selectedApproved.length > 0}
+                    checked={allSelected}
                     onClick={handleSelectAllApproved}
                   />
                 </Box>
@@ -185,7 +195,7 @@ export const ApprovalSection: FC<ApprovalSectionProps> = ({
                     <ProgramSelect
                       dataCy="program-select-approval"
                       selectedProgram={selectedProgram}
-                      setSelectedProgram={setSelectedProgram}
+                      setSelectedProgram={handleProgramChange}
                       programs={programs}
                     />
                   ) : (
@@ -207,10 +217,10 @@ export const ApprovalSection: FC<ApprovalSectionProps> = ({
                 <TableCell padding="checkbox">
                   <Checkbox
                     data-cy="select-approval"
-                    checked={selectedApproved.includes(row.id)}
+                    checked={visibleSelectedIds.includes(row.id)}
                     onChange={() =>
                       handleSelect(
-                        selectedApproved,
+                        visibleSelectedIds,
                         setSelectedApproved,
                         row.id,
                       )
