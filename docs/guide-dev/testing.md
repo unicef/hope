@@ -48,21 +48,23 @@ assigned the average duration. Regenerate a file when its suite changes noticeab
 E2E:
 
 ```bash
-tox -e tests -- pytest tests/e2e -m selenium --headless -n auto --dist=loadgroup --no-migrations --create-db \
+tox -e tests -- pytest tests/e2e -m selenium --headless -n auto --dist=loadgroup --no-migrations --create-db --maxfail=0 \
     --store-durations --clean-durations --durations-path tests/e2e/test_durations.json
 ```
 
 Unit:
 
 ```bash
-tox -e tests -- pytest tests/unit -m unit -n auto --dist=loadgroup --no-migrations --create-db \
+tox -e tests -- pytest tests/unit -m unit -n auto --dist=loadgroup --no-migrations --create-db --maxfail=0 \
     --store-durations --clean-durations --durations-path tests/unit/test_durations.json
 jq -S 'with_entries(select(.value >= 0.5) | .value |= (. * 1000 | round / 1000))' \
     tests/unit/test_durations.json > durations.tmp && mv durations.tmp tests/unit/test_durations.json
 ```
 
 `--clean-durations` drops entries for tests that no longer exist; without it new
-timings are merged into the existing file.
+timings are merged into the existing file. `--maxfail=0` overrides the `--maxfail=20` from
+`tests/pytest.ini`, so a run with many failures doesn't stop early and drop the tests it
+never reached from the file.
 
 The unit file keeps only tests taking at least 0.5 s: with thousands of tests the full
 file would be too large, and the fast ones balance out by count. As a side effect, the
