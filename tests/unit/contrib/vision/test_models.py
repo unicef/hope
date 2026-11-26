@@ -51,6 +51,36 @@ def test_funds_commitment_header_str(afghanistan) -> None:
     assert str(header) == "FC-001"
 
 
+@pytest.fixture
+def synced_placeholder_header(afghanistan, django_assert_num_queries) -> FundsCommitmentHeader:
+    header = FundsCommitmentHeader.objects.create(funds_commitment_number="FC-001")
+
+    with django_assert_num_queries(1):
+        FundsCommitmentFactory(
+            funds_commitment_number="FC-001",
+            vendor_id="VENDOR-1",
+            posting_date=date(2026, 9, 1),
+            document_reference="REFERENCE-1",
+            fc_status="O",
+            currency_code="USD",
+            commitment_amount_usd=Decimal("100.50"),
+            commitment_amount_local=Decimal("100.25"),
+        )
+    return header
+
+
+def test_trigger_updates_placeholder_header(synced_placeholder_header: FundsCommitmentHeader) -> None:
+    refreshed = FundsCommitmentHeader.objects.with_derived_fields().get(pk=synced_placeholder_header.pk)
+    assert refreshed.vendor_id == "VENDOR-1"
+    assert refreshed.posting_date == date(2026, 9, 1)
+    assert refreshed.document_reference == "REFERENCE-1"
+    assert refreshed.fc_status == "O"
+    assert refreshed.currency == "USD"
+    assert refreshed.total_amount_usd == Decimal("100.50")
+    assert refreshed.total_amount_local == Decimal("100.25")
+    assert refreshed.funds_commitment_items.count() == 1
+
+
 def test_funds_commitment_header_labels() -> None:
     assert FundsCommitmentHeader._meta.verbose_name == "Funds Commitment Header"
     assert FundsCommitmentHeader._meta.verbose_name_plural == "Funds Commitment Headers"

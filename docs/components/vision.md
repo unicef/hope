@@ -38,9 +38,9 @@ When either flag is disabled:
 1. Authorization moves the Payment Plan to `IN_REVIEW`.
 2. HOPE queues the Vision request after the database transaction commits.
 3. A successful request sets the Vision state to `WAITING_FOR_CALLBACK`.
-4. The first callback confirms that Vision created the Payment Plan and sets `PP_CREATED`.
-5. The second successful callback provides one or more FC numbers.
-6. HOPE validates and assigns all matching FC headers.
+4. A `SUCCESS` callback without FC numbers acknowledges Payment Plan creation and sets `PP_CREATED`.
+5. A `SUCCESS` or `FC CREATE` callback with FC numbers identifies the Funds Commitments.
+6. HOPE reuses or creates FC headers for those numbers and links them to the Payment Plan.
 7. Successful assignment releases the Payment Plan automatically and moves it to `ACCEPTED`.
 8. A Payment Gateway plan is sent to Payment Gateway automatically. A non-Payment Gateway plan becomes available for
    the standard XLSX export flow.
@@ -85,7 +85,9 @@ the full parsed JSON notification. Callbacks received after a completed release,
 disabled do not change FC assignments or Payment Plan status.
 Any callback with a Vision plan identifier for an active request confirms that Vision received
 the Payment Plan, even when Vision reports an error or the FC cannot be assigned.
-Duplicate callbacks do not repeat release or delivery side effects.
+A failed result, or `FC CREATE` without FC numbers, sets `CALLBACK_FAILED` without replacing the stored Vision
+identifier or FC numbers. The new callback payload remains available in the log, so the displayed identifier and FC
+numbers may come from an earlier callback. Duplicate callbacks do not repeat release or delivery side effects.
 
 ### Callback Outcomes
 
@@ -95,14 +97,15 @@ Duplicate callbacks do not repeat release or delivery side effects.
 | Missing Vision identifier on an active plan in review | `CALLBACK_FAILED` | Remains `IN_REVIEW`; no FC changes |
 | Plan has no active Vision request | Unchanged | Callback is logged; no workflow changes |
 | `SUCCESS` without `fc_numbers` after Vision creates the plan | `PP_CREATED` | Remains `IN_REVIEW` and waits for the FC callback |
-| Vision reports failure | `CALLBACK_FAILED` | Remains `IN_REVIEW`; no FC changes |
-| Any FC number has no eligible HOPE header | `FC_NOT_FOUND` | Remains `IN_REVIEW`; no FC changes |
-| FC assignment succeeds | `FC_ASSOCIATED`, then `RELEASED` | Moves to `ACCEPTED` and continues to delivery |
+| `SUCCESS` with `fc_numbers` | `FC_ASSOCIATED`, then `RELEASED` | Moves to `ACCEPTED` and continues to delivery |
+| `FC CREATE` with `fc_numbers` | `FC_ASSOCIATED`, then `RELEASED` | Moves to `ACCEPTED` and continues to delivery |
+| `FC CREATE` without `fc_numbers` | `CALLBACK_FAILED` | Remains `IN_REVIEW`; no FC assignment changes |
+| Vision reports failure | `CALLBACK_FAILED` | Remains `IN_REVIEW`; no FC assignment changes |
 
 The callback response includes `status`, `messageId`, `payplanSno`, and `message`. An accepted callback returns HTTP
 `200`, status `OK`, and message `Callback received`, including when Vision reports a failed Payment Plan status.
 An invalid callback returns HTTP `400` with a reason in `message`; an unknown `payplanSno` returns HTTP `404` and
-`Payment plan not found`. An FC assignment failure returns HTTP `400`, status `KO`, and an `FC not found` message.
+`Payment plan not found`.
 A later callback retries processing from `SEND_FAILED`, `PP_CREATED`, `CALLBACK_FAILED`, or `FC_NOT_FOUND`. A successful
 callback with a valid FC can therefore recover the workflow without admin intervention.
 
@@ -110,11 +113,12 @@ callback with a valid FC can therefore recover the workflow without admin interv
 
 Vision's `fc_numbers` identifies one or more `FundsCommitmentHeader` records. Automatic assignment works as follows:
 
-1. HOPE matches every number to a unique header.
-2. A header is eligible when at least one of its items belongs to the Payment Plan's Business Area.
-3. All requested headers are assigned to the Payment Plan atomically.
-4. A header can be assigned to multiple Payment Plans.
-5. Business Area and WBS remain item-level attributes, and all items under an assigned header are available for display.
+1. HOPE reuses the header for each number or creates a placeholder header when none exists.
+2. Automatic callback assignment does not require an FC item or a Business Area match.
+3. All requested headers are linked to the Payment Plan atomically.
+4. Later Vision FC synchronization updates the same header and creates its items without removing the Payment Plan link.
+5. A header can be assigned to multiple Payment Plans. Business Area and WBS remain item-level attributes, and all
+   items under an assigned header are available for display.
 
 Historical item-level assignments are migrated to header-level Payment Plan associations.
 

@@ -66,7 +66,7 @@ class PaymentPlanCallbackRequestSerializer(serializers.Serializer):
     vision_payplan_sno = serializers.CharField(required=False, allow_blank=True)
     status = serializers.CharField(required=False, allow_blank=True)
     fc_numbers = serializers.ListField(
-        child=serializers.CharField(),
+        child=serializers.CharField(max_length=10),
         required=False,
         default=list,
     )
@@ -130,7 +130,7 @@ class PaymentPlanCallbackAckSerializer(serializers.Serializer):
 
 
 class PaymentPlanPayloadSerializer(serializers.Serializer):
-    business_area = serializers.CharField(source="business_area.code")
+    business_area = serializers.SerializerMethodField()
     vendor_number = serializers.CharField(source="financial_service_provider.vision_vendor_number")
     payplan_sno = serializers.CharField(source="unicef_id")
     payplan_desc = serializers.CharField(source="name")
@@ -139,7 +139,17 @@ class PaymentPlanPayloadSerializer(serializers.Serializer):
     auth_amt_usd = serializers.CharField(source="total_entitled_quantity_usd")
     exchange_rate = serializers.DecimalField(max_digits=15, decimal_places=8, allow_null=True)
     head_vendor = serializers.CharField(source="financial_service_provider.name")
-    gl_code = serializers.CharField(source="program_cycle.program.data_collecting_type.payee_type.gl_code")
+    gl_code = serializers.SerializerMethodField()
+
+    def get_business_area(self, instance: Any) -> str:
+        business_area = instance.business_area
+        parent_business_area = business_area.parent
+        return parent_business_area.code if parent_business_area is not None else business_area.code
+
+    def get_gl_code(self, instance: Any) -> str:
+        payee_type = instance.program_cycle.program.data_collecting_type.payee_type
+        gl_code: str = payee_type.gl_code if payee_type is not None else ""
+        return {"7700410": "FAM", "7700430": "INC"}.get(gl_code, "")
 
     def to_representation(self, instance: Any) -> dict[str, Any]:
         data = super().to_representation(instance)

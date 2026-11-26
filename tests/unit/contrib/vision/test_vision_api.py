@@ -65,6 +65,29 @@ def vision_api_payment_plan_factory(db) -> Callable[..., PaymentPlan]:
     return create_payment_plan
 
 
+@pytest.fixture(
+    params=[
+        ("7700410", "FAM"),
+        ("7700430", "INC"),
+        ("7700999", ""),
+        ("", ""),
+        (None, ""),
+    ]
+)
+def payment_plan_with_gl_code(request, vision_api_payment_plan_factory) -> tuple[PaymentPlan, str]:
+    gl_code, expected_code = request.param
+    payment_plan = vision_api_payment_plan_factory()
+    data_collecting_type = payment_plan.program_cycle.program.data_collecting_type
+    if gl_code is None:
+        data_collecting_type.payee_type = None
+        data_collecting_type.save(update_fields=["payee_type"])
+    else:
+        payee_type = data_collecting_type.payee_type
+        payee_type.gl_code = gl_code
+        payee_type.save(update_fields=["gl_code"])
+    return payment_plan, expected_code
+
+
 @pytest.fixture
 def payment_plan_without_exchange_rate(vision_api_payment_plan_factory) -> PaymentPlan:
     return vision_api_payment_plan_factory(exchange_rate=None)
@@ -210,9 +233,47 @@ def test_send_payment_plan(mock_post, mock_acquire_token, vision_api_payment_pla
             "authAmtUsd": "10000.00",
             "exchangeRate": "1.25000000",
             "headVendor": "Head Vendor Name",
-            "glCode": "7700410",
+            "glCode": "FAM",
         },
     )
+
+
+@pytest.fixture
+def office_payment_plan(vision_api_payment_plan_factory) -> PaymentPlan:
+    payment_plan = vision_api_payment_plan_factory()
+    parent_business_area = BusinessAreaFactory(code="FI00")
+    office = payment_plan.business_area
+    office.parent = parent_business_area
+    office.save(update_fields=["parent"])
+    return payment_plan
+
+
+@patch("hope.contrib.vision.api.VisionAPI._acquire_token")
+@patch("hope.contrib.vision.api.VisionAPI._post")
+def test_send_payment_plan_from_office_uses_parent_business_area(
+    mock_post,
+    mock_acquire_token,
+    office_payment_plan,
+) -> None:
+    mock_post.return_value = ({"status": "ok"}, 200)
+
+    VisionAPI().send_payment_plan(office_payment_plan)
+
+    assert mock_post.call_args.args[1]["businessArea"] == "FI00"
+
+
+@patch("hope.contrib.vision.api.VisionAPI._acquire_token")
+@patch("hope.contrib.vision.api.VisionAPI._post")
+def test_notify_payment_plan_status_from_office_uses_parent_business_area(
+    mock_post,
+    mock_acquire_token,
+    office_payment_plan,
+) -> None:
+    mock_post.return_value = ({"status": "ok"}, 200)
+
+    VisionAPI().notify_payment_plan_status(office_payment_plan, "REJECTED")
+
+    assert mock_post.call_args.args[1]["businessArea"] == "FI00"
 
 
 def test_payment_plan_payload_includes_null_exchange_rate(
@@ -223,6 +284,18 @@ def test_payment_plan_payload_includes_null_exchange_rate(
         payload = PaymentPlanPayloadSerializer(payment_plan_without_exchange_rate).data
 
     assert payload["exchangeRate"] is None
+
+
+def test_payment_plan_payload_maps_gl_code(
+    payment_plan_with_gl_code: tuple[PaymentPlan, str],
+    django_assert_num_queries,
+) -> None:
+    payment_plan, expected_code = payment_plan_with_gl_code
+
+    with django_assert_num_queries(0):
+        payload = PaymentPlanPayloadSerializer(payment_plan).data
+
+    assert payload["glCode"] == expected_code
 
 
 @patch("hope.contrib.vision.api.VisionAPI._acquire_token")
@@ -252,7 +325,7 @@ def test_send_payment_plan_with_different_currency(
             "authAmtUsd": "10000.00",
             "exchangeRate": "1.25000000",
             "headVendor": "Head Vendor Name",
-            "glCode": "7700410",
+            "glCode": "FAM",
         },
     )
 
@@ -549,7 +622,7 @@ def test_callback_view_empty_status_does_not_confirm_plan_creation(mock_get, moc
     }
     vision_data = mock_pp.internal_data["vision"]
     assert vision_data["sent"] is True
-    assert vision_data["vision_id"] == "00000110"
+    assert "vision_id" not in vision_data
     assert vision_data["status"] == VisionStatus.CALLBACK_FAILED.value
     assert vision_data["error_code"] == VisionErrorCode.VISION_STATUS_FAILED.value
     entry = vision_data["log"][0]
@@ -600,7 +673,6 @@ def test_callback_view_success_with_fc_numbers(mock_get, mock_release_actor_snap
 
     view = PaymentPlanCallbackView.as_view()
     with patch("hope.contrib.vision.views.VisionService.process_callback") as mock_process_callback:
-        mock_process_callback.return_value = False
         response = view(request)
 
     assert response.status_code == 200
@@ -816,7 +888,7 @@ def test_callback_view_non_success_status(mock_get, mock_log_entry) -> None:
     assert entry["payload"]["payplanSno"] == "PP043"
     assert entry["payload"]["error_message"] == "something went wrong"
     assert entry["response"]["status"] == "OK"
-    assert mock_pp.internal_data["vision"]["vision_id"] == "00000062"
+    assert "vision_id" not in mock_pp.internal_data["vision"]
     assert mock_pp.internal_data["vision"]["sent"] is True
     assert mock_pp.internal_data["vision"]["status"] == "CALLBACK_FAILED"
     assert mock_pp.internal_data["vision"]["error_code"] == "VISION_STATUS_FAILED"
@@ -876,35 +948,16 @@ def test_callback_view_missing_payplan_sno(mock_get, mock_log_entry) -> None:
     mock_get.assert_not_called()
 
 
-@pytest.mark.parametrize(
-    ("vision_data", "expected_message"),
-    [
-        ({"status": VisionStatus.FC_NOT_FOUND.value}, "FC not found"),
-        ({"error_code": "FC_AMBIGUOUS"}, "Multiple FC headers found"),
-        ({"error_code": "FC_CONFLICT"}, "FC assignment conflict"),
-        ({}, "FC assignment failed"),
-    ],
-)
-def test_callback_view_fc_failure_message(vision_data, expected_message, django_assert_num_queries) -> None:
-    from hope.contrib.vision.views import PaymentPlanCallbackView
-
-    payment_plan = PaymentPlan(internal_data={"vision": vision_data})
-
-    with django_assert_num_queries(0):
-        message = PaymentPlanCallbackView._fc_failure_message(payment_plan)
-
-    assert message == expected_message
-
-
+@pytest.mark.parametrize("vision_result", ["SUCCESS", "FC CREATE"])
 @patch("hope.apps.account.actor_snapshot.MicrosoftGraphAPI")
 def test_release_actor_snapshot_arrange_success_with_fc_act_build_assert_creator_snapshot_from_ad(
-    mock_graph, callback_payment_plan: PaymentPlan
+    mock_graph, callback_payment_plan: PaymentPlan, vision_result: str
 ) -> None:
     from hope.contrib.vision.views import PaymentPlanCallbackView
 
     mock_graph.return_value.get_user_data.return_value = {"jobTitle": "Finance Officer"}
     serializer = PaymentPlanCallbackRequestSerializer(
-        data={"payplanSno": "PP044", "vision_payplanSno": "00000063", "status": "SUCCESS", "fc_numbers": ["FC123"]}
+        data={"payplanSno": "PP044", "vision_payplanSno": "00000063", "status": vision_result, "fc_numbers": ["FC123"]}
     )
     serializer.is_valid()
 
@@ -917,6 +970,7 @@ def test_release_actor_snapshot_arrange_success_with_fc_act_build_assert_creator
     "payload",
     [
         pytest.param({"payplanSno": "PP044", "status": "SUCCESS", "fc_numbers": []}, id="creation_acknowledgement"),
+        pytest.param({"payplanSno": "PP044", "status": "FC CREATE", "fc_numbers": []}, id="fc_create_without_numbers"),
         pytest.param({"payplanSno": "PP044", "status": "FAILED", "fc_numbers": ["FC123"]}, id="failure"),
         pytest.param({"payplanSno": "PP-MISSING", "status": "SUCCESS", "fc_numbers": ["FC123"]}, id="unknown_plan"),
         pytest.param({"payplanSno": "PP044", "status": "SUCCESS", "fc_numbers": ["FC123"]}, id="missing_vision_id"),

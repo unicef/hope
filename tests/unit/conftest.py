@@ -295,15 +295,18 @@ def _collect_migration_sql_statements() -> tuple[set[str], list]:
     orig = getattr(settings, "MIGRATION_MODULES", None)
     settings.MIGRATION_MODULES = {}
 
-    loader = MigrationLoader(None, load=False)
-    loader.load_disk()
+    loader = MigrationLoader(None)
     all_migrations = loader.disk_migrations
+    migration_keys = dict.fromkeys(
+        key for leaf in loader.graph.leaf_nodes() for key in loader.graph.forwards_plan(leaf)
+    )
     if orig is not None:
         settings.MIGRATION_MODULES = orig
 
     apps = set()
     all_sqls = []
-    for (app_label, _), migration in all_migrations.items():
+    for app_label, migration_name in migration_keys:
+        migration = all_migrations[app_label, migration_name]
         apps.add(app_label)
         for operation in migration.operations:
             if isinstance(operation, RunSQL):

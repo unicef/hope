@@ -138,13 +138,13 @@ def test_funds_commitment_serializer_exposes_derived_header_fields(funds_commitm
     serializer = FundsCommitmentSerializer(funds_commitment_header_data)
 
     assert serializer.data["funds_commitment_number"] == "FC-002"
-    assert serializer.data["vendor_id"] == "VENDOR-2"
-    assert serializer.data["posting_date"] == "2026-09-02"
-    assert serializer.data["document_reference"] == "REFERENCE-2"
-    assert serializer.data["fc_status"] == "C"
+    assert serializer.data["vendor_id"] == "VENDOR-1"
+    assert serializer.data["posting_date"] == "2026-09-01"
+    assert serializer.data["document_reference"] == "REFERENCE-1"
+    assert serializer.data["fc_status"] == "O"
     assert serializer.data["total_amount_usd"] == "401.00"
     assert serializer.data["total_amount_local"] == "351.00"
-    assert serializer.data["currency"] == "EUR"
+    assert serializer.data["currency"] == "USD"
 
 
 def test_payment_plan_callback_request_serializer_to_internal_value() -> None:
@@ -205,6 +205,19 @@ def test_payment_plan_callback_request_serializer_rejects_nonempty_string_fc_num
     )
 
     assert serializer.is_valid() is False
+    assert "fc_numbers" in serializer.errors
+
+
+def test_payment_plan_callback_request_serializer_rejects_fc_number_longer_than_header_field(
+    django_assert_num_queries,
+) -> None:
+    serializer = PaymentPlanCallbackRequestSerializer(
+        data={"payplanSno": "PP001", "status": "SUCCESS", "fc_numbers": ["FC123456789"]}
+    )
+
+    with django_assert_num_queries(0):
+        assert serializer.is_valid() is False
+
     assert "fc_numbers" in serializer.errors
 
 
