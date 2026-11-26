@@ -40,6 +40,7 @@ export const editProgramDetailsValidationSchema = (
       .transform((v) => (v instanceof Date && !isNaN(v.getTime()) ? v : null)),
     endDate,
     sector: Yup.string().required(t('Sector is required')),
+    payeeType: Yup.string().required(t('Payee Type is required')),
     dataCollectingTypeCode: Yup.string().required(
       t('Data Collecting Type is required'),
     ),
@@ -47,7 +48,7 @@ export const editProgramDetailsValidationSchema = (
       .nullable()
       .test({
         name: 'conditional-required',
-        message: t('Beneficiary Group is required'),
+        message: t('Payee Label is required'),
         test: function (value) {
           // Get parent values from the validation context
           const { dataCollectingTypeCode } = this.parent;

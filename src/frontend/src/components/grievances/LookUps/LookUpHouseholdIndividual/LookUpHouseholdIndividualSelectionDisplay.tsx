@@ -5,6 +5,7 @@ import { useProgramContext } from 'src/programContext';
 import styled from 'styled-components';
 import { BlueText, DarkGrey, StyledBox } from '../LookUpStyles';
 import type { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
+import { ResponsiveGrid, ResponsiveGridContainer } from 'src/responsive';
 
 const Types = { household: 'household', individual: 'individual' };
 
@@ -48,9 +49,9 @@ export const LookUpHouseholdIndividualSelectionDisplay = ({
     onValueChange('identityVerified', false);
   };
   return (
-    <Grid container spacing={5}>
+    <ResponsiveGridContainer spacing={5}>
       {!isSocialDctType && (
-        <Grid size={{ xs: 4 }}>
+        <ResponsiveGrid size="third">
           <StyledBox disabled={disableUnselectHousehold}>
             <Grid
               container
@@ -87,9 +88,9 @@ export const LookUpHouseholdIndividualSelectionDisplay = ({
               )}
             </Grid>
           </StyledBox>
-        </Grid>
+        </ResponsiveGrid>
       )}
-      <Grid size={{ xs: 4 }}>
+      <ResponsiveGrid size="third">
         <StyledBox disabled={disableUnselectIndividual}>
           <Grid
             container
@@ -126,7 +127,7 @@ export const LookUpHouseholdIndividualSelectionDisplay = ({
             )}
           </Grid>
         </StyledBox>
-      </Grid>
-    </Grid>
+      </ResponsiveGrid>
+    </ResponsiveGridContainer>
   );
 };

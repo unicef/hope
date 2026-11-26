@@ -3,25 +3,24 @@ import { Refresh } from '@mui/icons-material';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import { Link, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
+import { responsiveValue } from 'src/responsive';
 import PageNotFoundGraphic from './404_graphic.png';
 import HopeLogo from './404_hope_logo.png';
 import type { FC } from 'react';
 
-const Container = styled.div`
+const Container = styled(Box)`
   background-color: #ffffff;
   text-align: center;
-  padding-top: 150px;
   font-family: 'Roboto', sans-serif;
   height: 100vh;
 `;
 
-const LogoContainer = styled.div`
-  position: absolute;
+const LogoContainer = styled(Box)`
   top: 20px;
   left: 20px;
 `;
 
-const SquareLogo = styled.div`
+const SquareLogo = styled(Box)`
   display: inline-block;
   background-color: white;
   padding: 20px;
@@ -55,11 +54,25 @@ export const PageNotFound: FC = () => {
   };
 
   return (
-    <Container>
-      <LogoContainer>
+    <Container
+      sx={{
+        pt: responsiveValue('16px', '150px'),
+        px: responsiveValue('16px', '0'),
+      }}
+    >
+      <LogoContainer sx={{ position: responsiveValue('static', 'absolute') }}>
         <img src={HopeLogo} alt="Hope Logo" width="186" height="101" />
       </LogoContainer>
-      <SquareLogo>
+      <SquareLogo
+        sx={{
+          maxWidth: '100%',
+          boxSizing: 'border-box',
+          '& img': {
+            maxWidth: '100%',
+            height: responsiveValue('auto', '293px'),
+          },
+        }}
+      >
         <img
           src={PageNotFoundGraphic}
           alt="Brush with paint 404"
@@ -78,13 +91,15 @@ export const PageNotFound: FC = () => {
       <Box
         sx={{
           display: 'flex',
+          flexWrap: 'wrap',
+          gap: responsiveValue(2, 0),
           justifyContent: 'center',
           alignItems: 'center',
         }}
       >
         <Box
           sx={{
-            mr: 4,
+            mr: responsiveValue(0, 4),
           }}
         >
           <Button

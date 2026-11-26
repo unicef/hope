@@ -405,6 +405,9 @@ export function paymentPlanBackgroundActionStatusToColor(
       theme.hctPalette.gray,
     [PaymentPlanBackgroundActionStatusEnum.SEND_TO_PAYMENT_GATEWAY_ERROR]:
       theme.palette.error.main,
+    [PaymentPlanBackgroundActionStatusEnum.REBUILDING]: theme.hctPalette.gray,
+    [PaymentPlanBackgroundActionStatusEnum.REBUILD_ERROR]:
+      theme.palette.error.main,
   };
   if (status in colorsMap) {
     return colorsMap[status];
@@ -1222,6 +1225,7 @@ export function showApiErrorMessages(
   function formatFieldLabel(field: string): string {
     let cleaned = field.replace(/\[\d+\]/g, '');
     cleaned = cleaned.split('.').pop();
+    if (_.snakeCase(cleaned) === 'beneficiary_group') return 'Payee Label';
     let label = cleaned.replace(/_/g, ' ');
     label = label.replace(/([a-z])([A-Z])/g, '$1 $2');
     label = label
@@ -1332,6 +1336,7 @@ export function getApiErrorMessages(
   function formatFieldLabel(field: string): string {
     let cleaned = field.replace(/\[\d+\]/g, '');
     cleaned = cleaned.split('.').pop();
+    if (_.snakeCase(cleaned) === 'beneficiary_group') return 'Payee Label';
     let label = cleaned.replace(/_/g, ' ');
     label = label.replace(/([a-z])([A-Z])/g, '$1 $2');
     label = label

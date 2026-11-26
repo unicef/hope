@@ -44,6 +44,7 @@ import { useVerificationChannelChoices } from '@hooks/useVerificationChannelChoi
 import { LoadingComponent } from '@core/LoadingComponent';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { PERMISSIONS } from 'src/config/permissions';
+import { responsiveGridSize, responsiveValue } from 'src/responsive';
 
 const StyledTabs = styled(Tabs)`
   && {
@@ -469,7 +470,7 @@ export const CreateVerificationPlan = ({
                           <Field
                             name="verificationChannel"
                             label={t('Verification Channel')}
-                            style={{ flexDirection: 'row' }}
+                            style={{ flexDirection: 'row', flexWrap: 'wrap' }}
                             data-cy="checkbox-verification-channel"
                             choices={channelChoices}
                             component={FormikRadioGroup}
@@ -529,6 +530,7 @@ export const CreateVerificationPlan = ({
                         <Box
                           sx={{
                             display: 'flex',
+                            flexWrap: responsiveValue('wrap', 'nowrap'),
                           }}
                         >
                           <Field
@@ -568,7 +570,9 @@ export const CreateVerificationPlan = ({
                                 }}
                               >
                                 <Grid container>
-                                  <Grid size={{ xs: 4 }}>
+                                  <Grid
+                                    size={responsiveGridSize('third', 'half')}
+                                  >
                                     <Field
                                       name="filterAgeMin"
                                       label={t('Minimum Age')}
@@ -577,7 +581,9 @@ export const CreateVerificationPlan = ({
                                       component={FormikTextField}
                                     />
                                   </Grid>
-                                  <Grid size={{ xs: 4 }}>
+                                  <Grid
+                                    size={responsiveGridSize('third', 'half')}
+                                  >
                                     <Field
                                       name="filterAgeMax"
                                       label={t('Maximum Age')}
@@ -591,7 +597,7 @@ export const CreateVerificationPlan = ({
                             </Grid>
                           )}
                           {values.sexCheckbox && (
-                            <Grid size={{ xs: 5 }}>
+                            <Grid size={responsiveValue(12, 5)}>
                               <Box
                                 sx={{
                                   mt: 6,
@@ -632,7 +638,7 @@ export const CreateVerificationPlan = ({
                         <Field
                           name="verificationChannel"
                           label={t('Verification Channel')}
-                          style={{ flexDirection: 'row' }}
+                          style={{ flexDirection: 'row', flexWrap: 'wrap' }}
                           alignItems="center"
                           choices={channelChoices}
                           component={FormikRadioGroup}

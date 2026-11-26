@@ -1,4 +1,5 @@
-import { Grid, MenuItem } from '@mui/material';
+import { MenuItem } from '@mui/material';
+import { ResponsiveGrid, ResponsiveGridContainer } from 'src/responsive';
 import CakeIcon from '@mui/icons-material/Cake';
 import FlashOnIcon from '@mui/icons-material/FlashOn';
 import { useTranslation } from 'react-i18next';
@@ -107,22 +108,21 @@ export function IndividualsFilter({
       applyHandler={handleApplyFilter}
       isOnPaper={isOnPaper}
     >
-      <Grid
-        container
+      <ResponsiveGridContainer
         spacing={3}
         sx={{
           alignItems: 'flex-end',
         }}
       >
-        <Grid size={{ xs: 3 }}>
+        <ResponsiveGrid size="quarter">
           <SearchTextField
             label={t('Search')}
             value={filter.search}
             onChange={(e) => handleFilterChange('search', e.target.value)}
             data-cy="ind-filters-search"
           />
-        </Grid>
-        <Grid size={{ xs: 3 }}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="quarter">
           <SearchTextField
             label={t('Phone number')}
             value={filter.phone}
@@ -134,7 +134,7 @@ export function IndividualsFilter({
             error={!!phoneError}
             helperText={phoneError ?? ''}
           />
-        </Grid>
+        </ResponsiveGrid>
         <DocumentSearchField
           onChange={handleFilterChange}
           type={filter.documentType}
@@ -142,7 +142,7 @@ export function IndividualsFilter({
           choices={documentTypeChoices}
         />
         {isAllPrograms && (
-          <Grid size={{ xs: 3 }}>
+          <ResponsiveGrid size="quarter">
             <SelectFilter
               onChange={(e) => handleFilterChange('program', e.target.value)}
               label={t('Programme')}
@@ -157,10 +157,10 @@ export function IndividualsFilter({
                 </MenuItem>
               ))}
             </SelectFilter>
-          </Grid>
+          </ResponsiveGrid>
         )}
         {!isAllPrograms && (
-          <Grid size={{ xs: 3 }}>
+          <ResponsiveGrid size="quarter">
             <RdiAutocompleteRestFilter
               filter={filter}
               name="rdiId"
@@ -170,10 +170,10 @@ export function IndividualsFilter({
               setAppliedFilter={setAppliedFilter}
               setFilter={setFilter}
             />
-          </Grid>
+          </ResponsiveGrid>
         )}
         {showAdminAreaFilter && (
-          <Grid size={{ xs: 3 }}>
+          <ResponsiveGrid size="quarter">
             <AdminAreaAutocomplete
               level={2}
               name="admin2"
@@ -185,9 +185,9 @@ export function IndividualsFilter({
               setAppliedFilter={setAppliedFilter}
               dataCy="ind-filters-admin2"
             />
-          </Grid>
+          </ResponsiveGrid>
         )}
-        <Grid size={{ xs: 3 }}>
+        <ResponsiveGrid size="quarter">
           <SelectFilter
             onChange={(e) => handleFilterChange('sex', e.target.value)}
             value={filter.sex}
@@ -201,8 +201,8 @@ export function IndividualsFilter({
               </MenuItem>
             ))}
           </SelectFilter>
-        </Grid>
-        <Grid size={{ xs: 2 }}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="sixth" mobileSize="half">
           <NumberTextField
             fullWidth
             topLabel={t('Age')}
@@ -215,8 +215,8 @@ export function IndividualsFilter({
             }}
             icon={<CakeIcon />}
           />
-        </Grid>
-        <Grid size={{ xs: 2 }}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="sixth" mobileSize="half">
           <NumberTextField
             fullWidth
             placeholder={t('To')}
@@ -228,16 +228,16 @@ export function IndividualsFilter({
             }}
             icon={<CakeIcon />}
           />
-        </Grid>
-        <Grid size={{ xs: 2 }}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="sixth">
           <DatePickerFilter
             topLabel={t('Date of Birth')}
             onChange={(date) => handleFilterChange('birthDate', date)}
             value={filter.birthDate}
             dataCy="ind-filters-birth-date"
           />
-        </Grid>
-        <Grid size={{ xs: 3 }}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="quarter">
           <SelectFilter
             onChange={(e) => handleFilterChange('flags', e.target.value)}
             label={t('Flags')}
@@ -256,8 +256,8 @@ export function IndividualsFilter({
               </MenuItem>
             ))}
           </SelectFilter>
-        </Grid>
-        <Grid size={{ xs: 3 }}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="quarter">
           <SelectFilter
             onChange={(e) => handleFilterChange('orderBy', e.target.value)}
             label={t('Sort by')}
@@ -272,8 +272,8 @@ export function IndividualsFilter({
               </MenuItem>
             ))}
           </SelectFilter>
-        </Grid>
-        <Grid size={{ xs: 2 }}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="sixth">
           <SelectFilter
             onChange={(e) => handleFilterChange('status', e.target.value)}
             label={t('Status')}
@@ -286,8 +286,8 @@ export function IndividualsFilter({
               </MenuItem>
             ))}
           </SelectFilter>
-        </Grid>
-        <Grid size={{ xs: 2 }}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="sixth" mobileSize="half">
           <DatePickerFilter
             topLabel={t('Registration Date')}
             placeholder={t('From')}
@@ -297,8 +297,8 @@ export function IndividualsFilter({
             value={filter.lastRegistrationDateMin}
             dataCy="ind-filters-reg-date-from"
           />
-        </Grid>
-        <Grid size={{ xs: 2 }}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="sixth" mobileSize="half">
           <DatePickerFilter
             placeholder={t('To')}
             onChange={(date) =>
@@ -307,9 +307,9 @@ export function IndividualsFilter({
             value={filter.lastRegistrationDateMax}
             dataCy="ind-filters-reg-date-to"
           />
-        </Grid>
+        </ResponsiveGrid>
         {isAllPrograms && (
-          <Grid size={{ xs: 2 }}>
+          <ResponsiveGrid size="sixth">
             <SelectFilter
               onChange={(e) =>
                 handleFilterChange('programState', e.target.value)
@@ -327,9 +327,9 @@ export function IndividualsFilter({
                 {t('All Programmes')}
               </MenuItem>
             </SelectFilter>
-          </Grid>
+          </ResponsiveGrid>
         )}
-      </Grid>
+      </ResponsiveGridContainer>
     </FiltersSection>
   );
 }

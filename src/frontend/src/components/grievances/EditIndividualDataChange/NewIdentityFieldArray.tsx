@@ -1,4 +1,4 @@
-import { Button, Grid } from '@mui/material';
+import { Button } from '@mui/material';
 import { AddCircleOutlined } from '@mui/icons-material';
 import { useLocation } from 'react-router-dom';
 import { FieldArray } from 'formik';
@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { AgencyField } from '../AgencyField';
 import { removeItemById } from '../utils/helpers';
 import type { ReactElement } from 'react';
+import { ResponsiveGrid, ResponsiveGridContainer } from 'src/responsive';
 
 export interface NewIdentityFieldArrayProps {
   addIndividualFieldsData: any;
@@ -20,15 +21,15 @@ export const NewIdentityFieldArray = ({
   const isEditTicket = location.pathname.indexOf('edit-ticket') !== -1;
   const { t } = useTranslation();
   return (
-    <Grid container spacing={3}>
+    <ResponsiveGridContainer spacing={3}>
       <FieldArray
         name="individualDataUpdateFieldsIdentities"
         render={(arrayHelpers) => (
           <>
             {values.individualDataUpdateFieldsIdentities?.map((item) => {
               return (
-                <Grid
-                  size={12}
+                <ResponsiveGrid
+                  size="full"
                   key={`${item?.id}-${item?.country}-${item?.partner}`}
                 >
                   <AgencyField
@@ -47,12 +48,12 @@ export const NewIdentityFieldArray = ({
                     baseName="individualDataUpdateFieldsIdentities"
                     values={values}
                   />
-                </Grid>
+                </ResponsiveGrid>
               );
             })}
 
-            <Grid size={8} />
-            <Grid size={12}>
+            <ResponsiveGrid size="twoThirds" />
+            <ResponsiveGrid size="full">
               <Button
                 color="primary"
                 onClick={() => {
@@ -68,10 +69,10 @@ export const NewIdentityFieldArray = ({
               >
                 {t('Add Identity')}
               </Button>
-            </Grid>
+            </ResponsiveGrid>
           </>
         )}
       />
-    </Grid>
+    </ResponsiveGridContainer>
   );
 };

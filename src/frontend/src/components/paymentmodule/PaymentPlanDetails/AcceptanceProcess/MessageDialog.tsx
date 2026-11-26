@@ -93,7 +93,9 @@ export function MessageDialog({
                 </GreyText>
               </Box>
               <DividerLine />
-              {comment}
+              <Box sx={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
+                {comment}
+              </Box>
             </Box>
           </DialogContainer>
         </DialogContent>

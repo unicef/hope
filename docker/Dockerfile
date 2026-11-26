@@ -75,9 +75,9 @@ ENTRYPOINT ["entrypoint.sh"]
 
 
 # Frontend builder
-FROM oven/bun:1.3-slim AS frontend-builder
+FROM oven/bun:1.4.2-slim AS frontend-builder
 WORKDIR /fe-build
-COPY ./src/frontend/package.json ./src/frontend/bun.lock ./
+COPY ./src/frontend/package.json ./src/frontend/bun.lock ./src/frontend/bunfig.toml ./src/frontend/.npmrc ./
 RUN bun install --frozen-lockfile
 COPY ./src/frontend ./
 RUN NODE_ENV="production" bun run build
@@ -90,7 +90,7 @@ COPY ./src/ ./src/
 COPY --chown=hope:hope --from=frontend-builder /fe-build/build $APP_PATH/src/hope/apps/web/static/web
 RUN uv sync --python=/usr/local/bin/python \
         --python-preference=system \
-        --no-editable --frozen
+        --no-editable --frozen --no-dev
 
 
 # Dist — final production image. FROM base-runtime, not base-build, so no toolchain leaks in.

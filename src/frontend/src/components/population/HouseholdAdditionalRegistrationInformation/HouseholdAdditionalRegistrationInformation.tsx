@@ -2,18 +2,21 @@ import { LabelizedField } from '@core/LabelizedField';
 import { Title } from '@core/Title';
 import { useArrayToDict } from '@hooks/useArrayToDict';
 import type { Theme } from '@mui/material';
-import { Grid, Typography } from '@mui/material';
+import { Typography } from '@mui/material';
 import Paper from '@mui/material/Paper';
 import type { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
 import type { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
+import {
+  ResponsiveGrid,
+  ResponsiveGridContainer,
+  SECTION_PADDING,
+} from 'src/responsive';
 import styled from 'styled-components';
 import { HouseholdFlexFieldPhotoModal } from '../HouseholdFlexFieldPhotoModal';
 import { formatNormalCaseValue, renderNestedObject } from '@utils/utils';
 
 const Overview = styled(Paper)<{ theme?: Theme }>`
-  padding: ${({ theme }) => theme.spacing(8)}
-    ${({ theme }) => theme.spacing(11)};
   margin-top: 20px;
   &:first-child {
     margin-top: 0px;
@@ -39,7 +42,7 @@ export const HouseholdAdditionalRegistrationInformation = ({
 
   if (Object.entries(household?.flexFields || {}).length === 0) {
     return (
-      <Overview>
+      <Overview sx={{ padding: SECTION_PADDING }}>
         <Title>
           <Typography variant="h6">
             {t('No additional registration information available')}
@@ -122,19 +125,19 @@ export const HouseholdAdditionalRegistrationInformation = ({
 
   return (
     <div>
-      <Overview>
+      <Overview sx={{ padding: SECTION_PADDING }}>
         <Title>
           <Typography variant="h6">
             {t('Additional Registration information')}
           </Typography>
         </Title>
-        <Grid container spacing={6}>
+        <ResponsiveGridContainer spacing={6}>
           {fields.map((field, i) => (
-            <Grid key={i} size={4}>
+            <ResponsiveGrid key={i} size="third">
               {field}
-            </Grid>
+            </ResponsiveGrid>
           ))}
-        </Grid>
+        </ResponsiveGridContainer>
       </Overview>
     </div>
   );

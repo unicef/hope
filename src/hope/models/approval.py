@@ -5,6 +5,8 @@ from django.utils.translation import gettext_lazy as _
 from hope.models.approval_process import ApprovalProcess
 from hope.models.utils import LongNameIndex, TimeStampedUUIDModel
 
+COMMENT_MAX_LENGTH = 2000
+
 
 def get_approval_type_choices() -> tuple:
     return Approval.TYPE_CHOICES
@@ -28,7 +30,7 @@ class Approval(TimeStampedUUIDModel):
         default=APPROVAL,
         verbose_name=_("Approval type"),
     )
-    comment = models.CharField(max_length=500, null=True, blank=True)
+    comment = models.CharField(max_length=COMMENT_MAX_LENGTH, null=True, blank=True)
     created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True)
     approval_process = models.ForeignKey(ApprovalProcess, on_delete=models.CASCADE, related_name="approvals")
 

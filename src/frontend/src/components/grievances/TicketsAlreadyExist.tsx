@@ -1,4 +1,4 @@
-import { Box, Grid, Paper, Typography } from '@mui/material';
+import { Box, Paper, Typography } from '@mui/material';
 import WarningIcon from '@mui/icons-material/Warning';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
@@ -11,6 +11,7 @@ import { ContentLink } from '@core/ContentLink';
 import { LoadingComponent } from '@core/LoadingComponent';
 import { getGrievanceDetailsPath } from './utils/createGrievanceUtils';
 import type { ReactElement } from 'react';
+import { ResponsiveGrid } from 'src/responsive';
 
 const StyledBox = styled(Paper)`
   border: 1px solid ${({ theme }) => theme.hctPalette.orange};
@@ -83,7 +84,7 @@ export function TicketsAlreadyExist({ values }): ReactElement {
     (!!values.selectedHousehold?.id || !!values.selectedIndividual?.id);
 
   return results.length && shouldShowBox ? (
-    <Grid size={6}>
+    <ResponsiveGrid size="half">
       <StyledBox>
         <OrangeTitle>
           <Typography variant="h6">
@@ -108,6 +109,6 @@ export function TicketsAlreadyExist({ values }): ReactElement {
           {mappedTickets}
         </Box>
       </StyledBox>
-    </Grid>
+    </ResponsiveGrid>
   ) : null;
 }

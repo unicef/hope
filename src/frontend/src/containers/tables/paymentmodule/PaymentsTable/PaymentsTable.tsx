@@ -34,6 +34,7 @@ import { PaymentsFilters } from './PaymentsFilters';
 import { PaymentsTableRow } from './PaymentsTableRow';
 import { headCells, headCellsPeople } from './PaymentsTableHeadCells';
 import { WarningTooltipTable } from './WarningTooltipTable';
+import { responsiveValue } from 'src/responsive';
 
 const StyledBox = styled(Box)`
   background-color: #fff;
@@ -241,7 +242,7 @@ const PaymentsTableSection = ({
 
   return (
     <>
-      <Box sx={{ p: 4 }}>
+      <Box sx={{ p: responsiveValue(2, 4) }}>
         <PaymentsFilters
           filter={filter}
           setFilter={setFilter}
@@ -265,7 +266,7 @@ const PaymentsTableSection = ({
           <Paper>
             <StyledBox
               sx={{
-                p: 6,
+                p: responsiveValue(4, 6),
                 display: 'flex',
                 justifyContent: 'space-between',
               }}

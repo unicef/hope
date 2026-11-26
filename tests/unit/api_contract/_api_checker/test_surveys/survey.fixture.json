@@ -119,6 +119,7 @@
                     "household_filters_available": true,
                     "recalculate_composition": false,
                     "weight": 0,
+                    "payee_type": "8d1f5a4e-2c7b-4f0e-9b3a-6e1d2c4b5a70",
                     "compatible_types": [
                         38
                     ],
@@ -136,7 +137,23 @@
                     "group_label_plural": "Households",
                     "member_label": "Individual",
                     "member_label_plural": "Individuals",
-                    "master_detail": true
+                    "payee_type": "8d1f5a4e-2c7b-4f0e-9b3a-6e1d2c4b5a70",
+                    "active": true,
+                    "data_collecting_types": []
+                }
+            },
+            {
+                "model": "core.payeetype",
+                "pk": "8d1f5a4e-2c7b-4f0e-9b3a-6e1d2c4b5a70",
+                "fields": {
+                    "created_at": "2025-01-01T00:00:00Z",
+                    "updated_at": "2025-01-01T00:00:00Z",
+                    "name": "Household",
+                    "gl_code": "7700410",
+                    "description": "",
+                    "active": true,
+                    "weight": 0,
+                    "default_data_collecting_type": null
                 }
             },
             {

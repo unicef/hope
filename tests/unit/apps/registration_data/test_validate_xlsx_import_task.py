@@ -30,7 +30,7 @@ def program(business_area: Any) -> Any:
 @pytest.fixture
 def program_with_social_worker(business_area: Any) -> Any:
     data_collecting_type = DataCollectingTypeFactory(type=DataCollectingType.Type.SOCIAL)
-    beneficiary_group = BeneficiaryGroupFactory(master_detail=False)
+    beneficiary_group = BeneficiaryGroupFactory()
     return ProgramFactory(
         business_area=business_area,
         data_collecting_type=data_collecting_type,

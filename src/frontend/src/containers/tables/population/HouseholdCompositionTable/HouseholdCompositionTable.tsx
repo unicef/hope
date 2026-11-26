@@ -8,6 +8,7 @@ import {
   Table,
   TableBody,
   TableCell,
+  TableContainer,
   TableHead,
   TableRow,
   Tooltip,
@@ -17,6 +18,7 @@ import type { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
 import type { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useProgramContext } from 'src/programContext';
+import { responsiveValue } from 'src/responsive';
 import styled from 'styled-components';
 
 const GreyTableCell = styled(TableCell)`
@@ -24,7 +26,6 @@ const GreyTableCell = styled(TableCell)`
 `;
 const OverviewPaper = styled(Paper)`
   margin: 20px 20px 0 20px;
-  padding: 20px ${({ theme }) => theme.spacing(11)};
 `;
 
 export interface HouseholdCompositionTableProps {
@@ -107,7 +108,10 @@ export function HouseholdCompositionTable({
     { label: t('Size'), value: household?.kabSize, dataCy: 'kab-size' },
   ];
   return (
-    <OverviewPaper data-cy="known-affected-beneficiaries">
+    <OverviewPaper
+      data-cy="known-affected-beneficiaries"
+      sx={{ padding: responsiveValue('16px', '20px 44px') }}
+    >
       <Title>
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
           <Typography variant="h6">{title}</Typography>
@@ -122,39 +126,44 @@ export function HouseholdCompositionTable({
           </Tooltip>
         </Box>
       </Title>
-      <Table>
-        <TableHead>
-          <TableRow>
-            <TableCell align="left">{t('Age Group')}</TableCell>
-            <GreyTableCell align="left">{t('Females')}</GreyTableCell>
-            <GreyTableCell align="left">{t('with disability')}</GreyTableCell>
-            <GreyTableCell align="left">{t('Pregnant')}</GreyTableCell>
-            <TableCell align="left" />
-            <GreyTableCell align="left">{t('Males')}</GreyTableCell>
-            <GreyTableCell align="left">{t('with disability')}</GreyTableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {rows.map((row) => (
-            <TableRow key={row.ageGroup} data-cy={row.dataCy}>
-              <TableCell align="left">{row.ageGroup}</TableCell>
-              <GreyTableCell align="left">{format(row.female)}</GreyTableCell>
-              <GreyTableCell align="left">
-                {format(row.femaleDisabled)}
-              </GreyTableCell>
-              <GreyTableCell align="left">{format(row.pregnant)}</GreyTableCell>
+      <TableContainer>
+        <Table>
+          <TableHead>
+            <TableRow>
+              <TableCell align="left">{t('Age Group')}</TableCell>
+              <GreyTableCell align="left">{t('Females')}</GreyTableCell>
+              <GreyTableCell align="left">{t('with disability')}</GreyTableCell>
+              <GreyTableCell align="left">{t('Pregnant')}</GreyTableCell>
               <TableCell align="left" />
-              <GreyTableCell align="left">{format(row.male)}</GreyTableCell>
-              <GreyTableCell align="left">
-                {format(row.maleDisabled)}
-              </GreyTableCell>
+              <GreyTableCell align="left">{t('Males')}</GreyTableCell>
+              <GreyTableCell align="left">{t('with disability')}</GreyTableCell>
             </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+          </TableHead>
+          <TableBody>
+            {rows.map((row) => (
+              <TableRow key={row.ageGroup} data-cy={row.dataCy}>
+                <TableCell align="left">{row.ageGroup}</TableCell>
+                <GreyTableCell align="left">{format(row.female)}</GreyTableCell>
+                <GreyTableCell align="left">
+                  {format(row.femaleDisabled)}
+                </GreyTableCell>
+                <GreyTableCell align="left">
+                  {format(row.pregnant)}
+                </GreyTableCell>
+                <TableCell align="left" />
+                <GreyTableCell align="left">{format(row.male)}</GreyTableCell>
+                <GreyTableCell align="left">
+                  {format(row.maleDisabled)}
+                </GreyTableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
       <Box
         sx={{
           display: 'flex',
+          flexWrap: 'wrap',
           mt: 2,
         }}
       >

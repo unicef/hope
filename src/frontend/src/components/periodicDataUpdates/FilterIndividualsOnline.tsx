@@ -2,7 +2,8 @@ import { DatePickerFilter } from '@components/core/DatePickerFilter';
 import { FiltersSection } from '@components/core/FiltersSection';
 import { NumberTextField } from '@components/core/NumberTextField';
 import { SelectFilter } from '@components/core/SelectFilter';
-import { Grid, MenuItem } from '@mui/material';
+import { MenuItem } from '@mui/material';
+import { ResponsiveGrid, ResponsiveGridContainer } from 'src/responsive';
 import { YES_NO_CHOICES } from '@utils/constants';
 import { RdiAutocompleteRestFilter } from '@shared/autocompletes/RdiAutocompleteRestFilter';
 import { useSexChoices } from '@hooks/useSexChoices';
@@ -34,30 +35,29 @@ export const FilterIndividualsOnline: FC<FilterIndividualsOnlineProps> = ({
 
   return (
     <FiltersSection isOnPaper={isOnPaper} withApplyClearButtons={false}>
-      <Grid
-        container
+      <ResponsiveGridContainer
         spacing={3}
         sx={{
           alignItems: 'flex-end',
         }}
       >
-        <Grid size={3}>
+        <ResponsiveGrid size="quarter">
           <RdiAutocompleteRestFilter
             value={filter.registrationDataImportId}
             onChange={(selectedItem) =>
               handleStateFilterChange('registrationDataImportId', selectedItem)
             }
           />
-        </Grid>
-        <Grid size={3}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="quarter">
           <TargetPopulationAutocompleteRestFilter
             value={filter.targetPopulationId}
             onChange={(selectedItem) =>
               handleStateFilterChange('targetPopulationId', selectedItem)
             }
           />
-        </Grid>
-        <Grid size={3}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="quarter">
           <SelectFilter
             onChange={(e) => handleStateFilterChange('gender', e.target.value)}
             label={t('Gender')}
@@ -70,8 +70,8 @@ export const FilterIndividualsOnline: FC<FilterIndividualsOnlineProps> = ({
               </MenuItem>
             ))}
           </SelectFilter>
-        </Grid>
-        <Grid size={3}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="quarter" mobileSize="half">
           <NumberTextField
             topLabel={t('Age')}
             value={filter.ageFrom}
@@ -80,8 +80,8 @@ export const FilterIndividualsOnline: FC<FilterIndividualsOnlineProps> = ({
             onChange={(e) => handleStateFilterChange('ageFrom', e.target.value)}
             data-cy="hh-filters-age-from"
           />
-        </Grid>
-        <Grid size={3}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="quarter" mobileSize="half">
           <NumberTextField
             value={filter.ageTo}
             placeholder={t('To')}
@@ -89,8 +89,8 @@ export const FilterIndividualsOnline: FC<FilterIndividualsOnlineProps> = ({
             onChange={(e) => handleStateFilterChange('ageTo', e.target.value)}
             data-cy="hh-filters-age-to"
           />
-        </Grid>
-        <Grid size={3}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="quarter" mobileSize="half">
           <DatePickerFilter
             topLabel={t('Registration Date')}
             placeholder={t('From')}
@@ -100,8 +100,8 @@ export const FilterIndividualsOnline: FC<FilterIndividualsOnlineProps> = ({
             value={filter.registrationDateFrom}
             dataCy="ind-filters-reg-date-from"
           />
-        </Grid>
-        <Grid size={3}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="quarter" mobileSize="half">
           <DatePickerFilter
             placeholder={t('To')}
             onChange={(date) =>
@@ -110,8 +110,8 @@ export const FilterIndividualsOnline: FC<FilterIndividualsOnlineProps> = ({
             value={filter.registrationDateTo}
             dataCy="ind-filters-reg-date-to"
           />
-        </Grid>
-        <Grid size={3}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="quarter">
           <SelectFilter
             onChange={(e) =>
               handleStateFilterChange('hasGrievanceTicket', e.target.value)
@@ -126,8 +126,8 @@ export const FilterIndividualsOnline: FC<FilterIndividualsOnlineProps> = ({
               </MenuItem>
             ))}
           </SelectFilter>
-        </Grid>
-        <Grid size={3}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="quarter">
           <AdminAreaAutocompleteMultipleRestFilter
             value={filter.admin1 || []}
             onChange={(_, option) => {
@@ -137,8 +137,8 @@ export const FilterIndividualsOnline: FC<FilterIndividualsOnlineProps> = ({
             dataCy="filter-admin1"
             disabled={filter.admin2?.length > 0}
           />
-        </Grid>
-        <Grid size={3}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="quarter">
           <AdminAreaAutocompleteMultipleRestFilter
             value={filter.admin2 || []}
             onChange={(_, option) => {
@@ -148,8 +148,8 @@ export const FilterIndividualsOnline: FC<FilterIndividualsOnlineProps> = ({
             dataCy="filter-admin2"
             disabled={filter.admin1?.length > 0}
           />
-        </Grid>
-        <Grid size={3}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="quarter">
           <SelectFilter
             onChange={(e) =>
               handleStateFilterChange('receivedAssistance', e.target.value)
@@ -164,8 +164,8 @@ export const FilterIndividualsOnline: FC<FilterIndividualsOnlineProps> = ({
               </MenuItem>
             ))}
           </SelectFilter>
-        </Grid>
-      </Grid>
+        </ResponsiveGrid>
+      </ResponsiveGridContainer>
     </FiltersSection>
   );
 };

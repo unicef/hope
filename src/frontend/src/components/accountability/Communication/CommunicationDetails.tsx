@@ -1,4 +1,4 @@
-import { Grid, Typography } from '@mui/material';
+import { Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { BlackLink } from '@core/BlackLink';
@@ -8,6 +8,7 @@ import { OverviewContainer } from '@core/OverviewContainer';
 import { Title } from '@core/Title';
 import { UniversalMoment } from '@core/UniversalMoment';
 import type { ReactElement } from 'react';
+import { ResponsiveGrid, ResponsiveGridContainer } from 'src/responsive';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import type { MessageDetail } from '@restgenerated/models/MessageDetail';
 
@@ -26,17 +27,17 @@ function CommunicationDetails({
         <Typography variant="h6">{t('Details')}</Typography>
       </Title>
       <OverviewContainer>
-        <Grid container spacing={6}>
-          <Grid size={{ xs: 3 }}>
+        <ResponsiveGridContainer spacing={6}>
+          <ResponsiveGrid size="quarter" mobileSize="half">
             <LabelizedField label={t('Created By')} value={message.createdBy} />
-          </Grid>
-          <Grid size={{ xs: 3 }}>
+          </ResponsiveGrid>
+          <ResponsiveGrid size="quarter" mobileSize="half">
             <LabelizedField label={t('Date Created')}>
               <UniversalMoment>{message.createdAt}</UniversalMoment>
             </LabelizedField>
-          </Grid>
+          </ResponsiveGrid>
           {message.paymentPlan ? (
-            <Grid size={{ xs: 4 }}>
+            <ResponsiveGrid size="third" mobileSize="half">
               <LabelizedField label={t('Target Population')}>
                 <BlackLink
                   to={`/${baseUrl}/target-population/${message?.paymentPlan.id}`}
@@ -44,14 +45,14 @@ function CommunicationDetails({
                   {message?.paymentPlan.name}
                 </BlackLink>
               </LabelizedField>
-            </Grid>
+            </ResponsiveGrid>
           ) : (
-            <Grid size={{ xs: 4 }}>
+            <ResponsiveGrid size="third" mobileSize="half">
               <LabelizedField label={t('Target Population')}>-</LabelizedField>
-            </Grid>
+            </ResponsiveGrid>
           )}
           {message.registrationDataImport && (
-            <Grid size={{ xs: 4 }}>
+            <ResponsiveGrid size="third" mobileSize="half">
               <LabelizedField label={t('Registration Data Import')}>
                 <BlackLink
                   to={`/${baseUrl}/registration-data-import/${message.registrationDataImport.id}`}
@@ -59,9 +60,9 @@ function CommunicationDetails({
                   {message.registrationDataImport.name}
                 </BlackLink>
               </LabelizedField>
-            </Grid>
+            </ResponsiveGrid>
           )}
-        </Grid>
+        </ResponsiveGridContainer>
       </OverviewContainer>
     </ContainerColumnWithBorder>
   );

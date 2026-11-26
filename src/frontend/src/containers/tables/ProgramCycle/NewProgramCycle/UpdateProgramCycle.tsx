@@ -22,6 +22,7 @@ import { Field, Form, Formik } from 'formik';
 import moment from 'moment';
 import { useTranslation } from 'react-i18next';
 import * as Yup from 'yup';
+import { ResponsiveGrid } from 'src/responsive';
 
 interface UpdateProgramCycleProps {
   program: Partial<ProgramDetail>;
@@ -146,23 +147,23 @@ const UpdateProgramCycle = ({
               </GreyText>
             </DialogDescription>
             <Grid container spacing={3}>
-              <Grid size={6}>
+              <ResponsiveGrid size="half">
                 <LabelizedField
                   data-cy="previous-program-cycle-title"
                   label={t('Programme Cycle Title')}
                 >
                   {values.title}
                 </LabelizedField>
-              </Grid>
-              <Grid size={6}>
+              </ResponsiveGrid>
+              <ResponsiveGrid size="half">
                 <LabelizedField
                   data-cy="previous-program-cycle-start-date"
                   label={t('Start Date')}
                 >
                   {values.startDate}
                 </LabelizedField>
-              </Grid>
-              <Grid size={6}>
+              </ResponsiveGrid>
+              <ResponsiveGrid size="half">
                 <Field
                   name="endDate"
                   label={t('End Date')}
@@ -172,7 +173,7 @@ const UpdateProgramCycle = ({
                   decoratorEnd={<CalendarTodayRoundedIcon color="disabled" />}
                   data-cy="input-previous-program-cycle-end-date"
                 />
-              </Grid>
+              </ResponsiveGrid>
             </Grid>
           </DialogContent>
           <DialogFooter>

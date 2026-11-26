@@ -18,10 +18,8 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useHopeDetailsQuery } from '@hooks/useHopeDetailsQuery';
 import { usePermissions } from '@hooks/usePermissions';
 import Box from '@mui/material/Box';
-import Grid from '@mui/material/Grid';
 import { Typography } from '@mui/material';
 import Paper from '@mui/material/Paper';
-import type { Theme } from '@mui/material/styles';
 import type { IndividualChoices } from '@restgenerated/models/IndividualChoices';
 import { RestService } from '@restgenerated/services/RestService';
 import { restQueryKey } from '@utils/queryKeys';
@@ -31,6 +29,11 @@ import type { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useParams } from 'react-router-dom';
 import { useProgramContext } from 'src/programContext';
+import {
+  ResponsiveGrid,
+  ResponsiveGridContainer,
+  SECTION_PADDING,
+} from 'src/responsive';
 import styled from 'styled-components';
 import { PERMISSIONS, hasPermissions } from '../../../config/permissions';
 import { UniversalActivityLogTable } from '../../tables/UniversalActivityLogTable';
@@ -46,9 +49,7 @@ const Container = styled.div`
   }
 `;
 
-const Overview = styled(Paper)<{ theme?: Theme }>`
-  padding: ${({ theme }) => theme.spacing(8)}
-    ${({ theme }) => theme.spacing(11)};
+const Overview = styled(Paper)`
   margin-top: 20px;
   &:first-child {
     margin-top: 0;
@@ -231,22 +232,22 @@ const PopulationHouseholdDetailsPage = (): ReactElement => {
           household={household}
           flexFieldsData={flexFieldsData}
         />
-        <Overview>
+        <Overview sx={{ padding: SECTION_PADDING }}>
           <Title>
             <Typography variant="h6">{t('Registration Details')}</Typography>
           </Title>
-          <Grid container spacing={6}>
-            <Grid size={{ xs: 3 }}>
+          <ResponsiveGridContainer spacing={6}>
+            <ResponsiveGrid size="quarter" mobileSize="half">
               <LabelizedField label={t('Source')}>
                 <div>{household?.registrationDataImport?.dataSource}</div>
               </LabelizedField>
-            </Grid>
-            <Grid size={{ xs: 3 }}>
+            </ResponsiveGrid>
+            <ResponsiveGrid size="quarter" mobileSize="half">
               <LabelizedField label={t('Import name')}>
                 <div>{household?.registrationDataImport?.name}</div>
               </LabelizedField>
-            </Grid>
-            <Grid size={{ xs: 3 }}>
+            </ResponsiveGrid>
+            <ResponsiveGrid size="quarter" mobileSize="half">
               <LabelizedField label={t('Registration Date')}>
                 <div>
                   <UniversalMoment>
@@ -254,43 +255,43 @@ const PopulationHouseholdDetailsPage = (): ReactElement => {
                   </UniversalMoment>
                 </div>
               </LabelizedField>
-            </Grid>
-            <Grid size={{ xs: 3 }}>
+            </ResponsiveGrid>
+            <ResponsiveGrid size="quarter" mobileSize="half">
               <LabelizedField label={t('User name')}>
                 {household?.registrationDataImport?.importedBy?.email}
               </LabelizedField>
-            </Grid>
+            </ResponsiveGrid>
             {household?.programRegistrationId && (
-              <Grid size={{ xs: 3 }}>
+              <ResponsiveGrid size="quarter" mobileSize="half">
                 <LabelizedField label={t('Programme registration id')}>
                   {household.programRegistrationId}
                 </LabelizedField>
-              </Grid>
+              </ResponsiveGrid>
             )}
-          </Grid>
+          </ResponsiveGridContainer>
           {household?.registrationDataImport?.dataSource === 'XLS' ? null : (
             <>
               <hr />
               <SubTitle variant="h6">{t('Data Collection')}</SubTitle>
-              <Grid container spacing={6}>
-                <Grid size={{ xs: 3 }}>
+              <ResponsiveGridContainer spacing={6}>
+                <ResponsiveGrid size="quarter" mobileSize="half">
                   <LabelizedField label={t('Start time')}>
                     <UniversalMoment>{household?.start}</UniversalMoment>
                   </LabelizedField>
-                </Grid>
-                <Grid size={{ xs: 3 }}>
+                </ResponsiveGrid>
+                <ResponsiveGrid size="quarter" mobileSize="half">
                   <LabelizedField label={t('End time')}>
                     <UniversalMoment>
                       {household?.firstRegistrationDate}
                     </UniversalMoment>
                   </LabelizedField>
-                </Grid>
-                <Grid size={{ xs: 3 }}>
+                </ResponsiveGrid>
+                <ResponsiveGrid size="quarter" mobileSize="half">
                   <LabelizedField label={t('Device ID')}>
                     {household?.deviceid}
                   </LabelizedField>
-                </Grid>
-              </Grid>
+                </ResponsiveGrid>
+              </ResponsiveGridContainer>
             </>
           )}
         </Overview>

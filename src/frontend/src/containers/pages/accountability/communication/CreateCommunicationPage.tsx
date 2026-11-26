@@ -48,6 +48,7 @@ import { useTranslation } from 'react-i18next';
 import { Link, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import * as Yup from 'yup';
+import { ResponsiveGrid, responsiveValue, useIsMobile } from 'src/responsive';
 import { PERMISSIONS, hasPermissions } from '../../../../config/permissions';
 
 const steps = ['Recipients Look up', 'Sample Size', 'Details'];
@@ -118,6 +119,7 @@ function prepareSampleSizeRequest(
 
 const CreateCommunicationPage = (): ReactElement => {
   const { t } = useTranslation();
+  const isMobile = useIsMobile();
   const { baseUrl, businessArea, programId } = useBaseUrl();
   const {
     data: sexChoices = [],
@@ -424,8 +426,8 @@ const CreateCommunicationPage = (): ReactElement => {
             }
           />
           <PaperContainer>
-            <Grid size={9}>
-              <Stepper activeStep={activeStep}>
+            <Grid size={responsiveValue(12, 9)}>
+              <Stepper activeStep={activeStep} alternativeLabel={isMobile}>
                 {steps.map((label) => {
                   const stepProps: { completed?: boolean } = {};
                   const labelProps: {
@@ -465,7 +467,7 @@ const CreateCommunicationPage = (): ReactElement => {
                 (values.households.length ? (
                   <Box
                     sx={{
-                      px: 8,
+                      px: responsiveValue(2, 8),
                     }}
                   >
                     <Box
@@ -499,19 +501,20 @@ const CreateCommunicationPage = (): ReactElement => {
                 ) : (
                   <Box
                     sx={{
-                      px: 8,
+                      px: responsiveValue(2, 8),
                     }}
                   >
                     <Box
                       sx={{
                         display: 'flex',
                         alignItems: 'center',
+                        flexWrap: 'wrap',
                       }}
                     >
                       <Box
                         sx={{
-                          pl: 5,
-                          pr: 5,
+                          pl: responsiveValue(0, 5),
+                          pr: responsiveValue(2, 5),
                           fontWeight: '500',
                           fontSize: 'medium',
                         }}
@@ -629,6 +632,7 @@ const CreateCommunicationPage = (): ReactElement => {
                           <Box
                             sx={{
                               display: 'flex',
+                              flexWrap: 'wrap',
                             }}
                           >
                             <Field
@@ -661,7 +665,10 @@ const CreateCommunicationPage = (): ReactElement => {
                             {values.ageCheckbox && (
                               <Grid size={{ xs: 12 }}>
                                 <Grid container>
-                                  <Grid size={{ xs: 4 }}>
+                                  <ResponsiveGrid
+                                    size="third"
+                                    mobileSize="half"
+                                  >
                                     <Field
                                       name="filterAgeMin"
                                       label={t('Minimum Age')}
@@ -669,8 +676,11 @@ const CreateCommunicationPage = (): ReactElement => {
                                       color="primary"
                                       component={FormikTextField}
                                     />
-                                  </Grid>
-                                  <Grid size={{ xs: 4 }}>
+                                  </ResponsiveGrid>
+                                  <ResponsiveGrid
+                                    size="third"
+                                    mobileSize="half"
+                                  >
                                     <Field
                                       name="filterAgeMax"
                                       label={t('Maximum Age')}
@@ -678,12 +688,12 @@ const CreateCommunicationPage = (): ReactElement => {
                                       color="primary"
                                       component={FormikTextField}
                                     />
-                                  </Grid>
+                                  </ResponsiveGrid>
                                 </Grid>
                               </Grid>
                             )}
                             {values.sexCheckbox && (
-                              <Grid size={{ xs: 5 }}>
+                              <Grid size={responsiveValue(12, 5)}>
                                 {isSexChoicesLoading ? (
                                   <LoadingComponent />
                                 ) : (
@@ -772,6 +782,7 @@ const CreateCommunicationPage = (): ReactElement => {
                 pt: 3,
                 display: 'flex',
                 flexDirection: 'row',
+                flexWrap: 'wrap',
               }}
             >
               <Box

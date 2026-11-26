@@ -14,6 +14,7 @@ import MergeRegistrationDataImportDialog from './MergeRegistrationDataImportDial
 import { RerunDedupe } from './RerunDedupe';
 import { RefuseRdiForm } from './refuseRdiForm';
 import { AdminButton } from '@core/AdminButton';
+import { HeaderActions } from '@core/HeaderActions';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import { RegistrationDataImportStatusEnum } from '@restgenerated/models/RegistrationDataImportStatusEnum';
 import type { RegistrationDataImportDetail } from '@restgenerated/models/RegistrationDataImportDetail';
@@ -77,14 +78,13 @@ const RegistrationDataImportDetailsPageHeader = ({
       });
     },
   });
-  const { mutate: eraseRdiMutate, isPending: eraseLoading } =
-    useActionMutation(
-      registration.id,
-      RestService.restBusinessAreasProgramsRegistrationDataImportsEraseCreate,
-      restQueryKey(
-        RestService.restBusinessAreasProgramsRegistrationDataImportsRetrieve,
-      ),
-    );
+  const { mutate: eraseRdiMutate, isPending: eraseLoading } = useActionMutation(
+    registration.id,
+    RestService.restBusinessAreasProgramsRegistrationDataImportsEraseCreate,
+    restQueryKey(
+      RestService.restBusinessAreasProgramsRegistrationDataImportsRetrieve,
+    ),
+  );
   const [showRefuseRdiForm, setShowRefuseRdiForm] = useState(false);
 
   let buttons = null;
@@ -114,11 +114,13 @@ const RegistrationDataImportDetailsPageHeader = ({
   switch (registration?.status) {
     case RegistrationDataImportStatusEnum.IMPORT_ERROR:
     case RegistrationDataImportStatusEnum.MERGE_ERROR:
-      buttons = <div>{canRefuse && eraseButton}</div>;
+      buttons = (
+        <HeaderActions spacing="none">{canRefuse && eraseButton}</HeaderActions>
+      );
       break;
     case RegistrationDataImportStatusEnum.IN_REVIEW:
       buttons = (
-        <div>
+        <HeaderActions spacing="none">
           {isManualIngest &&
             !registration.countryWorkspaceId &&
             canMerge &&
@@ -139,12 +141,12 @@ const RegistrationDataImportDetailsPageHeader = ({
               <MergeRegistrationDataImportDialog registration={registration} />
             </MergeButtonContainer>
           )}
-        </div>
+        </HeaderActions>
       );
       break;
     case RegistrationDataImportStatusEnum.DEDUPLICATION_FAILED:
       buttons = (
-        <div>
+        <HeaderActions spacing="none">
           {canRefuse && eraseButton}
           {isManualIngest &&
             !registration.countryWorkspaceId &&
@@ -153,22 +155,24 @@ const RegistrationDataImportDetailsPageHeader = ({
                 <RerunDedupe registration={registration} />
               </MergeButtonContainer>
             )}
-        </div>
+        </HeaderActions>
       );
       break;
     case RegistrationDataImportStatusEnum.MERGED:
       buttons = (
-        <MergeButtonContainer>
-          <Button
-            variant="contained"
-            color="primary"
-            component={Link}
-            data-cy="button-view-tickets"
-            to={`/${baseUrl}/grievance/rdi/${registration.id}`}
-          >
-            {t('View Tickets')}
-          </Button>
-        </MergeButtonContainer>
+        <HeaderActions spacing="none">
+          <MergeButtonContainer>
+            <Button
+              variant="contained"
+              color="primary"
+              component={Link}
+              data-cy="button-view-tickets"
+              to={`/${baseUrl}/grievance/rdi/${registration.id}`}
+            >
+              {t('View Tickets')}
+            </Button>
+          </MergeButtonContainer>
+        </HeaderActions>
       );
       break;
   }

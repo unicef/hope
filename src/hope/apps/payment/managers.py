@@ -150,6 +150,9 @@ class PaymentQuerySet(SoftDeletableQuerySet):
     def eligible(self) -> QuerySet:
         return self.exclude(Q(conflicted=True) | Q(excluded=True) | Q(has_valid_wallet=False))
 
+    def unreconciled(self) -> QuerySet:
+        return self.filter(delivered_quantity__isnull=True).exclude(status__in=self.model.FAILED_STATUSES)
+
     def update_and_log(
         self,
         logged_changes: dict[str, Any],

@@ -1,5 +1,6 @@
 import type { FC } from 'react';
 import { Stepper, Step, StepButton } from '@mui/material';
+import { useIsMobile } from 'src/responsive';
 
 interface StepData {
   title: string;
@@ -49,8 +50,10 @@ export const ProgramStepper: FC<ProgramStepperProps> = ({
   setStep,
   stepsData,
 }) => {
+  const isMobile = useIsMobile();
+  // Side-by-side labels don't fit a phone; put them under the step icons there.
   return (
-    <Stepper activeStep={step}>
+    <Stepper activeStep={step} alternativeLabel={isMobile}>
       {stepsData.map((item, index) => (
         <Step key={item.title}>
           <StepButton data-cy={item.dataCy} onClick={() => setStep(index)}>

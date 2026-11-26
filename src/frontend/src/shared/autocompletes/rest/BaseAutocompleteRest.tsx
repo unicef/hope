@@ -29,6 +29,7 @@ export function BaseAutocompleteRest({
   onDebouncedInputTextChanges,
   required = false,
   error = null,
+  enabled = true,
 }: {
   value: string;
   disabled?: boolean;
@@ -55,6 +56,7 @@ export function BaseAutocompleteRest({
   onDebouncedInputTextChanges: (text: string) => void;
   required?: boolean;
   error?: string;
+  enabled?: boolean;
 }): ReactElement {
   const [modifiedOptions, setModifiedOptions] = useState<OptionType[]>([]);
   const [inputValue, setInputValue] = useState('');
@@ -69,6 +71,7 @@ export function BaseAutocompleteRest({
       ...queryParams,
     }),
     queryFn: () => fetchFunction(businessArea, programId, { ...queryParams }),
+    enabled,
   });
   useEffect(
     () => onDebouncedInputTextChanges(debouncedInputText),

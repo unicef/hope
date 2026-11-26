@@ -4,10 +4,12 @@ import { ButtonDialog } from '@core/ButtonDialog';
 import { useConfirmation } from '@core/ConfirmationDialog';
 import { LoadingButton } from '@core/LoadingButton';
 import { PageHeader } from '@core/PageHeader';
+import { HeaderActions } from '@core/HeaderActions';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useSnackbar } from '@hooks/useSnackBar';
 import EditIcon from '@mui/icons-material/EditRounded';
 import { Box, Button, Tooltip } from '@mui/material';
+import { responsiveValue } from 'src/responsive';
 import type { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
 import { RestService } from '@restgenerated/services/RestService';
 import { restQueryKey } from '@utils/queryKeys';
@@ -23,6 +25,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { useProgramContext } from '../../programContext';
 import type { MiśTheme } from '../../theme';
+import { AssignGrievanceDialog } from './GrievancesDetails/AssignGrievanceDialog';
 import {
   getGrievanceDetailsPath,
   getGrievanceEditPath,
@@ -32,7 +35,7 @@ import { showApiErrorMessages } from '@utils/utils';
 import { PERMISSIONS } from 'src/config/permissions';
 import { countTicketChanges, getTicketData } from './utils/ticketData';
 
-const Separator = styled.div`
+const Separator = styled(Box)`
   width: 1px;
   height: 28px;
   border: 1px solid
@@ -49,6 +52,7 @@ export const GrievanceDetailsToolbar = ({
   canSendBack,
   canClose,
   canAssign,
+  canAssignToOther,
 }: {
   ticket: GrievanceTicketDetail;
   canEdit: boolean;
@@ -58,6 +62,7 @@ export const GrievanceDetailsToolbar = ({
   canSendBack: boolean;
   canClose: boolean;
   canAssign: boolean;
+  canAssignToOther: boolean;
 }): ReactElement => {
   const { t } = useTranslation();
   const { showMessage } = useSnackbar();
@@ -407,12 +412,7 @@ export const GrievanceDetailsToolbar = ({
       breadCrumbs={breadCrumbsItems}
       flags={<AdminButton adminUrl={ticket.adminUrl} />}
     >
-      <Box
-        sx={{
-          display: 'flex',
-          alignItems: 'center',
-        }}
-      >
+      <HeaderActions spacing="none">
         {isEditable && canEdit && (
           <Box
             sx={{
@@ -451,18 +451,18 @@ export const GrievanceDetailsToolbar = ({
             </Button>
           </Box>
         )}
-        {isNew && canEdit && canAssign && <Separator />}
         {isNew && canEdit && canAssign && (
-          <LoadingButton
+          <Separator sx={{ display: responsiveValue('none', 'block') }} />
+        )}
+        {isNew && canEdit && canAssign && (
+          <AssignGrievanceDialog
+            ticketId={ticket.id}
+            onAssignToMe={() => changeState(GRIEVANCE_TICKET_STATES.ASSIGNED)}
+            canAssignToOther={canAssignToOther}
             loading={loading}
-            color="primary"
-            variant="contained"
-            onClick={() => changeState(GRIEVANCE_TICKET_STATES.ASSIGNED)}
-            data-cy="button-assign-to-me"
+            programCode={ticket.programs?.[0]?.code}
             disabled={!isActiveProgram}
-          >
-            {t('ASSIGN TO ME')}
-          </LoadingButton>
+          />
         )}
         {isAssigned && canSetInProgress && (
           <Box
@@ -674,7 +674,7 @@ export const GrievanceDetailsToolbar = ({
             {canClose && wrapWithTooltip(closeButton)}
           </>
         )}
-      </Box>
+      </HeaderActions>
     </PageHeader>
   );
 };

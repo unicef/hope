@@ -1,7 +1,6 @@
 import { DialogContainer } from '@containers/dialogs/DialogContainer';
 import { DialogFooter } from '@containers/dialogs/DialogFooter';
 import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
-import { AutoSubmitFormOnEnter } from '@core/AutoSubmitFormOnEnter';
 import { ErrorButton } from '@core/ErrorButton';
 import { GreyText } from '@core/GreyText';
 import { LoadingButton } from '@core/LoadingButton';
@@ -26,6 +25,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import * as Yup from 'yup';
 import { useProgramContext } from '../../../../programContext';
+import { COMMENT_MAX_LENGTH } from 'src/config';
 import { PERMISSIONS } from 'src/config/permissions';
 
 export interface RejectPaymentPlanProps {
@@ -81,29 +81,31 @@ export function RejectPaymentPlan({
   };
 
   const validationSchema = Yup.object().shape({
-    comment: Yup.string().min(4, 'Too short').max(255, 'Too long'),
+    comment: Yup.string()
+      .min(4, 'Too short')
+      .max(COMMENT_MAX_LENGTH, 'Too long'),
   });
 
   return (
     <Formik
       initialValues={initialValues}
       onSubmit={(values, { resetForm }) => {
-        reject({
-          businessAreaSlug: businessArea,
-          id: paymentPlanId,
-          programCode: programId,
-          requestBody: {
-            comment: values.comment,
+        reject(
+          {
+            businessAreaSlug: businessArea,
+            id: paymentPlanId,
+            programCode: programId,
+            requestBody: {
+              comment: values.comment,
+            },
           },
-        });
-        setRejectDialogOpen(false);
-        resetForm({});
+          { onSuccess: () => resetForm() },
+        );
       }}
       validationSchema={validationSchema}
     >
-      {({ submitForm }) => (
+      {({ submitForm, resetForm }) => (
         <>
-          {rejectDialogOpen && <AutoSubmitFormOnEnter />}
           <Box
             sx={{
               p: 2,
@@ -118,7 +120,10 @@ export function RejectPaymentPlan({
           </Box>
           <Dialog
             open={rejectDialogOpen}
-            onClose={() => setRejectDialogOpen(false)}
+            onClose={() => {
+              resetForm();
+              setRejectDialogOpen(false);
+            }}
             scroll="paper"
             aria-labelledby="form-dialog-title"
             maxWidth="md"
@@ -150,6 +155,7 @@ export function RejectPaymentPlan({
                   <Field
                     name="comment"
                     multiline
+                    minRows={3}
                     fullWidth
                     variant="filled"
                     label="Comment (optional)"
@@ -160,7 +166,12 @@ export function RejectPaymentPlan({
             </DialogContent>
             <DialogFooter>
               <DialogActions>
-                <Button onClick={() => setRejectDialogOpen(false)}>
+                <Button
+                  onClick={() => {
+                    resetForm();
+                    setRejectDialogOpen(false);
+                  }}
+                >
                   CANCEL
                 </Button>
                 <LoadingButton

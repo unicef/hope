@@ -16,9 +16,15 @@ export function ClearApplyButtons({
 
   const handleKeyPress = useCallback(
     (event: KeyboardEvent) => {
-      if (event.key === 'Enter') {
-        applyHandler();
+      if (event.key !== 'Enter') {
+        return;
       }
+      // Enter in a textarea is a new line, and Enter inside a modal belongs to the modal, not to the page filters.
+      const target = event.target as HTMLElement | null;
+      if (target?.closest?.('textarea, [role="dialog"]')) {
+        return;
+      }
+      applyHandler();
     },
     [applyHandler],
   );

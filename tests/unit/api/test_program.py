@@ -1,14 +1,29 @@
 from datetime import timedelta
 
+from django.db import connection
+from django.test.utils import CaptureQueriesContext
 from django.utils import timezone
 import pytest
 from rest_framework.test import APIClient
 
-from hope.models import APIToken, BusinessArea, Program
+from extras.test_utils.factories import BeneficiaryGroupFactory, DataCollectingTypeFactory, PayeeTypeFactory
+from hope.models import APIToken, BeneficiaryGroup, BusinessArea, DataCollectingType, Program
 from hope.models.grant import Grant
 from unit.api.conftest import token_grant_permission
 
 pytestmark = pytest.mark.django_db
+
+
+@pytest.fixture
+def dct_without_payee_type(db) -> DataCollectingType:
+    return DataCollectingTypeFactory(code="delegate", payee_type=None)
+
+
+@pytest.fixture
+def payee_label_of_other_payee_type(db) -> BeneficiaryGroup:
+    return BeneficiaryGroupFactory(
+        name="Education workers", payee_type=PayeeTypeFactory(name="Incentive Payee", gl_code="7700430")
+    )
 
 
 # --- Program create (BA-scoped) ---
@@ -63,8 +78,51 @@ def test_create_program_succeeds_with_create_permission(
         "start_date": "2022-09-27",
         "data_collecting_type": program.data_collecting_type_id,
         "beneficiary_group": str(program.beneficiary_group_id),
+        "payee_type": {
+            "id": str(program.data_collecting_type.payee_type_id),
+            "name": "Household",
+            "gl_code": "7700410",
+        },
     }
     assert program.business_area == business_area
+
+
+def test_create_program_returns_400_for_dct_without_payee_type(
+    token_api_client: APIClient,
+    api_token: APIToken,
+    program_create_url: str,
+    program_create_payload: dict,
+    dct_without_payee_type: DataCollectingType,
+) -> None:
+    payload = {**program_create_payload, "data_collecting_type": dct_without_payee_type.id}
+
+    with (
+        token_grant_permission(api_token, Grant.API_READ_ONLY),
+        token_grant_permission(api_token, Grant.API_PROGRAM_CREATE),
+    ):
+        response = token_api_client.post(program_create_url, payload, format="json")
+
+    assert response.status_code == 400
+    assert response.json() == {"data_collecting_type": ["Data Collecting Type has no Payee Type."]}
+
+
+def test_create_program_returns_400_for_payee_label_of_other_payee_type(
+    token_api_client: APIClient,
+    api_token: APIToken,
+    program_create_url: str,
+    program_create_payload: dict,
+    payee_label_of_other_payee_type: BeneficiaryGroup,
+) -> None:
+    payload = {**program_create_payload, "beneficiary_group": str(payee_label_of_other_payee_type.id)}
+
+    with (
+        token_grant_permission(api_token, Grant.API_READ_ONLY),
+        token_grant_permission(api_token, Grant.API_PROGRAM_CREATE),
+    ):
+        response = token_api_client.post(program_create_url, payload, format="json")
+
+    assert response.status_code == 400
+    assert response.json() == {"beneficiary_group": ["Payee Label does not belong to the selected Payee Type."]}
 
 
 # --- Program list (BA-scoped) ---
@@ -96,6 +154,21 @@ def test_list_programs_returns_only_own_business_area(
     assert _ba_expected(program2) in results
 
 
+def test_list_programs_does_not_query_payee_type_per_program(
+    token_api_client: APIClient,
+    api_token: APIToken,
+    program_list_url: str,
+    ba_scoped_programs: tuple[Program, Program],
+) -> None:
+    with token_grant_permission(api_token, Grant.API_READ_ONLY), CaptureQueriesContext(connection) as queries:
+        response = token_api_client.get(program_list_url)
+
+    assert response.status_code == 200
+    executed_sql = str(queries.captured_queries)
+    assert executed_sql.count('FROM "core_datacollectingtype"') == 0
+    assert executed_sql.count('FROM "core_payeetype"') == 0
+
+
 def _ba_expected(p: Program) -> dict:
     return {
         "budget": str(p.budget),
@@ -109,6 +182,11 @@ def _ba_expected(p: Program) -> dict:
         "start_date": p.start_date.strftime("%Y-%m-%d"),
         "data_collecting_type": p.data_collecting_type_id,
         "beneficiary_group": str(p.beneficiary_group_id),
+        "payee_type": {
+            "id": str(p.data_collecting_type.payee_type_id),
+            "name": "Household",
+            "gl_code": "7700410",
+        },
     }
 
 
@@ -131,6 +209,11 @@ def _global_expected(p: Program) -> dict:
         "status": p.status,
         "start_date": p.start_date.strftime("%Y-%m-%d"),
         "beneficiary_group": str(p.beneficiary_group.id),
+        "payee_type": {
+            "id": str(p.data_collecting_type.payee_type_id),
+            "name": "Household",
+            "gl_code": "7700410",
+        },
         "biometric_deduplication_enabled": p.biometric_deduplication_enabled,
     }
 
@@ -160,6 +243,35 @@ def test_global_list_returns_all_programs(
     assert _global_expected(program_active) in results
     assert _global_expected(program_draft) in results
     assert _global_expected(program_other_ba) in results
+
+
+def test_global_list_does_not_query_payee_type_per_program(
+    token_api_client: APIClient,
+    api_token: APIToken,
+    program_global_list_url: str,
+    three_programs: tuple[Program, Program, Program],
+) -> None:
+    with token_grant_permission(api_token, Grant.API_READ_ONLY), CaptureQueriesContext(connection) as queries:
+        response = token_api_client.get(program_global_list_url)
+
+    assert response.status_code == 200
+    executed_sql = str(queries.captured_queries)
+    assert executed_sql.count('FROM "core_datacollectingtype"') == 0
+    assert executed_sql.count('FROM "core_payeetype"') == 0
+
+
+def test_global_list_query_count_does_not_grow_with_programs(
+    token_api_client: APIClient,
+    api_token: APIToken,
+    program_global_list_url: str,
+    three_programs: tuple[Program, Program, Program],
+    django_assert_num_queries,
+) -> None:
+    with token_grant_permission(api_token, Grant.API_READ_ONLY), django_assert_num_queries(2):
+        response = token_api_client.get(program_global_list_url)
+
+    assert response.status_code == 200
+    assert len(response.json()["results"]) == 3
 
 
 def test_global_list_filter_business_area(

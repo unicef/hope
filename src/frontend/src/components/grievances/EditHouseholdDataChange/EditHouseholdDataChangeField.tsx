@@ -1,6 +1,5 @@
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import CalendarTodayRoundedIcon from '@mui/icons-material/CalendarTodayRounded';
-import { Grid } from '@mui/material';
 import { FormikAsyncAutocomplete } from '@shared/Formik/FormikAsyncAutocomplete';
 import { FormikDateField } from '@shared/Formik/FormikDateField';
 import { FormikDecimalField } from '@shared/Formik/FormikDecimalField';
@@ -12,6 +11,7 @@ import type { ReactElement } from 'react';
 import { useLocation } from 'react-router-dom';
 import { FormikBoolFieldGrievances } from '../FormikBoolFieldGrievances';
 import { GrievanceFlexFieldPhotoModalEditable } from '../GrievancesPhotoModals/GrievanceFlexFieldPhotoModalEditable';
+import { ResponsiveGrid } from 'src/responsive';
 
 export interface EditHouseholdDataChangeFieldProps {
   field: {
@@ -108,7 +108,7 @@ export const EditHouseholdDataChangeField = ({
       fieldProps = {};
   }
   return (
-    <Grid size={12}>
+    <ResponsiveGrid size="full">
       <Field
         name={name}
         fullWidth
@@ -118,6 +118,6 @@ export const EditHouseholdDataChangeField = ({
         disabled={isEditTicket}
         {...fieldProps}
       />
-    </Grid>
+    </ResponsiveGrid>
   );
 };

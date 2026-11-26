@@ -49,6 +49,7 @@ from hope.models import (
     FileTemp,
     Individual,
     Partner,
+    PayeeType,
     PaymentPlanGroup,
     PaymentPlanPurpose,
     Program,
@@ -214,6 +215,7 @@ class ProgramAdmin(
         "end_date",
         "business_area",
         "data_collecting_type",
+        "payee_type",
         "beneficiary_group",
         "sector",
         "scope",
@@ -228,6 +230,7 @@ class ProgramAdmin(
         ("status", ChoicesFieldComboFilter),
         ("business_area", AutoCompleteFilter),
         ("data_collecting_type", AutoCompleteFilter),
+        ("data_collecting_type__payee_type", AutoCompleteFilter),
         ("beneficiary_group", AutoCompleteFilter),
         ("scope", ChoicesFieldComboFilter),
         ("sector", ChoicesFieldComboFilter),
@@ -246,8 +249,14 @@ class ProgramAdmin(
     def get_queryset(self, request: HttpRequest) -> QuerySet[Program]:
         return cast(
             "QuerySet[Program]",
-            super().get_queryset(request).select_related("data_collecting_type", "business_area", "beneficiary_group"),
+            super()
+            .get_queryset(request)
+            .select_related("data_collecting_type__payee_type", "business_area", "beneficiary_group"),
         )
+
+    @admin.display(description="Payee Type", ordering="data_collecting_type__payee_type__name")
+    def payee_type(self, obj: Program) -> PayeeType | None:
+        return obj.data_collecting_type.payee_type
 
     def frontend_url(self, obj: Program) -> str | None:
         return f"/{obj.business_area.slug}/programs/{obj.code}/details/{obj.code}"
@@ -560,8 +569,10 @@ def bulk_upload_individuals_photos_action(job: "AsyncJob") -> int:
         job.save(update_fields=["errors"])
         return 0
 
-    individuals = Individual.objects.filter(program=job.program, unicef_id__in=individual_unicef_ids).only(
-        "id", "unicef_id", "photo"
+    individuals = (
+        Individual.objects.filter(program=job.program, unicef_id__in=individual_unicef_ids)
+        .select_related("program__business_area")
+        .only("id", "unicef_id", "photo", "program")
     )
 
     individuals_by_unicef_id = {ind.unicef_id: ind for ind in individuals}

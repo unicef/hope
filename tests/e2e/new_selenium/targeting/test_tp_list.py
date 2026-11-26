@@ -1,3 +1,5 @@
+from collections.abc import Callable
+
 import pytest
 
 from e2e.new_selenium.conftest import grant_permission
@@ -29,22 +31,42 @@ def tp_list_url(program: Program) -> str:
     return f"/{program.business_area.slug}/programs/{program.code}/target-population"
 
 
-def apply_filters(browser: HopeTestBrowser) -> None:
-    browser.click('button[data-cy="button-filters-apply"]')
+def filter_by_name(browser: HopeTestBrowser) -> None:
+    browser.type('[data-cy="filters-search"] input', "Locked")
 
 
-def clear_filters(browser: HopeTestBrowser) -> None:
-    browser.click('button[data-cy="button-filters-clear"]')
-    browser.wait_for_text(BUILT_TP_NAME, "table")
-    browser.wait_for_text(LOCKED_TP_NAME, "table")
+def filter_by_open_status(browser: HopeTestBrowser) -> None:
+    browser.click('[data-cy="filters-status"]')
+    browser.select_listbox_element("Open")
 
 
-def test_tp_list_filters_by_name_status_and_household_count(
+def filter_by_min_households(browser: HopeTestBrowser) -> None:
+    browser.type('[data-cy="filters-total-households-count-min"] input', "5")
+
+
+@pytest.fixture
+def finished_programme_tp(built_tp: PaymentPlan) -> PaymentPlan:
+    Program.objects.filter(id=built_tp.program_cycle.program_id).update(status=Program.FINISHED)
+    return built_tp
+
+
+@pytest.mark.parametrize(
+    ("apply_filter", "shown", "hidden"),
+    [
+        pytest.param(filter_by_name, LOCKED_TP_NAME, BUILT_TP_NAME, id="name"),
+        pytest.param(filter_by_open_status, BUILT_TP_NAME, LOCKED_TP_NAME, id="status"),
+        pytest.param(filter_by_min_households, LOCKED_TP_NAME, BUILT_TP_NAME, id="household-count"),
+    ],
+)
+def test_tp_list_filter(
     browser: HopeTestBrowser,
     user_with_no_permissions: User,
     business_area: BusinessArea,
     built_tp: PaymentPlan,
     locked_large_tp: PaymentPlan,
+    apply_filter: Callable[[HopeTestBrowser], None],
+    shown: str,
+    hidden: str,
 ) -> None:
     with grant_permission(
         user_with_no_permissions,
@@ -57,33 +79,20 @@ def test_tp_list_filters_by_name_status_and_household_count(
         browser.wait_for_text(BUILT_TP_NAME, "table")
         browser.wait_for_text(LOCKED_TP_NAME, "table")
 
-        browser.type('[data-cy="filters-search"] input', "Locked")
-        apply_filters(browser)
-        browser.wait_for_text_not_visible(BUILT_TP_NAME, "table")
-        browser.assert_text(LOCKED_TP_NAME, "table")
-        clear_filters(browser)
+        apply_filter(browser)
+        browser.click('button[data-cy="button-filters-apply"]')
 
-        browser.click('[data-cy="filters-status"]')
-        browser.select_listbox_element("Open")
-        apply_filters(browser)
-        browser.wait_for_text_not_visible(LOCKED_TP_NAME, "table")
-        browser.assert_text(BUILT_TP_NAME, "table")
-        clear_filters(browser)
-
-        browser.type('[data-cy="filters-total-households-count-min"] input', "5")
-        apply_filters(browser)
-        browser.wait_for_text_not_visible(BUILT_TP_NAME, "table")
-        browser.assert_text(LOCKED_TP_NAME, "table")
+        browser.wait_for_text_not_visible(hidden, "table")
+        browser.assert_text(shown, "table")
 
 
 def test_create_button_disabled_when_programme_not_active(
     browser: HopeTestBrowser,
     user_with_no_permissions: User,
     business_area: BusinessArea,
-    built_tp: PaymentPlan,
+    finished_programme_tp: PaymentPlan,
 ) -> None:
-    program = built_tp.program_cycle.program
-    Program.objects.filter(id=program.id).update(status=Program.FINISHED)
+    program = finished_programme_tp.program_cycle.program
     with grant_permission(
         user_with_no_permissions,
         business_area,

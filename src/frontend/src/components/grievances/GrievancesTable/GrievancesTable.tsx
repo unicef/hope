@@ -6,6 +6,7 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useDebounce } from '@hooks/useDebounce';
 import { usePermissions } from '@hooks/usePermissions';
 import { Box } from '@mui/material';
+import { responsiveValue } from 'src/responsive';
 import Paper from '@mui/material/Paper';
 import type { GrievanceTicketList } from '@restgenerated/models/GrievanceTicketList';
 import type { PaginatedGrievanceTicketListList } from '@restgenerated/models/PaginatedGrievanceTicketListList';
@@ -447,8 +448,9 @@ export const GrievancesTable = ({
           sx={{
             display: 'flex',
             flexDirection: 'row',
-            marginX: 6,
-            gap: 4,
+            flexWrap: responsiveValue('wrap', 'nowrap'),
+            marginX: responsiveValue(2, 6),
+            gap: responsiveValue(2, 4),
           }}
         >
           {canBulkAssign && (

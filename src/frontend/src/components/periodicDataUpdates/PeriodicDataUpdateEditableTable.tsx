@@ -17,6 +17,7 @@ import { Box } from '@mui/system';
 import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { BaseSection } from '@components/core/BaseSection';
+import { responsiveValue } from 'src/responsive';
 import { BlackLink } from '@components/core/BlackLink';
 import { UniversalMoment } from '@components/core/UniversalMoment';
 import { t } from 'i18next';
@@ -325,6 +326,11 @@ const PeriodicDataUpdateEditableTable: React.FC<
                                 field.subtype === 'DECIMAL' ? 'number' : 'text'
                               }
                               value={field.value ?? ''}
+                              slotProps={{
+                                htmlInput: {
+                                  'data-cy': `input-pdu-${fieldKey}-${individual.unicefId}`,
+                                },
+                              }}
                               onChange={(e) => {
                                 let newValue;
                                 if (field.subtype === 'DECIMAL') {
@@ -429,6 +435,7 @@ const PeriodicDataUpdateEditableTable: React.FC<
                               });
                               handleSaveRow(idx);
                             }}
+                            data-cy={`button-save-row-${individual.unicefId}`}
                           >
                             {t('Save')}
                           </Button>
@@ -440,6 +447,7 @@ const PeriodicDataUpdateEditableTable: React.FC<
                         color="primary"
                         size="small"
                         disabled={!isAuthorized}
+                        data-cy={`button-edit-row-${individual.unicefId}`}
                         onClick={() =>
                           setEditingRows((prev) => {
                             const updated = new Set(prev);
@@ -471,7 +479,7 @@ const PeriodicDataUpdateEditableTable: React.FC<
         title={
           <Box
             sx={{
-              p: 6,
+              p: responsiveValue(2, 6),
             }}
           >
             <Typography data-cy="title" variant="h6">

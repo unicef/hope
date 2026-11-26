@@ -1,4 +1,5 @@
 import { Avatar, Box, Grid, Paper, Typography } from '@mui/material';
+import { ResponsiveGrid, responsiveValue } from 'src/responsive';
 import { Field, Form, Formik } from 'formik';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
@@ -109,6 +110,7 @@ export function Notes({
             data-cy="note-name"
             sx={{
               display: 'flex',
+              flexWrap: responsiveValue('wrap', 'nowrap'),
               justifyContent: 'space-between',
             }}
           >
@@ -142,10 +144,10 @@ export function Notes({
   const myName = `${meData.firstName || meData.email}`;
 
   return (
-    <Grid size={{ xs: 8 }}>
+    <ResponsiveGrid size="twoThirds">
       <Box
         sx={{
-          p: 3,
+          p: responsiveValue(2, 3),
         }}
       >
         <Formik
@@ -219,6 +221,6 @@ export function Notes({
           )}
         </Formik>
       </Box>
-    </Grid>
+    </ResponsiveGrid>
   );
 }

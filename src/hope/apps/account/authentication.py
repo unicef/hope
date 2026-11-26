@@ -2,8 +2,10 @@ import logging
 from typing import Any
 
 from django.http import HttpRequest, HttpResponse
-from social_core.exceptions import InvalidEmail
+from social_core.backends.base import BaseAuth
+from social_core.exceptions import AuthResponseError
 from social_core.pipeline import social_auth, user as social_core_user
+from social_core.strategy import BaseStrategy
 
 from hope.apps.account.microsoft_graph import MicrosoftGraphAPI
 from hope.models import ACTIVE, BusinessArea, Role, RoleAssignment, User  # pragma: no cover
@@ -11,7 +13,9 @@ from hope.models import ACTIVE, BusinessArea, Role, RoleAssignment, User  # prag
 logger = logging.getLogger(__name__)
 
 
-def social_details(backend: Any, details: dict, response: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
+def social_details(
+    backend: BaseAuth, details: dict[str, Any], response: HttpRequest, *args: Any, **kwargs: Any
+) -> HttpResponse:
     logger.debug("social_details response:\n%s", response)
     logger.debug("user_data:\n%s", backend.user_data(None, response=response))
     r = social_auth.social_details(backend, details, response, *args, **kwargs)
@@ -25,10 +29,10 @@ def social_details(backend: Any, details: dict, response: HttpRequest, *args: An
 
 
 def user_details(
-    strategy: Any,
-    details: dict,
-    backend: Any,
-    user: Any | None = None,
+    strategy: BaseStrategy,
+    details: dict[str, Any],
+    backend: BaseAuth | None = None,
+    user: User | None = None,
     *args: Any,
     **kwargs: Any,
 ) -> None:
@@ -50,10 +54,11 @@ def user_details(
 
 
 def require_email(
-    strategy: Any,
-    details: dict,
+    strategy: BaseStrategy,
+    details: dict[str, Any],
     user: User | None = None,
     is_new: bool = False,
+    backend: BaseAuth | None = None,
     *args: Any,
     **kwargs: Any,
 ) -> None:
@@ -61,13 +66,18 @@ def require_email(
         return
     if is_new and not details.get("email"):
         logger.warning("Email couldn't be validated")
-        raise InvalidEmail(strategy)
+        raise AuthResponseError(
+            backend,
+            "Email couldn't be validated",
+            code="profile_email_missing",
+            stage="pipeline",
+        )
 
 
 def create_user(
-    strategy: Any,
-    details: dict,
-    backend: Any,
+    strategy: BaseStrategy,
+    details: dict[str, Any],
+    backend: BaseAuth,
     user: bool | User,
     *args: Any,
     **kwargs: Any,
@@ -78,8 +88,8 @@ def create_user(
     user = User.objects.create(  # pragma: no cover
         email=details["email"],
         username=details["email"],
-        first_name=details.get("first_name"),
-        last_name=details.get("last_name"),
+        first_name=details.get("first_name") or "",
+        last_name=details.get("last_name") or "",
         status=ACTIVE,
     )
     ms_graph = MicrosoftGraphAPI()

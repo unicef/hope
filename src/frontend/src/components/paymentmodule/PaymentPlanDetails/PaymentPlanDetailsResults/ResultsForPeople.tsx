@@ -6,6 +6,7 @@ import {
 } from '@components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsResults/Styles';
 import { LabelizedField } from '@core/LabelizedField';
 import type { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
+import { responsiveGridSize } from 'src/responsive';
 
 interface ResultsForPeopleProps {
   paymentPlan: PaymentPlanDetail;
@@ -13,10 +14,10 @@ interface ResultsForPeopleProps {
 
 export const ResultsForPeople = ({ paymentPlan }: ResultsForPeopleProps) => {
   const { t } = useTranslation();
-  const { totalIndividualsCount } = paymentPlan;
+  const { totalHouseholdsCount } = paymentPlan;
 
   return (
-    <Grid size={{ xs: 4 }}>
+    <Grid size={responsiveGridSize('third')}>
       <Grid
         container
         spacing={0}
@@ -27,7 +28,7 @@ export const ResultsForPeople = ({ paymentPlan }: ResultsForPeopleProps) => {
         <Grid>
           <SummaryBorder>
             <LabelizedField label={t('Total Number of People')}>
-              <SummaryValue>{totalIndividualsCount || '0'}</SummaryValue>
+              <SummaryValue>{totalHouseholdsCount || '0'}</SummaryValue>
             </LabelizedField>
           </SummaryBorder>
         </Grid>

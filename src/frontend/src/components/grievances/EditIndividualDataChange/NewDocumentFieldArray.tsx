@@ -1,4 +1,4 @@
-import { Button, Grid } from '@mui/material';
+import { Button } from '@mui/material';
 import { useLocation } from 'react-router-dom';
 import { AddCircleOutlined } from '@mui/icons-material';
 import { FieldArray } from 'formik';
@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { DocumentField } from '../DocumentField';
 import { removeItemById } from '../utils/helpers';
 import type { ReactElement } from 'react';
+import { ResponsiveGrid, ResponsiveGridContainer } from 'src/responsive';
 
 export interface NewDocumentFieldArrayProps {
   addIndividualFieldsData: any;
@@ -22,15 +23,15 @@ export function NewDocumentFieldArray({
   const location = useLocation();
   const isEditTicket = location.pathname.indexOf('edit-ticket') !== -1;
   return (
-    <Grid container spacing={3}>
+    <ResponsiveGridContainer spacing={3}>
       <FieldArray
         name="individualDataUpdateFieldsDocuments"
         render={(arrayHelpers) => (
           <>
             {values.individualDataUpdateFieldsDocuments?.map((item) => {
               return (
-                <Grid
-                  size={12}
+                <ResponsiveGrid
+                  size="full"
                   key={`${item?.id}-${item?.country}-${item?.type?.key}`}
                 >
                   <DocumentField
@@ -50,12 +51,12 @@ export function NewDocumentFieldArray({
                     setFieldValue={setFieldValue}
                     values={values}
                   />
-                </Grid>
+                </ResponsiveGrid>
               );
             })}
 
-            <Grid size={8} />
-            <Grid size={12}>
+            <ResponsiveGrid size="twoThirds" />
+            <ResponsiveGrid size="full">
               <Button
                 color="primary"
                 disabled={isEditTicket}
@@ -71,10 +72,10 @@ export function NewDocumentFieldArray({
               >
                 {t('Add Document')}
               </Button>
-            </Grid>
+            </ResponsiveGrid>
           </>
         )}
       />
-    </Grid>
+    </ResponsiveGridContainer>
   );
 }

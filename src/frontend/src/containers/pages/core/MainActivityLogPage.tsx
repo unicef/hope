@@ -4,7 +4,6 @@ import { useState, useRef } from 'react';
 import { useScrollToRefOnChange } from '@hooks/useScrollToRefOnChange';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
-import styled from 'styled-components';
 import { useQuery } from '@tanstack/react-query';
 import { RestService } from '@restgenerated/services/RestService';
 import { restQueryKey } from '@utils/queryKeys';
@@ -18,10 +17,7 @@ import { usePermissions } from '@hooks/usePermissions';
 import { getFilterFromQueryParams } from '@utils/utils';
 import { MainActivityLogTable } from '../../tables/MainActivityLogTable/MainActivityLogTable';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-
-export const StyledPaper = styled(Paper)`
-  margin: 20px;
-`;
+import { responsiveValue } from 'src/responsive';
 
 function filtersToVariables(filters) {
   const variables: { module?: string; search?: string; userId?: string } = {};
@@ -173,7 +169,7 @@ export function ActivityLogPage(): ReactElement {
         }}
       />
       <div ref={tableRef}>
-        <StyledPaper>
+        <Paper sx={{ margin: responsiveValue('8px', '20px') }}>
           <MainActivityLogTable
             totalCount={totalCount}
             rowsPerPage={rowsPerPage}
@@ -183,7 +179,7 @@ export function ActivityLogPage(): ReactElement {
             onChangePage={handlePageChange}
             onChangeRowsPerPage={handleRowsPerPageChange}
           />
-        </StyledPaper>
+        </Paper>
       </div>
     </>
   );

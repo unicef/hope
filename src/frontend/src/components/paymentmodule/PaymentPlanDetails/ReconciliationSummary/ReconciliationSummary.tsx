@@ -1,4 +1,5 @@
 import { Box, Grid, Tooltip, Typography } from '@mui/material';
+import InfoOutlined from '@mui/icons-material/InfoOutlined';
 import { Pie } from 'react-chartjs-2';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
@@ -7,6 +8,7 @@ import { LabelizedField } from '@core/LabelizedField';
 import { FieldBorder } from '@core/FieldBorder';
 import type { ReactElement } from 'react';
 import type { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
+import { ResponsiveGrid, responsiveValue } from 'src/responsive';
 
 const Title = styled.div`
   padding-bottom: ${({ theme }) => theme.spacing(2)};
@@ -50,26 +52,31 @@ export function ReconciliationSummary({
 
   const datasets = [
     {
+      key: 'deliveredFully',
       label: t('Delivered fully'),
       value: deliveredFully,
       color: '#10CB16',
     },
     {
+      key: 'deliveredPartially',
       label: t('Delivered partially'),
       value: deliveredPartially,
       color: '#FC942A',
     },
     {
+      key: 'notDelivered',
       label: t('Not delivered'),
       value: notDelivered,
       color: '#EF4343',
     },
     {
+      key: 'unsuccessful',
       label: t('Unsuccessful'),
       value: unsuccessful,
       color: '#EF4343',
     },
     {
+      key: 'pending',
       label: t('Pending'),
       value: pending,
       color: '#4E606A',
@@ -91,38 +98,55 @@ export function ReconciliationSummary({
               <Grid
                 container
                 spacing={0}
+                rowSpacing={responsiveValue(3, 0)}
                 sx={{
                   justifyContent: 'flex-start',
                 }}
               >
-                {datasets.map(({ color, label, value }) => {
-                  const field = (
+                {datasets.map(({ key, color, label, value }) => (
+                  <ResponsiveGrid size="sixth" mobileSize="half" key={key}>
                     <FieldBorder color={color}>
-                      <LabelizedField label={label} value={value} />
-                    </FieldBorder>
-                  );
-                  return (
-                    <Grid size={2} key={label}>
-                      {label === t('Pending') ? (
-                        <Tooltip
-                          arrow
-                          title={
-                            <Box>
-                              <div>{`${t('Pending')}: ${pendingBreakdown.pending}`}</div>
-                              <div>{`${t('Sent to Payment Gateway')}: ${pendingBreakdown.sentToPaymentGateway}`}</div>
-                              <div>{`${t('Sent to FSP')}: ${pendingBreakdown.sentToFsp}`}</div>
-                            </Box>
-                          }
-                        >
-                          <Box tabIndex={0}>{field}</Box>
-                        </Tooltip>
+                      {key === 'pending' ? (
+                        <LabelizedField label={label}>
+                          <Box
+                            component="span"
+                            sx={{
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: 0.5,
+                            }}
+                          >
+                            {value}
+                            <Tooltip
+                              arrow
+                              title={
+                                <Box>
+                                  <div>{`${t('Pending')}: ${pendingBreakdown.pending}`}</div>
+                                  <div>{`${t('Sent to Payment Gateway')}: ${pendingBreakdown.sentToPaymentGateway}`}</div>
+                                  <div>{`${t('Sent to FSP')}: ${pendingBreakdown.sentToFsp}`}</div>
+                                </Box>
+                              }
+                            >
+                              <InfoOutlined
+                                tabIndex={0}
+                                aria-label={t('Pending breakdown')}
+                                data-cy="pending-breakdown-icon"
+                                sx={{
+                                  fontSize: 16,
+                                  color: 'text.secondary',
+                                  cursor: 'pointer',
+                                }}
+                              />
+                            </Tooltip>
+                          </Box>
+                        </LabelizedField>
                       ) : (
-                        field
+                        <LabelizedField label={label} value={value} />
                       )}
-                    </Grid>
-                  );
-                })}
-                <Grid size={2}>
+                    </FieldBorder>
+                  </ResponsiveGrid>
+                ))}
+                <ResponsiveGrid size="sixth">
                   <ChartContainer data-cy="chart-container">
                     <Pie
                       width={100}
@@ -147,7 +171,7 @@ export function ReconciliationSummary({
                       }}
                     />
                   </ChartContainer>
-                </Grid>
+                </ResponsiveGrid>
               </Grid>
             </Grid>
             <ReconciliationWrapUp>
@@ -155,26 +179,27 @@ export function ReconciliationSummary({
                 <Grid
                   container
                   spacing={0}
+                  rowSpacing={responsiveValue(3, 0)}
                   sx={{
                     justifyContent: 'flex-start',
                   }}
                 >
-                  <Grid size={2}>
+                  <ResponsiveGrid size="sixth" mobileSize="half">
                     <FieldBorder color="#4E606A">
                       <LabelizedField
                         label={t('Number of payments')}
                         value={numberOfPayments}
                       />
                     </FieldBorder>
-                  </Grid>
-                  <Grid size={2}>
+                  </ResponsiveGrid>
+                  <ResponsiveGrid size="sixth" mobileSize="half">
                     <FieldBorder color="#4E606A">
                       <LabelizedField
                         label={t('Reconciled')}
                         value={`${reconciled} (${reconciledInPercent}%)`}
                       />
                     </FieldBorder>
-                  </Grid>
+                  </ResponsiveGrid>
                 </Grid>
               </Grid>
             </ReconciliationWrapUp>

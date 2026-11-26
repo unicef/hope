@@ -19,6 +19,8 @@ class ProgrammeManagement(BaseComponents):
     label_end_date = 'input[data-cy="date-input-endDate"]'
     select_selector = 'div[data-cy="select-sector"]'
     label_selector = 'div[data-cy="input-sector"]'
+    input_payee_type = 'div[data-cy="input-payee-type"]'
+    label_payee_type = 'div[data-cy="input-payee-type"]'
     input_data_collecting_type = 'div[data-cy="input-data-collecting-type"]'
     label_data_collecting_type = 'div[data-cy="input-data-collecting-type"]'
     input_cash_plus = 'span[data-cy="input-cashPlus"]'
@@ -245,6 +247,13 @@ class ProgrammeManagement(BaseComponents):
 
     def get_label_selector(self) -> WebElement:
         return self.wait_for(self.label_selector)
+
+    def choose_option_payee_type(self, option_name: str = "Household") -> None:
+        self.wait_for(self.input_payee_type).click()
+        self.select_option_by_name(option_name)
+
+    def get_label_payee_type(self) -> WebElement:
+        return self.wait_for(self.label_payee_type)
 
     def choose_option_data_collecting_type(self, option_name: str) -> None:
         self.wait_for(self.input_data_collecting_type).click()

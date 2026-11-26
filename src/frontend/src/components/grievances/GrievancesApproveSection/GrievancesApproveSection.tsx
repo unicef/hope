@@ -1,4 +1,5 @@
 import { Box, Grid } from '@mui/material';
+import { responsiveValue } from 'src/responsive';
 import { GRIEVANCE_CATEGORIES, GRIEVANCE_ISSUE_TYPES } from '@utils/constants';
 import AddIndividualGrievanceDetails from '../AddIndividualGrievanceDetails';
 import { DeleteHouseholdGrievanceDetails } from '../DeleteHouseholdGrievanceDetails';
@@ -136,7 +137,7 @@ function GrievancesApproveSection({
     <Grid container size={12}>
       <Box
         sx={{
-          p: 3,
+          p: responsiveValue(2, 3),
           width: '100%',
         }}
       >

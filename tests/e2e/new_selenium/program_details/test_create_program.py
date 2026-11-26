@@ -26,6 +26,7 @@ def _fill_programme_create_required_fields(
     start_date: str = "2023-05-01",
     end_date: str = "2033-12-12",
     sector: str = "Child Protection",
+    payee_type: str = "Household",
     dct: str = "Full",
     beneficiary_group: str = "Main Menu",
     purpose_name: str = BA_PURPOSE_NAME,
@@ -36,6 +37,7 @@ def _fill_programme_create_required_fields(
     browser.fill_date('input[name="endDate"]', end_date)
     browser.click('input[name="name"]')
     browser.select_dropdown_option("sector", sector)
+    browser.select_dropdown_option("payeeType", payee_type)
     browser.select_dropdown_option("dataCollectingTypeCode", dct)
     browser.select_dropdown_option("beneficiaryGroup", beneficiary_group)
     browser.select_chip_option(purpose_name, '[data-cy="input-payment-plan-purposes"]')
@@ -92,7 +94,10 @@ def test_create_programme_mandatory_fields_only(
         browser.assert_text("1 May 2023", 'div[data-cy="label-START DATE"]')
         browser.assert_text("12 Dec 2033", 'div[data-cy="label-END DATE"]')
         browser.assert_text("Child Protection", 'div[data-cy="label-Sector"]')
+        browser.assert_text("Household", 'div[data-cy="label-Payee Type"]')
+        browser.assert_text("7700410", 'div[data-cy="label-GL Code"]')
         browser.assert_text("Full", 'div[data-cy="label-Data Collecting Type"]')
+        browser.assert_text("Main Menu", 'div[data-cy="label-Payee Label"]')
         browser.assert_text("Regular", 'div[data-cy="label-Frequency of Payment"]')
         browser.assert_text("-", 'div[data-cy="label-Administrative Areas of implementation"]')
         browser.assert_text("No", 'div[data-cy="label-CASH+"]')
@@ -158,7 +163,7 @@ def test_create_programme_all_fields(
         description_text,
         'div[data-cy="label-Description"]',
     )
-    browser.assert_text("People", 'div[data-cy="label-Beneficiary Group"]')
+    browser.assert_text("People", 'div[data-cy="label-Payee Label"]')
     browser.wait_for_element_visible('div[data-cy="label-Programme Code"]')
 
     # Navigate to edit form to verify Budget, Population Goal, and PDU field
@@ -285,6 +290,7 @@ def test_create_programme_validation_empty_fields(browser: HopeTestBrowser) -> N
     browser.assert_text("Programme Name is required", 'div[data-cy="input-programme-name"]')
     browser.assert_text("Start Date is required", 'div[data-cy="date-picker-filter"]')
     browser.assert_text("Sector is required", 'div[data-cy="input-sector"]')
+    browser.assert_text("Payee Type is required", 'div[data-cy="input-payee-type"]')
     browser.assert_text("Data Collecting Type is required", 'div[data-cy="input-data-collecting-type"]')
 
 

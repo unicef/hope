@@ -5,6 +5,7 @@ import { Field } from 'formik';
 import type { ReactElement } from 'react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { responsiveGridSize } from 'src/responsive';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
 import { PaperContainer } from '../PaperContainer';
 import { useProgramContext } from '../../../programContext';
@@ -52,7 +53,7 @@ function Exclusions({
           }}
         >
           <Grid container>
-            <Grid size={6}>
+            <Grid size={responsiveGridSize('half')}>
               <Field
                 data-cy="input-excluded-ids"
                 name="excludedIds"
@@ -76,7 +77,7 @@ function Exclusions({
           }}
         >
           <Grid container>
-            <Grid size={6}>
+            <Grid size={responsiveGridSize('half')}>
               <Field
                 data-cy="input-exclusion-reason"
                 name="exclusionReason"

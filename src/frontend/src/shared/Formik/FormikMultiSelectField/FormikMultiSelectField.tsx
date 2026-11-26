@@ -7,15 +7,10 @@ import Select from '@mui/material/Select';
 import Chip from '@mui/material/Chip';
 import styled from 'styled-components';
 import type { ReactElement } from 'react';
+import { responsiveValue } from 'src/responsive';
 
 const StyledFormControl = styled(FormControl)`
   margin: ${(props) => props.theme.spacing(1)};
-  min-width: 500px;
-  max-width: 500px;
-`;
-
-const StyledInput = styled(Input)`
-  width: 500px !important;
 `;
 
 const StyledChips = styled.div`
@@ -71,7 +66,13 @@ export function FormikMultiSelectField({
     return null;
   }
   return (
-    <StyledFormControl>
+    <StyledFormControl
+      sx={{
+        minWidth: responsiveValue<number | string>(0, '500px'),
+        maxWidth: responsiveValue('100%', '500px'),
+        width: responsiveValue('100%', 'auto'),
+      }}
+    >
       {label ? (
         <InputLabel id="mutiple-chip-label">{label}</InputLabel>
       ) : (
@@ -85,7 +86,14 @@ export function FormikMultiSelectField({
         data-cy={`select-${field.name}`}
         value={field.value}
         onChange={handleChange}
-        input={<StyledInput id="select-multiple-chip" />}
+        input={
+          <Input
+            id="select-multiple-chip"
+            sx={{
+              width: responsiveValue('100% !important', '500px !important'),
+            }}
+          />
+        }
         renderValue={(selected: string[]) => (
           <StyledChips>
             {selected.map((value) => (

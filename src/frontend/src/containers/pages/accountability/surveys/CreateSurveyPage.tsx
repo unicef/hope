@@ -47,6 +47,7 @@ import { useTranslation } from 'react-i18next';
 import { Link, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import * as Yup from 'yup';
+import { ResponsiveGrid, responsiveValue, useIsMobile } from 'src/responsive';
 import { PERMISSIONS, hasPermissions } from '../../../../config/permissions';
 
 const steps = ['Recipients Look up', 'Sample Size', 'Details'];
@@ -89,6 +90,7 @@ function prepareSampleSizeRequest(selectedSampleSizeType, values) {
 
 const CreateSurveyPage = (): ReactElement => {
   const { t } = useTranslation();
+  const isMobile = useIsMobile();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { mutateAsync: mutate, isPending: loading } = useMutation({
@@ -487,7 +489,7 @@ const CreateSurveyPage = (): ReactElement => {
             />
             <PaperContainer>
               <Grid size={12}>
-                <Stepper activeStep={activeStep}>
+                <Stepper activeStep={activeStep} alternativeLabel={isMobile}>
                   {steps.map((label) => {
                     const stepProps: { completed?: boolean } = {};
                     const labelProps: {
@@ -524,7 +526,7 @@ const CreateSurveyPage = (): ReactElement => {
                 {activeStep === SurveySteps.SampleSize && (
                   <Box
                     sx={{
-                      px: 8,
+                      px: responsiveValue(2, 8),
                     }}
                   >
                     {sampleSizeError && (
@@ -543,12 +545,13 @@ const CreateSurveyPage = (): ReactElement => {
                       sx={{
                         display: 'flex',
                         alignItems: 'center',
+                        flexWrap: 'wrap',
                       }}
                     >
                       <Box
                         sx={{
-                          pl: 5,
-                          pr: 5,
+                          pl: responsiveValue(0, 5),
+                          pr: responsiveValue(2, 5),
                           fontWeight: '500',
                           fontSize: 'medium',
                         }}
@@ -579,7 +582,7 @@ const CreateSurveyPage = (): ReactElement => {
                     <TabPanel value={selectedSampleSizeType} index={0}>
                       <Box
                         sx={{
-                          pt: 6,
+                          pt: responsiveValue(3, 6),
                         }}
                       >
                         {mappedAdminAreas && (
@@ -659,6 +662,7 @@ const CreateSurveyPage = (): ReactElement => {
                           <Box
                             sx={{
                               display: 'flex',
+                              flexWrap: 'wrap',
                             }}
                           >
                             <Field
@@ -691,7 +695,10 @@ const CreateSurveyPage = (): ReactElement => {
                             {values.ageCheckbox && (
                               <Grid size={{ xs: 12 }}>
                                 <Grid container>
-                                  <Grid size={{ xs: 4 }}>
+                                  <ResponsiveGrid
+                                    size="third"
+                                    mobileSize="half"
+                                  >
                                     <Field
                                       name="filterAgeMin"
                                       label={t('Minimum Age')}
@@ -699,8 +706,11 @@ const CreateSurveyPage = (): ReactElement => {
                                       color="primary"
                                       component={FormikTextField}
                                     />
-                                  </Grid>
-                                  <Grid size={{ xs: 4 }}>
+                                  </ResponsiveGrid>
+                                  <ResponsiveGrid
+                                    size="third"
+                                    mobileSize="half"
+                                  >
                                     <Field
                                       name="filterAgeMax"
                                       label={t('Maximum Age')}
@@ -708,12 +718,12 @@ const CreateSurveyPage = (): ReactElement => {
                                       color="primary"
                                       component={FormikTextField}
                                     />
-                                  </Grid>
+                                  </ResponsiveGrid>
                                 </Grid>
                               </Grid>
                             )}
                             {values.sexCheckbox && (
-                              <Grid size={{ xs: 5 }}>
+                              <Grid size={responsiveValue(12, 5)}>
                                 {isSexChoicesLoading ? (
                                   <LoadingComponent />
                                 ) : (
@@ -861,6 +871,7 @@ const CreateSurveyPage = (): ReactElement => {
                   pt: 3,
                   display: 'flex',
                   flexDirection: 'row',
+                  flexWrap: 'wrap',
                 }}
               >
                 <Box

@@ -7,6 +7,11 @@ import { createHandleApplyFilterChange } from '@utils/utils';
 import type { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
+import {
+  ResponsiveGrid,
+  ResponsiveGridContainer,
+  responsiveGridSize,
+} from 'src/responsive';
 
 interface CommunicationFiltersProps {
   filter: Record<string, any>;
@@ -50,14 +55,13 @@ export function CommunicationFilters({
       applyHandler={handleApplyFilter}
       clearHandler={handleClearFilter}
     >
-      <Grid
-        container
+      <ResponsiveGridContainer
         spacing={3}
         sx={{
           alignItems: 'flex-end',
         }}
       >
-        <Grid size={{ xs: 4 }}>
+        <ResponsiveGrid size="third">
           <TargetPopulationAutocompleteRestFilter
             name="targetPopulation"
             value={filter.targetPopulation}
@@ -67,8 +71,8 @@ export function CommunicationFilters({
             appliedFilter={appliedFilter}
             setAppliedFilter={setAppliedFilter}
           />
-        </Grid>
-        <Grid size={{ xs: 2 }}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="sixth">
           <CreatedByAutocompleteRestFilter
             label={t('Created by')}
             filter={filter}
@@ -80,10 +84,10 @@ export function CommunicationFilters({
             setAppliedFilter={setAppliedFilter}
             additionalVariables={{ isMessageCreator: true }}
           />
-        </Grid>
+        </ResponsiveGrid>
         <Grid
           container
-          size={{ xs: 6 }}
+          size={responsiveGridSize('half')}
           spacing={3}
           sx={{
             alignItems: 'flex-end',
@@ -107,7 +111,7 @@ export function CommunicationFilters({
             />
           </Grid>
         </Grid>
-      </Grid>
+      </ResponsiveGridContainer>
     </FiltersSection>
   );
 }

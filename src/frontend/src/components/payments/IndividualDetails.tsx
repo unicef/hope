@@ -1,11 +1,12 @@
 import { useTranslation } from 'react-i18next';
 import { Overview } from '@components/payments/Overview';
 import { Title } from '@core/Title';
-import { Grid, Typography } from '@mui/material';
+import { Typography } from '@mui/material';
 import { LabelizedField } from '@core/LabelizedField';
 import { displayNameWithLatin, getPhoneNoLabel } from '@utils/utils';
 import { useProgramContext } from 'src/programContext';
 import type { ReactElement } from 'react';
+import { ResponsiveGrid, ResponsiveGridContainer } from 'src/responsive';
 
 export const IndividualDetails = ({ individual }): ReactElement => {
   const { t } = useTranslation();
@@ -19,26 +20,26 @@ export const IndividualDetails = ({ individual }): ReactElement => {
           {t(`${beneficiaryGroup?.memberLabel}`)}
         </Typography>{' '}
       </Title>
-      <Grid container spacing={3}>
-        <Grid size={{ xs: 3 }}>
+      <ResponsiveGridContainer spacing={3}>
+        <ResponsiveGrid size="quarter" mobileSize="half">
           <LabelizedField
             label={t(`${beneficiaryGroup?.memberLabel.toUpperCase()} ID`)}
             value={individual.unicefId}
           />
-        </Grid>
-        <Grid size={{ xs: 3 }}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="quarter" mobileSize="half">
           <LabelizedField
             label={t(`${beneficiaryGroup?.memberLabel.toUpperCase()} ID`)}
             value={displayNameWithLatin(individual, 'fullName')}
           />
-        </Grid>
-        <Grid size={{ xs: 3 }}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="quarter" mobileSize="half">
           <LabelizedField
             label={t('PHONE NUMBER')}
             value={getPhoneNoLabel(individual.phoneNo, individual.phoneNoValid)}
           />
-        </Grid>
-        <Grid size={{ xs: 3 }}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="quarter" mobileSize="half">
           <LabelizedField
             label={t('ALT. PHONE NUMBER')}
             value={getPhoneNoLabel(
@@ -46,8 +47,8 @@ export const IndividualDetails = ({ individual }): ReactElement => {
               individual.phoneNoAlternativeValid,
             )}
           />
-        </Grid>
-      </Grid>
+        </ResponsiveGrid>
+      </ResponsiveGridContainer>
     </Overview>
   );
 };

@@ -10,6 +10,7 @@ import { Field, FieldArray } from 'formik';
 import type { FC } from 'react';
 import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
+import { ResponsiveGrid } from 'src/responsive';
 import { Link } from 'react-router-dom';
 import { ProgramPartnerCard } from './ProgramPartnerCard';
 
@@ -83,7 +84,7 @@ export const PartnersStep: FC<PartnersStepProps> = ({
         }}
       >
         <Grid container spacing={2}>
-          <Grid size={6}>
+          <ResponsiveGrid size="half">
             <Field
               name="partnerAccess"
               label={t('Who should have access to the program?')}
@@ -93,7 +94,7 @@ export const PartnersStep: FC<PartnersStepProps> = ({
               required
               disableClearable
             />
-          </Grid>
+          </ResponsiveGrid>
         </Grid>
       </Box>
       {values.partnerAccess === 'SELECTED_PARTNERS_ACCESS' && (

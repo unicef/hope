@@ -57,4 +57,4 @@ def recalculate_cash_received(household: "Household") -> None:
     )
     household.total_cash_received = aggregated_delivered_quantity["total_cash_received"]
     household.total_cash_received_usd = aggregated_delivered_quantity["total_cash_received_usd"]
-    household.save(update_fields=("total_cash_received_usd", "total_cash_received_usd"))
+    household.save(update_fields=("total_cash_received", "total_cash_received_usd"))

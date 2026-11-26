@@ -11,11 +11,15 @@ export const ProgramCycleAutocompleteRest = ({
   onChange,
   required = false,
   error = null,
+  disabled = false,
+  enabled = true,
 }: {
   value;
   onChange: (e) => void;
   required?: boolean;
   error?: string;
+  disabled?: boolean;
+  enabled?: boolean;
 }): ReactElement => {
   const { t } = useTranslation();
   const [queryParams, setQueryParams] = useState({
@@ -68,6 +72,8 @@ export const ProgramCycleAutocompleteRest = ({
       queryParams={queryParams}
       required={required}
       error={error}
+      disabled={disabled}
+      enabled={enabled}
     />
   );
 };

@@ -50,7 +50,6 @@ def program(business_area) -> Program:
         group_label_plural="Items Groups",
         member_label="Item",
         member_label_plural="Items",
-        master_detail=True,
     )
     return ProgramFactory(
         name="Test Program",
@@ -162,7 +161,7 @@ class TestPeriodicDataTemplates:
         periodic_data_update_template.refresh_from_db()
         assert (
             page_individuals.check_file_exists(
-                os.path.join(download_path, periodic_data_update_template.file.file.name)
+                os.path.join(download_path, os.path.basename(periodic_data_update_template.file.file.name))
             )
             is True
         )
@@ -309,7 +308,7 @@ class TestPeriodicDataTemplates:
         periodic_data_update_template.refresh_from_db()
         assert (
             page_individuals.check_file_exists(
-                os.path.join(download_path, periodic_data_update_template.file.file.name)
+                os.path.join(download_path, os.path.basename(periodic_data_update_template.file.file.name))
             )
             is True
         )

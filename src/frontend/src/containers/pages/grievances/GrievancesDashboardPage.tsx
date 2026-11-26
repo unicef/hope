@@ -1,5 +1,4 @@
 import Box from '@mui/material/Box';
-import Grid from '@mui/material/Grid';
 import { useTranslation } from 'react-i18next';
 import { LoadingComponent } from '@components/core/LoadingComponent';
 import { PageHeader } from '@components/core/PageHeader';
@@ -22,6 +21,11 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import type { ReactElement } from 'react';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import { formatFigure } from '@utils/utils';
+import {
+  ResponsiveGrid,
+  ResponsiveGridContainer,
+  responsiveValue,
+} from 'src/responsive';
 
 function GrievancesDashboardPage(): ReactElement {
   const { t } = useTranslation();
@@ -97,8 +101,8 @@ function GrievancesDashboardPage(): ReactElement {
     <>
       <PageHeader title={t('Grievance Dashboard')} />
       <TableWrapper>
-        <Grid container spacing={2} sx={{ alignItems: 'stretch' }}>
-          <Grid size={{ xs: 4 }}>
+        <ResponsiveGridContainer spacing={2} sx={{ alignItems: 'stretch' }}>
+          <ResponsiveGrid size="third">
             <Box
               sx={{
                 height: '100%',
@@ -138,25 +142,25 @@ function GrievancesDashboardPage(): ReactElement {
                 dataCy="tickets-average-resolution"
               />
             </Box>
-          </Grid>
-          <Grid size={{ xs: 8 }}>
-            <Box sx={{ ml: 3 }}>
+          </ResponsiveGrid>
+          <ResponsiveGrid size="twoThirds">
+            <Box sx={{ ml: responsiveValue(0, 3) }}>
               <TicketsByCategorySection data={ticketsByCategory} />
             </Box>
-          </Grid>
-        </Grid>
-        <Grid container spacing={2} sx={{ mt: 5 }}>
-          <Grid size={{ xs: 4 }}>
+          </ResponsiveGrid>
+        </ResponsiveGridContainer>
+        <ResponsiveGridContainer spacing={2} sx={{ mt: 5 }}>
+          <ResponsiveGrid size="third">
             <TicketsByStatusSection data={ticketsByStatus} />
-          </Grid>
-          <Grid size={{ xs: 8 }}>
-            <Box sx={{ ml: 3 }}>
+          </ResponsiveGrid>
+          <ResponsiveGrid size="twoThirds">
+            <Box sx={{ ml: responsiveValue(0, 3) }}>
               <TicketsByLocationAndCategorySection
                 data={ticketsByLocationAndCategory}
               />
             </Box>
-          </Grid>
-        </Grid>
+          </ResponsiveGrid>
+        </ResponsiveGridContainer>
       </TableWrapper>
     </>
   );

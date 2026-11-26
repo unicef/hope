@@ -7,7 +7,8 @@ import { PeriodicDataUpdates } from '@components/periodicDataUpdates/PeriodicDat
 import { PeopleListTable } from '@containers/tables/people/PeopleListTable';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
-import { Box, Fade, Tab, Tabs, Tooltip } from '@mui/material';
+import { Tab, Tabs } from '@core/Tabs';
+import { Box, Fade, Tooltip } from '@mui/material';
 import type { HouseholdChoices } from '@restgenerated/models/HouseholdChoices';
 import type { IndividualChoices } from '@restgenerated/models/IndividualChoices';
 import { RestService } from '@restgenerated/services/RestService';

@@ -325,4 +325,5 @@ export const PAYMENT_PLAN_BACKGROUND_ACTION_ERROR_STATUSES: PaymentPlanDetailBac
     PaymentPlanDetailBackgroundActionStatusEnum.APPLYING_CUSTOM_EXCHANGE_RATE_ERROR,
     PaymentPlanDetailBackgroundActionStatusEnum.RULE_ENGINE_ERROR,
     PaymentPlanDetailBackgroundActionStatusEnum.SEND_TO_PAYMENT_GATEWAY_ERROR,
+    PaymentPlanDetailBackgroundActionStatusEnum.REBUILD_ERROR,
   ];

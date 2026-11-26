@@ -5,6 +5,7 @@ from typing import Any
 
 from django.apps import apps
 from django.conf import settings
+from django.core.management import call_command
 from django.utils import timezone
 from django.utils.module_loading import import_string
 from sentry_sdk import set_tag
@@ -277,6 +278,8 @@ def cleanup_old_periodic_async_jobs_async_task(
 
 def clear_expired_sessions_async_task_action() -> None:
     import_module(settings.SESSION_ENGINE).SessionStore.clear_expired()
+    # social-core stores a nonce per login start and only a completed callback deletes it.
+    call_command("clearsocial")
 
 
 @app.task()

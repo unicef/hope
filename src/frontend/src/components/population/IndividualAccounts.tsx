@@ -6,12 +6,17 @@ import PhotoModal from '@core/PhotoModal/PhotoModal';
 import { Title } from '@core/Title';
 import { usePermissions } from '@hooks/usePermissions';
 import type { Theme } from '@mui/material';
-import { Grid, Paper, Typography } from '@mui/material';
+import { Paper, Typography } from '@mui/material';
 import type { IndividualDetail } from '@restgenerated/models/IndividualDetail';
 import { renderSomethingOrDash, splitCamelCase } from '@utils/utils';
 import { t } from 'i18next';
 import { hasPermissions, PERMISSIONS } from 'src/config/permissions';
 import { useProgramContext } from 'src/programContext';
+import {
+  ResponsiveGrid,
+  ResponsiveGridContainer,
+  SECTION_PADDING,
+} from 'src/responsive';
 import styled from 'styled-components';
 import { useArrayToDict } from '@hooks/useArrayToDict';
 import type { Account } from '@restgenerated/models/Account';
@@ -31,7 +36,7 @@ const AttachmentField: FC<{ attachment: AccountAttachment }> = ({
 }) => {
   const label = attachment.title || t('Attachment');
   return (
-    <Grid size={3}>
+    <ResponsiveGrid size="quarter" mobileSize="half">
       <LabelizedField label={label}>
         {isImage(attachment.file) ? (
           <PhotoModal src={attachment.file} title={label} />
@@ -41,7 +46,7 @@ const AttachmentField: FC<{ attachment: AccountAttachment }> = ({
           </a>
         )}
       </LabelizedField>
-    </Grid>
+    </ResponsiveGrid>
   );
 };
 
@@ -50,8 +55,6 @@ interface IndividualAccountsProps {
 }
 
 const Overview = styled(Paper)<{ theme?: Theme }>`
-  padding: ${({ theme }) => theme.spacing(8)}
-    ${({ theme }) => theme.spacing(11)};
   margin-top: ${({ theme }) => theme.spacing(6)};
   margin-bottom: ${({ theme }) => theme.spacing(4)};
 `;
@@ -73,37 +76,39 @@ const AccountItem: FC<AccountItemProps> = ({
 }) => {
   const dataFields = account.dataFields;
   return (
-    <Grid size={12} key={account.id}>
+    <ResponsiveGrid size="full" key={account.id}>
       <Typography variant="h6">{account.name}</Typography>
-      <Grid container spacing={3}>
-        <Grid size={3}>
+      <ResponsiveGridContainer spacing={3}>
+        <ResponsiveGrid size="quarter" mobileSize="half">
           <LabelizedField label={t('Financial Institution')}>
             {renderSomethingOrDash(
-              accountFinancialInstitutionsDict[account.financialInstitution ?? ''],
+              accountFinancialInstitutionsDict[
+                account.financialInstitution ?? ''
+              ],
             )}
           </LabelizedField>
-        </Grid>
+        </ResponsiveGrid>
 
-        <Grid size={3}>
+        <ResponsiveGrid size="quarter" mobileSize="half">
           <LabelizedField label={t('Number')}>
             {renderSomethingOrDash(account.number)}
           </LabelizedField>
-        </Grid>
+        </ResponsiveGrid>
         {dataFields.map((field, idx) => {
           return (
-            <Grid key={idx} size={3}>
+            <ResponsiveGrid key={idx} size="quarter" mobileSize="half">
               <LabelizedField label={splitCamelCase(field.key)}>
                 {renderSomethingOrDash(field.value)}
               </LabelizedField>
-            </Grid>
+            </ResponsiveGrid>
           );
         })}
         {account.attachments?.map((attachment) => (
           <AttachmentField key={attachment.id} attachment={attachment} />
         ))}
-      </Grid>
+      </ResponsiveGridContainer>
       {!lastItem && <DividerLine />}
-    </Grid>
+    </ResponsiveGrid>
   );
 };
 
@@ -146,13 +151,13 @@ export const IndividualAccounts: FC<IndividualAccountsProps> = ({
   }
 
   return (
-    <Overview>
+    <Overview sx={{ padding: SECTION_PADDING }}>
       <Title>
         <Typography variant="h6">
           {t(`${beneficiaryGroup?.memberLabel} Accounts`)}
         </Typography>
       </Title>
-      <Grid container spacing={6}>
+      <ResponsiveGridContainer spacing={6}>
         {individual.accounts.map((account, index) => {
           return (
             <AccountItem
@@ -165,7 +170,7 @@ export const IndividualAccounts: FC<IndividualAccountsProps> = ({
             />
           );
         })}
-      </Grid>
+      </ResponsiveGridContainer>
     </Overview>
   );
 };

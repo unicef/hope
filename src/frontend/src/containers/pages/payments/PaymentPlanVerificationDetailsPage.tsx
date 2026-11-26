@@ -12,7 +12,7 @@ import { VerificationPlansSummary } from '@components/payments/VerificationPlans
 import { PaymentVerificationPlanStatusEnum } from '@restgenerated/models/PaymentVerificationPlanStatusEnum';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
-import { Button } from '@mui/material';
+import { Box, Button } from '@mui/material';
 import type { Choice } from '@restgenerated/models/Choice';
 import type { PaymentVerificationPlanDetails } from '@restgenerated/models/PaymentVerificationPlanDetails';
 import { RestService } from '@restgenerated/services/RestService';
@@ -33,25 +33,25 @@ import { PERMISSIONS, hasPermissions } from '../../../config/permissions';
 import { UniversalActivityLogTablePaymentVerification } from '../../tables/UniversalActivityLogTablePaymentVerification';
 import { VerificationsTable } from '../../tables/payments/VerificationRecordsTable';
 import { VerificationRecordsFilters } from '../../tables/payments/VerificationRecordsTable/VerificationRecordsFilters';
+import { HeaderActions } from '@core/HeaderActions';
+import { SECTION_PADDING, responsiveValue } from 'src/responsive';
 
-const Container = styled.div`
+const Container = styled(Box)`
   display: flex;
   flex: 1;
   width: 100%;
   background-color: #fff;
-  padding: 32px 44px;
   flex-direction: column;
   border-color: #b1b1b5;
   border-bottom-width: 1px;
   border-bottom-style: solid;
 `;
 
-const BottomTitle = styled.div`
+const BottomTitle = styled(Box)`
   color: rgba(0, 0, 0, 0.38);
   font-size: 24px;
   line-height: 28px;
   text-align: center;
-  padding: 70px;
 `;
 
 const initialFilter = {
@@ -174,7 +174,7 @@ function PaymentPlanVerificationDetailsPage(): ReactElement {
           : null
       }
     >
-      <>
+      <HeaderActions spacing="none">
         {canCreate && (
           <CreateVerificationPlan
             paymentPlanId={paymentPlan.id}
@@ -198,7 +198,7 @@ function PaymentPlanVerificationDetailsPage(): ReactElement {
               {t('View Tickets')}
             </Button>
           ) : null)}
-      </>
+      </HeaderActions>
     </PageHeader>
   );
 
@@ -219,10 +219,10 @@ function PaymentPlanVerificationDetailsPage(): ReactElement {
   return (
     <>
       {toolbar}
-      <Container>
+      <Container sx={{ padding: SECTION_PADDING }}>
         <CashPlanDetailsSection planNode={paymentPlan} />
       </Container>
-      <Container>
+      <Container sx={{ padding: SECTION_PADDING }}>
         <VerificationPlansSummary planNode={paymentPlan} />
       </Container>
       {paymentPlan.paymentVerificationPlans?.length
@@ -253,12 +253,12 @@ function PaymentPlanVerificationDetailsPage(): ReactElement {
         </>
       ) : null}
       {canSeeActivationMessage() ? (
-        <BottomTitle>
+        <BottomTitle sx={{ padding: responsiveValue('24px 16px', '70px') }}>
           {t('To see more details please activate Verification Plan')}
         </BottomTitle>
       ) : null}
       {canSeeCreationMessage() ? (
-        <BottomTitle>
+        <BottomTitle sx={{ padding: responsiveValue('24px 16px', '70px') }}>
           {t('To see more details please create Verification Plan')}
         </BottomTitle>
       ) : null}

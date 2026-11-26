@@ -15,17 +15,26 @@ import type { OptionType } from '../DedupeBox';
 import { DedupeBox } from '../DedupeBox';
 import { Title } from '@core/Title';
 import { useProgramContext } from 'src/programContext';
-import type { ReactElement } from 'react';
+import { responsiveValue } from 'src/responsive';
+import type { ReactElement, ReactNode } from 'react';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import { RegistrationDataImportStatusEnum } from '@restgenerated/models/RegistrationDataImportStatusEnum';
 
-export const BigValueContainer = styled.div`
-  padding: ${({ theme }) => theme.spacing(6)};
-  border-color: #b1b1b5;
-  border-left-width: 1px;
-  border-left-style: solid;
-  display: flex;
-`;
+export const BigValueContainer = ({
+  children,
+}: {
+  children: ReactNode;
+}): ReactElement => (
+  <Box
+    sx={{
+      p: responsiveValue(2, 6),
+      borderLeft: '1px solid #b1b1b5',
+      display: 'flex',
+    }}
+  >
+    {children}
+  </Box>
+);
 export const BigValue = styled.div`
   font-family: ${({ theme }: { theme: MiśTheme }) =>
     theme.hctTypography.fontFamily};
@@ -87,7 +96,7 @@ function RegistrationDetails({
   let numbersComponent: ReactElement;
   if (isSocialWorkerProgram) {
     numbersComponent = (
-      <Grid size={{ xs: 4 }}>
+      <Grid size={responsiveValue(12, 4)}>
         <Grid container>
           <Grid size={{ xs: 6 }}>
             <BigValueContainer>
@@ -106,7 +115,7 @@ function RegistrationDetails({
     );
   } else {
     numbersComponent = (
-      <Grid size={{ xs: 'auto' }}>
+      <Grid size={responsiveValue<number | 'auto'>(12, 'auto')}>
         <Grid container>
           <Grid size={{ xs: 6 }}>
             <BigValueContainer>
@@ -168,11 +177,12 @@ function RegistrationDetails({
       <OverviewContainer>
         <Grid
           container
+          rowSpacing={responsiveValue(3, 0)}
           sx={{
             alignItems: 'center',
           }}
         >
-          <Grid size={{ xs: 'auto' }}>
+          <Grid size={responsiveValue<number | 'auto'>(12, 'auto')}>
             <Grid container spacing={3}>
               <Grid size={{ xs: 6 }}>
                 <Box
@@ -228,7 +238,7 @@ function RegistrationDetails({
           {numbersComponent}
           {registration.status ===
           RegistrationDataImportStatusEnum.DEDUPLICATION_FAILED ? null : (
-            <Grid size={{ xs: 'auto' }}>
+            <Grid size={responsiveValue<number | 'auto'>(12, 'auto')}>
               <Grid container sx={{ flexDirection: 'column' }}>
                 <Grid container size={{ xs: 12 }} spacing={3}>
                   <Grid size={{ xs: 4 }}></Grid>

@@ -103,7 +103,7 @@ def social_worker_program(
     all_currencies: None,
 ) -> Any:
     data_collecting_type = DataCollectingTypeFactory(type=DataCollectingType.Type.SOCIAL)
-    beneficiary_group = BeneficiaryGroupFactory(master_detail=False)
+    beneficiary_group = BeneficiaryGroupFactory()
     return ProgramFactory(
         business_area=business_area,
         data_collecting_type=data_collecting_type,
@@ -333,7 +333,7 @@ def social_worker_program_with_redenominated_currency(
     return ProgramFactory(
         business_area=business_area,
         data_collecting_type=DataCollectingTypeFactory(type=DataCollectingType.Type.SOCIAL),
-        beneficiary_group=BeneficiaryGroupFactory(master_detail=False),
+        beneficiary_group=BeneficiaryGroupFactory(),
     )
 
 

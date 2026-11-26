@@ -2,6 +2,7 @@ import { Box, Button, FormHelperText } from '@mui/material';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import ProgramForm from '@containers/forms/ProgramForm';
+import type { ProgramDetail } from '@restgenerated/models/ProgramDetail';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import type { FC } from 'react';
 
@@ -11,6 +12,7 @@ interface DetailsStepProps {
   errors: any;
   programId?: string;
   programHasRdi?: boolean;
+  program?: ProgramDetail;
 }
 
 export const DetailsStep: FC<DetailsStepProps> = ({
@@ -19,6 +21,7 @@ export const DetailsStep: FC<DetailsStepProps> = ({
   errors,
   programId: formProgramId,
   programHasRdi,
+  program,
 }) => {
   const { t } = useTranslation();
   const { businessArea, programId, baseUrl } = useBaseUrl();
@@ -35,6 +38,7 @@ export const DetailsStep: FC<DetailsStepProps> = ({
         values={values}
         programHasRdi={programHasRdi}
         errors={errors}
+        program={program}
       />
       {errors?.documentationToUpdate && (
         <FormHelperText error>{errors.documentationToUpdate}</FormHelperText>

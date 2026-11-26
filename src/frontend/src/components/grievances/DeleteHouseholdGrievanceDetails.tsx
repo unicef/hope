@@ -1,4 +1,4 @@
-import { Box, Grid, Typography } from '@mui/material';
+import { Box, Typography } from '@mui/material';
 import InfoIcon from '@mui/icons-material/Info';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
@@ -18,6 +18,7 @@ import { RestService } from '@restgenerated/services/RestService';
 import { restQueryKey } from '@utils/queryKeys';
 import { useQuery } from '@tanstack/react-query';
 import type { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
+import { ResponsiveGrid, ResponsiveGridContainer } from 'src/responsive';
 
 const Info = styled(InfoIcon)`
   color: ${({ theme }) => theme.hctPalette.gray};
@@ -107,18 +108,18 @@ export function DeleteHouseholdGrievanceDetails({
           )}
         </Box>
       </Title>
-      <Grid container spacing={6}>
-        <Grid size={3}>
+      <ResponsiveGridContainer spacing={6}>
+        <ResponsiveGrid size="quarter" mobileSize="half">
           <LabelizedField label={`${beneficiaryGroup?.groupLabel} Size`}>
             {ticket.household.size}
           </LabelizedField>
-        </Grid>
-        <Grid size={3}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="quarter" mobileSize="half">
           <LabelizedField label={t('Residence Status')}>
             {residenceChoicesDict[ticket.household.residenceStatus]}
           </LabelizedField>
-        </Grid>
-        <Grid size={3}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="quarter" mobileSize="half">
           <LabelizedField label={`Head of ${beneficiaryGroup?.groupLabel}`}>
             <ContentLink
               href={`/${baseUrl}/population/individuals/${ticket.household.headOfHousehold.id}`}
@@ -126,49 +127,49 @@ export function DeleteHouseholdGrievanceDetails({
               {ticket.household.headOfHousehold.fullName}
             </ContentLink>
           </LabelizedField>
-        </Grid>
-        <Grid size={3}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="quarter" mobileSize="half">
           <LabelizedField label={t('Country')}>
             {ticket.household.country}
           </LabelizedField>
-        </Grid>
+        </ResponsiveGrid>
 
-        <Grid size={3}>
+        <ResponsiveGrid size="quarter" mobileSize="half">
           <LabelizedField label={t('Country of Origin')}>
             {ticket.household.countryOrigin}
           </LabelizedField>
-        </Grid>
-        <Grid size={3}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="quarter" mobileSize="half">
           <LabelizedField label={t('Address')}>
             {ticket.household.address}
           </LabelizedField>
-        </Grid>
-        <Grid size={3}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="quarter" mobileSize="half">
           <LabelizedField label={t('Village')}>
             {ticket.household.village}
           </LabelizedField>
-        </Grid>
-        <Grid size={3}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="quarter" mobileSize="half">
           <LabelizedField label={t('Administrative Level 1')}>
             {ticket.household.admin1?.name}
           </LabelizedField>
-        </Grid>
-        <Grid size={3}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="quarter" mobileSize="half">
           <LabelizedField label={t('Administrative Level 2')}>
             {ticket.household.admin2?.name}
           </LabelizedField>
-        </Grid>
-        <Grid size={3}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="quarter" mobileSize="half">
           <LabelizedField label={t('Geolocation')}>
             {ticket.household?.geopoint || '-'}
           </LabelizedField>
-        </Grid>
-        <Grid size={3}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="quarter" mobileSize="half">
           <LabelizedField label={t('UNHCR CASE ID')}>
             {ticket.household?.unhcrId}
           </LabelizedField>
-        </Grid>
-      </Grid>
+        </ResponsiveGrid>
+      </ResponsiveGridContainer>
     </ApproveBox>
   );
 }

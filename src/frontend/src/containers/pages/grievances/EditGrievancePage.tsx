@@ -59,7 +59,7 @@ import {
   thingForSpecificGrievanceType,
 } from '@utils/utils';
 import { Field, Formik } from 'formik';
-import type { ReactElement } from 'react';
+import type { ReactElement, ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useProgramContext } from 'src/programContext';
@@ -70,13 +70,18 @@ import {
   hasPermissions,
 } from '../../../config/permissions';
 import { grievancePermissions } from './GrievancesDetailsPage/grievancePermissions';
+import {
+  ResponsiveGrid,
+  ResponsiveGridContainer,
+  responsiveValue,
+} from 'src/responsive';
 
 const BoxPadding = styled.div`
   padding: 15px 0;
 `;
-const NewTicket = styled.div`
-  padding: 20px;
-`;
+function NewTicket({ children }: { children: ReactNode }): ReactElement {
+  return <Box sx={{ padding: responsiveValue('8px', '20px') }}>{children}</Box>;
+}
 
 const BoxWithBottomBorders = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
@@ -465,45 +470,45 @@ const EditGrievancePage = (): ReactElement => {
                 </LoadingButton>
               </Box>
             </PageHeader>
-            <Grid container spacing={3}>
-              <Grid size={{ xs: 12 }}>
+            <ResponsiveGridContainer spacing={3}>
+              <ResponsiveGrid size="full">
                 <NewTicket>
                   <ContainerColumnWithBorder>
-                    <Grid container spacing={3}>
-                      <Grid size={{ xs: 3 }}>
+                    <ResponsiveGridContainer spacing={3}>
+                      <ResponsiveGrid size="quarter">
                         <LabelizedField label={t('Category')}>
                           {categoryChoices[ticket.category]}
                         </LabelizedField>
-                      </Grid>
+                      </ResponsiveGrid>
                       {showIssueType(values) ? (
-                        <Grid size={{ xs: 6 }}>
+                        <ResponsiveGrid size="half">
                           <LabelizedField label={t('Issue Type')}>
                             {selectedIssueType(values, issueTypeDict)}
                           </LabelizedField>
-                        </Grid>
+                        </ResponsiveGrid>
                       ) : null}
                       {values.category && (
                         <>
                           <DividerLine />
-                          <Grid size={{ xs: 6 }}>
+                          <ResponsiveGrid size="half">
                             <LabelizedField label={t('Category Description')}>
                               {categoryDescription}
                             </LabelizedField>
-                          </Grid>
+                          </ResponsiveGrid>
                           {issueTypeDescription && (
-                            <Grid size={{ xs: 6 }}>
+                            <ResponsiveGrid size="half">
                               <LabelizedField
                                 label={t('Issue Type Description')}
                               >
                                 {issueTypeDescription}
                               </LabelizedField>
-                            </Grid>
+                            </ResponsiveGrid>
                           )}
                           <DividerLine />
                         </>
                       )}
                       <Grid container size={{ xs: 12 }}>
-                        <Grid size={{ xs: 3 }}>
+                        <ResponsiveGrid size="quarter">
                           <LabelizedField
                             label={`${beneficiaryGroup?.groupLabel}`}
                           >
@@ -525,8 +530,8 @@ const EditGrievancePage = (): ReactElement => {
                               )}
                             </span>
                           </LabelizedField>
-                        </Grid>
-                        <Grid size={{ xs: 3 }}>
+                        </ResponsiveGrid>
+                        <ResponsiveGrid size="quarter">
                           <LabelizedField label={t('Individual ID')}>
                             <span>
                               {ticket.individual?.id &&
@@ -546,12 +551,12 @@ const EditGrievancePage = (): ReactElement => {
                               )}
                             </span>
                           </LabelizedField>
-                        </Grid>
+                        </ResponsiveGrid>
                       </Grid>
-                    </Grid>
+                    </ResponsiveGridContainer>
                     <BoxPadding>
-                      <Grid container spacing={3}>
-                        <Grid size={{ xs: 12 }}>
+                      <ResponsiveGridContainer spacing={3}>
+                        <ResponsiveGrid size="full">
                           <Field
                             name="description"
                             multiline
@@ -562,8 +567,8 @@ const EditGrievancePage = (): ReactElement => {
                             required
                             component={FormikTextField}
                           />
-                        </Grid>
-                        <Grid size={{ xs: 12 }}>
+                        </ResponsiveGrid>
+                        <ResponsiveGrid size="full">
                           <Field
                             name="comments"
                             multiline
@@ -573,16 +578,16 @@ const EditGrievancePage = (): ReactElement => {
                             label="Comments"
                             component={FormikTextField}
                           />
-                        </Grid>
-                        <Grid size={{ xs: 6 }}>
+                        </ResponsiveGrid>
+                        <ResponsiveGrid size="half">
                           <Field
                             name="admin"
                             disabled={Boolean(ticket.admin)}
                             variant="outlined"
                             component={FormikAdminAreaAutocomplete}
                           />
-                        </Grid>
-                        <Grid size={{ xs: 6 }}>
+                        </ResponsiveGrid>
+                        <ResponsiveGrid size="half">
                           <Field
                             name="area"
                             fullWidth
@@ -591,8 +596,8 @@ const EditGrievancePage = (): ReactElement => {
                             label={t('Area / Village / Pay point')}
                             component={FormikTextField}
                           />
-                        </Grid>
-                        <Grid size={{ xs: 6 }}>
+                        </ResponsiveGrid>
+                        <ResponsiveGrid size="half">
                           <Field
                             name="language"
                             multiline
@@ -602,8 +607,8 @@ const EditGrievancePage = (): ReactElement => {
                             label={t('Languages Spoken')}
                             component={FormikTextField}
                           />
-                        </Grid>
-                        <Grid size={{ xs: 3 }}>
+                        </ResponsiveGrid>
+                        <ResponsiveGrid size="quarter">
                           <Field
                             name="priority"
                             multiline
@@ -613,8 +618,8 @@ const EditGrievancePage = (): ReactElement => {
                             choices={choicesData.grievanceTicketPriorityChoices}
                             component={FormikSelectField}
                           />
-                        </Grid>
-                        <Grid size={{ xs: 3 }}>
+                        </ResponsiveGrid>
+                        <ResponsiveGrid size="quarter">
                           <Field
                             name="urgency"
                             multiline
@@ -624,8 +629,8 @@ const EditGrievancePage = (): ReactElement => {
                             choices={choicesData.grievanceTicketUrgencyChoices}
                             component={FormikSelectField}
                           />
-                        </Grid>
-                        <Grid size={{ xs: 3 }}>
+                        </ResponsiveGrid>
+                        <ResponsiveGrid size="quarter">
                           <Field
                             name="submissionChannel"
                             fullWidth
@@ -645,8 +650,8 @@ const EditGrievancePage = (): ReactElement => {
                               ticket.issueType,
                             )}
                           />
-                        </Grid>
-                        <Grid size={{ xs: 3 }}>
+                        </ResponsiveGrid>
+                        <ResponsiveGrid size="quarter">
                           <Field
                             name="program"
                             label={t('Programme Name')}
@@ -659,8 +664,8 @@ const EditGrievancePage = (): ReactElement => {
                               Boolean(ticket.programs?.[0]?.id)
                             }
                           />
-                        </Grid>
-                      </Grid>
+                        </ResponsiveGrid>
+                      </ResponsiveGridContainer>
                       {canAddDocumentation && (
                         <Box
                           sx={{
@@ -689,7 +694,7 @@ const EditGrievancePage = (): ReactElement => {
                       )}
                     </BoxPadding>
                     <BoxPadding>
-                      <Grid size={{ xs: 6 }}>
+                      <ResponsiveGrid size="half">
                         <Box
                           sx={{
                             py: 3,
@@ -701,13 +706,13 @@ const EditGrievancePage = (): ReactElement => {
                             disabled={Boolean(ticket.linkedTickets)}
                           />
                         </Box>
-                      </Grid>
+                      </ResponsiveGrid>
                       {(ticket.issueType?.toString() ===
                         GRIEVANCE_ISSUE_TYPES.PAYMENT_COMPLAINT ||
                         ticket.issueType?.toString() ===
                           GRIEVANCE_ISSUE_TYPES.FSP_COMPLAINT) && (
                         <BoxWithBottomBorders>
-                          <Grid size={{ xs: 6 }}>
+                          <ResponsiveGrid size="half">
                             <Box
                               sx={{
                                 py: 3,
@@ -719,7 +724,7 @@ const EditGrievancePage = (): ReactElement => {
                                 onValueChange={setFieldValue}
                               />
                             </Box>
-                          </Grid>
+                          </ResponsiveGrid>
                         </BoxWithBottomBorders>
                       )}
                     </BoxPadding>
@@ -743,13 +748,13 @@ const EditGrievancePage = (): ReactElement => {
                     )}
                   </ContainerColumnWithBorder>
                 </NewTicket>
-              </Grid>
-              <Grid size={{ xs: 6 }}>
+              </ResponsiveGrid>
+              <ResponsiveGrid size="half">
                 <NewTicket>
                   <OtherRelatedTicketsCreate values={values} />
                 </NewTicket>
-              </Grid>
-            </Grid>
+              </ResponsiveGrid>
+            </ResponsiveGridContainer>
           </>
         );
       }}

@@ -7,7 +7,8 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { Box, Button, DialogContent, DialogTitle } from '@mui/material';
 import { RestService } from '@restgenerated/services/RestService';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { restQueryKey } from '@utils/queryKeys';
 import { showApiErrorMessages } from '@utils/utils';
 import type { ReactElement } from 'react';
 import { useState } from 'react';
@@ -28,6 +29,7 @@ export function ForceFailedButton({
   const { showMessage } = useSnackbar();
   const { paymentPlanId } = useParams();
   const { businessArea, programId } = useBaseUrl();
+  const queryClient = useQueryClient();
   const { mutate: markAsFailed, isPending: loadingMarkAsFailed } =
     useMutation({
       mutationFn: ({
@@ -51,6 +53,12 @@ export function ForceFailedButton({
         ),
       onSuccess: () => {
         showMessage(t('Payment has been marked as failed successfully.'));
+        setOpenModal(false);
+        queryClient.invalidateQueries({
+          queryKey: restQueryKey(
+            RestService.restBusinessAreasProgramsPaymentPlansPaymentsRetrieve,
+          ),
+        });
       },
       onError: (error: any) => {
         showApiErrorMessages(error, showMessage);
@@ -113,7 +121,7 @@ export function ForceFailedButton({
               color="primary"
               variant="contained"
               onClick={() => submit()}
-              data-cy="button-submit"
+              data-cy="button-mark-as-failed-submit"
               disabled={loadingMarkAsFailed}
               data-perm={PERMISSIONS.PM_MARK_PAYMENT_AS_FAILED}
             >

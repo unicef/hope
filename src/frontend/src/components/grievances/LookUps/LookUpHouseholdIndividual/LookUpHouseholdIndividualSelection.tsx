@@ -1,10 +1,11 @@
-import { Box, FormHelperText, Grid } from '@mui/material';
+import { Box, FormHelperText } from '@mui/material';
 import type { ReactElement } from 'react';
 import { useEffect, useState } from 'react';
 import { isInvalid } from '@utils/utils';
 import { LookUpHouseholdIndividualSelectionDetail } from './LookUpHouseholdIndividualSelectionDetail';
 import { LookUpHouseholdIndividualSelectionDisplay } from './LookUpHouseholdIndividualSelectionDisplay';
 import { useProgramContext } from 'src/programContext';
+import { ResponsiveGrid, ResponsiveGridContainer } from 'src/responsive';
 
 export function LookUpHouseholdIndividualSelection({
   onValueChange,
@@ -69,16 +70,16 @@ export function LookUpHouseholdIndividualSelection({
           setSelectedIndividual={setSelectedIndividual}
         />
         {isInvalid('selectedIndividual', errors, touched) && (
-          <Grid container spacing={4}>
-            {!isSocialDctType && <Grid size={{ xs: 4 }} />}
-            <Grid size={{ xs: 4 }}>
+          <ResponsiveGridContainer spacing={4}>
+            {!isSocialDctType && <ResponsiveGrid size="third" />}
+            <ResponsiveGrid size="third">
               {!selectedIndividual && (
                 <FormHelperText error>
                   {errors?.selectedIndividual}
                 </FormHelperText>
               )}
-            </Grid>
-          </Grid>
+            </ResponsiveGrid>
+          </ResponsiveGridContainer>
         )}
         {isInvalid('selectedHousehold', errors, touched) &&
           !selectedHousehold && (

@@ -2,6 +2,7 @@ import withErrorBoundary from '@components/core/withErrorBoundary';
 import { AdminButton } from '@core/AdminButton';
 import type { BreadCrumbsItem } from '@core/BreadCrumbs';
 import { ButtonTooltip } from '@core/ButtonTooltip';
+import { HeaderActions } from '@core/HeaderActions';
 import { PageHeader } from '@core/PageHeader';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import EditIcon from '@mui/icons-material/EditRounded';
@@ -46,12 +47,7 @@ function FeedbackDetailsToolbar({
       breadCrumbs={breadCrumbsItems}
       flags={<AdminButton adminUrl={feedback.adminUrl} />}
     >
-      <Box
-        sx={{
-          display: 'flex',
-          alignItems: 'center',
-        }}
-      >
+      <HeaderActions spacing="none">
         {canEdit && (
           <Box
             sx={{
@@ -104,7 +100,7 @@ function FeedbackDetailsToolbar({
             </ButtonTooltip>
           </Box>
         )}
-      </Box>
+      </HeaderActions>
     </PageHeader>
   );
 }

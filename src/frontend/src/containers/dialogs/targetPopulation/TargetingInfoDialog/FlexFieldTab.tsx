@@ -1,6 +1,5 @@
 import Box from '@mui/material/Box';
-import Grid from '@mui/material/Grid';
-import { MenuItem } from '@mui/material';
+import { MenuItem, TableContainer } from '@mui/material';
 import type { ReactElement } from 'react';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -12,6 +11,7 @@ import { FlexFieldsTable } from '../../../tables/targeting/TargetPopulation/Flex
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useProgramContext } from 'src/programContext';
 import { restQueryKey } from '@utils/queryKeys';
+import { ResponsiveGrid, ResponsiveGridContainer } from 'src/responsive';
 
 export function FlexFieldTab(): ReactElement {
   const { t } = useTranslation();
@@ -52,8 +52,8 @@ export function FlexFieldTab(): ReactElement {
 
   return (
     <Box sx={{ p: 3 }}>
-      <Grid container spacing={3}>
-        <Grid size={{ xs: 3 }}>
+      <ResponsiveGridContainer spacing={3}>
+        <ResponsiveGrid size="quarter">
           <SearchTextField
             label={t('Search')}
             value={searchValue}
@@ -61,8 +61,8 @@ export function FlexFieldTab(): ReactElement {
             data-cy="filters-search"
             fullWidth
           />
-        </Grid>
-        <Grid size={{ xs: 3 }}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="quarter">
           {selectOptions.length && (
             <SelectFilter
               onChange={(e) => setSelectedOption(e.target.value)}
@@ -82,8 +82,8 @@ export function FlexFieldTab(): ReactElement {
               ))}
             </SelectFilter>
           )}
-        </Grid>
-        <Grid size={{ xs: 3 }}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="quarter">
           <SelectFilter
             onChange={(e) => setSelectedFieldType(e.target.value)}
             label={t('Field Type')}
@@ -103,14 +103,16 @@ export function FlexFieldTab(): ReactElement {
               </MenuItem>
             ))}
           </SelectFilter>
-        </Grid>
-      </Grid>
-      <FlexFieldsTable
-        selectedOption={selectedOption}
-        searchValue={searchValue}
-        selectedFieldType={selectedFieldType}
-        fields={data}
-      />
+        </ResponsiveGrid>
+      </ResponsiveGridContainer>
+      <TableContainer>
+        <FlexFieldsTable
+          selectedOption={selectedOption}
+          searchValue={searchValue}
+          selectedFieldType={selectedFieldType}
+          fields={data}
+        />
+      </TableContainer>
     </Box>
   );
 }

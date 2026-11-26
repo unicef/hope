@@ -5,8 +5,7 @@ import { LabelizedField } from '@core/LabelizedField';
 import { OverviewContainer } from '@core/OverviewContainer';
 import { Title } from '@core/Title';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import type { GridSize } from '@mui/material';
-import { Box, FormHelperText, Grid, Typography } from '@mui/material';
+import { Box, FormHelperText, Typography } from '@mui/material';
 import type { PaginatedProgramListList } from '@restgenerated/models/PaginatedProgramListList';
 import { RestService } from '@restgenerated/services/RestService';
 import { restQueryKey } from '@utils/queryKeys';
@@ -28,6 +27,8 @@ import { LookUpLinkedTickets } from '../../LookUps/LookUpLinkedTickets/LookUpLin
 import { LookUpPaymentRecord } from '../../LookUps/LookUpPaymentRecord/LookUpPaymentRecord';
 import { LookUpDelegate } from '../../LookUps/LookUpDelegate/LookUpDelegate';
 import type { GrievanceChoices } from '@restgenerated/models/GrievanceChoices';
+import { ResponsiveGrid, ResponsiveGridContainer } from 'src/responsive';
+import type { ResponsiveGridSize } from 'src/responsive';
 
 const BoxPadding = styled.div`
   padding: 15px 0;
@@ -125,12 +126,12 @@ function Description({
     <>
       <BoxPadding>
         <OverviewContainer>
-          <Grid container spacing={6}>
+          <ResponsiveGridContainer spacing={6}>
             {[
               {
                 label: t('Category'),
                 value: <span>{categoryChoices[values.category]}</span>,
-                size: 6,
+                size: 'half',
               },
               showIssueType(values) && {
                 label: t('Issue Type'),
@@ -139,7 +140,7 @@ function Description({
                     {replaceLabels(issueTypeToDisplay, beneficiaryGroup)}
                   </span>
                 ),
-                size: 6,
+                size: 'half',
               },
               {
                 label: `${beneficiaryGroup?.groupLabel} ID`,
@@ -158,7 +159,7 @@ function Description({
                     )}
                   </span>
                 ),
-                size: 6,
+                size: 'half',
               },
               {
                 label: `${beneficiaryGroup?.memberLabel} ID`,
@@ -177,7 +178,7 @@ function Description({
                     )}
                   </span>
                 ),
-                size: 6,
+                size: 'half',
               },
             ]
               .filter((el) =>
@@ -186,17 +187,20 @@ function Description({
                   : el,
               )
               .map((el) => (
-                <Grid key={el.label} size={{ xs: el.size as GridSize }}>
+                <ResponsiveGrid
+                  key={el.label}
+                  size={el.size as ResponsiveGridSize}
+                >
                   <LabelizedField label={el.label}>{el.value}</LabelizedField>
-                </Grid>
+                </ResponsiveGrid>
               ))}
-          </Grid>
+          </ResponsiveGridContainer>
         </OverviewContainer>
         <BoxWithBorderBottom />
         <BoxPadding />
-        <Grid container spacing={3}>
+        <ResponsiveGridContainer spacing={3}>
           {values.issueType === GRIEVANCE_ISSUE_TYPES.PARTNER_COMPLAINT && (
-            <Grid size={{ xs: 3 }}>
+            <ResponsiveGrid size="quarter">
               <Field
                 name="partner"
                 fullWidth
@@ -205,9 +209,9 @@ function Description({
                 choices={partnerChoicesData || []}
                 component={FormikSelectField}
               />
-            </Grid>
+            </ResponsiveGrid>
           )}
-          <Grid size={{ xs: 12 }}>
+          <ResponsiveGrid size="full">
             <Field
               name="description"
               multiline
@@ -221,8 +225,8 @@ function Description({
               }
               component={FormikTextField}
             />
-          </Grid>
-          <Grid size={{ xs: 12 }}>
+          </ResponsiveGrid>
+          <ResponsiveGrid size="full">
             <Field
               name="comments"
               multiline
@@ -231,16 +235,16 @@ function Description({
               label={t('Comments')}
               component={FormikTextField}
             />
-          </Grid>
-          <Grid size={{ xs: 6 }}>
+          </ResponsiveGrid>
+          <ResponsiveGrid size="half">
             <Field
               name="admin"
               variant="outlined"
               component={FormikAdminAreaAutocomplete}
               disabled={Boolean(values.selectedHousehold?.admin2)}
             />
-          </Grid>
-          <Grid size={{ xs: 6 }}>
+          </ResponsiveGrid>
+          <ResponsiveGrid size="half">
             <Field
               name="area"
               fullWidth
@@ -248,8 +252,8 @@ function Description({
               label={t('Area / Village / Pay point')}
               component={FormikTextField}
             />
-          </Grid>
-          <Grid size={{ xs: 6 }}>
+          </ResponsiveGrid>
+          <ResponsiveGrid size="half">
             <Field
               name="language"
               multiline
@@ -258,8 +262,8 @@ function Description({
               label={t('Languages Spoken')}
               component={FormikTextField}
             />
-          </Grid>
-          <Grid size={{ xs: 3 }}>
+          </ResponsiveGrid>
+          <ResponsiveGrid size="quarter">
             <Field
               name="priority"
               multiline
@@ -269,8 +273,8 @@ function Description({
               choices={priorityChoicesData}
               component={FormikSelectField}
             />
-          </Grid>
-          <Grid size={{ xs: 3 }}>
+          </ResponsiveGrid>
+          <ResponsiveGrid size="quarter">
             <Field
               name="urgency"
               multiline
@@ -280,8 +284,8 @@ function Description({
               choices={urgencyChoicesData}
               component={FormikSelectField}
             />
-          </Grid>
-          <Grid size={{ xs: 3 }}>
+          </ResponsiveGrid>
+          <ResponsiveGrid size="quarter">
             <Field
               name="submissionChannel"
               fullWidth
@@ -290,8 +294,8 @@ function Description({
               choices={submissionChannelChoicesData}
               component={FormikSelectField}
             />
-          </Grid>
-          <Grid size={{ xs: 3 }}>
+          </ResponsiveGrid>
+          <ResponsiveGrid size="quarter">
             <Field
               name="program"
               label={t('Programme Name')}
@@ -301,12 +305,12 @@ function Description({
               component={FormikSelectField}
               disabled={!isAllPrograms || !isAnonymousTicket}
             />
-          </Grid>
-        </Grid>
+          </ResponsiveGrid>
+        </ResponsiveGridContainer>
         <Box sx={{ pt: 5 }}>
           <BoxWithBorders>
-            <Grid container spacing={4}>
-              <Grid size={{ xs: 6 }}>
+            <ResponsiveGridContainer spacing={4}>
+              <ResponsiveGrid size="half">
                 <Box sx={{ py: 3 }}>
                   <LookUpLinkedTickets
                     values={values}
@@ -314,10 +318,10 @@ function Description({
                     disabled={isLinkedFromUrl}
                   />
                 </Box>
-              </Grid>
+              </ResponsiveGrid>
               {(values.issueType === GRIEVANCE_ISSUE_TYPES.PAYMENT_COMPLAINT ||
                 values.issueType === GRIEVANCE_ISSUE_TYPES.FSP_COMPLAINT) && (
-                <Grid size={{ xs: 6 }}>
+                <ResponsiveGrid size="half">
                   <Box sx={{ py: 3 }}>
                     <LookUpPaymentRecord
                       values={values}
@@ -327,9 +331,9 @@ function Description({
                   <FormHelperText key="selectedPaymentRecords" error>
                     {errors.selectedPaymentRecords}
                   </FormHelperText>
-                </Grid>
+                </ResponsiveGrid>
               )}
-            </Grid>
+            </ResponsiveGridContainer>
           </BoxWithBorders>
         </Box>
       </BoxPadding>
@@ -353,11 +357,11 @@ function Description({
       )}
       {values.issueType === GRIEVANCE_ISSUE_TYPES.UPDATE_DELEGATE && (
         <Box sx={{ mt: 3 }}>
-          <Grid size={{ xs: 6 }}>
+          <ResponsiveGrid size="half">
             <Box sx={{ py: 3 }}>
               <LookUpDelegate values={values} onValueChange={setFieldValue} />
             </Box>
-          </Grid>
+          </ResponsiveGrid>
         </Box>
       )}
     </>

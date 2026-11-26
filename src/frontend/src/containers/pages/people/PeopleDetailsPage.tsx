@@ -21,7 +21,6 @@ import { Title } from '@core/Title';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useHopeDetailsQuery } from '@hooks/useHopeDetailsQuery';
 import { usePermissions } from '@hooks/usePermissions';
-import type { Theme } from '@mui/material';
 import { Typography } from '@mui/material';
 import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
@@ -39,6 +38,11 @@ import {
 import type { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
+import {
+  ResponsiveGrid,
+  ResponsiveGridContainer,
+  responsiveValue,
+} from 'src/responsive';
 import styled from 'styled-components';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { UniversalActivityLogTable } from '../../tables/UniversalActivityLogTable';
@@ -51,14 +55,13 @@ const Container = styled.div`
     width: 100%;
   }
 `;
-const OverviewPaper = styled(Paper)<{ theme?: Theme }>`
+const OverviewPaper = styled(Paper)`
   margin: 0px 0px 20px 0px;
-  padding: 20px ${({ theme }) => theme.spacing(11)};
 `;
-const Overview = styled(Paper)<{ theme?: Theme }>`
+const Overview = styled(Paper)`
   margin: 15px 0px 20px 0px;
-  padding: 20px ${({ theme }) => theme.spacing(11)};
 `;
+const OVERVIEW_PADDING = responsiveValue('16px', '20px 44px');
 const SubTitle = styled(Typography)`
   && {
     font-size: 16px;
@@ -199,17 +202,17 @@ const PeopleDetailsPage = (): ReactElement => {
             periodicFieldsData={periodicFieldsData}
           />
         </Box>
-        <OverviewPaper>
+        <OverviewPaper sx={{ padding: OVERVIEW_PADDING }}>
           <Title>
             <Typography variant="h6">{t('Benefits')}</Typography>
           </Title>
           <Grid container>
-            <Grid size={{ xs: 3 }}>
+            <ResponsiveGrid size="quarter" mobileSize="half">
               <LabelizedField label={t('Cash received')}>
                 {household?.deliveredQuantities?.length ? (
                   <Box sx={{ mb: 2 }}>
                     <Grid container>
-                      <Grid size={{ xs: 6 }}>
+                      <Grid size={6}>
                         <Box sx={{ display: 'flex', flexDirection: 'column' }}>
                           {household?.deliveredQuantities?.map((item) => (
                             <Box key={item.currencyVisionCode}>
@@ -233,8 +236,8 @@ const PeopleDetailsPage = (): ReactElement => {
                   <>-</>
                 )}
               </LabelizedField>
-            </Grid>
-            <Grid size={{ xs: 3 }}>
+            </ResponsiveGrid>
+            <ResponsiveGrid size="quarter" mobileSize="half">
               <BigValueContainer>
                 <LabelizedField label={t('Total Cash Received')}>
                   <BigValue>
@@ -245,7 +248,7 @@ const PeopleDetailsPage = (): ReactElement => {
                   </BigValue>
                 </LabelizedField>
               </BigValueContainer>
-            </Grid>
+            </ResponsiveGrid>
           </Grid>
         </OverviewPaper>
         {hasPermissions(PERMISSIONS.PM_VIEW_PAYMENT_LIST, permissions) && (
@@ -260,22 +263,22 @@ const PeopleDetailsPage = (): ReactElement => {
           />
         )}
 
-        <Overview>
+        <Overview sx={{ padding: OVERVIEW_PADDING }}>
           <Title>
             <Typography variant="h6">{t('Registration Details')}</Typography>
           </Title>
-          <Grid container spacing={6}>
-            <Grid size={{ xs: 3 }}>
+          <ResponsiveGridContainer spacing={6}>
+            <ResponsiveGrid size="quarter" mobileSize="half">
               <LabelizedField label={t('Source')}>
                 <div>{individual?.registrationDataImport?.dataSource}</div>
               </LabelizedField>
-            </Grid>
-            <Grid size={{ xs: 3 }}>
+            </ResponsiveGrid>
+            <ResponsiveGrid size="quarter" mobileSize="half">
               <LabelizedField label={t('Import name')}>
                 <div>{individual?.registrationDataImport?.name}</div>
               </LabelizedField>
-            </Grid>
-            <Grid size={{ xs: 3 }}>
+            </ResponsiveGrid>
+            <ResponsiveGrid size="quarter" mobileSize="half">
               <LabelizedField label={t('Registration Date')}>
                 <div>
                   <UniversalMoment>
@@ -283,29 +286,29 @@ const PeopleDetailsPage = (): ReactElement => {
                   </UniversalMoment>
                 </div>
               </LabelizedField>
-            </Grid>
-            <Grid size={{ xs: 3 }}>
+            </ResponsiveGrid>
+            <ResponsiveGrid size="quarter" mobileSize="half">
               <LabelizedField label={t('User name')}>
                 {individual?.registrationDataImport?.importedBy?.email}
               </LabelizedField>
-            </Grid>
-          </Grid>
+            </ResponsiveGrid>
+          </ResponsiveGridContainer>
           {individual?.registrationDataImport?.dataSource === 'XLS' ? null : (
             <>
               <hr />
               <SubTitle variant="h6">{t('Data Collection')}</SubTitle>
-              <Grid container spacing={6}>
-                <Grid size={{ xs: 3 }}>
+              <ResponsiveGridContainer spacing={6}>
+                <ResponsiveGrid size="quarter" mobileSize="half">
                   <LabelizedField label={t('Start time')}>
                     <UniversalMoment>{household?.start}</UniversalMoment>
                   </LabelizedField>
-                </Grid>
-                <Grid size={{ xs: 3 }}>
+                </ResponsiveGrid>
+                <ResponsiveGrid size="quarter" mobileSize="half">
                   <LabelizedField label={t('End time')}>
                     {household?.firstRegistrationDate}
                   </LabelizedField>
-                </Grid>
-              </Grid>
+                </ResponsiveGrid>
+              </ResponsiveGridContainer>
             </>
           )}
         </Overview>

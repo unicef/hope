@@ -108,7 +108,7 @@ export const SplitIntoPaymentLists = ({
     }),
   });
 
-  const handleSplit = async (values): Promise<void> => {
+  const handleSplit = async (values, resetForm: () => void): Promise<void> => {
     try {
       await mutate({
         businessAreaSlug: businessArea,
@@ -119,6 +119,7 @@ export const SplitIntoPaymentLists = ({
           paymentsNo: values.paymentsNo,
         },
       });
+      resetForm();
       setDialogOpen(false);
       showMessage(t('Split was successful!'));
     } catch (e) {
@@ -134,11 +135,11 @@ export const SplitIntoPaymentLists = ({
     <Formik
       initialValues={initialValues}
       validationSchema={validationSchema}
-      onSubmit={async (values) => {
-        await handleSplit(values);
+      onSubmit={async (values, { resetForm }) => {
+        await handleSplit(values, resetForm);
       }}
     >
-      {({ values, submitForm }) => (
+      {({ values, submitForm, resetForm }) => (
         <Form>
           <Button
             variant="contained"
@@ -153,7 +154,10 @@ export const SplitIntoPaymentLists = ({
           </Button>
           <Dialog
             open={dialogOpen}
-            onClose={() => setDialogOpen(false)}
+            onClose={() => {
+              resetForm();
+              setDialogOpen(false);
+            }}
             scroll="paper"
             aria-labelledby="form-dialog-title"
             maxWidth="md"
@@ -188,7 +192,12 @@ export const SplitIntoPaymentLists = ({
             </DialogContent>
             <DialogFooter>
               <DialogActions>
-                <Button onClick={() => setDialogOpen(false)}>
+                <Button
+                  onClick={() => {
+                    resetForm();
+                    setDialogOpen(false);
+                  }}
+                >
                   {t('Cancel')}
                 </Button>
                 <LoadingButton

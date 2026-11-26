@@ -4,6 +4,7 @@ from django.core.cache import cache
 from django.db import models
 from django.db.models import QuerySet
 
+from hope.apps.core.upload_paths import upload_path
 from hope.models.account_type import AccountType
 from hope.models.async_job import AsyncJob
 from hope.models.document_type import DocumentType
@@ -45,12 +46,16 @@ class UniversalUpdate(
         help_text="Selected Account Types of which Wallets data can be updated",
     )
     template_file = models.FileField(
+        upload_to=upload_path,
+        max_length=255,
         blank=True,
         null=True,
         help_text="Generated Template XLSX File, contains columns for data to be updated. "
         "Contains also rows for unicef_ids to be updated",
     )
     update_file = models.FileField(
+        upload_to=upload_path,
+        max_length=255,
         blank=True,
         null=True,
         help_text="Uploaded File, contains data to be updated. After clicking a button to update, data will be updated",
@@ -58,6 +63,8 @@ class UniversalUpdate(
 
     program = models.ForeignKey(Program, on_delete=models.CASCADE)
     backup_snapshot = models.FileField(
+        upload_to=upload_path,
+        max_length=255,
         blank=True,
         null=True,
         help_text="Backup Snapshot File, contains data before update. File updated on each start of update process.",

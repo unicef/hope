@@ -39,7 +39,7 @@ def social_purpose() -> PaymentPlanPurpose:
 
 @pytest.fixture
 def social_program(business_area: BusinessArea, social_purpose: PaymentPlanPurpose) -> Program:
-    # "People" beneficiary group (master_detail=False) is pre-seeded by create_super_user.
+    # "People" beneficiary group is pre-seeded by create_super_user.
     dct = DataCollectingTypeFactory(type=DataCollectingType.Type.SOCIAL, individual_filters_available=True)
     beneficiary_group = BeneficiaryGroup.objects.get(name="People")
     program = ProgramFactory(
@@ -118,7 +118,6 @@ def test_exclude_individual_id_removes_person_in_social_program(
         Permissions.TARGETING_VIEW_DETAILS,
         Permissions.TARGETING_UPDATE,
         Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS,
-        Permissions.PM_PROGRAMME_CYCLE_VIEW_LIST,
         Permissions.PM_PAYMENT_PLAN_GROUP_VIEW_LIST,
     ):
         browser.login(username="noperm_user")

@@ -10,6 +10,7 @@ import {
   DialogActions,
   Dialog,
   Table,
+  TableContainer,
   TextField,
 } from '@mui/material';
 import styled from 'styled-components';
@@ -17,6 +18,7 @@ import type { ReactElement, ReactNode } from 'react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useProgramContext } from 'src/programContext';
+import { COMMENT_MAX_LENGTH } from 'src/config';
 
 const StyledTable = styled(Table)`
   min-width: 400px;
@@ -67,9 +69,15 @@ export const ManagerialConsoleBaseModal = ({
       {buttonTitle}
     </Button>
   );
+  const handleClose = (): void => {
+    setDialogOpen(false);
+    setComment('');
+  };
+
   const onAccept = async (): Promise<void> => {
     try {
       await onSave(selectedPlansIds, comment);
+      setComment('');
     } catch {
       // handled by inner function
     } finally {
@@ -82,7 +90,7 @@ export const ManagerialConsoleBaseModal = ({
       {renderButton()}
       <StyledDialog
         open={dialogOpen}
-        onClose={() => setDialogOpen(false)}
+        onClose={handleClose}
         scroll="paper"
         aria-labelledby="form-dialog-title"
       >
@@ -114,24 +122,21 @@ export const ManagerialConsoleBaseModal = ({
                 value={comment}
                 onChange={(e) => setComment(e.target.value)}
                 multiline
-                slotProps={{ htmlInput: { maxLength: 500 } }}
+                slotProps={{ htmlInput: { maxLength: COMMENT_MAX_LENGTH } }}
                 fullWidth
                 data-cy={`comment-${buttonTitle.toLowerCase()}`}
               />
             </Box>
           </Box>
-          <StyledTable>
-            <TableBody>{children}</TableBody>
-          </StyledTable>
+          <TableContainer>
+            <StyledTable>
+              <TableBody>{children}</TableBody>
+            </StyledTable>
+          </TableContainer>
         </DialogContent>
         <DialogFooter>
           <DialogActions>
-            <Button
-              onClick={() => {
-                setDialogOpen(false);
-              }}
-              data-cy="button-cancel"
-            >
+            <Button onClick={handleClose} data-cy="button-cancel">
               {t('CANCEL')}
             </Button>
             <Button

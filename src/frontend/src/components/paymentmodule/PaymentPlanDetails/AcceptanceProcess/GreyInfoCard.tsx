@@ -4,6 +4,7 @@ import { UniversalMoment } from '@core/UniversalMoment';
 import { MessageDialog } from './MessageDialog';
 import type { ReactElement } from 'react';
 import type { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
+import { responsiveValue } from 'src/responsive';
 
 const GreyText = styled.div`
   color: #9e9e9e;
@@ -46,6 +47,7 @@ export function GreyInfoCard({
           sx={{
             alignItems: 'center',
             display: 'flex',
+            flexWrap: responsiveValue('wrap', 'nowrap'),
           }}
         >
           {info}
@@ -100,8 +102,7 @@ export function GreyInfoCard({
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
-          ml: 3,
-          mr: 3,
+          mx: responsiveValue(0, 3),
           p: 3,
         }}
       >

@@ -1,23 +1,23 @@
+import { Box } from '@mui/material';
 import styled from 'styled-components';
+import { responsiveValue } from 'src/responsive';
 import MaintenanceGraphic from './maintenance_graphic_painter.png';
 import HopeLogo from './maintenance_hope_logo.png';
 import type { FC } from 'react';
 
-const Container = styled.div`
+const Container = styled(Box)`
   background-color: #ffffff;
   text-align: center;
-  padding-top: 150px;
   font-family: 'Roboto', sans-serif;
   height: 100vh;
 `;
 
-const LogoContainer = styled.div`
-  position: absolute;
+const LogoContainer = styled(Box)`
   top: 20px;
   left: 20px;
 `;
 
-const SquareLogo = styled.div`
+const SquareLogo = styled(Box)`
   display: inline-block;
   background-color: white;
   padding: 20px;
@@ -68,12 +68,26 @@ export const MaintenancePage: FC = () => {
     window.history.back();
   };
   return (
-    <Container>
-      <LogoContainer>
+    <Container
+      sx={{
+        pt: responsiveValue('16px', '150px'),
+        px: responsiveValue('16px', '0'),
+      }}
+    >
+      <LogoContainer sx={{ position: responsiveValue('static', 'absolute') }}>
         <img src={HopeLogo} alt="Hope Logo" width="186" height="101" />
       </LogoContainer>
 
-      <SquareLogo>
+      <SquareLogo
+        sx={{
+          maxWidth: '100%',
+          boxSizing: 'border-box',
+          '& img': {
+            maxWidth: '100%',
+            height: responsiveValue('auto', '293px'),
+          },
+        }}
+      >
         <img
           src={MaintenanceGraphic}
           alt="Brush with paint"

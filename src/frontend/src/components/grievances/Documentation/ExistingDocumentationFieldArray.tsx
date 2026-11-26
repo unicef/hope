@@ -1,8 +1,9 @@
-import { FormHelperText, Grid } from '@mui/material';
+import { FormHelperText } from '@mui/material';
 import { FieldArray } from 'formik';
 import { EditDocumentationRow } from './EditDocumentationRow';
 import type { ReactElement } from 'react';
 import type { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
+import { ResponsiveGrid, ResponsiveGridContainer } from 'src/responsive';
 
 export interface ExistingDocumentationFieldArrayProps {
   values;
@@ -18,13 +19,13 @@ export function ExistingDocumentationFieldArray({
   ticket,
 }: ExistingDocumentationFieldArrayProps): ReactElement {
   return (
-    <Grid container spacing={3}>
+    <ResponsiveGridContainer spacing={3}>
       <FieldArray
         name="documentationToUpdate"
         render={(arrayHelpers) => (
           <>
             {ticket.documentation?.map((item, index) => (
-              <Grid size={12} key={item.id}>
+              <ResponsiveGrid size="full" key={item.id}>
                 <EditDocumentationRow
                   setFieldValue={setFieldValue}
                   values={values}
@@ -32,7 +33,7 @@ export function ExistingDocumentationFieldArray({
                   arrayHelpers={arrayHelpers}
                   index={index}
                 />
-              </Grid>
+              </ResponsiveGrid>
             ))}
             {errors?.documentationToUpdate && (
               <FormHelperText error>
@@ -42,6 +43,6 @@ export function ExistingDocumentationFieldArray({
           </>
         )}
       />
-    </Grid>
+    </ResponsiveGridContainer>
   );
 }

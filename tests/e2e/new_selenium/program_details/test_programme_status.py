@@ -1,18 +1,16 @@
 import pytest
 
 from e2e.new_selenium.conftest import grant_permission
-from extras.test_utils.selenium import HopeTestBrowser
+from extras.test_utils.selenium import HopeTestBrowser, ui_date
 from hope.apps.account.permissions import Permissions
 from hope.models import BusinessArea, Program, User
+
+from .conftest import details_url
 
 pytestmark = pytest.mark.django_db()
 
 STATUS = 'div[data-cy="status-container"]'
 FINISH_DIALOG_BUTTON = 'div[role="dialog"] button[data-cy="button-finish-program"]'
-
-
-def details_url(program: Program) -> str:
-    return f"/{program.business_area.slug}/programs/{program.code}/details/{program.code}"
 
 
 def test_draft_programme_details(
@@ -34,8 +32,8 @@ def test_draft_programme_details(
 
         browser.wait_for_text(draft_programme.name, 'h5[data-cy="page-header-title"]')
         browser.assert_text("DRAFT", STATUS)
-        browser.assert_text(draft_programme.start_date.strftime("%-d %b %Y"), 'div[data-cy="label-START DATE"]')
-        browser.assert_text(draft_programme.end_date.strftime("%-d %b %Y"), 'div[data-cy="label-END DATE"]')
+        browser.assert_text(ui_date(draft_programme.start_date), 'div[data-cy="label-START DATE"]')
+        browser.assert_text(ui_date(draft_programme.end_date), 'div[data-cy="label-END DATE"]')
         browser.assert_text(draft_programme.code, 'div[data-cy="label-Programme Code"]')
         browser.assert_text(draft_programme.data_collecting_type.label, 'div[data-cy="label-Data Collecting Type"]')
         browser.assert_text("One-off", 'div[data-cy="label-Frequency of Payment"]')

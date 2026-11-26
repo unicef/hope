@@ -1,3 +1,4 @@
+import { HeaderActions } from '@components/core/HeaderActions';
 import { AdminButton } from '@core/AdminButton';
 import type { BreadCrumbsItem } from '@core/BreadCrumbs';
 import { PageHeader } from '@core/PageHeader';
@@ -168,13 +169,7 @@ export const ProgramCycleDetailsHeader = ({
 
   const buttons = (
     <>
-      <Box
-        sx={{
-          display: 'flex',
-          mt: 2,
-          mb: 2,
-        }}
-      >
+      <HeaderActions spacing="between">
         {programCycle.status !== 'Finished' &&
           hasPermissions(PERMISSIONS.PM_CREATE, permissions) && (
             <Box>
@@ -196,11 +191,7 @@ export const ProgramCycleDetailsHeader = ({
           PERMISSIONS.PM_PAYMENT_PLAN_GROUP_CREATE,
           permissions,
         ) && (
-          <Box
-            sx={{
-              ml: 2,
-            }}
-          >
+          <Box>
             <Button
               variant="contained"
               color="primary"
@@ -219,11 +210,7 @@ export const ProgramCycleDetailsHeader = ({
             PERMISSIONS.PM_PROGRAMME_CYCLE_UPDATE,
             permissions,
           ) && (
-            <Box
-              sx={{
-                ml: 2,
-              }}
-            >
+            <Box>
               <Button
                 variant="contained"
                 color="primary"
@@ -241,11 +228,7 @@ export const ProgramCycleDetailsHeader = ({
             PERMISSIONS.PM_PROGRAMME_CYCLE_UPDATE,
             permissions,
           ) && (
-            <Box
-              sx={{
-                ml: 2,
-              }}
-            >
+            <Box>
               <Button
                 variant="contained"
                 color="primary"
@@ -258,7 +241,7 @@ export const ProgramCycleDetailsHeader = ({
               </Button>
             </Box>
           )}
-      </Box>
+      </HeaderActions>
 
       <Dialog
         open={createGroupOpen}

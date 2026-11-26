@@ -130,4 +130,39 @@ describe('PaymentDetailsPage', () => {
     });
     expect(screen.queryByText('Verification Details')).toBeNull();
   });
+
+  it.each(['ACCEPTED', 'FINISHED'])(
+    'hides Mark as failed on a %s plan without the permission',
+    async (planStatus) => {
+      retrieve.mockResolvedValue({
+        ...paymentWithoutVerification,
+        parent: { ...paymentWithoutVerification.parent, status: planStatus },
+      });
+
+      renderPage();
+
+      expect(
+        await screen.findByText(`Payment ${paymentWithoutVerification.unicefId}`),
+      ).toBeTruthy();
+      expect(screen.queryByText('Mark as failed')).toBeNull();
+    },
+  );
+
+  it.each(['ACCEPTED', 'FINISHED'])(
+    'shows Mark as failed on a %s plan with the permission',
+    async (planStatus) => {
+      mockUsePermissions.mockReturnValue([
+        PERMISSIONS.PM_VIEW_DETAILS,
+        PERMISSIONS.PM_MARK_PAYMENT_AS_FAILED,
+      ]);
+      retrieve.mockResolvedValue({
+        ...paymentWithoutVerification,
+        parent: { ...paymentWithoutVerification.parent, status: planStatus },
+      });
+
+      renderPage();
+
+      expect(await screen.findByText('Mark as failed')).toBeTruthy();
+    },
+  );
 });

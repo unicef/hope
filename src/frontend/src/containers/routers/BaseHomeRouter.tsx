@@ -8,41 +8,50 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { styled as MuiStyled } from '@mui/system';
 import { theme } from 'src/theme';
 import type { FC } from 'react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { RestService } from '@restgenerated/index';
 import { useQuery } from '@tanstack/react-query';
 import { restQueryKey } from '@utils/queryKeys';
 import { TimezoneProvider } from 'src/timezoneContext';
+import { responsiveValue, useIsMobile } from 'src/responsive';
 
 const Root = styled.div`
   display: flex;
   width: 100vw;
 `;
 
-const MainContent = styled.div`
-  padding: 0px 1px;
-  transition: margin-left 225ms cubic-bezier(0, 0, 0.2, 1) 0ms;
-  width: 100%;
-  flex-grow: 1;
-  height: 100vh;
-  overflow: auto;
-`;
+const MainContent = MuiStyled('div')({
+  padding: '0px 1px',
+  transition: 'margin-left 225ms cubic-bezier(0, 0, 0.2, 1) 0ms',
+  width: '100%',
+  flexGrow: 1,
+  height: '100vh',
+  overflow: 'auto',
+});
 
 const AppBarSpacer = MuiStyled('div')(() => ({
   ...theme.mixins.toolbar,
 }));
 
 export const BaseHomeRouter: FC = () => {
-  const [open, setOpen] = useState(true);
+  const isMobile = useIsMobile();
+  const [desktopOpen, setDesktopOpen] = useState(true);
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const open = isMobile ? mobileOpen : desktopOpen;
   const { businessArea, programCode } = useBaseUrl();
   const location = useLocation();
   const navigate = useNavigate();
+  const setOpen = isMobile ? setMobileOpen : setDesktopOpen;
   const handleDrawerOpen = (): void => {
     setOpen(true);
   };
   const handleDrawerClose = (): void => {
     setOpen(false);
   };
+
+  useEffect(() => {
+    setMobileOpen(false);
+  }, [location.pathname]);
 
   const profileParams = {
     businessAreaSlug: businessArea,
@@ -76,9 +85,7 @@ export const BaseHomeRouter: FC = () => {
     return <LoadingComponent />;
   }
 
-  const allBusinessAreasSlugs = profileData.businessAreas.map(
-    (el) => el.slug,
-  );
+  const allBusinessAreasSlugs = profileData.businessAreas.map((el) => el.slug);
   const isBusinessAreaValid = allBusinessAreasSlugs.includes(businessArea);
 
   if (!isBusinessAreaValid) {
@@ -90,14 +97,19 @@ export const BaseHomeRouter: FC = () => {
     <TimezoneProvider timezone={profileData.effectiveTimezone ?? 'UTC'}>
       <Root>
         <CssBaseline />
-        <AppBar open={open} handleDrawerOpen={handleDrawerOpen} />
+        {/* On mobile the drawer overlays the page, so the app bar never shifts. */}
+        <AppBar open={!isMobile && open} handleDrawerOpen={handleDrawerOpen} />
         <Drawer
           open={open}
           handleDrawerClose={handleDrawerClose}
           currentLocation={location.pathname}
           dataCy="side-nav"
         />
-        <MainContent data-cy="main-content">
+        <MainContent
+          data-cy="main-content"
+          // Lets wide content (tables) scroll inside the page instead of widening it.
+          sx={{ minWidth: responsiveValue<number | string>(0, 'auto') }}
+        >
           <AppBarSpacer />
           <Outlet />
         </MainContent>

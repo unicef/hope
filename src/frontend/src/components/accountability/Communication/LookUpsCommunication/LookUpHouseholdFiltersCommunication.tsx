@@ -4,7 +4,7 @@ import { SearchTextField } from '@core/SearchTextField';
 import { SelectFilter } from '@core/SelectFilter';
 import AssignmentIndRoundedIcon from '@mui/icons-material/AssignmentIndRounded';
 import GroupIcon from '@mui/icons-material/Group';
-import { Grid, MenuItem } from '@mui/material';
+import { MenuItem } from '@mui/material';
 import type { HouseholdChoices } from '@restgenerated/models/HouseholdChoices';
 import { AdminAreaAutocomplete } from '@shared/autocompletes/AdminAreaAutocomplete';
 import { generateTableOrderOptionsGroup } from '@utils/constants';
@@ -13,6 +13,7 @@ import type { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useProgramContext } from 'src/programContext';
+import { ResponsiveGrid, ResponsiveGridContainer } from 'src/responsive';
 
 interface LookUpHouseholdFiltersCommunicationProps {
   filter;
@@ -65,8 +66,8 @@ export function LookUpHouseholdFiltersCommunication({
       clearHandler={handleClearFilter}
       isOnPaper={false}
     >
-      <Grid container spacing={3} sx={{ alignItems: 'flex-end' }}>
-        <Grid size={3}>
+      <ResponsiveGridContainer spacing={3} sx={{ alignItems: 'flex-end' }}>
+        <ResponsiveGrid size="quarter">
           <SearchTextField
             label={t('Search')}
             value={filter.search}
@@ -74,8 +75,8 @@ export function LookUpHouseholdFiltersCommunication({
             onChange={(e) => handleFilterChange('search', e.target.value)}
             data-cy="hh-filters-search"
           />
-        </Grid>
-        <Grid size={3}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="quarter">
           <SelectFilter
             onChange={(e) =>
               handleFilterChange('residenceStatus', e.target.value)
@@ -92,8 +93,8 @@ export function LookUpHouseholdFiltersCommunication({
               </MenuItem>
             ))}
           </SelectFilter>
-        </Grid>
-        <Grid size={3}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="quarter">
           <AdminAreaAutocomplete
             name="admin2"
             level={2}
@@ -105,8 +106,8 @@ export function LookUpHouseholdFiltersCommunication({
             setAppliedFilter={setAppliedFilter}
             dataCy="hh-filters-admin2"
           />
-        </Grid>
-        <Grid size={3}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="quarter" mobileSize="half">
           <NumberTextField
             topLabel={`${beneficiaryGroup?.groupLabel} Size`}
             value={filter.householdSizeMin}
@@ -118,8 +119,8 @@ export function LookUpHouseholdFiltersCommunication({
             }
             data-cy="hh-filters-household-size-from"
           />
-        </Grid>
-        <Grid size={3}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="quarter" mobileSize="half">
           <NumberTextField
             value={filter.householdSizeMax}
             placeholder={t('To')}
@@ -130,8 +131,8 @@ export function LookUpHouseholdFiltersCommunication({
             }
             data-cy="hh-filters-household-size-to"
           />
-        </Grid>
-        <Grid size={3}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="quarter">
           <SelectFilter
             onChange={(e) => handleFilterChange('orderBy', e.target.value)}
             label={t('Sort by')}
@@ -144,8 +145,8 @@ export function LookUpHouseholdFiltersCommunication({
               </MenuItem>
             ))}
           </SelectFilter>
-        </Grid>
-        <Grid size={3}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="quarter">
           <SelectFilter
             onChange={(e) => handleFilterChange('withdrawn', e.target.value)}
             label={t('Status')}
@@ -162,8 +163,8 @@ export function LookUpHouseholdFiltersCommunication({
               Withdrawn
             </MenuItem>
           </SelectFilter>
-        </Grid>
-      </Grid>
+        </ResponsiveGrid>
+      </ResponsiveGridContainer>
     </FiltersSection>
   );
 }

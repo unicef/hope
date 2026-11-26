@@ -15,6 +15,7 @@ from extras.test_utils.factories import (
     DataCollectingTypeFactory,
     FlexibleAttributeForPDUFactory,
     PartnerFactory,
+    PayeeTypeFactory,
     PaymentPlanPurposeFactory,
     PeriodicFieldDataFactory,
     ProgramFactory,
@@ -29,6 +30,7 @@ from hope.models import (
     DataCollectingType,
     FlexibleAttribute,
     Partner,
+    PayeeType,
     PaymentPlanPurpose,
     PeriodicFieldData,
     Program,
@@ -94,23 +96,81 @@ def area2(afghanistan: BusinessArea) -> Area:
 
 
 @pytest.fixture
-def dct_standard(db: Any) -> DataCollectingType:
-    return DataCollectingTypeFactory(label="Full", code="full", type=DataCollectingType.Type.STANDARD)
+def household_payee_type(db: Any) -> PayeeType:
+    return PayeeTypeFactory(name="Household", gl_code="7700410")
 
 
 @pytest.fixture
-def dct_social(db: Any) -> DataCollectingType:
-    return DataCollectingTypeFactory(label="SW Full", code="sw_full", type=DataCollectingType.Type.SOCIAL)
+def incentive_payee_type(db: Any) -> PayeeType:
+    return PayeeTypeFactory(name="Incentive Payee", gl_code="7700430")
 
 
 @pytest.fixture
-def bg_household(db: Any) -> BeneficiaryGroup:
-    return BeneficiaryGroupFactory(name="Household", master_detail=True)
+def inactive_payee_type(db: Any) -> PayeeType:
+    return PayeeTypeFactory(name="Organization", gl_code="7700430", active=False)
 
 
 @pytest.fixture
-def bg_sw(db: Any) -> BeneficiaryGroup:
-    return BeneficiaryGroupFactory(name="Social Worker", master_detail=False)
+def dct_standard(household_payee_type: PayeeType) -> DataCollectingType:
+    return DataCollectingTypeFactory(
+        label="Full", code="full", type=DataCollectingType.Type.STANDARD, payee_type=household_payee_type
+    )
+
+
+@pytest.fixture
+def dct_size_only(household_payee_type: PayeeType) -> DataCollectingType:
+    return DataCollectingTypeFactory(
+        label="Size only", code="size_only", type=DataCollectingType.Type.STANDARD, payee_type=household_payee_type
+    )
+
+
+@pytest.fixture
+def dct_of_inactive_payee_type(inactive_payee_type: PayeeType) -> DataCollectingType:
+    return DataCollectingTypeFactory(
+        label="Head of Facility",
+        code="head_of_facility",
+        type=DataCollectingType.Type.SOCIAL,
+        payee_type=inactive_payee_type,
+    )
+
+
+@pytest.fixture
+def dct_without_payee_type(db: Any) -> DataCollectingType:
+    return DataCollectingTypeFactory(label="Delegate", code="delegate", payee_type=None)
+
+
+@pytest.fixture
+def bg_household(household_payee_type: PayeeType) -> BeneficiaryGroup:
+    return BeneficiaryGroupFactory(name="Household", payee_type=household_payee_type)
+
+
+@pytest.fixture
+def bg_sw(incentive_payee_type: PayeeType) -> BeneficiaryGroup:
+    return BeneficiaryGroupFactory(name="Social Worker", payee_type=incentive_payee_type)
+
+
+@pytest.fixture
+def bg_of_inactive_payee_type(inactive_payee_type: PayeeType) -> BeneficiaryGroup:
+    return BeneficiaryGroupFactory(name="Schools", payee_type=inactive_payee_type)
+
+
+@pytest.fixture
+def bg_inactive(household_payee_type: PayeeType) -> BeneficiaryGroup:
+    return BeneficiaryGroupFactory(name="Retired Households", payee_type=household_payee_type, active=False)
+
+
+@pytest.fixture
+def bg_restricted_to_size_only(household_payee_type: PayeeType, dct_size_only: DataCollectingType) -> BeneficiaryGroup:
+    beneficiary_group = BeneficiaryGroupFactory(name="Size Only Households", payee_type=household_payee_type)
+    beneficiary_group.data_collecting_types.add(dct_size_only)
+    return beneficiary_group
+
+
+@pytest.fixture
+def bg_restricted_to_standard(household_payee_type: PayeeType, dct_standard: DataCollectingType) -> BeneficiaryGroup:
+    beneficiary_group = BeneficiaryGroupFactory(name="Full Households", payee_type=household_payee_type)
+    beneficiary_group.data_collecting_types.add(dct_standard)
+    return beneficiary_group
 
 
 @pytest.fixture
@@ -120,7 +180,9 @@ def purpose() -> PaymentPlanPurpose:
 
 @pytest.fixture
 def valid_input_data_standard(
-    dct_standard: DataCollectingType, bg_household: BeneficiaryGroup, purpose: PaymentPlanPurpose
+    dct_standard: DataCollectingType,
+    bg_household: BeneficiaryGroup,
+    purpose: PaymentPlanPurpose,
 ) -> dict:
     return {
         "name": "Test Program",
@@ -399,7 +461,7 @@ def test_create_program_with_invalid_data_collecting_type(
     assert response_for_valid.status_code == status.HTTP_201_CREATED
 
 
-def test_create_program_with_invalid_beneficiary_group(
+def test_create_program_with_beneficiary_group_of_other_payee_type_returns_400(
     authenticated_client: Any,
     user: User,
     afghanistan: BusinessArea,
@@ -416,15 +478,147 @@ def test_create_program_with_invalid_beneficiary_group(
     )
     invalid_input_data = {
         **valid_input_data_standard,
-        "beneficiary_group": str(bg_sw.id),  # Invalid DCT and BG combination
+        "beneficiary_group": str(bg_sw.id),
     }
+
     response = authenticated_client.post(list_url, invalid_input_data)
+
     assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert "beneficiary_group" in response.json()
-    assert (
-        response.json()["beneficiary_group"][0]
-        == "Selected combination of data collecting type and beneficiary group is invalid."
+    assert response.json() == {"beneficiary_group": ["Payee Label does not belong to the selected Payee Type."]}
+
+
+def test_create_program_with_beneficiary_group_restricted_to_other_dct_returns_400(
+    authenticated_client: Any,
+    user: User,
+    afghanistan: BusinessArea,
+    list_url: str,
+    valid_input_data_standard: dict,
+    bg_restricted_to_size_only: BeneficiaryGroup,
+    create_user_role_with_permissions: Callable,
+) -> None:
+    create_user_role_with_permissions(
+        user,
+        [Permissions.PROGRAMME_CREATE],
+        afghanistan,
+        whole_business_area_access=True,
     )
+    invalid_input_data = {
+        **valid_input_data_standard,
+        "beneficiary_group": str(bg_restricted_to_size_only.id),
+    }
+
+    response = authenticated_client.post(list_url, invalid_input_data)
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response.json() == {
+        "beneficiary_group": ["Payee Label is not permitted for the selected Data Collecting Type."]
+    }
+
+
+def test_create_program_with_beneficiary_group_restricted_to_selected_dct_returns_201(
+    authenticated_client: Any,
+    user: User,
+    afghanistan: BusinessArea,
+    list_url: str,
+    valid_input_data_standard: dict,
+    bg_restricted_to_standard: BeneficiaryGroup,
+    create_user_role_with_permissions: Callable,
+) -> None:
+    create_user_role_with_permissions(
+        user,
+        [Permissions.PROGRAMME_CREATE],
+        afghanistan,
+        whole_business_area_access=True,
+    )
+    input_data = {
+        **valid_input_data_standard,
+        "beneficiary_group": str(bg_restricted_to_standard.id),
+    }
+
+    response = authenticated_client.post(list_url, input_data)
+
+    assert response.status_code == status.HTTP_201_CREATED
+    assert Program.objects.get(pk=response.json()["id"]).beneficiary_group == bg_restricted_to_standard
+
+
+def test_create_program_with_inactive_beneficiary_group_returns_400(
+    authenticated_client: Any,
+    user: User,
+    afghanistan: BusinessArea,
+    list_url: str,
+    valid_input_data_standard: dict,
+    bg_inactive: BeneficiaryGroup,
+    create_user_role_with_permissions: Callable,
+) -> None:
+    create_user_role_with_permissions(
+        user,
+        [Permissions.PROGRAMME_CREATE],
+        afghanistan,
+        whole_business_area_access=True,
+    )
+    invalid_input_data = {
+        **valid_input_data_standard,
+        "beneficiary_group": str(bg_inactive.id),
+    }
+
+    response = authenticated_client.post(list_url, invalid_input_data)
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response.json() == {"beneficiary_group": ["Only active Payee Label can be used in Program."]}
+
+
+def test_create_program_with_data_collecting_type_of_inactive_payee_type_returns_400(
+    authenticated_client: Any,
+    user: User,
+    afghanistan: BusinessArea,
+    list_url: str,
+    valid_input_data_standard: dict,
+    dct_of_inactive_payee_type: DataCollectingType,
+    bg_of_inactive_payee_type: BeneficiaryGroup,
+    create_user_role_with_permissions: Callable,
+) -> None:
+    create_user_role_with_permissions(
+        user,
+        [Permissions.PROGRAMME_CREATE],
+        afghanistan,
+        whole_business_area_access=True,
+    )
+    invalid_input_data = {
+        **valid_input_data_standard,
+        "data_collecting_type": dct_of_inactive_payee_type.code,
+        "beneficiary_group": str(bg_of_inactive_payee_type.id),
+    }
+
+    response = authenticated_client.post(list_url, invalid_input_data)
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response.json() == {"data_collecting_type": ["Payee Type of the selected Data Collecting Type is inactive."]}
+
+
+def test_create_program_with_data_collecting_type_without_payee_type_returns_400(
+    authenticated_client: Any,
+    user: User,
+    afghanistan: BusinessArea,
+    list_url: str,
+    valid_input_data_standard: dict,
+    dct_without_payee_type: DataCollectingType,
+    create_user_role_with_permissions: Callable,
+) -> None:
+    create_user_role_with_permissions(
+        user,
+        [Permissions.PROGRAMME_CREATE],
+        afghanistan,
+        whole_business_area_access=True,
+    )
+    invalid_input_data = {
+        **valid_input_data_standard,
+        "data_collecting_type": dct_without_payee_type.code,
+    }
+
+    response = authenticated_client.post(list_url, invalid_input_data)
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response.json() == {"data_collecting_type": ["Data Collecting Type has no Payee Type."]}
 
 
 def test_create_program_with_invalid_dates(

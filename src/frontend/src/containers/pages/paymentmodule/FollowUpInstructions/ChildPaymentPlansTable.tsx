@@ -7,6 +7,7 @@ import {
   Table,
   TableBody,
   TableCell,
+  TableContainer,
   TableHead,
   TableRow,
   Typography,
@@ -46,75 +47,77 @@ export function ChildPaymentPlansTable({
       <Title>
         <Typography variant="h6">{t('Payment Plans')}</Typography>
       </Title>
-      <Table>
-        <TableHead>
-          <TableRow>
-            <TableCell>{t('Payment Plan ID')}</TableCell>
-            <TableCell>{t('Status')}</TableCell>
-            <TableCell align="right">{t('Households')}</TableCell>
-            <TableCell align="right">{t('Total Entitled')}</TableCell>
-            <TableCell align="right">{t('Total Delivered')}</TableCell>
-            <TableCell align="right">{t('Total Undelivered')}</TableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {paymentPlans.map((pp, index) => (
-            <TableRow key={pp.id} data-cy={`plan-row-${index}`}>
-              <TableCell>
-                <BlackLink
-                  to={`/${baseUrl}/payment-module/followup-payment-plans/${pp.id}`}
-                >
-                  {pp.unicefId ?? pp.id}
-                </BlackLink>
-              </TableCell>
-              <TableCell data-cy={`plan-status-${index}`}>
-                {pp.status ? (
-                  <StatusBox
-                    status={pp.status}
-                    statusToColor={paymentPlanStatusToColor}
-                  />
-                ) : (
-                  '-'
-                )}
-              </TableCell>
-              <TableCell align="right" data-cy={`plan-households-${index}`}>
-                {pp.householdsCount}
-              </TableCell>
-              <TableCell align="right" data-cy={`plan-entitled-${index}`}>
-                {formatInstructionAmount(
-                  pp.totalEntitledQuantity,
-                  pp.totalEntitledQuantityUsd,
-                  pp.currency,
-                  pp.currencyVisionCode,
-                )}
-              </TableCell>
-              <TableCell align="right" data-cy={`plan-delivered-${index}`}>
-                {formatInstructionAmount(
-                  pp.totalDeliveredQuantity,
-                  pp.totalDeliveredQuantityUsd,
-                  pp.currency,
-                  pp.currencyVisionCode,
-                )}
-              </TableCell>
-              <TableCell align="right" data-cy={`plan-undelivered-${index}`}>
-                {formatInstructionAmount(
-                  pp.totalUndeliveredQuantity,
-                  pp.totalUndeliveredQuantityUsd,
-                  pp.currency,
-                  pp.currencyVisionCode,
-                )}
-              </TableCell>
-            </TableRow>
-          ))}
-          {paymentPlans.length === 0 && (
+      <TableContainer>
+        <Table>
+          <TableHead>
             <TableRow>
-              <TableCell colSpan={8} align="center">
-                {t('No Payment Plans')}
-              </TableCell>
+              <TableCell>{t('Payment Plan ID')}</TableCell>
+              <TableCell>{t('Status')}</TableCell>
+              <TableCell align="right">{t('Households')}</TableCell>
+              <TableCell align="right">{t('Total Entitled')}</TableCell>
+              <TableCell align="right">{t('Total Delivered')}</TableCell>
+              <TableCell align="right">{t('Total Undelivered')}</TableCell>
             </TableRow>
-          )}
-        </TableBody>
-      </Table>
+          </TableHead>
+          <TableBody>
+            {paymentPlans.map((pp, index) => (
+              <TableRow key={pp.id} data-cy={`plan-row-${index}`}>
+                <TableCell>
+                  <BlackLink
+                    to={`/${baseUrl}/payment-module/followup-payment-plans/${pp.id}`}
+                  >
+                    {pp.unicefId ?? pp.id}
+                  </BlackLink>
+                </TableCell>
+                <TableCell data-cy={`plan-status-${index}`}>
+                  {pp.status ? (
+                    <StatusBox
+                      status={pp.status}
+                      statusToColor={paymentPlanStatusToColor}
+                    />
+                  ) : (
+                    '-'
+                  )}
+                </TableCell>
+                <TableCell align="right" data-cy={`plan-households-${index}`}>
+                  {pp.householdsCount}
+                </TableCell>
+                <TableCell align="right" data-cy={`plan-entitled-${index}`}>
+                  {formatInstructionAmount(
+                    pp.totalEntitledQuantity,
+                    pp.totalEntitledQuantityUsd,
+                    pp.currency,
+                    pp.currencyVisionCode,
+                  )}
+                </TableCell>
+                <TableCell align="right" data-cy={`plan-delivered-${index}`}>
+                  {formatInstructionAmount(
+                    pp.totalDeliveredQuantity,
+                    pp.totalDeliveredQuantityUsd,
+                    pp.currency,
+                    pp.currencyVisionCode,
+                  )}
+                </TableCell>
+                <TableCell align="right" data-cy={`plan-undelivered-${index}`}>
+                  {formatInstructionAmount(
+                    pp.totalUndeliveredQuantity,
+                    pp.totalUndeliveredQuantityUsd,
+                    pp.currency,
+                    pp.currencyVisionCode,
+                  )}
+                </TableCell>
+              </TableRow>
+            ))}
+            {paymentPlans.length === 0 && (
+              <TableRow>
+                <TableCell colSpan={8} align="center">
+                  {t('No Payment Plans')}
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </TableContainer>
     </ContainerColumnWithBorder>
   );
 }

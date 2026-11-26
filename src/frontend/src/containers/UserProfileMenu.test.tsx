@@ -81,13 +81,24 @@ describe('UserProfileMenu timezone picker', () => {
     );
   });
 
-  const renderMenu = (meData: Profile) => {
+  const renderMenu = (meData: Profile, compact?: boolean) => {
     renderWithProviders(
       <QueryClientProvider client={queryClient}>
-        <UserProfileMenu meData={meData} />
+        <UserProfileMenu meData={meData} compact={compact} />
       </QueryClientProvider>,
     );
   };
+
+  it('shows the email next to the avatar by default', () => {
+    renderMenu(buildProfile());
+    expect(screen.getByText('user1@example.com')).toBeTruthy();
+  });
+
+  it('hides the email in compact mode', () => {
+    renderMenu(buildProfile(), true);
+    expect(screen.queryByText('user1@example.com')).toBeNull();
+    expect(screen.getByTestId('menu-user-profile')).toBeTruthy();
+  });
 
   it('does not request timezone choices before the menu is opened', () => {
     renderMenu(buildProfile());

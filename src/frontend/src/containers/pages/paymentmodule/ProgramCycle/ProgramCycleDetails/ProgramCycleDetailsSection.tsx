@@ -5,6 +5,7 @@ import { StatusBox } from '@core/StatusBox';
 import { Title } from '@core/Title';
 import { UniversalMoment } from '@core/UniversalMoment';
 import { Grid, Typography } from '@mui/material';
+import { ResponsiveGrid, ResponsiveGridContainer } from 'src/responsive';
 import type { ProgramCycleList } from '@restgenerated/models/ProgramCycleList';
 import { programCycleStatusToColor } from '@utils/utils';
 import type { ReactElement } from 'react';
@@ -25,46 +26,46 @@ export const ProgramCycleDetailsSection = ({
           <Typography variant="h6">{t('Details')}</Typography>
         </Title>
         <OverviewContainer>
-          <Grid container spacing={6}>
-            <Grid size={12}>
+          <ResponsiveGridContainer spacing={6}>
+            <ResponsiveGrid size="full">
               <StatusBox
                 status={programCycle.status}
                 statusToColor={programCycleStatusToColor}
               />
-            </Grid>
-            <Grid size={3}>
+            </ResponsiveGrid>
+            <ResponsiveGrid size="quarter" mobileSize="half">
               <LabelizedField label={t('Created By')}>
                 {programCycle.createdBy}
               </LabelizedField>
-            </Grid>
-            <Grid size={3}>
+            </ResponsiveGrid>
+            <ResponsiveGrid size="quarter" mobileSize="half">
               <LabelizedField label={t('Start Date')}>
                 <UniversalMoment>{programCycle.startDate}</UniversalMoment>
               </LabelizedField>
-            </Grid>
-            <Grid size={3}>
+            </ResponsiveGrid>
+            <ResponsiveGrid size="quarter" mobileSize="half">
               <LabelizedField label={t('End Date')}>
                 <UniversalMoment>{programCycle.endDate}</UniversalMoment>
               </LabelizedField>
-            </Grid>
-            <Grid size={3}>
+            </ResponsiveGrid>
+            <ResponsiveGrid size="quarter" mobileSize="half">
               <LabelizedField label={t('Programme Start Date')}>
                 <UniversalMoment>
                   {programCycle.programStartDate}
                 </UniversalMoment>
               </LabelizedField>
-            </Grid>
-            <Grid size={3}>
+            </ResponsiveGrid>
+            <ResponsiveGrid size="quarter" mobileSize="half">
               <LabelizedField label={t('Programme End Date')}>
                 <UniversalMoment>{programCycle.programEndDate}</UniversalMoment>
               </LabelizedField>
-            </Grid>
-            <Grid size={3}>
+            </ResponsiveGrid>
+            <ResponsiveGrid size="quarter" mobileSize="half">
               <LabelizedField label={t('Frequency of Payment')}>
                 {programCycle.frequencyOfPayments}
               </LabelizedField>
-            </Grid>
-          </Grid>
+            </ResponsiveGrid>
+          </ResponsiveGridContainer>
         </OverviewContainer>
       </ContainerColumnWithBorder>
     </Grid>

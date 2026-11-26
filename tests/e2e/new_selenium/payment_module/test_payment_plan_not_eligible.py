@@ -95,8 +95,8 @@ def test_not_eligible_table_status_filter_and_pending_breakdown(
     assert "Reconciliation" not in not_eligible_headers
 
     login.wait_for_text("3", '[data-cy="label-Pending"]')
-    pending_summary = login.wait_for_element_visible('[data-cy="label-Pending"]')
-    ActionChains(login.driver).move_to_element(pending_summary).perform()
+    pending_breakdown_icon = login.wait_for_element_visible('[data-cy="pending-breakdown-icon"]')
+    ActionChains(login.driver).move_to_element(pending_breakdown_icon).perform()
     login.wait_for_text("Pending: 1", '[role="tooltip"]')
     login.wait_for_text("Sent to Payment Gateway: 1", '[role="tooltip"]')
     login.wait_for_text("Sent to FSP: 1", '[role="tooltip"]')

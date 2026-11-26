@@ -1,6 +1,5 @@
 import {
   Box,
-  Grid,
   FormControl,
   InputLabel,
   MenuItem,
@@ -28,6 +27,7 @@ import type { PaginatedHouseholdListList } from '@restgenerated/models/Paginated
 import { useQuery } from '@tanstack/react-query';
 import { createApiParams } from '@utils/apiUtils';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { ResponsiveGrid, ResponsiveGridContainer } from 'src/responsive';
 import type { PaginatedIndividualListList } from '@restgenerated/models/PaginatedIndividualListList';
 import HHDataTable from '@containers/pages/countrySearch/HHdataTable';
 import INDDataTable from '@containers/pages/countrySearch/INDdataTable';
@@ -316,14 +316,13 @@ const OfficeSearchPage = (): ReactElement => {
           clearHandler={handleClearFilter}
           applyHandler={handleApplyFilter}
         >
-          <Grid
-            container
+          <ResponsiveGridContainer
             spacing={3}
             sx={{
               alignItems: 'flex-end',
             }}
           >
-            <Grid size={3}>
+            <ResponsiveGrid size="quarter">
               <FormControl fullWidth size="small">
                 <InputLabel id="search-for-label">Search For</InputLabel>
                 <Select
@@ -342,8 +341,8 @@ const OfficeSearchPage = (): ReactElement => {
                   ))}
                 </Select>
               </FormControl>
-            </Grid>
-            <Grid size={3}>
+            </ResponsiveGrid>
+            <ResponsiveGrid size="quarter">
               <FormControl fullWidth size="small">
                 <InputLabel id="based-on-id-label">Based on</InputLabel>
                 <Select
@@ -362,8 +361,8 @@ const OfficeSearchPage = (): ReactElement => {
                   ))}
                 </Select>
               </FormControl>
-            </Grid>
-            <Grid size={3}>
+            </ResponsiveGrid>
+            <ResponsiveGrid size="quarter">
               <SearchTextField
                 label={t('Search Value')}
                 value={filter.officeSearch}
@@ -372,8 +371,8 @@ const OfficeSearchPage = (): ReactElement => {
                 }
                 data-cy="office-filters-search"
               />
-            </Grid>
-            <Grid size={3}>
+            </ResponsiveGrid>
+            <ResponsiveGrid size="quarter">
               <FormControlLabel
                 control={
                   <Checkbox
@@ -387,8 +386,8 @@ const OfficeSearchPage = (): ReactElement => {
                 }
                 label={t('Only Active Programs')}
               />
-            </Grid>
-          </Grid>
+            </ResponsiveGrid>
+          </ResponsiveGridContainer>
         </FiltersSection>
         <BaseSection>
           {/* Households */}

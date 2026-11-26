@@ -9,6 +9,8 @@ from extras.test_utils.selenium import HopeTestBrowser
 from hope.apps.account.permissions import Permissions
 from hope.models import BusinessArea, PaymentPlan, Rule, User
 
+from .conftest import PM_VIEW_PERMISSIONS, payment_plan_url
+
 pytestmark = pytest.mark.django_db()
 
 FORMULA_SELECT = 'div[data-cy="input-entitlement-formula"]'
@@ -28,18 +30,6 @@ CUSTOM_RATE_OPTION = '[data-cy="radio-custom-exchange-rate"]'
 CUSTOM_RATE_RADIO = f"{CUSTOM_RATE_OPTION} input"
 CUSTOM_RATE_INPUT = 'div[data-cy="input-custom-exchange-rate"] input'
 APPLY_EXCHANGE_RATE = 'button[data-cy="button-apply-exchange-rate"]'
-VIEW_PERMISSIONS = (
-    Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS,
-    Permissions.PM_VIEW_LIST,
-    Permissions.PM_VIEW_DETAILS,
-)
-
-
-def payment_plan_url(payment_plan: PaymentPlan) -> str:
-    return (
-        f"/{payment_plan.business_area.slug}/programs/{payment_plan.program.code}"
-        f"/payment-module/payment-plans/{payment_plan.id}"
-    )
 
 
 def entitlement_cell(amount: str, amount_usd: str) -> str:
@@ -89,7 +79,7 @@ def test_apply_entitlement_formula(
     with grant_permission(
         user_with_no_permissions,
         business_area,
-        *VIEW_PERMISSIONS,
+        *PM_VIEW_PERMISSIONS,
         Permissions.PM_APPLY_RULE_ENGINE_FORMULA_WITH_ENTITLEMENTS,
     ):
         browser.login(username="noperm_user")
@@ -119,7 +109,7 @@ def test_apply_flat_amount(
     with grant_permission(
         user_with_no_permissions,
         business_area,
-        *VIEW_PERMISSIONS,
+        *PM_VIEW_PERMISSIONS,
         Permissions.PM_APPLY_RULE_ENGINE_FORMULA_WITH_ENTITLEMENTS,
     ):
         browser.login(username="noperm_user")
@@ -149,7 +139,7 @@ def test_entitlement_xlsx_export_and_import(
     with grant_permission(
         user_with_no_permissions,
         business_area,
-        *VIEW_PERMISSIONS,
+        *PM_VIEW_PERMISSIONS,
         Permissions.PM_IMPORT_XLSX_WITH_ENTITLEMENTS,
     ):
         browser.login(username="noperm_user")
@@ -190,7 +180,7 @@ def test_entitlement_import_without_changes_shows_error(
     with grant_permission(
         user_with_no_permissions,
         business_area,
-        *VIEW_PERMISSIONS,
+        *PM_VIEW_PERMISSIONS,
         Permissions.PM_IMPORT_XLSX_WITH_ENTITLEMENTS,
     ):
         browser.login(username="noperm_user")
@@ -219,7 +209,7 @@ def test_custom_exchange_rate(
     with grant_permission(
         user_with_no_permissions,
         business_area,
-        *VIEW_PERMISSIONS,
+        *PM_VIEW_PERMISSIONS,
         Permissions.PM_CUSTOM_EXCHANGE_RATE,
     ):
         browser.login(username="noperm_user")
@@ -245,20 +235,20 @@ def test_custom_exchange_rate(
 
 
 @pytest.mark.parametrize(
-    ("permission", "expected_controls"),
+    ("permissions", "expected_controls"),
     [
         pytest.param(
-            None,
+            (),
             (FORMULA_DISABLED, f"{FLAT_AMOUNT_INPUT}:disabled", f"{UPLOAD_XLSX}:disabled"),
             id="view-only",
         ),
         pytest.param(
-            Permissions.PM_APPLY_RULE_ENGINE_FORMULA_WITH_ENTITLEMENTS,
+            (Permissions.PM_APPLY_RULE_ENGINE_FORMULA_WITH_ENTITLEMENTS,),
             (FORMULA_ENABLED, f"{FLAT_AMOUNT_INPUT}:enabled", f"{UPLOAD_XLSX}:disabled"),
             id="apply-formula",
         ),
         pytest.param(
-            Permissions.PM_IMPORT_XLSX_WITH_ENTITLEMENTS,
+            (Permissions.PM_IMPORT_XLSX_WITH_ENTITLEMENTS,),
             (FORMULA_DISABLED, f"{FLAT_AMOUNT_INPUT}:disabled", f"{UPLOAD_XLSX}:enabled"),
             id="import-xlsx",
         ),
@@ -269,11 +259,10 @@ def test_entitlement_actions_follow_permissions(
     user_with_no_permissions: User,
     business_area: BusinessArea,
     entitled_locked_payment_plan: PaymentPlan,
-    permission: Permissions | None,
+    permissions: tuple[Permissions, ...],
     expected_controls: tuple[str, ...],
 ) -> None:
-    extra_permissions = (permission,) if permission else ()
-    with grant_permission(user_with_no_permissions, business_area, *VIEW_PERMISSIONS, *extra_permissions):
+    with grant_permission(user_with_no_permissions, business_area, *PM_VIEW_PERMISSIONS, *permissions):
         browser.login(username="noperm_user")
         browser.open(payment_plan_url(entitled_locked_payment_plan))
         browser.wait_for_element_clickable(EXPORT_XLSX)
@@ -281,10 +270,10 @@ def test_entitlement_actions_follow_permissions(
 
 
 @pytest.mark.parametrize(
-    ("permission", "radio_state"),
+    ("permissions", "radio_state"),
     [
-        pytest.param(None, ":disabled", id="view-only"),
-        pytest.param(Permissions.PM_CUSTOM_EXCHANGE_RATE, ":enabled", id="custom-exchange-rate"),
+        pytest.param((), ":disabled", id="view-only"),
+        pytest.param((Permissions.PM_CUSTOM_EXCHANGE_RATE,), ":enabled", id="custom-exchange-rate"),
     ],
 )
 def test_exchange_rate_options_follow_permission(
@@ -292,11 +281,10 @@ def test_exchange_rate_options_follow_permission(
     user_with_no_permissions: User,
     business_area: BusinessArea,
     entitled_open_payment_plan: PaymentPlan,
-    permission: Permissions | None,
+    permissions: tuple[Permissions, ...],
     radio_state: str,
 ) -> None:
-    extra_permissions = (permission,) if permission else ()
-    with grant_permission(user_with_no_permissions, business_area, *VIEW_PERMISSIONS, *extra_permissions):
+    with grant_permission(user_with_no_permissions, business_area, *PM_VIEW_PERMISSIONS, *permissions):
         browser.login(username="noperm_user")
         browser.open(payment_plan_url(entitled_open_payment_plan))
         browser.wait_for_element_present(f"{UNORE_RATE_RADIO}{radio_state}")

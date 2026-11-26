@@ -2,7 +2,7 @@ from django.urls import include, path
 from rest_framework import routers
 from rest_framework_nested.routers import NestedSimpleRouter
 
-from hope.apps.core.api.views import BusinessAreaViewSet, DataCollectingTypeViewSet
+from hope.apps.core.api.views import BusinessAreaViewSet, DataCollectingTypeViewSet, PayeeTypeViewSet
 
 app_name = "core"
 
@@ -22,6 +22,11 @@ business_area_nested_router.register(
     r"data-collecting-types",
     DataCollectingTypeViewSet,
     basename="data-collecting-types",
+)
+business_area_nested_router.register(
+    r"payee-types",
+    PayeeTypeViewSet,
+    basename="payee-types",
 )
 
 

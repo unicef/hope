@@ -8,7 +8,8 @@ import { useDocumentTypeChoices } from '@hooks/useDocumentTypeChoices';
 import AssignmentIndRoundedIcon from '@mui/icons-material/AssignmentIndRounded';
 import FlashOnIcon from '@mui/icons-material/FlashOn';
 import GroupIcon from '@mui/icons-material/Group';
-import { Grid, MenuItem } from '@mui/material';
+import { MenuItem } from '@mui/material';
+import { ResponsiveGrid, ResponsiveGridContainer } from 'src/responsive';
 import type { HouseholdChoices } from '@restgenerated/models/HouseholdChoices';
 import type { ProgramList } from '@restgenerated/models/ProgramList';
 import { AdminAreaAutocomplete } from '@shared/autocompletes/AdminAreaAutocomplete';
@@ -80,21 +81,20 @@ export function HouseholdFilters({
       applyHandler={handleApplyFilter}
       isOnPaper={isOnPaper}
     >
-      <Grid
-        container
+      <ResponsiveGridContainer
         spacing={3}
         sx={{
           alignItems: 'flex-end',
         }}
       >
-        <Grid size={{ xs: 3 }}>
+        <ResponsiveGrid size="quarter">
           <SearchTextField
             label={t('Search')}
             value={filter.search}
             onChange={(e) => handleFilterChange('search', e.target.value)}
             data-cy="hh-filters-search"
           />
-        </Grid>
+        </ResponsiveGrid>
         <DocumentSearchField
           onChange={handleFilterChange}
           type={filter.documentType}
@@ -102,7 +102,7 @@ export function HouseholdFilters({
           choices={documentTypeChoices}
         />
         {isAllPrograms && (
-          <Grid size={{ xs: 3 }}>
+          <ResponsiveGrid size="quarter">
             <SelectFilter
               onChange={(e) => handleFilterChange('program', e.target.value)}
               label={t('Programme')}
@@ -117,10 +117,10 @@ export function HouseholdFilters({
                 </MenuItem>
               ))}
             </SelectFilter>
-          </Grid>
+          </ResponsiveGrid>
         )}
         {!isAllPrograms && (
-          <Grid size={{ xs: 3 }}>
+          <ResponsiveGrid size="quarter">
             <RdiAutocompleteRestFilter
               filter={filter}
               name="rdiId"
@@ -130,9 +130,9 @@ export function HouseholdFilters({
               setAppliedFilter={setAppliedFilter}
               setFilter={setFilter}
             />
-          </Grid>
+          </ResponsiveGrid>
         )}
-        <Grid size={{ xs: 3 }}>
+        <ResponsiveGrid size="quarter">
           <SelectFilter
             onChange={(e) =>
               handleFilterChange('residenceStatus', e.target.value)
@@ -149,8 +149,8 @@ export function HouseholdFilters({
               </MenuItem>
             ))}
           </SelectFilter>
-        </Grid>
-        <Grid size={{ xs: 3 }}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="quarter" mobileSize="half">
           <NumberTextField
             topLabel={`${beneficiaryGroup?.groupLabel} ${t('Size')}`}
             value={filter.householdSizeMin}
@@ -162,8 +162,8 @@ export function HouseholdFilters({
             }
             data-cy="hh-filters-household-size-from"
           />
-        </Grid>
-        <Grid size={{ xs: 3 }}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="quarter" mobileSize="half">
           <NumberTextField
             value={filter.householdSizeMax}
             placeholder={t('To')}
@@ -174,8 +174,8 @@ export function HouseholdFilters({
             }
             data-cy="hh-filters-household-size-to"
           />
-        </Grid>
-        <Grid size={{ xs: 3 }}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="quarter">
           <SelectFilter
             onChange={(e) => handleFilterChange('orderBy', e.target.value)}
             label={t('Sort by')}
@@ -189,9 +189,9 @@ export function HouseholdFilters({
               </MenuItem>
             ))}
           </SelectFilter>
-        </Grid>
+        </ResponsiveGrid>
         {showStatusFilter && (
-          <Grid size={{ xs: 3 }}>
+          <ResponsiveGrid size="quarter">
             <SelectFilter
               onChange={(e) => handleFilterChange('withdrawn', e.target.value)}
               label={t('Status')}
@@ -208,10 +208,10 @@ export function HouseholdFilters({
                 Inactive (Withdrawn)
               </MenuItem>
             </SelectFilter>
-          </Grid>
+          </ResponsiveGrid>
         )}
         {isAllPrograms && (
-          <Grid size={{ xs: 3 }}>
+          <ResponsiveGrid size="quarter">
             <SelectFilter
               onChange={(e) =>
                 handleFilterChange('programState', e.target.value)
@@ -228,9 +228,9 @@ export function HouseholdFilters({
                 </MenuItem>
               ))}
             </SelectFilter>
-          </Grid>
+          </ResponsiveGrid>
         )}
-        <Grid size={{ xs: 3 }}>
+        <ResponsiveGrid size="quarter">
           <AdminAreaAutocomplete
             name="admin1"
             level={1}
@@ -243,8 +243,8 @@ export function HouseholdFilters({
             disabled={filter.admin2}
             dataCy="hh-filters-admin1"
           />
-        </Grid>
-        <Grid size={{ xs: 3 }}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="quarter">
           <AdminAreaAutocomplete
             name="admin2"
             level={2}
@@ -257,8 +257,8 @@ export function HouseholdFilters({
             disabled={filter.admin1}
             dataCy="hh-filters-admin2"
           />
-        </Grid>
-      </Grid>
+        </ResponsiveGrid>
+      </ResponsiveGridContainer>
     </FiltersSection>
   );
 }

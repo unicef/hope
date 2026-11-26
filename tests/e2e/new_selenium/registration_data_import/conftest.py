@@ -2,6 +2,7 @@ import pytest
 
 from extras.test_utils.factories import (
     HouseholdFactory,
+    PartnerFactory,
     PendingHouseholdFactory,
     ProgramFactory,
     RegistrationDataImportFactory,
@@ -10,7 +11,6 @@ from hope.models import (
     BeneficiaryGroup,
     BusinessArea,
     DataCollectingType,
-    Partner,
     Program,
     RegistrationDataImport,
     User,
@@ -23,7 +23,7 @@ def rdi_business_area(business_area: BusinessArea) -> BusinessArea:
     business_area.postpone_deduplication = True
     business_area.save(update_fields=["postpone_deduplication"])
     # The XLSX import looks up the WFP partner for the scope_id columns.
-    Partner.objects.get_or_create(name="WFP")
+    PartnerFactory(name="WFP")
     return business_area
 
 

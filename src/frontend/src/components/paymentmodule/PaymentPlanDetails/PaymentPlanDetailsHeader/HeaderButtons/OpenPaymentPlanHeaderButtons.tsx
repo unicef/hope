@@ -7,6 +7,7 @@ import { LockPaymentPlan } from '../LockPaymentPlan';
 import { useProgramContext } from '../../../../../programContext';
 import type { ReactElement } from 'react';
 import type { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
+import { HeaderActions } from '@core/HeaderActions';
 
 export interface OpenPaymentPlanHeaderButtonsProps {
   paymentPlan: PaymentPlanDetail;
@@ -25,12 +26,7 @@ export function OpenPaymentPlanHeaderButtons({
   const { isActiveProgram } = useProgramContext();
 
   return (
-    <Box
-      sx={{
-        display: 'flex',
-        alignItems: 'center',
-      }}
-    >
+    <HeaderActions spacing="none">
       {canRemove && <DeletePaymentPlan paymentPlan={paymentPlan} />}
       {canEdit && (
         <Box
@@ -60,6 +56,6 @@ export function OpenPaymentPlanHeaderButtons({
           <LockPaymentPlan paymentPlan={paymentPlan} />
         </Box>
       )}
-    </Box>
+    </HeaderActions>
   );
 }

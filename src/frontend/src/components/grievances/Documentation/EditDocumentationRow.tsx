@@ -9,6 +9,7 @@ import { LabelizedField } from '@core/LabelizedField';
 import PhotoModal from '@core/PhotoModal/PhotoModal';
 import { DocumentationField } from './DocumentationField';
 import type { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
+import { ResponsiveGrid, responsiveValue } from 'src/responsive';
 
 interface DisabledDivProps {
   disabled: boolean;
@@ -48,7 +49,10 @@ export function EditDocumentationRow({
         setFieldValue={setFieldValue}
         isEdited={isEdited}
       />
-      <Grid size={1} />
+      <Grid
+        sx={{ textAlign: responsiveValue('right', 'left') }}
+        size={responsiveValue(12, 1)}
+      />
       <Grid>
         <Button
           onClick={() => {
@@ -62,30 +66,40 @@ export function EditDocumentationRow({
     </Grid>
   ) : (
     <Grid container key={document.id}>
-      <Grid size={3}>
+      <ResponsiveGrid size="quarter">
         <DisabledDiv disabled={removed}>
           <LabelizedField label={t('Name')} value={document.name} />
         </DisabledDiv>
-      </Grid>
-      <Grid size={3}>
+      </ResponsiveGrid>
+      <ResponsiveGrid size="quarter">
         <DisabledDiv disabled={removed}>
           <LabelizedField label={t('File Type')} value={document.contentType} />
         </DisabledDiv>
-      </Grid>
+      </ResponsiveGrid>
       {document.contentType.includes('image') ? (
-        <Grid size={1}>
+        <Grid
+          sx={{ textAlign: responsiveValue('right', 'left') }}
+          size={responsiveValue(12, 1)}
+        >
           <PhotoModal showRotate={false} src={document.filePath} />
         </Grid>
       ) : (
-        <Grid size={1} />
+        <Grid
+          sx={{ display: responsiveValue('none', 'block') }}
+          size={responsiveValue(12, 1)}
+        />
       )}
-      <Grid size={1}>
+      <Grid
+        sx={{ textAlign: responsiveValue('right', 'left') }}
+        size={responsiveValue(12, 1)}
+      >
         {!removed ? (
           <Box
             align-items="center"
             sx={{
               ml: 2,
               display: 'flex',
+              justifyContent: responsiveValue('flex-end', 'flex-start'),
             }}
           >
             <IconButton

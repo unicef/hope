@@ -3,7 +3,7 @@
 exports[`HouseholdTable > should render HouseholdTable correctly 1`] = `
 <div>
   <div
-    class="styled-normalized"
+    class="MuiBox-root css-7yim04"
   >
     <div
       class="styled-normalized"
@@ -16,10 +16,10 @@ exports[`HouseholdTable > should render HouseholdTable correctly 1`] = `
           class="MuiTableContainer-root styled-normalized css-MuiTableContainer-root"
         >
           <div
-            class="styled-normalized MuiBox-root css-0"
+            class="styled-normalized MuiBox-root css-1b626uw"
           >
             <div
-              class="MuiToolbar-root MuiToolbar-gutters MuiToolbar-regular css-16wdp7y-MuiToolbar-root"
+              class="MuiToolbar-root MuiToolbar-gutters MuiToolbar-regular css-k5d18q-MuiToolbar-root"
             >
               <h6
                 class="MuiTypography-root MuiTypography-h6 css-15aaxeb-MuiTypography-root"
@@ -29,7 +29,7 @@ exports[`HouseholdTable > should render HouseholdTable correctly 1`] = `
               </h6>
             </div>
             <div
-              class="styled-normalized MuiBox-root css-1ruxp1v"
+              class="styled-normalized MuiBox-root css-7yim04"
             />
           </div>
           <table

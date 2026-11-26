@@ -30,6 +30,7 @@ import { Field, Form, Formik } from 'formik';
 import moment from 'moment/moment';
 import { useTranslation } from 'react-i18next';
 import * as Yup from 'yup';
+import { ResponsiveGrid } from 'src/responsive';
 
 interface CreateProgramCycleProps {
   program: Partial<ProgramDetail>;
@@ -158,7 +159,7 @@ const CreateProgramCycle = ({
                 </GreyText>
               </DialogDescription>
               <Grid container spacing={3}>
-                <Grid size={12}>
+                <ResponsiveGrid size="full">
                   <Field
                     name="title"
                     fullWidth
@@ -170,8 +171,8 @@ const CreateProgramCycle = ({
                   {error?.data?.title && (
                     <FormHelperText error>{error.data.title}</FormHelperText>
                   )}
-                </Grid>
-                <Grid size={6} data-cy="start-date-cycle">
+                </ResponsiveGrid>
+                <ResponsiveGrid size="half" data-cy="start-date-cycle">
                   <Field
                     name="startDate"
                     label={t('Start Date')}
@@ -185,8 +186,8 @@ const CreateProgramCycle = ({
                       {error.data.startDate}
                     </FormHelperText>
                   )}
-                </Grid>
-                <Grid size={6} data-cy="end-date-cycle">
+                </ResponsiveGrid>
+                <ResponsiveGrid size="half" data-cy="end-date-cycle">
                   <Field
                     name="endDate"
                     label={t('End Date')}
@@ -197,7 +198,7 @@ const CreateProgramCycle = ({
                   {error?.data?.endDate && (
                     <FormHelperText error>{error.data.endDate}</FormHelperText>
                   )}
-                </Grid>
+                </ResponsiveGrid>
               </Grid>
             </DialogContent>
             <DialogFooter>

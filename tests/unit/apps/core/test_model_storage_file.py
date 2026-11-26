@@ -12,4 +12,4 @@ def test_str_returns_file_name():
 
 def test_file_name_property():
     sf = StorageFileFactory()
-    assert sf.file_name == sf.file.name
+    assert sf.file_name == "storage.txt"

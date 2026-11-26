@@ -9,7 +9,6 @@ import { StatusBox } from '@core/StatusBox';
 import { Title } from '@core/Title';
 import { UniversalMoment } from '@core/UniversalMoment';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import Grid from '@mui/material/Grid';
 import { Typography } from '@mui/material';
 import type { PaymentDetail } from '@restgenerated/models/PaymentDetail';
 import {
@@ -26,6 +25,7 @@ import {
 import type { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useProgramContext } from 'src/programContext';
+import { ResponsiveGrid, ResponsiveGridContainer } from 'src/responsive';
 
 interface PaymentDetailsProps {
   payment: PaymentDetail;
@@ -63,8 +63,8 @@ function PaymentDetails({
         <Title>
           <Typography variant="h6">{t('Details')}</Typography>
         </Title>
-        <Grid container spacing={3}>
-          <Grid size={{ xs: 3 }}>
+        <ResponsiveGridContainer spacing={3}>
+          <ResponsiveGrid size="quarter" mobileSize="half">
             <LabelizedField label={t('STATUS')}>
               <StatusBox
                 status={payment.status}
@@ -72,20 +72,20 @@ function PaymentDetails({
                 statusNameMapping={paymentStatusDisplayMap}
               />
             </LabelizedField>
-          </Grid>
-          <Grid size={{ xs: 3 }}>
+          </ResponsiveGrid>
+          <ResponsiveGrid size="quarter" mobileSize="half">
             <LabelizedField
               label={t('ENTITLEMENT QUANTITY')}
               value={formatFigure(payment.entitlementQuantity)}
             />
-          </Grid>
-          <Grid size={{ xs: 3 }}>
+          </ResponsiveGrid>
+          <ResponsiveGrid size="quarter" mobileSize="half">
             <LabelizedField
               label={t('DELIVERED QUANTITY')}
               value={formatFigure(payment.deliveredQuantity)}
             />
-          </Grid>
-          <Grid size={{ xs: 3 }}>
+          </ResponsiveGrid>
+          <ResponsiveGrid size="quarter" mobileSize="half">
             <LabelizedField
               label={t('CURRENCY')}
               value={formatCurrencyCode(
@@ -93,14 +93,14 @@ function PaymentDetails({
                 payment.currencyVisionCode,
               )}
             />
-          </Grid>
-          <Grid size={{ xs: 3 }}>
+          </ResponsiveGrid>
+          <ResponsiveGrid size="quarter" mobileSize="half">
             <LabelizedField
               label={t('DELIVERY DATE')}
               value={<UniversalMoment>{payment.deliveryDate}</UniversalMoment>}
             />
-          </Grid>
-          <Grid size={{ xs: 3 }}>
+          </ResponsiveGrid>
+          <ResponsiveGrid size="quarter" mobileSize="half">
             <LabelizedField label={t('TARGET POPULATION')}>
               <BlackLink
                 to={`/${businessArea}/programs/${programId}/target-population/${payment.parent.id}`}
@@ -108,14 +108,14 @@ function PaymentDetails({
                 {payment.parent?.name}
               </BlackLink>
             </LabelizedField>
-          </Grid>
-          <Grid size={{ xs: 3 }}>
+          </ResponsiveGrid>
+          <ResponsiveGrid size="quarter" mobileSize="half">
             <LabelizedField
               label={t('Distribution Modality')}
               value={payment.parent?.deliveryMechanism?.name}
             />
-          </Grid>
-          <Grid size={{ xs: 3 }}>
+          </ResponsiveGrid>
+          <ResponsiveGrid size="quarter" mobileSize="half">
             <LabelizedField label={t('Original Payment Plan ID')}>
               {payment.parent && (
                 <BlackLink
@@ -125,35 +125,35 @@ function PaymentDetails({
                 </BlackLink>
               )}
             </LabelizedField>
-          </Grid>
+          </ResponsiveGrid>
           {payment.parent.isPaymentGateway && (
-            <Grid size={{ xs: 3 }}>
+            <ResponsiveGrid size="quarter" mobileSize="half">
               <LabelizedField
                 label={t('Sent to FSP on')}
                 value={
                   <UniversalMoment>{payment.sentToFspDate}</UniversalMoment>
                 }
               />
-            </Grid>
+            </ResponsiveGrid>
           )}
-        </Grid>
+        </ResponsiveGridContainer>
       </ContainerColumnWithBorder>
       {paymentVerification != null ? (
         <ContainerColumnWithBorder>
           <Title>
             <Typography variant="h6">{t('Verification Details')}</Typography>
           </Title>
-          <Grid container spacing={3}>
-            <Grid size={{ xs: 3 }}>
+          <ResponsiveGridContainer spacing={3}>
+            <ResponsiveGrid size="quarter" mobileSize="half">
               <LabelizedField label={t('STATUS')}>
                 <StatusBox
                   status={paymentVerification.status}
                   statusToColor={verificationRecordsStatusToColor}
                 />
               </LabelizedField>
-            </Grid>
+            </ResponsiveGrid>
 
-            <Grid size={{ xs: 3 }}>
+            <ResponsiveGrid size="quarter" mobileSize="half">
               <LabelizedField
                 label={t('AMOUNT RECEIVED')}
                 value={formatCurrencyWithSymbol(
@@ -162,8 +162,8 @@ function PaymentDetails({
                   payment.currencyVisionCode,
                 )}
               />
-            </Grid>
-          </Grid>
+            </ResponsiveGrid>
+          </ResponsiveGridContainer>
         </ContainerColumnWithBorder>
       ) : null}
       {isSocialDctType && (
@@ -171,8 +171,8 @@ function PaymentDetails({
           <Title>
             <Typography variant="h6">{beneficiaryGroup?.groupLabel}</Typography>
           </Title>
-          <Grid container spacing={3}>
-            <Grid size={{ xs: 3 }}>
+          <ResponsiveGridContainer spacing={3}>
+            <ResponsiveGrid size="quarter" mobileSize="half">
               <LabelizedField label={`${beneficiaryGroup?.groupLabel}`}>
                 {payment.household?.id && canViewHouseholdDetails ? (
                   <BlackLink
@@ -186,26 +186,26 @@ function PaymentDetails({
                   </div>
                 )}
               </LabelizedField>
-            </Grid>
-            <Grid size={{ xs: 3 }}>
+            </ResponsiveGrid>
+            <ResponsiveGrid size="quarter" mobileSize="half">
               <LabelizedField
                 label={t("Collector's Name")}
                 value={payment.snapshotCollectorFullName}
               />
-            </Grid>
-            <Grid size={{ xs: 3 }}>
+            </ResponsiveGrid>
+            <ResponsiveGrid size="quarter" mobileSize="half">
               <LabelizedField
                 label={t("Collector's ID")}
                 value={payment.collector?.unicefId}
               />
-            </Grid>
-            <Grid size={{ xs: 3 }}>
+            </ResponsiveGrid>
+            <ResponsiveGrid size="quarter" mobileSize="half">
               <LabelizedField
                 label={t('TOTAL PERSON COVERED')}
                 value={payment.household.size}
               />
-            </Grid>
-            <Grid size={{ xs: 3 }}>
+            </ResponsiveGrid>
+            <ResponsiveGrid size="quarter" mobileSize="half">
               <LabelizedField
                 label={t('PHONE NUMBER')}
                 value={getPhoneNoLabel(
@@ -213,8 +213,8 @@ function PaymentDetails({
                   payment.collector.phoneNoValid,
                 )}
               />
-            </Grid>
-            <Grid size={{ xs: 3 }}>
+            </ResponsiveGrid>
+            <ResponsiveGrid size="quarter" mobileSize="half">
               <LabelizedField
                 label={t('ALT. PHONE NUMBER')}
                 value={getPhoneNoLabel(
@@ -222,78 +222,78 @@ function PaymentDetails({
                   payment.collector.phoneNoAlternativeValid,
                 )}
               />
-            </Grid>
-          </Grid>
+            </ResponsiveGrid>
+          </ResponsiveGridContainer>
         </Overview>
       )}
       <Overview>
         <Title>
           <Typography variant="h6">{t('Entitlement Details')}</Typography>
         </Title>
-        <Grid container spacing={3}>
-          <Grid size={{ xs: 3 }}>
+        <ResponsiveGridContainer spacing={3}>
+          <ResponsiveGrid size="quarter" mobileSize="half">
             <LabelizedField
               label={t('DELIVERY MECHANISM')}
               value={payment.deliveryMechanism?.name}
             />
-          </Grid>
-          <Grid size={{ xs: 3 }}>
+          </ResponsiveGrid>
+          <ResponsiveGrid size="quarter" mobileSize="half">
             <LabelizedField label={t('FSP')} value={payment.fspName} />
-          </Grid>
-          <Grid size={{ xs: 3 }}>
+          </ResponsiveGrid>
+          <ResponsiveGrid size="quarter" mobileSize="half">
             <LabelizedField
               label={t('TRANSACTION REFERENCE ID')}
               value={payment.transactionReferenceId}
             />
-          </Grid>
-        </Grid>
+          </ResponsiveGrid>
+        </ResponsiveGridContainer>
         <DividerLine />
-        <Grid container spacing={3}>
+        <ResponsiveGridContainer spacing={3}>
           {Object.entries(collectorAccountData).map(([key, value]) => (
-            <Grid key={key} size={{ xs: 3 }}>
+            <ResponsiveGrid key={key} size="quarter">
               <LabelizedField
                 label={t(`Account ${key}`)}
                 value={safeStringify(value)}
               />
-            </Grid>
+            </ResponsiveGrid>
           ))}
-        </Grid>
+        </ResponsiveGridContainer>
       </Overview>
       <Overview>
         <Title>
           <Typography variant="h6">{t('Reconciliation Details')}</Typography>
         </Title>
-        <Grid container spacing={3}>
-          <Grid size={{ xs: 3 }}>
+        <ResponsiveGridContainer spacing={3}>
+          <ResponsiveGrid size="quarter">
             <LabelizedField
               label={t("Collector's Name")}
               value={payment.additionalCollectorName}
             />
-          </Grid>
-          <Grid size={{ xs: 3 }}>
+          </ResponsiveGrid>
+          <ResponsiveGrid size="quarter">
             <LabelizedField
               label={t('Document Type')}
               value={payment.additionalDocumentType}
             />
-          </Grid>
-          <Grid size={{ xs: 3 }}>
+          </ResponsiveGrid>
+          <ResponsiveGrid size="quarter">
             <LabelizedField
               label={t('Document Number')}
               value={payment.additionalDocumentNumber}
             />
-          </Grid>
-        </Grid>
+          </ResponsiveGrid>
+        </ResponsiveGridContainer>
         <DividerLine />
-        <Grid container spacing={3}>
+        <ResponsiveGridContainer spacing={3}>
           {showFailureReason && (
-            <Grid size={{ xs: 3 }}>
+            <ResponsiveGrid size="quarter">
               <LabelizedField
                 label={t('Failure Reason')}
                 value={payment.reasonForUnsuccessfulPayment}
               />
-            </Grid>
+            </ResponsiveGrid>
           )}
-        </Grid>
+        </ResponsiveGridContainer>
       </Overview>
       {extraFields.length > 0 && (
         <Overview>
@@ -302,16 +302,16 @@ function PaymentDetails({
               {t('Reconciliation Information: Extra Info')}
             </Typography>
           </Title>
-          <Grid container spacing={3}>
+          <ResponsiveGridContainer spacing={3}>
             {extraFields.map(([key, value]) => (
-              <Grid key={key} size={{ xs: 3 }}>
+              <ResponsiveGrid key={key} size="quarter">
                 <LabelizedField
                   label={formatNormalCaseValue(key)}
                   value={safeStringify(value)}
                 />
-              </Grid>
+              </ResponsiveGrid>
             ))}
-          </Grid>
+          </ResponsiveGridContainer>
         </Overview>
       )}
       {fspExtraFields.length > 0 && (
@@ -319,16 +319,16 @@ function PaymentDetails({
           <Title>
             <Typography variant="h6">{t('FSP extra fields')}</Typography>
           </Title>
-          <Grid container spacing={3}>
+          <ResponsiveGridContainer spacing={3}>
             {fspExtraFields.map(([key, value]) => (
-              <Grid key={key} size={{ xs: 3 }}>
+              <ResponsiveGrid key={key} size="quarter">
                 <LabelizedField
                   label={formatNormalCaseValue(key)}
                   value={safeStringify(value)}
                 />
-              </Grid>
+              </ResponsiveGrid>
             ))}
-          </Grid>
+          </ResponsiveGridContainer>
         </Overview>
       )}
       {canViewActivityLog && (

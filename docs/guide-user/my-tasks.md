@@ -65,13 +65,13 @@ Both tabs carry a sensitivity filter:
 |---|---|
 | **All Categories** (default) | Everything you are allowed to see |
 | **Sensitive** | Sensitive Grievance tickets only |
-| **Other** | Everything except Sensitive Grievance |
+| **Non-Sensitive** | Everything except Sensitive Grievance |
 
 The filter reshapes the **Category** list below it:
 
 - On **Sensitive** the category is already settled, so the Category filter disappears and the
   **Issue Type** list is the sensitive one straight away.
-- On **Other** the Sensitive Grievance option is removed from the Category list.
+- On **Non-Sensitive** the Sensitive Grievance option is removed from the Category list.
 - On **All Categories** every category you may see is offered.
 
 ![The sensitivity filter open on Sensitive, with Category replaced by Issue Type](./_screenshots/my-tasks/sensitivity-filter.png)

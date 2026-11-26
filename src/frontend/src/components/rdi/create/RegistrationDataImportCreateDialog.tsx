@@ -40,6 +40,7 @@ const StyledDialogFooter = styled(DialogFooter)`
   && {
     display: flex;
     flex-direction: row;
+    flex-wrap: wrap;
     justify-content: space-between;
   }
 `;

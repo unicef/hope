@@ -12,6 +12,7 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { Box, Button, Typography } from '@mui/material';
+import { responsiveValue } from 'src/responsive';
 import type { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
 import { RestService } from '@restgenerated/services/RestService';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -181,7 +182,7 @@ const PictureErrorEditPage = (): ReactElement => {
               </LoadingButton>
             </Box>
           </PageHeader>
-          <Box sx={{ p: 5 }}>
+          <Box sx={{ p: responsiveValue(1, 5) }}>
             <ContainerColumnWithBorder>
               <Title>
                 <Typography variant="h6">{t('Photo')}</Typography>

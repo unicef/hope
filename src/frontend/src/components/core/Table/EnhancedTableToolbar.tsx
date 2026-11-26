@@ -2,6 +2,7 @@ import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
 import { styled } from '@mui/material/styles';
 import type { ReactElement, ReactNode } from 'react';
+import { responsiveValue } from 'src/responsive';
 
 interface EnhancedTableToolbarProps {
   title: string;
@@ -9,7 +10,6 @@ interface EnhancedTableToolbarProps {
 }
 
 const StyledToolbar = styled(Toolbar)(({ theme }) => ({
-  paddingLeft: theme.spacing(6),
   paddingRight: theme.spacing(1),
   color: theme.palette.text.primary,
   backgroundColor: 'white',
@@ -24,7 +24,7 @@ export function EnhancedTableToolbar({
   children,
 }: EnhancedTableToolbarProps): ReactElement {
   return (
-    <StyledToolbar>
+    <StyledToolbar sx={{ pl: responsiveValue(2, 6) }}>
       <StyledTypography data-cy="table-title" variant="h6">
         {title}
       </StyledTypography>

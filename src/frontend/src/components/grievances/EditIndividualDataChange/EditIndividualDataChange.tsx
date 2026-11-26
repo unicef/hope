@@ -1,4 +1,4 @@
-import { Box, Button, Grid, Typography } from '@mui/material';
+import { Box, Button, Typography } from '@mui/material';
 import { AddCircleOutlined } from '@mui/icons-material';
 import { useLocation } from 'react-router-dom';
 import { FieldArray } from 'formik';
@@ -24,6 +24,7 @@ import withErrorBoundary from '@components/core/withErrorBoundary';
 import { NewAccountFieldArray } from '@components/grievances/EditIndividualDataChange/NewAccountFieldArray';
 import type { IndividualDetail } from '@restgenerated/models/IndividualDetail';
 import type { IndividualList } from '@restgenerated/models/IndividualList';
+import { ResponsiveGrid, ResponsiveGridContainer } from 'src/responsive';
 
 const BoxWithBorders = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
@@ -182,13 +183,16 @@ function EditIndividualDataChange({
           <Title>
             <Typography variant="h6">{t('Bio Data')}</Typography>
           </Title>
-          <Grid container spacing={3}>
+          <ResponsiveGridContainer spacing={3}>
             <FieldArray
               name="individualDataUpdateFields"
               render={(arrayHelpers) => (
                 <>
                   {values.individualDataUpdateFields.map((item, index) => (
-                    <Grid size={12} key={`${index}-${item?.fieldName}`}>
+                    <ResponsiveGrid
+                      size="full"
+                      key={`${index}-${item?.fieldName}`}
+                    >
                       <EditIndividualDataChangeFieldRow
                         itemValue={item}
                         index={index}
@@ -198,9 +202,9 @@ function EditIndividualDataChange({
                         onDelete={() => arrayHelpers.remove(index)}
                         values={values}
                       />
-                    </Grid>
+                    </ResponsiveGrid>
                   ))}
-                  <Grid size={4}>
+                  <ResponsiveGrid size="third">
                     <Button
                       color="primary"
                       onClick={() => {
@@ -212,11 +216,11 @@ function EditIndividualDataChange({
                     >
                       {t('Add new field')}
                     </Button>
-                  </Grid>
+                  </ResponsiveGrid>
                 </>
               )}
             />
-          </Grid>
+          </ResponsiveGridContainer>
         </BoxWithBorders>
       )}
       <BoxWithBorders>

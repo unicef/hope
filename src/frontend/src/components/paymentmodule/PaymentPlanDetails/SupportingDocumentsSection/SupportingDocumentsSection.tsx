@@ -41,6 +41,11 @@ import { useDownloadSupportingDocument } from './SupportingDocumentsSectionActio
 import type { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 import { showApiErrorMessages } from '@utils/utils';
 import { getErrorMessage } from '@utils/errors';
+import {
+  ResponsiveGrid,
+  ResponsiveGridContainer,
+  responsiveValue,
+} from 'src/responsive';
 
 const StyledBox = styled(Box)`
   max-width: 300px;
@@ -227,6 +232,7 @@ export const SupportingDocumentsSection = ({
       <Box
         sx={{
           display: 'flex',
+          flexWrap: responsiveValue('wrap', 'nowrap'),
           justifyContent: 'space-between',
           alignItems: 'center',
         }}
@@ -276,9 +282,9 @@ export const SupportingDocumentsSection = ({
             mt: 2,
           }}
         >
-          <Grid container spacing={3}>
+          <ResponsiveGridContainer spacing={3}>
             {documents.map((doc) => (
-              <Grid size={3} key={doc.id}>
+              <ResponsiveGrid size="quarter" key={doc.id}>
                 <GreyBox
                   data-cy="document-item"
                   sx={{
@@ -342,9 +348,9 @@ export const SupportingDocumentsSection = ({
                     </Box>
                   </Box>
                 </GreyBox>
-              </Grid>
+              </ResponsiveGrid>
             ))}
-          </Grid>
+          </ResponsiveGridContainer>
         </Box>
       </Collapse>
       {canUploadFile && (

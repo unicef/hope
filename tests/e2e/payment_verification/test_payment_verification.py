@@ -517,7 +517,7 @@ class TestSmokePaymentVerification:
         page_grievance_tickets.get_tab_system_generated().click()
         assert len(page_grievance_tickets.get_ticket_list_row()) == 1
         page_grievance_tickets.get_ticket_list_row()[0].click()
-        page_grievance_details_page.get_button_assign_to_me().click()
+        page_grievance_details_page.assign_to_me()
         page_grievance_details_page.get_button_set_in_progress().click()
 
         page_grievance_details_page.get_grievance_verify().click()
@@ -530,6 +530,8 @@ class TestSmokePaymentVerification:
 
         page_grievance_details_page.get_button_close_ticket().click()
         page_grievance_details_page.get_button_confirm().click()
+        # Closing the ticket is what sets the verification to RECEIVED; leaving earlier races that request.
+        page_grievance_details_page.wait_for_text("Closed", page_grievance_details_page.ticket_status)
 
         page_payment_verification.get_nav_payment_verification().click()
         page_payment_verification.get_cash_plan_table_row().click()

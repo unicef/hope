@@ -11,6 +11,11 @@ import { LabelizedField } from '@core/LabelizedField';
 import { AgencyField } from '../AgencyField';
 import { removeItemById } from '../utils/helpers';
 import type { IndividualIdentity } from '@restgenerated/models/IndividualIdentity';
+import {
+  ResponsiveGrid,
+  ResponsiveGridContainer,
+  responsiveValue,
+} from 'src/responsive';
 
 interface DisabledDivProps {
   disabled: boolean;
@@ -52,8 +57,7 @@ export function EditIdentityRow({
     values?.individualDataUpdateIdentitiesToRemove || [];
   const removed = identitiesToRemove.includes(identity.id);
   return isEdited ? (
-    <Grid
-      container
+    <ResponsiveGridContainer
       spacing={3}
       sx={{
         alignItems: 'center',
@@ -94,40 +98,43 @@ export function EditIdentityRow({
           <Close />
         </IconButton>
       </Box>
-    </Grid>
+    </ResponsiveGridContainer>
   ) : (
-    <Grid
-      container
+    <ResponsiveGridContainer
       spacing={3}
       key={identity.id}
       sx={{
         alignItems: 'center',
       }}
     >
-      <Grid size={4}>
+      <ResponsiveGrid size="third">
         <DisabledDiv disabled={removed}>
           <LabelizedField label={t('ID AGENCY1')} value={identity.partner} />
         </DisabledDiv>
-      </Grid>
-      <Grid size={4}>
+      </ResponsiveGrid>
+      <ResponsiveGrid size="third">
         <DisabledDiv disabled={removed}>
           <LabelizedField
             label={t('Country')}
             value={identity.country?.name ?? '-'}
           />
         </DisabledDiv>
-      </Grid>
-      <Grid size={3}>
+      </ResponsiveGrid>
+      <ResponsiveGrid size="quarter">
         <DisabledDiv disabled={removed}>
           <LabelizedField label={t('ID Number')} value={identity.number} />
         </DisabledDiv>
-      </Grid>
-      <Grid size={1}>
+      </ResponsiveGrid>
+      <Grid
+        sx={{ textAlign: responsiveValue('right', 'left') }}
+        size={responsiveValue(12, 1)}
+      >
         {!removed ? (
           !isEditTicket && (
             <Box
               sx={{
                 display: 'flex',
+                justifyContent: responsiveValue('flex-end', 'flex-start'),
                 alignItems: 'center',
               }}
             >
@@ -169,6 +176,6 @@ export function EditIdentityRow({
           </Box>
         )}
       </Grid>
-    </Grid>
+    </ResponsiveGridContainer>
   );
 }

@@ -49,10 +49,11 @@ def test_add_individual_stores_latin_name_as_provided(
 
     login.set_value(INPUT_FULL_NAME_LATIN, "Dmytro Koval")
     login.click(BUTTON_SUBMIT)
-    login.wait_for_element_visible('button[data-cy="button-assign-to-me"]', timeout=60)
+    login.wait_for_element_visible('button[data-cy="button-assign"]', timeout=60)
     login.assert_text("Дмитро Коваль", 'div[data-cy="label-full name"]')
 
-    _js_click(login, 'button[data-cy="button-assign-to-me"]')
+    _js_click(login, 'button[data-cy="button-assign"]')
+    _js_click(login, 'button[data-cy="button-confirm-assign"]')
     _js_click(login, 'button[data-cy="button-set-to-in-progress"]')
     _js_click(login, 'button[data-cy="button-send-for-approval"]')
     login.wait_for_element_clickable('button[data-cy="button-approve"]')

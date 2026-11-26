@@ -1,3 +1,4 @@
+import { HeaderActions } from '@components/core/HeaderActions';
 import { EditProgramMenu } from '@components/programs/EditProgram/EditProgramMenu';
 import { Box } from '@mui/material';
 import type { ProgramDetail } from '@restgenerated/models/ProgramDetail';
@@ -18,39 +19,22 @@ export function ActiveProgramDetailsPageHeaderButtons({
   canDuplicate,
 }: ActiveProgramDetailsPageHeaderPropTypes): ReactElement {
   return (
-    <Box
-      sx={{
-        display: 'flex',
-        alignItems: 'center',
-      }}
-    >
+    <HeaderActions>
       {canFinish && (
-        <Box
-          sx={{
-            m: 2,
-          }}
-        >
+        <Box>
           <FinishProgram program={program} />
         </Box>
       )}
       {canEdit && (
-        <Box
-          sx={{
-            m: 2,
-          }}
-        >
+        <Box>
           <EditProgramMenu program={program} />
         </Box>
       )}
       {canDuplicate && (
-        <Box
-          sx={{
-            m: 2,
-          }}
-        >
+        <Box>
           <DuplicateProgramButtonLink program={program} />
         </Box>
       )}
-    </Box>
+    </HeaderActions>
   );
 }

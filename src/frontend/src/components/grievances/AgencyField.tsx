@@ -7,6 +7,11 @@ import { FormikSelectField } from '@shared/Formik/FormikSelectField';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
 import { getIndexForId } from './utils/helpers';
 import type { ReactElement } from 'react';
+import {
+  ResponsiveGrid,
+  ResponsiveGridContainer,
+  responsiveValue,
+} from 'src/responsive';
 
 export interface AgencyFieldProps {
   id: string;
@@ -38,8 +43,8 @@ export function AgencyField({
   const location = useLocation();
   const isEditTicket = location.pathname.indexOf('edit-ticket') !== -1;
   return (
-    <Grid container spacing={3} sx={{ alignItems: 'center' }}>
-      <Grid size={{ xs: 4 }}>
+    <ResponsiveGridContainer spacing={3} sx={{ alignItems: 'center' }}>
+      <ResponsiveGrid size="third">
         <Field
           name={`${agencyFieldName}.partner`}
           fullWidth
@@ -50,8 +55,8 @@ export function AgencyField({
           required={!isEditTicket}
           disabled={isEditTicket}
         />
-      </Grid>
-      <Grid size={{ xs: 4 }}>
+      </ResponsiveGrid>
+      <ResponsiveGrid size="third">
         <Field
           name={`${agencyFieldName}.country`}
           fullWidth
@@ -62,8 +67,8 @@ export function AgencyField({
           required={!isEditTicket}
           disabled={isEditTicket}
         />
-      </Grid>
-      <Grid size={{ xs: 3 }}>
+      </ResponsiveGrid>
+      <ResponsiveGrid size="quarter">
         <Field
           name={`${agencyFieldName}.number`}
           fullWidth
@@ -73,14 +78,17 @@ export function AgencyField({
           required={!isEditTicket}
           disabled={isEditTicket}
         />
-      </Grid>
+      </ResponsiveGrid>
       {!isEdited ? (
-        <Grid size={{ xs: 1 }}>
+        <Grid
+          sx={{ textAlign: responsiveValue('right', 'left') }}
+          size={responsiveValue(12, 1)}
+        >
           <IconButton disabled={isEditTicket} onClick={onDelete}>
             <Delete />
           </IconButton>
         </Grid>
       ) : null}
-    </Grid>
+    </ResponsiveGridContainer>
   );
 }
