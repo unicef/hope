@@ -3,13 +3,13 @@ import pytest
 from extras.test_utils.factories import (
     HouseholdFactory,
     IndividualFactory,
-    PaymentPlanFactory,
+    PaymentListFactory,
     ProgramFactory,
     UserFactory,
 )
 from extras.test_utils.selenium import HopeTestBrowser
 from hope.apps.household.const import REFUGEE
-from hope.models import BeneficiaryGroup, BusinessArea, Household, PaymentPlan, Program, User
+from hope.models import BeneficiaryGroup, BusinessArea, Household, PaymentList, Program, User
 
 PROGRAM_NAME = "Accountability Programme"
 TARGET_POPULATION_NAME = "Accountability Target Population"
@@ -42,10 +42,10 @@ def author() -> User:
 
 
 @pytest.fixture
-def target_population(program: Program, author: User) -> PaymentPlan:
-    return PaymentPlanFactory(
+def target_population(program: Program, author: User) -> PaymentList:
+    return PaymentListFactory(
         name=TARGET_POPULATION_NAME,
-        status=PaymentPlan.Status.TP_LOCKED,
+        status=PaymentList.Status.TP_LOCKED,
         created_by=author,
         business_area=program.business_area,
         program_cycle=program.cycles.first(),

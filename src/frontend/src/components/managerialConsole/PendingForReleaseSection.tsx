@@ -1,7 +1,7 @@
 import type { Dispatch, FC, SetStateAction } from 'react';
 import { useState } from 'react';
 import { BaseSection } from '@components/core/BaseSection';
-import type { PaginatedPaymentPlanList } from '@restgenerated/models/PaginatedPaymentPlanList';
+import type { PaginatedPaymentPlanManagerialList } from '@restgenerated/models/PaginatedPaymentPlanManagerialList';
 import type {
   BulkActionMutation,
   SelectAllHandler,
@@ -37,7 +37,7 @@ interface PendingForReleaseSectionProps {
   setSelectedInReview: Dispatch<SetStateAction<string[]>>;
   handleSelect: SelectHandler;
   handleSelectAll: SelectAllHandler;
-  inReviewData: PaginatedPaymentPlanList;
+  inReviewData: PaginatedPaymentPlanManagerialList;
   bulkAction: BulkActionMutation;
   enableSearch?: boolean;
 }
@@ -80,13 +80,14 @@ export const PendingForReleaseSection: FC<PendingForReleaseSectionProps> = ({
       width: 200,
       renderCell: (params) => (
         <BlackLink
-          to={`/${businessArea}/programs/${params.row.programCode}/payment-module/${params.row.planType === 'FOLLOW_UP' ? 'followup-payment-plans' : 'payment-plans'}/${params.row.id}`}
+          to={`/${businessArea}/programs/${params.row.programCode}/payment-module/payment-plans/${params.row.id}`}
           newTab={true}
         >
           {params.value}
         </BlackLink>
       ),
     },
+    { field: 'name', headerName: t('Name'), width: 200 },
     { field: 'program', headerName: t('Programme Name'), width: 200 },
     {
       field: 'lastApprovalProcessDate',
@@ -108,13 +109,15 @@ export const PendingForReleaseSection: FC<PendingForReleaseSectionProps> = ({
     columns,
   );
   const sortedRows = sortRows(filteredRows);
+  // Vision releases its payment plans itself once the funds commitment arrives.
+  const releasableRows = sortedRows.filter((row) => !row.visionManaged);
 
   const {
     visibleIds,
     visibleSelectedIds,
     selectedPlansUnicefIds,
     allSelected,
-  } = getVisibleSelection(sortedRows, selectedInReview);
+  } = getVisibleSelection(releasableRows, selectedInReview);
 
   const handleSelectAllReviewed = () => {
     handleSelectAll(visibleIds, visibleSelectedIds, setSelectedInReview);
@@ -216,6 +219,7 @@ export const PendingForReleaseSection: FC<PendingForReleaseSectionProps> = ({
                 <TableCell padding="checkbox">
                   <Checkbox
                     checked={visibleSelectedIds.includes(row.id)}
+                    disabled={row.visionManaged}
                     onChange={() =>
                       handleSelect(
                         visibleSelectedIds,

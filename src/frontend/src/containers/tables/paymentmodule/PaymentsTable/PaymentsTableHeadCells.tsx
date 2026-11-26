@@ -1,8 +1,8 @@
 import type { HeadCell } from '@components/core/Table/EnhancedTableHead';
-import type { PaymentList } from '@restgenerated/models/PaymentList';
+import type { PaymentRow } from '@restgenerated/models/PaymentRow';
 import { PERMISSIONS } from '../../../../config/permissions';
 
-export const headCells: HeadCell<PaymentList>[] = [
+export const headCells: HeadCell<PaymentRow>[] = [
   {
     disablePadding: false,
     label: '',
@@ -81,7 +81,7 @@ export const headCells: HeadCell<PaymentList>[] = [
   },
 ];
 
-export const headCellsPeople: HeadCell<PaymentList>[] = [
+export const headCellsPeople: HeadCell<PaymentRow>[] = [
   {
     disablePadding: false,
     label: '',

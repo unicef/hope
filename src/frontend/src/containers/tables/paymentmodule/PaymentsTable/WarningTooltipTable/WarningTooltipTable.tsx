@@ -19,21 +19,21 @@ import { LabelizedField } from '@components/core/LabelizedField';
 import { StatusBox } from '@components/core/StatusBox';
 import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
 import { UniversalMoment } from '@components/core/UniversalMoment';
-import { paymentPlanStatusToColor } from '@utils/utils';
+import { paymentListStatusToColor } from '@utils/utils';
 import { DialogFooter } from '../../../../dialogs/DialogFooter';
 import { DialogTitleWrapper } from '../../../../dialogs/DialogTitleWrapper';
 import { useProgramContext } from 'src/programContext';
 import type { ReactElement } from 'react';
-import type { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
-import type { PaymentList } from '@restgenerated/models/PaymentList';
+import type { PaymentListDetail } from '@restgenerated/models/PaymentListDetail';
+import type { PaymentRow } from '@restgenerated/models/PaymentRow';
 
 // Interface to replace PaymentConflictDataNode
 interface PaymentConflictData {
-  paymentPlanId?: string;
-  paymentPlanUnicefId?: string;
-  paymentPlanStartDate?: string;
-  paymentPlanEndDate?: string;
-  paymentPlanStatus?: string;
+  paymentListId?: string;
+  paymentListUnicefId?: string;
+  paymentListStartDate?: string;
+  paymentListEndDate?: string;
+  paymentListStatus?: string;
   paymentId?: string;
   paymentUnicefId?: string;
 }
@@ -51,15 +51,15 @@ const GreyBox = styled(Box)`
 `;
 
 interface WarningTooltipTableProps {
-  paymentPlan: PaymentPlanDetail;
-  payment: PaymentList;
+  paymentList: PaymentListDetail;
+  payment: PaymentRow;
   setDialogOpen: (dialogOpen: boolean) => void;
   baseUrl: string;
   canViewDetails: boolean;
 }
 
 export function WarningTooltipTable({
-  paymentPlan,
+  paymentList,
   payment,
   setDialogOpen,
   baseUrl,
@@ -70,12 +70,12 @@ export function WarningTooltipTable({
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
   if (!payment) return null;
-  const mappedPaymentPlanRows = (): ReactElement[] => {
+  const mappedPaymentListRows = (): ReactElement[] => {
     const {
-      paymentPlanSoftConflicted,
-      paymentPlanHardConflicted,
-      paymentPlanHardConflictedData,
-      paymentPlanSoftConflictedData,
+      paymentListSoftConflicted,
+      paymentListHardConflicted,
+      paymentListHardConflictedData,
+      paymentListSoftConflictedData,
     } = payment;
 
     const renderRow = (row: PaymentConflictData): ReactElement => (
@@ -83,35 +83,35 @@ export function WarningTooltipTable({
         <TableCell align="left">
           {canViewDetails ? (
             <BlackLink
-              to={`/${baseUrl}/payment-module/payment-plans/${row.paymentPlanId}`}
+              to={`/${baseUrl}/payment-module/payment-lists/${row.paymentListId}`}
             >
-              {row.paymentPlanUnicefId}
+              {row.paymentListUnicefId}
             </BlackLink>
           ) : (
-            row.paymentPlanUnicefId
+            row.paymentListUnicefId
           )}
         </TableCell>
         <TableCell align="left">
-          <UniversalMoment>{row.paymentPlanStartDate}</UniversalMoment>
+          <UniversalMoment>{row.paymentListStartDate}</UniversalMoment>
         </TableCell>
         <TableCell align="left">
-          <UniversalMoment>{row.paymentPlanEndDate}</UniversalMoment>
+          <UniversalMoment>{row.paymentListEndDate}</UniversalMoment>
         </TableCell>
         <TableCell align="left">
           <StatusBox
-            status={row.paymentPlanStatus}
-            statusToColor={paymentPlanStatusToColor}
+            status={row.paymentListStatus}
+            statusToColor={paymentListStatusToColor}
           />
         </TableCell>
         <TableCell align="left">{row.paymentUnicefId}</TableCell>
       </ClickableTableRow>
     );
 
-    if (paymentPlanHardConflicted) {
-      return paymentPlanHardConflictedData.map((el) => renderRow(el));
+    if (paymentListHardConflicted) {
+      return paymentListHardConflictedData.map((el) => renderRow(el));
     }
-    if (paymentPlanSoftConflicted) {
-      return paymentPlanSoftConflictedData.map((el) => renderRow(el));
+    if (paymentListSoftConflicted) {
+      return paymentListSoftConflictedData.map((el) => renderRow(el));
     }
     return [];
   };
@@ -135,7 +135,7 @@ export function WarningTooltipTable({
             display: 'flex',
           }}
         >
-          {t('Payment Plan ID')} <Bold>{paymentPlan.unicefId}</Bold>{' '}
+          {t('Payment List ID')} <Bold>{paymentList.unicefId}</Bold>{' '}
           {t('details')}:
         </Box>
         <GreyBox
@@ -146,12 +146,12 @@ export function WarningTooltipTable({
           <Grid container>
             <Grid size={6}>
               <LabelizedField label={t('Start Date')}>
-                <UniversalMoment>{paymentPlan.startDate}</UniversalMoment>
+                <UniversalMoment>{paymentList.startDate}</UniversalMoment>
               </LabelizedField>
             </Grid>
             <Grid size={6}>
               <LabelizedField label={t('End Date')}>
-                <UniversalMoment>{paymentPlan.endDate}</UniversalMoment>
+                <UniversalMoment>{paymentList.endDate}</UniversalMoment>
               </LabelizedField>
             </Grid>
           </Grid>
@@ -165,19 +165,19 @@ export function WarningTooltipTable({
         >
           {`${beneficiaryGroup?.groupLabel} ID`}{' '}
           <Bold>{payment.householdUnicefId}</Bold>{' '}
-          {t('is also included in the following Payment Plans')}:
+          {t('is also included in the following Payment Lists')}:
         </Box>
         <StyledTable>
           <TableHead>
             <TableRow>
-              <TableCell align="left">{t('Payment Plan ID')}</TableCell>
+              <TableCell align="left">{t('Payment List ID')}</TableCell>
               <TableCell align="left">{t('Start Date')}</TableCell>
               <TableCell align="left">{t('End Date')}</TableCell>
               <TableCell align="left">{t('Status')}</TableCell>
               <TableCell align="left">{t('Payment ID')}</TableCell>
             </TableRow>
           </TableHead>
-          <TableBody>{mappedPaymentPlanRows()}</TableBody>
+          <TableBody>{mappedPaymentListRows()}</TableBody>
         </StyledTable>
       </DialogContent>
       <DialogFooter>

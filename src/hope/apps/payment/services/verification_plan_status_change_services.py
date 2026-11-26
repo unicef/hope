@@ -129,7 +129,7 @@ class VerificationPlanStatusChangeServices:
         return exception
 
     def finish(self) -> PaymentVerificationPlan:
-        if not self.payment_verification_plan.payment_plan.is_reconciled:
+        if not self.payment_verification_plan.payment_list.is_reconciled:
             log_and_raise("You can finish only if reconciliation is finalized")
 
         self.payment_verification_plan.status = PaymentVerificationPlan.STATUS_FINISHED
@@ -148,7 +148,7 @@ class VerificationPlanStatusChangeServices:
         if verifications.count() == 0:
             return
 
-        business_area = payment_verification_plan.payment_plan.business_area
+        business_area = payment_verification_plan.payment_list.business_area
         grievance_ticket_list = []
         tickets_programs = []
         GrievanceTicketProgramThrough = GrievanceTicket.programs.through  # noqa

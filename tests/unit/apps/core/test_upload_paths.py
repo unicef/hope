@@ -17,8 +17,8 @@ from extras.test_utils.factories import (
     ImportDataFactory,
     IndividualFactory,
     KoboImportDataFactory,
+    PaymentListFactory,
     PaymentPlanFactory,
-    PaymentPlanGroupFactory,
     PaymentPlanSupportingDocumentFactory,
     PaymentVerificationPlanFactory,
     PaymentVerificationSummaryFactory,
@@ -29,7 +29,7 @@ from extras.test_utils.factories import (
     SurveyFactory,
     UniversalUpdateFactory,
     UploadedXLSXFileFactory,
-    WesternUnionPaymentPlanReportFactory,
+    WesternUnionPaymentListReportFactory,
     XLSXKoboTemplateFactory,
     XlsxUpdateFileFactory,
 )
@@ -52,7 +52,12 @@ def program(business_area: Any) -> Any:
 
 @pytest.fixture
 def payment_plan(program: Any) -> Any:
-    return PaymentPlanFactory(program_cycle=program.cycles.first())
+    return PaymentPlanFactory(cycle=program.cycles.first())
+
+
+@pytest.fixture
+def payment_list(program: Any, payment_plan: Any) -> Any:
+    return PaymentListFactory(program_cycle=program.cycles.first(), payment_plan=payment_plan)
 
 
 @pytest.fixture
@@ -96,18 +101,17 @@ def long_named_supporting_document(payment_plan: Any, tmp_path: Any) -> Any:
 
 
 @pytest.fixture
-def file_temp_for_payment_plan_group(program: Any) -> Any:
-    group = PaymentPlanGroupFactory(cycle=program.cycles.first())
+def file_temp_for_payment_list(payment_list: Any) -> Any:
     return FileTempFactory(
-        object_id=str(group.pk),
-        content_type=ContentType.objects.get_for_model(group),
+        object_id=str(payment_list.pk),
+        content_type=ContentType.objects.get_for_model(payment_list),
     )
 
 
 @pytest.fixture
-def file_temp_for_payment_verification_plan(payment_plan: Any) -> Any:
-    PaymentVerificationSummaryFactory(payment_plan=payment_plan)
-    verification_plan = PaymentVerificationPlanFactory(payment_plan=payment_plan)
+def file_temp_for_payment_verification_plan(payment_list: Any) -> Any:
+    PaymentVerificationSummaryFactory(payment_list=payment_list)
+    verification_plan = PaymentVerificationPlanFactory(payment_list=payment_list)
     return FileTempFactory(
         object_id=str(verification_plan.pk),
         content_type=ContentType.objects.get_for_model(verification_plan),
@@ -115,8 +119,8 @@ def file_temp_for_payment_verification_plan(payment_plan: Any) -> Any:
 
 
 @pytest.fixture
-def file_temp_for_western_union_report(payment_plan: Any) -> Any:
-    report = WesternUnionPaymentPlanReportFactory(payment_plan=payment_plan)
+def file_temp_for_western_union_report(payment_list: Any) -> Any:
+    report = WesternUnionPaymentListReportFactory(payment_list=payment_list)
     return FileTempFactory(
         object_id=str(report.pk),
         content_type=ContentType.objects.get_for_model(report),
@@ -321,10 +325,10 @@ def test_build_upload_path_uses_the_upload_year_when_no_year_is_given() -> None:
             "file_temp_for_payment_plan", "report.xlsx", "2024/ukraine/ab12/report.xlsx", id="owner-payment-plan"
         ),
         pytest.param(
-            "file_temp_for_payment_plan_group",
+            "file_temp_for_payment_list",
             "report.xlsx",
             "2024/ukraine/ab12/report.xlsx",
-            id="owner-payment-plan-group",
+            id="owner-payment-list",
         ),
         pytest.param(
             "file_temp_for_payment_verification_plan",

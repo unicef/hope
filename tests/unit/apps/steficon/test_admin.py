@@ -13,7 +13,7 @@ from extras.test_utils.factories import (
     HouseholdFactory,
     IndividualFactory,
     PaymentFactory,
-    PaymentPlanFactory,
+    PaymentListFactory,
     RuleFactory,
     UserFactory,
 )
@@ -73,7 +73,7 @@ def rule_test_setup(client: DjangoClient) -> Tuple[DjangoClient, Rule]:
         name="Test Rule",
         definition="result.value = 2 + 3",
         language="python",
-        type=Rule.TYPE_PAYMENT_PLAN,
+        type=Rule.TYPE_PAYMENT_LIST,
     )
     return client, rule
 
@@ -205,7 +205,7 @@ def business_area():
 @pytest.mark.django_db
 def test_test_button_with_target_population(rule_test_setup: Tuple[DjangoClient, Rule], business_area) -> None:
     client, rule = rule_test_setup
-    pp = PaymentPlanFactory(business_area=business_area)
+    pp = PaymentListFactory(business_area=business_area)
 
     hoh1 = IndividualFactory(household=None)
     hoh2 = IndividualFactory(household=None)

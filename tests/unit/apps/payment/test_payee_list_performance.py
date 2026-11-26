@@ -14,7 +14,7 @@ from extras.test_utils.factories import (
     IndividualFactory,
     IndividualRoleInHouseholdFactory,
     PaymentFactory,
-    PaymentPlanFactory,
+    PaymentListFactory,
     ProgramCycleFactory,
     ProgramFactory,
     UserFactory,
@@ -22,9 +22,9 @@ from extras.test_utils.factories import (
 from hope.apps.account.permissions import Permissions
 from hope.apps.household.const import ROLE_ALTERNATE, ROLE_PRIMARY
 from hope.apps.payment.services.payment_household_snapshot_service import (
-    create_payment_plan_snapshot_data,
+    create_payment_list_snapshot_data,
 )
-from hope.models import MergeStatusModel, Payment, PaymentPlan, Program
+from hope.models import MergeStatusModel, Payment, PaymentList, Program
 
 pytestmark = pytest.mark.django_db
 
@@ -54,22 +54,22 @@ def authorized_user(
 
 
 @pytest.fixture
-def large_payment_plan(
+def large_payment_list(
     afghanistan: Any,
     authorized_user: Any,
     program_active: Program,
-) -> PaymentPlan:
+) -> PaymentList:
     cycle = ProgramCycleFactory(program=program_active, title="Perf Test Cycle")
     fsp = FinancialServiceProviderFactory(
         name="Perf FSP",
         vision_vendor_number="999",
         communication_channel="XLSX",
     )
-    payment_plan = PaymentPlanFactory(
+    payment_list = PaymentListFactory(
         name="Perf test PP",
         business_area=afghanistan,
         program_cycle=cycle,
-        status=PaymentPlan.Status.LOCKED,
+        status=PaymentList.Status.LOCKED,
         created_by=authorized_user,
         financial_service_provider=fsp,
     )
@@ -115,7 +115,7 @@ def large_payment_plan(
             rdi_merge_status=MergeStatusModel.MERGED,
         )
         PaymentFactory(
-            parent=payment_plan,
+            parent=payment_list,
             program=program_active,
             financial_service_provider=fsp,
             household=household,
@@ -123,22 +123,22 @@ def large_payment_plan(
             collector=primary,
             status=Payment.STATUS_PENDING,
         )
-    create_payment_plan_snapshot_data(payment_plan)
-    return payment_plan
+    create_payment_list_snapshot_data(payment_list)
+    return payment_list
 
 
 @pytest.fixture
 def payee_list_url(
     afghanistan: Any,
     program_active: Program,
-    large_payment_plan: PaymentPlan,
+    large_payment_list: PaymentList,
 ) -> str:
     return reverse(
         "api:payments:payments-list",
         kwargs={
             "business_area_slug": afghanistan.slug,
             "program_code": program_active.code,
-            "payment_plan_pk": large_payment_plan.pk,
+            "payment_list_pk": large_payment_list.pk,
         },
     )
 

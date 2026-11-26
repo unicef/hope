@@ -43,7 +43,7 @@ from extras.test_utils.factories.payment import (
     AccountFactory,
     AccountTypeFactory,
     PaymentFactory,
-    PaymentPlanFactory,
+    PaymentListFactory,
     PaymentVerificationFactory,
     PaymentVerificationPlanFactory,
     PaymentVerificationSummaryFactory,
@@ -1575,16 +1575,16 @@ def test_grievance_detail_payment_verification(
         issue_type=None,
         household_unicef_id=household1.unicef_id,
     )
-    payment_plan = PaymentPlanFactory(
+    payment_list = PaymentListFactory(
         name="TEST",
         business_area=afghanistan,
     )
-    PaymentVerificationSummaryFactory(payment_plan=payment_plan)
+    PaymentVerificationSummaryFactory(payment_list=payment_list)
     payment_verification_plan = PaymentVerificationPlanFactory(
-        payment_plan=payment_plan, status=PaymentVerificationPlan.STATUS_ACTIVE
+        payment_list=payment_list, status=PaymentVerificationPlan.STATUS_ACTIVE
     )
     payment = PaymentFactory(
-        parent=payment_plan,
+        parent=payment_list,
         household=household1,
         collector=household1.individuals.first(),
         delivered_quantity_usd=50,
@@ -1609,7 +1609,7 @@ def test_grievance_detail_payment_verification(
         payment_verification=payment_verification,
     )
     assign_ticket_data(grievance_ticket, ticket_note, grievance_document, program, linked_ticket)
-    payment_plan.refresh_from_db()
+    payment_list.refresh_from_db()
 
     create_user_role_with_permissions(
         user,
@@ -1644,8 +1644,8 @@ def test_grievance_detail_payment_verification(
         "id": str(payment.id),
         "unicef_id": payment.unicef_id,
         "parent": {
-            "id": str(payment_plan.id),
-            "unicef_id": payment_plan.unicef_id,
+            "id": str(payment_list.id),
+            "unicef_id": payment_list.unicef_id,
         },
         "delivered_quantity": f"{payment.delivered_quantity:.2f}",
         "entitlement_quantity": f"{payment.entitlement_quantity:.2f}" if payment.entitlement_quantity else None,

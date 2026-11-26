@@ -12,7 +12,7 @@
                 "category": "MANUAL",
                 "number_of_recipients": 0,
                 "created_by": "9abd42d7-ca4a-44f2-835e-73c86c8492d5",
-                "payment_plan": null,
+                "payment_list": null,
                 "program": "4b9e8960-9340-405d-9622-eb5a39b1490f",
                 "business_area": "690e5a52-75c4-430f-a2e8-68a276f650db",
                 "flow_id": null,

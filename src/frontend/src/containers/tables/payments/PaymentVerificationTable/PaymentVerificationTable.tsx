@@ -37,7 +37,7 @@ function PaymentVerificationTable({
       deliveryMechanism: filter.deliveryTypes,
       startDate: filter.startDate,
       endDate: filter.endDate,
-      isPaymentPlan: true,
+      isPaymentList: true,
     }),
     [
       programId,
@@ -77,7 +77,7 @@ function PaymentVerificationTable({
     listVariables,
   );
   const {
-    data: paymentPlansData,
+    data: paymentListsData,
     isLoading,
     isFetching,
     error,
@@ -98,18 +98,18 @@ function PaymentVerificationTable({
 
   return (
     <UniversalRestTable
-      title={t('List of Payment Plans')}
+      title={t('List of Payment Lists')}
       headCells={headCells}
-      data={paymentPlansData}
+      data={paymentListsData}
       isLoading={isLoading}
       isFetching={isFetching}
       error={error}
       tableState={table}
       itemsCount={itemsCount}
-      renderRow={(paymentPlan) => (
+      renderRow={(paymentList) => (
         <PaymentVerificationTableRow
-          key={paymentPlan.id}
-          plan={paymentPlan}
+          key={paymentList.id}
+          plan={paymentList}
           canViewDetails={canViewDetails}
         />
       )}

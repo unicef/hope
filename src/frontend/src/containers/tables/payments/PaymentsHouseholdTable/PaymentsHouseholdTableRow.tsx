@@ -11,11 +11,11 @@ import { UniversalMoment } from '@components/core/UniversalMoment';
 import { BlackLink } from '@components/core/BlackLink';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import type { ReactElement } from 'react';
-import type { PaymentList } from '@restgenerated/models/PaymentList';
+import type { PaymentRow } from '@restgenerated/models/PaymentRow';
 import { useProgramContext } from 'src/programContext';
 
 interface PaymentsHouseholdTableRowProps {
-  payment: PaymentList;
+  payment: PaymentRow;
   openInNewTab: boolean;
   canViewDetails: boolean;
 }
@@ -61,8 +61,8 @@ export function PaymentsHouseholdTableRow({
       <TableCell align="left">
         {payment.paymentPlanPurposes?.join(', ')}
       </TableCell>
-      <TableCell align="left">{payment.paymentPlanGroup}</TableCell>
-      <TableCell align="left">{payment.paymentPlanCycle}</TableCell>
+      <TableCell align="left">{payment.paymentPlan}</TableCell>
+      <TableCell align="left">{payment.paymentListCycle}</TableCell>
       {!isSocialDctType && (
         <TableCell align="left">{payment.hohFullName}</TableCell>
       )}

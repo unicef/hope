@@ -10,11 +10,11 @@ from hope.models import (
     TargetingIndividualRuleFilterBlock,
 )
 
-from .payment import PaymentPlanFactory
+from .payment import PaymentListFactory
 
 
 class TargetingCriteriaRuleFactory(DjangoModelFactory):
-    payment_plan = factory.SubFactory(PaymentPlanFactory)
+    payment_list = factory.SubFactory(PaymentListFactory)
     household_ids = ""
     individual_ids = ""
     alternative_collectors_ids = ""

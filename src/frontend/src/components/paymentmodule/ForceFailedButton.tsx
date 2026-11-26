@@ -27,49 +27,48 @@ export function ForceFailedButton({
   const { t } = useTranslation();
   const [isOpenModal, setOpenModal] = useState(false);
   const { showMessage } = useSnackbar();
-  const { paymentPlanId } = useParams();
+  const { paymentListId } = useParams();
   const { businessArea, programId } = useBaseUrl();
   const queryClient = useQueryClient();
-  const { mutate: markAsFailed, isPending: loadingMarkAsFailed } =
-    useMutation({
-      mutationFn: ({
-        businessAreaSlug,
-        id,
-        paymentPlanId: ppId,
-        programCode,
-      }: {
-        businessAreaSlug: string;
-        id: string;
-        paymentPlanId: string;
-        programCode: string;
-      }) =>
-        RestService.restBusinessAreasProgramsPaymentPlansPaymentsMarkAsFailedRetrieve(
-          {
-            businessAreaSlug,
-            paymentId: id,
-            paymentPlanPk: ppId,
-            programCode,
-          },
+  const { mutate: markAsFailed, isPending: loadingMarkAsFailed } = useMutation({
+    mutationFn: ({
+      businessAreaSlug,
+      id,
+      paymentListId: ppId,
+      programCode,
+    }: {
+      businessAreaSlug: string;
+      id: string;
+      paymentListId: string;
+      programCode: string;
+    }) =>
+      RestService.restBusinessAreasProgramsPaymentListsPaymentsMarkAsFailedRetrieve(
+        {
+          businessAreaSlug,
+          paymentId: id,
+          paymentListPk: ppId,
+          programCode,
+        },
+      ),
+    onSuccess: () => {
+      showMessage(t('Payment has been marked as failed successfully.'));
+      setOpenModal(false);
+      queryClient.invalidateQueries({
+        queryKey: restQueryKey(
+          RestService.restBusinessAreasProgramsPaymentListsPaymentsRetrieve,
         ),
-      onSuccess: () => {
-        showMessage(t('Payment has been marked as failed successfully.'));
-        setOpenModal(false);
-        queryClient.invalidateQueries({
-          queryKey: restQueryKey(
-            RestService.restBusinessAreasProgramsPaymentPlansPaymentsRetrieve,
-          ),
-        });
-      },
-      onError: (error: any) => {
-        showApiErrorMessages(error, showMessage);
-      },
-    });
+      });
+    },
+    onError: (error: any) => {
+      showApiErrorMessages(error, showMessage);
+    },
+  });
 
   const submit = (): void => {
     markAsFailed({
       businessAreaSlug: businessArea,
       programCode: programId,
-      paymentPlanId,
+      paymentListId,
       id: paymentId,
     });
   };

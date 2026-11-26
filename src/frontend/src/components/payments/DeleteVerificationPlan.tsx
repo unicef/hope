@@ -21,12 +21,12 @@ import { responsiveValue } from 'src/responsive';
 
 export interface DeleteVerificationPlanProps {
   paymentVerificationPlanId: string;
-  paymentPlanId: string;
+  paymentListId: string;
 }
 
 export function DeleteVerificationPlan({
   paymentVerificationPlanId,
-  paymentPlanId,
+  paymentListId,
 }: DeleteVerificationPlanProps): ReactElement {
   const { t } = useTranslation();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -39,7 +39,7 @@ export function DeleteVerificationPlan({
       RestService.restBusinessAreasProgramsPaymentVerificationsDeleteVerificationPlanCreate(
         {
           businessAreaSlug: businessArea,
-          id: paymentPlanId,
+          id: paymentListId,
           programCode: programCode,
           verificationPlanId: paymentVerificationPlanId,
         },

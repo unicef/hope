@@ -17,7 +17,7 @@ import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { useProgramContext } from '../../../programContext';
 import { DuplicateTargetPopulation } from '../../dialogs/targetPopulation/DuplicateTargetPopulation';
-import { FinalizeTargetPopulationPaymentPlan } from '../../dialogs/targetPopulation/FinalizeTargetPopulationPaymentPlan';
+import { FinalizeTargetPopulationPaymentList } from '../../dialogs/targetPopulation/FinalizeTargetPopulationPaymentList';
 import { showApiErrorMessages } from '@utils/utils';
 
 const IconContainer = styled.span`
@@ -48,7 +48,7 @@ export function LockedTargetPopulationHeaderButtons({
 }: ApprovedTargetPopulationHeaderButtonsPropTypes): ReactElement {
   const { t } = useTranslation();
   const [openDuplicate, setOpenDuplicate] = useState(false);
-  const [openFinalizePaymentPlan, setOpenFinalizePaymentPlan] = useState(false);
+  const [openFinalizePaymentList, setOpenFinalizePaymentList] = useState(false);
   const { showMessage } = useSnackbar();
   const { isActiveProgram } = useProgramContext();
   const { businessArea, programId } = useBaseUrl();
@@ -137,7 +137,7 @@ export function LockedTargetPopulationHeaderButtons({
                 variant="contained"
                 color="primary"
                 disabled={!isActiveProgram}
-                onClick={() => setOpenFinalizePaymentPlan(true)}
+                onClick={() => setOpenFinalizePaymentList(true)}
                 data-cy="button-target-population-send-to-hope"
               >
                 {t('Mark Ready')}
@@ -151,9 +151,9 @@ export function LockedTargetPopulationHeaderButtons({
         setOpen={setOpenDuplicate}
         targetPopulationId={targetPopulation.id}
       />
-      <FinalizeTargetPopulationPaymentPlan
-        open={openFinalizePaymentPlan}
-        setOpen={setOpenFinalizePaymentPlan}
+      <FinalizeTargetPopulationPaymentList
+        open={openFinalizePaymentList}
+        setOpen={setOpenFinalizePaymentList}
         targetPopulationId={targetPopulation.id}
         totalHouseholds={targetPopulation.totalHouseholdsCount}
       />

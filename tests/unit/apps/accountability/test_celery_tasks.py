@@ -10,7 +10,7 @@ from extras.test_utils.factories import (
     HouseholdFactory,
     IndividualFactory,
     PaymentFactory,
-    PaymentPlanFactory,
+    PaymentListFactory,
     ProgramFactory,
     RegistrationDataImportFactory,
     SurveyFactory,
@@ -22,7 +22,7 @@ from hope.apps.accountability.celery_tasks import (
     send_survey_to_users_async_task,
     send_survey_to_users_async_task_action,
 )
-from hope.models import AsyncJob, PaymentPlan, Program, Survey
+from hope.models import AsyncJob, PaymentList, Program, Survey
 
 pytestmark = pytest.mark.django_db
 
@@ -47,9 +47,9 @@ def user() -> Any:
 
 
 @pytest.fixture
-def payment_plan(user: Any, business_area: Any, program: Any) -> Any:
-    return PaymentPlanFactory(
-        status=PaymentPlan.Status.TP_LOCKED,
+def payment_list(user: Any, business_area: Any, program: Any) -> Any:
+    return PaymentListFactory(
+        status=PaymentList.Status.TP_LOCKED,
         created_by=user,
         business_area=business_area,
         program_cycle=program.cycles.first(),
@@ -104,9 +104,9 @@ def household_valid(program: Any, business_area: Any, rdi: Any, hoh_valid: Any) 
 
 
 @pytest.fixture
-def payment_valid(payment_plan: Any, program: Any, business_area: Any, household_valid: Any, hoh_valid: Any) -> Any:
+def payment_valid(payment_list: Any, program: Any, business_area: Any, household_valid: Any, hoh_valid: Any) -> Any:
     return PaymentFactory(
-        parent=payment_plan,
+        parent=payment_list,
         program=program,
         household=household_valid,
         business_area=business_area,
@@ -115,7 +115,7 @@ def payment_valid(payment_plan: Any, program: Any, business_area: Any, household
 
 
 @pytest.fixture
-def survey_manual(program: Any, business_area: Any, user: Any, payment_plan: Any) -> Any:
+def survey_manual(program: Any, business_area: Any, user: Any, payment_list: Any) -> Any:
     return SurveyFactory(
         program=program,
         business_area=business_area,
@@ -123,12 +123,12 @@ def survey_manual(program: Any, business_area: Any, user: Any, payment_plan: Any
         title="Manual survey",
         body="body",
         category=Survey.CATEGORY_MANUAL,
-        payment_plan=payment_plan,
+        payment_list=payment_list,
     )
 
 
 @pytest.fixture
-def survey_sms(program: Any, business_area: Any, user: Any, payment_plan: Any, payment_valid: Any) -> Any:
+def survey_sms(program: Any, business_area: Any, user: Any, payment_list: Any, payment_valid: Any) -> Any:
     srv = SurveyFactory(
         program=program,
         business_area=business_area,
@@ -136,7 +136,7 @@ def survey_sms(program: Any, business_area: Any, user: Any, payment_plan: Any, p
         title="SMS survey",
         body="body",
         category=Survey.CATEGORY_SMS,
-        payment_plan=payment_plan,
+        payment_list=payment_list,
     )
     srv.recipients.set([payment_valid.household])
     return srv
@@ -144,7 +144,7 @@ def survey_sms(program: Any, business_area: Any, user: Any, payment_plan: Any, p
 
 @pytest.fixture
 def survey_rapid_pro_with_flow_id(
-    program: Any, business_area: Any, user: Any, payment_plan: Any, payment_valid: Any
+    program: Any, business_area: Any, user: Any, payment_list: Any, payment_valid: Any
 ) -> Any:
     srv = SurveyFactory(
         program=program,
@@ -154,7 +154,7 @@ def survey_rapid_pro_with_flow_id(
         body="body",
         category=Survey.CATEGORY_RAPID_PRO,
         flow_id="flow-uuid-123",
-        payment_plan=payment_plan,
+        payment_list=payment_list,
         successful_rapid_pro_calls=[],
     )
     srv.recipients.set([payment_valid.household])

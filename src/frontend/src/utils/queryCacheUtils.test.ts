@@ -39,7 +39,7 @@ describe('isStaticReferenceQuery', () => {
     expect(isStaticReferenceQuery(['householdChoices', 'afghanistan'])).toBe(
       true,
     );
-    expect(isStaticReferenceQuery(['choicesPaymentPlanStatusList'])).toBe(true);
+    expect(isStaticReferenceQuery(['choicesPaymentListStatusList'])).toBe(true);
     expect(
       isStaticReferenceQuery([
         'businessAreasDataCollectingTypesChoicesList',
@@ -61,7 +61,7 @@ describe('isStaticReferenceQuery', () => {
       isStaticReferenceQuery(['businessAreasProgramsList', {}, 'afghanistan']),
     ).toBe(false);
     expect(
-      isStaticReferenceQuery(['paymentPlan', 'afghanistan', 'pp-1', 'prog-1']),
+      isStaticReferenceQuery(['paymentList', 'afghanistan', 'pp-1', 'prog-1']),
     ).toBe(false);
     expect(
       isStaticReferenceQuery(['businessAreaProgram', 'afghanistan', 'prog-1']),

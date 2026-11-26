@@ -553,7 +553,7 @@
         },
         {
             "name": "PM SYNC PAYMENT PLAN WITH PG",
-            "value": "PM_SYNC_PAYMENT_PLAN_WITH_PG"
+            "value": "PM_SYNC_PAYMENT_LIST_WITH_PG"
         },
         {
             "name": "PM SYNC PAYMENT WITH PG",

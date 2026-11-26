@@ -10,6 +10,7 @@ from rest_framework.views import APIView
 from hope.api.auth import HOPEAuthentication
 from hope.api.endpoints.base import HOPEAPIView
 from hope.apps.account.actor_snapshot import ActorSnapshot, build_actor_snapshot
+from hope.apps.payment.services.payment_plan_services import PaymentPlanService
 from hope.contrib.api.serializers.vision import (
     PaymentPlanCallbackAckSerializer,
     PaymentPlanCallbackRequestSerializer,
@@ -22,7 +23,7 @@ VISION_RESPONSE_OK = "OK"
 VISION_RESPONSE_KO = "KO"
 VISION_CALLBACK_RECEIVED_MESSAGE = "Callback received"
 VISION_INVALID_CALLBACK_MESSAGE = "Invalid callback payload"
-VISION_PAYMENT_PLAN_NOT_FOUND_MESSAGE = "Payment plan not found"
+VISION_PAYMENT_LIST_NOT_FOUND_MESSAGE = "Payment plan not found"
 VISION_PAYPLAN_ID_MISSING_MESSAGE = "vision_payplanSno is required"
 VISION_FC_NOT_FOUND_MESSAGE = "FC not found"
 VISION_FC_AMBIGUOUS_MESSAGE = "Multiple FC headers found"
@@ -69,18 +70,18 @@ class PaymentPlanCallbackView(HOPEAPIView, APIView):
     @staticmethod
     def _get_payment_plan(payplan_sno: str) -> PaymentPlan:
         return (
-            PaymentPlan.objects.select_for_update()
-            .select_related("business_area", "created_by")
+            PaymentPlan.objects.select_for_update(of=("self",))
+            .select_related("cycle__program__business_area", "created_by")
             .get(unicef_id=payplan_sno)
         )
 
     @staticmethod
     def _release_actor_snapshot(serializer: PaymentPlanCallbackRequestSerializer) -> ActorSnapshot | None:
-        """Return the name and AD job title of the plan creator for the release this callback will trigger.
+        """Return the name and AD job title of the actor of the release this callback will trigger.
 
-        A SUCCESS callback with FC numbers releases the plan and records a FINANCE_RELEASE Approval for its
-        creator. The AD lookup for that record is done here, before `post` locks the Payment Plan row.
-        Any other callback, an unknown plan, or a plan the callback cannot release returns None.
+        A SUCCESS callback with FC numbers releases the plan and records a FINANCE_RELEASE Approval for the
+        Vision release actor. The AD lookup for that record is done here, before `post` locks the Payment Plan
+        row. Any other callback, an unknown plan, or a plan the callback cannot release returns None.
         """
         if (
             serializer.validated_data.get("status") != "SUCCESS"
@@ -89,17 +90,17 @@ class PaymentPlanCallbackView(HOPEAPIView, APIView):
         ):
             return None
         payment_plan = (
-            PaymentPlan.objects.select_related("business_area", "created_by")
-            .filter(unicef_id=serializer.validated_payplan_sno)
-            .first()
+            PaymentPlan.objects.select_related("created_by").filter(unicef_id=serializer.validated_payplan_sno).first()
         )
-        if payment_plan is None or not VisionService.can_recover_with_funds_commitment_headers(payment_plan):
+        if payment_plan is None or not VisionService.can_recover_payment_plan_with_funds_commitment_headers(
+            payment_plan
+        ):
             return None
-        return build_actor_snapshot(payment_plan.created_by)
+        return build_actor_snapshot(PaymentPlanService.vision_release_actor(payment_plan))
 
     @staticmethod
-    def _append_log(payment_plan: Any, payload: dict, response_data: dict) -> None:
-        vision_data = payment_plan.internal_data.setdefault("vision", {})
+    def _append_log(payment_plan: PaymentPlan, payload: dict, response_data: dict) -> None:
+        vision_data = VisionService.vision_data(payment_plan)
         vision_data.setdefault("log", []).append(
             {
                 "timestamp": timezone.now().isoformat(),
@@ -121,7 +122,7 @@ class PaymentPlanCallbackView(HOPEAPIView, APIView):
         except PaymentPlan.DoesNotExist:
             return self._error_response(
                 serializer,
-                message=VISION_PAYMENT_PLAN_NOT_FOUND_MESSAGE,
+                message=VISION_PAYMENT_LIST_NOT_FOUND_MESSAGE,
                 http_status=status.HTTP_404_NOT_FOUND,
             )
 
@@ -138,7 +139,7 @@ class PaymentPlanCallbackView(HOPEAPIView, APIView):
             }
             if (
                 payment_plan.status == PaymentPlan.Status.IN_REVIEW
-                and payment_plan.vision_integration_enabled
+                and payment_plan.vision_managed
                 and payment_plan.vision_status in missing_id_failure_statuses
             ):
                 VisionService.set_status(payment_plan, VisionStatus.CALLBACK_FAILED)

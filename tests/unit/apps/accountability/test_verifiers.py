@@ -11,14 +11,14 @@ def test_message_argument_verifier_raises_when_no_target_provided():
     service = MessageArgumentVerifier({})
     with pytest.raises(ValidationError) as exc_info:
         service.verify()
-    assert "Must provide any one of households, payment_plan or registration_data_import" in str(exc_info.value)
+    assert "Must provide any one of households, payment_list or registration_data_import" in str(exc_info.value)
 
 
 def test_message_argument_verifier_raises_when_multiple_targets_provided():
-    service = MessageArgumentVerifier({"households": "1", "payment_plan": "2"})
+    service = MessageArgumentVerifier({"households": "1", "payment_list": "2"})
     with pytest.raises(ValidationError) as exc_info:
         service.verify()
-    assert "Must provide only one of households, payment_plan or registration_data_import" in str(exc_info.value)
+    assert "Must provide only one of households, payment_list or registration_data_import" in str(exc_info.value)
 
 
 def test_message_argument_verifier_raises_when_full_list_arguments_missing_for_full_list_sampling():

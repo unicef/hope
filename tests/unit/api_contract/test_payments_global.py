@@ -6,7 +6,7 @@ from unit.api_contract._helpers import HopeRecorder
 
 from extras.test_utils.factories.account import RoleAssignmentFactory, RoleFactory, UserFactory
 from extras.test_utils.factories.core import BusinessAreaFactory
-from extras.test_utils.factories.payment import PaymentFactory, PaymentPlanFactory
+from extras.test_utils.factories.payment import PaymentFactory, PaymentListFactory
 from extras.test_utils.factories.program import ProgramFactory
 
 pytestmark = pytest.mark.django_db
@@ -44,7 +44,7 @@ def role_assignment(request, db, superuser, business_area, role):
 @frozenfixture()
 def payment(request, db, business_area, program, superuser):
     cycle = program.cycles.first()
-    plan = PaymentPlanFactory(business_area=business_area, program_cycle=cycle, created_by=superuser)
+    plan = PaymentListFactory(business_area=business_area, program_cycle=cycle, created_by=superuser)
     return PaymentFactory(parent=plan, business_area=business_area, program=program)
 
 

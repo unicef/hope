@@ -19,6 +19,7 @@ import TargetingCriteriaDisplayDisabled, {
   ContentWrapper,
 } from './TargetingCriteriaDisplayDisabled';
 import { VulnerabilityScoreComponent } from './VulnerabilityScoreComponent';
+import { usePaymentPlan } from '@hooks/usePaymentPlan';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 
 const Title = styled.div`
@@ -72,6 +73,9 @@ interface AddFilterTargetingCriteriaDisplayProps {
   rules?;
   helpers?;
   targetPopulation?: TargetPopulationDetail;
+  // The payment plan the TP is (being) assigned to; its FSP limits the
+  // delivery mechanisms.
+  paymentPlanId?: string;
   isEdit?: boolean;
   screenBeneficiary: boolean;
   isSocialDctType: boolean;
@@ -82,6 +86,7 @@ const AddFilterTargetingCriteriaDisplay = ({
   rules,
   helpers,
   targetPopulation,
+  paymentPlanId,
   isEdit,
   screenBeneficiary,
   isSocialDctType,
@@ -91,6 +96,7 @@ const AddFilterTargetingCriteriaDisplay = ({
   const location = useLocation();
   const { selectedProgram } = useProgramContext();
   const { businessArea, isAllPrograms } = useBaseUrl();
+  const { data: paymentPlan } = usePaymentPlan(paymentPlanId);
 
   const { data: allCoreFieldsAttributesData, isLoading: loading } = useQuery({
     queryKey: restQueryKey(
@@ -159,7 +165,6 @@ const AddFilterTargetingCriteriaDisplay = ({
       individualIds: values.individualIds,
       alternativeCollectorsIds: values.alternativeCollectorsIds,
       deliveryMechanism: values.deliveryMechanism,
-      fsp: values.fsp,
     };
     if (criteriaIndex !== null) {
       helpers.replace(criteriaIndex, criteria);
@@ -232,6 +237,7 @@ const AddFilterTargetingCriteriaDisplay = ({
           individualFiltersAvailable={individualFiltersAvailable}
           householdFiltersAvailable={householdFiltersAvailable}
           criteriaIndex={criteriaIndex}
+          paymentPlan={paymentPlan}
         />
         <ContentWrapper>
           <Box
@@ -265,7 +271,9 @@ const AddFilterTargetingCriteriaDisplay = ({
                         }
                         deliveryMechanism={targetPopulation?.deliveryMechanism}
                         financialServiceProvider={
-                          targetPopulation?.financialServiceProvider
+                          paymentPlan
+                            ? paymentPlan.financialServiceProvider
+                            : targetPopulation?.financialServiceProvider
                         }
                         criteria={criteria}
                         editFunction={() => editCriteria(criteria, index)}

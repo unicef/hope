@@ -36,9 +36,7 @@ export const FollowUpInstructionTable = (): ReactElement => {
       refetchInterval: (query) => {
         const results = query.state.data?.results ?? [];
         const hasPendingAction = results.some(
-          (r) =>
-            r.backgroundActionStatus !== null &&
-            r.backgroundActionStatus !== '',
+          (r) => r.backgroundActionStatus !== null,
         );
         return hasPendingAction ? 3000 : false;
       },

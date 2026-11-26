@@ -9,7 +9,7 @@ from e2e.new_selenium.accountability.conftest import (
 )
 from extras.test_utils.factories import SurveyFactory
 from extras.test_utils.selenium import HopeTestBrowser
-from hope.models import Household, PaymentPlan, Program, Survey, User
+from hope.models import Household, PaymentList, Program, Survey, User
 
 pytestmark = pytest.mark.django_db()
 
@@ -46,13 +46,13 @@ SURVEY_TITLE = "Test survey"
 
 
 @pytest.fixture
-def survey(program: Program, target_population: PaymentPlan, author: User, household: Household) -> Survey:
+def survey(program: Program, target_population: PaymentList, author: User, household: Household) -> Survey:
     survey = SurveyFactory(
         title=SURVEY_TITLE,
         category=Survey.CATEGORY_MANUAL,
         business_area=program.business_area,
         program=program,
-        payment_plan=target_population,
+        payment_list=target_population,
         created_by=author,
         number_of_recipients=1,
     )

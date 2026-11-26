@@ -18,12 +18,12 @@ import { responsiveValue } from 'src/responsive';
 
 export interface ActivateVerificationPlanProps {
   paymentVerificationPlanId: string;
-  paymentPlanId: string;
+  paymentListId: string;
 }
 
 export function ActivateVerificationPlan({
   paymentVerificationPlanId,
-  paymentPlanId,
+  paymentListId,
 }: ActivateVerificationPlanProps): ReactElement {
   const { t } = useTranslation();
   const [activateDialogOpen, setActivateDialogOpen] = useState(false);
@@ -37,7 +37,7 @@ export function ActivateVerificationPlan({
       RestService.restBusinessAreasProgramsPaymentVerificationsActivateVerificationPlanCreate(
         {
           businessAreaSlug: businessArea,
-          id: paymentPlanId,
+          id: paymentListId,
           programCode: programCode,
           verificationPlanId: paymentVerificationPlanId,
         },
@@ -96,7 +96,7 @@ export function ActivateVerificationPlan({
               }}
             >
               {t(
-                'Are you sure you want to activate the Verification Plan for this Payment Plan?',
+                'Are you sure you want to activate the Verification Plan for this Payment List?',
               )}
             </Box>
           </DialogContainer>

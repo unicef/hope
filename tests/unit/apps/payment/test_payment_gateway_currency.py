@@ -8,14 +8,14 @@ from hope.apps.payment.services.payment_gateway import PaymentInstructionFromSpl
 @pytest.fixture
 def build_split_mock():
     def _build(currency):
-        payment_plan = MagicMock()
-        payment_plan.currency = currency
-        payment_plan.business_area.code = "BA01"
-        payment_plan.business_area.payment_countries.count.return_value = 0
-        payment_plan.business_area.payment_countries.first.return_value = None
+        payment_list = MagicMock()
+        payment_list.currency = currency
+        payment_list.business_area.code = "BA01"
+        payment_list.business_area.payment_countries.count.return_value = 0
+        payment_list.business_area.payment_countries.first.return_value = None
         split = MagicMock()
-        split.payment_plan = payment_plan
-        split.payment_plan.delivery_mechanism.code = "cash"
+        split.payment_list = payment_list
+        split.payment_list.delivery_mechanism.code = "cash"
         return split
 
     return _build

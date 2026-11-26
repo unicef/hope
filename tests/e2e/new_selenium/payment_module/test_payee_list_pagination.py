@@ -1,7 +1,7 @@
 import pytest
 
 from extras.test_utils.selenium import HopeTestBrowser
-from hope.models import PaymentPlan
+from hope.models import PaymentList
 
 pytestmark = pytest.mark.django_db()
 
@@ -9,19 +9,19 @@ pytestmark = pytest.mark.django_db()
 # "Hotfix // Payments ordering by created_at". The Payment Plan Payee List rendered blank
 
 
-def _open_payment_plan(browser: HopeTestBrowser, payment_plan: PaymentPlan) -> None:
-    program = payment_plan.program_cycle.program
-    url = f"/{payment_plan.business_area.slug}/programs/{program.code}/payment-module/payment-plans/{payment_plan.id}"
+def _open_payment_list(browser: HopeTestBrowser, payment_list: PaymentList) -> None:
+    program = payment_list.program_cycle.program
+    url = f"/{payment_list.business_area.slug}/programs/{program.code}/payment-module/payment-lists/{payment_list.id}"
     browser.open(url)
     browser.wait_for_element_visible('div[data-cy="status-container"]')
 
 
 def test_payee_list_second_page_is_not_blank(
     login: HopeTestBrowser,
-    payment_plan_for_pagination: tuple[PaymentPlan, str, str],
+    payment_list_for_pagination: tuple[PaymentList, str, str],
 ) -> None:
-    payment_plan, page_one_unicef_id, page_two_unicef_id = payment_plan_for_pagination
-    _open_payment_plan(login, payment_plan)
+    payment_list, page_one_unicef_id, page_two_unicef_id = payment_list_for_pagination
+    _open_payment_list(login, payment_list)
 
     # Payee List loaded; the newest payment is shown on page 1.
     login.wait_for_text("Payee List", '[data-cy="table-title"]')

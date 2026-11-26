@@ -9,9 +9,10 @@ from extras.test_utils.factories import (
     DocumentTypeFactory,
     HouseholdFactory,
     IndividualFactory,
-    PaymentPlanGroupFactory,
+    PaymentPlanFactory,
     PendingHouseholdFactory,
     PendingIndividualFactory,
+    ProgramCycleFactory,
     ProgramFactory,
     RegistrationDataImportFactory,
     XlsxUpdateFileFactory,
@@ -26,7 +27,7 @@ from hope.apps.household.forms import (
     WithdrawHouseholdsForm,
     get_households_from_text,
 )
-from hope.models import BusinessArea, Household, Individual, PendingDocument, Program
+from hope.models import BusinessArea, Household, Individual, PaymentList, PaymentPlan, PendingDocument, Program
 
 pytestmark = pytest.mark.django_db
 
@@ -156,7 +157,7 @@ class TestCreateTargetPopulationTextForm:
 
     def test_clean_criteria_returns_households(self, program, household) -> None:
         cycle = program.cycles.first()
-        payment_plan_group = PaymentPlanGroupFactory(cycle=cycle)
+        payment_plan = PaymentPlanFactory(cycle=cycle)
         form = CreateTargetPopulationTextForm(
             data={
                 "action": "create",
@@ -165,7 +166,7 @@ class TestCreateTargetPopulationTextForm:
                 "separator": ",",
                 "criteria": household.unicef_id,
                 "program_cycle": cycle.pk,
-                "payment_plan_group": payment_plan_group.pk,
+                "payment_plan": payment_plan.pk,
             },
             program=program,
         )
@@ -186,6 +187,62 @@ class TestCreateTargetPopulationTextForm:
 
         assert not form.is_valid()
         assert "criteria" in form.errors
+
+
+@pytest.fixture(
+    params=(
+        PaymentList.PlanType.TOP_UP,
+        PaymentList.PlanType.FOLLOW_UP,
+        PaymentList.PlanType.TOP_UP_AMENDMENT,
+    ),
+    ids=("top-up", "follow-up", "top-up-amendment"),
+)
+def target_population_plan_choices(request, program):
+    cycle = program.cycles.first()
+    regular = PaymentPlanFactory(cycle=cycle)
+    locked = PaymentPlanFactory(cycle=cycle, status=PaymentPlan.Status.LOCKED)
+    linked = PaymentPlanFactory(cycle=cycle, plan_type=request.param, source_payment_plan=regular)
+    return regular, locked, linked
+
+
+def test_target_population_form_offers_only_open_regular_plans(
+    program, target_population_plan_choices, django_assert_num_queries
+) -> None:
+    regular, locked, linked = target_population_plan_choices
+    form = CreateTargetPopulationTextForm(program=program)
+
+    with django_assert_num_queries(1):
+        choices = list(form.fields["payment_plan"].queryset)
+
+    assert regular in choices
+    assert locked not in choices
+    assert linked not in choices
+
+
+@pytest.fixture
+def target_population_form_with_mismatched_cycle(program, household):
+    source_cycle = program.cycles.first()
+    payment_plan = PaymentPlanFactory(cycle=source_cycle)
+    other_cycle = ProgramCycleFactory(program=program)
+    return CreateTargetPopulationTextForm(
+        data={
+            "action": "create",
+            "name": "TP",
+            "target_field": "unicef_id",
+            "separator": ",",
+            "criteria": household.unicef_id,
+            "program_cycle": other_cycle.pk,
+            "payment_plan": payment_plan.pk,
+        },
+        program=program,
+    )
+
+
+def test_target_population_form_rejects_plan_from_another_cycle(target_population_form_with_mismatched_cycle) -> None:
+    form = target_population_form_with_mismatched_cycle
+
+    assert not form.is_valid()
+    assert form.errors["payment_plan"] == ["Payment Plan must belong to the selected Programme Cycle."]
 
 
 class TestWithdrawHouseholdsForm:

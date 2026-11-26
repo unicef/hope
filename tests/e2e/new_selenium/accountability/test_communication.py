@@ -9,7 +9,7 @@ from e2e.new_selenium.accountability.conftest import (
 )
 from extras.test_utils.factories import CommunicationMessageFactory
 from extras.test_utils.selenium import HopeTestBrowser
-from hope.models import Message, PaymentPlan, Program, User
+from hope.models import Message, PaymentList, Program, User
 
 pytestmark = pytest.mark.django_db()
 
@@ -45,13 +45,13 @@ MESSAGE_BODY = "Greetings, we have sent you USD 100 in your registered account o
 
 
 @pytest.fixture
-def message(program: Program, target_population: PaymentPlan, author: User) -> Message:
+def message(program: Program, target_population: PaymentList, author: User) -> Message:
     return CommunicationMessageFactory(
         title=MESSAGE_TITLE,
         body=MESSAGE_BODY,
         business_area=program.business_area,
         program=program,
-        payment_plan=target_population,
+        payment_list=target_population,
         created_by=author,
     )
 

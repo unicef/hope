@@ -116,13 +116,13 @@ function GrievancesDetails({
     return <>-</>;
   };
 
-  const renderPaymentPlanUrl = (): ReactElement => {
+  const renderPaymentListUrl = (): ReactElement => {
     const parent = ticket?.paymentRecord?.parent;
 
     if (parent) {
       return (
         <ContentLink
-          href={`/${businessArea}/programs/${ticket.programs?.[0]?.code}/payment-module/payment-plans/${parent.id}`}
+          href={`/${businessArea}/programs/${ticket.programs?.[0]?.code}/payment-module/payment-lists/${parent.id}`}
         >
           {parent.unicefId}
         </ContentLink>
@@ -131,11 +131,11 @@ function GrievancesDetails({
     return <>-</>;
   };
 
-  const renderPaymentPlanVerificationUrl = (): ReactElement => {
+  const renderPaymentListVerificationUrl = (): ReactElement => {
     const parent = ticket?.paymentRecord?.parent;
 
     if (parent) {
-      const url = `/${businessArea}/programs/${ticket.programs?.[0]?.code}/payment-verification/payment-plan/${parent.id}`;
+      const url = `/${businessArea}/programs/${ticket.programs?.[0]?.code}/payment-verification/payment-list/${parent.id}`;
       return <ContentLink href={url}>{parent.unicefId}</ContentLink>;
     }
     return <>-</>;
@@ -299,13 +299,13 @@ function GrievancesDetails({
                 size: 'quarter',
               },
               {
-                label: t('Payment Plan'),
-                value: <span>{renderPaymentPlanUrl()}</span>,
+                label: t('Payment List'),
+                value: <span>{renderPaymentListUrl()}</span>,
                 size: 'quarter',
               },
               {
-                label: t('Payment Plan Verification'),
-                value: <span>{renderPaymentPlanVerificationUrl()}</span>,
+                label: t('Payment List Verification'),
+                value: <span>{renderPaymentListVerificationUrl()}</span>,
                 size: 'quarter',
               },
               {

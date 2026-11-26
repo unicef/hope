@@ -4,7 +4,7 @@ from e2e.page_object.base_components import BaseComponents
 
 
 class ProgramCycleDetailsPage(BaseComponents):
-    button_create_payment_plan = 'a[data-cy="button-create-payment-plan"]'
+    button_create_payment_list = 'a[data-cy="button-create-payment-list"]'
     button_finish_programme_cycle = 'button[data-cy="button-finish-programme-cycle"]'
     button_reactivate_programme_cycle = 'button[data-cy="button-reactivate-programme-cycle"]'
     status_container = 'div[data-cy="status-container"]'
@@ -23,8 +23,8 @@ class ProgramCycleDetailsPage(BaseComponents):
     table_row = 'tr[data-cy="table-row"]'
     table_pagination = 'div[data-cy="table-pagination"]'
 
-    def get_button_create_payment_plan(self) -> WebElement:
-        return self.wait_for(self.button_create_payment_plan)
+    def get_button_create_payment_list(self) -> WebElement:
+        return self.wait_for(self.button_create_payment_list)
 
     def get_button_finish_programme_cycle(self) -> WebElement:
         return self.wait_for(self.button_finish_programme_cycle)

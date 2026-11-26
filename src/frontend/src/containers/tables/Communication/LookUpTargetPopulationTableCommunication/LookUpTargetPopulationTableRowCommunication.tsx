@@ -6,8 +6,8 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { Radio } from '@mui/material';
 import TableCell from '@mui/material/TableCell';
 import {
-  paymentPlanStatusMapping,
-  paymentPlanStatusToColor,
+  paymentListStatusMapping,
+  paymentListStatusToColor,
 } from '@utils/utils';
 import type { ReactElement } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -69,8 +69,8 @@ export function LookUpTargetPopulationTableRowCommunication({
       <TableCell align="left">
         <StatusBox
           status={targetPopulation.status}
-          statusToColor={paymentPlanStatusToColor}
-          statusNameMapping={paymentPlanStatusMapping}
+          statusToColor={paymentListStatusToColor}
+          statusNameMapping={paymentListStatusMapping}
         />
       </TableCell>
       <TableCell align="left">{'-'}</TableCell>

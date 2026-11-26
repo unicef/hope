@@ -17,7 +17,7 @@ from extras.test_utils.factories import (
     FileTempFactory,
     HouseholdFactory,
     PaymentFactory,
-    PaymentPlanFactory,
+    PaymentListFactory,
     PaymentVerificationFactory,
     PaymentVerificationPlanFactory,
     PaymentVerificationSummaryFactory,
@@ -55,16 +55,16 @@ def rapidpro_verification_setup(business_area: Any, user: Any, program: Any) -> 
     payment_record_amount = 2
 
     cycle = program.cycles.first()
-    payment_plan = PaymentPlanFactory(
+    payment_list = PaymentListFactory(
         program_cycle=cycle,
         business_area=business_area,
         created_by=user,
     )
-    PaymentVerificationSummaryFactory(payment_plan=payment_plan)
+    PaymentVerificationSummaryFactory(payment_list=payment_list)
     cash_plan_payment_verification = PaymentVerificationPlanFactory(
         status=PaymentVerificationPlan.STATUS_PENDING,
         verification_channel=PaymentVerificationPlan.VERIFICATION_CHANNEL_RAPIDPRO,
-        payment_plan=payment_plan,
+        payment_list=payment_list,
     )
     individuals = []
     version_key = f":1:{business_area.slug}:1:{program.code}:registration_data_import_list"
@@ -87,7 +87,7 @@ def rapidpro_verification_setup(business_area: Any, user: Any, program: Any) -> 
         individuals.append(head)
 
         payment = PaymentFactory(
-            parent=payment_plan,
+            parent=payment_list,
             household=household,
             head_of_household=head,
             collector=head,
@@ -104,16 +104,16 @@ def rapidpro_verification_setup(business_area: Any, user: Any, program: Any) -> 
     other_program = ProgramFactory(business_area=business_area)
     other_program.admin_areas.set([AreaFactory(), AreaFactory(), AreaFactory()])
     other_cycle = other_program.cycles.first()
-    other_payment_plan = PaymentPlanFactory(
+    other_payment_list = PaymentListFactory(
         program_cycle=other_cycle,
         business_area=business_area,
         created_by=user,
     )
-    PaymentVerificationSummaryFactory(payment_plan=other_payment_plan)
-    other_payment_plan_payment_verification = PaymentVerificationPlanFactory(
+    PaymentVerificationSummaryFactory(payment_list=other_payment_list)
+    other_payment_list_payment_verification = PaymentVerificationPlanFactory(
         status=PaymentVerificationPlan.STATUS_PENDING,
         verification_channel=PaymentVerificationPlan.VERIFICATION_CHANNEL_RAPIDPRO,
-        payment_plan=other_payment_plan,
+        payment_list=other_payment_list,
     )
     other_individuals = []
     for _ in range(payment_record_amount):
@@ -131,7 +131,7 @@ def rapidpro_verification_setup(business_area: Any, user: Any, program: Any) -> 
         other_individuals.append(other_household.head_of_household)
 
         other_payment_record = PaymentFactory(
-            parent=other_payment_plan,
+            parent=other_payment_list,
             household=other_household,
             head_of_household=other_household.head_of_household,
             collector=other_household.head_of_household,
@@ -139,7 +139,7 @@ def rapidpro_verification_setup(business_area: Any, user: Any, program: Any) -> 
         )
 
         PaymentVerificationFactory(
-            payment_verification_plan=other_payment_plan_payment_verification,
+            payment_verification_plan=other_payment_list_payment_verification,
             payment=other_payment_record,
             status=PaymentVerification.STATUS_PENDING,
         )
@@ -147,57 +147,57 @@ def rapidpro_verification_setup(business_area: Any, user: Any, program: Any) -> 
 
     return {
         "payment_record_amount": payment_record_amount,
-        "payment_plan": payment_plan,
-        "verification": payment_plan.payment_verification_plans.first(),
+        "payment_list": payment_list,
+        "verification": payment_list.payment_verification_plans.first(),
         "individuals": individuals,
-        "other_payment_plan": other_payment_plan,
-        "other_verification": other_payment_plan.payment_verification_plans.first(),
+        "other_payment_list": other_payment_list,
+        "other_verification": other_payment_list.payment_verification_plans.first(),
         "other_individuals": other_individuals,
     }
 
 
 @pytest.fixture
 def active_xlsx_verification_plan(business_area: Any, user: Any, program: Any) -> Any:
-    payment_plan = PaymentPlanFactory(
+    payment_list = PaymentListFactory(
         program_cycle=program.cycles.first(),
         business_area=business_area,
         created_by=user,
     )
-    PaymentVerificationSummaryFactory(payment_plan=payment_plan)
+    PaymentVerificationSummaryFactory(payment_list=payment_list)
     return PaymentVerificationPlanFactory(
         status=PaymentVerificationPlan.STATUS_ACTIVE,
         verification_channel=PaymentVerificationPlan.VERIFICATION_CHANNEL_XLSX,
-        payment_plan=payment_plan,
+        payment_list=payment_list,
     )
 
 
 @pytest.fixture
 def pending_xlsx_verification_plan(business_area: Any, user: Any, program: Any) -> Any:
-    payment_plan = PaymentPlanFactory(
+    payment_list = PaymentListFactory(
         program_cycle=program.cycles.first(),
         business_area=business_area,
         created_by=user,
     )
-    PaymentVerificationSummaryFactory(payment_plan=payment_plan)
+    PaymentVerificationSummaryFactory(payment_list=payment_list)
     return PaymentVerificationPlanFactory(
         status=PaymentVerificationPlan.STATUS_PENDING,
         verification_channel=PaymentVerificationPlan.VERIFICATION_CHANNEL_XLSX,
-        payment_plan=payment_plan,
+        payment_list=payment_list,
     )
 
 
 @pytest.fixture
 def active_rapidpro_verification_plan(business_area: Any, user: Any, program: Any) -> Any:
-    payment_plan = PaymentPlanFactory(
+    payment_list = PaymentListFactory(
         program_cycle=program.cycles.first(),
         business_area=business_area,
         created_by=user,
     )
-    PaymentVerificationSummaryFactory(payment_plan=payment_plan)
+    PaymentVerificationSummaryFactory(payment_list=payment_list)
     return PaymentVerificationPlanFactory(
         status=PaymentVerificationPlan.STATUS_ACTIVE,
         verification_channel=PaymentVerificationPlan.VERIFICATION_CHANNEL_RAPIDPRO,
-        payment_plan=payment_plan,
+        payment_list=payment_list,
     )
 
 
@@ -407,15 +407,15 @@ def test_activate_rapidpro_stores_flat_uuid_list(
 def test_does_payment_record_have_right_hoh_phone_number(
     rapidpro_verification_setup: dict[str, Any],
 ) -> None:
-    payment_plan = rapidpro_verification_setup["payment_plan"]
+    payment_list = rapidpro_verification_setup["payment_list"]
     individuals = rapidpro_verification_setup["individuals"]
 
     household = HouseholdFactory(
-        program=payment_plan.program_cycle.program,
-        business_area=payment_plan.business_area,
+        program=payment_list.program_cycle.program,
+        business_area=payment_list.business_area,
     )
     payment_without_hoh = PaymentFactory(
-        parent=payment_plan,
+        parent=payment_list,
         household=household,
         head_of_household=None,
         collector=household.head_of_household,
@@ -427,10 +427,10 @@ def test_does_payment_record_have_right_hoh_phone_number(
     hoh = individuals[0]
     assert hoh.phone_no_valid is True
     payment_with_hoh_phone_no_valid = PaymentFactory(
-        parent=payment_plan,
+        parent=payment_list,
         household=HouseholdFactory(
-            program=payment_plan.program_cycle.program,
-            business_area=payment_plan.business_area,
+            program=payment_list.program_cycle.program,
+            business_area=payment_list.business_area,
         ),
         head_of_household=hoh,
         collector=hoh,
@@ -550,16 +550,16 @@ def test_export_xlsx_validation_if_no_records(
     user: Any,
     program: Any,
 ) -> None:
-    payment_plan = PaymentPlanFactory(
+    payment_list = PaymentListFactory(
         program_cycle=program.cycles.first(),
         business_area=business_area,
         created_by=user,
     )
-    PaymentVerificationSummaryFactory(payment_plan=payment_plan)
+    PaymentVerificationSummaryFactory(payment_list=payment_list)
     pvp = PaymentVerificationPlanFactory(
         status=PaymentVerificationPlan.STATUS_ACTIVE,
         verification_channel=PaymentVerificationPlan.VERIFICATION_CHANNEL_XLSX,
-        payment_plan=payment_plan,
+        payment_list=payment_list,
     )
     assert pvp.payment_record_verifications.count() == 0
     service = VerificationPlanStatusChangeServices(pvp)

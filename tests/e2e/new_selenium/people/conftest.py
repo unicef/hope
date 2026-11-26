@@ -8,7 +8,7 @@ from extras.test_utils.factories import (
     HouseholdFactory,
     IndividualFactory,
     PaymentFactory,
-    PaymentPlanFactory,
+    PaymentListFactory,
     ProgramFactory,
     RegistrationDataImportFactory,
 )
@@ -82,7 +82,7 @@ def payment(person: Individual, program: Program) -> Payment:
     person.household.total_cash_received_usd = 21.36
     person.household.save()
     return PaymentFactory(
-        parent=PaymentPlanFactory(
+        parent=PaymentListFactory(
             name="TEST", program_cycle=program.cycles.first(), business_area=program.business_area
         ),
         household=person.household,

@@ -24,7 +24,7 @@ if TYPE_CHECKING:
 @admin.register(PaymentVerificationPlan)
 class PaymentVerificationPlanAdmin(ViewOnUiMixin, LinkedObjectsMixin, HOPEModelAdminBase):
     list_display = (
-        "payment_plan",
+        "payment_list",
         "status",
         "verification_channel",
         "sampling",
@@ -40,9 +40,9 @@ class PaymentVerificationPlanAdmin(ViewOnUiMixin, LinkedObjectsMixin, HOPEModelA
         "error",
     )
     list_filter = (
-        ("payment_plan__program_cycle__program__business_area", AutoCompleteFilter),
-        ("payment_plan__program_cycle__program", AutoCompleteFilter),
-        ("payment_plan", AutoCompleteFilter),
+        ("payment_list__program_cycle__program__business_area", AutoCompleteFilter),
+        ("payment_list__program_cycle__program", AutoCompleteFilter),
+        ("payment_list", AutoCompleteFilter),
         ("status", ChoicesFieldComboFilter),
         ("verification_channel", ChoicesFieldComboFilter),
         "sampling",
@@ -61,12 +61,12 @@ class PaymentVerificationPlanAdmin(ViewOnUiMixin, LinkedObjectsMixin, HOPEModelA
         "xlsx_file_imported",
         "error",
     )
-    search_fields = ("payment_plan__name",)
+    search_fields = ("payment_list__name",)
 
     def frontend_url(self, obj: PaymentVerificationPlan) -> str | None:
         program = obj.get_program
         return (
-            f"/{obj.business_area.slug}/programs/{program.code}/payment-verification/payment-plan/{obj.payment_plan.id}"
+            f"/{obj.business_area.slug}/programs/{program.code}/payment-verification/payment-list/{obj.payment_list.id}"
         )
 
     @button(permission="payment.view_paymentverification")

@@ -22,12 +22,12 @@ const StyledButton = styled(Button)`
 
 export interface ImportXlsxProps {
   paymentVerificationPlanId: string;
-  paymentPlanId: string;
+  paymentListId: string;
 }
 
 export const ImportXlsx = ({
   paymentVerificationPlanId,
-  paymentPlanId,
+  paymentListId,
 }: ImportXlsxProps): ReactElement => {
   const [xlsxError, setXlsxError] = useState<string | null>(null);
   const { showMessage } = useSnackbar();
@@ -42,7 +42,7 @@ export const ImportXlsx = ({
       RestService.restBusinessAreasProgramsPaymentVerificationsImportXlsxCreate(
         {
           businessAreaSlug: businessArea,
-          id: paymentPlanId,
+          id: paymentListId,
           programCode: programCode,
           verificationPlanId: paymentVerificationPlanId,
           formData: data,

@@ -1,21 +1,21 @@
 from decimal import Decimal
 from unittest.mock import MagicMock
 
-from hope.apps.payment.xlsx.xlsx_payment_plan_delivery_import_service import (
-    XlsxPaymentPlanDeliveryImportService,
+from hope.apps.payment.xlsx.xlsx_payment_list_delivery_import_service import (
+    XlsxPaymentListDeliveryImportService,
 )
-from hope.models import Payment, PaymentPlan
+from hope.models import Payment, PaymentList
 
 
-def _build_service(payments_dict: dict) -> XlsxPaymentPlanDeliveryImportService:
-    svc = XlsxPaymentPlanDeliveryImportService.__new__(XlsxPaymentPlanDeliveryImportService)
+def _build_service(payments_dict: dict) -> XlsxPaymentListDeliveryImportService:
+    svc = XlsxPaymentListDeliveryImportService.__new__(XlsxPaymentListDeliveryImportService)
     svc.errors = []
     svc.sheetname = "TestSheet"
     svc.xlsx_headers = ["payment_id", "delivered_quantity"]
     svc.payments_dict = payments_dict
     svc.override = False
     svc.null_delivery_policy = "reset"
-    svc.payment_plan = MagicMock(status=PaymentPlan.Status.ACCEPTED, Status=PaymentPlan.Status)
+    svc.payment_list = MagicMock(status=PaymentList.Status.ACCEPTED, Status=PaymentList.Status)
     return svc
 
 

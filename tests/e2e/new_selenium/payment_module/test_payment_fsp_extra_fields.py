@@ -12,12 +12,12 @@ from extras.test_utils.factories import (
     FspXlsxTemplatePerDeliveryMechanismFactory,
     PaymentFactory,
     PaymentHouseholdSnapshotFactory,
+    PaymentListFactory,
     PaymentPlanFactory,
-    PaymentPlanGroupFactory,
 )
 from extras.test_utils.factories.program import ProgramCycleFactory, ProgramFactory
 from extras.test_utils.selenium import HopeTestBrowser
-from hope.models import BusinessArea, FinancialServiceProvider, Payment, PaymentPlan, Program
+from hope.models import BusinessArea, FinancialServiceProvider, Payment, PaymentList, PaymentPlan, Program
 
 pytestmark = pytest.mark.django_db()
 
@@ -27,14 +27,18 @@ RECONCILIATION_NOTE = "RECONCILIATION-E2E"
 
 
 @pytest.fixture
-def fsp_extra_fields_payment_plan(business_area: BusinessArea) -> tuple[PaymentPlan, Payment]:
+def fsp_extra_fields_payment_list(business_area: BusinessArea) -> tuple[PaymentList, Payment]:
     program = ProgramFactory(
         name="FSP Extra Fields E2E Program",
         status=Program.ACTIVE,
         business_area=business_area,
     )
     program_cycle = ProgramCycleFactory(program=program)
-    payment_plan_group = PaymentPlanGroupFactory(cycle=program_cycle, name="FSP Extra Fields E2E Group")
+    payment_plan = PaymentPlanFactory(
+        cycle=program_cycle,
+        name="FSP Extra Fields E2E Group",
+        status=PaymentPlan.Status.LOCKED,
+    )
     delivery_mechanism = DeliveryMechanismFactory(
         code="fsp-extra-fields-e2e",
         name="FSP Extra Fields E2E",
@@ -58,13 +62,13 @@ def fsp_extra_fields_payment_plan(business_area: BusinessArea) -> tuple[PaymentP
         xlsx_template=xlsx_template,
     )
     currency = CurrencyFactory(code="USD", name="United States Dollar")
-    payment_plan = PaymentPlanFactory(
+    payment_list = PaymentListFactory(
         name="FSP Extra Fields E2E Payment Plan",
         program_cycle=program_cycle,
-        payment_plan_group=payment_plan_group,
+        payment_plan=payment_plan,
         business_area=business_area,
-        status=PaymentPlan.Status.LOCKED_FSP,
-        plan_type=PaymentPlan.PlanType.REGULAR,
+        status=PaymentList.Status.LOCKED_FSP,
+        plan_type=PaymentList.PlanType.REGULAR,
         financial_service_provider=fsp,
         delivery_mechanism=delivery_mechanism,
         currency=currency,
@@ -72,7 +76,7 @@ def fsp_extra_fields_payment_plan(business_area: BusinessArea) -> tuple[PaymentP
         total_entitled_quantity_usd=Decimal("125.00"),
     )
     payment = PaymentFactory(
-        parent=payment_plan,
+        parent=payment_list,
         program=program,
         unicef_id="PAYMENT-FSP-EXTRA-FIELDS-E2E",
         status=Payment.STATUS_PENDING,
@@ -86,7 +90,7 @@ def fsp_extra_fields_payment_plan(business_area: BusinessArea) -> tuple[PaymentP
     )
     payment.save(update_fields=["unicef_id"])
     PaymentHouseholdSnapshotFactory(payment=payment, snapshot_data={})
-    return payment_plan, payment
+    return payment_list, payment
 
 
 def _confirm_workflow_action(browser: HopeTestBrowser, data_cy: str) -> None:
@@ -140,15 +144,16 @@ def _assert_export_and_prepare_reconciliation(
 def test_payment_fsp_extra_fields_full_xlsx_flow(
     login: HopeTestBrowser,
     business_area: BusinessArea,
-    fsp_extra_fields_payment_plan: tuple[PaymentPlan, Payment],
+    fsp_extra_fields_payment_list: tuple[PaymentList, Payment],
     tmp_path: Path,
 ) -> None:
-    payment_plan, payment = fsp_extra_fields_payment_plan
-    program = payment_plan.program
-    payment_plan_path = f"/{business_area.slug}/programs/{program.code}/payment-module/payment-plans/{payment_plan.id}"
-    template_filename = f"payment_plan_{payment_plan.unicef_id}_fsp_extra_fields.xlsx"
+    payment_list, payment = fsp_extra_fields_payment_list
+    program = payment_list.program
+    group = payment_list.payment_plan
+    group_path = f"/{business_area.slug}/programs/{program.code}/payment-module/payment-plans/{group.id}"
+    template_filename = f"payment_plan_{group.unicef_id}_fsp_extra_fields.xlsx"
     login.delete_downloaded_file_if_present(template_filename, browser=True)
-    login.open(payment_plan_path)
+    login.open(group_path)
 
     login.wait_for_element_clickable('[data-cy="button-fsp-extra-fields-template"]').click()
     login.assert_downloaded_file(template_filename, browser=True)
@@ -169,27 +174,24 @@ def test_payment_fsp_extra_fields_full_xlsx_flow(
         "fsp_routing_code": FSP_ROUTING_CODE,
     }
 
-    login.open(payment_plan_path)
-    login.wait_for_element_clickable('[data-cy="button-send-for-approval"]').click()
-    login.wait_for_text("IN APPROVAL")
-    _confirm_workflow_action(login, "button-approve")
-    login.wait_for_text("IN AUTHORIZATION")
-    _confirm_workflow_action(login, "button-authorize")
-    login.wait_for_text("IN REVIEW")
-    _confirm_workflow_action(login, "button-mark-as-released")
-    login.wait_for_text("ACCEPTED")
-
-    group = payment_plan.payment_plan_group
-    group_path = f"/{business_area.slug}/programs/{program.code}/payment-module/groups/{group.id}"
-    export_filename = f"payment_plan_group_{group.unicef_id}_payment_list_batch_1.xlsx"
-    login.delete_downloaded_file_if_present(export_filename, browser=True)
     login.open(group_path)
+    login.wait_for_element_clickable('[data-cy="button-send-for-approval"]').click()
+    login.wait_for_text("IN APPROVAL", '[data-cy="group-status"]')
+    _confirm_workflow_action(login, "button-approve")
+    login.wait_for_text("IN AUTHORIZATION", '[data-cy="group-status"]')
+    _confirm_workflow_action(login, "button-authorize")
+    login.wait_for_text("IN REVIEW", '[data-cy="group-status"]')
+    _confirm_workflow_action(login, "button-mark-as-released")
+    login.wait_for_text("ACCEPTED", '[data-cy="group-status"]')
+
+    export_filename = f"payment_plan_{group.unicef_id}_payment_list.xlsx"
+    login.delete_downloaded_file_if_present(export_filename, browser=True)
     login.wait_for_element_clickable('[data-cy="button-delivery-export-xlsx-group"]').click()
     login.wait_for_element_visible('[data-cy="dialog-delivery-export-xlsx-group"]')
     login.wait_for_element_clickable('[data-cy="button-delivery-export-xlsx-group-submit"]').click()
     login.wait_for_text("Export started")
     login.open(group_path)
-    login.wait_for_element_clickable('[data-cy="batch-download-link-1"]').click()
+    login.wait_for_element_clickable('[data-cy="button-download-group-xlsx"]').click()
 
     login.assert_downloaded_file(export_filename, browser=True)
     export_path = login.get_path_of_downloaded_file(export_filename, browser=True)
@@ -206,8 +208,8 @@ def test_payment_fsp_extra_fields_full_xlsx_flow(
     login.wait_for_text("Delivery reconciliation import started")
 
     payment.refresh_from_db()
-    payment_plan.refresh_from_db()
-    assert payment_plan.status == PaymentPlan.Status.FINISHED
+    payment_list.refresh_from_db()
+    assert payment_list.status == PaymentList.Status.FINISHED
     assert payment.delivered_quantity == Decimal("125.00")
     assert payment.extra_fields == {"reconciliation_note": RECONCILIATION_NOTE}
     assert payment.fsp_extra_fields == {

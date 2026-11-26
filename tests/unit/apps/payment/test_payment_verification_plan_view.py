@@ -21,7 +21,7 @@ from extras.test_utils.factories import (
     BusinessAreaFactory,
     CurrencyFactory,
     PaymentFactory,
-    PaymentPlanFactory,
+    PaymentListFactory,
     PaymentVerificationFactory,
     PaymentVerificationPlanFactory,
     ProgramCycleFactory,
@@ -33,7 +33,7 @@ from hope.apps.payment.api.views import PaymentVerificationRecordViewSet
 from hope.apps.payment.xlsx.xlsx_error import XlsxError
 from hope.models import (
     Payment,
-    PaymentPlan,
+    PaymentList,
     PaymentVerification,
     PaymentVerificationPlan,
     PaymentVerificationSummary,
@@ -72,32 +72,32 @@ def verification_context(
     program_active: Program,
     cycle: Any,
 ) -> dict[str, Any]:
-    payment_plan = PaymentPlanFactory(
+    payment_list = PaymentListFactory(
         name="Payment Plan",
         business_area=business_area,
         program_cycle=cycle,
-        status=PaymentPlan.Status.FINISHED,
+        status=PaymentList.Status.FINISHED,
         created_by=user,
         currency=CurrencyFactory(code="SYP", vision_code="SYP01", name="Syrian Pound"),
     )
-    build_summary(payment_plan)
+    build_summary(payment_list)
 
     payment_1 = PaymentFactory(
         pk="0329a41f-affd-4669-9e38-38ec2d6699b3",
-        parent=payment_plan,
+        parent=payment_list,
         status=Payment.STATUS_SUCCESS,
         delivered_quantity=999,
         entitlement_quantity=112,
     )
     payment_2 = PaymentFactory(
         pk="299811ef-b123-427d-b77d-9fd5d1bc8946",
-        parent=payment_plan,
+        parent=payment_list,
         status=Payment.STATUS_SUCCESS,
         delivered_quantity=111,
         entitlement_quantity=112,
     )
     pvp = PaymentVerificationPlanFactory(
-        payment_plan=payment_plan,
+        payment_list=payment_list,
         sampling=PaymentVerificationPlan.SAMPLING_RANDOM,
         verification_channel=PaymentVerificationPlan.VERIFICATION_CHANNEL_MANUAL,
     )
@@ -118,12 +118,12 @@ def verification_context(
     url_kwargs = {
         "business_area_slug": business_area.slug,
         "program_code": program_active.code,
-        "pk": str(payment_plan.pk),
+        "pk": str(payment_list.pk),
     }
     url_kwargs_id = {
         "business_area_slug": business_area.slug,
         "program_code": program_active.code,
-        "pk": str(payment_plan.pk),
+        "pk": str(payment_list.pk),
         "verification_plan_id": str(pvp.pk),
     }
 
@@ -132,7 +132,7 @@ def verification_context(
         "user": user,
         "client": client,
         "program_active": program_active,
-        "payment_plan": payment_plan,
+        "payment_list": payment_list,
         "payment_1": payment_1,
         "payment_2": payment_2,
         "pvp": pvp,
@@ -272,7 +272,7 @@ def test_create_pvp(
         verification_context["program_active"],
     )
     PaymentFactory(
-        parent=verification_context["payment_plan"],
+        parent=verification_context["payment_list"],
         status=Payment.STATUS_SUCCESS,
         delivered_quantity=111,
         entitlement_quantity=112,
@@ -416,7 +416,7 @@ def test_pvp_activate_returns_404_when_plan_does_not_exist(
         kwargs={
             "business_area_slug": verification_context["business_area"].slug,
             "program_code": verification_context["program_active"].code,
-            "pk": str(verification_context["payment_plan"].pk),
+            "pk": str(verification_context["payment_list"].pk),
             "verification_plan_id": "00000000-0000-0000-0000-000000000000",
         },
     )
@@ -729,7 +729,7 @@ def test_verifications_list(
         kwargs={
             "business_area_slug": verification_context["business_area"].slug,
             "program_code": verification_context["program_active"].code,
-            "payment_verification_pk": str(verification_context["payment_plan"].pk),
+            "payment_verification_pk": str(verification_context["payment_list"].pk),
         },
     )
     create_user_role_with_permissions(
@@ -755,7 +755,7 @@ def test_verifications_list(
 
 @pytest.fixture
 def unverified_payment(verification_context: dict[str, Any]) -> Payment:
-    return PaymentFactory(parent=verification_context["payment_plan"], status=Payment.STATUS_SUCCESS)
+    return PaymentFactory(parent=verification_context["payment_list"], status=Payment.STATUS_SUCCESS)
 
 
 def test_verifications_list_omits_payment_without_verification(
@@ -768,7 +768,7 @@ def test_verifications_list_omits_payment_without_verification(
         kwargs={
             "business_area_slug": verification_context["business_area"].slug,
             "program_code": verification_context["program_active"].code,
-            "payment_verification_pk": str(verification_context["payment_plan"].pk),
+            "payment_verification_pk": str(verification_context["payment_list"].pk),
         },
     )
     create_user_role_with_permissions(
@@ -805,7 +805,7 @@ def test_verification_details(
         kwargs={
             "business_area_slug": verification_context["business_area"].slug,
             "program_code": verification_context["program_active"].code,
-            "payment_verification_pk": str(verification_context["payment_plan"].pk),
+            "payment_verification_pk": str(verification_context["payment_list"].pk),
             "pk": str(verification_context["payment_1"].pk),
         },
     )
@@ -858,7 +858,7 @@ def test_update_verification(
         kwargs={
             "business_area_slug": verification_context["business_area"].slug,
             "program_code": verification_context["program_active"].code,
-            "payment_verification_pk": str(verification_context["payment_plan"].id),
+            "payment_verification_pk": str(verification_context["payment_list"].id),
             "pk": str(verification_context["payment_1"].pk),
         },
     )
@@ -904,7 +904,7 @@ def test_verifications_list_filter_search(
         kwargs={
             "business_area_slug": verification_context["business_area"].slug,
             "program_code": verification_context["program_active"].code,
-            "payment_verification_pk": str(verification_context["payment_plan"].pk),
+            "payment_verification_pk": str(verification_context["payment_list"].pk),
         },
     )
     response = verification_context["client"].get(url, {"search": verification_context["payment_1"].unicef_id})
@@ -934,7 +934,7 @@ def test_verifications_list_filter_verification_status(
         kwargs={
             "business_area_slug": verification_context["business_area"].slug,
             "program_code": verification_context["program_active"].code,
-            "payment_verification_pk": str(verification_context["payment_plan"].pk),
+            "payment_verification_pk": str(verification_context["payment_list"].pk),
         },
     )
     response = verification_context["client"].get(url, {"verification_status": PaymentVerification.STATUS_RECEIVED})
@@ -955,12 +955,12 @@ def test_verifications_list_filter_verification_channel(
         verification_context["program_active"],
     )
     pvp_xlsx = PaymentVerificationPlanFactory(
-        payment_plan=verification_context["payment_plan"],
+        payment_list=verification_context["payment_list"],
         sampling=PaymentVerificationPlan.SAMPLING_FULL_LIST,
         verification_channel=PaymentVerificationPlan.VERIFICATION_CHANNEL_XLSX,
     )
     payment_3 = PaymentFactory(
-        parent=verification_context["payment_plan"],
+        parent=verification_context["payment_list"],
         status=Payment.STATUS_SUCCESS,
         delivered_quantity=200,
         entitlement_quantity=200,
@@ -977,7 +977,7 @@ def test_verifications_list_filter_verification_channel(
         kwargs={
             "business_area_slug": verification_context["business_area"].slug,
             "program_code": verification_context["program_active"].code,
-            "payment_verification_pk": str(verification_context["payment_plan"].pk),
+            "payment_verification_pk": str(verification_context["payment_list"].pk),
         },
     )
     response = verification_context["client"].get(
@@ -1002,12 +1002,12 @@ def test_verifications_list_filter_verification_plan_id(
         verification_context["program_active"],
     )
     pvp_2 = PaymentVerificationPlanFactory(
-        payment_plan=verification_context["payment_plan"],
+        payment_list=verification_context["payment_list"],
         sampling=PaymentVerificationPlan.SAMPLING_FULL_LIST,
         verification_channel=PaymentVerificationPlan.VERIFICATION_CHANNEL_XLSX,
     )
     payment_3 = PaymentFactory(
-        parent=verification_context["payment_plan"],
+        parent=verification_context["payment_list"],
         status=Payment.STATUS_SUCCESS,
         delivered_quantity=200,
         entitlement_quantity=200,
@@ -1024,7 +1024,7 @@ def test_verifications_list_filter_verification_plan_id(
         kwargs={
             "business_area_slug": verification_context["business_area"].slug,
             "program_code": verification_context["program_active"].code,
-            "payment_verification_pk": str(verification_context["payment_plan"].pk),
+            "payment_verification_pk": str(verification_context["payment_list"].pk),
         },
     )
     response = verification_context["client"].get(
@@ -1053,7 +1053,7 @@ def test_verifications_list_ordering(
         kwargs={
             "business_area_slug": verification_context["business_area"].slug,
             "program_code": verification_context["program_active"].code,
-            "payment_verification_pk": str(verification_context["payment_plan"].pk),
+            "payment_verification_pk": str(verification_context["payment_list"].pk),
         },
     )
     response_asc = verification_context["client"].get(url, {"ordering": "unicef_id"})
@@ -1110,7 +1110,7 @@ def verification_record_url(verification_context: dict[str, Any]) -> str:
         kwargs={
             "business_area_slug": verification_context["business_area"].slug,
             "program_code": verification_context["program_active"].code,
-            "payment_verification_pk": str(verification_context["payment_plan"].pk),
+            "payment_verification_pk": str(verification_context["payment_list"].pk),
             "pk": str(verification_context["payment_1"].pk),
         },
     )
@@ -1257,16 +1257,16 @@ def test_partial_update_rejects_received_none_with_positive_amount(
     assert "not set received to YES" in str(response.data)
 
 
-def test_record_viewset_get_object_returns_parent_payment_plan(
+def test_record_viewset_get_object_returns_parent_payment_list(
     verification_context: dict[str, Any],
 ) -> None:
     viewset = PaymentVerificationRecordViewSet()
     viewset.kwargs = {
         "business_area_slug": verification_context["business_area"].slug,
         "program_code": verification_context["program_active"].code,
-        "payment_verification_pk": str(verification_context["payment_plan"].pk),
+        "payment_verification_pk": str(verification_context["payment_list"].pk),
     }
-    assert viewset.get_object() == verification_context["payment_plan"]
+    assert viewset.get_object() == verification_context["payment_list"]
 
 
 def test_record_viewset_get_object_raises_404_for_unknown_id(verification_context: dict[str, Any]) -> None:
@@ -1297,7 +1297,7 @@ def test_verifications_list_without_pagination_returns_flat_response(
         kwargs={
             "business_area_slug": verification_context["business_area"].slug,
             "program_code": verification_context["program_active"].code,
-            "payment_verification_pk": str(verification_context["payment_plan"].pk),
+            "payment_verification_pk": str(verification_context["payment_list"].pk),
         },
     )
     response = verification_context["client"].get(url)
@@ -1351,7 +1351,7 @@ def test_list_cache_invalidated_on_verification_summary_change(
     etag = first.headers["etag"]
     assert len(miss_ctx.captured_queries) == 15
 
-    summary = verification_context["payment_plan"].payment_verification_summary
+    summary = verification_context["payment_list"].payment_verification_summary
     with TestCase.captureOnCommitCallbacks(execute=True):
         summary.status = PaymentVerificationSummary.STATUS_ACTIVE
         summary.save()

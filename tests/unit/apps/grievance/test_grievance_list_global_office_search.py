@@ -27,7 +27,7 @@ from extras.test_utils.factories.grievance import (
 )
 from extras.test_utils.factories.payment import (
     PaymentFactory,
-    PaymentPlanFactory,
+    PaymentListFactory,
     PaymentVerificationFactory,
     PaymentVerificationPlanFactory,
     PaymentVerificationSummaryFactory,
@@ -188,12 +188,12 @@ def tickets(
     data = households_and_individuals
 
     program_cycle = program.cycles.first()
-    payment_plan = PaymentPlanFactory(
+    payment_list = PaymentListFactory(
         business_area=afghanistan,
         program_cycle=program_cycle,
     )
     payment = PaymentFactory(
-        parent=payment_plan,
+        parent=payment_list,
         household=data["household1"],
         head_of_household=data["individuals1"][0],
         program=program,
@@ -286,20 +286,20 @@ def tickets(
     )
     system_flagging_ticket.programs.add(program)
 
-    payment_plan2 = PaymentPlanFactory(
+    payment_list2 = PaymentListFactory(
         business_area=afghanistan,
         program_cycle=program_cycle,
     )
     payment2 = PaymentFactory(
-        parent=payment_plan2,
+        parent=payment_list2,
         household=data["household5"],
         head_of_household=data["individuals5"][0],
         program=program,
         collector=data["individuals5"][0],
     )
-    PaymentVerificationSummaryFactory(payment_plan=payment_plan2)
+    PaymentVerificationSummaryFactory(payment_list=payment_list2)
     payment_verification_plan = PaymentVerificationPlanFactory(
-        payment_plan=payment_plan2,
+        payment_list=payment_list2,
     )
     payment_verification = PaymentVerificationFactory(
         payment=payment2,

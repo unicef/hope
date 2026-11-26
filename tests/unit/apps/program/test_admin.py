@@ -2,6 +2,7 @@
 
 from datetime import timedelta
 from io import BytesIO
+import json
 from typing import Any
 from unittest.mock import MagicMock, patch
 import uuid
@@ -29,6 +30,7 @@ from extras.test_utils.factories import (
     IndividualFactory,
     PartnerFactory,
     PayeeTypeFactory,
+    PaymentPlanFactory,
     ProgramFactory,
     RegistrationDataImportFactory,
     RoleAssignmentFactory,
@@ -50,6 +52,8 @@ from hope.models import (
     FileTemp,
     Partner,
     PayeeType,
+    PaymentList,
+    PaymentPlan,
     Program,
     RegistrationDataImport,
     RoleAssignment,
@@ -83,6 +87,37 @@ def business_area(db: Any) -> BusinessArea:
 @pytest.fixture
 def program(business_area: BusinessArea) -> Program:
     return ProgramFactory(business_area=business_area)
+
+
+@pytest.fixture
+def program_with_target_population_plan_choices(program: Program) -> tuple[PaymentPlan, PaymentPlan, PaymentPlan]:
+    cycle = program.cycles.first()
+    regular = PaymentPlanFactory(cycle=cycle)
+    locked = PaymentPlanFactory(cycle=cycle, status=PaymentPlan.Status.LOCKED)
+    linked = PaymentPlanFactory(
+        cycle=cycle,
+        plan_type=PaymentList.PlanType.TOP_UP,
+        source_payment_plan=regular,
+    )
+    return regular, locked, linked
+
+
+def test_admin_create_target_population_offers_only_open_regular_plans(
+    admin_client: Client,
+    program: Program,
+    program_with_target_population_plan_choices: tuple[PaymentPlan, PaymentPlan, PaymentPlan],
+) -> None:
+    regular, locked, linked = program_with_target_population_plan_choices
+    url = reverse("admin:program_program_create_target_population_from_list", args=[program.pk])
+
+    response = admin_client.get(url)
+
+    assert response.status_code == 200
+    plans_by_cycle = json.loads(response.context_data["payment_plans_by_cycle_json"])
+    offered_ids = {plan["id"] for plan in plans_by_cycle[str(regular.cycle_id)]}
+    assert str(regular.pk) in offered_ids
+    assert str(locked.pk) not in offered_ids
+    assert str(linked.pk) not in offered_ids
 
 
 @pytest.fixture

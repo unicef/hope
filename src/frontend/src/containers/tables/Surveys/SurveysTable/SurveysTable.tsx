@@ -36,7 +36,7 @@ function SurveysTable({
       businessAreaSlug,
       programCode: programId,
       search: filter.search,
-      paymentPlan: filter.targetPopulation || '',
+      paymentList: filter.targetPopulation || '',
       createdBy: filter.createdBy || '',
       createdAtRange: JSON.stringify({
         min: dateToIsoString(filter.createdAtRangeMin, 'startOfDay'),

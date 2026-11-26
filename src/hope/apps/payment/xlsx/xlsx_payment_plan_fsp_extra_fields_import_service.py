@@ -11,8 +11,8 @@ from hope.apps.activity_log.utils import copy_model_object
 from hope.apps.payment.utils import bulk_log_payment_changes
 from hope.apps.payment.xlsx.base_xlsx_import_service import XlsxImportBaseService
 from hope.apps.payment.xlsx.xlsx_error import XlsxError
-from hope.apps.payment.xlsx.xlsx_payment_plan_delivery_export_service import (
-    XlsxPaymentPlanDeliveryExportService,
+from hope.apps.payment.xlsx.xlsx_payment_list_delivery_export_service import (
+    XlsxPaymentListDeliveryExportService,
 )
 from hope.models import (
     Payment,
@@ -40,10 +40,9 @@ class XlsxPaymentPlanFspExtraFieldsImportService(XlsxImportBaseService):
         self.custom_headers: list[str] = []
         self.payments = {
             str(payment.unicef_id): payment
-            for payment in payment_plan.eligible_payments.select_related(
-                "currency",
-                "delivery_type",
-            )
+            for payment in Payment.objects.filter(parent__payment_plan=payment_plan)
+            .eligible()
+            .select_related("currency", "delivery_type")
         }
         self.is_updated = False
 
@@ -102,8 +101,8 @@ class XlsxPaymentPlanFspExtraFieldsImportService(XlsxImportBaseService):
             )
 
     def _system_controlled_headers(self) -> frozenset[str]:
-        return XlsxPaymentPlanDeliveryExportService.get_system_controlled_headers(
-            self.payment_plan,
+        return XlsxPaymentListDeliveryExportService.get_system_controlled_headers(
+            self.payment_plan.payment_lists.all(),
         )
 
     def _validate_rows(self) -> None:

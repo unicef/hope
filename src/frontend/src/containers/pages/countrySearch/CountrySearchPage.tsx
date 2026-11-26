@@ -72,7 +72,7 @@ const OfficeSearchPage = (): ReactElement => {
     PERMISSIONS.GRIEVANCES_FEEDBACK_VIEW_LIST,
     permissions,
   );
-  const canViewPaymentPlans = hasPermissions(
+  const canViewPaymentLists = hasPermissions(
     PERMISSIONS.PM_VIEW_LIST,
     permissions,
   );
@@ -222,14 +222,14 @@ const OfficeSearchPage = (): ReactElement => {
 
   const {
     data: ppData,
-    isLoading: isLoadingPaymentPlans,
-    error: errorPaymentPlans,
+    isLoading: isLoadingPaymentLists,
+    error: errorPaymentLists,
   } = useQuery({
     queryKey: restQueryKey(
-      RestService.restBusinessAreasPaymentPlansList,
+      RestService.restBusinessAreasPaymentListsList,
       ppParams,
     ),
-    queryFn: () => RestService.restBusinessAreasPaymentPlansList(ppParams),
+    queryFn: () => RestService.restBusinessAreasPaymentListsList(ppParams),
     enabled: appliedFilter.searchFor === 'PP' && !!appliedFilter.officeSearch,
   });
 
@@ -268,7 +268,7 @@ const OfficeSearchPage = (): ReactElement => {
         label: `${beneficiaryGroup?.memberLabel || 'Individual'} (ID, phone number, name)`,
       },
       canViewGrievances && { value: 'GRV', label: 'Grievance (ID)' },
-      canViewPaymentPlans && { value: 'PP', label: 'Payment Plan (ID)' },
+      canViewPaymentLists && { value: 'PP', label: 'Payment List (ID)' },
       canViewPayments && { value: 'RCPT', label: 'Payment (ID)' },
     ].filter(Boolean);
 
@@ -294,7 +294,7 @@ const OfficeSearchPage = (): ReactElement => {
       label: beneficiaryGroup?.memberLabel || 'Individual',
     },
     canViewGrievances && { value: 'GRV', label: 'Grievance' },
-    canViewPaymentPlans && { value: 'PP', label: 'Payment Plan' },
+    canViewPaymentLists && { value: 'PP', label: 'Payment List' },
     canViewPayments && { value: 'RCPT', label: 'Payment' },
   ].filter(Boolean);
 
@@ -425,10 +425,10 @@ const OfficeSearchPage = (): ReactElement => {
             ))}
           {/* Payment Plans */}
           {appliedFilter.searchFor === 'PP' &&
-            (isLoadingPaymentPlans ? (
-              <div>{t('Loading payment plans...')}</div>
-            ) : errorPaymentPlans ? (
-              <div>{t('Error loading payment plans')}</div>
+            (isLoadingPaymentLists ? (
+              <div>{t('Loading payment lists...')}</div>
+            ) : errorPaymentLists ? (
+              <div>{t('Error loading payment lists')}</div>
             ) : ppData?.results?.length ? (
               <PPDataTable ppData={ppData} />
             ) : (

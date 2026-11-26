@@ -38,8 +38,8 @@ export function FollowUpInstructionSummary({
       <OverviewContainer>
         <ResponsiveGridContainer spacing={6}>
           <ResponsiveGrid size="quarter" data-cy="summary-child-plans-count">
-            <LabelizedField label={t('Payment Plans')}>
-              {instruction.childPaymentPlansCount}
+            <LabelizedField label={t('Payment Lists')}>
+              {instruction.childPaymentListsCount}
             </LabelizedField>
           </ResponsiveGrid>
           <ResponsiveGrid size="quarter" data-cy="summary-households-count">

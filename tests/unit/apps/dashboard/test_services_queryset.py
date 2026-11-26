@@ -5,9 +5,9 @@ from unittest.mock import patch
 from django.utils import timezone
 import pytest
 
-from extras.test_utils.factories import BusinessAreaFactory, PaymentFactory, PaymentPlanFactory, ProgramFactory
+from extras.test_utils.factories import BusinessAreaFactory, PaymentFactory, PaymentListFactory, ProgramFactory
 from hope.apps.dashboard.services import DashboardCacheBase
-from hope.models import BusinessArea, Payment, PaymentPlan, Program
+from hope.models import BusinessArea, Payment, PaymentList, Program
 
 
 @pytest.fixture
@@ -36,7 +36,7 @@ def create_payment_for_queryset(db):
         program_obj: Program,
         business_area_obj: BusinessArea,
         *,
-        pp_status: str = PaymentPlan.Status.ACCEPTED,
+        pp_status: str = PaymentList.Status.ACCEPTED,
         pp_is_removed: bool = False,
         prog_is_visible: bool = True,
         payment_is_removed: bool = False,
@@ -44,11 +44,11 @@ def create_payment_for_queryset(db):
         payment_excluded: bool = False,
         payment_status: str = "Transaction Successful",
         delivery_date: Optional[timezone.datetime] = None,
-    ) -> tuple[Payment, PaymentPlan]:
+    ) -> tuple[Payment, PaymentList]:
         program_obj.is_visible = prog_is_visible
         program_obj.save()
 
-        pp = PaymentPlanFactory(
+        pp = PaymentListFactory(
             program_cycle__program=program_obj,
             status=pp_status,
             is_removed=pp_is_removed,
@@ -91,11 +91,11 @@ def prog_invisible_for_base_queryset_tests(ba_for_base_queryset_tests):
 @pytest.mark.parametrize(
     "pp_status",
     [
-        PaymentPlan.Status.IN_APPROVAL,
-        PaymentPlan.Status.IN_AUTHORIZATION,
-        PaymentPlan.Status.IN_REVIEW,
-        PaymentPlan.Status.ACCEPTED,
-        PaymentPlan.Status.FINISHED,
+        PaymentList.Status.IN_APPROVAL,
+        PaymentList.Status.IN_AUTHORIZATION,
+        PaymentList.Status.IN_REVIEW,
+        PaymentList.Status.ACCEPTED,
+        PaymentList.Status.FINISHED,
     ],
     ids=[
         "IN_APPROVAL",
@@ -125,7 +125,7 @@ def test_base_queryset_excludes_payment_with_draft_status(
     ba_for_base_queryset_tests,
     prog_for_base_queryset_tests,
 ) -> None:
-    invalid_status = PaymentPlan.Status.DRAFT
+    invalid_status = PaymentList.Status.DRAFT
     payment_invalid, _ = create_payment_for_queryset(
         prog_for_base_queryset_tests, ba_for_base_queryset_tests, pp_status=invalid_status
     )

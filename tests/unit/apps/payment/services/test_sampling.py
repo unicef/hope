@@ -37,7 +37,7 @@ def areas() -> dict[str, Area]:
 
 @pytest.fixture
 def payments(verification_plan: PaymentVerificationPlan, areas: dict) -> list[Payment]:
-    plan = verification_plan.payment_plan
+    plan = verification_plan.payment_list
     ba = plan.business_area
     program = plan.program_cycle.program
 
@@ -63,7 +63,7 @@ def payments(verification_plan: PaymentVerificationPlan, areas: dict) -> list[Pa
 def test_random_sampling_filters_by_sex(
     seed_random: None, verification_plan: PaymentVerificationPlan, payments: list[Payment]
 ) -> None:
-    plan = verification_plan.payment_plan
+    plan = verification_plan.payment_list
     input_data = {
         "sampling": PaymentVerificationPlan.SAMPLING_RANDOM,
         "random_sampling_arguments": {
@@ -85,7 +85,7 @@ def test_random_sampling_filters_by_sex(
 def test_random_sampling_filters_by_age(
     seed_random: None, verification_plan: PaymentVerificationPlan, payments: list[Payment]
 ) -> None:
-    plan = verification_plan.payment_plan
+    plan = verification_plan.payment_list
     input_data = {
         "sampling": PaymentVerificationPlan.SAMPLING_RANDOM,
         "random_sampling_arguments": {
@@ -107,7 +107,7 @@ def test_random_sampling_filters_by_age(
 def test_random_sampling_caps_sample_size_to_population(
     seed_random: None, verification_plan: PaymentVerificationPlan, payments: list[Payment]
 ) -> None:
-    plan = verification_plan.payment_plan
+    plan = verification_plan.payment_list
     input_data = {
         "sampling": PaymentVerificationPlan.SAMPLING_RANDOM,
         "random_sampling_arguments": {
@@ -128,7 +128,7 @@ def test_random_sampling_caps_sample_size_to_population(
 def test_random_sampling_zero_sample_size_returns_empty(
     verification_plan: PaymentVerificationPlan, payments: list[Payment]
 ) -> None:
-    plan = verification_plan.payment_plan
+    plan = verification_plan.payment_list
     input_data = {
         "sampling": PaymentVerificationPlan.SAMPLING_RANDOM,
         "random_sampling_arguments": {
@@ -149,7 +149,7 @@ def test_random_sampling_zero_sample_size_returns_empty(
 def test_full_list_sampling_returns_all_records(
     verification_plan: PaymentVerificationPlan, payments: list[Payment]
 ) -> None:
-    plan = verification_plan.payment_plan
+    plan = verification_plan.payment_list
     input_data = {
         "sampling": PaymentVerificationPlan.SAMPLING_FULL_LIST,
         "full_list_arguments": {
@@ -167,7 +167,7 @@ def test_full_list_sampling_returns_all_records(
 def test_full_list_sampling_excludes_admin_areas(
     verification_plan: PaymentVerificationPlan, payments: list[Payment], areas: dict
 ) -> None:
-    plan = verification_plan.payment_plan
+    plan = verification_plan.payment_list
     input_data = {
         "sampling": PaymentVerificationPlan.SAMPLING_FULL_LIST,
         "full_list_arguments": {
@@ -185,7 +185,7 @@ def test_full_list_sampling_excludes_admin_areas(
 def test_generate_sampling_returns_count_and_sample_size(
     verification_plan: PaymentVerificationPlan, payments: list[Payment]
 ) -> None:
-    plan = verification_plan.payment_plan
+    plan = verification_plan.payment_list
     input_data = {
         "sampling": PaymentVerificationPlan.SAMPLING_FULL_LIST,
         "full_list_arguments": {
@@ -202,7 +202,7 @@ def test_generate_sampling_returns_count_and_sample_size(
 def test_process_sampling_raises_when_no_payment_records(
     verification_plan: PaymentVerificationPlan,
 ) -> None:
-    plan = verification_plan.payment_plan
+    plan = verification_plan.payment_list
     input_data = {
         "sampling": PaymentVerificationPlan.SAMPLING_RANDOM,
         "random_sampling_arguments": {

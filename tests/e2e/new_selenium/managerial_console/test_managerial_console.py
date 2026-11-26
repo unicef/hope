@@ -3,6 +3,7 @@ import pytest
 from extras.test_utils.factories import (
     ApprovalProcessFactory,
     CurrencyFactory,
+    PaymentListFactory,
     PaymentPlanFactory,
     ProgramFactory,
 )
@@ -41,12 +42,16 @@ APPROVE_COMMENT = "Approved from the managerial console"
 
 def _payment_plan(program: Program, status: PaymentPlan.Status, **kwargs) -> PaymentPlan:
     payment_plan = PaymentPlanFactory(
-        business_area=program.business_area,
-        program_cycle=program.cycles.first(),
+        cycle=program.cycles.first(),
         status=status,
-        plan_type=PaymentPlan.PlanType.REGULAR,
         currency=CurrencyFactory(code="USD", name="United States Dollar"),
         **kwargs,
+    )
+    PaymentListFactory(
+        business_area=program.business_area,
+        program_cycle=payment_plan.cycle,
+        payment_plan=payment_plan,
+        status=status,
     )
     ApprovalProcessFactory(payment_plan=payment_plan)
     return payment_plan

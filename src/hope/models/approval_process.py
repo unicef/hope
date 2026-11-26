@@ -1,5 +1,6 @@
 from django.conf import settings
 from django.db import models
+from django.db.models import Q
 
 from hope.apps.account.actor_snapshot import JobTitleSource
 from hope.models.utils import LongNameIndex, TimeStampedUUIDModel
@@ -34,7 +35,29 @@ class ApprovalProcess(TimeStampedUUIDModel):
     sent_for_finance_release_by_job_title_source = models.CharField(
         max_length=16, blank=True, default="", choices=JobTitleSource.choices
     )
-    payment_plan = models.ForeignKey("payment.PaymentPlan", on_delete=models.CASCADE, related_name="approval_process")
+    payment_list = models.ForeignKey(
+        "payment.PaymentList",
+        on_delete=models.CASCADE,
+        related_name="approval_process",
+        null=True,
+        blank=True,
+        db_column="payment_plan_id",
+    )
+    payment_plan = models.ForeignKey(
+        "payment.PaymentPlan",
+        on_delete=models.CASCADE,
+        related_name="approval_process",
+        null=True,
+        blank=True,
+        db_column="payment_plan_group_id",
+    )
+    follow_up_instruction = models.ForeignKey(
+        "payment.FollowUpInstruction",
+        on_delete=models.CASCADE,
+        related_name="approval_process",
+        null=True,
+        blank=True,
+    )
 
     approval_number_required = models.PositiveIntegerField(default=1)
     authorization_number_required = models.PositiveIntegerField(default=1)
@@ -44,6 +67,14 @@ class ApprovalProcess(TimeStampedUUIDModel):
         app_label = "payment"
         ordering = ("-created_at",)
         verbose_name_plural = "Approval Processes"
+        constraints = [
+            models.CheckConstraint(
+                condition=Q(payment_list__isnull=False, payment_plan__isnull=True, follow_up_instruction__isnull=True)
+                | Q(payment_list__isnull=True, payment_plan__isnull=False, follow_up_instruction__isnull=True)
+                | Q(payment_list__isnull=True, payment_plan__isnull=True, follow_up_instruction__isnull=False),
+                name="approval_process_has_one_owner",
+            )
+        ]
         indexes = [
             LongNameIndex(fields=["created_at"], name="payment_approvalprocess_created_at_6a9c5d12"),
             LongNameIndex(fields=["updated_at"], name="payment_approvalprocess_updated_at_1ff18c46"),

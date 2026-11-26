@@ -13,7 +13,7 @@ from extras.test_utils.factories import (
 from extras.test_utils.selenium import HopeTestBrowser
 from hope.apps.dashboard.services import DashboardDataCache
 from hope.apps.household.const import DISABLED
-from hope.models import BeneficiaryGroup, BusinessArea, Household, Payment, PaymentPlan, Program
+from hope.models import BeneficiaryGroup, BusinessArea, Household, Payment, PaymentList, Program
 
 pytestmark = pytest.mark.django_db(databases=["default", "read_only"])
 
@@ -65,7 +65,7 @@ def pending_payment(business_area: BusinessArea, program: Program) -> Payment:
     return PaymentFactory(
         parent__business_area=business_area,
         parent__program_cycle__program=program,
-        parent__status=PaymentPlan.Status.ACCEPTED,
+        parent__status=PaymentList.Status.ACCEPTED,
         business_area=business_area,
         program=program,
         household=household,
@@ -85,7 +85,7 @@ def payments(
         2,
         parent__business_area=business_area,
         parent__program_cycle__program=program,
-        parent__status=PaymentPlan.Status.ACCEPTED,
+        parent__status=PaymentList.Status.ACCEPTED,
         business_area=business_area,
         program=program,
         household=household,

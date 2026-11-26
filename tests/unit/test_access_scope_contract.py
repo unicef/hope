@@ -9,7 +9,7 @@ from hope.apps.core.api.fields import ScopedRelatedFieldMixin
 
 GLOBAL_MODELS = {"BusinessArea", "Partner", "Area", "AreaType", "Country", "User", "Role"}
 
-SCOPE_FIELDS = {"business_area", "program", "program_cycle", "payment_plan"}
+SCOPE_FIELDS = {"business_area", "program", "program_cycle", "payment_list"}
 
 WRITE_METHODS = {"post", "put", "patch", "delete"}
 
