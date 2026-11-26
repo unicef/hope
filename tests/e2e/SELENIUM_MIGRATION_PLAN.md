@@ -9,14 +9,14 @@ Goal: re-cover every scenario from the old `tests/e2e` suite as a new-style Sele
 
 ## Rules for every migration PR (one module = one PR)
 1. Write new tests in `tests/e2e/new_selenium/<module>/` following `SELENIUM_E2E_PATTERNS.md`: plain `def test_*`, no classes, no `sleep`, no autouse data fixtures, no `if/for` in test bodies, factories from `extras.test_utils.factories` (not `old_factories`), `data-cy` CSS selectors, `pytest.mark.parametrize` instead of loops, `grant_permission` for permission scenarios.
-2. Domain data fixtures go in the module `conftest.py`; reuse existing ones (`new_selenium/payment_module/conftest.py`, `targeting/conftest.py`, `grievance/conftest.py`, `program_details/conftest.py`, `programme_population/conftest.py`) before writing new ones.
+2. Domain data fixtures go in the module `conftest.py`; reuse existing ones (`new_selenium/payment_module/conftest.py`, `targeting/conftest.py`, `grievance/conftest.py`, `program_details/conftest.py`, `programme_population/conftest.py`, `people/conftest.py`) before writing new ones.
 3. Each old test gets one of two outcomes:
    - **NEW** – port the scenario as a new-style Selenium test (file named in the checklist). Several old tests may merge into one parametrized test when they are the same flow with different data.
    - **COVERED** – an existing `new_selenium` test already exercises the same scenario (name it in the PR description). Before deleting the old test, compare it step by step with the new one and add any missing assertions to the new test.
    For both, compare every old assertion and step with the new test, and keep label texts, column headers and their order, pagination (`Rows per page` and the row count), empty-table texts and navigation through the side menu and tabs. Name anything left out, and why, in the PR description.
-4. Delete the old test file **and** any page object / old conftest fixture that becomes unused in the same PR.
+4. Delete the old test file **and** any page object / old conftest fixture that becomes unused in the same PR. Some old test files import helpers from each other (`grep -rn 'from e2e\.[a-z_]*\.test_' tests/e2e`); move such a helper into the importing file before deleting its source, and check `pytest --collect-only tests/e2e`.
 5. Update the counter below in the same PR.
-6. Verify: `tox -e tests -- pytest --no-migrations --create-db tests/e2e/new_selenium/<module>/` (plus one `-n auto` run to check xdist isolation), `tox -e lint`, `tox -e mypy`.
+6. Verify: `tox -e tests -- pytest --no-migrations --create-db --headless tests/e2e/new_selenium/<module>/` (plus one `-n auto` run to check xdist isolation), `tox -e lint`, `tox -e mypy`. Always pass `--headless`: SeleniumBase opens visible Chrome windows without it (CI passes it too). The old suite is headless already.
 
 ## Progress counter
 Units = old `def test_*` functions (parametrize cases count once; `test_program` is a fixture). Recount the remaining ones with:
@@ -32,12 +32,12 @@ grep -rhE '^\s*def test_' tests/e2e --include='test_*.py' --exclude-dir=new_sele
 | 4 | `programme_user` | 1 | 1 | ✅ |
 | 5 | `country_search` | 3 | 3 | ✅ |
 | 6 | `country_dashboard` | 1 | 1 | ✅ |
-| 7 | `managerial_console` | 2 | 0 | ⬜ in review #6563 |
-| 8 | `drawer` | 4 | 0 | ⬜ in review #6564 |
-| 9 | `accountability` | 4 | 0 | ⬜ in review #6565 |
-| 10 | `programme_population` (hh/ind/PDU) | 12 | 0 | ⬜ in review #6570 |
-| 11 | `people` | 7 | 0 | ⬜ in review #6571 |
-| 12 | `programme_management` | 8 | 8 | ✅ in review #6574 |
+| 7 | `managerial_console` | 2 | 2 | ✅ |
+| 8 | `drawer` | 4 | 4 | ✅ |
+| 9 | `accountability` | 4 | 4 | ✅ |
+| 10 | `programme_population` (hh/ind/PDU) | 12 | 12 | ✅ |
+| 11 | `people` | 7 | 7 | ✅ |
+| 12 | `programme_management` | 8 | 8 | ✅ |
 | 13 | `generic_import` | 15 | 0 | ⬜ |
 | 14 | `filters` | 4 | 0 | ⬜ |
 | 15 | `payment_verification` | 10 | 0 | ⬜ |
@@ -47,9 +47,9 @@ grep -rhE '^\s*def test_' tests/e2e --include='test_*.py' --exclude-dir=new_sele
 | 19 | `grievance/grievance_dashboard` | 2 | 0 | ⬜ |
 | 20 | `grievance/grievance_tickets` | 25 | 0 | ⬜ |
 | 21 | Old infra cleanup | – | – | ⬜ |
-| | **Total** | **152** | **25** | **16 %** |
+| | **Total** | **152** | **54** | **36 %** |
 
-`[███░░░░░░░░░░░░░░░░░] 25 / 152`. Update it after each PR: 1 block per ~8 tests. An "in review" module counts as migrated only on its own branch; drop the mark when its PR merges.
+`[███████░░░░░░░░░░░░░] 54 / 152`. Update it after each PR: 1 block per ~8 tests. An "in review" module counts as migrated only on its own branch; drop the mark when its PR merges.
 
 The new suite already has 46 test files and ~250 test functions. These do not count toward the 152.
 
@@ -97,47 +97,48 @@ Legend: `NEW <new_selenium/...>` · `COVERED <existing new test>` (verify assert
 - [x] Delete `page_object/country_dashboard/`, the `page_country_dashboard` fixture and the unused `get_nav_country_dashboard` helpers
 
 ### 7. `managerial_console/test_managerial_console.py` (2) → `new_selenium/managerial_console/test_managerial_console.py`
-- [ ] test_managerial_console_renders_all_sections → NEW
-- [ ] test_managerial_console_happy_path → NEW
-- [ ] Delete `page_object/managerial_console/`
+- [x] test_managerial_console_renders_all_sections → NEW `test_managerial_console_renders_all_sections`
+- [x] test_managerial_console_happy_path → NEW `test_managerial_console_approve_authorize_and_release_payment_plan` (also asserts the programme filter, the final status and the approval records)
+- [x] Delete `page_object/managerial_console/`, the `page_managerial_console` fixture and the `get_nav_managerial_console` helper
 
 ### 8. `drawer/test_drawer.py` (4) → `new_selenium/navigation/test_drawer.py`
-- [ ] test_social_worker_program_drawer_order → NEW, parametrize social worker / normal / all programmes
-- [ ] test_normal_program_drawer_order → NEW (param)
-- [ ] test_all_program_drawer_order → NEW (param)
-- [ ] test_inactive_draft_subheader → NEW
+- [x] test_social_worker_program_drawer_order → NEW `test_programme_drawer_order[social-worker]`
+- [x] test_normal_program_drawer_order → NEW `test_programme_drawer_order[normal]`
+- [x] test_all_program_drawer_order → NEW `test_all_programmes_drawer_order` (no programme to parametrize over, so a separate test)
+- [x] test_inactive_draft_subheader → NEW `test_inactive_programme_shows_inactive_subheader[draft_program|finished_program]` + `test_active_programme_has_no_inactive_subheader` (programmes opened by URL; switching through the global filter is covered by `test_global_program_filter_*`)
 
 ### 9. `accountability/` (4) → `new_selenium/accountability/`
-- [ ] test_smoke_accountability_communication → NEW `test_communication.py`
-- [ ] test_smoke_accountability_communication_details → NEW `test_communication.py`
-- [ ] test_smoke_accountability_surveys → NEW `test_surveys.py`
-- [ ] test_smoke_accountability_surveys_details → NEW `test_surveys.py`
-- [ ] Delete `page_object/accountability/`
+- [x] test_smoke_accountability_communication → NEW `test_communication.py::test_communication_list_shows_message`
+- [x] test_smoke_accountability_communication_details → NEW `test_communication.py::test_communication_details_shows_message`
+- [x] test_smoke_accountability_surveys → NEW `test_surveys.py::test_surveys_list_shows_survey`
+- [x] test_smoke_accountability_surveys_details → NEW `test_surveys.py::test_survey_details_shows_survey_and_recipient`
+- [x] Delete `page_object/accountability/`, the four `page_accountability_*` fixtures and the unused `get_nav_accountability` / `_communication` / `_surveys` helpers
 
 ### 10. `programme_population/` (12) → `new_selenium/programme_population/`
-- [ ] test_smoke_page_households → NEW `test_households.py`
-- [ ] test_smoke_page_households_details → NEW `test_households.py`
-- [ ] test_smoke_page_individuals → NEW `test_individuals.py`
-- [ ] test_smoke_page_individuals_details → NEW `test_individuals.py`
-- [ ] test_periodic_data_template_export_and_download → NEW `test_periodic_data_templates.py`
-- [ ] test_periodic_data_template_list → NEW `test_periodic_data_templates.py`
-- [ ] test_periodic_data_template_details → NEW `test_periodic_data_templates.py`
-- [ ] test_periodic_data_template_create_and_download → NEW `test_periodic_data_templates.py`
-- [ ] test_periodic_data_update_upload_success → NEW `test_periodic_data_xlsx_upload.py`
-- [ ] test_periodic_data_update_upload_form_error → NEW `test_periodic_data_xlsx_upload.py`, parametrize form error / upload error
-- [ ] test_periodic_data_update_upload_error → NEW (param)
-- [ ] test_periodic_data_uploads_list → NEW `test_periodic_data_xlsx_upload.py`
-- [ ] Delete `page_object/programme_population/`
+- [x] test_smoke_page_households → NEW `test_households.py::test_households_list_shows_household`
+- [x] test_smoke_page_households_details → NEW `test_households.py::test_household_details_shows_household`
+- [x] test_smoke_page_individuals → NEW `test_individuals.py::test_individuals_list_shows_individual`
+- [x] test_smoke_page_individuals_details → NEW `test_individuals.py::test_individual_details_shows_individual` (birth date relative to today instead of `freeze_time`)
+- [x] test_periodic_data_template_export_and_download → NEW `test_periodic_data_templates.py::test_export_and_download_template`
+- [x] test_periodic_data_template_list → NEW `test_periodic_data_templates.py::test_template_list_shows_template`
+- [x] test_periodic_data_template_details → NEW `test_periodic_data_templates.py::test_template_details_shows_rounds`
+- [x] test_periodic_data_template_create_and_download → NEW `test_periodic_data_templates.py::test_create_and_download_template`
+- [x] test_periodic_data_update_upload_success → NEW `test_periodic_data_xlsx_upload.py::test_upload_xlsx_updates_individual`
+- [x] test_periodic_data_update_upload_form_error → NEW `test_periodic_data_xlsx_upload.py::test_upload_xlsx_with_invalid_value_shows_form_errors` (not parametrized with the upload error: the two flows assert different elements after different steps)
+- [x] test_periodic_data_update_upload_error → NEW `test_periodic_data_xlsx_upload.py::test_upload_xlsx_for_unknown_template_shows_error`
+- [x] test_periodic_data_uploads_list → NEW `test_periodic_data_xlsx_upload.py::test_uploads_list_shows_upload`
+- [x] Delete `page_object/programme_population/individuals_details.py`, `PDUXlsxTemplatesDetails` and the `page_individuals_details` / `page_pdu_xlsx_templates_details` fixtures. The rest of `page_object/programme_population/` is still used by `grievance_tickets/test_e2e_grievance_tickets.py`; delete it in module 20.
+- [x] `prepare_xlsx_file` moved to `new_selenium/programme_population/conftest.py`
 
 ### 11. `people/` (7) → `new_selenium/people/`
-- [ ] test_smoke_page_people → NEW `test_people.py`
-- [ ] test_smoke_page_details_people → NEW `test_people.py`
-- [ ] test_people_happy_path → NEW `test_people.py`
-- [ ] test_check_people_data_after_grievance_ticket_processed → NEW `test_people.py` (keep the parametrize)
-- [ ] test_people_periodic_data_update_upload_success → NEW `test_people_periodic_data_update.py` (share fixtures with module 10)
-- [ ] test_people_periodic_data_update_upload_form_error → NEW `test_people_periodic_data_update.py`
-- [ ] test_people_periodic_data_uploads_list → NEW `test_people_periodic_data_update.py`
-- [ ] Delete `page_object/people/`
+- [x] test_smoke_page_people → NEW `test_people.py::test_people_list_is_empty_without_people`
+- [x] test_smoke_page_details_people → NEW `test_people.py::test_person_details_shows_person`
+- [x] test_people_happy_path → NEW `test_people.py::test_person_details_shows_payment`
+- [x] test_check_people_data_after_grievance_ticket_processed → NEW `test_people.py::test_person_data_updated_after_grievance_ticket_processed` (now also asserts the updated data)
+- [x] test_people_periodic_data_update_upload_success → NEW `test_people_periodic_data_update.py::test_upload_xlsx_updates_person`
+- [x] test_people_periodic_data_update_upload_form_error → NEW `test_people_periodic_data_update.py::test_upload_xlsx_with_invalid_value_shows_form_errors`
+- [x] test_people_periodic_data_uploads_list → NEW `test_people_periodic_data_update.py::test_uploads_list_shows_upload`
+- [x] Delete `page_object/people/`, the PDU page objects in `page_object/programme_population/` and their fixtures (`individuals.py` is still used by module 20). `upload_xlsx` and `update_cell` moved to `new_selenium/programme_population/conftest.py`, shared by both modules.
 
 ### 12. `programme_management/test_programme_management.py` (8) → `new_selenium/program_details/`
 - [x] test_create_programme_check → COVERED `test_create_programme_all_fields` (extended with the programmes list search) + `test_create_programme_mandatory_fields_only` (Regular payments, no administrative areas)
@@ -148,7 +149,8 @@ Legend: `NEW <new_selenium/...>` · `COVERED <existing new test>` (verify assert
 - [x] test_create_programme_accesses → NEW `test_programme_partners.py::test_partner_access_is_saved`
 - [x] test_programme_partners → NEW `test_programme_partners.py::test_only_partners_with_role_in_business_area_can_be_selected` + `test_edit_partner_access`
 - [x] test_edit_programme_with_rdi → NEW `test_edit_program.py::test_edit_programme_with_rdi_locks_time_series_fields` (also checks the new name and the third round are saved)
-- [ ] `page_object/programme_management/` is still used by the old `drawer` test; delete it once module 8 is merged. `page_object/programme_details/` is still used by `drawer`, `filters` and `grievance/feedback`; delete it in module 18.
+- [x] Delete `page_object/programme_management/` and the `page_programme_management` fixture
+- [ ] `page_object/programme_details/` is still used by `filters` and `grievance/feedback`; delete it in module 18.
 
 ### 13. `generic_import/test_generic_import.py` (15) → `new_selenium/generic_import/test_generic_import_form.py`
 Already in new suite: `test_generic_import_data.py`.
@@ -273,11 +275,11 @@ Already in new suite: `test_grievance_tickets.py` (referral), `test_my_tasks.py`
 - [ ] test_grievance_tickets_create_new_error → NEW `test_grievance_tickets.py`
 - [ ] test_grievance_tickets_individual_data_update_with_photo → NEW `test_data_change_tickets.py`, parametrize update / add (uses `helpers/document_example.png`)
 - [ ] test_grievance_tickets_add_individual_with_photo → NEW (param)
-- [ ] Delete `page_object/grievance/`
+- [ ] Delete `page_object/grievance/` and what is left of `page_object/programme_population/` with the `page_households*` / `page_individuals` fixtures
 
 ### 21. Old infrastructure cleanup (after the counter reaches 152/152)
 - [ ] Delete `tests/e2e/page_object/` (incl. `base_components.py`), `tests/e2e/helpers/helper.py`, `helpers/fixtures.py`, `helpers/date_time_format.py` if unused, `tools/tag_name_finder.py`
 - [ ] Strip `tests/e2e/conftest.py` of `driver`, the autouse `browser`, `login`, `page_*`/`filters` fixtures, `create_session`, and `screenshot_path`/`download_path` if unused. Keep the DB/cache autouse fixtures and `live_server_with_static`.
 - [ ] Remove the "Existing raw Selenium tests…" note from `SELENIUM_E2E_PATTERNS.md`, update `tests/e2e/README.md`
 - [ ] Check CI / tox / compose files (`compose.selenium.yml`, `.github/workflows`) for paths to old dirs
-- [ ] Final: `tox -e tests -- pytest --no-migrations --create-db tests/e2e`, `tox -e lint`, `tox -e mypy` green; the recount command prints 0
+- [ ] Final: `tox -e tests -- pytest --no-migrations --create-db --headless tests/e2e`, `tox -e lint`, `tox -e mypy` green; the recount command prints 0
