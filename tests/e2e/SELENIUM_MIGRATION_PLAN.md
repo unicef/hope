@@ -32,8 +32,8 @@ grep -rhE '^\s*def test_' tests/e2e --include='test_*.py' --exclude-dir=new_sele
 | 4 | `programme_user` | 1 | 1 | ✅ |
 | 5 | `country_search` | 3 | 3 | ✅ |
 | 6 | `country_dashboard` | 1 | 1 | ✅ |
-| 7 | `managerial_console` | 2 | 0 | ⬜ in review #6563 |
-| 8 | `drawer` | 4 | 4 | ✅ in review #6564 |
+| 7 | `managerial_console` | 2 | 2 | ✅ in review #6563 |
+| 8 | `drawer` | 4 | 4 | ✅ |
 | 9 | `accountability` | 4 | 4 | ✅ |
 | 10 | `programme_population` (hh/ind/PDU) | 12 | 0 | ⬜ in review #6570 |
 | 11 | `people` | 7 | 0 | ⬜ in review #6571 |
@@ -47,9 +47,9 @@ grep -rhE '^\s*def test_' tests/e2e --include='test_*.py' --exclude-dir=new_sele
 | 19 | `grievance/grievance_dashboard` | 2 | 0 | ⬜ |
 | 20 | `grievance/grievance_tickets` | 25 | 0 | ⬜ |
 | 21 | Old infra cleanup | – | – | ⬜ |
-| | **Total** | **152** | **33** | **22 %** |
+| | **Total** | **152** | **35** | **23 %** |
 
-`[████░░░░░░░░░░░░░░░░] 33 / 152`. Update it after each PR: 1 block per ~8 tests. An "in review" module counts as migrated only on its own branch; drop the mark when its PR merges.
+`[████░░░░░░░░░░░░░░░░] 35 / 152`. Update it after each PR: 1 block per ~8 tests. An "in review" module counts as migrated only on its own branch; drop the mark when its PR merges.
 
 The new suite already has 46 test files and ~250 test functions. These do not count toward the 152.
 
@@ -97,9 +97,9 @@ Legend: `NEW <new_selenium/...>` · `COVERED <existing new test>` (verify assert
 - [x] Delete `page_object/country_dashboard/`, the `page_country_dashboard` fixture and the unused `get_nav_country_dashboard` helpers
 
 ### 7. `managerial_console/test_managerial_console.py` (2) → `new_selenium/managerial_console/test_managerial_console.py`
-- [ ] test_managerial_console_renders_all_sections → NEW
-- [ ] test_managerial_console_happy_path → NEW
-- [ ] Delete `page_object/managerial_console/`
+- [x] test_managerial_console_renders_all_sections → NEW `test_managerial_console_renders_all_sections`
+- [x] test_managerial_console_happy_path → NEW `test_managerial_console_approve_authorize_and_release_payment_plan` (also asserts the programme filter, the final status and the approval records)
+- [x] Delete `page_object/managerial_console/`, the `page_managerial_console` fixture and the `get_nav_managerial_console` helper
 
 ### 8. `drawer/test_drawer.py` (4) → `new_selenium/navigation/test_drawer.py`
 - [x] test_social_worker_program_drawer_order → NEW `test_programme_drawer_order[social-worker]`

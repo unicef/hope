@@ -32,7 +32,6 @@ from e2e.page_object.grievance.grievance_dashboard import GrievanceDashboard
 from e2e.page_object.grievance.grievance_tickets import GrievanceTickets
 from e2e.page_object.grievance.new_feedback import NewFeedback
 from e2e.page_object.grievance.new_ticket import NewTicket
-from e2e.page_object.managerial_console.managerial_console import ManagerialConsole
 from e2e.page_object.payment_module.new_payment_plan import NewPaymentPlan
 from e2e.page_object.payment_module.payment_module import PaymentModule
 from e2e.page_object.payment_module.payment_module_details import PaymentModuleDetails
@@ -525,11 +524,6 @@ def page_grievance_new_ticket(request: FixtureRequest, browser: Chrome) -> NewTi
 @pytest.fixture
 def page_grievance_dashboard(request: FixtureRequest, browser: Chrome) -> GrievanceDashboard:
     return GrievanceDashboard(browser)
-
-
-@pytest.fixture
-def page_managerial_console(request: FixtureRequest, browser: Chrome) -> ManagerialConsole:
-    return ManagerialConsole(browser)
 
 
 @pytest.fixture
