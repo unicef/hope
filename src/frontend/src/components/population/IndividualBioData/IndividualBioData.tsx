@@ -92,7 +92,7 @@ export const IndividualBioData = ({
             )}
           </LabelizedField>
         </Box>
-        <LabelizedField label="issued">{doc.country.name}</LabelizedField>
+        <LabelizedField label="issued">{doc.country?.name}</LabelizedField>
       </Box>
     </ResponsiveGrid>
   ));
@@ -113,7 +113,7 @@ export const IndividualBioData = ({
             {item.number}
           </LabelizedField>
         </Box>
-        <LabelizedField label="issued">{item.country.name}</LabelizedField>
+        <LabelizedField label="issued">{item.country?.name}</LabelizedField>
       </Box>
     </ResponsiveGrid>
   ));

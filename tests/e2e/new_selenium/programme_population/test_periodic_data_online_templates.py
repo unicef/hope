@@ -3,6 +3,7 @@ from collections.abc import Callable
 import pytest
 
 from e2e.new_selenium.conftest import grant_permission
+from e2e.new_selenium.programme_population.conftest import individuals_url
 from extras.test_utils.factories import PDUOnlineEditFactory
 from extras.test_utils.selenium import HopeTestBrowser
 from hope.apps.account.permissions import Permissions
@@ -39,10 +40,6 @@ ALL_ONLINE_PERMISSIONS = (
     Permissions.PDU_ONLINE_APPROVE,
     Permissions.PDU_ONLINE_MERGE,
 )
-
-
-def individuals_url(program: Program) -> str:
-    return f"/{program.business_area.slug}/programs/{program.code}/population/individuals"
 
 
 def open_details(browser: HopeTestBrowser, online_edit: PDUOnlineEdit) -> None:
