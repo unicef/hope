@@ -269,6 +269,67 @@ def test_fetch_findings_and_merge_rdi_classifies_population_when_one_side_merged
     assert pending_ind.biometric_deduplication_batch_results == []
 
 
+@pytest.fixture
+def pending_and_withdrawn_merged_individuals(cw_rdi, cw_program):
+    pending_ind = PendingIndividualFactory(
+        program=cw_program,
+        business_area=cw_program.business_area,
+        registration_data_import=cw_rdi,
+        country_workspace_id="1001",
+    )
+    withdrawn_merged_ind = PendingIndividualFactory(
+        program=cw_program,
+        business_area=cw_program.business_area,
+        country_workspace_id="1002",
+        rdi_merge_status=MergeStatusModel.MERGED,
+        withdrawn=True,
+    )
+    return pending_ind, withdrawn_merged_ind
+
+
+@pytest.fixture
+def ignore_withdraw_enabled(cw_program):
+    BusinessArea.objects.filter(pk=cw_program.business_area_id).update(deduplication_ignore_withdraw=True)
+
+
+@patch("hope.apps.registration_data.tasks.fetch_findings_and_merge_rdi.RdiMergeTask")
+@patch("hope.apps.registration_data.api.deduplication_engine.DeduplicationEngineAPI.get_rdi_biometric_findings")
+def test_fetch_findings_and_merge_rdi_keeps_withdrawn_population_match_by_default(
+    mock_get_findings: mock.Mock,
+    mock_rdi_merge: mock.Mock,
+    cw_rdi: RegistrationDataImport,
+    pending_and_withdrawn_merged_individuals: tuple[Individual, Individual],
+) -> None:
+    pending_ind, withdrawn_merged_ind = pending_and_withdrawn_merged_individuals
+    mock_get_findings.return_value = [_finding(first_pk="1001", second_pk="1002")]
+
+    queue_and_run_retry_task(fetch_findings_and_merge_rdi, registration_data_import=cw_rdi)
+
+    pending_ind.refresh_from_db()
+    assert pending_ind.biometric_deduplication_golden_record_status == DUPLICATE
+    assert len(pending_ind.biometric_deduplication_golden_record_results) == 1
+    assert pending_ind.biometric_deduplication_golden_record_results[0]["id"] == str(withdrawn_merged_ind.id)
+
+
+@patch("hope.apps.registration_data.tasks.fetch_findings_and_merge_rdi.RdiMergeTask")
+@patch("hope.apps.registration_data.api.deduplication_engine.DeduplicationEngineAPI.get_rdi_biometric_findings")
+def test_fetch_findings_and_merge_rdi_drops_withdrawn_population_match_when_ignore_withdraw(
+    mock_get_findings: mock.Mock,
+    mock_rdi_merge: mock.Mock,
+    cw_rdi: RegistrationDataImport,
+    pending_and_withdrawn_merged_individuals: tuple[Individual, Individual],
+    ignore_withdraw_enabled: None,
+) -> None:
+    pending_ind, _withdrawn_merged_ind = pending_and_withdrawn_merged_individuals
+    mock_get_findings.return_value = [_finding(first_pk="1001", second_pk="1002")]
+
+    queue_and_run_retry_task(fetch_findings_and_merge_rdi, registration_data_import=cw_rdi)
+
+    pending_ind.refresh_from_db()
+    assert pending_ind.biometric_deduplication_golden_record_status == UNIQUE
+    assert pending_ind.biometric_deduplication_golden_record_results == []
+
+
 @patch("hope.apps.registration_data.tasks.fetch_findings_and_merge_rdi.RdiMergeTask")
 @patch("hope.apps.registration_data.api.deduplication_engine.DeduplicationEngineAPI.get_rdi_biometric_findings")
 @pytest.mark.parametrize(

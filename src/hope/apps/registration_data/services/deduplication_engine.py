@@ -153,8 +153,6 @@ class DeduplicationEngineService:
             Q(individual1__in=rdi_individuals) | Q(individual2__in=rdi_individuals),
             (Q(individual1__duplicate=False) | Q(individual1__isnull=True))
             & (Q(individual2__duplicate=False) | Q(individual2__isnull=True)),
-            (Q(individual1__withdrawn=False) | Q(individual1__isnull=True))
-            & (Q(individual2__withdrawn=False) | Q(individual2__isnull=True)),
             (
                 Q(individual1__rdi_merge_status=MergeStatusModel.MERGED)
                 | Q(individual1__isnull=True)
@@ -163,6 +161,12 @@ class DeduplicationEngineService:
             ),
             program=rdi.program,
         ).exclude(Q(individual1__in=other_pending_rdis_individuals) | Q(individual2__in=other_pending_rdis_individuals))
+
+        if rdi.business_area.deduplication_ignore_withdraw:
+            no_withdrawn_individual = (Q(individual1__withdrawn=False) | Q(individual1__isnull=True)) & (
+                Q(individual2__withdrawn=False) | Q(individual2__isnull=True)
+            )
+            qs = qs.filter(no_withdrawn_individual)
 
         if exclude_not_valid:
             qs = qs.exclude(similarity_score=0)
