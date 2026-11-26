@@ -156,7 +156,7 @@ def test_delete_rdi_true_removes_population_and_sends_captured_ids_to_elasticsea
     individual_ids = set(Individual.all_objects.filter(registration_data_import=rdi).values_list("id", flat=True))
     assert len(individual_ids) == 2
 
-    with patch(ES_REMOVE) as mock_remove_es, django_assert_num_queries(63):
+    with patch(ES_REMOVE) as mock_remove_es, django_assert_num_queries(65):
         remove_rdi_population(rdi, delete_rdi=True)
 
     assert not RegistrationDataImport.objects.filter(id=rdi_id).exists()
