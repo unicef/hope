@@ -13,14 +13,15 @@ Goal: re-cover every scenario from the old `tests/e2e` suite as a new-style Sele
 3. Each old test gets one of two outcomes:
    - **NEW** – port the scenario as a new-style Selenium test (file named in the checklist). Several old tests may merge into one parametrized test when they are the same flow with different data.
    - **COVERED** – an existing `new_selenium` test already exercises the same scenario (name it in the PR description). Before deleting the old test, compare it step by step with the new one and add any missing assertions to the new test.
-4. Delete the old test file **and** any page object / old conftest fixture that becomes unused in the same PR.
+   For both, compare every old assertion and step with the new test, and keep label texts, column headers and their order, pagination (`Rows per page` and the row count), empty-table texts and navigation through the side menu and tabs. Name anything left out, and why, in the PR description.
+4. Delete the old test file **and** any page object / old conftest fixture that becomes unused in the same PR. Some old test files import helpers from each other (`grep -rn 'from e2e\.[a-z_]*\.test_' tests/e2e`); move such a helper into the importing file before deleting its source, and check `pytest --collect-only tests/e2e`.
 5. Update the counter below in the same PR.
 6. Verify: `tox -e tests -- pytest --no-migrations --create-db --headless tests/e2e/new_selenium/<module>/` (plus one `-n auto` run to check xdist isolation), `tox -e lint`, `tox -e mypy`. Always pass `--headless`: SeleniumBase opens visible Chrome windows without it (CI passes it too). The old suite is headless already.
 
 ## Progress counter
-Units = old `def test_*` functions (parametrize cases count once). Recount the remaining ones with:
+Units = old `def test_*` functions (parametrize cases count once; `test_program` is a fixture). Recount the remaining ones with:
 ```bash
-grep -rcE '^\s*def test_' tests/e2e --include='test_*.py' --exclude-dir=new_selenium | awk -F: '{s+=$2} END {print s}'
+grep -rhE '^\s*def test_' tests/e2e --include='test_*.py' --exclude-dir=new_selenium | grep -vc 'def test_program('
 ```
 
 | # | Module (old path) | Old tests | Migrated | Status |
@@ -30,13 +31,13 @@ grep -rcE '^\s*def test_' tests/e2e --include='test_*.py' --exclude-dir=new_sele
 | 3 | `program_log` | 2 | 2 | ✅ |
 | 4 | `programme_user` | 1 | 1 | ✅ |
 | 5 | `country_search` | 3 | 3 | ✅ |
-| 6 | `country_dashboard` | 1 | 0 | ⬜ |
-| 7 | `managerial_console` | 2 | 0 | ⬜ |
-| 8 | `drawer` | 4 | 0 | ⬜ |
-| 9 | `accountability` | 4 | 0 | ⬜ |
+| 6 | `country_dashboard` | 1 | 1 | ✅ |
+| 7 | `managerial_console` | 2 | 2 | ✅ |
+| 8 | `drawer` | 4 | 4 | ✅ |
+| 9 | `accountability` | 4 | 4 | ✅ |
 | 10 | `programme_population` (hh/ind/PDU) | 12 | 12 | ✅ |
 | 11 | `people` | 7 | 7 | ✅ |
-| 12 | `programme_management` | 8 | 0 | ⬜ |
+| 12 | `programme_management` | 8 | 8 | ✅ |
 | 13 | `generic_import` | 15 | 0 | ⬜ |
 | 14 | `filters` | 4 | 0 | ⬜ |
 | 15 | `payment_verification` | 10 | 0 | ⬜ |
@@ -46,11 +47,11 @@ grep -rcE '^\s*def test_' tests/e2e --include='test_*.py' --exclude-dir=new_sele
 | 19 | `grievance/grievance_dashboard` | 2 | 0 | ⬜ |
 | 20 | `grievance/grievance_tickets` | 25 | 0 | ⬜ |
 | 21 | Old infra cleanup | – | – | ⬜ |
-| | **Total** | **155** | **35** | **23 %** |
+| | **Total** | **152** | **54** | **36 %** |
 
-`[█████░░░░░░░░░░░░░░░] 35 / 155`. Update it after each PR: 1 block per ~8 tests.
+`[███████░░░░░░░░░░░░░] 54 / 152`. Update it after each PR: 1 block per ~8 tests. An "in review" module counts as migrated only on its own branch; drop the mark when its PR merges.
 
-The new suite already has 46 test files and ~250 test functions. These do not count toward the 155.
+The new suite already has 46 test files and ~250 test functions. These do not count toward the 152.
 
 Order: small, isolated modules first (1–9) to settle shared fixtures, then population/programme (10–14), then payments/targeting/grievance (15–20), which overlap most with tests already in the new suite.
 
@@ -77,8 +78,8 @@ Legend: `NEW <new_selenium/...>` · `COVERED <existing new test>` (verify assert
 - [x] Delete `page_object/error_page/` and the `page_error` / `page_access_denied` fixtures
 
 ### 3. `program_log/test_program_log.py` (2) → `new_selenium/activity_log/test_activity_log.py`
-- [x] test_smoke_program_log → NEW `test_activity_log_lists_entry[programme-log]` (entry created by `LogEntryFactory`; the finish flow itself is covered by `program_details/test_programme_status.py::test_finish_programme`)
-- [x] test_smoke_activity_log → NEW `test_activity_log_lists_entry[activity-log]`
+- [x] test_smoke_program_log → NEW `test_activity_log_lists_entry[programme-log]` (entry created by `LogEntryFactory`) + `test_finishing_programme_is_logged[programme-log]` (entry created by finishing the programme in the UI)
+- [x] test_smoke_activity_log → NEW `test_activity_log_lists_entry[activity-log]` + `test_finishing_programme_is_logged[activity-log]`
 - [x] Delete `page_object/program_log/` and the `page_program_log` fixture
 
 ### 4. `programme_user/test_programme_user.py` (1) → `new_selenium/program_details/test_programme_users.py`
@@ -92,26 +93,26 @@ Legend: `NEW <new_selenium/...>` · `COVERED <existing new test>` (verify assert
 - [x] Delete `page_object/country_search/` and the `page_country_search` fixture
 
 ### 6. `country_dashboard/test_country_dashboard.py` (1) → `new_selenium/dashboard/test_country_dashboard.py`
-- [ ] test_smoke_country_dashboard → NEW (assert values from factory data, not only labels)
-- [ ] Delete `page_object/country_dashboard/`
+- [x] test_smoke_country_dashboard → NEW `test_country_dashboard_shows_metrics_from_payments` (exact metric values from factory payments)
+- [x] Delete `page_object/country_dashboard/`, the `page_country_dashboard` fixture and the unused `get_nav_country_dashboard` helpers
 
 ### 7. `managerial_console/test_managerial_console.py` (2) → `new_selenium/managerial_console/test_managerial_console.py`
-- [ ] test_managerial_console_renders_all_sections → NEW
-- [ ] test_managerial_console_happy_path → NEW
-- [ ] Delete `page_object/managerial_console/`
+- [x] test_managerial_console_renders_all_sections → NEW `test_managerial_console_renders_all_sections`
+- [x] test_managerial_console_happy_path → NEW `test_managerial_console_approve_authorize_and_release_payment_plan` (also asserts the programme filter, the final status and the approval records)
+- [x] Delete `page_object/managerial_console/`, the `page_managerial_console` fixture and the `get_nav_managerial_console` helper
 
 ### 8. `drawer/test_drawer.py` (4) → `new_selenium/navigation/test_drawer.py`
-- [ ] test_social_worker_program_drawer_order → NEW, parametrize social worker / normal / all programmes
-- [ ] test_normal_program_drawer_order → NEW (param)
-- [ ] test_all_program_drawer_order → NEW (param)
-- [ ] test_inactive_draft_subheader → NEW
+- [x] test_social_worker_program_drawer_order → NEW `test_programme_drawer_order[social-worker]`
+- [x] test_normal_program_drawer_order → NEW `test_programme_drawer_order[normal]`
+- [x] test_all_program_drawer_order → NEW `test_all_programmes_drawer_order` (no programme to parametrize over, so a separate test)
+- [x] test_inactive_draft_subheader → NEW `test_inactive_programme_shows_inactive_subheader[draft_program|finished_program]` + `test_active_programme_has_no_inactive_subheader` (programmes opened by URL; switching through the global filter is covered by `test_global_program_filter_*`)
 
 ### 9. `accountability/` (4) → `new_selenium/accountability/`
-- [ ] test_smoke_accountability_communication → NEW `test_communication.py`
-- [ ] test_smoke_accountability_communication_details → NEW `test_communication.py`
-- [ ] test_smoke_accountability_surveys → NEW `test_surveys.py`
-- [ ] test_smoke_accountability_surveys_details → NEW `test_surveys.py`
-- [ ] Delete `page_object/accountability/`
+- [x] test_smoke_accountability_communication → NEW `test_communication.py::test_communication_list_shows_message`
+- [x] test_smoke_accountability_communication_details → NEW `test_communication.py::test_communication_details_shows_message`
+- [x] test_smoke_accountability_surveys → NEW `test_surveys.py::test_surveys_list_shows_survey`
+- [x] test_smoke_accountability_surveys_details → NEW `test_surveys.py::test_survey_details_shows_survey_and_recipient`
+- [x] Delete `page_object/accountability/`, the four `page_accountability_*` fixtures and the unused `get_nav_accountability` / `_communication` / `_surveys` helpers
 
 ### 10. `programme_population/` (12) → `new_selenium/programme_population/`
 - [x] test_smoke_page_households → NEW `test_households.py::test_households_list_shows_household`
@@ -140,16 +141,16 @@ Legend: `NEW <new_selenium/...>` · `COVERED <existing new test>` (verify assert
 - [x] Delete `page_object/people/`, the PDU page objects in `page_object/programme_population/` and their fixtures (`individuals.py` is still used by module 20). `upload_xlsx` and `update_cell` moved to `new_selenium/programme_population/conftest.py`, shared by both modules.
 
 ### 12. `programme_management/test_programme_management.py` (8) → `new_selenium/program_details/`
-Already in new suite: `test_create_program.py`, `test_edit_program.py`, `test_duplicate_program.py`.
-- [ ] test_create_programme_check → COVERED `test_create_programme_mandatory_fields_only` / `_all_fields` (add any parametrize case that is missing)
-- [ ] test_create_programme_delete_partners → NEW `test_programme_partners.py`
-- [ ] test_create_programme_add_partners_business_area → NEW `test_programme_partners.py`
-- [ ] test_create_programme_back_scenarios → NEW `test_create_program.py`
-- [ ] test_create_programme_chose_dates_via_calendar → NEW `test_create_program.py` (use `helpers/date_picker`)
-- [ ] test_create_programme_accesses → NEW `test_programme_partners.py` (keep the parametrize)
-- [ ] test_programme_partners → NEW `test_programme_partners.py`
-- [ ] test_edit_programme_with_rdi → NEW `test_edit_program.py`
-- [ ] Delete `page_object/programme_management/`, `page_object/programme_details/`
+- [x] test_create_programme_check → COVERED `test_create_programme_all_fields` (extended with the programmes list search) + `test_create_programme_mandatory_fields_only` (Regular payments, no administrative areas)
+- [x] test_create_programme_delete_partners → NEW `test_programme_partners.py::test_delete_partner_while_creating_programme` (checks the saved access: the details page lists every partner with a business area wide role, and only those can be selected)
+- [x] test_create_programme_add_partners_business_area → NEW `test_programme_partners.py::test_partner_with_admin_area_access`
+- [x] test_create_programme_back_scenarios → NEW `test_create_program.py::test_create_programme_keeps_values_when_going_back`
+- [x] test_create_programme_chose_dates_via_calendar → NEW `test_create_program.py::test_create_programme_dates_chosen_in_calendar`
+- [x] test_create_programme_accesses → NEW `test_programme_partners.py::test_partner_access_is_saved`
+- [x] test_programme_partners → NEW `test_programme_partners.py::test_only_partners_with_role_in_business_area_can_be_selected` + `test_edit_partner_access`
+- [x] test_edit_programme_with_rdi → NEW `test_edit_program.py::test_edit_programme_with_rdi_locks_time_series_fields` (also checks the new name and the third round are saved)
+- [x] Delete `page_object/programme_management/` and the `page_programme_management` fixture
+- [ ] `page_object/programme_details/` is still used by `filters` and `grievance/feedback`; delete it in module 18.
 
 ### 13. `generic_import/test_generic_import.py` (15) → `new_selenium/generic_import/test_generic_import_form.py`
 Already in new suite: `test_generic_import_data.py`.
@@ -276,7 +277,7 @@ Already in new suite: `test_grievance_tickets.py` (referral), `test_my_tasks.py`
 - [ ] test_grievance_tickets_add_individual_with_photo → NEW (param)
 - [ ] Delete `page_object/grievance/` and what is left of `page_object/programme_population/` with the `page_households*` / `page_individuals` fixtures
 
-### 21. Old infrastructure cleanup (after the counter reaches 155/155)
+### 21. Old infrastructure cleanup (after the counter reaches 152/152)
 - [ ] Delete `tests/e2e/page_object/` (incl. `base_components.py`), `tests/e2e/helpers/helper.py`, `helpers/fixtures.py`, `helpers/date_time_format.py` if unused, `tools/tag_name_finder.py`
 - [ ] Strip `tests/e2e/conftest.py` of `driver`, the autouse `browser`, `login`, `page_*`/`filters` fixtures, `create_session`, and `screenshot_path`/`download_path` if unused. Keep the DB/cache autouse fixtures and `live_server_with_static`.
 - [ ] Remove the "Existing raw Selenium tests…" note from `SELENIUM_E2E_PATTERNS.md`, update `tests/e2e/README.md`

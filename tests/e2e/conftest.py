@@ -22,14 +22,7 @@ from selenium.common.exceptions import TimeoutException
 from selenium.webdriver import Chrome
 from selenium.webdriver.chrome.options import Options
 
-from e2e.page_object.accountability.communication import AccountabilityCommunication
-from e2e.page_object.accountability.comunication_details import (
-    AccountabilityCommunicationDetails,
-)
-from e2e.page_object.accountability.surveys import AccountabilitySurveys
-from e2e.page_object.accountability.surveys_details import AccountabilitySurveysDetails
 from e2e.page_object.admin_panel.admin_panel import AdminPanel
-from e2e.page_object.country_dashboard.country_dashboard import CountryDashboard
 from e2e.page_object.filters import Filters
 from e2e.page_object.generic_import.generic_import import GenericImport
 from e2e.page_object.grievance.details_feedback_page import FeedbackDetailsPage
@@ -39,7 +32,6 @@ from e2e.page_object.grievance.grievance_dashboard import GrievanceDashboard
 from e2e.page_object.grievance.grievance_tickets import GrievanceTickets
 from e2e.page_object.grievance.new_feedback import NewFeedback
 from e2e.page_object.grievance.new_ticket import NewTicket
-from e2e.page_object.managerial_console.managerial_console import ManagerialConsole
 from e2e.page_object.payment_module.new_payment_plan import NewPaymentPlan
 from e2e.page_object.payment_module.payment_module import PaymentModule
 from e2e.page_object.payment_module.payment_module_details import PaymentModuleDetails
@@ -53,13 +45,9 @@ from e2e.page_object.payment_verification.payment_verification_details import (
     PaymentVerificationDetails,
 )
 from e2e.page_object.programme_details.programme_details import ProgrammeDetails
-from e2e.page_object.programme_management.programme_management import (
-    ProgrammeManagement,
-)
 from e2e.page_object.programme_population.households import Households
 from e2e.page_object.programme_population.households_details import HouseholdsDetails
 from e2e.page_object.programme_population.individuals import Individuals
-from e2e.page_object.programme_users.programme_users import ProgrammeUsers
 from e2e.page_object.targeting.targeting import Targeting
 from e2e.page_object.targeting.targeting_create import TargetingCreate
 from e2e.page_object.targeting.targeting_details import TargetingDetails
@@ -401,11 +389,6 @@ def filters(request: FixtureRequest, browser: Chrome) -> Filters:
 
 
 @pytest.fixture
-def page_programme_management(request: FixtureRequest, browser: Chrome) -> ProgrammeManagement:
-    return ProgrammeManagement(browser)
-
-
-@pytest.fixture
 def page_programme_details(request: FixtureRequest, browser: Chrome) -> ProgrammeDetails:
     return ProgrammeDetails(browser)
 
@@ -501,11 +484,6 @@ def page_grievance_dashboard(request: FixtureRequest, browser: Chrome) -> Grieva
 
 
 @pytest.fixture
-def page_managerial_console(request: FixtureRequest, browser: Chrome) -> ManagerialConsole:
-    return ManagerialConsole(browser)
-
-
-@pytest.fixture
 def page_payment_module_details(request: FixtureRequest, browser: Chrome) -> PaymentModuleDetails:
     return PaymentModuleDetails(browser)
 
@@ -523,38 +501,6 @@ def page_program_cycle(request: FixtureRequest, browser: Chrome) -> ProgramCycle
 @pytest.fixture
 def page_program_cycle_details(request: FixtureRequest, browser: Chrome) -> ProgramCycleDetailsPage:
     return ProgramCycleDetailsPage(browser)
-
-
-@pytest.fixture
-def page_accountability_surveys(request: FixtureRequest, browser: Chrome) -> AccountabilitySurveys:
-    return AccountabilitySurveys(browser)
-
-
-@pytest.fixture
-def page_accountability_surveys_details(request: FixtureRequest, browser: Chrome) -> AccountabilitySurveysDetails:
-    return AccountabilitySurveysDetails(browser)
-
-
-@pytest.fixture
-def page_programme_users(request: FixtureRequest, browser: Chrome) -> ProgrammeUsers:
-    return ProgrammeUsers(browser)
-
-
-@pytest.fixture
-def page_accountability_communication(request: FixtureRequest, browser: Chrome) -> AccountabilityCommunication:
-    return AccountabilityCommunication(browser)
-
-
-@pytest.fixture
-def page_accountability_communication_details(
-    request: FixtureRequest, browser: Chrome
-) -> AccountabilityCommunicationDetails:
-    return AccountabilityCommunicationDetails(browser)
-
-
-@pytest.fixture
-def page_country_dashboard(request: FixtureRequest, browser: Chrome) -> CountryDashboard:
-    return CountryDashboard(browser)
 
 
 @pytest.fixture
@@ -593,15 +539,6 @@ def clear_downloaded_files(download_path: str) -> None:
     yield
     for file in os.listdir(download_path):
         os.remove(os.path.join(download_path, file))
-
-
-@pytest.fixture
-def change_super_user(business_area: BusinessArea) -> None:
-    user = User.objects.filter(email="test@example.com").first()
-    user.partner = Partner.objects.get(name="UNHCR")
-    user.partner.allowed_business_areas.add(business_area)
-    user.save()
-    return user
 
 
 @pytest.fixture(autouse=True)
