@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import pytest
 
 from extras.test_utils.factories import (
@@ -19,6 +21,8 @@ from hope.models import (
     Program,
 )
 
+GENERIC_IMPORT_URL = "/api/generic-import/upload/"
+AFGHANISTAN_PROGRAM_NAME = "Test Program"
 SOMALIA_PROGRAM_NAME = "Somalia Test Program"
 
 
@@ -61,3 +65,23 @@ def somalia_program(somalia_business_area: BusinessArea) -> Program:
         data_collecting_type=dct,
         beneficiary_group=BeneficiaryGroup.objects.get(name="Main Menu"),
     )
+
+
+@pytest.fixture
+def afghanistan_program(business_area: BusinessArea) -> Program:
+    dct = DataCollectingTypeFactory(type=DataCollectingType.Type.STANDARD)
+    dct.limit_to.add(business_area)
+    return ProgramFactory(
+        name=AFGHANISTAN_PROGRAM_NAME,
+        status=Program.ACTIVE,
+        business_area=business_area,
+        data_collecting_type=dct,
+        beneficiary_group=BeneficiaryGroup.objects.get(name="Main Menu"),
+    )
+
+
+@pytest.fixture
+def invalid_csv_file(tmp_path: Path) -> Path:
+    csv_file = tmp_path / "test_file.csv"
+    csv_file.write_text("col1,col2\nval1,val2")
+    return csv_file

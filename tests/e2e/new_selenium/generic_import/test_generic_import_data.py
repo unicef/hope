@@ -14,7 +14,7 @@ from hope.models import (
     User,
 )
 
-from .conftest import SOMALIA_PROGRAM_NAME
+from .conftest import GENERIC_IMPORT_URL, SOMALIA_PROGRAM_NAME
 
 pytestmark = pytest.mark.django_db()
 
@@ -27,17 +27,21 @@ def test_generic_import_creates_rdi_with_household_individual_document_and_accou
 ) -> None:
     with grant_permission(user_with_no_permissions, somalia_business_area, Permissions.GENERIC_IMPORT_DATA):
         browser.login(username="noperm_user", wait_for_drawer=False)
-        browser.open("/api/generic-import/upload/")
+        browser.open(GENERIC_IMPORT_URL)
+        browser.assert_exact_text("Generic Import - Upload File", "h1.generic-import-title")
         browser.select_option_by_text("#id_business_area", "Somalia")
         browser.wait_for_text(SOMALIA_PROGRAM_NAME, "#id_program")
         browser.select_option_by_text("#id_program", SOMALIA_PROGRAM_NAME)
         browser.choose_file("#id_file", f"{pytest.SELENIUM_PATH}/helpers/e2e_generic_import_somalia.xlsx")
         browser.wait_for_text("e2e_generic_import_somalia.xlsx", "#file-name-display")
-        browser.click("button.submit-button")
-        browser.wait_for_and_accept_alert(timeout=60)
+        # browser.click() runs scripts after the click, and they dismiss an alert that opens quickly.
+        browser.wait_for_element_clickable("button.submit-button").click()
+        alert_text = browser.wait_for_and_accept_alert(timeout=60)
 
     rdi = RegistrationDataImport.objects.get(program=somalia_program, name__contains="Generic Import")
     assert rdi.status == RegistrationDataImport.IN_REVIEW, rdi.error_message
+    assert "File uploaded successfully!" in alert_text
+    assert rdi.name in alert_text
     household = Household.all_merge_status_objects.get(registration_data_import=rdi)
     assert (household.size, household.village) == (3, "Hantiwadaag")
     individual = Individual.all_merge_status_objects.get(registration_data_import=rdi)
