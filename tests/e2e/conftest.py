@@ -23,7 +23,6 @@ from selenium.webdriver import Chrome
 from selenium.webdriver.chrome.options import Options
 
 from e2e.page_object.admin_panel.admin_panel import AdminPanel
-from e2e.page_object.filters import Filters
 from e2e.page_object.generic_import.generic_import import GenericImport
 from e2e.page_object.grievance.details_feedback_page import FeedbackDetailsPage
 from e2e.page_object.grievance.details_grievance_page import GrievanceDetailsPage
@@ -381,11 +380,6 @@ def login(browser: Chrome) -> Chrome:
 
     cache.clear()
     return browser
-
-
-@pytest.fixture
-def filters(request: FixtureRequest, browser: Chrome) -> Filters:
-    return Filters(browser)
 
 
 @pytest.fixture

@@ -8,7 +8,6 @@ from selenium.common.exceptions import NoSuchElementException, TimeoutException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.remote.webelement import WebElement
 
-from e2e.filters.test_filters import create_grievance
 from e2e.helpers.date_time_format import FormatTime
 from e2e.page_object.admin_panel.admin_panel import AdminPanel
 from e2e.page_object.grievance.details_grievance_page import GrievanceDetailsPage
@@ -19,6 +18,7 @@ from e2e.page_object.programme_population.households_details import HouseholdsDe
 from e2e.page_object.programme_population.individuals import Individuals
 from extras.test_utils.factories import (
     DataCollectingTypeFactory,
+    GrievanceTicketFactory,
     HouseholdFactory,
     IndividualFactory,
     IndividualRoleInHouseholdFactory,
@@ -64,6 +64,19 @@ def get_program_with_dct_type_and_name(
         beneficiary_group=beneficiary_group,
         business_area=BusinessArea.objects.get(slug="afghanistan"),
     )
+
+
+def create_grievance(name: str, program: str = "Test Programm") -> None:
+    business_area = BusinessArea.objects.filter(slug="afghanistan").first()
+    grievance = GrievanceTicketFactory(
+        category=GrievanceTicket.CATEGORY_DATA_CHANGE,
+        issue_type=GrievanceTicket.ISSUE_TYPE_INDIVIDUAL_DATA_CHANGE_DATA_UPDATE,
+        business_area=business_area,
+        status=GrievanceTicket.STATUS_FOR_APPROVAL,
+    )
+    grievance.programs.add(Program.objects.filter(name=program).first())
+    grievance.unicef_id = name
+    grievance.save()
 
 
 @pytest.fixture
