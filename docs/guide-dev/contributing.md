@@ -42,6 +42,10 @@ All pull requests must meet these criteria before merging:
 - **Two approving reviews** are required before merging
 - Address all reviewer comments
 
+### Release steps
+
+- A change that needs a manual step before or after deploy adds it to `RELEASE_STEPS.md`, with an owner. See [Release steps](release-steps.md).
+
 ### Tests
 
 - All existing tests must pass

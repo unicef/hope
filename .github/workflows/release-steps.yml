@@ -1,0 +1,23 @@
+name: Release steps
+on:
+  pull_request:
+    branches: [staging, master]
+permissions:
+  contents: read
+jobs:
+  unreleased-empty:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      # Runs on every PR, not only ones touching RELEASE_STEPS.md: if this becomes a required
+      # check, a run skipped by a `paths:` filter would block the merge forever.
+      - name: No entries under "## Unreleased"
+        run: |
+          entries=$(awk '/^## /{u = /^## Unreleased[ \t\r]*$/; next} u && /[^ \t\r]/' RELEASE_STEPS.md)
+          if [ -n "$entries" ]; then
+            echo "::error file=RELEASE_STEPS.md::Label these entries with the version (PR to develop) before merging:"
+            echo "$entries"
+            exit 1
+          fi
