@@ -292,6 +292,11 @@ const PeopleDetailsPage = (): ReactElement => {
                 {individual?.registrationDataImport?.importedBy?.email}
               </LabelizedField>
             </ResponsiveGrid>
+            <ResponsiveGrid size="quarter" mobileSize="half">
+              <LabelizedField label={t('Implementing Partner')}>
+                {household?.orgNameEnumerator}
+              </LabelizedField>
+            </ResponsiveGrid>
           </ResponsiveGridContainer>
           {individual?.registrationDataImport?.dataSource === 'XLS' ? null : (
             <>

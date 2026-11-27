@@ -59,3 +59,15 @@ The field label can be configured separately for each programme by a HOPE admini
 The identification key can be manually compared with an identity reference returned by a Financial Service Provider (FSP). References included as additional columns in a reconciliation file are available in the relevant Payment Record details. See [Payment Reconciliation](payment-reconciliation.md#additional-reconciliation-columns).
 
 Programme-specific identification key labels were introduced by [Change Request 299147: Identity Field customisation & PaymentRecord flex fields](https://dev.azure.com/unicef/ICTD-HCT-MIS/_workitems/edit/299147).
+
+### Implementing Partner
+
+The **Registration Details** section of the household details page, and of the people details page in Social Worker programmes, shows the **Implementing Partner** recorded at registration. The value comes from the **Name of partner organization** field of the registration data (`org_name_enumerator_h_c` in an XLSX import). When the field was not filled in, the page shows a dash.
+
+![Registration Details of a household, with Implementing Partner Plan International](./_screenshots/population/implementing-partner-household-details.png)
+
+The household list and the people list carry an **Implementing Partner** filter. Its options are the partner names found on the records of the current programme that you can see, in alphabetical order.
+
+![The Implementing Partner filter open, listing the programme's partner names in alphabetical order](./_screenshots/population/implementing-partner-filter.png)
+
+![The household list filtered by CARE, showing only the CARE households](./_screenshots/population/implementing-partner-filtered-list.png)

@@ -52,6 +52,7 @@ export const PeopleListTable = ({
       orderBy: filter.orderBy,
       rdiId: filter.rdiId,
       birthDate: filter.birthDate,
+      orgNameEnumerator: filter.orgNameEnumerator,
     }),
     [
       filter.ageMin,
@@ -72,6 +73,7 @@ export const PeopleListTable = ({
       businessArea,
       filter.rdiId,
       filter.birthDate,
+      filter.orgNameEnumerator,
     ],
   );
 

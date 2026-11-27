@@ -19,7 +19,7 @@ from hope.apps.core.api.mixins import (
     ProgramVisibilityMixin,
     SerializerActionMixin,
 )
-from hope.apps.core.api.serializers import FieldAttributeSerializer
+from hope.apps.core.api.serializers import ChoiceSerializer, FieldAttributeSerializer
 from hope.apps.household.api.caches import (
     HouseholdListKeyConstructor,
     IndividualListKeyConstructor,
@@ -45,6 +45,7 @@ from hope.apps.household.filters import (
 from hope.apps.payment.api.querysets import with_payment_related_data
 from hope.apps.payment.api.serializers import PaymentListSerializer
 from hope.models import FlexibleAttribute, Household, Individual, IndividualRoleInHousehold, PaymentPlan, Program
+from hope.models.utils import MergeStatusModel
 
 
 class HouseholdViewSet(
@@ -96,6 +97,11 @@ class HouseholdViewSet(
             Permissions.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_DETAILS_AS_CREATOR,
         ],
         "recipients": [Permissions.ACCOUNTABILITY_SURVEY_VIEW_DETAILS],
+        "implementing_partners": [
+            Permissions.POPULATION_VIEW_HOUSEHOLDS_LIST,
+            Permissions.POPULATION_VIEW_INDIVIDUALS_LIST,
+            Permissions.RDI_VIEW_DETAILS,
+        ],
     }
     filter_backends = (OrderingFilter, DjangoFilterBackend)
     filterset_class = HouseholdFilter
@@ -257,6 +263,22 @@ class HouseholdViewSet(
 
         serializer = self.get_serializer(recipients, many=True)
         return Response(serializer.data)
+
+    @extend_schema(responses={200: ChoiceSerializer(many=True)})
+    @action(detail=False, methods=["get"], url_path="implementing-partners", filter_backends=(), pagination_class=None)
+    def implementing_partners(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        if self.program.status == Program.DRAFT:
+            return Response([])
+        names = (
+            super()
+            .get_queryset()
+            .filter(rdi_merge_status=MergeStatusModel.MERGED)
+            .exclude(org_name_enumerator="")
+            .order_by("org_name_enumerator")
+            .values_list("org_name_enumerator", flat=True)
+            .distinct()
+        )
+        return Response(ChoiceSerializer([{"name": name, "value": name} for name in names], many=True).data)
 
     @extend_schema(responses={200: RecipientSerializer(many=True)})
     @action(detail=False, methods=["get"])

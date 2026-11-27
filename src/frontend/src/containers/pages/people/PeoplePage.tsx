@@ -59,6 +59,7 @@ const PeoplePage = (): ReactElement => {
     lastRegistrationDateMax: '',
     rdiId: '',
     birthDate: '',
+    orgNameEnumerator: '',
   };
 
   const [filter, setFilter] = useState(

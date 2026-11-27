@@ -69,6 +69,7 @@ export const HouseholdTable = ({
       withdrawn: matchWithdrawnValue(),
       rdiMergeStatus: 'MERGED',
       rdiId: filter.rdiId,
+      orgNameEnumerator: filter.orgNameEnumerator,
     };
   }, [
     businessArea,
@@ -83,6 +84,7 @@ export const HouseholdTable = ({
     filter.residenceStatus,
     filter.withdrawn,
     filter.rdiId,
+    filter.orgNameEnumerator,
   ]);
 
   const table = useTableState({

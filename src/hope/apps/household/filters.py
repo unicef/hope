@@ -97,6 +97,7 @@ class HouseholdFilter(UpdatedAtFilter):
     survey_id = CharFilter(method="filter_survey_id")
     message_id = CharFilter(method="filter_message_id")
     recipient_id = CharFilter(method="filter_recipient_id")
+    org_name_enumerator = CharFilter(field_name="org_name_enumerator")
 
     class Meta:
         model = Household
@@ -286,6 +287,7 @@ class IndividualFilter(UpdatedAtFilter):
     rdi_id = CharFilter(method="filter_rdi_id")
     duplicates_only = BooleanFilter(method="filter_duplicates_only")
     rdi_merge_status = ChoiceFilter(method="rdi_merge_status_filter", choices=MergeStatusModel.STATUS_CHOICE)
+    org_name_enumerator = CharFilter(field_name="household__org_name_enumerator")
 
     class Meta:
         model = Individual
