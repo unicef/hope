@@ -72,6 +72,22 @@ def payment_plan_without_exchange_rate(vision_api_payment_plan_factory) -> Payme
 
 
 @pytest.fixture
+def closure_payment_plan(vision_api_payment_plan_factory) -> PaymentPlan:
+    payment_plan = vision_api_payment_plan_factory(unicef_id="PP-CLOSURE")
+    payment_plan.status = PaymentPlan.Status.CLOSED
+    payment_plan.internal_data = {
+        "vision": {
+            "status": VisionStatus.RELEASED.value,
+            "sent": True,
+            "vision_id": "V12345",
+            "log": [],
+        }
+    }
+    payment_plan.save(update_fields=["status", "internal_data"])
+    return payment_plan
+
+
+@pytest.fixture
 def closed_payment_plan_without_vision_id(vision_api_payment_plan_factory) -> PaymentPlan:
     payment_plan = vision_api_payment_plan_factory(unicef_id="PP-NO-VISION-ID")
     payment_plan.status = PaymentPlan.Status.CLOSED
@@ -498,30 +514,20 @@ def test_notify_payment_plan_status_logs_api_error(
 def test_notify_payment_plan_closure_posts_reconciliation_to_payment_plan_endpoint(
     mock_post,
     mock_acquire_token,
-    vision_api_payment_plan_factory,
+    closure_payment_plan: PaymentPlan,
     django_assert_num_queries,
 ) -> None:
     mock_post.return_value = ({"status": "ok"}, 200)
-    payment_plan = vision_api_payment_plan_factory(unicef_id="PP-CLOSURE")
-    payment_plan.internal_data = {
-        "vision": {
-            "status": VisionStatus.RELEASED.value,
-            "sent": True,
-            "vision_id": "V12345",
-            "log": [],
-        }
-    }
-    payment_plan.save(update_fields=["internal_data"])
     closure_date = datetime(2026, 11, 9, 10, 30, tzinfo=timezone.utc)
 
     with django_assert_num_queries(4):
         response = VisionAPI().notify_payment_plan_closure(
-            payment_plan,
+            closure_payment_plan,
             total_amount_reconciled=Decimal("8500.50"),
             closure_date=closure_date,
         )
 
-    payment_plan.refresh_from_db(fields=["internal_data"])
+    closure_payment_plan.refresh_from_db(fields=["internal_data"])
     assert response == {"status": "ok"}
     assert mock_post.call_args.args[0] == "https://test.example.com/ps/ezcash/PaymentPlan"
     assert mock_post.call_args.args[1] == {
@@ -539,8 +545,8 @@ def test_notify_payment_plan_closure_posts_reconciliation_to_payment_plan_endpoi
         "reconAmt": "8500.50",
         "reconDate": "20261109",
     }
-    assert payment_plan.vision_status == VisionStatus.RELEASED.value
-    entry = payment_plan.vision_data["log"][0]
+    assert closure_payment_plan.vision_status == VisionStatus.RELEASED.value
+    entry = closure_payment_plan.vision_data["log"][0]
     assert entry["type"] == VisionLogEntryType.CLOSURE_NOTIFICATION.value
     # The response is persisted in the plan's internal_data vision log, not just returned.
     assert entry["response"] == {"status": "ok"}
@@ -552,36 +558,26 @@ def test_notify_payment_plan_closure_posts_reconciliation_to_payment_plan_endpoi
 def test_notify_payment_plan_closure_saves_error_response_in_internal_data(
     mock_post,
     mock_acquire_token,
-    vision_api_payment_plan_factory,
+    closure_payment_plan: PaymentPlan,
     django_assert_num_queries,
 ) -> None:
     mock_post.side_effect = BaseAPI.APIError("closure endpoint failed")
-    payment_plan = vision_api_payment_plan_factory(unicef_id="PP-CLOSURE-FAIL")
-    payment_plan.internal_data = {
-        "vision": {
-            "status": VisionStatus.RELEASED.value,
-            "sent": True,
-            "vision_id": "V12345",
-            "log": [],
-        }
-    }
-    payment_plan.save(update_fields=["internal_data"])
 
     with django_assert_num_queries(4), pytest.raises(VisionAPIError, match="closure endpoint failed"):
         VisionAPI().notify_payment_plan_closure(
-            payment_plan,
+            closure_payment_plan,
             total_amount_reconciled=Decimal("8500.50"),
             closure_date=datetime(2026, 11, 9, 10, 30, tzinfo=timezone.utc),
         )
 
-    payment_plan.refresh_from_db(fields=["internal_data"])
-    entry = payment_plan.vision_data["log"][0]
+    closure_payment_plan.refresh_from_db(fields=["internal_data"])
+    entry = closure_payment_plan.vision_data["log"][0]
     assert entry["type"] == VisionLogEntryType.CLOSURE_NOTIFICATION.value
     assert entry["response"] == {"error": "closure endpoint failed"}
     assert entry["payload"] == mock_post.call_args.args[1]
-    assert entry["payload"]["payplanSno"] == "PP-CLOSURE-FAIL"
+    assert entry["payload"]["payplanSno"] == "PP-CLOSURE"
     # A failed closure notification must not change the Vision workflow status.
-    assert payment_plan.vision_status == VisionStatus.RELEASED.value
+    assert closure_payment_plan.vision_status == VisionStatus.RELEASED.value
 
 
 @patch("hope.contrib.vision.api.VisionAPI._acquire_token")

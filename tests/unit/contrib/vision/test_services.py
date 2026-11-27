@@ -60,22 +60,34 @@ def vision_enabled_payment_plan(vision_payment_plan: PaymentPlan) -> PaymentPlan
 
 
 @pytest.fixture
-def closure_notified_payment_plan(vision_enabled_payment_plan: PaymentPlan) -> PaymentPlan:
+def closed_sent_vision_payment_plan(vision_enabled_payment_plan: PaymentPlan) -> PaymentPlan:
     vision_enabled_payment_plan.status = PaymentPlan.Status.CLOSED
+    vision_enabled_payment_plan.total_delivered_quantity = Decimal("8500.50")
     vision_enabled_payment_plan.internal_data = {
-        "vision": {
-            "sent": True,
-            "log": [
-                {
-                    "type": VisionLogEntryType.CLOSURE_NOTIFICATION.value,
-                    "payload": {},
-                    "response": {"status": "ok"},
-                }
-            ],
-        }
+        "vision": {"sent": True, "vision_id": "V12345", "status": VisionStatus.RELEASED.value}
     }
-    vision_enabled_payment_plan.save(update_fields=["status", "internal_data"])
+    vision_enabled_payment_plan.save(update_fields=["status", "total_delivered_quantity", "internal_data"])
     return vision_enabled_payment_plan
+
+
+@pytest.fixture
+def non_closed_sent_vision_payment_plan(vision_enabled_payment_plan: PaymentPlan) -> PaymentPlan:
+    VisionService.vision_data(vision_enabled_payment_plan)["sent"] = True
+    vision_enabled_payment_plan.save(update_fields=["internal_data"])
+    return vision_enabled_payment_plan
+
+
+@pytest.fixture
+def closure_notified_payment_plan(closed_sent_vision_payment_plan: PaymentPlan) -> PaymentPlan:
+    VisionService.vision_data(closed_sent_vision_payment_plan)["log"] = [
+        {
+            "type": VisionLogEntryType.CLOSURE_NOTIFICATION.value,
+            "payload": {},
+            "response": {"status": "ok"},
+        }
+    ]
+    closed_sent_vision_payment_plan.save(update_fields=["internal_data"])
+    return closed_sent_vision_payment_plan
 
 
 @pytest.fixture(params=["global", "business-area"])
@@ -1096,36 +1108,28 @@ def test_notify_payment_plan_status_to_vision_queues_non_blocking_job(
 @patch("hope.contrib.vision.tasks.VisionAPI")
 def test_notify_payment_plan_closure_to_vision_task_calls_api(
     mock_vision_api,
-    vision_enabled_payment_plan: PaymentPlan,
+    closed_sent_vision_payment_plan: PaymentPlan,
     django_assert_num_queries,
 ) -> None:
-    vision_enabled_payment_plan.status = PaymentPlan.Status.CLOSED
-    vision_enabled_payment_plan.total_delivered_quantity = Decimal("8500.50")
-    vision_enabled_payment_plan.internal_data = {
-        "vision": {"sent": True, "vision_id": "V12345", "status": VisionStatus.RELEASED.value}
-    }
-    vision_enabled_payment_plan.save(update_fields=["status", "total_delivered_quantity", "internal_data"])
-    job = MagicMock(config={"payment_plan_id": str(vision_enabled_payment_plan.pk)})
+    job = MagicMock(config={"payment_plan_id": str(closed_sent_vision_payment_plan.pk)})
 
     with django_assert_num_queries(1):
         notify_payment_plan_closure_to_vision_async_task_action(job)
 
     notified_payment_plan = mock_vision_api.return_value.notify_payment_plan_closure.call_args.args[0]
     kwargs = mock_vision_api.return_value.notify_payment_plan_closure.call_args.kwargs
-    assert notified_payment_plan.pk == vision_enabled_payment_plan.pk
-    assert kwargs["total_amount_reconciled"] == vision_enabled_payment_plan.total_delivered_quantity
-    assert kwargs["closure_date"] == vision_enabled_payment_plan.status_date
+    assert notified_payment_plan.pk == closed_sent_vision_payment_plan.pk
+    assert kwargs["total_amount_reconciled"] == closed_sent_vision_payment_plan.total_delivered_quantity
+    assert kwargs["closure_date"] == closed_sent_vision_payment_plan.status_date
 
 
 @patch("hope.contrib.vision.tasks.VisionAPI")
 def test_notify_payment_plan_closure_to_vision_task_skips_non_closed_plan(
     mock_vision_api,
-    vision_enabled_payment_plan: PaymentPlan,
+    non_closed_sent_vision_payment_plan: PaymentPlan,
     django_assert_num_queries,
 ) -> None:
-    vision_enabled_payment_plan.internal_data = {"vision": {"sent": True}}
-    vision_enabled_payment_plan.save(update_fields=["internal_data"])
-    job = MagicMock(config={"payment_plan_id": str(vision_enabled_payment_plan.pk)})
+    job = MagicMock(config={"payment_plan_id": str(non_closed_sent_vision_payment_plan.pk)})
 
     with django_assert_num_queries(1):
         notify_payment_plan_closure_to_vision_async_task_action(job)
