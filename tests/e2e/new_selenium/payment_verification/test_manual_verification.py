@@ -136,9 +136,7 @@ def test_grievance_ticket_for_partially_received_payment_updates_verification(
     login.open_nav_section("Grievance")
     login.click('a[data-cy="nav-Grievance Tickets"]')
     login.wait_for_element_clickable('button[data-cy="tab-SYSTEM-GENERATED"]').click()
-    ticket = GrievanceTicket.objects.get(
-        payment_verification_ticket_details__payment_verification=manual_verification
-    )
+    ticket = GrievanceTicket.objects.get(payment_verification_ticket_details__payment_verification=manual_verification)
     login.wait_for_text(ticket.unicef_id, 'tr[role="checkbox"]')
     assert len(login.find_elements('tr[role="checkbox"]')) == 1
     login.click('tr[role="checkbox"]')
