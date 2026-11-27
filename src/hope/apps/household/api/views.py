@@ -45,6 +45,7 @@ from hope.apps.household.filters import (
 from hope.apps.payment.api.querysets import with_payment_related_data
 from hope.apps.payment.api.serializers import PaymentListSerializer
 from hope.models import FlexibleAttribute, Household, Individual, IndividualRoleInHousehold, PaymentPlan, Program
+from hope.models.utils import MergeStatusModel
 
 
 class HouseholdViewSet(
@@ -268,6 +269,7 @@ class HouseholdViewSet(
         names = (
             super()
             .get_queryset()
+            .filter(rdi_merge_status=MergeStatusModel.MERGED)
             .exclude(org_name_enumerator="")
             .order_by("org_name_enumerator")
             .values_list("org_name_enumerator", flat=True)
@@ -465,7 +467,7 @@ class IndividualViewSet(
         names = (
             super()
             .get_queryset()
-            .filter(household__isnull=False)
+            .filter(rdi_merge_status=MergeStatusModel.MERGED, household__isnull=False)
             .exclude(household__org_name_enumerator="")
             .order_by("household__org_name_enumerator")
             .values_list("household__org_name_enumerator", flat=True)

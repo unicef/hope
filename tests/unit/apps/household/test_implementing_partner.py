@@ -14,6 +14,7 @@ from extras.test_utils.factories import (
 )
 from hope.apps.account.permissions import Permissions
 from hope.models import BusinessArea, Household, Individual, Program
+from hope.models.utils import MergeStatusModel
 
 pytestmark = pytest.mark.django_db
 
@@ -119,6 +120,16 @@ def blank_partner_household(afghanistan: BusinessArea, program: Program) -> Hous
 
 
 @pytest.fixture
+def pending_household(afghanistan: BusinessArea, program: Program) -> Household:
+    return HouseholdFactory(
+        program=program,
+        business_area=afghanistan,
+        org_name_enumerator="World Vision",
+        rdi_merge_status=MergeStatusModel.PENDING,
+    )
+
+
+@pytest.fixture
 def other_program_household(afghanistan: BusinessArea, other_program: Program) -> Household:
     return HouseholdFactory(program=other_program, business_area=afghanistan, org_name_enumerator="Save the Children")
 
@@ -152,13 +163,14 @@ def test_individual_list_filtered_by_implementing_partner_returns_only_that_part
     assert [row["id"] for row in response.json()["results"]] == [str(care_household.head_of_household.id)]
 
 
-def test_household_implementing_partners_returns_distinct_sorted_names_of_the_program(
+def test_household_implementing_partners_returns_distinct_sorted_merged_names_of_the_program(
     household_list_client: Any,
     household_partners_url: str,
     plan_household: Household,
     second_plan_household: Household,
     care_household: Household,
     blank_partner_household: Household,
+    pending_household: Household,
     other_program_household: Household,
 ) -> None:
     response = household_list_client.get(household_partners_url)
@@ -170,13 +182,14 @@ def test_household_implementing_partners_returns_distinct_sorted_names_of_the_pr
     ]
 
 
-def test_individual_implementing_partners_returns_distinct_sorted_names_of_the_program(
+def test_individual_implementing_partners_returns_distinct_sorted_merged_names_of_the_program(
     individual_list_client: Any,
     individual_partners_url: str,
     plan_household: Household,
     second_plan_household: Household,
     care_household: Household,
     blank_partner_household: Household,
+    pending_household: Household,
     other_program_household: Household,
     individual_without_household: Individual,
 ) -> None:
