@@ -804,6 +804,51 @@ def test_create_account_bank_with_financial_institution(
     assert "id" in response.data[0]
 
 
+def test_create_account_with_number_longer_than_256_characters_returns_number_error_and_creates_no_ticket(
+    authenticated_client: Any,
+    grant_create_permission: None,
+    user: User,
+    grievance_context: dict[str, Any],
+    list_url: str,
+    bank_account: dict[str, Any],
+) -> None:
+    input_data = {
+        "description": "Test",
+        "assigned_to": str(user.id),
+        "issue_type": GrievanceTicket.ISSUE_TYPE_INDIVIDUAL_DATA_CHANGE_DATA_UPDATE,
+        "category": GrievanceTicket.CATEGORY_DATA_CHANGE,
+        "consent": True,
+        "language": "PL",
+        "extras": {
+            "issue_type": {
+                "individual_data_update_issue_type_extras": {
+                    "individual": str(grievance_context["individual"].id),
+                    "individual_data": {
+                        "accounts": [
+                            {
+                                "account_type": "bank",
+                                "financial_institution": str(bank_account["financial_institution"].id),
+                                "number": "1" * 257,
+                            }
+                        ],
+                    },
+                }
+            }
+        },
+    }
+
+    response = authenticated_client.post(list_url, input_data, format="json")
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    individual_data_errors = response.json()["extras"]["issue_type"]["individual_data_update_issue_type_extras"][
+        "individual_data"
+    ]
+    assert individual_data_errors == {
+        "accounts": {"0": {"number": ["Ensure this field has no more than 256 characters."]}}
+    }
+    assert GrievanceTicket.objects.count() == 0
+
+
 @pytest.fixture
 def bank_account(
     grievance_context: dict[str, Any],
@@ -853,6 +898,51 @@ def test_edit_account_bank_requires_financial_institution(
     response = authenticated_client.post(list_url, input_data_fail, format="json")
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert "financial_institution" in str(response.data).lower()
+
+
+def test_edit_account_with_number_longer_than_256_characters_returns_number_error_and_creates_no_ticket(
+    authenticated_client: Any,
+    grant_create_permission: None,
+    user: User,
+    grievance_context: dict[str, Any],
+    list_url: str,
+    bank_account: dict[str, Any],
+) -> None:
+    input_data = {
+        "description": "Test",
+        "assigned_to": str(user.id),
+        "issue_type": GrievanceTicket.ISSUE_TYPE_INDIVIDUAL_DATA_CHANGE_DATA_UPDATE,
+        "category": GrievanceTicket.CATEGORY_DATA_CHANGE,
+        "consent": True,
+        "language": "PL",
+        "extras": {
+            "issue_type": {
+                "individual_data_update_issue_type_extras": {
+                    "individual": str(grievance_context["individual"].id),
+                    "individual_data": {
+                        "accounts_to_edit": [
+                            {
+                                "id": str(bank_account["account"].id),
+                                "financial_institution": str(bank_account["financial_institution"].id),
+                                "number": "1" * 257,
+                            }
+                        ],
+                    },
+                }
+            }
+        },
+    }
+
+    response = authenticated_client.post(list_url, input_data, format="json")
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    individual_data_errors = response.json()["extras"]["issue_type"]["individual_data_update_issue_type_extras"][
+        "individual_data"
+    ]
+    assert individual_data_errors == {
+        "accounts_to_edit": {"0": {"number": ["Ensure this field has no more than 256 characters."]}}
+    }
+    assert GrievanceTicket.objects.count() == 0
 
 
 def test_edit_account_bank_with_financial_institution(

@@ -47,7 +47,7 @@ from hope.models.individual import ascii_name_validator, normalize_latin_name
 class CreateAccountSerializer(serializers.Serializer):
     account_type = serializers.CharField(required=True)
     financial_institution = serializers.CharField(required=True)
-    number = serializers.CharField(required=True)
+    number = serializers.CharField(required=True, max_length=256)
     data_fields = serializers.JSONField(required=False)
     approve_status = serializers.BooleanField(required=False)
 
@@ -55,7 +55,7 @@ class CreateAccountSerializer(serializers.Serializer):
 class EditAccountSerializer(serializers.Serializer):
     id = serializers.UUIDField()
     financial_institution = serializers.CharField(required=True)
-    number = serializers.CharField(required=True)
+    number = serializers.CharField(required=True, max_length=256)
     data_fields = serializers.JSONField(required=False)
     approve_status = serializers.BooleanField(required=False)
 
