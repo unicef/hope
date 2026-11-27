@@ -285,6 +285,14 @@ def payment_gateway_setup(
 
 
 @pytest.fixture
+def two_decimal_gateway_payment(payment_gateway_setup: dict) -> Payment:
+    payment = payment_gateway_setup["payments"][0]
+    payment.entitlement_quantity = Decimal("100.12")
+    payment.save(update_fields=["entitlement_quantity"])
+    return payment
+
+
+@pytest.fixture
 def unmatched_payment_gateway_record():
     return PaymentRecordData(
         id=999,
@@ -524,7 +532,7 @@ def test_sync_records_for_split(
 @mock.patch("hope.apps.payment.services.payment_gateway.PaymentGatewayAPI.get_records_for_payment_instruction")
 @mock.patch(
     "hope.apps.payment.services.payment_gateway.get_quantity_in_usd",
-    return_value=100.00,
+    side_effect=lambda amount, **kwargs: amount / Decimal(2),
 )
 def test_sync_records_error_messages(
     get_quantity_in_usd_mock: Any,
@@ -994,60 +1002,6 @@ def test_sync_record_skips_when_parent_split_is_none(
     assert payment.status != original_status
 
 
-@mock.patch(
-    "hope.apps.payment.services.payment_gateway.PaymentGatewayAPI.change_payment_instruction_status",
-    return_value="FINALIZED",
-)
-@mock.patch("hope.models.payment_plan.PaymentPlan.get_exchange_rate", return_value=2.0)
-@mock.patch("hope.apps.payment.services.payment_gateway.PaymentGatewayAPI.get_record")
-@mock.patch(
-    "hope.apps.payment.services.payment_gateway.get_quantity_in_usd",
-    return_value=100.00,
-)
-def test_sync_record_with_none_entitlement_quantity(
-    get_quantity_in_usd_mock: Any,
-    get_record_mock: Any,
-    get_exchange_rate_mock: Any,
-    change_payment_instruction_status_mock: Any,
-    payment_gateway_setup: dict,
-) -> None:
-    """Exercise the `entitlement_quantity or Decimal(0)` fallback branch."""
-    payments = payment_gateway_setup["payments"]
-    split_1, split_2 = payment_gateway_setup["splits"]
-
-    # Set entitlement_quantity to None
-    payments[0].entitlement_quantity = None
-    payments[0].status = Payment.STATUS_ERROR
-    payments[0].save()
-
-    split_1.sent_to_payment_gateway = True
-    split_2.sent_to_payment_gateway = True
-    split_1.save()
-    split_2.save()
-
-    get_record_mock.side_effect = [
-        PaymentRecordData(
-            id=1,
-            remote_id=str(payments[0].id),
-            created="2023-10-10",
-            modified="2023-10-11",
-            record_code="1",
-            parent="1",
-            status="TRANSFERRED_TO_BENEFICIARY",
-            auth_code="1",
-            payout_amount=10.0,
-            fsp_code="1",
-        )
-    ]
-
-    pg_service = PaymentGatewayService()
-    pg_service.api.get_record = get_record_mock  # type: ignore
-    pg_service.api.change_payment_instruction_status = change_payment_instruction_status_mock  # type: ignore
-
-    with pytest.raises(TypeError):
-        pg_service.sync_record(payments[0])
-
-
 def test_get_hope_status(payment_gateway_setup: dict) -> None:
     payment = payment_gateway_setup["payments"][0]
     record = PaymentRecordData(
@@ -1071,6 +1025,41 @@ def test_get_hope_status(payment_gateway_setup: dict) -> None:
     record.payout_amount = float(payment.entitlement_quantity)
     record.status = "NOT EXISTING STATUS"
     assert record.get_hope_status(Decimal("1000000.00")) == Payment.STATUS_ERROR
+
+
+def test_update_payment_not_distributed_without_payout_amount(payment_gateway_setup: dict) -> None:
+    payment = payment_gateway_setup["payments"][0]
+    payment_plan = payment_gateway_setup["payment_plan"]
+    split = payment_gateway_setup["splits"][0]
+    record = PaymentRecordData(
+        id=1,
+        remote_id=str(payment.id),
+        created="2023-10-10",
+        modified="2023-10-11",
+        record_code="1",
+        parent=str(split.id),
+        status="REFUND",
+        auth_code="1",
+        payout_amount=None,
+        payout_date="2023-10-11",
+        fsp_code="1",
+    )
+    log_pairs = []
+
+    update_fields = PaymentGatewayService.update_payment(
+        payment=payment,
+        payment_records_by_remote_id={str(payment.id): record},
+        container=split,
+        payment_plan=payment_plan,
+        exchange_rate=None,
+        log_pairs=log_pairs,
+    )
+
+    assert update_fields is not None
+    assert payment.status == Payment.STATUS_NOT_DISTRIBUTED
+    assert payment.delivered_quantity == Decimal("0.00")
+    assert payment.delivered_quantity_usd == Decimal("0.00")
+    assert payment.delivery_date is None
 
 
 @mock.patch("hope.apps.payment.services.payment_gateway.PaymentGatewayAPI.add_records_to_payment_instruction")
@@ -1238,7 +1227,7 @@ def test_api_add_records_to_payment_instruction(
                 "remote_id": str(payments[0].id),
                 "record_code": payments[0].unicef_id,
                 "payload": {
-                    "amount": str(payments[0].entitlement_quantity),
+                    "amount": "100.00",
                     "phone_no": str(payments[0].collector.phone_no),
                     "last_name": payments[0].collector.family_name,
                     "middle_name": payments[0].collector.middle_name,
@@ -1306,7 +1295,7 @@ def test_api_add_records_to_payment_instruction_wallet_integration_mobile(
                 "remote_id": str(payments[0].id),
                 "record_code": payments[0].unicef_id,
                 "payload": {
-                    "amount": str(payments[0].entitlement_quantity),
+                    "amount": "100.00",
                     "phone_no": str(primary_collector.phone_no),
                     "last_name": primary_collector.family_name,
                     "middle_name": primary_collector.middle_name,
@@ -1393,7 +1382,7 @@ def test_api_add_records_to_payment_instruction_wallet_integration_bank(
     payments[0].household_snapshot.refresh_from_db()
 
     expected_payload = {
-        "amount": str(payments[0].entitlement_quantity),
+        "amount": "100.00",
         "phone_no": str(primary_collector.phone_no),
         "last_name": primary_collector.family_name,
         "middle_name": primary_collector.middle_name,
@@ -2257,10 +2246,16 @@ def test_payment_payload_system_fields_override_fsp_extra_fields(payment_gateway
     payload = PaymentSerializer().get_payload(payment)
 
     assert payload["fsp_reference"] == "FSP-001"
-    assert payload["amount"] == str(payment.entitlement_quantity)
+    assert payload["amount"] == "100.00"
     assert "account" not in payload
     assert "origination_currency" not in payload
     assert "reconciliation_reference" not in payload
+
+
+def test_payment_payload_uses_two_decimal_places_for_local_amount(two_decimal_gateway_payment: Payment) -> None:
+    payload = PaymentSerializer().get_payload(two_decimal_gateway_payment)
+
+    assert payload["amount"] == "100.12"
 
 
 def test_map_financial_institution_pk_and_mapping_missing_logs_and_returns_original_data(

@@ -76,7 +76,7 @@
       <td></td>
       <td></td>
       <td>Total entitlement (USD)</td>
-      <td>{{ payment_plan.total_entitled_quantity_usd|default_if_none:"0" }}</td>
+      <td>{{ payment_plan.total_entitled_quantity_usd|default_if_none:"0"|floatformat:"2u" }}</td>
     </tr>
   </tbody>
 </table>
@@ -96,7 +96,7 @@
       <td>Total amount redeemed ({{ payment_plan.currency }})</td>
       <td>{{ reconciliation.reconciled_local|default_if_none:"0" }}</td>
       <td>Total amount redeemed (USD)</td>
-      <td>{{ reconciliation.reconciled_usd|default_if_none:"0" }}</td>
+      <td>{{ reconciliation.reconciled_usd|default_if_none:"0"|floatformat:"2u" }}</td>
     </tr>
     <tr>
       {% if is_social_worker_program %}
@@ -108,7 +108,7 @@
       <td>Total amount unredeemed ({{ payment_plan.currency }})</td>
       <td>{{ reconciliation.failed_local|default_if_none:"0" }}</td>
       <td>Total amount unredeemed (USD)</td>
-      <td>{{ reconciliation.failed_usd|default_if_none:"0" }}</td>
+      <td>{{ reconciliation.failed_usd|default_if_none:"0"|floatformat:"2u" }}</td>
     </tr>
   </tbody>
 </table>

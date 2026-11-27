@@ -77,26 +77,28 @@ class QCFReportPaymentRowData:
     payment_plan_unicef_id: str | None
     programme: str
     fc: str
-    principal_amount: float
-    charges_amount: float
-    fee_amount: float
+    principal_amount: Decimal
+    charges_amount: Decimal
+    fee_amount: Decimal
     ad_name_value: str
 
 
 @dataclasses.dataclass
 class QCFReportPaymentPlanData:
     payment_plan_unicef_id: str | None
-    principal_total: float = dataclasses.field(init=False)
-    charges_total: float = dataclasses.field(init=False)
-    refunds_total: float = dataclasses.field(init=False)
-    fees_total: float = dataclasses.field(init=False)
+    principal_total: Decimal = dataclasses.field(init=False)
+    charges_total: Decimal = dataclasses.field(init=False)
+    refunds_total: Decimal = dataclasses.field(init=False)
+    fees_total: Decimal = dataclasses.field(init=False)
     payments_data: list[QCFReportPaymentRowData]
 
     def __post_init__(self) -> None:
-        self.principal_total = sum(p.principal_amount for p in self.payments_data if p.principal_amount >= 0) or 0
-        self.charges_total = sum(p.charges_amount for p in self.payments_data) or 0
-        self.refunds_total = sum(p.principal_amount for p in self.payments_data if p.principal_amount < 0) or 0
-        self.fees_total = sum(p.fee_amount for p in self.payments_data) or 0
+        self.principal_total = sum(
+            (p.principal_amount for p in self.payments_data if p.principal_amount >= 0), Decimal(0)
+        )
+        self.charges_total = sum((p.charges_amount for p in self.payments_data), Decimal(0))
+        self.refunds_total = sum((p.principal_amount for p in self.payments_data if p.principal_amount < 0), Decimal(0))
+        self.fees_total = sum((p.fee_amount for p in self.payments_data), Decimal(0))
 
 
 class WesternUnionReportsService:
@@ -681,9 +683,9 @@ class WesternUnionReportsService:
                     payment_plan_unicef_id=payment_plan.unicef_id,
                     programme=payment_plan.program_cycle.program.name,
                     fc=funds_commitments_str,
-                    principal_amount=float(row.principal_amount),
-                    charges_amount=float(row.charges_amount),
-                    fee_amount=float(row.fee_amount),
+                    principal_amount=row.principal_amount,
+                    charges_amount=row.charges_amount,
+                    fee_amount=row.fee_amount,
                     ad_name_value=ad_name_value or "",
                 )
             )
@@ -733,6 +735,8 @@ class WesternUnionReportsService:
                     payment_data.ad_name_value,
                 ]
             )
+            for column in ("H", "I", "J"):
+                ws[f"{column}{ws.max_row}"].number_format = "0.00"
 
         ws.append([])
 
@@ -743,6 +747,8 @@ class WesternUnionReportsService:
         last_row = ws.max_row
         for row_number in range(last_row - 3, last_row + 1):
             ws[f"A{row_number}"].font = Font(bold=True)
+        for row_number in range(last_row - 2, last_row + 1):
+            ws[f"E{row_number}"].number_format = "0.00"
 
         return wb
 

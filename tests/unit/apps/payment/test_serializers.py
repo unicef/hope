@@ -37,7 +37,6 @@ from hope.apps.payment.api.serializers import (
     PaymentVerificationPlanDetailsSerializer,
     PaymentVerificationPlanListSerializer,
     PendingPaymentSerializer,
-    VolumeByDeliveryMechanismSerializer,
 )
 from hope.contrib.vision.models import FundsCommitmentItem
 from hope.models import Approval, FinancialServiceProvider, Payment, PaymentPlan, PaymentPlanSplit
@@ -500,7 +499,6 @@ def test_payment_plan_detail_serializer_all_data(payment_plan_detail_context: di
     assert data["can_create_follow_up"] is False
     assert data["can_split"] is True
     assert data["split_choices"] == to_choice_object(PaymentPlanSplit.SplitType.choices)
-    assert data.get("volume_by_delivery_mechanism") is not None
     assert data["status_date"] is not None
     assert data["start_date"] == "2024-01-02"
     assert data["end_date"] == "2024-02-03"
@@ -658,7 +656,7 @@ def test_payment_plan_detail_serializer_unore_exchange_rate_none_when_api_unavai
     payment_plan.save(update_fields=["currency"])
     payment_plan.get_unore_exchange_rate = Mock(side_effect=ConnectionError("exchange rate API unavailable"))
 
-    with django_assert_num_queries(23):
+    with django_assert_num_queries(21):
         data = PaymentPlanDetailSerializer(instance=payment_plan, context={"request": Mock(user=user)}).data
 
     assert data["id"] == str(payment_plan.id)
@@ -675,7 +673,7 @@ def test_payment_plan_detail_serializer_unore_exchange_rate_not_unavailable_with
     payment_plan.currency = None
     payment_plan.save(update_fields=["currency"])
 
-    with django_assert_num_queries(23):
+    with django_assert_num_queries(21):
         data = PaymentPlanDetailSerializer(instance=payment_plan, context={"request": Mock(user=user)}).data
 
     assert data["currency"] is None
@@ -696,7 +694,7 @@ def test_payment_plan_detail_serializer_unore_exchange_rate_from_exchange_rate_c
     payment_plan.custom_exchange_rate = False
     payment_plan.save(update_fields=["currency", "custom_exchange_rate"])
 
-    with django_assert_num_queries(23):
+    with django_assert_num_queries(21):
         data = PaymentPlanDetailSerializer(instance=payment_plan, context={"request": Mock(user=user)}).data
 
     expected_rate = payment_plan.get_unore_exchange_rate()
@@ -793,21 +791,6 @@ def test_approval_process_serializer_rejected_on(approval_process_context: dict[
     approval_process.save(update_fields=["sent_for_finance_release_date"])
     data = ApprovalProcessSerializer(instance=approval_process).data
     assert data["rejected_on"] == "IN_REVIEW"
-
-
-def test_volume_by_delivery_mechanism_serializer_get_volume_fields(volume_by_delivery_context: dict[str, Any]) -> None:
-    payment_plan = volume_by_delivery_context["payment_plan"]
-    data = VolumeByDeliveryMechanismSerializer(instance=payment_plan).data
-
-    assert data["volume"] is None
-    assert data["volume_usd"] is None
-
-    payment_plan.financial_service_provider = volume_by_delivery_context["fsp"]
-    payment_plan.save(update_fields=["financial_service_provider"])
-    data = VolumeByDeliveryMechanismSerializer(instance=payment_plan).data
-
-    assert data["volume"] == 222
-    assert data["volume_usd"] == 111
 
 
 def test_payment_list_serializer_snapshot_collector_data_with_collector_type_primary(

@@ -1,0 +1,39 @@
+from decimal import ROUND_HALF_UP, Context, Decimal, InvalidOperation
+from typing import Any
+
+from django.core.exceptions import ValidationError
+from django.db import models
+
+CURRENCY_DECIMAL_PLACES = 10
+CURRENCY_MAX_DIGITS = 30
+CURRENCY_QUANTUM = Decimal("0.0000000001")
+CURRENCY_MAX_ABSOLUTE_VALUE = Decimal(10) ** (CURRENCY_MAX_DIGITS - CURRENCY_DECIMAL_PLACES)
+
+
+def normalize_currency_decimal(value: Any) -> Decimal:
+    try:
+        amount = Decimal(str(value))
+        if not amount.is_finite() or amount < 0 or amount >= CURRENCY_MAX_ABSOLUTE_VALUE:
+            raise InvalidOperation
+        return amount.quantize(
+            CURRENCY_QUANTUM,
+            context=Context(prec=CURRENCY_MAX_DIGITS, rounding=ROUND_HALF_UP),
+        )
+    except (InvalidOperation, TypeError, ValueError) as exc:
+        raise ValidationError("Enter a valid monetary amount with at most 20 digits before the decimal point.") from exc
+
+
+class HopeCurrencyField(models.DecimalField):
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
+        kwargs.setdefault("max_digits", CURRENCY_MAX_DIGITS)
+        kwargs.setdefault("decimal_places", CURRENCY_DECIMAL_PLACES)
+        super().__init__(*args, **kwargs)
+
+    def db_type(self, connection: Any) -> str:
+        return "numeric"
+
+    def get_db_prep_save(self, value: Any, connection: Any) -> Any:
+        # Let Django prepare bulk_update() expressions.
+        if value is None or hasattr(value, "as_sql"):
+            return super().get_db_prep_save(value, connection)
+        return super().get_db_prep_save(normalize_currency_decimal(value), connection)

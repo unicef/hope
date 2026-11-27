@@ -10,6 +10,7 @@ import zipfile
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.utils import timezone
 from freezegun import freeze_time
+import openpyxl
 import pytest
 
 from extras.test_utils.factories import (
@@ -1057,6 +1058,33 @@ def test_aggregate_data_payment_row_prefers_record_type_three_and_sums_amounts(
     assert aggregated_row.fee_amount == Decimal("0.00")
 
 
+@pytest.fixture
+def currency_precision_wu_rows(db) -> tuple[Payment, list[list[str]]]:
+    payment = PaymentFactory(unicef_id="RCPT-HIGH-PRECISION", fsp_auth_code="MTCN-1")
+    first_row = [""] * 19
+    first_row[0] = "1"
+    first_row[1] = "MTCN-1"
+    first_row[10] = "999999999999.12"
+    first_row[11] = "0.01"
+    first_row[12] = "0"
+    first_row[18] = "2"
+    second_row = first_row.copy()
+    second_row[10] = "0.01"
+    return payment, [first_row, second_row]
+
+
+def test_aggregate_wu_payment_rows_keeps_currency_precision(
+    service: QCFReportsService,
+    currency_precision_wu_rows: tuple[Payment, list[list[str]]],
+) -> None:
+    payment, rows = currency_precision_wu_rows
+
+    aggregated = service.aggregate_data_payment_row(payment.unicef_id, payment, rows)
+
+    assert aggregated.principal_amount == Decimal("999999999999.13")
+    assert aggregated.charges_amount == Decimal("0.02")
+
+
 def test_record_type_rank_uses_expected_order(
     service: QCFReportsService,
     one_day: timedelta,
@@ -1610,9 +1638,9 @@ def test_payment_plan_data_post_init_tracks_principal_charges_refunds_and_fees(
                 payment_plan_unicef_id="PP-1",
                 programme="Programme",
                 fc="FC-1",
-                principal_amount=100.0,
-                charges_amount=3.0,
-                fee_amount=1.5,
+                principal_amount=Decimal("999999999999.12"),
+                charges_amount=Decimal("3.00"),
+                fee_amount=Decimal("1.50"),
                 ad_name_value="Advice-1",
             ),
             QCFReportPaymentRowData(
@@ -1623,18 +1651,18 @@ def test_payment_plan_data_post_init_tracks_principal_charges_refunds_and_fees(
                 payment_plan_unicef_id="PP-1",
                 programme="Programme",
                 fc="FC-1",
-                principal_amount=-50.0,
-                charges_amount=2.0,
-                fee_amount=0.5,
+                principal_amount=Decimal("-50.00"),
+                charges_amount=Decimal("2.00"),
+                fee_amount=Decimal("0.50"),
                 ad_name_value="Advice-1",
             ),
         ],
     )
 
-    assert report_data.principal_total == 100.0
-    assert report_data.charges_total == 5.0
-    assert report_data.refunds_total == -50.0
-    assert report_data.fees_total == 2.0
+    assert report_data.principal_total == Decimal("999999999999.12")
+    assert report_data.charges_total == Decimal("5.00")
+    assert report_data.refunds_total == Decimal("-50.00")
+    assert report_data.fees_total == Decimal("2.00")
 
 
 def test_generate_report_xlsx_contains_headers_and_totals(
@@ -1655,9 +1683,9 @@ def test_generate_report_xlsx_contains_headers_and_totals(
                 payment_plan_unicef_id="PP-1",
                 programme="Programme",
                 fc="FC1/001",
-                principal_amount=100.0,
-                charges_amount=3.0,
-                fee_amount=0.0,
+                principal_amount=Decimal("100.00"),
+                charges_amount=Decimal("3.00"),
+                fee_amount=Decimal("0.00"),
                 ad_name_value="Advice",
             )
         ],
@@ -1682,11 +1710,16 @@ def test_generate_report_xlsx_contains_headers_and_totals(
     ]
     assert worksheet["K2"].value == "Advice"
     assert worksheet["A4"].value == "Principal Total"
-    assert worksheet["E4"].value == 100.0
+    assert worksheet["E4"].value == 100
+    assert worksheet["E4"].data_type == "n"
+    assert worksheet["E4"].number_format == "0.00"
     assert worksheet["A5"].value == "Charges Total"
-    assert worksheet["E5"].value == 3.0
+    assert worksheet["E5"].value == 3
+    assert worksheet["E5"].data_type == "n"
     assert worksheet["A6"].value == "Refunds Total"
     assert worksheet["E6"].value == 0
+    assert worksheet["E6"].data_type == "n"
+    assert worksheet["E6"].number_format == "0.00"
 
 
 def test_generate_reports_for_invoice_creates_report_and_registers_notification_callback(
@@ -1777,16 +1810,32 @@ def test_generate_report_uses_payment_plan_data(
             payment=payment,
             mtcn="MTCN-1",
             transaction_status="2",
-            principal_amount=Decimal("100.00"),
-            charges_amount=Decimal("3.00"),
-            fee_amount=Decimal("0.00"),
+            principal_amount=Decimal("123456789.12"),
+            charges_amount=Decimal("0.10"),
+            fee_amount=Decimal("0.20"),
         )
     ]
 
     filename, workbook = service.generate_report(payment.parent, payment_rows, "Advice")
+    output = io.BytesIO()
+    workbook.save(output)
+    output.seek(0)
+    worksheet = openpyxl.load_workbook(output).active
 
     assert filename.startswith(f"WU_REPORT_{payment.parent.business_area.slug}_{payment.parent.unicef_id}_")
-    assert workbook.active["K2"].value == "Advice"
+    assert worksheet["K2"].value == "Advice"
+    assert worksheet["H2"].value == 123456789.12
+    assert worksheet["I2"].value == 0.1
+    assert worksheet["J2"].value == 0.2
+    assert worksheet["E4"].value == 123456789.12
+    assert worksheet["E5"].value == 0.1
+    assert worksheet["H2"].data_type == "n"
+    assert worksheet["I2"].data_type == "n"
+    assert worksheet["J2"].data_type == "n"
+    assert worksheet["E4"].data_type == "n"
+    assert worksheet["E5"].data_type == "n"
+    assert worksheet["H2"].number_format == "0.00"
+    assert worksheet["E4"].number_format == "0.00"
 
 
 def test_generate_report_marks_mtcn_mismatch_in_workbook(

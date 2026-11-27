@@ -1,0 +1,62 @@
+from decimal import Decimal
+
+import django.core.validators
+from django.db import migrations
+
+import hope.apps.core.fields
+
+PAYMENT_COLUMNS = (
+    "entitlement_quantity_usd",
+    "delivered_quantity_usd",
+)
+
+
+def change_payment_columns(apps, schema_editor):
+    connection = schema_editor.connection
+    table = schema_editor.quote_name(apps.get_model("payment", "Payment")._meta.db_table)
+    columns = [schema_editor.quote_name(name) for name in PAYMENT_COLUMNS]
+    alterations = ", ".join(f"ALTER COLUMN {column} TYPE numeric" for column in columns)
+    with connection.cursor() as cursor:
+        cursor.execute("SET LOCAL lock_timeout = '1s'")
+        cursor.execute("SET LOCAL statement_timeout = '30s'")
+        cursor.execute(f"ALTER TABLE {table} {alterations}")
+
+
+class Migration(migrations.Migration):
+    atomic = True
+
+    dependencies = [("payment", "0087_migration")]
+
+    operations = [
+        migrations.SeparateDatabaseAndState(
+            database_operations=[migrations.RunPython(change_payment_columns)],
+            state_operations=[
+                migrations.AlterField(
+                    model_name="payment",
+                    name="delivered_quantity_usd",
+                    field=hope.apps.core.fields.HopeCurrencyField(
+                        blank=True,
+                        decimal_places=10,
+                        help_text="Delivered amount converted to USD, with up to 10 decimal places.",
+                        max_digits=30,
+                        null=True,
+                        validators=[django.core.validators.MinValueValidator(Decimal("0.00"))],
+                        verbose_name="Delivered quantity in USD",
+                    ),
+                ),
+                migrations.AlterField(
+                    model_name="payment",
+                    name="entitlement_quantity_usd",
+                    field=hope.apps.core.fields.HopeCurrencyField(
+                        blank=True,
+                        decimal_places=10,
+                        help_text="Entitlement amount converted to USD, with up to 10 decimal places.",
+                        max_digits=30,
+                        null=True,
+                        validators=[django.core.validators.MinValueValidator(Decimal("0.00"))],
+                        verbose_name="Entitlement quantity in USD",
+                    ),
+                ),
+            ],
+        ),
+    ]
