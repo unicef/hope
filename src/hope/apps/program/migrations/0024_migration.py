@@ -51,6 +51,7 @@ class Migration(migrations.Migration):
                 on_delete=django.db.models.deletion.PROTECT,
                 related_name="programs",
                 to="program.beneficiarygroup",
+                verbose_name="Payee Label",
             ),
         ),
     ]

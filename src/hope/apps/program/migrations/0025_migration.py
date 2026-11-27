@@ -1,5 +1,7 @@
-from django.db import migrations
+from django.db import migrations, transaction
 from django.db.models import Q
+
+from hope.api.caches import get_or_create_cache_key, increment_cache_key
 
 STANDARD = "STANDARD"
 SOCIAL = "SOCIAL"
@@ -9,10 +11,25 @@ INCENTIVE_PAYEE_MASTER_DETAIL_PAYEE_LABELS = ("Education Workers", "Community wo
 # (name, singular) pairs; the singular fills group_label and member_label, the name both plurals
 INCENTIVE_PAYEE_NEW_PAYEE_LABELS = (
     ("Child Protection Workers", "Child Protection Worker"),
+    ("Education Workers", "Education Worker"),
     ("Health Workers", "Health Worker"),
     ("Social Protection Workers", "Social Protection Worker"),
     ("WASH Workers", "WASH Worker"),
+    ("Nutrition Workers", "Nutrition Worker"),
+    ("Humanitarian Workers", "Humanitarian Worker"),
 )
+# Each Frontline Worker DCT is restricted to one of the labels above and its programs move to that label;
+# every other Incentive Payee label is deactivated. Reverting moves those programs back to Social Workers.
+FRONTLINE_WORKER_PAYEE_LABELS = {
+    "frontline_worker_cp": "Child Protection Workers",
+    "frontline_worker_education": "Education Workers",
+    "frontline_worker_health": "Health Workers",
+    "frontline_worker_sp": "Social Protection Workers",
+    "frontline_worker_wash": "WASH Workers",
+    "frontline_worker_nutrition": "Nutrition Workers",
+    "frontline_worker_humanitarian": "Humanitarian Workers",
+}
+SOCIAL_WORKERS_PAYEE_LABEL = "Social Workers"
 # (name, singular) pairs; the singular fills group_label, member_label is the organization's representative
 ORGANIZATION_NEW_PAYEE_LABELS = (
     ("Schools", "School"),
@@ -53,6 +70,34 @@ def _create_payee_labels(beneficiary_group_model, payee_type, payee_labels, memb
                 "payee_type": payee_type,
             },
         )
+
+
+def _assign_frontline_worker_payee_labels(
+    data_collecting_type_model, beneficiary_group_model, program_model, payee_type
+):
+    for dct_code, payee_label_name in FRONTLINE_WORKER_PAYEE_LABELS.items():
+        data_collecting_types = data_collecting_type_model.objects.filter(code=dct_code, payee_type=payee_type)
+        payee_label = (
+            _payee_labels_named(beneficiary_group_model, [payee_label_name]).filter(payee_type=payee_type).first()
+        )
+        if payee_label is None or not data_collecting_types.exists():
+            continue
+        payee_label.data_collecting_types.add(*data_collecting_types)
+        program_model.objects.filter(data_collecting_type__in=data_collecting_types).update(
+            beneficiary_group=payee_label
+        )
+
+    payee_labels_in_table = _payee_labels_named(beneficiary_group_model, FRONTLINE_WORKER_PAYEE_LABELS.values())
+    beneficiary_group_model.objects.filter(payee_type=payee_type).exclude(
+        pk__in=payee_labels_in_table.values("pk")
+    ).update(active=False)
+
+
+def _bump_cache_versions(business_area_slugs):
+    increment_cache_key("beneficiary_group_list")
+    for business_area_slug in business_area_slugs:
+        business_area_version = get_or_create_cache_key(f"{business_area_slug}:version", 1)
+        increment_cache_key(f"{business_area_slug}:{business_area_version}:program_list")
 
 
 def _default_dct(data_collecting_type_model, payee_type, preferred_code):
@@ -101,6 +146,7 @@ def create_payee_types_and_backfill(apps, schema_editor):
     ).update(payee_type=organization)
     BeneficiaryGroup.objects.filter(payee_type__isnull=True, master_detail=True).update(payee_type=household)
     BeneficiaryGroup.objects.filter(payee_type__isnull=True, master_detail=False).update(payee_type=incentive_payee)
+    _assign_frontline_worker_payee_labels(DataCollectingType, BeneficiaryGroup, Program, incentive_payee)
 
     household.default_data_collecting_type = _default_dct(DataCollectingType, household, "full_collection")
     household.save(update_fields=["default_data_collecting_type"])
@@ -121,13 +167,34 @@ def create_payee_types_and_backfill(apps, schema_editor):
         )
         unmapped_dcts_with_programs.update(payee_type=legacy)
 
+    # Migrations do not send the signals that bump the cached Payee Label and program list versions
+    business_area_slugs = list(Program.objects.order_by().values_list("business_area__slug", flat=True).distinct())
+    transaction.on_commit(lambda: _bump_cache_versions(business_area_slugs), robust=True)
+
 
 def restore_master_detail(apps, schema_editor):
+    DataCollectingType = apps.get_model("core", "DataCollectingType")
     BeneficiaryGroup = apps.get_model("program", "BeneficiaryGroup")
+    Program = apps.get_model("program", "Program")
+
+    social_workers = BeneficiaryGroup.objects.filter(name=SOCIAL_WORKERS_PAYEE_LABEL).first()
+    if social_workers is not None:
+        Program.objects.filter(data_collecting_type__code__in=FRONTLINE_WORKER_PAYEE_LABELS).update(
+            beneficiary_group=social_workers
+        )
+    for dct_code, payee_label_name in FRONTLINE_WORKER_PAYEE_LABELS.items():
+        data_collecting_types = DataCollectingType.objects.filter(code=dct_code)
+        for payee_label in _payee_labels_named(BeneficiaryGroup, [payee_label_name]):
+            payee_label.data_collecting_types.remove(*data_collecting_types)
+    BeneficiaryGroup.objects.update(active=True)
+
     payee_labels_with_master_detail = _payee_labels_named(BeneficiaryGroup, INCENTIVE_PAYEE_MASTER_DETAIL_PAYEE_LABELS)
     BeneficiaryGroup.objects.filter(payee_type__data_collecting_types__type=SOCIAL).exclude(
         pk__in=payee_labels_with_master_detail.values("pk")
     ).update(master_detail=False)
+
+    business_area_slugs = list(Program.objects.order_by().values_list("business_area__slug", flat=True).distinct())
+    transaction.on_commit(lambda: _bump_cache_versions(business_area_slugs), robust=True)
 
 
 class Migration(migrations.Migration):
