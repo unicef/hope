@@ -41,15 +41,15 @@ grep -rhE '^\s*def test_' tests/e2e --include='test_*.py' --exclude-dir=new_sele
 | 13 | `generic_import` | 15 | 0 | ⬜ |
 | 14 | `filters` | 4 | 0 | ⬜ |
 | 15 | `payment_verification` | 10 | 0 | ⬜ |
-| 16 | `payment_module` | 9 | 0 | ⬜ |
+| 16 | `payment_module` | 9 | 9 | ✅ |
 | 17 | `targeting` | 21 | 0 | ⬜ |
 | 18 | `grievance/feedback` | 12 | 0 | ⬜ |
 | 19 | `grievance/grievance_dashboard` | 2 | 0 | ⬜ |
 | 20 | `grievance/grievance_tickets` | 25 | 0 | ⬜ |
 | 21 | Old infra cleanup | – | – | ⬜ |
-| | **Total** | **152** | **54** | **36 %** |
+| | **Total** | **152** | **63** | **41 %** |
 
-`[███████░░░░░░░░░░░░░] 54 / 152`. Update it after each PR: 1 block per ~8 tests. An "in review" module counts as migrated only on its own branch; drop the mark when its PR merges.
+`[████████░░░░░░░░░░░░] 63 / 152`. Update it after each PR: 1 block per ~8 tests. An "in review" module counts as migrated only on its own branch; drop the mark when its PR merges.
 
 The new suite already has 46 test files and ~250 test functions. These do not count toward the 152.
 
@@ -194,16 +194,16 @@ Already in new suite: `test_activate_verification_plan.py`.
 
 ### 16. `payment_module/test_e2e_payment_plans.py` (9) → `new_selenium/payment_module/`
 Already in new suite: lifecycle, entitlement, top-up, group, details, close, follow-up, cycles.
-- [ ] test_smoke_payment_plan → NEW `test_payment_plan_list.py`
-- [ ] test_smoke_new_payment_plan → NEW `test_create_payment_plan.py`
-- [ ] test_smoke_details_payment_plan → NEW `test_payment_plan_details.py`, unless `test_payment_details.py` already asserts the same sections
-- [ ] test_payment_plan_happy_path → NEW `test_create_payment_plan.py` (create → lock → entitlement → approve → authorize → release)
-- [ ] test_payment_plan_exclude_not_lock_error → NEW `test_payment_plan_exclusions.py`
-- [ ] test_payment_plan_save_exclude_people → NEW `test_payment_plan_exclusions.py`, parametrize people / households
-- [ ] test_payment_plan_save_exclude → NEW (param)
-- [ ] test_payment_plan_creation_error → NEW `test_create_payment_plan.py`
-- [ ] test_payment_plan_supporting_documents → NEW `test_supporting_documents.py`
-- [ ] Delete `page_object/payment_module/`
+- [x] test_smoke_payment_plan → NEW `test_payment_plan_list.py::test_payment_plan_list_shows_payment_plan`
+- [x] test_smoke_new_payment_plan → NEW `test_create_payment_plan.py::test_new_payment_plan_form_shows_fields`
+- [x] test_smoke_details_payment_plan → NEW `test_payment_plan_list.py::test_payment_plan_details_shows_summary` (`test_payment_details.py` covers the payment page, not the plan page)
+- [x] test_payment_plan_happy_path → NEW `test_create_payment_plan.py::test_create_payment_plan_and_take_it_to_accepted`
+- [x] test_payment_plan_exclude_not_lock_error → NEW `test_payment_plan_exclusions.py::test_exclusions_cannot_be_created_for_accepted_payment_plan` (asserts the disabled button and its tooltip instead of a click error)
+- [x] test_payment_plan_save_exclude_people → NEW `test_payment_plan_exclusions.py::test_save_exclusion_updates_payment_plan_summary[people]`
+- [x] test_payment_plan_save_exclude → NEW `…[households]`
+- [x] test_payment_plan_creation_error → NEW `test_create_payment_plan.py::test_saving_empty_payment_plan_form_shows_required_errors`
+- [x] test_payment_plan_supporting_documents → NEW `test_supporting_documents.py::test_upload_supporting_document`
+- [x] Delete `page_object/payment_module/` and its 5 fixtures in `tests/e2e/conftest.py`
 
 ### 17. `targeting/test_targeting.py` (21) → `new_selenium/targeting/`
 Already in new suite: target population, criteria, list, permissions, status flow, vulnerability score, social-worker exclusions.
