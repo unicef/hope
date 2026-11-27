@@ -23,6 +23,9 @@ import type { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useProgramContext } from 'src/programContext';
+import { RestService } from '@restgenerated/services/RestService';
+import { restQueryKey } from '@utils/queryKeys';
+import { useQuery } from '@tanstack/react-query';
 
 interface HouseholdFiltersProps {
   filter;
@@ -34,6 +37,7 @@ interface HouseholdFiltersProps {
   setAppliedFilter: (filter) => void;
   isOnPaper?: boolean;
   showStatusFilter?: boolean;
+  showImplementingPartnerFilter?: boolean;
 }
 
 export function HouseholdFilters({
@@ -46,14 +50,30 @@ export function HouseholdFilters({
   setAppliedFilter,
   isOnPaper = true,
   showStatusFilter = true,
+  showImplementingPartnerFilter = false,
 }: HouseholdFiltersProps): ReactElement {
   const { t } = useTranslation();
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
   const navigate = useNavigate();
   const location = useLocation();
-  const { isAllPrograms } = useBaseUrl();
+  const { isAllPrograms, businessArea, programId } = useBaseUrl();
   const { data: documentTypeChoices } = useDocumentTypeChoices();
+  const implementingPartnersParams = {
+    businessAreaSlug: businessArea,
+    programCode: programId,
+  };
+  const { data: implementingPartners } = useQuery({
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasProgramsHouseholdsImplementingPartnersList,
+      implementingPartnersParams,
+    ),
+    queryFn: () =>
+      RestService.restBusinessAreasProgramsHouseholdsImplementingPartnersList(
+        implementingPartnersParams,
+      ),
+    enabled: showImplementingPartnerFilter,
+  });
   const { handleFilterChange, applyFilterChanges, clearFilter } =
     createHandleApplyFilterChange(
       initialFilter,
@@ -225,6 +245,25 @@ export function HouseholdFilters({
               {PROGRAM_STATE_CHOICES.map((choice) => (
                 <MenuItem key={choice.value} value={choice.value}>
                   {t(choice.label)}
+                </MenuItem>
+              ))}
+            </SelectFilter>
+          </ResponsiveGrid>
+        )}
+        {showImplementingPartnerFilter && (
+          <ResponsiveGrid size="quarter">
+            <SelectFilter
+              onChange={(e) =>
+                handleFilterChange('orgNameEnumerator', e.target.value)
+              }
+              label={t('Implementing Partner')}
+              fullWidth
+              value={filter.orgNameEnumerator}
+              data-cy="hh-filters-implementing-partner"
+            >
+              {implementingPartners?.map((partner) => (
+                <MenuItem key={partner.value} value={partner.value}>
+                  {partner.name}
                 </MenuItem>
               ))}
             </SelectFilter>

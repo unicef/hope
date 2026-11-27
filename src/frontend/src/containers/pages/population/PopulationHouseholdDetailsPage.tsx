@@ -261,6 +261,11 @@ const PopulationHouseholdDetailsPage = (): ReactElement => {
                 {household?.registrationDataImport?.importedBy?.email}
               </LabelizedField>
             </ResponsiveGrid>
+            <ResponsiveGrid size="quarter" mobileSize="half">
+              <LabelizedField label={t('Implementing Partner')}>
+                {household?.orgNameEnumerator}
+              </LabelizedField>
+            </ResponsiveGrid>
             {household?.programRegistrationId && (
               <ResponsiveGrid size="quarter" mobileSize="half">
                 <LabelizedField label={t('Programme registration id')}>

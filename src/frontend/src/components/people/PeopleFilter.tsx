@@ -30,6 +30,9 @@ import type { IndividualChoices } from '@restgenerated/models/IndividualChoices'
 import { RdiAutocompleteRestFilter } from '@shared/autocompletes/RdiAutocompleteRestFilter';
 import { useSexChoices } from '@hooks/useSexChoices';
 import { useDocumentTypeChoices } from '@hooks/useDocumentTypeChoices';
+import { RestService } from '@restgenerated/services/RestService';
+import { restQueryKey } from '@utils/queryKeys';
+import { useQuery } from '@tanstack/react-query';
 
 interface PeopleFilterProps {
   filter;
@@ -55,11 +58,25 @@ export function PeopleFilter({
   const { t } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
-  const { isAllPrograms } = useBaseUrl();
+  const { isAllPrograms, businessArea, programId } = useBaseUrl();
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup || null;
   const { data: sexChoices } = useSexChoices();
   const { data: documentTypeChoices } = useDocumentTypeChoices();
+  const implementingPartnersParams = {
+    businessAreaSlug: businessArea,
+    programCode: programId,
+  };
+  const { data: implementingPartners } = useQuery({
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasProgramsIndividualsImplementingPartnersList,
+      implementingPartnersParams,
+    ),
+    queryFn: () =>
+      RestService.restBusinessAreasProgramsIndividualsImplementingPartnersList(
+        implementingPartnersParams,
+      ),
+  });
 
   const { handleFilterChange, applyFilterChanges, clearFilter } =
     createHandleApplyFilterChange(
@@ -278,6 +295,23 @@ export function PeopleFilter({
             value={filter.birthDate}
             dataCy="ind-filters-birth-date"
           />
+        </ResponsiveGrid>
+        <ResponsiveGrid size="quarter">
+          <SelectFilter
+            onChange={(e) =>
+              handleFilterChange('orgNameEnumerator', e.target.value)
+            }
+            label={t('Implementing Partner')}
+            fullWidth
+            value={filter.orgNameEnumerator}
+            data-cy="ind-filters-implementing-partner"
+          >
+            {implementingPartners?.map((partner) => (
+              <MenuItem key={partner.value} value={partner.value}>
+                {partner.name}
+              </MenuItem>
+            ))}
+          </SelectFilter>
         </ResponsiveGrid>
         <ResponsiveGrid size="quarter">
           <SelectFilter

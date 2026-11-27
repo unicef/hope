@@ -41,6 +41,7 @@ function PopulationHouseholdPage(): ReactElement {
     orderBy: 'unicef_id',
     withdrawn: '',
     rdiId: '',
+    orgNameEnumerator: '',
   };
 
   const [filter, setFilter] = useState(
@@ -82,6 +83,7 @@ function PopulationHouseholdPage(): ReactElement {
           setAppliedFilter(newFilter);
           setShouldScroll(true);
         }}
+        showImplementingPartnerFilter
       />
       <Box
         data-cy="page-details-container"
