@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+from decimal import Decimal
 from typing import cast
 
 from django.conf import settings
@@ -22,6 +23,12 @@ class VisionAPIMissingCredentialsError(Exception):
     pass
 
 
+# Refresh the token slightly before it actually expires, so a request started just before
+# expiry does not fail with an expired token.
+TOKEN_EXPIRY_BUFFER_SECONDS = 60
+DEFAULT_TOKEN_LIFETIME_SECONDS = 3600
+
+
 class VisionAPI(BaseAPI):
     API_URL_SETTING_NAME = "VISION_API_URL"
     API_AUTHENTICATION_REQUIRED = False
@@ -36,35 +43,69 @@ class VisionAPI(BaseAPI):
         self._token_expiry: datetime | None = None
 
     def _acquire_token(self) -> None:
+        """Exchange the client credentials for an OAuth bearer token and cache it on the session.
+
+        Post only to the OAuth token endpoint (``token_url``), never to the Payment Plan endpoint.
+        Store the token on the shared HTTP session with its (timezone-aware) expiry, so subsequent
+        calls reuse it until shortly before it lapses.
+        Raise ``VisionAPIMissingCredentialsError`` when credentials are not configured and
+        ``VisionAPIError`` when Vision rejects the request or returns a malformed token response.
+        """
         client_id = settings.VISION_CLIENT_ID
         client_secret = settings.VISION_CLIENT_SECRET
         grant_type = settings.VISION_TOKEN_GRANT_TYPE
-        timeout = settings.VISION_DEFAULT_TIMEOUT
 
         if not client_id or not client_secret:
             raise VisionAPIMissingCredentialsError("Missing Vision OAuth credentials")
 
-        response = requests.post(
+        # Use the shared session so token requests get the same connection pooling and retries
+        # (502/503/504) as the API calls that follow.
+        response = self._client.post(
             self.token_url,
             data={
                 "client_id": client_id,
                 "client_secret": client_secret,
                 "grant_type": grant_type,
             },
-            timeout=timeout,
+            timeout=settings.VISION_DEFAULT_TIMEOUT,
         )
 
-        if response.status_code == 401:
-            raise VisionAPIError(f"Vision OAuth authentication failed: {response.json()}")
+        if not response.ok:
+            try:
+                error_detail = response.json()
+            except ValueError:
+                error_detail = response.reason or "non-JSON response"
+            error_message = (
+                "Vision OAuth authentication failed"
+                if response.status_code == 401
+                else "Vision OAuth token request failed"
+            )
+            raise VisionAPIError(f"{error_message} (HTTP {response.status_code}): {str(error_detail)[:200]}")
 
-        response.raise_for_status()
-        data = response.json()
-        self._client.headers["Authorization"] = f"Bearer {data['access_token']}"
-        expires_in = int(data.get("expires_in", 3600))
-        self._token_expiry = datetime.now() + timedelta(seconds=expires_in - 60)
+        try:
+            data = response.json()
+        except ValueError as error:
+            raise VisionAPIError(
+                f"Vision OAuth token response was not valid JSON (HTTP {response.status_code})"
+            ) from error
+
+        access_token = data.get("access_token") if isinstance(data, dict) else None
+        if not access_token:
+            raise VisionAPIError("Vision OAuth token response did not contain an access token")
+        try:
+            expires_in = int(data.get("expires_in", DEFAULT_TOKEN_LIFETIME_SECONDS))
+        except (TypeError, ValueError) as error:
+            raise VisionAPIError("Vision OAuth token response contained an invalid expires_in value") from error
+
+        self._client.headers["Authorization"] = f"Bearer {access_token}"
+        # Clamp at zero: a lifetime shorter than the safety buffer must expire immediately
+        # rather than in the past.
+        lifetime_seconds = max(expires_in - TOKEN_EXPIRY_BUFFER_SECONDS, 0)
+        self._token_expiry = timezone.now() + timedelta(seconds=lifetime_seconds)
 
     def _ensure_token(self) -> None:
-        if not self._token_expiry or datetime.now() >= self._token_expiry:
+        """Acquire a token unless a previously acquired one is still valid."""
+        if not self._token_expiry or timezone.now() >= self._token_expiry:
             self._acquire_token()
 
     @classmethod
@@ -165,3 +206,36 @@ class VisionAPI(BaseAPI):
         payload = dict(PaymentPlanPayloadSerializer(payment_plan).data)
         payload["status"] = vision_status
         return self._post_payment_plan(payment_plan, payload, VisionLogEntryType.STATUS_NOTIFICATION)
+
+    def notify_payment_plan_closure(
+        self,
+        payment_plan: PaymentPlan,
+        *,
+        total_amount_reconciled: Decimal,
+        closure_date: datetime,
+    ) -> dict:
+        """Post the closure reconciliation to Vision's PaymentPlan endpoint.
+
+        Extend the Payment Plan creation payload with the Vision Payment Plan code (``visionPayplanSno``),
+        the total amount reconciled (``reconAmt``), and the reconciliation date (``reconDate``)
+        in YYYYMMDD format.
+        The attempt, including its response, is logged under the plan's Vision log in ``internal_data``;
+        a failure raises and never changes Vision status.
+        """
+        vision_payment_plan_id = str(payment_plan.vision_data.get("vision_id") or "")
+        # Total delivered quantity is a Decimal, which is not JSON-serializable by the
+        # underlying requests client; Vision expects it as a string, like authAmt.
+        payload = dict(PaymentPlanPayloadSerializer(payment_plan).data)
+        payload.update(
+            {
+                "visionPayplanSno": vision_payment_plan_id,
+                "reconAmt": str(total_amount_reconciled),
+                "reconDate": closure_date.strftime("%Y%m%d"),
+            }
+        )
+        # TODO: Add any further closure payload fields once Vision defines them.
+        return self._post_payment_plan(
+            payment_plan,
+            payload,
+            VisionLogEntryType.CLOSURE_NOTIFICATION,
+        )

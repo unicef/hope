@@ -19,7 +19,7 @@ from extras.test_utils.factories import (
 from hope.admin.funds_commitment_header import FundsCommitmentHeaderAdmin, FundsCommitmentItemInline
 from hope.admin.payment_plan import FundsCommitmentHeaderInline as PaymentPlanFundsCommitmentHeaderInline
 from hope.apps.account.actor_snapshot import ActorSnapshot
-from hope.contrib.vision.choices import VisionStatus
+from hope.contrib.vision.choices import VisionLogEntryType, VisionStatus
 from hope.contrib.vision.models import FundsCommitmentHeader
 from hope.models import PaymentPlan
 
@@ -218,6 +218,131 @@ def test_send_to_vision_queues_task(mock_send, afghanistan, admin_user, program_
     response = admin_client.post(url)
     assert response.status_code == 302, response.content[:500]
     mock_send.assert_called_once_with(pp, str(admin_user.pk))
+
+
+def _create_closed_payment_plan(afghanistan, admin_user, program_cycle, log=None):
+    """Create a closed, Vision-sent Payment Plan with the given Vision log entries."""
+    pp = _create_payment_plan(afghanistan, admin_user, program_cycle, PaymentPlan.Status.CLOSED)
+    pp.internal_data = {
+        "vision": {
+            "sent": True,
+            "status": VisionStatus.RELEASED.value,
+            "vision_id": "00000110",
+            "log": log or [],
+        }
+    }
+    pp.save(update_fields=["internal_data"])
+    return pp
+
+
+@pytest.fixture
+def closed_vision_payment_plan(vision_admin_context) -> PaymentPlan:
+    return _create_closed_payment_plan(
+        vision_admin_context["business_area"],
+        vision_admin_context["user"],
+        vision_admin_context["program_cycle"],
+    )
+
+
+@pytest.fixture
+def failed_closure_payment_plan(vision_admin_context) -> PaymentPlan:
+    return _create_closed_payment_plan(
+        vision_admin_context["business_area"],
+        vision_admin_context["user"],
+        vision_admin_context["program_cycle"],
+        log=[
+            {
+                "type": VisionLogEntryType.CLOSURE_NOTIFICATION.value,
+                "payload": {},
+                "response": {"error": "Vision request failed"},
+            }
+        ],
+    )
+
+
+@pytest.fixture
+def closure_notified_payment_plan(vision_admin_context) -> PaymentPlan:
+    return _create_closed_payment_plan(
+        vision_admin_context["business_area"],
+        vision_admin_context["user"],
+        vision_admin_context["program_cycle"],
+        log=[
+            {
+                "type": VisionLogEntryType.CLOSURE_NOTIFICATION.value,
+                "payload": {},
+                "response": {"status": "ok"},
+            }
+        ],
+    )
+
+
+def test_send_closure_to_vision_button_visible_when_closure_never_sent(
+    closed_vision_payment_plan: PaymentPlan, admin_client, django_assert_num_queries
+) -> None:
+    with django_assert_num_queries(14):
+        response = admin_client.get(reverse("admin:payment_paymentplan_change", args=[closed_vision_payment_plan.pk]))
+    assert response.status_code == 200
+    assert 'id="btn-send_closure_to_vision"' in response.content.decode()
+
+
+def test_send_closure_to_vision_button_visible_when_closure_failed(
+    failed_closure_payment_plan: PaymentPlan, admin_client, django_assert_num_queries
+) -> None:
+    with django_assert_num_queries(14):
+        response = admin_client.get(reverse("admin:payment_paymentplan_change", args=[failed_closure_payment_plan.pk]))
+    assert response.status_code == 200
+    assert 'id="btn-send_closure_to_vision"' in response.content.decode()
+
+
+def test_send_closure_to_vision_button_hidden_when_closure_succeeded(
+    closure_notified_payment_plan: PaymentPlan, admin_client, django_assert_num_queries
+) -> None:
+    with django_assert_num_queries(14):
+        response = admin_client.get(
+            reverse("admin:payment_paymentplan_change", args=[closure_notified_payment_plan.pk])
+        )
+    assert response.status_code == 200
+    assert 'id="btn-send_closure_to_vision"' not in response.content.decode()
+
+
+def test_send_closure_to_vision_get_returns_confirmation(
+    closed_vision_payment_plan: PaymentPlan, admin_client, django_assert_num_queries
+) -> None:
+    url = reverse("admin:payment_paymentplan_send_closure_to_vision", args=[closed_vision_payment_plan.pk])
+    with django_assert_num_queries(4):
+        response = admin_client.get(url)
+    assert response.status_code == 200
+    assert "Do you confirm to send this payment plan closure to Vision?" in response.content.decode()
+
+
+@patch("hope.admin.payment_plan.notify_payment_plan_closure_to_vision_async_task")
+def test_send_closure_to_vision_queues_task(
+    mock_notify_closure,
+    failed_closure_payment_plan: PaymentPlan,
+    admin_user,
+    admin_client,
+    django_assert_num_queries,
+) -> None:
+    url = reverse("admin:payment_paymentplan_send_closure_to_vision", args=[failed_closure_payment_plan.pk])
+    with django_assert_num_queries(3):
+        response = admin_client.post(url)
+    assert response.status_code == 302, response.content[:500]
+    mock_notify_closure.assert_called_once_with(failed_closure_payment_plan, str(admin_user.pk))
+
+
+@patch("hope.admin.payment_plan.notify_payment_plan_closure_to_vision_async_task")
+def test_send_closure_to_vision_post_skips_successful_notification(
+    mock_notify_closure, closure_notified_payment_plan: PaymentPlan, admin_client, django_assert_num_queries
+) -> None:
+    with django_assert_num_queries(3):
+        response = admin_client.post(
+            reverse("admin:payment_paymentplan_send_closure_to_vision", args=[closure_notified_payment_plan.pk])
+        )
+
+    assert response.status_code == 302
+    mock_notify_closure.assert_not_called()
+    closure_notified_payment_plan.refresh_from_db(fields=["status"])
+    assert closure_notified_payment_plan.status == PaymentPlan.Status.CLOSED
 
 
 def test_manual_fc_header_recovery_shows_warning_and_available_header(

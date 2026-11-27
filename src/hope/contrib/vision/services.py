@@ -7,6 +7,7 @@ from hope.contrib.vision.choices import (
     VISION_CREATION_ACKNOWLEDGEMENT_MUTABLE_STATUSES,
     VISION_RECOVERABLE_STATUSES,
     VisionErrorCode,
+    VisionLogEntryType,
     VisionStatus,
 )
 from hope.contrib.vision.models import FundsCommitmentHeader, FundsCommitmentItem
@@ -199,6 +200,35 @@ class VisionService:
             )
         cls.assign_selected_funds_commitment_headers(payment_plan, funds_commitment_headers)
         cls.complete_funds_commitment_assignment(payment_plan, actor_snapshot)
+
+    @classmethod
+    def closure_notification_entries(cls, payment_plan: PaymentPlan) -> list[dict]:
+        """Return every logged closure-notification attempt for the plan, oldest first."""
+        vision_data = (payment_plan.internal_data or {}).get("vision", {})
+        if not isinstance(vision_data, dict):
+            return []
+        entries = []
+        for entry in vision_data.get("log", []):
+            if not isinstance(entry, dict):
+                continue
+            if entry.get("type") == VisionLogEntryType.CLOSURE_NOTIFICATION.value:
+                entries.append(entry)
+        return entries
+
+    @classmethod
+    def can_notify_vision_of_closure(cls, payment_plan: PaymentPlan) -> bool:
+        """Return whether the plan may (re)send its closure notification to Vision.
+
+        Allow retrying until one attempt succeeds. A missing response or an ``error`` response
+        means that attempt did not succeed.
+        """
+        if payment_plan.status != PaymentPlan.Status.CLOSED or not payment_plan.sent_to_vision:
+            return False
+        for entry in cls.closure_notification_entries(payment_plan):
+            response = entry.get("response")
+            if isinstance(response, dict) and not response.get("error"):
+                return False
+        return True
 
     @classmethod
     def can_recover_with_funds_commitment_headers(cls, payment_plan: PaymentPlan) -> bool:
