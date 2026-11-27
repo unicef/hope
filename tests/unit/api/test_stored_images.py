@@ -7,13 +7,14 @@ from rest_framework import serializers
 
 from hope.api.endpoints.rdi.stored_images import (
     STORED_IMAGE_DIRECTORY_CONTEXT_KEY,
+    StoredFileField,
     StoredImageField,
     clean_image_flex_fields,
     get_stored_image_directory,
     get_stored_image_error,
     normalize_stored_image_name,
 )
-from hope.models import PendingIndividual
+from hope.models import AccountAttachment, PendingIndividual
 
 DIRECTORY = "afghanistan/ab12/"
 PREFIX = f"2025/{DIRECTORY}"
@@ -24,6 +25,10 @@ PHOTO_MAX_LENGTH = PendingIndividual._meta.get_field("photo").max_length
 
 class PhotoSerializer(serializers.Serializer):
     photo = StoredImageField(model_field=(PendingIndividual, "photo"), allow_blank=True, allow_null=True)
+
+
+class AttachmentSerializer(serializers.Serializer):
+    file = StoredFileField(model_field=(AccountAttachment, "file"), extensions={"pdf", "xlsx"}, name_prefix="CW_")
 
 
 def test_get_stored_image_directory_is_business_area_slug_and_program_code() -> None:
@@ -121,6 +126,58 @@ def test_get_stored_image_error_not_an_image() -> None:
     )
 
 
+@pytest.mark.parametrize(
+    "file_name",
+    [
+        pytest.param(f"{PREFIX}CW_ind_1_attachment.pdf", id="pdf"),
+        pytest.param(f"{PREFIX}CW_ind_1_attachment.XLSX", id="xlsx-uppercase"),
+    ],
+)
+def test_get_stored_image_error_custom_extensions_accept_listed_type(
+    store_image: Callable[[str], str], file_name: str
+) -> None:
+    stored_name = store_image(file_name)
+
+    assert get_stored_image_error(stored_name, DIRECTORY, MAX_LENGTH, extensions={"pdf", "xlsx"}) is None
+
+
+@pytest.mark.parametrize(
+    "file_name",
+    [
+        pytest.param(f"{PREFIX}x.png", id="image-outside-the-set"),
+        pytest.param(f"{PREFIX}x.exe", id="executable"),
+    ],
+)
+def test_get_stored_image_error_custom_extensions_reject_unlisted_type(file_name: str) -> None:
+    with patch("hope.api.endpoints.rdi.stored_images.default_storage") as storage:
+        error = get_stored_image_error(file_name, DIRECTORY, MAX_LENGTH, extensions={"pdf", "xlsx"})
+
+    assert error == f"File '{file_name}' is not a supported file type."
+    storage.exists.assert_not_called()
+
+
+def test_get_stored_image_error_name_prefix_accepts_prefixed_name(store_image: Callable[[str], str]) -> None:
+    file_name = store_image(f"{PREFIX}CW_ind_1_attachment.pdf")
+
+    assert get_stored_image_error(file_name, DIRECTORY, MAX_LENGTH, extensions={"pdf"}, name_prefix="CW_") is None
+
+
+@pytest.mark.parametrize(
+    "file_name",
+    [
+        pytest.param(f"{PREFIX}payment_plan_payment_list_PP-0001.xlsx", id="no-prefix"),
+        pytest.param(f"{PREFIX}cw_ind_1_attachment.pdf", id="lowercase-prefix"),
+        pytest.param(f"{PREFIX}sub/CW_ind_1_attachment.pdf", id="prefix-in-subdirectory"),
+    ],
+)
+def test_get_stored_image_error_name_prefix_rejects_other_names_without_asking_the_storage(file_name: str) -> None:
+    with patch("hope.api.endpoints.rdi.stored_images.default_storage") as storage:
+        error = get_stored_image_error(file_name, DIRECTORY, MAX_LENGTH, extensions={"pdf", "xlsx"}, name_prefix="CW_")
+
+    assert error == f"File name must start with '<year>/{DIRECTORY}CW_'."
+    storage.exists.assert_not_called()
+
+
 def test_get_stored_image_error_too_long() -> None:
     assert (
         get_stored_image_error(f"{PREFIX}x.png", PREFIX, max_length=10)
@@ -159,6 +216,30 @@ def test_stored_image_field_uses_the_model_column_length() -> None:
 
     assert not serializer.is_valid()
     assert serializer.errors["photo"] == [f"File name must have no more than {PHOTO_MAX_LENGTH} characters."]
+
+
+def test_stored_file_field_uses_the_account_attachment_column_length() -> None:
+    long_name = f"{PREFIX}{'a' * 500}.pdf"
+    serializer = AttachmentSerializer(data={"file": long_name}, context=CONTEXT)
+
+    assert not serializer.is_valid()
+    assert serializer.errors["file"] == ["File name must have no more than 500 characters."]
+
+
+def test_stored_file_field_normalizes_the_name_of_a_listed_type(store_image: Callable[[str], str]) -> None:
+    file_name = store_image(f"{PREFIX}CW_ind_1_attachment.pdf")
+    serializer = AttachmentSerializer(data={"file": f"/{file_name}"}, context=CONTEXT)
+
+    assert serializer.is_valid()
+    assert serializer.validated_data["file"] == file_name
+
+
+def test_stored_file_field_requires_the_name_prefix(store_image: Callable[[str], str]) -> None:
+    file_name = store_image(f"{PREFIX}contract.pdf")
+    serializer = AttachmentSerializer(data={"file": file_name}, context=CONTEXT)
+
+    assert not serializer.is_valid()
+    assert serializer.errors["file"] == [f"File name must start with '<year>/{DIRECTORY}CW_'."]
 
 
 def test_stored_image_field_requires_the_directory_in_the_context() -> None:

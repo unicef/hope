@@ -1,6 +1,8 @@
-from collections.abc import Callable
+from collections.abc import Callable, Iterator
 from typing import Any
 
+from django.core.files.base import ContentFile
+from django.core.files.storage import default_storage
 import pytest
 from rest_framework import status
 from rest_framework.reverse import reverse
@@ -33,6 +35,7 @@ from hope.apps.household.const import (
     NOT_PROVIDED,
 )
 from hope.models import (
+    AccountAttachment,
     AccountType,
     FinancialInstitution,
     FlexibleAttribute,
@@ -141,6 +144,40 @@ def stored_image(store_image: Callable[[str], str], file_prefix: str) -> str:
 @pytest.fixture
 def missing_image(file_prefix: str) -> str:
     return f"{file_prefix}does_not_exist.png"
+
+
+@pytest.fixture
+def stored_attachment(store_image: Callable[[str], str], file_prefix: str) -> str:
+    return store_image(f"{file_prefix}CW_ind_1_attachment_ab12.pdf")
+
+
+@pytest.fixture
+def missing_attachment(file_prefix: str) -> str:
+    return f"{file_prefix}CW_ind_1_attachment_missing.pdf"
+
+
+@pytest.fixture
+def other_program_attachment(store_image: Callable[[str], str]) -> str:
+    return store_image("2025/other-area/zz99/CW_ind_1_attachment.pdf")
+
+
+@pytest.fixture
+def hope_owned_attachment(store_image: Callable[[str], str], file_prefix: str) -> str:
+    return store_image(f"{file_prefix}payment_plan_payment_list_PP-0001.xlsx")
+
+
+@pytest.fixture
+def unsupported_attachment(store_image: Callable[[str], str], file_prefix: str) -> str:
+    return store_image(f"{file_prefix}CW_ind_1_attachment.docx")
+
+
+@pytest.fixture
+def oversized_attachment(file_prefix: str) -> Iterator[str]:
+    file_name = default_storage.save(
+        f"{file_prefix}CW_ind_1_attachment_big.pdf", ContentFile(b"0" * (10 * 1024 * 1024 + 1))
+    )
+    yield file_name
+    default_storage.delete(file_name)
 
 
 # ── CreateLaxIndividuals tests ───────────────────────────────────────────
@@ -1252,3 +1289,194 @@ def test_lax_push_null_country_workspace_id_reports_error(lax_api_client, lax_pu
     assert response.data["errors"] == 1
     assert response.data["results"][0] == {"country_workspace_id": ["This field may not be null."]}
     assert PendingIndividual.objects.count() == 0
+
+
+def test_create_individual_with_account_attachment_stores_the_file_name_and_title(
+    lax_api_client, lax_push_url, bank_account_type, generic_bank, stored_attachment
+):
+    individual_data = {
+        "country_workspace_id": "IND_ATTACHMENT",
+        "full_name": "John Doe",
+        "birth_date": "1990-01-01",
+        "accounts": [
+            {
+                "type": bank_account_type.key,
+                "number": "123456789",
+                "attachments": [{"file": stored_attachment, "title": "contract.pdf"}],
+            }
+        ],
+    }
+
+    response = lax_api_client.post(lax_push_url, [individual_data], format="json")
+
+    assert response.status_code == status.HTTP_201_CREATED, str(response.json())
+    assert response.data["accepted"] == 1
+    attachment = AccountAttachment.objects.get()
+    assert attachment.account == PendingAccount.objects.get(individual__country_workspace_id="IND_ATTACHMENT")
+    assert attachment.file.name == stored_attachment
+    assert attachment.title == "contract.pdf"
+    assert attachment.uploaded_at is not None
+
+
+@pytest.mark.parametrize(
+    "title_payload",
+    [
+        pytest.param({"title": ""}, id="blank-title"),
+        pytest.param({}, id="missing-title"),
+    ],
+)
+def test_create_individual_with_account_attachment_without_title_stores_empty_title(
+    lax_api_client, lax_push_url, bank_account_type, generic_bank, stored_attachment, title_payload
+):
+    individual_data = {
+        "country_workspace_id": "IND_ATTACHMENT",
+        "full_name": "John Doe",
+        "birth_date": "1990-01-01",
+        "accounts": [
+            {
+                "type": bank_account_type.key,
+                "number": "123456789",
+                "attachments": [{"file": stored_attachment, **title_payload}],
+            }
+        ],
+    }
+
+    response = lax_api_client.post(lax_push_url, [individual_data], format="json")
+
+    assert response.status_code == status.HTTP_201_CREATED, str(response.json())
+    assert response.data["accepted"] == 1
+    assert AccountAttachment.objects.get().title == ""
+
+
+def test_create_individual_with_account_without_attachments_key_creates_no_attachments(
+    lax_api_client, lax_push_url, bank_account_type, generic_bank
+):
+    individual_data = {
+        "country_workspace_id": "IND_NO_ATTACHMENTS",
+        "full_name": "John Doe",
+        "birth_date": "1990-01-01",
+        "accounts": [{"type": bank_account_type.key, "number": "123456789"}],
+    }
+
+    response = lax_api_client.post(lax_push_url, [individual_data], format="json")
+
+    assert response.status_code == status.HTTP_201_CREATED, str(response.json())
+    assert response.data["accepted"] == 1
+    assert PendingAccount.objects.count() == 1
+    assert not AccountAttachment.objects.exists()
+
+
+@pytest.mark.parametrize(
+    ("attachment_fixture", "expected_error"),
+    [
+        pytest.param("missing_attachment", "File '{file}' does not exist in storage.", id="missing-file"),
+        pytest.param(
+            "other_program_attachment",
+            "File name must start with '<year>/{directory}CW_'.",
+            id="file-of-another-program",
+        ),
+        pytest.param(
+            "hope_owned_attachment",
+            "File name must start with '<year>/{directory}CW_'.",
+            id="file-not-written-by-cw",
+        ),
+        pytest.param(
+            "unsupported_attachment", "File '{file}' is not a supported file type.", id="unsupported-extension"
+        ),
+        pytest.param("oversized_attachment", "File size must be ≤ 10MB.", id="oversized-file"),
+    ],
+)
+def test_create_individual_with_invalid_account_attachment_returns_error(
+    request,
+    lax_api_client,
+    lax_push_url,
+    bank_account_type,
+    generic_bank,
+    file_directory,
+    attachment_fixture,
+    expected_error,
+):
+    file_name = request.getfixturevalue(attachment_fixture)
+    individual_data = {
+        "country_workspace_id": "IND_BAD_ATTACHMENT",
+        "full_name": "John Doe",
+        "birth_date": "1990-01-01",
+        "accounts": [
+            {
+                "type": bank_account_type.key,
+                "number": "123456789",
+                "attachments": [{"file": file_name, "title": "contract.pdf"}],
+            }
+        ],
+    }
+
+    response = lax_api_client.post(lax_push_url, [individual_data], format="json")
+
+    assert response.status_code == status.HTTP_201_CREATED, str(response.json())
+    assert response.data["accepted"] == 0
+    assert response.data["errors"] == 1
+    assert response.data["results"][0] == {
+        "accounts": {
+            0: {"attachments": {0: {"file": [expected_error.format(file=file_name, directory=file_directory)]}}}
+        }
+    }
+    assert not PendingIndividual.objects.exists()
+    assert not PendingAccount.objects.exists()
+    assert not AccountAttachment.objects.exists()
+
+
+def test_create_individual_with_more_than_ten_account_attachments_returns_error(
+    lax_api_client, lax_push_url, bank_account_type, generic_bank, stored_attachment
+):
+    individual_data = {
+        "country_workspace_id": "IND_TOO_MANY_ATTACHMENTS",
+        "full_name": "John Doe",
+        "birth_date": "1990-01-01",
+        "accounts": [
+            {
+                "type": bank_account_type.key,
+                "number": "123456789",
+                "attachments": [{"file": stored_attachment, "title": ""}] * 11,
+            }
+        ],
+    }
+
+    response = lax_api_client.post(lax_push_url, [individual_data], format="json")
+
+    assert response.status_code == status.HTTP_201_CREATED, str(response.json())
+    assert response.data["accepted"] == 0
+    assert response.data["errors"] == 1
+    assert response.data["results"][0] == {
+        "accounts": {0: {"attachments": ["An account cannot have more than 10 attachments."]}}
+    }
+    assert not PendingIndividual.objects.exists()
+    assert not AccountAttachment.objects.exists()
+
+
+def test_retry_with_same_originating_id_and_attachment_names_keeps_one_set_of_attachments(
+    lax_api_client, lax_push_url, bank_account_type, generic_bank, stored_attachment
+):
+    individual_data = {
+        "country_workspace_id": "IND_REPUSH_ATTACHMENT",
+        "full_name": "John Doe",
+        "birth_date": "1990-01-01",
+        "originating_id": "AUR#200#1",
+        "accounts": [
+            {
+                "type": bank_account_type.key,
+                "number": "123456789",
+                "attachments": [{"file": stored_attachment, "title": "contract.pdf"}],
+            }
+        ],
+    }
+    first_response = lax_api_client.post(lax_push_url, [individual_data], format="json")
+    assert first_response.status_code == status.HTTP_201_CREATED, str(first_response.json())
+
+    second_response = lax_api_client.post(lax_push_url, [individual_data], format="json")
+
+    assert second_response.status_code == status.HTTP_201_CREATED, str(second_response.json())
+    assert second_response.data["accepted"] == 1
+    attachment = AccountAttachment.objects.get()
+    assert attachment.account == PendingAccount.objects.get()
+    assert attachment.file.name == stored_attachment
+    assert default_storage.exists(stored_attachment)

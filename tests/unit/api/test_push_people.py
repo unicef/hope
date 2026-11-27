@@ -1,5 +1,7 @@
-from collections.abc import Callable
+from collections.abc import Callable, Iterator
 
+from django.core.files.base import ContentFile
+from django.core.files.storage import default_storage
 import pytest
 from rest_framework import status
 from rest_framework.reverse import reverse
@@ -26,6 +28,7 @@ from hope.apps.household.const import (
     NOT_DISABLED,
 )
 from hope.models import (
+    AccountAttachment,
     Area,
     DataCollectingType,
     DocumentType,
@@ -96,6 +99,40 @@ def admin_areas(afghanistan_country) -> tuple[Area, Area]:
     # the parent-child tree structure needed by area validation logic.
     AreaFactory(parent=area2, p_code="AF010101", area_type=admin_type_3)
     return area1, area2
+
+
+@pytest.fixture
+def stored_attachment(store_image: Callable[[str], str], file_prefix: str) -> str:
+    return store_image(f"{file_prefix}CW_ind_1_attachment_ab12.pdf")
+
+
+@pytest.fixture
+def missing_attachment(file_prefix: str) -> str:
+    return f"{file_prefix}CW_ind_1_attachment_missing.pdf"
+
+
+@pytest.fixture
+def other_program_attachment(store_image: Callable[[str], str]) -> str:
+    return store_image("2025/other-area/zz99/CW_ind_1_attachment.pdf")
+
+
+@pytest.fixture
+def hope_owned_attachment(store_image: Callable[[str], str], file_prefix: str) -> str:
+    return store_image(f"{file_prefix}payment_plan_payment_list_PP-0001.xlsx")
+
+
+@pytest.fixture
+def unsupported_attachment(store_image: Callable[[str], str], file_prefix: str) -> str:
+    return store_image(f"{file_prefix}CW_ind_1_attachment.docx")
+
+
+@pytest.fixture
+def oversized_attachment(file_prefix: str) -> Iterator[str]:
+    file_name = default_storage.save(
+        f"{file_prefix}CW_ind_1_attachment_big.pdf", ContentFile(b"0" * (10 * 1024 * 1024 + 1))
+    )
+    yield file_name
+    default_storage.delete(file_name)
 
 
 def test_upload_single_person(token_api_client, push_people_url, program, rdi, afghanistan_country) -> None:
@@ -806,3 +843,91 @@ def test_push_people_creates_accounts(
     assert account.number == "123"
     assert account.account_type.key == "bank"
     assert account.financial_institution == generic_bank
+
+
+def test_push_people_creates_account_attachments_from_file_names(
+    token_api_client,
+    push_people_url,
+    person_payload,
+    afghanistan_country,
+    bank_account_type,
+    generic_bank,
+    stored_attachment,
+) -> None:
+    person_payload["accounts"] = [
+        {"type": "bank", "number": "123", "attachments": [{"file": stored_attachment, "title": "contract.pdf"}]}
+    ]
+
+    response = token_api_client.post(push_people_url, [person_payload], format="json")
+
+    assert response.status_code == status.HTTP_201_CREATED, str(response.json())
+    attachment = AccountAttachment.objects.get()
+    assert attachment.account == PendingAccount.objects.get(individual__country_workspace_id="cw-files-1")
+    assert attachment.file.name == stored_attachment
+    assert attachment.title == "contract.pdf"
+
+
+@pytest.mark.parametrize(
+    ("attachment_fixture", "expected_error"),
+    [
+        pytest.param("missing_attachment", "File '{file}' does not exist in storage.", id="missing-file"),
+        pytest.param(
+            "other_program_attachment",
+            "File name must start with '<year>/{directory}CW_'.",
+            id="file-of-another-program",
+        ),
+        pytest.param(
+            "hope_owned_attachment",
+            "File name must start with '<year>/{directory}CW_'.",
+            id="file-not-written-by-cw",
+        ),
+        pytest.param(
+            "unsupported_attachment", "File '{file}' is not a supported file type.", id="unsupported-extension"
+        ),
+        pytest.param("oversized_attachment", "File size must be ≤ 10MB.", id="oversized-file"),
+    ],
+)
+def test_push_people_with_invalid_account_attachment_returns_error(
+    request,
+    token_api_client,
+    push_people_url,
+    person_payload,
+    bank_account_type,
+    generic_bank,
+    file_directory,
+    attachment_fixture,
+    expected_error,
+) -> None:
+    file_name = request.getfixturevalue(attachment_fixture)
+    person_payload["accounts"] = [
+        {"type": "bank", "number": "123", "attachments": [{"file": file_name, "title": "contract.pdf"}]}
+    ]
+
+    response = token_api_client.post(push_people_url, [person_payload], format="json")
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response.json() == {
+        "0": {
+            "accounts": {
+                "0": {"attachments": {"0": {"file": [expected_error.format(file=file_name, directory=file_directory)]}}}
+            }
+        }
+    }
+    assert not PendingIndividual.objects.exists()
+    assert not AccountAttachment.objects.exists()
+
+
+def test_push_people_with_more_than_ten_account_attachments_returns_error(
+    token_api_client, push_people_url, person_payload, bank_account_type, generic_bank, stored_attachment
+) -> None:
+    person_payload["accounts"] = [
+        {"type": "bank", "number": "123", "attachments": [{"file": stored_attachment, "title": ""}] * 11}
+    ]
+
+    response = token_api_client.post(push_people_url, [person_payload], format="json")
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response.json() == {
+        "0": {"accounts": {"0": {"attachments": ["An account cannot have more than 10 attachments."]}}}
+    }
+    assert not PendingIndividual.objects.exists()
