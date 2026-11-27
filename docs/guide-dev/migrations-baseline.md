@@ -15,7 +15,7 @@ ordinary files that depend on the baseline.
 
 - A database that has the replaced migrations applied runs **nothing of the baseline**: `migrate`
   applies the ordinary migrations the database lacks, as in any release, and then records the
-  baseline names in `django_migrations`. On production those migrations include the 16 kept ones.
+  baseline names in `django_migrations`.
 - An empty database runs the baseline and the migrations above it, and ends up with the same schema
   and seed rows the old chain produced.
 

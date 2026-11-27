@@ -32,7 +32,6 @@ from e2e.page_object.grievance.grievance_dashboard import GrievanceDashboard
 from e2e.page_object.grievance.grievance_tickets import GrievanceTickets
 from e2e.page_object.grievance.new_feedback import NewFeedback
 from e2e.page_object.grievance.new_ticket import NewTicket
-from e2e.page_object.managerial_console.managerial_console import ManagerialConsole
 from e2e.page_object.payment_module.new_payment_plan import NewPaymentPlan
 from e2e.page_object.payment_module.payment_module import PaymentModule
 from e2e.page_object.payment_module.payment_module_details import PaymentModuleDetails
@@ -45,20 +44,10 @@ from e2e.page_object.payment_verification.payment_verification import (
 from e2e.page_object.payment_verification.payment_verification_details import (
     PaymentVerificationDetails,
 )
-from e2e.page_object.people.people import People
-from e2e.page_object.people.people_details import PeopleDetails
 from e2e.page_object.programme_details.programme_details import ProgrammeDetails
 from e2e.page_object.programme_population.households import Households
 from e2e.page_object.programme_population.households_details import HouseholdsDetails
 from e2e.page_object.programme_population.individuals import Individuals
-from e2e.page_object.programme_population.individuals_details import IndividualsDetails
-from e2e.page_object.programme_population.periodic_data_update_templates import (
-    PDUXlsxTemplates,
-    PDUXlsxTemplatesDetails,
-)
-from e2e.page_object.programme_population.periodic_data_update_uploads import (
-    PDUXlsxUploads,
-)
 from e2e.page_object.targeting.targeting import Targeting
 from e2e.page_object.targeting.targeting_create import TargetingCreate
 from e2e.page_object.targeting.targeting_details import TargetingDetails
@@ -399,16 +388,6 @@ def page_households(request: FixtureRequest, browser: Chrome) -> Households:
 
 
 @pytest.fixture
-def page_people(request: FixtureRequest, browser: Chrome) -> People:
-    return People(browser)
-
-
-@pytest.fixture
-def page_people_details(request: FixtureRequest, browser: Chrome) -> PeopleDetails:
-    return PeopleDetails(browser)
-
-
-@pytest.fixture
 def page_households_details(request: FixtureRequest, browser: Chrome) -> HouseholdsDetails:
     return HouseholdsDetails(browser)
 
@@ -416,29 +395,6 @@ def page_households_details(request: FixtureRequest, browser: Chrome) -> Househo
 @pytest.fixture
 def page_individuals(request: FixtureRequest, browser: Chrome) -> Individuals:
     return Individuals(browser)
-
-
-@pytest.fixture
-def page_individuals_details(request: FixtureRequest, browser: Chrome) -> IndividualsDetails:
-    return IndividualsDetails(browser)
-
-
-@pytest.fixture
-def page_pdu_xlsx_templates(request: FixtureRequest, browser: Chrome) -> PDUXlsxTemplates:
-    return PDUXlsxTemplates(browser)
-
-
-@pytest.fixture
-def page_pdu_xlsx_templates_details(
-    request: FixtureRequest,
-    browser: Chrome,
-) -> PDUXlsxTemplatesDetails:
-    return PDUXlsxTemplatesDetails(browser)
-
-
-@pytest.fixture
-def page_pdu_xlsx_uploads(request: FixtureRequest, browser: Chrome) -> PDUXlsxUploads:
-    return PDUXlsxUploads(browser)
 
 
 @pytest.fixture
@@ -489,11 +445,6 @@ def page_grievance_new_ticket(request: FixtureRequest, browser: Chrome) -> NewTi
 @pytest.fixture
 def page_grievance_dashboard(request: FixtureRequest, browser: Chrome) -> GrievanceDashboard:
     return GrievanceDashboard(browser)
-
-
-@pytest.fixture
-def page_managerial_console(request: FixtureRequest, browser: Chrome) -> ManagerialConsole:
-    return ManagerialConsole(browser)
 
 
 @pytest.fixture
