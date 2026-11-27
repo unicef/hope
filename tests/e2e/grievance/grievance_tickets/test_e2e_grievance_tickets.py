@@ -8,7 +8,6 @@ from selenium.common.exceptions import NoSuchElementException, TimeoutException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.remote.webelement import WebElement
 
-from e2e.drawer.test_drawer import get_program_with_dct_type_and_name
 from e2e.filters.test_filters import create_grievance
 from e2e.helpers.date_time_format import FormatTime
 from e2e.page_object.admin_panel.admin_panel import AdminPanel
@@ -44,6 +43,27 @@ from hope.models import (
 )
 
 pytestmark = pytest.mark.django_db()
+
+
+def get_program_with_dct_type_and_name(
+    name: str,
+    code: str,
+    dct_type: str = DataCollectingType.Type.STANDARD,
+    status: str = Program.ACTIVE,
+    beneficiary_group_name: str = "Main Menu",
+) -> Program:
+    dct = DataCollectingTypeFactory(type=dct_type)
+    beneficiary_group = BeneficiaryGroup.objects.filter(name=beneficiary_group_name).first()
+    return ProgramFactory(
+        name=name,
+        code=code,
+        start_date=datetime.now() - relativedelta(months=1),
+        end_date=datetime.now() + relativedelta(months=1),
+        data_collecting_type=dct,
+        status=status,
+        beneficiary_group=beneficiary_group,
+        business_area=BusinessArea.objects.get(slug="afghanistan"),
+    )
 
 
 @pytest.fixture

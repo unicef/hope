@@ -622,35 +622,6 @@ class HouseholdAdmin(
             success_message="Successfully executed",
         )
 
-    @button(
-        permission=lambda request, household, *args, **kwargs: (
-            is_root(request) and request.user.has_perm("household.logical_delete") and not household.is_removed
-        )
-    )
-    def logical_delete(self, request: HttpRequest, pk: UUID) -> HttpResponseBase | None:
-        household: Household = cast("Household", self.get_queryset(request).get(pk=pk))
-        if request.method == "POST":
-            try:
-                household.delete()
-                self.message_user(
-                    request,
-                    f"Household {household.unicef_id} was soft removed.",
-                    messages.SUCCESS,
-                )
-            except ObjectDoesNotExist as e:
-                self.message_user(request, str(e), messages.ERROR)
-            return HttpResponseRedirect(reverse("admin:household_household_change", args=[pk]))
-        return confirm_action(
-            self,
-            request,
-            self.logical_delete,
-            message="""<h1>Household logical delete</h1>
-                <p>After this operation household will be marked as logical deleted
-                 and will be hidden in the application.</p>
-                """,
-            success_message="Successfully executed",
-        )
-
     def mass_enroll_to_another_program(self, request: HttpRequest, qs: QuerySet) -> HttpResponse | None:
         context = self.get_common_context(request, title="Mass enroll households to another program")
         business_area_id = qs.first().business_area_id

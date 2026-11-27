@@ -166,6 +166,7 @@ class Program(
         BeneficiaryGroup,
         on_delete=models.PROTECT,
         related_name="programs",
+        verbose_name="Payee Label",
         help_text="Program payee label",
     )
     business_area = models.ForeignKey("core.BusinessArea", on_delete=models.CASCADE, help_text="Business area")
