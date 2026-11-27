@@ -32,11 +32,6 @@ from e2e.page_object.grievance.grievance_dashboard import GrievanceDashboard
 from e2e.page_object.grievance.grievance_tickets import GrievanceTickets
 from e2e.page_object.grievance.new_feedback import NewFeedback
 from e2e.page_object.grievance.new_ticket import NewTicket
-from e2e.page_object.payment_module.new_payment_plan import NewPaymentPlan
-from e2e.page_object.payment_module.payment_module import PaymentModule
-from e2e.page_object.payment_module.payment_module_details import PaymentModuleDetails
-from e2e.page_object.payment_module.program_cycle import ProgramCyclePage
-from e2e.page_object.payment_module.program_cycle_details import ProgramCycleDetailsPage
 from e2e.page_object.payment_verification.payment_record import PaymentRecord
 from e2e.page_object.payment_verification.payment_verification import (
     PaymentVerification,
@@ -439,11 +434,6 @@ def page_targeting(request: FixtureRequest, browser: Chrome) -> Targeting:
 
 
 @pytest.fixture
-def page_payment_module(request: FixtureRequest, browser: Chrome) -> PaymentModule:
-    return PaymentModule(browser)
-
-
-@pytest.fixture
 def page_payment_record(request: FixtureRequest, browser: Chrome) -> PaymentRecord:
     return PaymentRecord(browser)
 
@@ -481,26 +471,6 @@ def page_grievance_new_ticket(request: FixtureRequest, browser: Chrome) -> NewTi
 @pytest.fixture
 def page_grievance_dashboard(request: FixtureRequest, browser: Chrome) -> GrievanceDashboard:
     return GrievanceDashboard(browser)
-
-
-@pytest.fixture
-def page_payment_module_details(request: FixtureRequest, browser: Chrome) -> PaymentModuleDetails:
-    return PaymentModuleDetails(browser)
-
-
-@pytest.fixture
-def page_new_payment_plan(request: FixtureRequest, browser: Chrome) -> NewPaymentPlan:
-    return NewPaymentPlan(browser)
-
-
-@pytest.fixture
-def page_program_cycle(request: FixtureRequest, browser: Chrome) -> ProgramCyclePage:
-    return ProgramCyclePage(browser)
-
-
-@pytest.fixture
-def page_program_cycle_details(request: FixtureRequest, browser: Chrome) -> ProgramCycleDetailsPage:
-    return ProgramCycleDetailsPage(browser)
 
 
 @pytest.fixture

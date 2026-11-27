@@ -18,7 +18,6 @@ from e2e.page_object.payment_verification.payment_verification import (
 from e2e.page_object.payment_verification.payment_verification_details import (
     PaymentVerificationDetails,
 )
-from e2e.payment_module.test_e2e_payment_plans import find_file
 from extras.test_utils.factories import (
     AccountTypeFactory,
     DataCollectingTypeFactory,
@@ -48,6 +47,19 @@ from hope.models import (
 from hope.models.currency import Currency
 
 pytestmark = pytest.mark.django_db()
+
+
+def find_file(
+    file_name: str,
+    search_in_dir: str = "",
+    number_of_ties: int = 1,
+) -> str:
+    for _ in range(number_of_ties):
+        for file in os.listdir(search_in_dir):
+            if file_name in file:
+                return file
+        sleep(1)
+    raise Exception(f"{file_name} file did not found in {search_in_dir}")
 
 
 @pytest.fixture

@@ -8,6 +8,7 @@ import pytest
 from extras.test_utils.factories import (
     ApprovalProcessFactory,
     CurrencyFactory,
+    DataCollectingTypeFactory,
     DeliveryMechanismFactory,
     FinancialServiceProviderFactory,
     FinancialServiceProviderXlsxTemplateFactory,
@@ -23,8 +24,10 @@ from extras.test_utils.factories.program import ProgramCycleFactory, ProgramFact
 from hope.apps.account.permissions import Permissions
 from hope.apps.payment.services.follow_up_instruction_service import FollowUpInstructionService
 from hope.models import (
+    BeneficiaryGroup,
     BusinessArea,
     Currency,
+    DataCollectingType,
     DeliveryMechanism,
     FinancialServiceProvider,
     FinancialServiceProviderXlsxTemplate,
@@ -516,3 +519,102 @@ def accepted_shared_collectors_payment_plan(business_area: BusinessArea) -> Paym
 @pytest.fixture
 def open_payment_plan(business_area: BusinessArea) -> PaymentPlan:
     return _lifecycle_payment_plan(business_area, PaymentPlan.Status.OPEN)
+
+
+PAYMENT_PLANS_PROGRAM_NAME = "Payment Plans E2E Program"
+TARGET_POPULATION_NAME = "Payment Plans E2E Target Population"
+
+
+@pytest.fixture
+def payment_plans_program(business_area: BusinessArea) -> Program:
+    today = timezone.now().date()
+    program = ProgramFactory(
+        name=PAYMENT_PLANS_PROGRAM_NAME,
+        status=Program.ACTIVE,
+        business_area=business_area,
+        data_collecting_type=DataCollectingTypeFactory(type=DataCollectingType.Type.STANDARD),
+        beneficiary_group=BeneficiaryGroup.objects.get(name="Main Menu"),
+        start_date=today - dt.timedelta(days=30),
+        end_date=today + dt.timedelta(days=30),
+        cycle=False,
+    )
+    ProgramCycleFactory(
+        program=program,
+        title="First cycle for Payment Plans",
+        status=ProgramCycle.DRAFT,
+        start_date=today - dt.timedelta(days=5),
+        end_date=today + dt.timedelta(days=5),
+    )
+    return program
+
+
+@pytest.fixture
+def accepted_payment_plan_without_payments(payment_plans_program: Program) -> PaymentPlan:
+    today = timezone.now().date()
+    delivery_mechanism = DeliveryMechanismFactory(code="cash", name="Cash")
+    fsp = FinancialServiceProviderFactory()
+    fsp.delivery_mechanisms.set([delivery_mechanism])
+    return PaymentPlanFactory(
+        name="Accepted E2E Payment Plan",
+        business_area=payment_plans_program.business_area,
+        program_cycle=payment_plans_program.cycles.first(),
+        status=PaymentPlan.Status.ACCEPTED,
+        plan_type=PaymentPlan.PlanType.REGULAR,
+        currency=CurrencyFactory(code="USD"),
+        dispersion_start_date=today + dt.timedelta(days=10),
+        dispersion_end_date=today + dt.timedelta(days=15),
+        total_entitled_quantity=Decimal(2999),
+        total_delivered_quantity=Decimal(999),
+        financial_service_provider=fsp,
+        delivery_mechanism=delivery_mechanism,
+    )
+
+
+@pytest.fixture
+def draft_target_population(payment_plans_program: Program) -> PaymentPlan:
+    """DRAFT payment plan (a target population) with 3 two-person households, an XLSX FSP and cash delivery."""
+    business_area = payment_plans_program.business_area
+    delivery_mechanism = DeliveryMechanismFactory(code="cash", name="Cash")
+    fsp = FinancialServiceProviderFactory(
+        name="Payment Plans E2E FSP",
+        distribution_limit=10_000,
+        communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_XLSX,
+    )
+    fsp.delivery_mechanisms.set([delivery_mechanism])
+    fsp.allowed_business_areas.add(business_area)
+    FspXlsxTemplatePerDeliveryMechanismFactory(
+        financial_service_provider=fsp,
+        delivery_mechanism=delivery_mechanism,
+        xlsx_template=FinancialServiceProviderXlsxTemplateFactory(),
+    )
+    payment_plan = PaymentPlanFactory(
+        name=TARGET_POPULATION_NAME,
+        business_area=business_area,
+        program_cycle=payment_plans_program.cycles.first(),
+        status=PaymentPlan.Status.DRAFT,
+        build_status=PaymentPlan.BuildStatus.BUILD_STATUS_OK,
+        financial_service_provider=fsp,
+        delivery_mechanism=delivery_mechanism,
+    )
+    households = [
+        HouseholdFactory(size=2, business_area=business_area, program=payment_plans_program) for _ in range(3)
+    ]
+    for household in households:
+        payment = PaymentFactory(
+            parent=payment_plan,
+            household=household,
+            collector=household.head_of_household,
+            head_of_household=household.head_of_household,
+            program=payment_plans_program,
+            delivery_type=delivery_mechanism,
+            financial_service_provider=fsp,
+            entitlement_quantity=None,
+            entitlement_quantity_usd=None,
+            delivered_quantity=None,
+            delivered_quantity_usd=None,
+            status=Payment.STATUS_PENDING,
+        )
+        # the entitlement formula reads the household from the snapshot
+        PaymentHouseholdSnapshotFactory(payment=payment, snapshot_data={"size": household.size})
+    payment_plan.update_population_count_fields()
+    return payment_plan
