@@ -71,5 +71,3 @@ The household list and the people list carry an **Implementing Partner** filter.
 ![The Implementing Partner filter open, listing the programme's partner names in alphabetical order](./_screenshots/population/implementing-partner-filter.png)
 
 ![The household list filtered by CARE, showing only the CARE households](./_screenshots/population/implementing-partner-filtered-list.png)
-
-The Implementing Partner field and filter were introduced by [AB#335913](https://dev.azure.com/unicef/ICTD-HCT-MIS/_workitems/edit/335913).
