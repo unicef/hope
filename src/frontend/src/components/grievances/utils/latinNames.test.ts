@@ -264,3 +264,91 @@ describe('validate - phone number, email and count formats', () => {
     });
   });
 });
+
+describe('validateUsingSteps - mobile account number', () => {
+  const runAccounts = (values) =>
+    validateUsingSteps(
+      { ...editIndividualBase, individualDataUpdateFields: [], ...values },
+      null,
+      {},
+      {},
+      GrievanceSteps.Description,
+      () => undefined,
+      beneficiaryGroup,
+    );
+
+  it.each(['1234567890', '+234', 'not a phone'])(
+    'rejects new mobile account number %j',
+    (number) => {
+      const errors = runAccounts({
+        individualDataUpdateFieldsAccounts: [
+          { accountType: 'mobile', financialInstitution: '1', number },
+        ],
+      });
+
+      expect(errors.individualDataUpdateFieldsAccounts).toBe(
+        'Account Number: Enter a valid phone number with the country code',
+      );
+    },
+  );
+
+  it('accepts a new mobile account number with the country code', () => {
+    const errors = runAccounts({
+      individualDataUpdateFieldsAccounts: [
+        {
+          accountType: 'mobile',
+          financialInstitution: '1',
+          number: '+50934101234',
+        },
+      ],
+    });
+
+    expect(errors.individualDataUpdateFieldsAccounts).toBeUndefined();
+  });
+
+  it('accepts a new bank account number that is not a phone number', () => {
+    const errors = runAccounts({
+      individualDataUpdateFieldsAccounts: [
+        {
+          accountType: 'bank',
+          financialInstitution: '1',
+          number: '0001234567',
+        },
+      ],
+    });
+
+    expect(errors.individualDataUpdateFieldsAccounts).toBeUndefined();
+  });
+
+  it('rejects an edited mobile account number without the country code', () => {
+    const errors = runAccounts({
+      individualDataUpdateAccountsToEdit: [
+        {
+          id: 'acc-1',
+          accountType: 'mobile',
+          financialInstitution: '1',
+          number: '1234567890',
+        },
+      ],
+    });
+
+    expect(errors.individualDataUpdateAccountsToEdit).toBe(
+      'Account Number: Enter a valid phone number with the country code',
+    );
+  });
+
+  it('accepts an edited mobile account number with the country code', () => {
+    const errors = runAccounts({
+      individualDataUpdateAccountsToEdit: [
+        {
+          id: 'acc-1',
+          accountType: 'mobile',
+          financialInstitution: '1',
+          number: '+509 34 10 1234',
+        },
+      ],
+    });
+
+    expect(errors.individualDataUpdateAccountsToEdit).toBeUndefined();
+  });
+});
