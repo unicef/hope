@@ -172,9 +172,7 @@ def test_save_exclusion_updates_payment_plan_summary(
     assert summary(login, labels) == after
     payment_plan.refresh_from_db()
     assert payment_plan.exclusion_reason == "Reason e2e Test"
-    assert list(payment_plan.payment_items.filter(excluded=True).values_list("household", flat=True)) == [
-        household.pk
-    ]
+    assert list(payment_plan.payment_items.filter(excluded=True).values_list("household", flat=True)) == [household.pk]
 
 
 def test_exclusions_cannot_be_created_for_accepted_payment_plan(
@@ -185,7 +183,7 @@ def test_exclusions_cannot_be_created_for_accepted_payment_plan(
     login.wait_for_text("ACCEPTED", 'div[data-cy="status-container"]')
 
     login.assert_element_present(f"{CREATE_EXCLUSIONS}:disabled")
-    login.hover_on_element(f'span:has(> {CREATE_EXCLUSIONS})')
+    login.hover_on_element(f"span:has(> {CREATE_EXCLUSIONS})")
     login.wait_for_text(
         "Items Groups can only be excluded from a Payment Plan in status open or locked", '[role="tooltip"]'
     )
