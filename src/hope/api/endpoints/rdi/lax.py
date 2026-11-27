@@ -5,6 +5,7 @@ from functools import cached_property, partial
 import logging
 from typing import TYPE_CHECKING, Any, cast
 
+from django.core.files.storage import default_storage
 from django.db.models import Field, Model
 from django.db.transaction import atomic
 from django.http import Http404
@@ -29,8 +30,10 @@ from hope.api.endpoints.rdi.cw_ids import (
 )
 from hope.api.endpoints.rdi.mixin import HouseholdUploadMixin
 from hope.api.endpoints.rdi.stored_images import (
+    CW_FILE_NAME_PREFIX,
     STORED_IMAGE_DIRECTORY_CONTEXT_KEY,
     ImageFlexFieldsValidationMixin,
+    StoredFileField,
     StoredImageField,
     get_stored_image_directory,
 )
@@ -47,10 +50,12 @@ from hope.apps.household.const import (
     ROLE_PRIMARY,
     SEX_CHOICE,
 )
+from hope.apps.payment.api.serializers import ATTACHMENT_ALLOWED_EXTENSIONS
 from hope.apps.periodic_data_update.utils import populate_pdu_with_null_values
 from hope.apps.utils.phone import calculate_phone_numbers_validity
 from hope.models import (
     Account,
+    AccountAttachment,
     AccountType,
     Area,
     Country,
@@ -123,6 +128,26 @@ class DocumentSerializerLax(serializers.ModelSerializer):
         fields = ["type", "country", "image", "document_number", "issuance_date", "expiry_date"]
 
 
+class AccountAttachmentLaxSerializer(serializers.Serializer):
+    file = StoredFileField(
+        model_field=(AccountAttachment, "file"),
+        extensions=ATTACHMENT_ALLOWED_EXTENSIONS,
+        name_prefix=CW_FILE_NAME_PREFIX,
+        help_text=(
+            "Name of a file in the media storage, relative to the container root, as "
+            f"'<year>/<business area slug>/<program code>/{CW_FILE_NAME_PREFIX}<file name>'. "
+            f"Allowed types: {', '.join(ATTACHMENT_ALLOWED_EXTENSIONS)}, "
+            f"at most {AccountAttachment.FILE_SIZE_LIMIT // (1024 * 1024)}MB."
+        ),
+    )
+    title = serializers.CharField(max_length=255, allow_blank=True, required=False, default="")
+
+    def validate_file(self, value: str) -> str:
+        if default_storage.size(value) > AccountAttachment.FILE_SIZE_LIMIT:
+            raise ValidationError(f"File size must be ≤ {AccountAttachment.FILE_SIZE_LIMIT // (1024 * 1024)}MB.")
+        return value
+
+
 class AccountLaxSerializer(serializers.ModelSerializer):
     type = serializers.SlugRelatedField(
         source="account_type",
@@ -135,10 +160,16 @@ class AccountLaxSerializer(serializers.ModelSerializer):
         required=False, queryset=FinancialInstitution.objects.all()
     )
     data = serializers.JSONField(required=False, default=dict)  # type: ignore
+    attachments = AccountAttachmentLaxSerializer(many=True, required=False)
 
     class Meta:
         model = PendingAccount
-        fields = ["type", "number", "financial_institution", "data"]
+        fields = ["type", "number", "financial_institution", "data", "attachments"]
+
+    def validate_attachments(self, value: list[dict]) -> list[dict]:
+        if len(value) > AccountAttachment.FILE_LIMIT:
+            raise ValidationError(f"An account cannot have more than {AccountAttachment.FILE_LIMIT} attachments.")
+        return value
 
     def validate(self, attrs: dict[str, Any]) -> dict[str, Any]:
         attrs = super().validate(attrs)
@@ -419,11 +450,19 @@ class CreateLaxIndividuals(CreateLaxBaseView):
 
     def _bulk_create_accounts(self, batch_size: int) -> None:
         account_instances: list[PendingAccount] = []
+        attachment_instances: list[AccountAttachment] = []
         for acc in self.staging.prepared_accounts:
             ind = acc.pop("individual")
-            account_instances.append(PendingAccount(individual_id=ind.id, **acc))
+            attachments = acc.pop("attachments", [])
+            account = PendingAccount(individual_id=ind.id, **acc)
+            account_instances.append(account)
+            attachment_instances.extend(
+                AccountAttachment(account=account, file=item["file"], title=item["title"]) for item in attachments
+            )
         if account_instances:
             PendingAccount.objects.bulk_create(account_instances, batch_size=batch_size)
+        if attachment_instances:
+            AccountAttachment.objects.bulk_create(attachment_instances, batch_size=batch_size)
 
     @extend_schema(request=IndividualSerializer(many=True))
     @atomic

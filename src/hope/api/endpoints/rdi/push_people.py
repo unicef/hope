@@ -40,10 +40,12 @@ from hope.apps.household.const import (
 )
 from hope.apps.periodic_data_update.utils import populate_pdu_with_null_values
 from hope.models import (
+    AccountAttachment,
     Area,
     Country,
     FlexibleAttribute,
     Grant,
+    PendingAccount,
     PendingHousehold,
     PendingIndividual,
     RegistrationDataImport,
@@ -168,6 +170,16 @@ class PushPeopleSerializer(ImageFlexFieldsValidationMixin, serializers.ModelSeri
 
 
 class PeopleUploadMixin(DocumentMixin, AccountMixin):
+    @staticmethod
+    def save_account(member: PendingIndividual, doc: dict) -> PendingAccount:
+        """Create the account and its attachments, whose ``file`` is a validated name of a file in the storage."""
+        attachments = doc.pop("attachments", [])
+        account = PendingAccount.objects.create(individual=member, **doc)
+        AccountAttachment.objects.bulk_create(
+            AccountAttachment(account=account, file=item["file"], title=item["title"]) for item in attachments
+        )
+        return account
+
     def save_people(self, rdi: RegistrationDataImport, people_data: list[dict]) -> list[int]:
         people_ids = []
         for person_data in people_data:

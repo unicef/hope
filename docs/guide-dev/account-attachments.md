@@ -29,7 +29,7 @@ The two behave differently on update, on purpose:
 - **Size is re-checked on every save.** The file stays editable in the Django admin, so an update can swap a small file for an oversized one.
 - **The count is checked only when adding** (`self._state.adding`), so attachments on a full account can still be edited.
 
-A third rule, the allowed extension list (`pdf`, `xlsx`, `jpg`, `jpeg`, `png`), is enforced only in `AccountAttachmentUploadSerializer`. That is a UI rule, not a data invariant, so the model ignores it and the admin can store anything.
+A third rule, the allowed extension list (`pdf`, `xlsx`, `jpg`, `jpeg`, `png`), is enforced only in the API serializers (`AccountAttachmentUploadSerializer` and, for the CW push, `AccountAttachmentLaxSerializer`). That is a UI rule, not a data invariant, so the model ignores it and the admin can store anything.
 
 ## REST API
 
@@ -110,7 +110,28 @@ It prints a `migrated / skipped / failed` tally at the end.
 
 `AccountMixin.save_account` (`src/hope/api/endpoints/rdi/mixin.py`) pops `attachments` off the payload, creates the `PendingAccount`, and writes one `AccountAttachment` per entry, reusing `PhotoMixin.get_photo` to turn the base64 into a file.
 
-`rdi-push-lax-individuals`, `rdi-push-lax-households` and `rdi-push-people` do not take attachments yet. They share `DocumentSerializerLax` and `AccountLaxSerializer` (`src/hope/api/endpoints/rdi/lax.py`), and `AccountLaxSerializer` has no `attachments` field, so the key is ignored if a client sends it.
+### CW push
+
+`rdi-push-lax-individuals` and `rdi-push-people`, the endpoints Country Workspace calls, take attachments as **storage file names**, not base64. CW writes the file to the media container it shares with HOPE and sends its name. HOPE stores that name and never copies the file, so it stays at CW's path, not at `account_attachment_path`. CW-pushed images work the same way.
+
+```json
+{
+  "type": "bank",
+  "number": "123456",
+  "attachments": [
+    {"file": "2026/afghanistan/ab12/CW_ind_42_attachment_9f0c.pdf", "title": "contract.pdf"}
+  ]
+}
+```
+
+Both endpoints share `AccountLaxSerializer` (`src/hope/api/endpoints/rdi/lax.py`). Its optional `attachments` field is `AccountAttachmentLaxSerializer`:
+
+- `file` is a `StoredFileField` (`src/hope/api/endpoints/rdi/stored_images.py`), which runs the same checks as `StoredImageField`: a plain relative name, under the RDI's `<year>/<business area slug>/<program code>/` directory, that exists in storage. The directory check stops a token from referencing files of another business area or program. The allowed extensions are `ATTACHMENT_ALLOWED_EXTENSIONS`.
+- The file name also has to start with `CW_` (`CW_FILE_NAME_PREFIX`), the prefix CW gives every file it writes for HOPE. HOPE keeps its own files (exports, supporting documents, imports) in the same directory, so without the prefix a token could attach one of them and expose it through the attachment download. The prefix is checked before the storage is asked, so the error doesn't reveal whether a HOPE file exists.
+- `title` is optional, may be blank and defaults to `""`.
+- Size (`FILE_SIZE_LIMIT`, read with `default_storage.size`) and count (`FILE_LIMIT`) are checked in the serializer too. A bad attachment comes back as a field error: per record in `results` on lax individuals, a 400 for the batch on push people.
+
+`rdi-push-lax-households` carries no accounts. A re-push with the same `originating_id` deletes the old individual, and the delete cascades to its attachment rows. HOPE never deletes the files, so the new rows can point at the same names.
 
 ## Django admin
 

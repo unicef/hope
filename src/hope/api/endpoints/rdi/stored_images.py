@@ -15,9 +15,11 @@ from rest_framework.exceptions import ValidationError
 from hope.apps.core.upload_paths import build_upload_path
 
 if TYPE_CHECKING:
-    from collections.abc import Iterable
+    from collections.abc import Collection, Iterable
 
 STORED_IMAGE_DIRECTORY_CONTEXT_KEY = "stored_image_directory"
+# Country Workspace starts the name of every file it writes for HOPE with this prefix
+CW_FILE_NAME_PREFIX = "CW_"
 # Azure blob name limit, flex fields are stored in a JSON column
 FLEX_FIELD_FILE_NAME_MAX_LENGTH = 1024
 
@@ -55,28 +57,46 @@ def _is_safe_file_name(file_name: str) -> bool:
     return True
 
 
-def _get_file_name_error(file_name: str, directory: str, max_length: int) -> str | None:
+def _get_file_name_error(
+    file_name: str,
+    directory: str,
+    max_length: int,
+    extensions: "Collection[str] | None" = None,
+    name_prefix: str = "",
+) -> str | None:
     if len(file_name) > max_length:
         return f"File name must have no more than {max_length} characters."
     if not _is_safe_file_name(file_name):
         return f"Invalid file name '{file_name}'."
     year = _YEAR_SEGMENT.match(file_name)
-    if not year or not file_name.startswith(directory, year.end()):
-        return f"File name must start with '<year>/{directory}'."
-    if PurePosixPath(file_name).suffix[1:].lower() not in _get_image_extensions():
-        return f"File '{file_name}' is not a supported image type."
+    if not year or not file_name.startswith(f"{directory}{name_prefix}", year.end()):
+        return f"File name must start with '<year>/{directory}{name_prefix}'."
+    extension = PurePosixPath(file_name).suffix[1:].lower()
+    if extensions is None:
+        if extension not in _get_image_extensions():
+            return f"File '{file_name}' is not a supported image type."
+    elif extension not in extensions:
+        return f"File '{file_name}' is not a supported file type."
     return None
 
 
-def get_stored_image_error(file_name: str, directory: str, max_length: int) -> str | None:
-    """Return why ``file_name`` can't be used as a reference to an image in the media storage, None if it can.
+def get_stored_image_error(
+    file_name: str,
+    directory: str,
+    max_length: int,
+    extensions: "Collection[str] | None" = None,
+    name_prefix: str = "",
+) -> str | None:
+    """Return why ``file_name`` can't be used as a reference to a file in the media storage, None if it can.
 
     The name has to be a plain relative path ``<year>/<directory>/<file name>``: backends resolve names
     differently (Azure rewrites ``a/../b`` to ``b``), so the name that was checked has to be the one that is
     stored. The storage is asked only after the name is known to belong to ``directory``, so a client can't probe
-    for files of other business areas or programs.
+    for files of other business areas or programs. ``extensions`` lists the allowed lowercase extensions,
+    None allows the image types. ``name_prefix`` is required right after the directory, which keeps out
+    the files HOPE stores in the same directory.
     """
-    if error := _get_file_name_error(file_name, directory, max_length):
+    if error := _get_file_name_error(file_name, directory, max_length, extensions, name_prefix):
         return error
     try:
         exists = default_storage.exists(file_name)
@@ -85,23 +105,33 @@ def get_stored_image_error(file_name: str, directory: str, max_length: int) -> s
     return None if exists else f"File '{file_name}' does not exist in storage."
 
 
-class StoredImageField(serializers.CharField):
-    """Name of an image CW has already written to the media storage.
+class StoredFileField(serializers.CharField):
+    """Name of a file CW has already written to the media storage.
 
     The validated name is returned as a string, ready to be assigned to the model file field given in
-    ``model_field``, whose ``max_length`` limits the name. The serializer context has to provide the
-    allowed directory under ``stored_image_directory``.
+    ``model_field``, whose ``max_length`` limits the name. ``extensions`` lists the allowed lowercase
+    extensions, None allows the image types. ``name_prefix`` is required at the start of the file name.
+    The serializer context has to provide the allowed directory under ``stored_image_directory``.
     """
 
-    def __init__(self, *, model_field: tuple[type[Model], str], **kwargs: Any) -> None:
+    def __init__(
+        self,
+        *,
+        model_field: tuple[type[Model], str],
+        extensions: "Collection[str] | None",
+        name_prefix: str = "",
+        **kwargs: Any,
+    ) -> None:
         model, field_name = model_field
         max_length = getattr(model._meta.get_field(field_name), "max_length", None)
         if max_length is None:
             raise ImproperlyConfigured(f"{model.__name__}.{field_name} has no max_length to validate names against.")
         self.file_name_max_length = max_length
+        self.extensions = None if extensions is None else frozenset(extensions)
+        self.name_prefix = name_prefix
         kwargs.setdefault(
             "help_text",
-            "Name of an image in the media storage, relative to the container root, as "
+            "Name of a file in the media storage, relative to the container root, as "
             "'<year>/<business area slug>/<program code>/<file name>'.",
         )
         super().__init__(**kwargs)
@@ -109,10 +139,26 @@ class StoredImageField(serializers.CharField):
     def to_internal_value(self, data: Any) -> str:
         file_name = normalize_stored_image_name(super().to_internal_value(data))
         if error := get_stored_image_error(
-            file_name, self.context[STORED_IMAGE_DIRECTORY_CONTEXT_KEY], self.file_name_max_length
+            file_name,
+            self.context[STORED_IMAGE_DIRECTORY_CONTEXT_KEY],
+            self.file_name_max_length,
+            self.extensions,
+            self.name_prefix,
         ):
             raise ValidationError(error)
         return file_name
+
+
+class StoredImageField(StoredFileField):
+    """Name of an image CW has already written to the media storage, see ``StoredFileField``."""
+
+    def __init__(self, *, model_field: tuple[type[Model], str], **kwargs: Any) -> None:
+        kwargs.setdefault(
+            "help_text",
+            "Name of an image in the media storage, relative to the container root, as "
+            "'<year>/<business area slug>/<program code>/<file name>'.",
+        )
+        super().__init__(model_field=model_field, extensions=None, **kwargs)
 
 
 def clean_image_flex_fields(
