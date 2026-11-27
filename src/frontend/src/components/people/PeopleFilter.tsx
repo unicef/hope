@@ -69,11 +69,11 @@ export function PeopleFilter({
   };
   const { data: implementingPartners } = useQuery({
     queryKey: restQueryKey(
-      RestService.restBusinessAreasProgramsIndividualsImplementingPartnersList,
+      RestService.restBusinessAreasProgramsHouseholdsImplementingPartnersList,
       implementingPartnersParams,
     ),
     queryFn: () =>
-      RestService.restBusinessAreasProgramsIndividualsImplementingPartnersList(
+      RestService.restBusinessAreasProgramsHouseholdsImplementingPartnersList(
         implementingPartnersParams,
       ),
   });

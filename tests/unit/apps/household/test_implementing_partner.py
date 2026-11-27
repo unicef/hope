@@ -7,13 +7,12 @@ from rest_framework.reverse import reverse
 from extras.test_utils.factories import (
     BusinessAreaFactory,
     HouseholdFactory,
-    IndividualFactory,
     PartnerFactory,
     ProgramFactory,
     UserFactory,
 )
 from hope.apps.account.permissions import Permissions
-from hope.models import BusinessArea, Household, Individual, Program
+from hope.models import BusinessArea, Household, Program
 from hope.models.utils import MergeStatusModel
 
 pytestmark = pytest.mark.django_db
@@ -92,14 +91,6 @@ def household_partners_url(afghanistan: BusinessArea, program: Program) -> str:
 
 
 @pytest.fixture
-def individual_partners_url(afghanistan: BusinessArea, program: Program) -> str:
-    return reverse(
-        "api:households:individuals-implementing-partners",
-        kwargs={"business_area_slug": afghanistan.slug, "program_code": program.code},
-    )
-
-
-@pytest.fixture
 def plan_household(afghanistan: BusinessArea, program: Program) -> Household:
     return HouseholdFactory(program=program, business_area=afghanistan, org_name_enumerator="Plan International")
 
@@ -132,11 +123,6 @@ def pending_household(afghanistan: BusinessArea, program: Program) -> Household:
 @pytest.fixture
 def other_program_household(afghanistan: BusinessArea, other_program: Program) -> Household:
     return HouseholdFactory(program=other_program, business_area=afghanistan, org_name_enumerator="Save the Children")
-
-
-@pytest.fixture
-def individual_without_household(afghanistan: BusinessArea, program: Program) -> Individual:
-    return IndividualFactory(program=program, business_area=afghanistan, household=None)
 
 
 def test_household_list_filtered_by_implementing_partner_returns_only_that_partner(
@@ -182,18 +168,13 @@ def test_household_implementing_partners_returns_distinct_sorted_merged_names_of
     ]
 
 
-def test_individual_implementing_partners_returns_distinct_sorted_merged_names_of_the_program(
+def test_household_implementing_partners_with_individuals_list_permission_returns_names(
     individual_list_client: Any,
-    individual_partners_url: str,
+    household_partners_url: str,
     plan_household: Household,
-    second_plan_household: Household,
     care_household: Household,
-    blank_partner_household: Household,
-    pending_household: Household,
-    other_program_household: Household,
-    individual_without_household: Individual,
 ) -> None:
-    response = individual_list_client.get(individual_partners_url)
+    response = individual_list_client.get(household_partners_url)
 
     assert response.status_code == status.HTTP_200_OK
     assert response.json() == [
@@ -206,13 +187,5 @@ def test_household_implementing_partners_without_permission_is_forbidden(
     no_permission_client: Any, household_partners_url: str
 ) -> None:
     response = no_permission_client.get(household_partners_url)
-
-    assert response.status_code == status.HTTP_403_FORBIDDEN
-
-
-def test_individual_implementing_partners_without_permission_is_forbidden(
-    no_permission_client: Any, individual_partners_url: str
-) -> None:
-    response = no_permission_client.get(individual_partners_url)
 
     assert response.status_code == status.HTTP_403_FORBIDDEN
