@@ -37,13 +37,6 @@ from e2e.page_object.payment_module.payment_module import PaymentModule
 from e2e.page_object.payment_module.payment_module_details import PaymentModuleDetails
 from e2e.page_object.payment_module.program_cycle import ProgramCyclePage
 from e2e.page_object.payment_module.program_cycle_details import ProgramCycleDetailsPage
-from e2e.page_object.payment_verification.payment_record import PaymentRecord
-from e2e.page_object.payment_verification.payment_verification import (
-    PaymentVerification,
-)
-from e2e.page_object.payment_verification.payment_verification_details import (
-    PaymentVerificationDetails,
-)
 from e2e.page_object.programme_details.programme_details import ProgrammeDetails
 from e2e.page_object.programme_population.households import Households
 from e2e.page_object.programme_population.households_details import HouseholdsDetails
@@ -441,21 +434,6 @@ def page_targeting(request: FixtureRequest, browser: Chrome) -> Targeting:
 @pytest.fixture
 def page_payment_module(request: FixtureRequest, browser: Chrome) -> PaymentModule:
     return PaymentModule(browser)
-
-
-@pytest.fixture
-def page_payment_record(request: FixtureRequest, browser: Chrome) -> PaymentRecord:
-    return PaymentRecord(browser)
-
-
-@pytest.fixture
-def page_payment_verification_details(request: FixtureRequest, browser: Chrome) -> PaymentVerificationDetails:
-    return PaymentVerificationDetails(browser)
-
-
-@pytest.fixture
-def page_payment_verification(request: FixtureRequest, browser: Chrome) -> PaymentVerification:
-    return PaymentVerification(browser)
 
 
 @pytest.fixture

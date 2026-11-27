@@ -40,16 +40,16 @@ grep -rhE '^\s*def test_' tests/e2e --include='test_*.py' --exclude-dir=new_sele
 | 12 | `programme_management` | 8 | 8 | ✅ |
 | 13 | `generic_import` | 15 | 0 | ⬜ |
 | 14 | `filters` | 4 | 0 | ⬜ |
-| 15 | `payment_verification` | 10 | 0 | ⬜ |
+| 15 | `payment_verification` | 10 | 10 | ✅ |
 | 16 | `payment_module` | 9 | 0 | ⬜ |
 | 17 | `targeting` | 21 | 0 | ⬜ |
 | 18 | `grievance/feedback` | 12 | 0 | ⬜ |
 | 19 | `grievance/grievance_dashboard` | 2 | 0 | ⬜ |
 | 20 | `grievance/grievance_tickets` | 25 | 0 | ⬜ |
 | 21 | Old infra cleanup | – | – | ⬜ |
-| | **Total** | **152** | **54** | **36 %** |
+| | **Total** | **152** | **64** | **42 %** |
 
-`[███████░░░░░░░░░░░░░] 54 / 152`. Update it after each PR: 1 block per ~8 tests. An "in review" module counts as migrated only on its own branch; drop the mark when its PR merges.
+`[████████░░░░░░░░░░░░] 64 / 152`. Update it after each PR: 1 block per ~8 tests. An "in review" module counts as migrated only on its own branch; drop the mark when its PR merges.
 
 The new suite already has 46 test files and ~250 test functions. These do not count toward the 152.
 
@@ -180,17 +180,17 @@ Already in new suite: `test_generic_import_data.py`.
 
 ### 15. `payment_verification/test_payment_verification.py` (10) → `new_selenium/payment_verification/`
 Already in new suite: `test_activate_verification_plan.py`.
-- [ ] test_smoke_payment_verification → NEW `test_verification_list.py`
-- [ ] test_smoke_payment_verification_details → NEW `test_verification_list.py`
-- [ ] test_happy_path_payment_verification → COVERED `test_activate_verification_plan_flow` (extend it to finish the plan if needed)
-- [ ] test_payment_verification_successful_not_received → NEW `test_manual_verification.py`
-- [ ] test_payment_verification_partially_successful_received_and_grievance_ticket → NEW `test_manual_verification.py`
-- [ ] test_payment_verification_xlsx_successful → NEW `test_xlsx_verification.py`, parametrize successful / partially / not received
-- [ ] test_payment_verification_xlsx_partially_successful → NEW (param)
-- [ ] test_payment_verification_xlsx_not_received → NEW (param)
-- [ ] test_payment_verification_discard → NEW `test_activate_verification_plan.py`
-- [ ] test_payment_verification_xlsx_invalid → NEW `test_xlsx_verification.py`
-- [ ] Delete `page_object/payment_verification/`
+- [x] test_smoke_payment_verification → NEW `test_verification_list.py::test_verification_list_shows_payment_plan` (also checks the column order)
+- [x] test_smoke_payment_verification_details → NEW `test_verification_list.py::test_verification_details_shows_payment_plan_and_verification_plan` (with the dates, sampling and counters from the happy path)
+- [x] test_happy_path_payment_verification → split into NEW `test_activate_verification_plan.py::test_delete_and_create_verification_plan`, `test_manual_verification.py::test_payment_details_shows_payment_and_verification` and `test_manual_verification_sets_payment_status[received-other-amount]`
+- [x] test_payment_verification_successful_not_received → NEW `test_manual_verification.py::test_manual_verification_sets_payment_status[not-received]` (plus a new `[received-full-amount]` case)
+- [x] test_payment_verification_partially_successful_received_and_grievance_ticket → NEW `test_manual_verification.py::test_grievance_ticket_for_partially_received_payment_updates_verification`
+- [x] test_payment_verification_xlsx_successful → NEW `test_xlsx_verification.py::test_xlsx_import_sets_payment_status[received]` (edits the exported file by header name, not column number)
+- [x] test_payment_verification_xlsx_partially_successful → NEW `…[received-with-issues]`
+- [x] test_payment_verification_xlsx_not_received → NEW `…[not-received]`
+- [x] test_payment_verification_discard → NEW `test_activate_verification_plan.py::test_discard_active_verification_plan_returns_it_to_pending` + `test_xlsx_verification.py::test_downloaded_xlsx_plan_can_be_marked_as_invalid_but_not_discarded` (the UI hides Discard once the file is downloaded, so the old "You cant discard…" alert can't be reached anymore; the test checks the button is gone instead)
+- [x] test_payment_verification_xlsx_invalid → NEW `test_xlsx_verification.py::test_downloaded_xlsx_plan_can_be_marked_as_invalid_but_not_discarded`
+- [x] Delete `page_object/payment_verification/` and the `page_payment_verification` / `page_payment_verification_details` / `page_payment_record` fixtures
 
 ### 16. `payment_module/test_e2e_payment_plans.py` (9) → `new_selenium/payment_module/`
 Already in new suite: lifecycle, entitlement, top-up, group, details, close, follow-up, cycles.
