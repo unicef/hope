@@ -295,6 +295,7 @@ def test_individuals_list(list_context: dict, create_user_role_with_permissions:
         assert individual_result["relationship"] == individual.relationship
         assert individual_result["age"] == individual.age
         assert individual_result["sex"] == individual.sex
+        assert individual_result["phone_no"] == str(individual.phone_no)
         assert individual_result["household"] == {
             "id": str(individual.household.id),
             "unicef_id": individual.household.unicef_id,

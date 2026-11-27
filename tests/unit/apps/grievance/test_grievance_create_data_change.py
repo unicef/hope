@@ -804,6 +804,51 @@ def test_create_account_bank_with_financial_institution(
     assert "id" in response.data[0]
 
 
+def test_create_account_with_number_longer_than_256_characters_returns_number_error_and_creates_no_ticket(
+    authenticated_client: Any,
+    grant_create_permission: None,
+    user: User,
+    grievance_context: dict[str, Any],
+    list_url: str,
+    bank_account: dict[str, Any],
+) -> None:
+    input_data = {
+        "description": "Test",
+        "assigned_to": str(user.id),
+        "issue_type": GrievanceTicket.ISSUE_TYPE_INDIVIDUAL_DATA_CHANGE_DATA_UPDATE,
+        "category": GrievanceTicket.CATEGORY_DATA_CHANGE,
+        "consent": True,
+        "language": "PL",
+        "extras": {
+            "issue_type": {
+                "individual_data_update_issue_type_extras": {
+                    "individual": str(grievance_context["individual"].id),
+                    "individual_data": {
+                        "accounts": [
+                            {
+                                "account_type": "bank",
+                                "financial_institution": str(bank_account["financial_institution"].id),
+                                "number": "1" * 257,
+                            }
+                        ],
+                    },
+                }
+            }
+        },
+    }
+
+    response = authenticated_client.post(list_url, input_data, format="json")
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    individual_data_errors = response.json()["extras"]["issue_type"]["individual_data_update_issue_type_extras"][
+        "individual_data"
+    ]
+    assert individual_data_errors == {
+        "accounts": {"0": {"number": ["Ensure this field has no more than 256 characters."]}}
+    }
+    assert GrievanceTicket.objects.count() == 0
+
+
 @pytest.fixture
 def bank_account(
     grievance_context: dict[str, Any],
@@ -853,6 +898,51 @@ def test_edit_account_bank_requires_financial_institution(
     response = authenticated_client.post(list_url, input_data_fail, format="json")
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert "financial_institution" in str(response.data).lower()
+
+
+def test_edit_account_with_number_longer_than_256_characters_returns_number_error_and_creates_no_ticket(
+    authenticated_client: Any,
+    grant_create_permission: None,
+    user: User,
+    grievance_context: dict[str, Any],
+    list_url: str,
+    bank_account: dict[str, Any],
+) -> None:
+    input_data = {
+        "description": "Test",
+        "assigned_to": str(user.id),
+        "issue_type": GrievanceTicket.ISSUE_TYPE_INDIVIDUAL_DATA_CHANGE_DATA_UPDATE,
+        "category": GrievanceTicket.CATEGORY_DATA_CHANGE,
+        "consent": True,
+        "language": "PL",
+        "extras": {
+            "issue_type": {
+                "individual_data_update_issue_type_extras": {
+                    "individual": str(grievance_context["individual"].id),
+                    "individual_data": {
+                        "accounts_to_edit": [
+                            {
+                                "id": str(bank_account["account"].id),
+                                "financial_institution": str(bank_account["financial_institution"].id),
+                                "number": "1" * 257,
+                            }
+                        ],
+                    },
+                }
+            }
+        },
+    }
+
+    response = authenticated_client.post(list_url, input_data, format="json")
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    individual_data_errors = response.json()["extras"]["issue_type"]["individual_data_update_issue_type_extras"][
+        "individual_data"
+    ]
+    assert individual_data_errors == {
+        "accounts_to_edit": {"0": {"number": ["Ensure this field has no more than 256 characters."]}}
+    }
+    assert GrievanceTicket.objects.count() == 0
 
 
 def test_edit_account_bank_with_financial_institution(
@@ -908,3 +998,279 @@ def test_people_update_fields_offered_in_the_picker_are_accepted_by_the_serializ
     offered = {field["name"] for field in FieldFactory.from_scope(Scope.PEOPLE_UPDATE)}
 
     assert offered - set(IndividualUpdateDataSerializer().fields) == set()
+
+
+@pytest.mark.parametrize(
+    ("field", "value", "expected_error"),
+    [
+        pytest.param(
+            "phone_no",
+            "12345",
+            "Enter a valid phone number with the country code",
+            id="phone_no-without-country-code",
+        ),
+        pytest.param(
+            "phone_no_alternative",
+            "+999",
+            "Enter a valid phone number with the country code",
+            id="phone_no_alternative-unknown-country-code",
+        ),
+        pytest.param(
+            "payment_delivery_phone_no",
+            "not a phone",
+            "Enter a valid phone number with the country code",
+            id="payment_delivery_phone_no-letters",
+        ),
+        pytest.param("email", "john.example.com", "Enter a valid email address.", id="email-without-at-sign"),
+        pytest.param(
+            "given_name", "a" * 86, "Ensure this field has no more than 85 characters.", id="given_name-too-long"
+        ),
+        pytest.param(
+            "full_name", "a" * 256, "Ensure this field has no more than 255 characters.", id="full_name-too-long"
+        ),
+        pytest.param(
+            "who_answers_phone",
+            "a" * 151,
+            "Ensure this field has no more than 150 characters.",
+            id="who_answers_phone-too-long",
+        ),
+        pytest.param(
+            "village", "a" * 251, "Ensure this field has no more than 250 characters.", id="people-village-too-long"
+        ),
+        pytest.param("birth_date", "2999-01-01", "Birth date cannot be in the future", id="birth_date-in-future"),
+    ],
+)
+def test_create_individual_data_update_with_invalid_value_returns_field_error_and_creates_no_ticket(
+    authenticated_client: Any,
+    grant_create_permission: None,
+    user: User,
+    grievance_context: dict[str, Any],
+    list_url: str,
+    field: str,
+    value: str,
+    expected_error: str,
+) -> None:
+    input_data = {
+        "description": "Test",
+        "assigned_to": str(user.id),
+        "issue_type": GrievanceTicket.ISSUE_TYPE_INDIVIDUAL_DATA_CHANGE_DATA_UPDATE,
+        "category": GrievanceTicket.CATEGORY_DATA_CHANGE,
+        "consent": True,
+        "language": "PL",
+        "extras": {
+            "issue_type": {
+                "individual_data_update_issue_type_extras": {
+                    "individual": str(grievance_context["individual"].id),
+                    "individual_data": {field: value},
+                }
+            }
+        },
+    }
+
+    response = authenticated_client.post(list_url, input_data, format="json")
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    individual_data_errors = response.json()["extras"]["issue_type"]["individual_data_update_issue_type_extras"][
+        "individual_data"
+    ]
+    assert individual_data_errors == {field: [expected_error]}
+    assert GrievanceTicket.objects.count() == 0
+
+
+def test_create_individual_data_update_with_valid_phone_numbers_and_email_stores_requested_values(
+    authenticated_client: Any,
+    grant_create_permission: None,
+    user: User,
+    grievance_context: dict[str, Any],
+    list_url: str,
+) -> None:
+    input_data = {
+        "description": "Test",
+        "assigned_to": str(user.id),
+        "issue_type": GrievanceTicket.ISSUE_TYPE_INDIVIDUAL_DATA_CHANGE_DATA_UPDATE,
+        "category": GrievanceTicket.CATEGORY_DATA_CHANGE,
+        "consent": True,
+        "language": "PL",
+        "extras": {
+            "issue_type": {
+                "individual_data_update_issue_type_extras": {
+                    "individual": str(grievance_context["individual"].id),
+                    "individual_data": {
+                        "phone_no": "+48609456789",
+                        "phone_no_alternative": "+48 609 456 780",
+                        "email": "john@example.com",
+                    },
+                }
+            }
+        },
+    }
+
+    response = authenticated_client.post(list_url, input_data, format="json")
+
+    assert response.status_code == status.HTTP_201_CREATED
+    ticket = GrievanceTicket.objects.get(id=response.data[0]["id"])
+    individual_data = ticket.individual_data_update_ticket_details.individual_data
+    assert individual_data["phone_no"]["value"] == "+48609456789"
+    assert individual_data["phone_no_alternative"]["value"] == "+48 609 456 780"
+    assert individual_data["email"]["value"] == "john@example.com"
+
+
+@freeze_time("2026-11-24 23:30:00")
+def test_create_individual_data_update_with_birth_date_tomorrow_in_utc_stores_requested_value(
+    authenticated_client: Any,
+    grant_create_permission: None,
+    user: User,
+    grievance_context: dict[str, Any],
+    list_url: str,
+) -> None:
+    input_data = {
+        "description": "Test",
+        "assigned_to": str(user.id),
+        "issue_type": GrievanceTicket.ISSUE_TYPE_INDIVIDUAL_DATA_CHANGE_DATA_UPDATE,
+        "category": GrievanceTicket.CATEGORY_DATA_CHANGE,
+        "consent": True,
+        "language": "PL",
+        "extras": {
+            "issue_type": {
+                "individual_data_update_issue_type_extras": {
+                    "individual": str(grievance_context["individual"].id),
+                    "individual_data": {"birth_date": "2026-11-25"},
+                }
+            }
+        },
+    }
+
+    response = authenticated_client.post(list_url, input_data, format="json")
+
+    assert response.status_code == status.HTTP_201_CREATED
+    ticket = GrievanceTicket.objects.get(id=response.data[0]["id"])
+    individual_data = ticket.individual_data_update_ticket_details.individual_data
+    assert individual_data["birth_date"]["value"] == "2026-11-25"
+
+
+@freeze_time("2026-11-24 23:30:00")
+def test_create_individual_data_update_with_birth_date_two_days_ahead_in_utc_returns_field_error(
+    authenticated_client: Any,
+    grant_create_permission: None,
+    user: User,
+    grievance_context: dict[str, Any],
+    list_url: str,
+) -> None:
+    input_data = {
+        "description": "Test",
+        "assigned_to": str(user.id),
+        "issue_type": GrievanceTicket.ISSUE_TYPE_INDIVIDUAL_DATA_CHANGE_DATA_UPDATE,
+        "category": GrievanceTicket.CATEGORY_DATA_CHANGE,
+        "consent": True,
+        "language": "PL",
+        "extras": {
+            "issue_type": {
+                "individual_data_update_issue_type_extras": {
+                    "individual": str(grievance_context["individual"].id),
+                    "individual_data": {"birth_date": "2026-11-26"},
+                }
+            }
+        },
+    }
+
+    response = authenticated_client.post(list_url, input_data, format="json")
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    individual_data_errors = response.json()["extras"]["issue_type"]["individual_data_update_issue_type_extras"][
+        "individual_data"
+    ]
+    assert individual_data_errors == {"birth_date": ["Birth date cannot be in the future"]}
+    assert GrievanceTicket.objects.count() == 0
+
+
+@pytest.mark.parametrize(
+    ("field", "value", "expected_error"),
+    [
+        pytest.param("size", -1, "Ensure this value is greater than or equal to 0.", id="negative-size"),
+        pytest.param(
+            "pregnant_count", -3, "Ensure this value is greater than or equal to 0.", id="negative-pregnant_count"
+        ),
+        pytest.param(
+            "male_age_group_60_disabled_count",
+            -1,
+            "Ensure this value is greater than or equal to 0.",
+            id="negative-disabled-count",
+        ),
+        pytest.param("village", "a" * 251, "Ensure this field has no more than 250 characters.", id="village-too-long"),
+        pytest.param(
+            "address", "a" * 1025, "Ensure this field has no more than 1024 characters.", id="address-too-long"
+        ),
+    ],
+)
+def test_create_household_data_update_with_invalid_value_returns_field_error_and_creates_no_ticket(
+    authenticated_client: Any,
+    grant_create_permission: None,
+    user: User,
+    grievance_context: dict[str, Any],
+    list_url: str,
+    field: str,
+    value: Any,
+    expected_error: str,
+) -> None:
+    input_data = {
+        "description": "Test",
+        "assigned_to": str(user.id),
+        "issue_type": GrievanceTicket.ISSUE_TYPE_HOUSEHOLD_DATA_CHANGE_DATA_UPDATE,
+        "category": GrievanceTicket.CATEGORY_DATA_CHANGE,
+        "consent": True,
+        "language": "PL",
+        "extras": {
+            "issue_type": {
+                "household_data_update_issue_type_extras": {
+                    "household": str(grievance_context["household"].id),
+                    "household_data": {field: value},
+                }
+            }
+        },
+    }
+
+    response = authenticated_client.post(list_url, input_data, format="json")
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    household_data_errors = response.json()["extras"]["issue_type"]["household_data_update_issue_type_extras"][
+        "household_data"
+    ]
+    assert household_data_errors == {field: [expected_error]}
+    assert GrievanceTicket.objects.count() == 0
+
+
+@pytest.mark.parametrize(
+    ("field", "value", "expected_error"),
+    [
+        pytest.param(
+            "phone_no",
+            "12345",
+            "Enter a valid phone number with the country code",
+            id="invalid-phone_no",
+        ),
+        pytest.param("email", "john.example.com", "Enter a valid email address.", id="invalid-email"),
+        pytest.param("birth_date", "2999-01-01", "Birth date cannot be in the future", id="birth_date-in-future"),
+    ],
+)
+def test_create_add_individual_with_invalid_value_returns_field_error_and_creates_no_ticket(
+    authenticated_client: Any,
+    grant_create_permission: None,
+    add_individual_payload: dict[str, Any],
+    list_url: str,
+    field: str,
+    value: str,
+    expected_error: str,
+) -> None:
+    payload = {
+        **add_individual_payload,
+        f"extras.issue_type.add_individual_issue_type_extras.individual_data.{field}": value,
+    }
+
+    response = authenticated_client.post(list_url, payload, format="multipart")
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    individual_data_errors = response.json()["extras"]["issue_type"]["add_individual_issue_type_extras"][
+        "individual_data"
+    ]
+    assert individual_data_errors == {field: [expected_error]}
+    assert GrievanceTicket.objects.count() == 0

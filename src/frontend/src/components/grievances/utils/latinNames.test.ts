@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, onTestFinished, vi } from 'vitest';
 import {
   GRIEVANCE_CATEGORIES,
   GRIEVANCE_ISSUE_TYPES,
@@ -114,5 +114,153 @@ describe('validateUsingSteps - latin name format for add individual', () => {
     const errors = runAddValidation({ fullName: 'Иван Иванов' });
 
     expect(errors.individualData).toBeUndefined();
+  });
+});
+
+describe('validate - phone number, email and count formats', () => {
+  const individualFieldsDict = {
+    phone_no: { labelEn: 'Phone number', type: 'STRING' },
+    phone_no_alternative: {
+      labelEn: 'Alternative phone number',
+      type: 'STRING',
+    },
+    email: { labelEn: 'Individual email', type: 'STRING' },
+    birth_date: { labelEn: 'Birth date', type: 'DATE' },
+  };
+  const householdFieldsDict = {
+    size: { labelEn: 'Household size', type: 'INTEGER' },
+  };
+  const runEditIndividual = (rows) =>
+    validate(
+      { ...editIndividualBase, individualDataUpdateFields: rows },
+      null,
+      individualFieldsDict,
+      {},
+      beneficiaryGroup,
+    );
+  const runEditHousehold = (rows) =>
+    validateUsingSteps(
+      {
+        category: GRIEVANCE_CATEGORIES.DATA_CHANGE,
+        issueType: GRIEVANCE_ISSUE_TYPES.EDIT_HOUSEHOLD,
+        selectedHousehold: { id: 'hh-1' },
+        householdDataUpdateFields: rows,
+      },
+      null,
+      {},
+      householdFieldsDict,
+      GrievanceSteps.Description,
+      () => undefined,
+      beneficiaryGroup,
+    );
+
+  it.each(['12345', '0791234567', '+999', 'abc', '+48 600'])(
+    'rejects phone number %j with the field label',
+    (value) => {
+      const errors = runEditIndividual([
+        { fieldName: 'phone_no', fieldValue: value },
+      ]);
+
+      expect(errors.individualDataUpdateFields).toBe(
+        'Phone number: Enter a valid phone number with the country code',
+      );
+    },
+  );
+
+  it.each(['+48609456789', '+48 609 456 789', '+1 (631) 784-1118'])(
+    'accepts phone number %j',
+    (value) => {
+      const errors = runEditIndividual([
+        { fieldName: 'phone_no_alternative', fieldValue: value },
+      ]);
+
+      expect(errors.individualDataUpdateFields).toBeUndefined();
+    },
+  );
+
+  it.each(['john.example.com', 'john@', '@example.com', 'john@example'])(
+    'rejects email %j with the field label',
+    (value) => {
+      const errors = runEditIndividual([
+        { fieldName: 'email', fieldValue: value },
+      ]);
+
+      expect(errors.individualDataUpdateFields).toBe(
+        'Individual email: Enter a valid email address',
+      );
+    },
+  );
+
+  it('accepts a well formed email', () => {
+    const errors = runEditIndividual([
+      { fieldName: 'email', fieldValue: 'john@example.com' },
+    ]);
+
+    expect(errors.individualDataUpdateFields).toBeUndefined();
+  });
+
+  it('rejects a birth date in the future with the field label', () => {
+    const errors = runEditIndividual([
+      { fieldName: 'birth_date', fieldValue: '2999-01-01' },
+    ]);
+
+    expect(errors.individualDataUpdateFields).toBe(
+      'Birth date: Birth date cannot be in the future',
+    );
+  });
+
+  it.each(['1990-05-17', '2026-11-24'])(
+    'accepts birth date %j on or before today',
+    (value) => {
+      const dateNow = vi
+        .spyOn(Date, 'now')
+        .mockReturnValue(new Date('2026-11-24T12:00:00Z').getTime());
+      onTestFinished(() => dateNow.mockRestore());
+
+      const errors = runEditIndividual([
+        { fieldName: 'birth_date', fieldValue: value },
+      ]);
+
+      expect(errors.individualDataUpdateFields).toBeUndefined();
+    },
+  );
+
+  it('rejects a negative household count with the field label', () => {
+    const errors = runEditHousehold([{ fieldName: 'size', fieldValue: -1 }]);
+
+    expect(errors.householdDataUpdateFields).toBe(
+      'Household size: Value cannot be negative',
+    );
+  });
+
+  it('accepts a zero household count', () => {
+    const errors = runEditHousehold([{ fieldName: 'size', fieldValue: 0 }]);
+
+    expect(errors.householdDataUpdateFields).toBeUndefined();
+  });
+
+  it('flags an invalid phone number, email and birth date under their own inputs when adding an individual', () => {
+    const errors = validateUsingSteps(
+      {
+        ...addIndividualBase,
+        individualData: {
+          phoneNo: '12345',
+          email: 'john.example.com',
+          birthDate: '2999-01-01',
+        },
+      },
+      [],
+      {},
+      {},
+      GrievanceSteps.Description,
+      () => undefined,
+      beneficiaryGroup,
+    );
+
+    expect(errors.individualData).toEqual({
+      phoneNo: 'Enter a valid phone number with the country code',
+      email: 'Enter a valid email address',
+      birthDate: 'Birth date cannot be in the future',
+    });
   });
 });

@@ -287,6 +287,7 @@ class IndividualListSerializer(serializers.ModelSerializer):
             "sex",
             "relationship_display",
             "birth_date",
+            "phone_no",
             "deduplication_batch_status",
             "deduplication_batch_status_display",
             "biometric_deduplication_batch_status",

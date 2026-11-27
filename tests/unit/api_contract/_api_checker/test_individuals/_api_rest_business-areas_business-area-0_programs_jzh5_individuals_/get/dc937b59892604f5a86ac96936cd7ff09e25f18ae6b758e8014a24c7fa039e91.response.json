@@ -28,6 +28,7 @@
                 "sex": "MALE",
                 "relationship_display": "",
                 "birth_date": "1990-01-01",
+                "phone_no": "",
                 "deduplication_batch_status": "UNIQUE_IN_BATCH",
                 "deduplication_batch_status_display": "Unique in RDI",
                 "biometric_deduplication_batch_status": "NOT_PROCESSED",
