@@ -28,6 +28,7 @@ import { useSnackbar } from '@hooks/useSnackBar';
 import { BlackLink } from '@components/core/BlackLink';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { ProgramSelect, useSortAndFilter } from './useSortAndFilter';
+import { getVisibleSelection } from './visibleSelection';
 import { showApiErrorMessages } from '@utils/utils';
 import { responsiveValue } from 'src/responsive';
 
@@ -65,25 +66,12 @@ export const PendingForReleaseSection: FC<PendingForReleaseSectionProps> = ({
     filterRows,
   } = useSortAndFilter({ initialSortField: null, initialSortDirection: 'asc' });
 
-  const handleSelectAllReviewed = () => {
-    const ids = inReviewData?.results?.map((plan) => plan.id);
-    handleSelectAll(ids, selectedInReview, setSelectedInReview);
-  };
-
   const programs = inReviewData?.results?.reduce<string[]>((acc, row) => {
     if (!acc.includes(row.program)) {
       acc.push(row.program);
     }
     return acc;
   }, []);
-
-  const allSelected = inReviewData?.results?.every((plan) =>
-    selectedInReview.includes(plan.id),
-  );
-
-  const selectedPlansUnicefIds = inReviewData?.results
-    .filter((plan) => selectedInReview.includes(plan.id))
-    .map((plan) => plan.unicefId);
 
   const columns = [
     {
@@ -121,6 +109,28 @@ export const PendingForReleaseSection: FC<PendingForReleaseSectionProps> = ({
   );
   const sortedRows = sortRows(filteredRows);
 
+  const {
+    visibleIds,
+    visibleSelectedIds,
+    selectedPlansUnicefIds,
+    allSelected,
+  } = getVisibleSelection(sortedRows, selectedInReview);
+
+  const handleSelectAllReviewed = () => {
+    handleSelectAll(visibleIds, visibleSelectedIds, setSelectedInReview);
+  };
+
+  // Drop the selection so plans hidden by the filter do not come back selected.
+  const handleProgramChange = (program: string) => {
+    setSelectedProgram(program);
+    setSelectedInReview([]);
+  };
+
+  const handleSearchChange = (text: string) => {
+    setSearchText(text);
+    setSelectedInReview([]);
+  };
+
   const title = t('Payment Plans pending for Release');
 
   const buttons = (
@@ -130,7 +140,7 @@ export const PendingForReleaseSection: FC<PendingForReleaseSectionProps> = ({
           label="Search"
           value={searchText}
           size="small"
-          onChange={(e) => setSearchText(e.target.value)}
+          onChange={(e) => handleSearchChange(e.target.value)}
           data-cy="search-release"
           slotProps={{
             input: {
@@ -144,12 +154,12 @@ export const PendingForReleaseSection: FC<PendingForReleaseSectionProps> = ({
         />
       )}
       <ReleasePaymentPlansModal
-        selectedPlansIds={selectedInReview}
+        selectedPlansIds={visibleSelectedIds}
         selectedPlansUnicefIds={selectedPlansUnicefIds}
         onRelease={async (_, comment) => {
           try {
             await bulkAction.mutateAsync({
-              ids: selectedInReview,
+              ids: visibleSelectedIds,
               action: 'REVIEW',
               comment: comment,
             });
@@ -172,7 +182,7 @@ export const PendingForReleaseSection: FC<PendingForReleaseSectionProps> = ({
               <TableCell padding="checkbox" style={{ width: '10%' }}>
                 <Box sx={{ flex: 1 }}>
                   <Checkbox
-                    checked={allSelected && selectedInReview.length > 0}
+                    checked={allSelected}
                     onClick={handleSelectAllReviewed}
                     data-cy="select-all-release"
                   />
@@ -183,7 +193,7 @@ export const PendingForReleaseSection: FC<PendingForReleaseSectionProps> = ({
                   {column.field === 'program' ? (
                     <ProgramSelect
                       selectedProgram={selectedProgram}
-                      setSelectedProgram={setSelectedProgram}
+                      setSelectedProgram={handleProgramChange}
                       programs={programs}
                       dataCy="program-select-release"
                     />
@@ -205,10 +215,10 @@ export const PendingForReleaseSection: FC<PendingForReleaseSectionProps> = ({
               <TableRow key={row.id}>
                 <TableCell padding="checkbox">
                   <Checkbox
-                    checked={selectedInReview.includes(row.id)}
+                    checked={visibleSelectedIds.includes(row.id)}
                     onChange={() =>
                       handleSelect(
-                        selectedInReview,
+                        visibleSelectedIds,
                         setSelectedInReview,
                         row.id,
                       )

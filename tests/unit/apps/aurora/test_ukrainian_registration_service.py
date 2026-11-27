@@ -1,4 +1,4 @@
-import datetime
+import datetime as dt
 import json
 from typing import Any
 
@@ -182,7 +182,7 @@ def ukraine_records(
     ukraine_individual_payloads: dict[str, dict[str, Any]],
     ukraine_files: dict[str, Any],
 ) -> dict[str, list[Record]]:
-    timestamp = timezone.make_aware(datetime.datetime(2022, 4, 1))
+    timestamp = timezone.make_aware(dt.datetime(2022, 4, 1))
     files_blob = json.dumps(ukraine_files).encode()
 
     records = [
@@ -248,7 +248,7 @@ def registration_2024_record(
     ukraine_household: list[dict[str, Any]],
     ukraine_individual_payloads: dict[str, dict[str, Any]],
 ) -> Record:
-    timestamp = timezone.make_aware(datetime.datetime(2024, 2, 4))
+    timestamp = timezone.make_aware(dt.datetime(2024, 2, 4))
     individual = {
         **ukraine_individual_payloads["with_tax_and_disability"],
         "low_income_hh_h_f": True,
@@ -276,7 +276,7 @@ def test_import_data_to_datahub(
     ukraine_records: dict[str, list[Record]],
 ) -> None:
     service = UkraineBaseRegistrationService(registration)
-    rdi = service.create_rdi(user, f"ukraine rdi {datetime.datetime.now()}")
+    rdi = service.create_rdi(user, f"ukraine rdi {dt.datetime.now()}")
     records_ids = [record.id for record in ukraine_records["records"]]
     service.process_records(rdi.id, records_ids)
 
@@ -305,7 +305,7 @@ def test_import_data_to_datahub_retry(
     ukraine_records: dict[str, list[Record]],
 ) -> None:
     service = UkraineBaseRegistrationService(registration)
-    rdi = service.create_rdi(user, f"ukraine rdi {datetime.datetime.now()}")
+    rdi = service.create_rdi(user, f"ukraine rdi {dt.datetime.now()}")
     records_ids_all = [record.id for record in ukraine_records["records"]]
     service.process_records(rdi.id, records_ids_all)
     ukraine_records["records"][2].refresh_from_db()
@@ -313,7 +313,7 @@ def test_import_data_to_datahub_retry(
     assert PendingHousehold.objects.count() == 4
 
     service = UkraineBaseRegistrationService(registration)
-    rdi = service.create_rdi(user, f"ukraine rdi {datetime.datetime.now()}")
+    rdi = service.create_rdi(user, f"ukraine rdi {dt.datetime.now()}")
     records_ids = [record.id for record in ukraine_records["records"][:2]]
     service.process_records(rdi.id, records_ids)
     assert Record.objects.filter(id__in=records_ids_all, ignored=False).count() == 4
@@ -329,7 +329,7 @@ def test_import_document_validation(
     ukraine_records: dict[str, list[Record]],
 ) -> None:
     service = UkraineBaseRegistrationService(registration)
-    rdi = service.create_rdi(user, f"ukraine rdi {datetime.datetime.now()}")
+    rdi = service.create_rdi(user, f"ukraine rdi {dt.datetime.now()}")
 
     service.process_records(rdi.id, [record.id for record in ukraine_records["bad_records"]])
     ukraine_records["bad_records"][0].refresh_from_db()
@@ -346,7 +346,7 @@ def test_registration_2024_import_data_to_datahub(
     registration_2024_record: Record,
 ) -> None:
     service = Registration2024(registration)
-    rdi = service.create_rdi(user, f"ukraine rdi {datetime.datetime.now()}")
+    rdi = service.create_rdi(user, f"ukraine rdi {dt.datetime.now()}")
     service.process_records(rdi.id, [registration_2024_record.id])
 
     assert Record.objects.filter(id__in=[registration_2024_record.id], ignored=False).count() == 1
@@ -368,7 +368,7 @@ def test_head_of_household_phone_number_marked_valid(
     ukraine_records: dict[str, list[Record]],
 ) -> None:
     service = UkraineBaseRegistrationService(registration)
-    rdi = service.create_rdi(user, f"ukraine rdi {datetime.datetime.now()}")
+    rdi = service.create_rdi(user, f"ukraine rdi {dt.datetime.now()}")
     service.process_records(rdi.id, [ukraine_records["records"][0].id])
 
     assert PendingIndividual.objects.get(family_name="Romaniak").phone_no_valid is True
@@ -386,7 +386,7 @@ def test_head_of_household_phone_number_marked_invalid(
     record.fields["individuals"][0]["phone_no_i_c"] = "123"
     record.save(update_fields=["fields"])
     service = UkraineBaseRegistrationService(registration)
-    rdi = service.create_rdi(user, f"ukraine rdi {datetime.datetime.now()}")
+    rdi = service.create_rdi(user, f"ukraine rdi {dt.datetime.now()}")
     service.process_records(rdi.id, [record.id])
 
     assert PendingIndividual.objects.get(family_name="Lamiący").phone_no_valid is False

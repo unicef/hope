@@ -1,8 +1,10 @@
 import base64
+from collections.abc import Callable, Iterator
 import contextlib
 from pathlib import Path
-from typing import Iterator
 
+from django.core.files.base import ContentFile
+from django.core.files.storage import default_storage
 import pytest
 from rest_framework.reverse import reverse
 from rest_framework.test import APIClient
@@ -81,6 +83,22 @@ def afghanistan_country(db) -> Country:
 def base64_image() -> str:
     image = Path(__file__).parent / "logo.png"
     return base64.b64encode(image.read_bytes()).decode("utf-8")
+
+
+@pytest.fixture
+def store_image() -> Iterator[Callable[[str], str]]:
+    image = Path(__file__).parent / "logo.png"
+    stored_names: list[str] = []
+
+    def store(file_name: str) -> str:
+        stored_name = default_storage.save(file_name, ContentFile(image.read_bytes()))
+        stored_names.append(stored_name)
+        return stored_name
+
+    yield store
+
+    for stored_name in stored_names:
+        default_storage.delete(stored_name)
 
 
 @pytest.fixture

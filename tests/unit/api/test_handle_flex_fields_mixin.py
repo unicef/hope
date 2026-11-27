@@ -1,22 +1,12 @@
-import base64
 from collections.abc import Callable
-import contextlib
-from pathlib import Path
 
-from django.core.files.storage import default_storage
 import pytest
 
 from extras.test_utils.factories.core import FlexibleAttributeFactory
 from hope.api.endpoints.rdi.lax import HandleFlexFieldsMixin
-from hope.api.endpoints.rdi.mixin import PhotoMixin
 from hope.models import FlexibleAttribute
 
 pytestmark = pytest.mark.django_db
-
-
-class ImageFlexFieldMixin(HandleFlexFieldsMixin, PhotoMixin):
-    def __init__(self) -> None:
-        self.saved_paths: list[str] = []
 
 
 @pytest.fixture
@@ -195,23 +185,6 @@ def test_handle_flex_fields_empty_raw_data(
 
 
 @pytest.fixture
-def base64_image_data() -> str:
-    image = Path(__file__).parent / "logo.png"
-    return base64.b64encode(image.read_bytes()).decode("utf-8")
-
-
-@pytest.fixture
-def image_flex_mixin() -> ImageFlexFieldMixin:
-    mixin = ImageFlexFieldMixin()
-
-    yield mixin
-
-    for path in mixin.saved_paths:
-        with contextlib.suppress(Exception):
-            default_storage.delete(path)
-
-
-@pytest.fixture
 def image_flex_individual() -> FlexibleAttribute:
     return FlexibleAttributeFactory(
         name="custom_image_i_f",
@@ -242,153 +215,32 @@ def image_flex_household() -> FlexibleAttribute:
 
 
 def test_get_image_flex_fields_individual(
-    image_flex_mixin: ImageFlexFieldMixin,
+    flex_mixin: HandleFlexFieldsMixin,
     image_flex_individual: FlexibleAttribute,
     string_flex_individual: FlexibleAttribute,
 ) -> None:
-    image_fields = image_flex_mixin.get_image_flex_fields(FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL)
+    image_fields = flex_mixin.get_image_flex_fields(FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL)
 
     assert "custom_image" in image_fields
     assert "custom_string" not in image_fields
 
 
 def test_get_image_flex_fields_household(
-    image_flex_mixin: ImageFlexFieldMixin,
+    flex_mixin: HandleFlexFieldsMixin,
     image_flex_household: FlexibleAttribute,
     image_flex_individual: FlexibleAttribute,
 ) -> None:
-    image_fields = image_flex_mixin.get_image_flex_fields(FlexibleAttribute.ASSOCIATED_WITH_HOUSEHOLD)
+    image_fields = flex_mixin.get_image_flex_fields(FlexibleAttribute.ASSOCIATED_WITH_HOUSEHOLD)
 
     assert "household_image" in image_fields
     assert "custom_image" not in image_fields
 
 
-def test_process_image_flex_fields_saves_file_and_updates_value(
-    image_flex_mixin: ImageFlexFieldMixin,
-    image_flex_individual: FlexibleAttribute,
-    string_flex_individual: FlexibleAttribute,
-    base64_image_data: str,
-) -> None:
-    flex_fields = {
-        "custom_image": base64_image_data,
-        "custom_string": "some text",
-    }
-
-    saved_paths = image_flex_mixin.process_image_flex_fields(
-        flex_fields,
-        FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL,
-        "test_prefix",
-    )
-    image_flex_mixin.saved_paths.extend(saved_paths)
-
-    assert len(saved_paths) == 1
-    assert flex_fields["custom_image"] == saved_paths[0]
-    assert not flex_fields["custom_image"].startswith(base64_image_data[:20])
-    assert default_storage.exists(saved_paths[0])
-    assert flex_fields["custom_string"] == "some text"
-
-
-def test_process_image_flex_fields_empty_value_skipped(
-    image_flex_mixin: ImageFlexFieldMixin,
-    image_flex_individual: FlexibleAttribute,
-    string_flex_individual: FlexibleAttribute,
-) -> None:
-    flex_fields = {
-        "custom_image": "",
-        "custom_string": "some text",
-    }
-
-    saved_paths = image_flex_mixin.process_image_flex_fields(
-        flex_fields,
-        FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL,
-        "test_prefix",
-    )
-
-    assert len(saved_paths) == 0
-    assert flex_fields["custom_image"] == ""
-
-
-def test_process_image_flex_fields_none_flex_fields(
-    image_flex_mixin: ImageFlexFieldMixin,
-    image_flex_individual: FlexibleAttribute,
-) -> None:
-    saved_paths = image_flex_mixin.process_image_flex_fields(
-        None,
-        FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL,
-        "test_prefix",
-    )
-
-    assert saved_paths == []
-
-
-@pytest.fixture
-def saved_image_path(
-    image_flex_mixin: ImageFlexFieldMixin,
-    image_flex_individual: FlexibleAttribute,
-    base64_image_data: str,
-) -> str:
-    flex_fields = {"custom_image": base64_image_data}
-    saved_paths = image_flex_mixin.process_image_flex_fields(
-        flex_fields,
-        FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL,
-        "test_prefix",
-    )
-    image_flex_mixin.saved_paths.extend(saved_paths)
-    return saved_paths[0]
-
-
-def test_cleanup_deletes_saved_files(
-    saved_image_path: str,
-) -> None:
-    assert default_storage.exists(saved_image_path)
-
-    default_storage.delete(saved_image_path)
-
-    assert not default_storage.exists(saved_image_path)
-
-
 def test_get_image_flex_fields_cache_reused(
-    image_flex_mixin: ImageFlexFieldMixin,
+    flex_mixin: HandleFlexFieldsMixin,
     image_flex_individual: FlexibleAttribute,
 ) -> None:
-    result1 = image_flex_mixin.get_image_flex_fields(FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL)
-    result2 = image_flex_mixin.get_image_flex_fields(FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL)
+    result1 = flex_mixin.get_image_flex_fields(FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL)
+    result2 = flex_mixin.get_image_flex_fields(FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL)
 
     assert result1 is result2
-
-
-def test_process_image_flex_fields_non_string_value_skipped(
-    image_flex_mixin: ImageFlexFieldMixin,
-    image_flex_individual: FlexibleAttribute,
-) -> None:
-    flex_fields = {
-        "custom_image": 12345,
-    }
-
-    saved_paths = image_flex_mixin.process_image_flex_fields(
-        flex_fields,
-        FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL,
-        "test_prefix",
-    )
-
-    assert len(saved_paths) == 0
-    assert flex_fields["custom_image"] == 12345
-
-
-def test_process_image_flex_fields_get_photo_returns_none(
-    image_flex_mixin: ImageFlexFieldMixin,
-    image_flex_individual: FlexibleAttribute,
-) -> None:
-    empty_data_uri = "data:;base64,"
-    flex_fields = {
-        "custom_image": empty_data_uri,
-    }
-
-    saved_paths = image_flex_mixin.process_image_flex_fields(
-        flex_fields,
-        FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL,
-        "test_prefix",
-    )
-
-    assert len(saved_paths) == 0
-    assert flex_fields["custom_image"] == empty_data_uri

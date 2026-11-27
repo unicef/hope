@@ -6,6 +6,7 @@ from django.db import transaction
 from django.db.models import Exists, OuterRef
 from rest_framework.exceptions import ValidationError
 
+from hope.apps.account.actor_snapshot import build_actor_snapshot
 from hope.apps.activity_log.utils import copy_model_object
 from hope.apps.payment.celery_tasks import (
     create_follow_up_instruction_delivery_xlsx_async_task,
@@ -17,9 +18,20 @@ from hope.apps.payment.utils import inactive_currency_reason
 from hope.models import FollowUpInstruction, Payment, PaymentPlan, PaymentPlanGroup, log_create
 
 if TYPE_CHECKING:
-    import datetime
+    import datetime as dt
 
     from hope.models import Program, User
+
+
+ACTOR_RECORDING_ACTIONS = frozenset(
+    {
+        PaymentPlan.Action.SEND_FOR_APPROVAL.value,
+        PaymentPlan.Action.APPROVE.value,
+        PaymentPlan.Action.AUTHORIZE.value,
+        PaymentPlan.Action.REVIEW.value,
+        PaymentPlan.Action.REJECT.value,
+    }
+)
 
 
 class FollowUpInstructionService:
@@ -95,8 +107,8 @@ class FollowUpInstructionService:
         self,
         user: "User",
         payment_plan_group_ids: list[str],
-        dispersion_start_date: datetime.date,
-        dispersion_end_date: datetime.date,
+        dispersion_start_date: dt.date,
+        dispersion_end_date: dt.date,
     ) -> FollowUpInstruction:
         source_plans = self._get_applicable_source_payment_plans(payment_plan_group_ids)
         instruction = FollowUpInstruction.objects.create(
@@ -202,6 +214,8 @@ class FollowUpInstructionService:
         extra_input_data: dict[str, Any] | None = None,
     ) -> FollowUpInstruction:
         instruction = self._require_instruction()
+        # One AD lookup for the whole instruction, only for actions that record an actor; the child plans share it.
+        actor_snapshot = build_actor_snapshot(user) if action in ACTOR_RECORDING_ACTIONS else None
         for payment_plan in self._get_child_payment_plans():
             old_payment_plan = cast("PaymentPlan", copy_model_object(payment_plan))
             input_data = {"action": action, **(extra_input_data or {})}
@@ -209,6 +223,7 @@ class FollowUpInstructionService:
                 input_data=input_data,
                 user=user,
                 allow_instruction_managed=True,
+                actor_snapshot=actor_snapshot,
             )
             self._log_payment_plan_change(updated_payment_plan, user, old_payment_plan)
         return instruction

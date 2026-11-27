@@ -148,7 +148,7 @@ def test_process_collisions_with_collision_detected(
 
 @pytest.fixture
 def pending_household_with_kobo(rdi: RegistrationDataImport) -> PendingHousehold:
-    import datetime
+    import datetime as dt
 
     return PendingHouseholdFactory(
         registration_data_import=rdi,
@@ -156,7 +156,7 @@ def pending_household_with_kobo(rdi: RegistrationDataImport) -> PendingHousehold
         business_area=rdi.business_area,
         kobo_submission_uuid=uuid.uuid4(),
         detail_id="asset123",
-        kobo_submission_time=datetime.datetime(2024, 1, 1, tzinfo=datetime.timezone.utc),
+        kobo_submission_time=dt.datetime(2024, 1, 1, tzinfo=dt.timezone.utc),
     )
 
 

@@ -1,6 +1,6 @@
 """Tests for program finish API endpoint."""
 
-import datetime
+import datetime as dt
 from typing import Any, Callable
 
 import pytest
@@ -16,7 +16,7 @@ from extras.test_utils.factories import (
     UserFactory,
 )
 from hope.apps.account.permissions import Permissions
-from hope.models import BusinessArea, Partner, PaymentPlan, Program, ProgramCycle, User
+from hope.models import BusinessArea, LogEntry, Partner, PaymentPlan, Program, ProgramCycle, User
 
 pytestmark = pytest.mark.django_db
 
@@ -42,8 +42,8 @@ def program(afghanistan: BusinessArea) -> Program:
         business_area=afghanistan,
         status=Program.ACTIVE,
         name="Test Program For Finish",
-        start_date=datetime.date(2031, 1, 1),
-        end_date=datetime.date(2033, 12, 31),
+        start_date=dt.date(2031, 1, 1),
+        end_date=dt.date(2033, 12, 31),
     )
     # There cannot be any active cycles for the program to finish
     for cycle in program.cycles.filter(status=ProgramCycle.ACTIVE):
@@ -68,6 +68,7 @@ def authenticated_client(api_client: Callable, user: User) -> Any:
     return api_client(user)
 
 
+@pytest.mark.enable_activity_log
 def test_finish_program_with_permission(
     authenticated_client: Any,
     user: User,
@@ -90,6 +91,13 @@ def test_finish_program_with_permission(
     program.refresh_from_db()
     assert program.status == Program.FINISHED
     assert response.json() == {"message": "Program Finished."}
+
+    log_entry = LogEntry.objects.get(object_id=program.id)
+    assert log_entry.action == LogEntry.UPDATE
+    assert log_entry.user == user
+    assert log_entry.business_area == afghanistan
+    assert list(log_entry.programs.all()) == [program]
+    assert log_entry.changes["status"] == {"from": Program.ACTIVE, "to": Program.FINISHED}
 
 
 @pytest.mark.parametrize(

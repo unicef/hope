@@ -84,7 +84,7 @@ export function RegistrationIndividualBioData({
             )}
           </LabelizedField>
         </Box>
-        <LabelizedField label={t('issued')}>{doc.country.name}</LabelizedField>
+        <LabelizedField label={t('issued')}>{doc.country?.name}</LabelizedField>
       </Box>
     </ResponsiveGrid>
   ));
@@ -105,7 +105,7 @@ export function RegistrationIndividualBioData({
             {item.number}
           </LabelizedField>
         </Box>
-        <LabelizedField label={t('issued')}>{item.country.name}</LabelizedField>
+        <LabelizedField label={t('issued')}>{item.country?.name}</LabelizedField>
       </Box>
     </ResponsiveGrid>
   ));

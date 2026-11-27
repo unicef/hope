@@ -108,7 +108,7 @@ export const PeopleBioData = ({
             {item.number}
           </LabelizedField>
         </Box>
-        <LabelizedField label="issued">{item.country.name}</LabelizedField>
+        <LabelizedField label="issued">{item.country?.name}</LabelizedField>
       </Box>
     </ResponsiveGrid>
   ));

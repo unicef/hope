@@ -1,4 +1,4 @@
-import datetime
+import datetime as dt
 from datetime import date
 from io import BytesIO
 from pathlib import Path
@@ -435,7 +435,7 @@ def test_execute_with_flex_field_and_pdu(
     program: Program,
 ) -> None:
     assert rdi_setup
-    registration_data_import_flex.created_at = datetime.datetime(2021, 3, 7)
+    registration_data_import_flex.created_at = dt.datetime(2021, 3, 7)
     registration_data_import_flex.save()
     task = RdiXlsxCreateTask()
     task.execute(
@@ -980,7 +980,7 @@ def test_misc_handlers_coverage() -> None:
     assert result.name.endswith(".jpg")
 
     ind = PendingIndividualFactory()
-    ind.birth_date = datetime.datetime.now() + datetime.timedelta(days=100)
+    ind.birth_date = dt.datetime.now() + dt.timedelta(days=100)
     task._validate_birth_date(ind)
     assert ind.estimated_birth_date is True
 
