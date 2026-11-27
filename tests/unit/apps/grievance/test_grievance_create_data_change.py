@@ -286,6 +286,25 @@ def individual_with_identification_key(grievance_context: dict[str, Any]) -> Any
     return individual
 
 
+@pytest.fixture
+def telco_financial_institution() -> Any:
+    return FinancialInstitutionFactory(name="Test Telco")
+
+
+@pytest.fixture
+def mobile_account(
+    grievance_context: dict[str, Any],
+    account_types: dict[str, AccountType],
+    telco_financial_institution: Any,
+) -> Any:
+    return AccountFactory(
+        individual=grievance_context["individual"],
+        account_type=account_types["mobile"],
+        financial_institution=telco_financial_institution,
+        number="+48609456789",
+    )
+
+
 def test_grievance_create_individual_data_change(
     authenticated_client: Any,
     grant_create_permission: None,
@@ -890,6 +909,233 @@ def test_edit_account_bank_with_financial_institution(
     response = authenticated_client.post(list_url, input_data_success, format="json")
     assert response.status_code == status.HTTP_201_CREATED
     assert "id" in response.data[0]
+
+
+@pytest.mark.parametrize(
+    "number",
+    [
+        pytest.param("1234567890", id="without-country-code"),
+        pytest.param("+2341234567890", id="not-a-valid-nigerian-number"),
+        pytest.param("not a phone", id="letters"),
+    ],
+)
+def test_create_mobile_account_with_invalid_phone_number_returns_number_error_and_creates_no_ticket(
+    authenticated_client: Any,
+    grant_create_permission: None,
+    user: User,
+    grievance_context: dict[str, Any],
+    list_url: str,
+    account_types: dict[str, AccountType],
+    telco_financial_institution: Any,
+    number: str,
+) -> None:
+    input_data = {
+        "description": "Test",
+        "assigned_to": str(user.id),
+        "issue_type": GrievanceTicket.ISSUE_TYPE_INDIVIDUAL_DATA_CHANGE_DATA_UPDATE,
+        "category": GrievanceTicket.CATEGORY_DATA_CHANGE,
+        "consent": True,
+        "language": "PL",
+        "extras": {
+            "issue_type": {
+                "individual_data_update_issue_type_extras": {
+                    "individual": str(grievance_context["individual"].id),
+                    "individual_data": {
+                        "accounts": [
+                            {
+                                "account_type": "mobile",
+                                "financial_institution": str(telco_financial_institution.id),
+                                "number": number,
+                            }
+                        ],
+                    },
+                }
+            }
+        },
+    }
+
+    response = authenticated_client.post(list_url, input_data, format="json")
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    individual_data_errors = response.json()["extras"]["issue_type"]["individual_data_update_issue_type_extras"][
+        "individual_data"
+    ]
+    assert individual_data_errors == {
+        "accounts": {"0": {"number": ["Enter a valid phone number with the country code"]}}
+    }
+    assert GrievanceTicket.objects.count() == 0
+
+
+def test_create_mobile_account_with_valid_phone_number_stores_requested_number(
+    authenticated_client: Any,
+    grant_create_permission: None,
+    user: User,
+    grievance_context: dict[str, Any],
+    list_url: str,
+    account_types: dict[str, AccountType],
+    telco_financial_institution: Any,
+) -> None:
+    input_data = {
+        "description": "Test",
+        "assigned_to": str(user.id),
+        "issue_type": GrievanceTicket.ISSUE_TYPE_INDIVIDUAL_DATA_CHANGE_DATA_UPDATE,
+        "category": GrievanceTicket.CATEGORY_DATA_CHANGE,
+        "consent": True,
+        "language": "PL",
+        "extras": {
+            "issue_type": {
+                "individual_data_update_issue_type_extras": {
+                    "individual": str(grievance_context["individual"].id),
+                    "individual_data": {
+                        "accounts": [
+                            {
+                                "account_type": "mobile",
+                                "financial_institution": str(telco_financial_institution.id),
+                                "number": "+50934101234",
+                            }
+                        ],
+                    },
+                }
+            }
+        },
+    }
+
+    response = authenticated_client.post(list_url, input_data, format="json")
+
+    assert response.status_code == status.HTTP_201_CREATED
+    ticket = GrievanceTicket.objects.get(id=response.data[0]["id"])
+    accounts = ticket.individual_data_update_ticket_details.individual_data["accounts"]
+    assert accounts[0]["value"]["number"] == "+50934101234"
+
+
+def test_create_bank_account_with_non_phone_number_stores_requested_number(
+    authenticated_client: Any,
+    grant_create_permission: None,
+    user: User,
+    grievance_context: dict[str, Any],
+    list_url: str,
+    account_types: dict[str, AccountType],
+    telco_financial_institution: Any,
+) -> None:
+    input_data = {
+        "description": "Test",
+        "assigned_to": str(user.id),
+        "issue_type": GrievanceTicket.ISSUE_TYPE_INDIVIDUAL_DATA_CHANGE_DATA_UPDATE,
+        "category": GrievanceTicket.CATEGORY_DATA_CHANGE,
+        "consent": True,
+        "language": "PL",
+        "extras": {
+            "issue_type": {
+                "individual_data_update_issue_type_extras": {
+                    "individual": str(grievance_context["individual"].id),
+                    "individual_data": {
+                        "accounts": [
+                            {
+                                "account_type": "bank",
+                                "financial_institution": str(telco_financial_institution.id),
+                                "number": "0001234567",
+                            }
+                        ],
+                    },
+                }
+            }
+        },
+    }
+
+    response = authenticated_client.post(list_url, input_data, format="json")
+
+    assert response.status_code == status.HTTP_201_CREATED
+    ticket = GrievanceTicket.objects.get(id=response.data[0]["id"])
+    accounts = ticket.individual_data_update_ticket_details.individual_data["accounts"]
+    assert accounts[0]["value"]["number"] == "0001234567"
+
+
+def test_edit_mobile_account_with_invalid_phone_number_returns_number_error_and_creates_no_ticket(
+    authenticated_client: Any,
+    grant_create_permission: None,
+    user: User,
+    grievance_context: dict[str, Any],
+    list_url: str,
+    mobile_account: Any,
+    telco_financial_institution: Any,
+) -> None:
+    input_data = {
+        "description": "Test",
+        "assigned_to": str(user.id),
+        "issue_type": GrievanceTicket.ISSUE_TYPE_INDIVIDUAL_DATA_CHANGE_DATA_UPDATE,
+        "category": GrievanceTicket.CATEGORY_DATA_CHANGE,
+        "consent": True,
+        "language": "PL",
+        "extras": {
+            "issue_type": {
+                "individual_data_update_issue_type_extras": {
+                    "individual": str(grievance_context["individual"].id),
+                    "individual_data": {
+                        "accounts_to_edit": [
+                            {
+                                "id": str(mobile_account.id),
+                                "financial_institution": str(telco_financial_institution.id),
+                                "number": "1234567890",
+                            }
+                        ],
+                    },
+                }
+            }
+        },
+    }
+
+    response = authenticated_client.post(list_url, input_data, format="json")
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    individual_data_errors = response.json()["extras"]["issue_type"]["individual_data_update_issue_type_extras"][
+        "individual_data"
+    ]
+    assert individual_data_errors == {
+        "accounts_to_edit": {"0": {"number": ["Enter a valid phone number with the country code"]}}
+    }
+    assert GrievanceTicket.objects.count() == 0
+
+
+def test_edit_mobile_account_with_valid_phone_number_stores_requested_number(
+    authenticated_client: Any,
+    grant_create_permission: None,
+    user: User,
+    grievance_context: dict[str, Any],
+    list_url: str,
+    mobile_account: Any,
+    telco_financial_institution: Any,
+) -> None:
+    input_data = {
+        "description": "Test",
+        "assigned_to": str(user.id),
+        "issue_type": GrievanceTicket.ISSUE_TYPE_INDIVIDUAL_DATA_CHANGE_DATA_UPDATE,
+        "category": GrievanceTicket.CATEGORY_DATA_CHANGE,
+        "consent": True,
+        "language": "PL",
+        "extras": {
+            "issue_type": {
+                "individual_data_update_issue_type_extras": {
+                    "individual": str(grievance_context["individual"].id),
+                    "individual_data": {
+                        "accounts_to_edit": [
+                            {
+                                "id": str(mobile_account.id),
+                                "financial_institution": str(telco_financial_institution.id),
+                                "number": "+509 34 10 1234",
+                            }
+                        ],
+                    },
+                }
+            }
+        },
+    }
+
+    response = authenticated_client.post(list_url, input_data, format="json")
+
+    assert response.status_code == status.HTTP_201_CREATED
+    ticket = GrievanceTicket.objects.get(id=response.data[0]["id"])
+    accounts_to_edit = ticket.individual_data_update_ticket_details.individual_data["accounts_to_edit"]
+    assert accounts_to_edit[0]["number"] == "+509 34 10 1234"
 
 
 def test_household_update_fields_offered_in_the_picker_are_accepted_by_the_serializer() -> None:

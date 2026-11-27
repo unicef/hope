@@ -24,6 +24,21 @@ export function isEmpty(value): boolean {
   return value === undefined || value === null || value === '';
 }
 
+function isPhoneNumber(value): boolean {
+  const digits = String(value).replace(/[\s\-().]/g, '');
+  return PHONE_NUMBER_REGEX.test(digits);
+}
+
+export function getAccountNumberFormatError(
+  accountType: string | undefined,
+  number,
+): string | undefined {
+  if (accountType !== 'mobile' || isEmpty(number)) {
+    return undefined;
+  }
+  return isPhoneNumber(number) ? undefined : PHONE_NUMBER_FORMAT_ERROR;
+}
+
 export function getFieldFormatError(
   fieldName: string,
   fieldValue,
@@ -33,10 +48,7 @@ export function getFieldFormatError(
     return undefined;
   }
   if (PHONE_NUMBER_FIELDS.includes(fieldName)) {
-    const digits = String(fieldValue).replace(/[\s\-().]/g, '');
-    return PHONE_NUMBER_REGEX.test(digits)
-      ? undefined
-      : PHONE_NUMBER_FORMAT_ERROR;
+    return isPhoneNumber(fieldValue) ? undefined : PHONE_NUMBER_FORMAT_ERROR;
   }
   if (EMAIL_FIELDS.includes(fieldName)) {
     return EMAIL_REGEX.test(String(fieldValue).trim())

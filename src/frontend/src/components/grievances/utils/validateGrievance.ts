@@ -13,6 +13,7 @@ import {
   BIRTH_DATE_FIELDS,
   EMAIL_FIELDS,
   PHONE_NUMBER_FIELDS,
+  getAccountNumberFormatError,
   getFieldFormatError,
   isEmpty,
 } from './fieldFormats';
@@ -480,9 +481,15 @@ export function validateUsingSteps(
         values.individualDataUpdateFieldsAccounts
           .filter((el) => el)
           .forEach((acc) => {
+            const numberFormatError = getAccountNumberFormatError(
+              acc.accountType,
+              acc.number,
+            );
             if (!acc.number) {
               errors.individualDataUpdateFieldsAccounts =
                 'Account Number is required';
+            } else if (numberFormatError) {
+              errors.individualDataUpdateFieldsAccounts = `Account Number: ${numberFormatError}`;
             }
             if (!acc.accountType) {
               errors.individualDataUpdateFieldsAccounts =
@@ -504,9 +511,15 @@ export function validateUsingSteps(
         values.individualDataUpdateAccountsToEdit
           .filter((el) => el)
           .forEach((acc) => {
+            const numberFormatError = getAccountNumberFormatError(
+              acc.accountType,
+              acc.number,
+            );
             if (!acc.number) {
               errors.individualDataUpdateAccountsToEdit =
                 'Account Number is required';
+            } else if (numberFormatError) {
+              errors.individualDataUpdateAccountsToEdit = `Account Number: ${numberFormatError}`;
             }
             if (!acc.financialInstitution) {
               errors.individualDataUpdateAccountsToEdit =

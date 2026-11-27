@@ -30,6 +30,7 @@ from hope.apps.payment.api.serializers import PaymentSmallSerializer
 from hope.apps.program.api.serializers import ProgramSmallSerializer
 from hope.apps.utils.phone import is_valid_phone_number
 from hope.models import (
+    Account,
     Area,
     Document,
     Feedback,
@@ -51,6 +52,10 @@ class CreateAccountSerializer(serializers.Serializer):
     data_fields = serializers.JSONField(required=False)
     approve_status = serializers.BooleanField(required=False)
 
+    def validate(self, attrs: dict) -> dict:
+        validate_mobile_account_number(attrs["account_type"], attrs["number"])
+        return attrs
+
 
 class EditAccountSerializer(serializers.Serializer):
     id = serializers.UUIDField()
@@ -58,6 +63,13 @@ class EditAccountSerializer(serializers.Serializer):
     number = serializers.CharField(required=True)
     data_fields = serializers.JSONField(required=False)
     approve_status = serializers.BooleanField(required=False)
+
+    def validate(self, attrs: dict) -> dict:
+        account_type_key = (
+            Account.all_objects.filter(pk=attrs["id"]).values_list("account_type__key", flat=True).first()
+        )
+        validate_mobile_account_number(account_type_key, attrs["number"])
+        return attrs
 
 
 class GrievanceTicketSimpleSerializer(serializers.ModelSerializer):
@@ -455,6 +467,15 @@ def validate_phone_number(value: str) -> None:
         raise serializers.ValidationError(
             "Enter a valid phone number with the country code", code="invalid_phone_number"
         )
+
+
+def validate_mobile_account_number(account_type_key: str | None, number: str) -> None:
+    if account_type_key != "mobile":
+        return
+    try:
+        validate_phone_number(number)
+    except serializers.ValidationError as exc:
+        raise serializers.ValidationError({"number": exc.detail}) from exc
 
 
 def validate_birth_date_not_in_future(value: date) -> None:
