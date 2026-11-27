@@ -5,6 +5,7 @@ class VisionLogEntryType(StrEnum):
     API_CALL = "api-call"
     PUSH_NOTIFICATION = "push-notification"
     STATUS_NOTIFICATION = "status-notification"
+    CLOSURE_NOTIFICATION = "closure-notification"
 
 
 class VisionStatus(StrEnum):

@@ -10,13 +10,14 @@ import { useQuery } from '@tanstack/react-query';
 import { restQueryKey } from '@utils/queryKeys';
 import { getFilterFromQueryParams } from '@utils/utils';
 import type { ReactElement } from 'react';
-import { useState, useRef } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { PERMISSIONS, hasPermissions } from '../../../config/permissions';
 import { ProgrammesTable } from '../../tables/ProgrammesTable';
 import ProgrammesFilter from '@containers/tables/ProgrammesTable/ProgrammesFilter';
 import { useScrollToRefOnChange } from '@hooks/useScrollToRefOnChange';
+import { CORE_PATH } from '@containers/pages/core/CorePage';
 
 const initialFilter = {
   search: '',
@@ -31,8 +32,25 @@ const initialFilter = {
   dataCollectingType: '',
 };
 
+const IGNORED_TARGETS =
+  'input, textarea, select, [contenteditable], [role="combobox"], [role="dialog"]';
+
 function ProgramsPage(): ReactElement {
   const location = useLocation();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    let typed = '';
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.ctrlKey || e.metaKey || e.altKey) return;
+      if ((e.target as HTMLElement | null)?.closest?.(IGNORED_TARGETS)) return;
+      if (e.key.length !== 1) return;
+      typed = (typed + e.key.toLowerCase()).slice(-CORE_PATH.length);
+      if (typed === CORE_PATH) navigate(`/${CORE_PATH}`);
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [navigate]);
 
   const [filter, setFilter] = useState(
     getFilterFromQueryParams(location, initialFilter),

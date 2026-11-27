@@ -1,3 +1,5 @@
+from urllib.parse import unquote
+
 from django.conf import settings
 from django.http import Http404
 from django.test import override_settings
@@ -88,6 +90,24 @@ def test_get_user_data_by_email_returns_first_match() -> None:
     result = api.get_user_data(email="user@example.com")
 
     assert result == {"id": "1", "mail": "user@example.com"}
+
+
+@override_settings(AZURE_CLIENT_ID="client-id", AZURE_CLIENT_SECRET="client-secret")
+@responses.activate
+def test_get_user_data_arrange_email_with_apostrophe_act_get_assert_quote_doubled_in_filter() -> None:
+    responses.add(responses.POST, settings.AZURE_TOKEN_URL, json={"access_token": "the-token"}, status=200)
+    responses.add(
+        responses.GET,
+        "https://graph.microsoft.com/v1.0/users/",
+        json={"value": [{"id": "1", "mail": "o'brien@example.com"}]},
+        status=200,
+    )
+    api = MicrosoftGraphAPI()
+
+    result = api.get_user_data(email="o'brien@example.com")
+
+    assert result == {"id": "1", "mail": "o'brien@example.com"}
+    assert "mail eq 'o''brien@example.com'" in unquote(responses.calls[1].request.url)
 
 
 @override_settings(AZURE_CLIENT_ID="client-id", AZURE_CLIENT_SECRET="client-secret")

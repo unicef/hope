@@ -61,6 +61,7 @@ from hope.apps.payment.flows import PaymentPlanFlow
 from hope.apps.payment.services.payment_plan_services import PaymentPlanService
 from hope.models import (
     AccountType,
+    Approval,
     BusinessArea,
     DeliveryMechanism,
     DeliveryMechanismConfig,
@@ -281,6 +282,43 @@ def payment_plan_base(
 
 
 @pytest.fixture
+def approver() -> User:
+    return UserFactory(
+        first_name="Jan", last_name="Kowalski", email="jan.kowalski@example.com", job_title="Stored Title"
+    )
+
+
+@pytest.fixture
+def ad_user_lookup(settings: Any) -> Generator[Any, None, None]:
+    settings.AZURE_CLIENT_ID = "client-id"
+    settings.AZURE_CLIENT_SECRET = "client-secret"
+    with requests_mock_lib.Mocker() as adapter:
+        adapter.post(settings.AZURE_TOKEN_URL, json={"access_token": "token"})
+        yield adapter.get(
+            "https://graph.microsoft.com/v1.0/users/", json={"value": [{"jobTitle": "Programme Officer"}]}
+        )
+
+
+@pytest.fixture
+def ad_token_failure(settings: Any) -> Generator[requests_mock_lib.Mocker, None, None]:
+    settings.AZURE_CLIENT_ID = "client-id"
+    settings.AZURE_CLIENT_SECRET = "client-secret"
+    with requests_mock_lib.Mocker() as adapter:
+        adapter.post(settings.AZURE_TOKEN_URL, status_code=500, text="fail")
+        yield adapter
+
+
+@pytest.fixture
+def locked_fsp_payment_plan(approver: User, business_area: Any, cycle: ProgramCycle) -> PaymentPlan:
+    return PaymentPlanFactory(
+        program_cycle=cycle,
+        created_by=approver,
+        business_area=business_area,
+        status=PaymentPlan.Status.LOCKED_FSP,
+    )
+
+
+@pytest.fixture
 def payment_plan_tp_open(
     user: User,
     business_area: Any,
@@ -296,6 +334,44 @@ def payment_plan_tp_open(
         delivery_mechanism=dm_transfer_to_account,
         financial_service_provider=fsp,
     )
+
+
+@pytest.fixture
+def acceptance_payment_plan(
+    request: pytest.FixtureRequest, approver: User, business_area: Any, cycle: ProgramCycle
+) -> PaymentPlan:
+    payment_plan = PaymentPlanFactory(
+        program_cycle=cycle,
+        created_by=approver,
+        business_area=business_area,
+        status=request.param,
+    )
+    ApprovalProcessFactory(payment_plan=payment_plan)
+    return payment_plan
+
+
+@pytest.fixture
+def in_approval_payment_plan(approver: User, business_area: Any, cycle: ProgramCycle) -> PaymentPlan:
+    payment_plan = PaymentPlanFactory(
+        program_cycle=cycle,
+        created_by=approver,
+        business_area=business_area,
+        status=PaymentPlan.Status.IN_APPROVAL,
+    )
+    ApprovalProcessFactory(payment_plan=payment_plan)
+    return payment_plan
+
+
+@pytest.fixture
+def in_authorization_payment_plan(approver: User, business_area: Any, cycle: ProgramCycle) -> PaymentPlan:
+    payment_plan = PaymentPlanFactory(
+        program_cycle=cycle,
+        created_by=approver,
+        business_area=business_area,
+        status=PaymentPlan.Status.IN_AUTHORIZATION,
+    )
+    ApprovalProcessFactory(payment_plan=payment_plan)
+    return payment_plan
 
 
 @pytest.fixture
@@ -2533,6 +2609,61 @@ def test_send_back_to_finished_rejects_stale_status(user: User, business_area: A
     assert "Send Back is possible only within Status READY_FOR_CLOSURE" in str(error.value)
 
 
+@pytest.fixture
+def ready_for_closure_sent_to_vision_payment_plan(business_area: Any, cycle: ProgramCycle) -> PaymentPlan:
+    return PaymentPlanFactory(
+        program_cycle=cycle,
+        business_area=business_area,
+        status=PaymentPlan.Status.READY_FOR_CLOSURE,
+        internal_data={"vision": {"sent": True, "vision_id": "V12345"}},
+    )
+
+
+@pytest.fixture
+def ready_for_closure_unsent_payment_plan(business_area: Any, cycle: ProgramCycle) -> PaymentPlan:
+    return PaymentPlanFactory(
+        program_cycle=cycle,
+        business_area=business_area,
+        status=PaymentPlan.Status.READY_FOR_CLOSURE,
+    )
+
+
+@patch("hope.contrib.vision.tasks.notify_payment_plan_closure_to_vision_async_task")
+def test_close_queues_vision_closure_notification_when_sent_to_vision(
+    mock_notify_vision_closure,
+    user: User,
+    ready_for_closure_sent_to_vision_payment_plan: PaymentPlan,
+    django_capture_on_commit_callbacks,
+    django_assert_num_queries: Any,
+) -> None:
+    payment_plan = ready_for_closure_sent_to_vision_payment_plan
+
+    with django_assert_num_queries(13), django_capture_on_commit_callbacks(execute=True):
+        PaymentPlanService(payment_plan).close(closure_comment="Comment", user_id=str(user.pk))
+
+    payment_plan.refresh_from_db()
+    assert payment_plan.status == PaymentPlan.Status.CLOSED
+    mock_notify_vision_closure.assert_called_once_with(payment_plan, str(user.pk))
+
+
+@patch("hope.contrib.vision.tasks.notify_payment_plan_closure_to_vision_async_task")
+def test_close_does_not_queue_vision_closure_notification_when_not_sent_to_vision(
+    mock_notify_vision_closure,
+    user: User,
+    ready_for_closure_unsent_payment_plan: PaymentPlan,
+    django_capture_on_commit_callbacks,
+    django_assert_num_queries: Any,
+) -> None:
+    payment_plan = ready_for_closure_unsent_payment_plan
+
+    with django_assert_num_queries(13), django_capture_on_commit_callbacks(execute=True):
+        PaymentPlanService(payment_plan).close(closure_comment="Comment", user_id=str(user.pk))
+
+    payment_plan.refresh_from_db()
+    assert payment_plan.status == PaymentPlan.Status.CLOSED
+    mock_notify_vision_closure.assert_not_called()
+
+
 def test_close_rejects_stale_status(user: User, business_area: Any, cycle: ProgramCycle) -> None:
     payment_plan = PaymentPlanFactory(
         program_cycle=cycle,
@@ -2671,3 +2802,125 @@ def test_split_removes_existing_export_file_delivery(
 
     pp.refresh_from_db()
     assert pp.export_file_delivery is None
+
+
+def test_send_for_approval_arrange_ad_title_act_send_assert_sender_name_and_ad_title_stored(
+    locked_fsp_payment_plan: PaymentPlan,
+    approver: User,
+    ad_user_lookup: Any,
+    mocker: Any,
+) -> None:
+    mocker.patch("hope.apps.payment.services.payment_plan_services.send_payment_notification_emails_async_task")
+
+    PaymentPlanService(locked_fsp_payment_plan).execute_update_status_action(
+        {"action": PaymentPlan.Action.SEND_FOR_APPROVAL.value}, approver
+    )
+
+    approval_process = locked_fsp_payment_plan.approval_process.first()
+    assert approval_process.sent_for_approval_by == approver
+    assert approval_process.sent_for_approval_by_name == "Jan Kowalski"
+    assert approval_process.sent_for_approval_by_job_title == "Programme Officer"
+    assert approval_process.sent_for_approval_by_job_title_source == "AD"
+    assert ad_user_lookup.call_count == 1
+
+
+@pytest.mark.parametrize(
+    ("acceptance_payment_plan", "action", "approval_type"),
+    [
+        pytest.param(PaymentPlan.Status.IN_APPROVAL, PaymentPlan.Action.APPROVE.value, Approval.APPROVAL, id="approve"),
+        pytest.param(
+            PaymentPlan.Status.IN_AUTHORIZATION,
+            PaymentPlan.Action.AUTHORIZE.value,
+            Approval.AUTHORIZATION,
+            id="authorize",
+        ),
+        pytest.param(
+            PaymentPlan.Status.IN_REVIEW, PaymentPlan.Action.REVIEW.value, Approval.FINANCE_RELEASE, id="release"
+        ),
+        pytest.param(PaymentPlan.Status.IN_APPROVAL, PaymentPlan.Action.REJECT.value, Approval.REJECT, id="reject"),
+    ],
+    indirect=["acceptance_payment_plan"],
+)
+def test_acceptance_process_arrange_ad_title_act_decide_assert_approval_stores_name_and_ad_title(
+    acceptance_payment_plan: PaymentPlan,
+    approver: User,
+    ad_user_lookup: Any,
+    action: str,
+    approval_type: str,
+    mocker: Any,
+) -> None:
+    mocker.patch("hope.apps.payment.services.payment_plan_services.send_payment_notification_emails_async_task")
+
+    PaymentPlanService(acceptance_payment_plan).execute_update_status_action(
+        {"action": action, "comment": ""}, approver
+    )
+
+    approval = acceptance_payment_plan.approval_process.first().approvals.get(type=approval_type)
+    assert approval.created_by == approver
+    assert approval.created_by_name == "Jan Kowalski"
+    assert approval.created_by_job_title == "Programme Officer"
+    assert approval.created_by_job_title_source == "AD"
+
+
+def test_acceptance_process_arrange_last_approval_act_approve_assert_authorization_sender_stored_once(
+    in_approval_payment_plan: PaymentPlan,
+    approver: User,
+    ad_user_lookup: Any,
+    mocker: Any,
+) -> None:
+    mocker.patch("hope.apps.payment.services.payment_plan_services.send_payment_notification_emails_async_task")
+
+    payment_plan = PaymentPlanService(in_approval_payment_plan).execute_update_status_action(
+        {"action": PaymentPlan.Action.APPROVE.value, "comment": ""}, approver
+    )
+
+    approval_process = payment_plan.approval_process.first()
+    assert payment_plan.status == PaymentPlan.Status.IN_AUTHORIZATION
+    assert approval_process.sent_for_authorization_by == approver
+    assert approval_process.sent_for_authorization_by_name == "Jan Kowalski"
+    assert approval_process.sent_for_authorization_by_job_title == "Programme Officer"
+    assert approval_process.sent_for_authorization_by_job_title_source == "AD"
+    assert ad_user_lookup.call_count == 1
+
+
+def test_acceptance_process_arrange_last_authorization_act_authorize_assert_release_sender_stored_once(
+    in_authorization_payment_plan: PaymentPlan,
+    approver: User,
+    ad_user_lookup: Any,
+    mocker: Any,
+) -> None:
+    mocker.patch("hope.apps.payment.services.payment_plan_services.send_payment_notification_emails_async_task")
+
+    payment_plan = PaymentPlanService(in_authorization_payment_plan).execute_update_status_action(
+        {"action": PaymentPlan.Action.AUTHORIZE.value, "comment": ""}, approver
+    )
+
+    approval_process = payment_plan.approval_process.first()
+    assert payment_plan.status == PaymentPlan.Status.IN_REVIEW
+    assert approval_process.sent_for_finance_release_by == approver
+    assert approval_process.sent_for_finance_release_by_name == "Jan Kowalski"
+    assert approval_process.sent_for_finance_release_by_job_title == "Programme Officer"
+    assert approval_process.sent_for_finance_release_by_job_title_source == "AD"
+    assert ad_user_lookup.call_count == 1
+
+
+def test_acceptance_process_arrange_ad_unavailable_act_approve_assert_approval_succeeds_with_stored_title(
+    in_approval_payment_plan: PaymentPlan,
+    approver: User,
+    ad_token_failure: requests_mock_lib.Mocker,
+    mocker: Any,
+) -> None:
+    mocker.patch("hope.apps.payment.services.payment_plan_services.send_payment_notification_emails_async_task")
+
+    payment_plan = PaymentPlanService(in_approval_payment_plan).execute_update_status_action(
+        {"action": PaymentPlan.Action.APPROVE.value, "comment": ""}, approver
+    )
+
+    approval_process = payment_plan.approval_process.first()
+    approval = approval_process.approvals.get(type=Approval.APPROVAL)
+    assert payment_plan.status == PaymentPlan.Status.IN_AUTHORIZATION
+    assert approval.created_by_name == "Jan Kowalski"
+    assert approval.created_by_job_title == "Stored Title"
+    assert approval.created_by_job_title_source == "USER_RECORD"
+    assert approval_process.sent_for_authorization_by_job_title == "Stored Title"
+    assert approval_process.sent_for_authorization_by_job_title_source == "USER_RECORD"

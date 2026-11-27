@@ -1,8 +1,10 @@
 from collections.abc import Callable
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from decimal import Decimal
 from unittest.mock import MagicMock, patch
 
+from django.utils import timezone as dj_timezone
+from flags.models import FlagState
 import pytest
 
 from extras.test_utils.factories import (
@@ -11,8 +13,9 @@ from extras.test_utils.factories import (
     FinancialServiceProviderFactory,
     PaymentPlanFactory,
 )
+from hope.apps.account.actor_snapshot import ActorSnapshot
 from hope.apps.core.api.mixins import BaseAPI
-from hope.contrib.api.serializers.vision import PaymentPlanPayloadSerializer
+from hope.contrib.api.serializers.vision import PaymentPlanCallbackRequestSerializer, PaymentPlanPayloadSerializer
 from hope.contrib.vision.api import VisionAPI, VisionAPIError, VisionAPIMissingCredentialsError
 from hope.contrib.vision.choices import VisionErrorCode, VisionLogEntryType, VisionStatus
 from hope.contrib.vision.services import VisionService
@@ -68,6 +71,61 @@ def payment_plan_without_exchange_rate(vision_api_payment_plan_factory) -> Payme
     return vision_api_payment_plan_factory(exchange_rate=None)
 
 
+@pytest.fixture
+def closure_payment_plan(vision_api_payment_plan_factory) -> PaymentPlan:
+    payment_plan = vision_api_payment_plan_factory(unicef_id="PP-CLOSURE")
+    payment_plan.status = PaymentPlan.Status.CLOSED
+    payment_plan.internal_data = {
+        "vision": {
+            "status": VisionStatus.RELEASED.value,
+            "sent": True,
+            "vision_id": "V12345",
+            "log": [],
+        }
+    }
+    payment_plan.save(update_fields=["status", "internal_data"])
+    return payment_plan
+
+
+@pytest.fixture
+def closed_payment_plan_without_vision_id(vision_api_payment_plan_factory) -> PaymentPlan:
+    payment_plan = vision_api_payment_plan_factory(unicef_id="PP-NO-VISION-ID")
+    payment_plan.status = PaymentPlan.Status.CLOSED
+    payment_plan.internal_data = {"vision": {"sent": True, "status": VisionStatus.RELEASED.value, "log": []}}
+    payment_plan.save(update_fields=["status", "internal_data"])
+    return payment_plan
+
+
+@pytest.fixture(params=[403, 500])
+def non_json_oauth_error_response(request: pytest.FixtureRequest) -> MagicMock:
+    response = MagicMock(status_code=request.param, ok=False, reason="Upstream error", text="<html>error page</html>")
+    response.json.side_effect = ValueError("No JSON")
+    return response
+
+
+@pytest.fixture
+def callback_payment_plan(vision_api_payment_plan_factory) -> PaymentPlan:
+    FlagState.objects.get_or_create(name="VISION_INTEGRATION_ACTIVE", condition="boolean", value="True")
+    payment_plan = vision_api_payment_plan_factory(unicef_id="PP044")
+    payment_plan.business_area.vision_integration_active = True
+    payment_plan.business_area.save(update_fields=["vision_integration_active"])
+    VisionService.set_status(payment_plan, VisionStatus.WAITING_FOR_CALLBACK)
+    payment_plan.save(update_fields=["internal_data"])
+    creator = payment_plan.created_by
+    creator.first_name = "Anna"
+    creator.last_name = "Nowak"
+    creator.job_title = "Stored Title"
+    creator.save(update_fields=["first_name", "last_name", "job_title"])
+    return payment_plan
+
+
+@pytest.fixture
+def released_callback_payment_plan(callback_payment_plan: PaymentPlan) -> PaymentPlan:
+    VisionService.set_status(callback_payment_plan, VisionStatus.RELEASED)
+    callback_payment_plan.save(update_fields=["internal_data"])
+    return callback_payment_plan
+
+
 def test_missing_vision_url_raises_error(settings) -> None:
     settings.VISION_API_URL = ""
     with pytest.raises(VisionAPIMissingCredentialsError):
@@ -83,7 +141,7 @@ def test_urls_are_built_from_a_base_with_a_trailing_slash() -> None:
 
 def test_ensure_token_skips_when_valid() -> None:
     api = VisionAPI()
-    api._token_expiry = datetime.now() + timedelta(hours=1)
+    api._token_expiry = dj_timezone.now() + timedelta(hours=1)
     with patch.object(api, "_acquire_token") as mock_acquire:
         api._ensure_token()
         mock_acquire.assert_not_called()
@@ -91,7 +149,7 @@ def test_ensure_token_skips_when_valid() -> None:
 
 def test_ensure_token_acquires_when_expired() -> None:
     api = VisionAPI()
-    api._token_expiry = datetime.now() - timedelta(hours=1)
+    api._token_expiry = dj_timezone.now() - timedelta(hours=1)
     with patch.object(api, "_acquire_token") as mock_acquire:
         api._ensure_token()
         mock_acquire.assert_called_once()
@@ -104,37 +162,88 @@ def test_no_auth_header_before_token() -> None:
     )
 
 
-@patch("hope.contrib.vision.api.requests.post")
-def test_acquire_token_sets_bearer(mock_post) -> None:
-    mock_post.return_value = MagicMock(
+def test_acquire_token_sets_bearer() -> None:
+    api = VisionAPI()
+    token_response = MagicMock(
         status_code=200,
+        ok=True,
         json=lambda: {
             "access_token": "oauth-token-123",
             "expires_in": "3600",
         },
     )
-    api = VisionAPI()
-    api._acquire_token()
+    with patch.object(api._client, "post", return_value=token_response) as mock_post:
+        api._acquire_token()
+    # Token acquisition posts to the OAuth endpoint only, never to the Payment Plan endpoint.
+    mock_post.assert_called_once_with(
+        api.token_url,
+        data={
+            "client_id": "test-client",
+            "client_secret": "test-secret",
+            "grant_type": "client_credentials",
+        },
+        timeout=60,
+    )
+    assert mock_post.call_args.args[0] != api.payment_plan_creation_url
     assert api._client.headers["Authorization"] == "Bearer oauth-token-123"
     assert api._token_expiry is not None
+    # Expiry is timezone-aware and shortened by the safety buffer.
+    assert api._token_expiry.tzinfo is not None
+    assert api._token_expiry <= dj_timezone.now() + timedelta(seconds=3600 - 60)
 
 
-@patch("hope.contrib.vision.api.requests.post")
-def test_acquire_token_401_raises_error(mock_post) -> None:
-    mock_post.return_value = MagicMock(
+def test_acquire_token_401_raises_error() -> None:
+    api = VisionAPI()
+    token_response = MagicMock(
         status_code=401,
+        ok=False,
         json=lambda: {"ErrorCode": "401", "Error": "Unauthorized"},
     )
+    with patch.object(api._client, "post", return_value=token_response), pytest.raises(VisionAPIError) as error:
+        api._acquire_token()
+    assert "HTTP 401" in str(error.value)
+
+
+def test_acquire_token_missing_access_token_raises_error() -> None:
     api = VisionAPI()
-    with pytest.raises(VisionAPIError):
+    token_response = MagicMock(status_code=200, ok=True, json=lambda: {"expires_in": 3600})
+    with patch.object(api._client, "post", return_value=token_response), pytest.raises(VisionAPIError):
         api._acquire_token()
 
 
-@patch("hope.contrib.vision.api.requests.post")
-def test_acquire_token_missing_credentials_raises_error(mock_post, settings) -> None:
+def test_acquire_token_non_dict_response_raises_error() -> None:
+    api = VisionAPI()
+    token_response = MagicMock(status_code=200, ok=True, json=lambda: ["token"])
+    with patch.object(api._client, "post", return_value=token_response), pytest.raises(VisionAPIError):
+        api._acquire_token()
+
+
+@pytest.mark.parametrize("expires_in", ["not-a-number", None])
+def test_acquire_token_invalid_expires_in_raises_error(expires_in: str | None) -> None:
+    api = VisionAPI()
+    token_response = MagicMock(
+        status_code=200,
+        ok=True,
+        json=lambda: {"access_token": "oauth-token-123", "expires_in": expires_in},
+    )
+    with patch.object(api._client, "post", return_value=token_response), pytest.raises(VisionAPIError):
+        api._acquire_token()
+
+
+def test_acquire_token_non_json_response_raises_error() -> None:
+    api = VisionAPI()
+    token_response = MagicMock(status_code=200, ok=True, text="<html>not json</html>")
+    token_response.json.side_effect = ValueError("No JSON")
+    with patch.object(api._client, "post", return_value=token_response), pytest.raises(VisionAPIError) as error:
+        api._acquire_token()
+    assert "HTTP 200" in str(error.value)
+    assert "<html>" not in str(error.value)
+
+
+def test_acquire_token_missing_credentials_raises_error(settings) -> None:
     settings.VISION_CLIENT_ID = ""
     api = VisionAPI()
-    with pytest.raises(VisionAPIMissingCredentialsError):
+    with patch.object(api._client, "post") as mock_post, pytest.raises(VisionAPIMissingCredentialsError):
         api._acquire_token()
     mock_post.assert_not_called()
 
@@ -402,6 +511,125 @@ def test_notify_payment_plan_status_logs_api_error(
 
 @patch("hope.contrib.vision.api.VisionAPI._acquire_token")
 @patch("hope.contrib.vision.api.VisionAPI._post")
+def test_notify_payment_plan_closure_posts_reconciliation_to_payment_plan_endpoint(
+    mock_post,
+    mock_acquire_token,
+    closure_payment_plan: PaymentPlan,
+    django_assert_num_queries,
+) -> None:
+    mock_post.return_value = ({"status": "ok"}, 200)
+    closure_date = datetime(2026, 11, 9, 10, 30, tzinfo=timezone.utc)
+
+    with django_assert_num_queries(4):
+        response = VisionAPI().notify_payment_plan_closure(
+            closure_payment_plan,
+            total_amount_reconciled=Decimal("8500.50"),
+            closure_date=closure_date,
+        )
+
+    closure_payment_plan.refresh_from_db(fields=["internal_data"])
+    assert response == {"status": "ok"}
+    assert mock_post.call_args.args[0] == "https://test.example.com/ps/ezcash/PaymentPlan"
+    assert mock_post.call_args.args[1] == {
+        "businessArea": "FI01",
+        "vendorNumber": "V100004",
+        "payplanSno": "PP-CLOSURE",
+        "payplanDesc": "Monthly payment plan testing the content length",
+        "currency": "USD",
+        "authAmt": "10000.00",
+        "authAmtUsd": "10000.00",
+        "exchangeRate": "1.25000000",
+        "headVendor": "Head Vendor Name",
+        "glCode": "7700410",
+        "visionPayplanSno": "V12345",
+        "reconAmt": "8500.50",
+        "reconDate": "20261109",
+    }
+    assert closure_payment_plan.vision_status == VisionStatus.RELEASED.value
+    entry = closure_payment_plan.vision_data["log"][0]
+    assert entry["type"] == VisionLogEntryType.CLOSURE_NOTIFICATION.value
+    # The response is persisted in the plan's internal_data vision log, not just returned.
+    assert entry["response"] == {"status": "ok"}
+    assert entry["payload"] == mock_post.call_args.args[1]
+
+
+@patch("hope.contrib.vision.api.VisionAPI._acquire_token")
+@patch("hope.contrib.vision.api.VisionAPI._post")
+def test_notify_payment_plan_closure_saves_error_response_in_internal_data(
+    mock_post,
+    mock_acquire_token,
+    closure_payment_plan: PaymentPlan,
+    django_assert_num_queries,
+) -> None:
+    mock_post.side_effect = BaseAPI.APIError("closure endpoint failed")
+
+    with django_assert_num_queries(4), pytest.raises(VisionAPIError, match="closure endpoint failed"):
+        VisionAPI().notify_payment_plan_closure(
+            closure_payment_plan,
+            total_amount_reconciled=Decimal("8500.50"),
+            closure_date=datetime(2026, 11, 9, 10, 30, tzinfo=timezone.utc),
+        )
+
+    closure_payment_plan.refresh_from_db(fields=["internal_data"])
+    entry = closure_payment_plan.vision_data["log"][0]
+    assert entry["type"] == VisionLogEntryType.CLOSURE_NOTIFICATION.value
+    assert entry["response"] == {"error": "closure endpoint failed"}
+    assert entry["payload"] == mock_post.call_args.args[1]
+    assert entry["payload"]["payplanSno"] == "PP-CLOSURE"
+    # A failed closure notification must not change the Vision workflow status.
+    assert closure_payment_plan.vision_status == VisionStatus.RELEASED.value
+
+
+@patch("hope.contrib.vision.api.VisionAPI._acquire_token")
+@patch("hope.contrib.vision.api.VisionAPI._post")
+def test_notify_payment_plan_closure_without_vision_id_sends_empty_value(
+    mock_post,
+    mock_acquire_token,
+    closed_payment_plan_without_vision_id: PaymentPlan,
+    django_assert_num_queries,
+) -> None:
+    mock_post.return_value = ({"status": "ok"}, 200)
+    with django_assert_num_queries(4):
+        VisionAPI().notify_payment_plan_closure(
+            closed_payment_plan_without_vision_id,
+            total_amount_reconciled=Decimal("8500.50"),
+            closure_date=datetime(2026, 11, 9, 10, 30, tzinfo=timezone.utc),
+        )
+    assert mock_post.call_args.args[1]["visionPayplanSno"] == ""
+    closed_payment_plan_without_vision_id.refresh_from_db(fields=["internal_data"])
+    entry = closed_payment_plan_without_vision_id.vision_data["log"][0]
+    assert entry["type"] == VisionLogEntryType.CLOSURE_NOTIFICATION.value
+
+
+def test_notify_payment_plan_closure_logs_non_json_oauth_error(
+    non_json_oauth_error_response: MagicMock,
+    closed_payment_plan_without_vision_id: PaymentPlan,
+    django_assert_num_queries,
+) -> None:
+    api = VisionAPI()
+    with (
+        patch.object(api._client, "post", return_value=non_json_oauth_error_response) as mock_post,
+        django_assert_num_queries(4),
+        pytest.raises(VisionAPIError) as error,
+    ):
+        api.notify_payment_plan_closure(
+            closed_payment_plan_without_vision_id,
+            total_amount_reconciled=Decimal("8500.50"),
+            closure_date=datetime(2026, 11, 9, 10, 30, tzinfo=timezone.utc),
+        )
+
+    mock_post.assert_called_once()
+    assert mock_post.call_args.args[0] == api.token_url
+    closed_payment_plan_without_vision_id.refresh_from_db(fields=["internal_data"])
+    entry = closed_payment_plan_without_vision_id.vision_data["log"][0]
+    assert entry["type"] == VisionLogEntryType.CLOSURE_NOTIFICATION.value
+    assert f"HTTP {non_json_oauth_error_response.status_code}" in entry["response"]["error"]
+    assert "<html>" not in entry["response"]["error"]
+    assert entry["response"]["error"] == str(error.value)
+
+
+@patch("hope.contrib.vision.api.VisionAPI._acquire_token")
+@patch("hope.contrib.vision.api.VisionAPI._post")
 def test_send_payment_plan_already_sent_raises_error(
     mock_post,
     mock_acquire_token,
@@ -541,14 +769,17 @@ def test_callback_view_empty_status_does_not_confirm_plan_creation(mock_get, moc
 
 
 @patch("hope.models.APILogEntry.objects.create")
+@patch("hope.contrib.vision.views.PaymentPlanCallbackView._release_actor_snapshot")
 @patch("hope.contrib.vision.views.PaymentPlanCallbackView._get_payment_plan")
-def test_callback_view_success_with_fc_numbers(mock_get, mock_log_entry) -> None:
+def test_callback_view_success_with_fc_numbers(mock_get, mock_release_actor_snapshot, mock_log_entry) -> None:
     from rest_framework.test import APIRequestFactory, force_authenticate
 
     from hope.contrib.vision.views import PaymentPlanCallbackView
 
     mock_pp = _make_mock_payment_plan(unicef_id="PP044")
     mock_get.return_value = mock_pp
+    actor_snapshot = ActorSnapshot(name="Anna Nowak", job_title="Finance Officer", job_title_source="AD")
+    mock_release_actor_snapshot.return_value = actor_snapshot
     mock_user = MagicMock()
     mock_token = MagicMock()
     mock_token.grants = ["API_VISION_PP_CREATE"]
@@ -587,6 +818,7 @@ def test_callback_view_success_with_fc_numbers(mock_get, mock_log_entry) -> None
         vision_payment_plan_id="00000063",
         vision_result="SUCCESS",
         fc_numbers=["FC123", "FC456"],
+        actor_snapshot=actor_snapshot,
     )
     mock_pp.save.assert_called_once_with(update_fields=["internal_data"])
 
@@ -865,3 +1097,61 @@ def test_callback_view_fc_failure_message(vision_data, expected_message, django_
         message = PaymentPlanCallbackView._fc_failure_message(payment_plan)
 
     assert message == expected_message
+
+
+@patch("hope.apps.account.actor_snapshot.MicrosoftGraphAPI")
+def test_release_actor_snapshot_arrange_success_with_fc_act_build_assert_creator_snapshot_from_ad(
+    mock_graph, callback_payment_plan: PaymentPlan
+) -> None:
+    from hope.contrib.vision.views import PaymentPlanCallbackView
+
+    mock_graph.return_value.get_user_data.return_value = {"jobTitle": "Finance Officer"}
+    serializer = PaymentPlanCallbackRequestSerializer(
+        data={"payplanSno": "PP044", "vision_payplanSno": "00000063", "status": "SUCCESS", "fc_numbers": ["FC123"]}
+    )
+    serializer.is_valid()
+
+    snapshot = PaymentPlanCallbackView._release_actor_snapshot(serializer)
+
+    assert snapshot == ActorSnapshot(name="Anna Nowak", job_title="Finance Officer", job_title_source="AD")
+
+
+@pytest.mark.parametrize(
+    "payload",
+    [
+        pytest.param({"payplanSno": "PP044", "status": "SUCCESS", "fc_numbers": []}, id="creation_acknowledgement"),
+        pytest.param({"payplanSno": "PP044", "status": "FAILED", "fc_numbers": ["FC123"]}, id="failure"),
+        pytest.param({"payplanSno": "PP-MISSING", "status": "SUCCESS", "fc_numbers": ["FC123"]}, id="unknown_plan"),
+        pytest.param({"payplanSno": "PP044", "status": "SUCCESS", "fc_numbers": ["FC123"]}, id="missing_vision_id"),
+    ],
+)
+@patch("hope.apps.account.actor_snapshot.MicrosoftGraphAPI")
+def test_release_actor_snapshot_arrange_non_releasing_callback_act_build_assert_none_without_ad_lookup(
+    mock_graph, payload: dict, callback_payment_plan: PaymentPlan
+) -> None:
+    from hope.contrib.vision.views import PaymentPlanCallbackView
+
+    serializer = PaymentPlanCallbackRequestSerializer(data=payload)
+    serializer.is_valid()
+
+    snapshot = PaymentPlanCallbackView._release_actor_snapshot(serializer)
+
+    assert snapshot is None
+    mock_graph.assert_not_called()
+
+
+@patch("hope.apps.account.actor_snapshot.MicrosoftGraphAPI")
+def test_release_actor_snapshot_arrange_already_released_plan_act_build_assert_none_without_ad_lookup(
+    mock_graph, released_callback_payment_plan: PaymentPlan
+) -> None:
+    from hope.contrib.vision.views import PaymentPlanCallbackView
+
+    serializer = PaymentPlanCallbackRequestSerializer(
+        data={"payplanSno": "PP044", "vision_payplanSno": "00000063", "status": "SUCCESS", "fc_numbers": ["FC123"]}
+    )
+    serializer.is_valid()
+
+    snapshot = PaymentPlanCallbackView._release_actor_snapshot(serializer)
+
+    assert snapshot is None
+    mock_graph.assert_not_called()

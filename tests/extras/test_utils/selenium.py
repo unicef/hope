@@ -115,13 +115,17 @@ class HopeTestBrowser(BaseCase):
         selector: str,
         timeout: int = 10,
         not_found_message: str | None = None,
+        label_selector: str = "",
     ) -> None:
-        """Click the option labelled exactly `name`, retrying while an async listbox re-renders."""
+        """Click the option labelled exactly `name`, retrying while an async listbox re-renders.
+
+        `label_selector` points at the label inside the option, for options that show more than the label.
+        """
         deadline = time.monotonic() + timeout
         labels: list[str] = []
         while True:
             try:
-                options = self.find_elements(f"{selector} li")
+                options = self.find_elements(f"{selector} li {label_selector}".strip())
                 labels = [option.text.strip() for option in options]
                 matches = [option for option, label in zip(options, labels, strict=True) if label == name]
                 if matches:
@@ -175,6 +179,20 @@ class HopeTestBrowser(BaseCase):
         if self.get_attribute(selector, "aria-expanded") != "true":
             self.click(selector)
 
+    def select_global_program(self, name: str) -> None:
+        """Switch programme with the filter in the top bar, searching for it by name.
+
+        Finished programmes are only listed when searched for. Use "All Programmes" to leave a programme.
+        """
+        search_input = 'input[data-cy="search-input-gpf"]'
+        self.click('button[data-cy="global-program-filter"]')
+        self.wait_for_element_visible(search_input)
+        if name != "All Programmes":
+            self.type(search_input, name)
+            self.click('button[data-cy="search-icon"]')
+        self._click_listbox_option(name, 'ul[role="listbox"]', label_selector='[data-cy="select-option-name"]')
+        self.wait_for_element_absent(search_input)
+
     def check_checkbox(self, selector: str, attempts: int = 3) -> None:
         """Tick the MUI checkbox matching `selector`, clicking again if the click was dropped.
 
@@ -202,6 +220,30 @@ class HopeTestBrowser(BaseCase):
         """
         field_element = self.wait_for_element_present(selector, timeout=timeout)
         fill_mui_date(self.driver, field_element, value)
+
+    def pick_calendar_day(self, field_name: str, day: int, *, next_month: bool = False, timeout: int = 10) -> None:
+        """Pick a day of the current (or next) month in the calendar popup of the date field `field_name`."""
+        calendar = "[data-popper-placement]"
+        month_label = ".MuiPickersCalendarHeader-label"
+        self.click(
+            f"//input[@name='{field_name}']/ancestor::*[contains(@class, 'MuiPickersInputBase-root')][1]//button",
+            by="xpath",
+        )
+        self.wait_for_element_visible(month_label)
+        if next_month:
+            month = self.get_text(month_label)
+            self.click('button[title="Next month"]')
+            self.wait_for_text_not_visible(month, month_label)
+        # While the month slides, both months are in the DOM, so wait until only one day matches.
+        # The day is clicked in JS: the popup animates open, so a native click can land on its neighbour.
+        days_xpath = f"//*[@data-timestamp][not(contains(@class, 'dayOutsideMonth'))][normalize-space()='{day}']"
+        deadline = time.monotonic() + timeout
+        while len(days := self.find_elements(days_xpath, by="xpath")) != 1:
+            if time.monotonic() >= deadline:
+                raise AssertionError(f"Expected one day {day} in the calendar, found {len(days)}")
+            time.sleep(0.1)
+        self.execute_script("arguments[0].click()", days[0])
+        self.wait_for_element_absent(calendar)
 
     def assert_value(self, selector: str, expected: str, timeout: int = 10):
         actual = self.get_value(selector, timeout=timeout)
