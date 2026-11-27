@@ -7,7 +7,7 @@ import hope.apps.core.upload_paths
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("registration_data", "0020_migration"),
+        ("registration_data", "0020_baseline_models"),
     ]
 
     operations = [

@@ -9,7 +9,7 @@ import hope.apps.core.upload_paths
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("household", "0052_migration"),
+        ("household", "0052_baseline_relations"),
     ]
 
     operations = [

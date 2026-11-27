@@ -5,7 +5,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("payment", "0081_migration"),
+        ("payment", "0081_baseline_relations"),
     ]
 
     operations = [

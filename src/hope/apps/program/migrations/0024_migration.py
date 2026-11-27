@@ -5,7 +5,7 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
     dependencies = [
         ("core", "0043_migration"),
-        ("program", "0023_migration"),
+        ("program", "0023_baseline_models"),
     ]
 
     operations = [
