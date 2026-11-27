@@ -124,47 +124,7 @@ def clear_default_cache() -> None:
     cache.clear()
 
 
-def _patch_sync_apps_for_no_migrations() -> None:
-    """Patch Django's sync_apps to not skip apps without models_module.
-
-    This is needed for --no-migrations to work correctly when models are
-    defined in hope.models instead of hope.apps.*.models.
-
-    Django's sync_apps() skips apps where models_module is None, but our
-    models are in hope.models with app_label pointing to hope.apps.*.
-    """
-    from django.conf import settings
-    from django.core.management.commands import migrate
-
-    original_sync_apps = migrate.Command.sync_apps
-
-    def patched_sync_apps(self, connection, app_labels):
-        # Import hope.models to register all models before sync
-        from django.apps import apps as django_apps
-
-        import hope.models
-
-        # Set models_module for hope.* apps that don't have their own models.py
-        for app_config in django_apps.get_app_configs():
-            if app_config.models_module is None and "hope" in app_config.name:
-                app_config.models_module = hope.models
-
-        # Execute premigrations.sql before syncing models that depend on
-        # custom collations, extensions, and functions.
-        filename = settings.TESTS_ROOT + "/../../development_tools/db/premigrations.sql"
-        with open(filename, "r") as file:
-            pre_sql = file.read()
-        connection.cursor().execute(pre_sql)
-
-        return original_sync_apps(self, connection, app_labels)
-
-    migrate.Command.sync_apps = patched_sync_apps
-
-
 def pytest_configure(config: Config) -> None:
-    # Patch sync_apps before tests run
-    _patch_sync_apps_for_no_migrations()
-
     pytest.localhost = bool(config.getoption("--localhost"))
     here = Path(__file__).parent
     utils = here.parent / "extras"
@@ -285,54 +245,6 @@ def _delete_program_es_indexes() -> None:
         all_indexes = list(es.indices.get_alias(index=f"{test_prefix}*", ignore_unavailable=True).keys())
         for index in all_indexes:
             es.indices.delete(index=index, ignore=[404, 400])
-
-
-def _collect_migration_sql_statements() -> tuple[set[str], list]:
-    from django.db.migrations.loader import MigrationLoader
-    from django.db.migrations.operations.special import RunSQL
-
-    orig = getattr(settings, "MIGRATION_MODULES", None)
-    settings.MIGRATION_MODULES = {}
-
-    loader = MigrationLoader(None, load=False)
-    loader.load_disk()
-    all_migrations = loader.disk_migrations
-    if orig is not None:
-        settings.MIGRATION_MODULES = orig
-
-    apps = set()
-    all_sqls = []
-    for (app_label, _), migration in all_migrations.items():
-        apps.add(app_label)
-        for operation in migration.operations:
-            if isinstance(operation, RunSQL):
-                sql_statements = operation.sql if isinstance(operation.sql, (list, tuple)) else [operation.sql]
-                all_sqls.extend(sql_statements)
-
-    return apps, all_sqls
-
-
-@pytest.fixture(scope="session", autouse=True)
-def register_custom_sql_signal(django_db_setup: Any, django_db_blocker: Any) -> None:
-    from django.db import connections
-    from django.db.utils import ProgrammingError
-
-    _apps, all_sqls = _collect_migration_sql_statements()
-
-    with django_db_blocker.unblock():
-        filename = settings.TESTS_ROOT + "/../../development_tools/db/premigrations.sql"
-        with open(filename, "r") as file:
-            pre_sql = file.read()
-        conn = connections["default"]
-        conn.cursor().execute(pre_sql)
-
-        for stmt in all_sqls:
-            try:
-                conn.cursor().execute(stmt)
-            except ProgrammingError as e:
-                if "already exists" in str(e):
-                    continue
-                raise
 
 
 @pytest.fixture(autouse=True)

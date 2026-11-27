@@ -4,74 +4,6 @@ permissions:
 on:
   workflow_call:
 jobs:
-  migrations:
-    name: Migrations on an empty database
-    runs-on: ubuntu-24.04
-    env:
-      DATABASE_URL: postgres://postgres:postgres@localhost:5432/hope
-      REP_DATABASE_URL: postgres://postgres:postgres@localhost:5432/hope
-      SECRET_KEY: ci-secret-key-for-migrations
-      DEBUG: "True"
-      ALLOWED_HOSTS: "*"
-      CACHE_ENABLED: "False"
-      PYTHONPATH: ./src
-      ELASTICSEARCH_SYNONYMS_FILE: ${{ github.workspace }}/src/data/synonyms.txt
-    services:
-      postgres:
-        image: postgres:15
-        env:
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: hope
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v6
-
-      - name: Install system dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y --no-install-recommends \
-            build-essential \
-            libjpeg-dev \
-            zlib1g-dev \
-            libpq-dev \
-            libcairo2 \
-            libcairo2-dev \
-            libffi-dev \
-            libgdk-pixbuf-2.0-0 \
-            libpango-1.0-0 \
-            libpangocairo-1.0-0 \
-            shared-mime-info
-
-      - name: Install Python & UV
-        uses: astral-sh/setup-uv@v7
-        with:
-          version: latest
-          enable-cache: true
-          prune-cache: false
-          cache-local-path: ./uv-cache
-          cache-dependency-glob: |
-            **/pyproject.toml
-            **/uv.lock
-          python-version: 3.14
-
-      - name: Install dependencies
-        run: uv sync --cache-dir ./uv-cache --frozen
-
-      # The test suites build their database with --no-migrations, and generate-types.yml runs
-      # migrate only when its database cache misses, so this is the job that checks them every time.
-      - name: Migrate an empty database
-        run: uv run python manage.py migrate
-
-      - name: Check that models and migrations agree
-        run: uv run python manage.py check_missing_migrations
-
   selenium:
     name: Selenium tests (${{ matrix.group }}/${{ strategy.job-total }})
     runs-on: ubuntu-24.04
@@ -195,7 +127,7 @@ jobs:
           key: ${{ runner.os }}-venv
 
       - name: Run Selenium suite
-        run: uv run tox -e tests -- pytest ./tests -m selenium -q -rfE --no-header --tb=short --no-migrations --randomly-seed=42 --dist=loadgroup --create-db -n auto --headless --durations=40 --splits ${{ strategy.job-total }} --group ${{ matrix.group }} --splitting-algorithm least_duration --durations-path tests/e2e/test_durations.json --cov-report xml:test-coverage/coverage.xml --junit-xml=test-results.xml --cov-config=.coveragerc --cov=hope
+        run: uv run tox -e tests -- pytest ./tests -m selenium -q -rfE --no-header --tb=short --randomly-seed=42 --dist=loadgroup --create-db -n auto --headless --durations=40 --splits ${{ strategy.job-total }} --group ${{ matrix.group }} --splitting-algorithm least_duration --durations-path tests/e2e/test_durations.json --cov-report xml:test-coverage/coverage.xml --junit-xml=test-results.xml --cov-config=.coveragerc --cov=hope
       - name: Test Report
         uses: dorny/test-reporter@v2
         if: success() || failure()

@@ -54,8 +54,8 @@ replace: `payment/0081_baseline_models.py` and `payment/0081_baseline_relations.
 `0081`, and the kept `payment/0082_migration.py` depends on the last of them. In the other apps the
 baseline continues after the last old migration (`account/0036_baseline_models.py`).
 
-Objects Django does not generate are created with top-level `RunSQL` at the end of the app's last
-baseline file:
+Objects Django does not generate are created with `RunSQL` at the end of the app's last baseline
+file:
 
 | Object | App |
 |---|---|
@@ -87,16 +87,18 @@ baseline never runs on existing databases.
 
 ### Writing SQL in a baseline file
 
-- Keep every `RunSQL` at the top level of `operations` and its `sql` a string or a list of strings.
-  The test suites build their database from the models and then replay every top-level `RunSQL`
-  from disk (`register_custom_sql_signal` in `tests/unit/conftest.py` and `tests/e2e/conftest.py`).
-- A replayed statement may fail only with "already exists". Anything else has to be idempotent
-  (`IF EXISTS`, `IF NOT EXISTS`, `CREATE OR REPLACE`).
+- The unit and e2e suites build their database by running the migrations, baseline included. A
+  statement runs once, where it stands in `operations`, and whatever it needs has to be created
+  earlier in the migration graph.
+- Keep `IF NOT EXISTS` on the `und-ci-det` collation and the `citext` extension. `dropalldb` drops
+  only tables, so both are still there when a rebuilt database is migrated. Six apps also create the
+  collation in their first baseline file, so whichever runs first creates it.
 - `CreateModel` and `AddField` create foreign keys and most indexes at the very end of the migration.
   A statement that touches them in the same migration goes into
-  `hope.apps.core.migration_operations.RunSQLAfterDeferred`.
-- `development_tools/db/premigrations.sql` creates the extension, the collation and the document
-  function before the test tables exist. Keep it in line with the baseline.
+  `hope.apps.core.migration_operations.RunSQLAfterDeferred`, with `sql` as a list of plain
+  statements.
+- Tests do not see the rows a migration inserts: `tests/conftest.py` empties every table once after
+  `migrate` (see [Testing](testing.md#test-infrastructure)).
 
 ## The guard
 

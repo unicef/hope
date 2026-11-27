@@ -215,4 +215,4 @@ tox -e tests -- tests/e2e/new_selenium/ --headed --demo
 tox -e lint
 ```
 
-tox runs: `pytest -q --create-db --no-migrations --dist=loadgroup {posargs:tests}`
+tox runs: `pytest -q --create-db --dist=loadgroup {posargs:tests}`

@@ -1,6 +1,9 @@
 import os
+from typing import Any
 
 from _pytest.config import Config
+from django.apps import apps
+from django.core.management import call_command
 import freezegun
 import pytest
 
@@ -85,3 +88,27 @@ def pytest_configure(config: Config) -> None:
             },
         }
     )
+
+
+@pytest.fixture(scope="session")
+def django_db_setup(django_db_setup: None, django_db_blocker: Any) -> None:
+    """Build the test database with ``migrate``, then empty every table once.
+
+    A transactional test (and every e2e test) flushes the database when it ends, and rows inserted
+    by migrations do not come back after that. Removing them up front gives every test the same
+    starting point whatever ran before it on the worker: tests create their reference rows
+    (currencies, payee types, beneficiary groups, ...) in fixtures and never rely on migration data.
+
+    The flush recreates content types and permissions through ``post_migrate``, which skips apps
+    without a models module. The models of a few ``hope`` apps live only in ``hope.models``, so
+    those apps get that module assigned first. Otherwise their content types would be created
+    lazily inside a test, rolled back with it and left in the ``ContentType`` cache with a dead
+    primary key.
+    """
+    import hope.models
+
+    for app_config in apps.get_app_configs():
+        if app_config.models_module is None and app_config.name.startswith("hope."):
+            app_config.models_module = hope.models
+    with django_db_blocker.unblock():
+        call_command("flush", verbosity=0, interactive=False)
