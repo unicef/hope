@@ -34,6 +34,25 @@ def other_program(afghanistan: BusinessArea) -> Program:
 
 
 @pytest.fixture
+def draft_program(afghanistan: BusinessArea) -> Program:
+    return ProgramFactory(business_area=afghanistan, status=Program.DRAFT)
+
+
+@pytest.fixture
+def draft_program_client(
+    api_client: Callable, afghanistan: BusinessArea, draft_program: Program, create_user_role_with_permissions: Callable
+) -> Any:
+    user = UserFactory(partner=PartnerFactory(name="TestPartner"))
+    create_user_role_with_permissions(
+        user=user,
+        permissions=[Permissions.POPULATION_VIEW_HOUSEHOLDS_LIST],
+        business_area=afghanistan,
+        program=draft_program,
+    )
+    return api_client(user)
+
+
+@pytest.fixture
 def household_list_client(
     api_client: Callable, afghanistan: BusinessArea, program: Program, create_user_role_with_permissions: Callable
 ) -> Any:
@@ -91,6 +110,14 @@ def household_partners_url(afghanistan: BusinessArea, program: Program) -> str:
 
 
 @pytest.fixture
+def draft_program_partners_url(afghanistan: BusinessArea, draft_program: Program) -> str:
+    return reverse(
+        "api:households:households-implementing-partners",
+        kwargs={"business_area_slug": afghanistan.slug, "program_code": draft_program.code},
+    )
+
+
+@pytest.fixture
 def plan_household(afghanistan: BusinessArea, program: Program) -> Household:
     return HouseholdFactory(program=program, business_area=afghanistan, org_name_enumerator="Plan International")
 
@@ -123,6 +150,11 @@ def pending_household(afghanistan: BusinessArea, program: Program) -> Household:
 @pytest.fixture
 def other_program_household(afghanistan: BusinessArea, other_program: Program) -> Household:
     return HouseholdFactory(program=other_program, business_area=afghanistan, org_name_enumerator="Save the Children")
+
+
+@pytest.fixture
+def draft_program_household(afghanistan: BusinessArea, draft_program: Program) -> Household:
+    return HouseholdFactory(program=draft_program, business_area=afghanistan, org_name_enumerator="CARE")
 
 
 def test_household_list_filtered_by_implementing_partner_returns_only_that_partner(
@@ -189,3 +221,14 @@ def test_household_implementing_partners_without_permission_is_forbidden(
     response = no_permission_client.get(household_partners_url)
 
     assert response.status_code == status.HTTP_403_FORBIDDEN
+
+
+def test_household_implementing_partners_of_draft_program_is_empty(
+    draft_program_client: Any,
+    draft_program_partners_url: str,
+    draft_program_household: Household,
+) -> None:
+    response = draft_program_client.get(draft_program_partners_url)
+
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json() == []

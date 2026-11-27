@@ -267,6 +267,8 @@ class HouseholdViewSet(
     @extend_schema(responses={200: ChoiceSerializer(many=True)})
     @action(detail=False, methods=["get"], url_path="implementing-partners", filter_backends=(), pagination_class=None)
     def implementing_partners(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        if self.program.status == Program.DRAFT:
+            return Response([])
         names = (
             super()
             .get_queryset()
