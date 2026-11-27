@@ -41,6 +41,11 @@ def user():
 
 
 @pytest.fixture
+def approver():
+    return UserFactory(first_name="Anna", last_name="Nowak", job_title="Finance Officer")
+
+
+@pytest.fixture
 def program_cycle():
     return ProgramCycleFactory(end_date=now().date() + timedelta(days=30))
 
@@ -50,18 +55,18 @@ def payment_plan(program_cycle):
     return PaymentPlanFactory(program_cycle=program_cycle)
 
 
-def test_get_last_approval_process_date_in_approval(user, program_cycle):
+def test_get_last_approval_process_date_in_approval(approver, program_cycle):
     sent_for_approval_date = timezone.datetime(2000, 10, 10, tzinfo=dt_timezone.utc)
     payment_plan = PaymentPlanFactory(program_cycle=program_cycle, status=PaymentPlan.Status.IN_APPROVAL)
     ApprovalProcessFactory(
         payment_plan=payment_plan,
         sent_for_approval_date=sent_for_approval_date,
-        sent_for_approval_by=user,
+        sent_for_approval_by=approver,
     )
     payment_plan.refresh_from_db()
     modified_data = payment_plan._get_last_approval_process_data()
     assert modified_data.modified_date == sent_for_approval_date
-    assert modified_data.modified_by == user
+    assert modified_data.modified_by == "Anna Nowak (Finance Officer)"
 
 
 def test_get_last_approval_process_date_in_approval_without_process(user, program_cycle):
@@ -71,20 +76,20 @@ def test_get_last_approval_process_date_in_approval_without_process(user, progra
     assert modified_data.modified_by is None
 
 
-def test_get_last_approval_process_date_in_authorization_with_approval(user, program_cycle):
+def test_get_last_approval_process_date_in_authorization_with_approval(approver, program_cycle):
     payment_plan = PaymentPlanFactory(program_cycle=program_cycle, status=PaymentPlan.Status.IN_AUTHORIZATION)
     approval_process = ApprovalProcessFactory(payment_plan=payment_plan)
     approval = ApprovalFactory(
         approval_process=approval_process,
         type=Approval.APPROVAL,
-        created_by=user,
+        created_by=approver,
     )
     approval.created_at = timezone.datetime(2000, 10, 11, tzinfo=dt_timezone.utc)
     approval.save(update_fields=["created_at"])
     payment_plan.refresh_from_db()
     modified_data = payment_plan._get_last_approval_process_data()
     assert modified_data.modified_date == approval.created_at
-    assert modified_data.modified_by == user
+    assert modified_data.modified_by == "Anna Nowak (Finance Officer)"
 
 
 def test_get_last_approval_process_date_in_authorization_without_approval(user, program_cycle):
@@ -96,27 +101,27 @@ def test_get_last_approval_process_date_in_authorization_without_approval(user, 
     assert modified_data.modified_by is None
 
 
-def test_get_last_approval_process_date_in_review_with_authorizations(user, program_cycle):
+def test_get_last_approval_process_date_in_review_with_authorizations(approver, program_cycle):
     payment_plan = PaymentPlanFactory(program_cycle=program_cycle, status=PaymentPlan.Status.IN_REVIEW)
     approval_process = ApprovalProcessFactory(payment_plan=payment_plan)
     first_authorization = ApprovalFactory(
         approval_process=approval_process,
         type=Approval.AUTHORIZATION,
-        created_by=user,
+        created_by=approver,
     )
     first_authorization.created_at = timezone.datetime(2000, 10, 11, tzinfo=dt_timezone.utc)
     first_authorization.save(update_fields=["created_at"])
     last_authorization = ApprovalFactory(
         approval_process=approval_process,
         type=Approval.AUTHORIZATION,
-        created_by=user,
+        created_by=approver,
     )
     last_authorization.created_at = timezone.datetime(2000, 10, 12, tzinfo=dt_timezone.utc)
     last_authorization.save(update_fields=["created_at"])
     payment_plan.refresh_from_db()
     modified_data = payment_plan._get_last_approval_process_data()
     assert modified_data.modified_date == last_authorization.created_at
-    assert modified_data.modified_by == user
+    assert modified_data.modified_by == "Anna Nowak (Finance Officer)"
 
 
 def test_get_last_approval_process_date_in_review_without_authorization(user, program_cycle):
@@ -128,20 +133,20 @@ def test_get_last_approval_process_date_in_review_without_authorization(user, pr
     assert modified_data.modified_by is None
 
 
-def test_get_last_approval_process_date_accepted_with_finance_release(user, program_cycle):
+def test_get_last_approval_process_date_accepted_with_finance_release(approver, program_cycle):
     payment_plan = PaymentPlanFactory(program_cycle=program_cycle, status=PaymentPlan.Status.ACCEPTED)
     approval_process = ApprovalProcessFactory(payment_plan=payment_plan)
     finance_release = ApprovalFactory(
         approval_process=approval_process,
         type=Approval.FINANCE_RELEASE,
-        created_by=user,
+        created_by=approver,
     )
     finance_release.created_at = timezone.datetime(2000, 10, 13, tzinfo=dt_timezone.utc)
     finance_release.save(update_fields=["created_at"])
     payment_plan.refresh_from_db()
     modified_data = payment_plan._get_last_approval_process_data()
     assert modified_data.modified_date == finance_release.created_at
-    assert modified_data.modified_by == user
+    assert modified_data.modified_by == "Anna Nowak (Finance Officer)"
 
 
 def test_get_last_approval_process_date_accepted_without_finance_release(user, program_cycle):

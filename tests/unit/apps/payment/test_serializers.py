@@ -233,6 +233,78 @@ def approval_process_context(business_area: Any, user: Any) -> dict[str, Any]:
     return {"approval_process": approval_process, "user": user, "payment_plan": payment_plan}
 
 
+@pytest.fixture
+def snapshot_approval_process_context(business_area: Any, user: Any) -> dict[str, Any]:
+    program = ProgramFactory(business_area=business_area)
+    payment_plan = PaymentPlanFactory(
+        created_by=user,
+        program_cycle=ProgramCycleFactory(program=program),
+        dispersion_start_date=None,
+        dispersion_end_date=None,
+    )
+    approval_process = ApprovalProcessFactory(
+        payment_plan=payment_plan,
+        sent_for_approval_by=user,
+        sent_for_approval_by_name="Old Name",
+        sent_for_approval_by_job_title="Old Title",
+        sent_for_approval_by_job_title_source="AD",
+        sent_for_authorization_by=user,
+        sent_for_authorization_by_name="Old Name",
+        sent_for_authorization_by_job_title="",
+        sent_for_authorization_by_job_title_source="USER_RECORD",
+        sent_for_finance_release_by=user,
+    )
+    ApprovalFactory(
+        approval_process=approval_process,
+        type=Approval.APPROVAL,
+        created_by=user,
+        created_by_name="Old Name",
+        created_by_job_title="Old Title",
+        created_by_job_title_source="AD",
+    )
+    ApprovalFactory(
+        approval_process=approval_process,
+        type=Approval.AUTHORIZATION,
+        created_by=user,
+        created_by_name="Old Name",
+        created_by_job_title="",
+        created_by_job_title_source="USER_RECORD",
+    )
+    return {"approval_process": approval_process, "user": user, "payment_plan": payment_plan}
+
+
+@pytest.fixture
+def volume_by_delivery_context(business_area: Any, user: Any) -> dict[str, Any]:
+    program = ProgramFactory(business_area=business_area)
+    payment_plan = PaymentPlanFactory(
+        created_by=user,
+        program_cycle=ProgramCycleFactory(program=program),
+        dispersion_start_date=None,
+        dispersion_end_date=None,
+        financial_service_provider=None,
+        delivery_mechanism=DeliveryMechanismFactory(),
+    )
+    program = payment_plan.program_cycle.program
+    hoh = IndividualFactory(household=None, business_area=business_area, program=program)
+    household = HouseholdFactory(
+        head_of_household=hoh,
+        size=2,
+        program=program,
+        business_area=business_area,
+    )
+    payment = PaymentFactory(
+        parent=payment_plan,
+        household=household,
+        head_of_household=hoh,
+        collector=hoh,
+        status=Payment.STATUS_SUCCESS,
+        entitlement_quantity=222,
+        entitlement_quantity_usd=111,
+        financial_service_provider=FinancialServiceProviderFactory(name="FSP_TEST_1"),
+    )
+    return {"payment_plan": payment_plan, "fsp": payment.financial_service_provider}
+
+
 def test_pending_payment_serializer_all_data(pending_payment_context: dict[str, Any]) -> None:
     payment = pending_payment_context["payment"]
     household = pending_payment_context["household"]
@@ -658,6 +730,42 @@ def test_approval_process_serializer_all_fields(approval_process_context: dict[s
     assert data_with_users["sent_for_approval_by"] == user_name_str
     assert data_with_users["sent_for_authorization_by"] == user_name_str
     assert data_with_users["sent_for_finance_release_by"] == user_name_str
+
+
+def test_approval_process_serializer_arrange_snapshot_rows_act_serialize_assert_snapshot_values_shown(
+    snapshot_approval_process_context: dict[str, Any],
+    django_assert_num_queries,
+) -> None:
+    approval_process = snapshot_approval_process_context["approval_process"]
+    approval_process.refresh_from_db()
+
+    # five payment_approval selects and one account_user fetch for the finance release row without a snapshot
+    with django_assert_num_queries(6):
+        data = ApprovalProcessSerializer(instance=approval_process).data
+
+    assert data["sent_for_approval_by"] == "Old Name (Old Title)"
+    assert data["sent_for_authorization_by"] == "Old Name"
+    assert data["sent_for_finance_release_by"] == "Test User"
+    assert data["actions"]["approval"][0]["info"] == "Approved by Old Name (Old Title)"
+    assert data["actions"]["authorization"][0]["info"] == "Authorized by Old Name"
+
+
+def test_approval_process_serializer_arrange_user_renamed_after_snapshot_act_serialize_assert_history_unchanged(
+    snapshot_approval_process_context: dict[str, Any],
+) -> None:
+    user = snapshot_approval_process_context["user"]
+    user.first_name = "New"
+    user.last_name = "Name"
+    user.job_title = "New Title"
+    user.save(update_fields=["first_name", "last_name", "job_title"])
+
+    data = ApprovalProcessSerializer(instance=snapshot_approval_process_context["approval_process"]).data
+
+    assert data["sent_for_approval_by"] == "Old Name (Old Title)"
+    assert data["sent_for_authorization_by"] == "Old Name"
+    assert data["sent_for_finance_release_by"] == "New Name (New Title)"
+    assert data["actions"]["approval"][0]["info"] == "Approved by Old Name (Old Title)"
+    assert data["actions"]["authorization"][0]["info"] == "Authorized by Old Name"
 
 
 def test_approval_process_serializer_rejected_on(approval_process_context: dict[str, Any]) -> None:

@@ -4,138 +4,6 @@ permissions:
 on:
   workflow_call:
 jobs:
-  unit:
-    name: Unit tests
-    runs-on: ubuntu-24.04
-    env:
-      DOCKER_DEFAULT_PLATFORM: linux/amd64
-      DATABASE_URL: postgres://postgres:postgres@localhost:5432/aurora
-      REP_DATABASE_URL: postgres://postgres:postgres@localhost:5432/aurora
-      CACHE_LOCATION: redis://localhost:6379/1
-      CELERY_BROKER_URL: redis://localhost:6379/0
-      CELERY_RESULT_BACKEND: redis://localhost:6379/0
-      CONSTANCE_REDIS_CONNECTION: redis://localhost:6379/0
-      ELASTICSEARCH_HOST: http://localhost:9200
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v6
-
-      - name: Install system dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y --no-install-recommends \
-            build-essential \
-            libjpeg-dev \
-            zlib1g-dev \
-            postgresql-client \
-            libpq-dev \
-            libcairo2 \
-            libcairo2-dev \
-            libffi-dev \
-            libgdk-pixbuf-2.0-0 \
-            libpango-1.0-0 \
-            libpangocairo-1.0-0 \
-            shared-mime-info \
-            wkhtmltopdf
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v4
-
-      - name: Install Docker Compose
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y docker-compose
-
-      - name: Launch services with Docker Compose
-        run: |
-          docker-compose -f development_tools/compose.yml down -v
-          docker-compose -f development_tools/compose.yml up --build -d
-
-      - name: Wait for Postgres to be ready
-        run: |
-          until docker exec $(docker-compose -f development_tools/compose.yml ps -q db) pg_isready -U postgres; do
-            echo "Waiting for Postgres..."
-            sleep 2
-          done
-
-      - name: Wait for Redis to be ready
-        run: |
-          until docker exec $(docker-compose -f development_tools/compose.yml  ps -q redis) redis-cli ping | grep PONG; do
-            echo "Waiting for Redis..."
-            sleep 2
-          done
-
-      - name: Wait for Elasticsearch to be ready
-        run: |
-          for i in $(seq 1 60); do
-            if curl -fs http://localhost:9200/_cluster/health >/dev/null; then
-              echo "Elasticsearch ready"
-              exit 0
-            fi
-            echo "Waiting for Elasticsearch... ($i)"
-            sleep 5
-          done
-          echo "Elasticsearch did not become ready" >&2
-          docker-compose -f development_tools/compose.yml logs elasticsearch || true
-          exit 1
-
-      - name: Install Python & UV
-        uses: astral-sh/setup-uv@v7
-        with:
-          version: latest
-          enable-cache: true
-          prune-cache: false
-          cache-local-path: ./uv-cache
-          cache-dependency-glob: |
-            **/pyproject.toml
-            **/uv.lock
-          python-version: 3.14
-
-      - name: Restore cached vEnv
-        id: cache-venv-restore
-        uses: actions/cache@v5
-        with:
-          path: |
-            ./venv
-            ./tox
-          key: ${{ runner.os }}-venv
-
-      - name: Install dependencies
-        run: uv sync --cache-dir ./uv-cache --frozen
-
-      - name: Save vEnv cache
-        id: cache-venv-save
-        uses: actions/cache@v5
-        with:
-          path: |
-            ./venv
-            ./tox
-          key: ${{ runner.os }}-venv
-
-      - name: Run Test suite
-        run: uv run tox -e tests -- pytest ./tests -m unit -q -rfE --no-header --tb=short --no-migrations --randomly-seed=42 --dist=loadgroup --create-db -n auto --cov-report xml:test-coverage/coverage.xml --junit-xml=test-results.xml --cov-config=.coveragerc --cov=hope
-
-      - name: Test Report
-        uses: dorny/test-reporter@v2
-        if: success() || failure()
-        with:
-          name: JEST Tests
-          path: test-results.xml
-          reporter: jest-junit
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v5
-        if: always()
-        continue-on-error: true
-        with:
-          files: ./test-coverage/coverage.xml
-          flags: unit
-          token: ${{ secrets.CODECOV_TOKEN }}
-          verbose: true
-
-      - name: Tear down Docker Compose
-        if: always()
-        run: docker-compose -f development_tools/compose.yml down --volumes
   selenium:
     name: Selenium tests (${{ matrix.group }}/${{ strategy.job-total }})
     runs-on: ubuntu-24.04
@@ -171,31 +39,25 @@ jobs:
             libgdk-pixbuf-2.0-0 \
             libpango-1.0-0 \
             libpangocairo-1.0-0 \
-            shared-mime-info \
-            wkhtmltopdf
+            shared-mime-info
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v4
 
-      - name: Install Docker Compose
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y docker-compose
-
       - name: Launch services with Docker Compose
         run: |
-          docker-compose -f development_tools/compose.yml -f development_tools/compose.ci.yml up -d
+          docker compose -f development_tools/compose.yml -f development_tools/compose.ci.yml up -d
 
       - name: Wait for Postgres to be ready
         run: |
-          until docker exec $(docker-compose -f development_tools/compose.yml ps -q db) pg_isready -U postgres; do
+          until docker exec $(docker compose -f development_tools/compose.yml ps -q db) pg_isready -U postgres; do
             echo "Waiting for Postgres..."
             sleep 2
           done
 
       - name: Wait for Redis to be ready
         run: |
-          until docker exec $(docker-compose -f development_tools/compose.yml ps -q redis) redis-cli ping | grep PONG; do
+          until docker exec $(docker compose -f development_tools/compose.yml ps -q redis) redis-cli ping | grep PONG; do
             echo "Waiting for Redis..."
             sleep 2
           done
@@ -211,7 +73,7 @@ jobs:
             sleep 5
           done
           echo "Elasticsearch did not become ready" >&2
-          docker-compose -f development_tools/compose.yml logs elasticsearch || true
+          docker compose -f development_tools/compose.yml logs elasticsearch || true
           exit 1
 
       - name: Set up Bun
@@ -294,7 +156,7 @@ jobs:
 
       - name: Tear down Docker Compose
         if: always()
-        run: docker-compose -f development_tools/compose.yml down --volumes
+        run: docker compose -f development_tools/compose.yml down --volumes
   selenium-result:
     # Keeps a single "Selenium tests" check for branch protection, whatever the number of shards.
     name: Selenium tests

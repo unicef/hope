@@ -34,23 +34,42 @@ tox -e tests -- tests/unit -k "test_create"
 E2E tests require Postgres, Redis, and Elasticsearch to be running locally — see
 `development_tools/compose.yml`.
 
-### E2E sharding in CI
+### Test sharding in CI
 
-The Selenium CI job is split across several runners (`matrix.group` in
-`.github/workflows/tests.yml`) with [pytest-split](https://github.com/jerry-git/pytest-split),
-which balances the shards using per-test durations stored in `tests/e2e/test_durations.json`.
+The unit and Selenium CI jobs are each split across several runners (`matrix.group` in
+`.github/workflows/unit-tests.yml` and `.github/workflows/tests.yml`) with
+[pytest-split](https://github.com/jerry-git/pytest-split), which balances the shards using per-test durations stored in `tests/unit/test_durations.json`
+and `tests/e2e/test_durations.json`.
 
-The file doesn't need updating on every PR — tests missing from it still run and are
-assigned the average duration. Regenerate it when the e2e suite changes noticeably
-(many tests added, removed or moved) or when the shards' run times in CI drift apart:
+The files don't need updating on every PR — tests missing from them still run and are
+assigned the average duration. Regenerate a file when its suite changes noticeably
+(many tests added, removed or moved) or when the shards' run times in CI drift apart.
+
+E2E:
 
 ```bash
-tox -e tests -- tests/e2e -m selenium --headless -n auto \
+tox -e tests -- pytest tests/e2e -m selenium --headless -n auto --dist=loadgroup --no-migrations --create-db --maxfail=0 \
     --store-durations --clean-durations --durations-path tests/e2e/test_durations.json
 ```
 
+Unit:
+
+```bash
+tox -e tests -- pytest tests/unit -m unit -n auto --dist=loadgroup --no-migrations --create-db --maxfail=0 \
+    --store-durations --clean-durations --durations-path tests/unit/test_durations.json
+jq -S 'with_entries(select(.value >= 0.5) | .value |= (. * 1000 | round / 1000))' \
+    tests/unit/test_durations.json > durations.tmp && mv durations.tmp tests/unit/test_durations.json
+```
+
 `--clean-durations` drops entries for tests that no longer exist; without it new
-timings are merged into the existing file.
+timings are merged into the existing file. `--maxfail=0` overrides the `--maxfail=20` from
+`tests/pytest.ini`, so a run with many failures doesn't stop early and drop the tests it
+never reached from the file.
+
+The unit file keeps only tests taking at least 0.5 s: with thousands of tests the full
+file would be too large, and the fast ones balance out by count. As a side effect, the
+"estimated duration" pytest-split prints for unit shards is far too high. Keep the
+`@elasticsearch` suffixes in the test IDs; xdist adds them and pytest-split matches on them.
 
 ## Coverage
 

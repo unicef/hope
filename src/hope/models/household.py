@@ -667,7 +667,6 @@ class Household(
             ("withdrawn", "Can withdrawn Household"),
             ("sanity_check", "Sanity check Household"),
             ("gdpr_remove", "GDPR remove Household data"),
-            ("logical_delete", "Logical delete Household"),
             ("see_linked_objects", "Can see Linked Objects"),
             ("reset_sync_date", "Can reset sync date"),
         )

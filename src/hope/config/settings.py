@@ -47,7 +47,8 @@ MEDIA_URL = f"/api/{UPLOADS_DIR_NAME}/"
 MEDIA_ROOT = env("HCT_MIS_UPLOADS_PATH") or os.path.join(DATA_VOLUME, UPLOADS_DIR_NAME)
 
 FILE_UPLOAD_MAX_MEMORY_SIZE = 25 * 1024 * 1024  # 25mb
-DATA_UPLOAD_MAX_MEMORY_SIZE = 50 * 1024 * 1024
+# TODO: Revisit this limit after migrating images from Base64 to Blob Storage.
+DATA_UPLOAD_MAX_MEMORY_SIZE = 100 * 1024 * 1024
 
 
 # static resources related. See documentation at: http://docs.djangoproject.com/en/dev/ref/contrib/staticfiles/
