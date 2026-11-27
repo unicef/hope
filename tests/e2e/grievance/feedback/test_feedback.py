@@ -451,7 +451,7 @@ class TestFeedback:
         page_new_feedback.select_area("Shakardara")
         page_new_feedback.get_button_next().click()
         # Check edited Feedback
-        assert "Draft Program" in page_feedback_details.get_programme().text
+        page_feedback_details.wait_for_text("Draft Program", page_feedback_details.label_programme)
         assert "New description" in page_feedback_details.get_description().text
         assert "New comment, new comment. New comment?" in page_feedback_details.get_comments().text
         assert "Abkamari" in page_feedback_details.get_area_village_pay_point().text
